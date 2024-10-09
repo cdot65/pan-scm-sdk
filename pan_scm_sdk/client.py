@@ -17,16 +17,16 @@ class APIClient:
     ):
         self.api_base_url = api_base_url
 
-        # Construct the scope from tsg_id
-        scope = f"tsg_id:{tsg_id}"
-
         # Create the AuthRequest object
-        auth_request = AuthRequest(
-            client_id=client_id,
-            client_secret=client_secret,
-            tsg_id=tsg_id,
-            scope=scope
-        )
+        try:
+            auth_request = AuthRequest(
+                client_id=client_id,
+                client_secret=client_secret,
+                tsg_id=tsg_id
+            )
+        except ValueError as e:
+            logger.error(f"Authentication initialization failed: {e}")
+            raise APIError(f"Authentication initialization failed: {e}")
 
         self.oauth_client = OAuth2Client(auth_request)
         self.session = self.oauth_client.session
