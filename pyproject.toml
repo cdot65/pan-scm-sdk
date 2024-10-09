@@ -13,6 +13,7 @@ requests-oauthlib = "^2.0.0"
 setuptools = "^75.1.0"
 pydantic = "^2.9.2"
 pyjwt = "^2.9.0"
+cryptography = "^43.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

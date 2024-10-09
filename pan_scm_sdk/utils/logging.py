@@ -1,3 +1,5 @@
+# pan_scm_sdk/utils/logging.py
+
 import logging
 import sys
 

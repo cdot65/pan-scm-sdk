@@ -1,3 +1,5 @@
+# pan_scm_sdk/auth/oauth2.py
+
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from pan_scm_sdk.utils.logging import setup_logger
@@ -13,20 +15,21 @@ class OAuth2Client:
         self.auth_request = auth_request
         self.session = self._create_session()
         self.signing_key = self._get_signing_key()
-        self.scope = f"tsg_id:{auth_request.tsg_id}"
 
     def _create_session(self):
         client = BackendApplicationClient(client_id=self.auth_request.client_id)
-        oauth = OAuth2Session(client=client, scope=self.auth_request.scope)
+        oauth = OAuth2Session(client=client)
         logger.debug("Fetching token...")
+
         token = oauth.fetch_token(
             token_url=self.auth_request.token_url,
             client_id=self.auth_request.client_id,
             client_secret=self.auth_request.client_secret,
+            scope=self.auth_request.scope,
             include_client_id=True,
             client_kwargs={'tsg_id': self.auth_request.tsg_id}
         )
-        logger.debug("Token fetched successfully.")
+        logger.debug(f"Token fetched successfully. {token}")
         return oauth
 
     def _get_signing_key(self):
@@ -71,8 +74,9 @@ class OAuth2Client:
             token_url=self.auth_request.token_url,
             client_id=self.auth_request.client_id,
             client_secret=self.auth_request.client_secret,
+            scope=self.auth_request.scope,
             include_client_id=True,
             client_kwargs={'tsg_id': self.auth_request.tsg_id}
         )
-        logger.debug("Token refreshed successfully.")
+        logger.debug(f"Token refreshed successfully. {token}")
         self.signing_key = self._get_signing_key()

@@ -1,3 +1,5 @@
+# pan_scm_sdk/client.py
+
 from pan_scm_sdk.auth.oauth2 import OAuth2Client
 from pan_scm_sdk.models.auth import AuthRequest
 from pan_scm_sdk.utils.logging import setup_logger
@@ -6,11 +8,28 @@ from pan_scm_sdk.exceptions import APIError
 logger = setup_logger(__name__)
 
 class APIClient:
-    def __init__(self, auth_request: AuthRequest, api_base_url: str):
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        tsg_id: str,
+        api_base_url: str = "https://api.strata.paloaltonetworks.com",
+    ):
         self.api_base_url = api_base_url
+
+        # Construct the scope from tsg_id
+        scope = f"tsg_id:{tsg_id}"
+
+        # Create the AuthRequest object
+        auth_request = AuthRequest(
+            client_id=client_id,
+            client_secret=client_secret,
+            tsg_id=tsg_id,
+            scope=scope
+        )
+
         self.oauth_client = OAuth2Client(auth_request)
         self.session = self.oauth_client.session
-        self.scope = f"tsg_id:{auth_request.tsg_id}"
 
     def request(self, method: str, endpoint: str, **kwargs):
         url = f"{self.api_base_url}{endpoint}"

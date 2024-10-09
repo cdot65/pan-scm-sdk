@@ -1,3 +1,5 @@
+# pan_scm_sdk/exceptions/authentication.py
+
 class APIError(Exception):
     """Base class for API exceptions."""
 
