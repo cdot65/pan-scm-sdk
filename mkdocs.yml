@@ -1,0 +1,40 @@
+# mkdocs.yml
+
+site_name: Strata Cloud Manager SDK Documentation
+site_description: Python SDK for Palo Alto Networks Strata Cloud Manager.
+site_url: https://cdot65.github.io/pan-scm-sdk/
+repo_name: cdot65/pan-scm-sdk
+repo_url: https://github.com/cdot65/pan-scm-sdk
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.instant
+plugins:
+  - search
+  - termynal
+  - mkdocstrings:
+      handlers:
+        python:
+          rendering:
+            show_source: true
+nav:
+  - Home: index.md
+  - User Guide:
+      - Introduction: user-guide/introduction.md
+      - Installation: user-guide/installation.md
+      - Getting Started: user-guide/getting-started.md
+      - Commands: user-guide/commands.md
+      - Examples: user-guide/examples.md
+      - Troubleshooting: user-guide/troubleshooting.md
+  - About:
+      - License: about/license.md
+      - Contributing: about/contributing.md
+      - Release Notes: about/release-notes.md
+extra_css:
+  - css/termynal.css
+  - css/custom.css
+extra_javascript:
+  - js/termynal.js
+  - js/custom.js
