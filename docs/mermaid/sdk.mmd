@@ -1,0 +1,330 @@
+classDiagram
+    direction BT
+    class BaseException {
+        args
+        __cause__
+        __context__
+        __suppress_context__
+        __traceback__
+        __init__(self, *args: object)
+        __setstate__(self, __state: dict[str, Any] | None)
+        with_traceback(self, __tb: TracebackType | None)
+    }
+    class Exception
+    class object {
+        __doc__
+        __dict__
+        __module__
+        __annotations__
+        __class__(self)
+        __class__(self, __type: type[object])
+        __init__(self)
+        __new__(cls)
+        __setattr__(self, __name: str, __value: Any)
+        __delattr__(self, __name: str)
+        __eq__(self, __value: object)
+        __ne__(self, __value: object)
+        __str__(self)
+        __repr__(self)
+        __hash__(self)
+        __format__(self, __format_spec: str)
+        __getattribute__(self, __name: str)
+        __sizeof__(self)
+        __reduce__(self)
+        __reduce_ex__(self, __protocol: SupportsIndex)
+        __dir__(self)
+        __init_subclass__(cls)
+        __subclasshook__(cls, __subclass: type)
+    }
+    class node3 {
+        auth_request
+        signing_key
+        session
+        __init__(self, auth_request: AuthRequest)
+        _create_session(self)
+        _get_signing_key(self)
+        decode_token(self)
+        is_expired(self)
+        refresh_token(self)
+    }
+    class node6 {
+        session
+        api_base_url
+        oauth_client
+        __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        tsg_id: str,
+        api_base_url: str = "https://api.strata.paloaltonetworks.com",
+        )
+        request(self, method: str, endpoint: str, **kwargs)
+        get(self, endpoint: str, **kwargs)
+        post(self, endpoint: str, **kwargs)
+        put(self, endpoint: str, **kwargs)
+        delete(self, endpoint: str, **kwargs)
+    }
+    class node1 {
+        client_id
+        client_secret
+        tsg_id
+        scope
+        token_url
+        construct_scope(cls, values)
+    }
+    class node5 {
+        parameters_str
+        combined_parameters
+        parent_namespace
+        __pydantic_generic_metadata__
+        config_wrapper
+        original_model_post_init
+        parent_parameters
+        BaseModel
+        types_namespace
+        class_vars
+        error_message
+        __pydantic_decorators__
+        model_computed_fields
+        base_private_attributes
+        private_attributes
+        base_field_names
+        cls
+        mro
+        generic_type_label
+        __pydantic_complete__
+        __pydantic_post_init__
+        missing_parameters
+        bases_str
+        __pydantic_custom_init__
+        parameters
+        __pydantic_parent_namespace__
+        __new__(
+        mcs,
+        cls_name: str,
+        bases: tuple[type[Any], ...],
+        namespace: dict[str, Any],
+        __pydantic_generic_metadata__: PydanticGenericMetadata | None = None,
+        __pydantic_reset_parent_namespace__: bool = True,
+        _create_model_module: str | None = None,
+        **kwargs: Any,
+        )
+        __getattr__(self, item: str)
+        __prepare__(cls, *args: Any, **kwargs: Any)
+        __instancecheck__(self, instance: Any)
+        _collect_bases_data(bases: tuple[type[Any], ...])
+        __fields__(self)
+        __dir__(self)
+    }
+    class node4 {
+        __pydantic_parent_namespace__
+        model_config
+        model_fields
+        model_computed_fields
+        __class_vars__
+        __private_attributes__
+        __signature__
+        __pydantic_complete__
+        __pydantic_core_schema__
+        __pydantic_custom_init__
+        __pydantic_decorators__
+        __pydantic_generic_metadata__
+        __pydantic_parent_namespace__
+        __pydantic_post_init__
+        __pydantic_root_model__
+        __pydantic_serializer__
+        __pydantic_validator__
+        __pydantic_extra__
+        __pydantic_fields_set__
+        __pydantic_private__
+        __pydantic_core_schema__
+        __pydantic_validator__
+        __pydantic_serializer__
+        __slots__
+        __pydantic_base_init__
+        __repr_name__
+        __repr_str__
+        __pretty__
+        __rich_repr__
+        __init__(self, /, **data: Any)
+        model_extra(self)
+        model_fields_set(self)
+        model_construct(cls, _fields_set: set[str] | None = None, **values: Any)
+        model_copy(self, *, update: dict[str, Any] | None = None, deep: bool = False)
+        model_dump(
+        self,
+        *,
+        mode: Literal['json', 'python'] | str = 'python',
+        include: IncEx | None = None,
+        exclude: IncEx | None = None,
+        context: Any | None = None,
+        by_alias: bool = False,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        round_trip: bool = False,
+        warnings: bool | Literal['none', 'warn', 'error'] = True,
+        serialize_as_any: bool = False,
+        )
+        model_dump_json(
+        self,
+        *,
+        indent: int | None = None,
+        include: IncEx | None = None,
+        exclude: IncEx | None = None,
+        context: Any | None = None,
+        by_alias: bool = False,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        round_trip: bool = False,
+        warnings: bool | Literal['none', 'warn', 'error'] = True,
+        serialize_as_any: bool = False,
+        )
+        model_json_schema(
+        cls,
+        by_alias: bool = True,
+        ref_template: str = DEFAULT_REF_TEMPLATE,
+        schema_generator: type[GenerateJsonSchema] = GenerateJsonSchema,
+        mode: JsonSchemaMode = 'validation',
+        )
+        model_parametrized_name(cls, params: tuple[type[Any], ...])
+        model_post_init(self, __context: Any)
+        model_rebuild(
+        cls,
+        *,
+        force: bool = False,
+        raise_errors: bool = True,
+        _parent_namespace_depth: int = 2,
+        _types_namespace: dict[str, Any] | None = None,
+        )
+        model_validate(
+        cls,
+        obj: Any,
+        *,
+        strict: bool | None = None,
+        from_attributes: bool | None = None,
+        context: Any | None = None,
+        )
+        model_validate_json(
+        cls,
+        json_data: str | bytes | bytearray,
+        *,
+        strict: bool | None = None,
+        context: Any | None = None,
+        )
+        model_validate_strings(
+        cls,
+        obj: Any,
+        *,
+        strict: bool | None = None,
+        context: Any | None = None,
+        )
+        __get_pydantic_core_schema__(cls, source: type[BaseModel], handler: GetCoreSchemaHandler, /)
+        __get_pydantic_json_schema__(
+        cls,
+        core_schema: CoreSchema,
+        handler: GetJsonSchemaHandler,
+        /,
+        )
+        __pydantic_init_subclass__(cls, **kwargs: Any)
+        __class_getitem__(
+        cls, typevar_values: type[Any] | tuple[type[Any], ...]
+        )
+        __copy__(self)
+        __deepcopy__(self, memo: dict[int, Any] | None = None)
+        __getattr__(self, item: str)
+        __setattr__(self, name: str, value: Any)
+        __delattr__(self, item: str)
+        _check_frozen(self, name: str, value: Any)
+        __getstate__(self)
+        __setstate__(self, state: dict[Any, Any])
+        __eq__(self, other: Any)
+        __init_subclass__(cls, **kwargs: Unpack[ConfigDict])
+        __iter__(self)
+        __repr__(self)
+        __repr_args__(self)
+        __str__(self)
+        __fields__(self)
+        __fields_set__(self)
+        dict(# noqa: D102
+        self,
+        *,
+        include: IncEx | None = None,
+        exclude: IncEx | None = None,
+        by_alias: bool = False,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        )
+        json(# noqa: D102
+        self,
+        *,
+        include: IncEx | None = None,
+        exclude: IncEx | None = None,
+        by_alias: bool = False,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = PydanticUndefined, # type: ignore[assignment]
+        models_as_dict: bool = PydanticUndefined, # type: ignore[assignment]
+        **dumps_kwargs: Any,
+        )
+        parse_obj(cls, obj: Any)
+        parse_raw(# noqa: D102
+        cls,
+        b: str | bytes,
+        *,
+        content_type: str | None = None,
+        encoding: str = 'utf8',
+        proto: DeprecatedParseProtocol | None = None,
+        allow_pickle: bool = False,
+        )
+        parse_file(# noqa: D102
+        cls,
+        path: str | Path,
+        *,
+        content_type: str | None = None,
+        encoding: str = 'utf8',
+        proto: DeprecatedParseProtocol | None = None,
+        allow_pickle: bool = False,
+        )
+        from_orm(cls, obj: Any)
+        construct(cls, _fields_set: set[str] | None = None, **values: Any)
+        copy(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        update: Dict[str, Any] | None = None, # noqa UP006
+        deep: bool = False,
+        )
+        schema(# noqa: D102
+        cls, by_alias: bool = True, ref_template: str = DEFAULT_REF_TEMPLATE
+        )
+        schema_json(# noqa: D102
+        cls, *, by_alias: bool = True, ref_template: str = DEFAULT_REF_TEMPLATE, **dumps_kwargs: Any
+        )
+        validate(cls, value: Any)
+        update_forward_refs(cls, **localns: Any)
+        _iter(self, *args: Any, **kwargs: Any)
+        _copy_and_set_values(self, *args: Any, **kwargs: Any)
+        _get_value(cls, *args: Any, **kwargs: Any)
+        _calculate_keys(self, *args: Any, **kwargs: Any)
+    }
+    class node2 {
+        __hash__(self)
+    }
+    class node7 {
+        __iter__(self)
+    }
+
+    object --> BaseException
+    BaseException --> Exception
+    node2 ..> object
+    object --> node3
+    object --> node6
+    node4 --> node1
+    object --> node4
+    node5 "isinstanceof" ..> node4
+    node7 ..> node4
