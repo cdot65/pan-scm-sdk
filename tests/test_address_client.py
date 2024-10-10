@@ -1,9 +1,9 @@
 # tests/test_address_client.py
 
 from unittest.mock import MagicMock
-from pan_scm_sdk.client import Scm
-from pan_scm_sdk.resources.address import AddressClient
-from pan_scm_sdk.models.address import Address
+from scm.client import Scm
+from scm.config.address import AddressClient
+from scm.models.address import Address
 
 
 def test_list_addresses():

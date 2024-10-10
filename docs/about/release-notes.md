@@ -1,6 +1,17 @@
 # Release Notes
 
-Welcome to the release notes for the `pan-scm-sdk` tool. This document provides a detailed record of changes, enhancements, and fixes in each version of the tool.
+Welcome to the release notes for the `pan-scm-sdk` tool. This document provides a detailed record of changes,
+enhancements, and fixes in each version of the tool.
+
+---
+
+## Version 0.1.2
+
+**Release Date:** October 10, 2024
+
+### Refactoring Names
+
+- **Refactoring Names**: Refactor the project to have simpler naming convention.
 
 ---
 
@@ -11,7 +22,6 @@ Welcome to the release notes for the `pan-scm-sdk` tool. This document provides 
 ### Object-Oriented
 
 - **Refactor**: Refactor the project to work in an object-oriented manner.
-
 
 ---
 
@@ -25,4 +35,6 @@ Welcome to the release notes for the `pan-scm-sdk` tool. This document provides 
 
 ---
 
-For more detailed information on each release, visit the [GitHub repository](https://github.com/cdot65/pan-scm-sdk/releases) or check the [commit history](https://github.com/cdot65/pan-scm-sdk/commits/main).
+For more detailed information on each release, visit
+the [GitHub repository](https://github.com/cdot65/pan-scm-sdk/releases) or check
+the [commit history](https://github.com/cdot65/pan-scm-sdk/commits/main).
