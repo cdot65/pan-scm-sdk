@@ -1,6 +1,6 @@
 # pan_scm_sdk/resources/base.py
 
-from pan_scm_sdk.client import APIClient
+from pan_scm_sdk.client import Scm
 from pan_scm_sdk.exceptions import APIError
 from typing import Optional, List, Dict, Any
 
@@ -14,7 +14,7 @@ class BaseObject:
 
     Attributes:
         ENDPOINT (str): API endpoint for the object, to be defined in subclasses.
-        api_client (APIClient): Instance of the API client for making HTTP requests.
+        api_client (Scm): Instance of the API client for making HTTP requests.
 
     Error:
         APIError: May be raised for any API-related errors during operations.
@@ -25,7 +25,7 @@ class BaseObject:
 
     ENDPOINT: str  # Should be defined in subclasses
 
-    def __init__(self, api_client: APIClient):
+    def __init__(self, api_client: Scm):
         self.api_client = api_client
 
     def create(self, data: Dict[str, Any]) -> Dict[str, Any]:

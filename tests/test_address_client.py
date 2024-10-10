@@ -1,13 +1,13 @@
 # tests/test_address_client.py
 
 from unittest.mock import MagicMock
-from pan_scm_sdk.client import APIClient
+from pan_scm_sdk.client import Scm
 from pan_scm_sdk.resources.address import AddressClient
 from pan_scm_sdk.models.address import Address
 
 
 def test_list_addresses():
-    api_client = APIClient(
+    api_client = Scm(
         client_id="dummy_client_id",
         client_secret="dummy_client_secret",
         tsg_id="dummy_tsg_id",
@@ -39,7 +39,7 @@ def test_list_addresses():
 
 
 def test_get_address():
-    api_client = APIClient(
+    api_client = Scm(
         client_id="dummy_client_id",
         client_secret="dummy_client_secret",
         tsg_id="dummy_tsg_id",

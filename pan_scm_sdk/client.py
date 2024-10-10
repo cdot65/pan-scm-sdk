@@ -25,7 +25,7 @@ from pan_scm_sdk.exceptions import (
 logger = setup_logger(__name__)
 
 
-class APIClient:
+class Scm:
     """
     A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
 
