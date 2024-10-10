@@ -1,4 +1,4 @@
-# pan_scm_sdk/models/auth.py
+# scm/models/auth.py
 
 from pydantic import BaseModel, Field, model_validator
 

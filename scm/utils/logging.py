@@ -1,4 +1,4 @@
-# pan_scm_sdk/utils/logging.py
+# scm/utils/logging.py
 
 import logging
 import sys

@@ -1,9 +1,9 @@
-# pan_scm_sdk/auth/oauth2.py
+# scm/auth/auth.py
 
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
-from pan_scm_sdk.utils.logging import setup_logger
-from pan_scm_sdk.models.auth import AuthRequest
+from scm.utils.logging import setup_logger
+from scm.models.auth import AuthRequest
 import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import ExpiredSignatureError

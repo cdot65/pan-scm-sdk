@@ -2,7 +2,7 @@
 
 import pytest
 from pydantic import ValidationError
-from pan_scm_sdk.models.address import Address
+from scm.models.address import Address
 
 
 def test_address_valid_ip_netmask():

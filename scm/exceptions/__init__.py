@@ -1,4 +1,4 @@
-# pan_scm_sdk/exceptions/__init__.py
+# scm/exceptions/__init__.py
 
 
 class APIError(Exception):
