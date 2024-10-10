@@ -4,6 +4,17 @@ Welcome to the release notes for the `pan-scm-sdk` tool. This document provides 
 
 ---
 
+## Version 0.1.1
+
+**Release Date:** October 10, 2024
+
+### Object-Oriented
+
+- **Refactor**: Refactor the project to work in an object-oriented manner.
+
+
+---
+
 ## Version 0.1.0
 
 **Release Date:** October 9, 2024
