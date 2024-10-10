@@ -84,8 +84,8 @@ class Address(BaseModel):
     )
 
     # Container Types
-    folder: str = Field(
-        ...,
+    folder: Optional[str] = Field(
+        None,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
         description="The folder in which the resource is defined",

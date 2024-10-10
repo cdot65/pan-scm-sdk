@@ -1,10 +1,26 @@
 # pan_scm_sdk/client.py
+from typing import Optional, Dict, Any
+
 import requests
 
 from pan_scm_sdk.auth.oauth2 import OAuth2Client
 from pan_scm_sdk.models.auth import AuthRequest
 from pan_scm_sdk.utils.logging import setup_logger
-from pan_scm_sdk.exceptions import APIError
+from pan_scm_sdk.exceptions import (
+    APIError,
+    ObjectAlreadyExistsError,
+    ValidationError,
+    BadRequestError,
+    AuthenticationError,
+    AuthorizationError,
+    NotFoundError,
+    MethodNotAllowedError,
+    ConflictError,
+    ReferenceNotZeroError,
+    ServerError,
+    VersionNotSupportedError,
+    SessionTimeoutError,
+)
 
 logger = setup_logger(__name__)
 
@@ -59,17 +75,76 @@ class APIClient:
         except requests.exceptions.HTTPError as http_err:
             error_content = response.json() if response.content else {}
             logger.error(f"HTTP error occurred: {http_err} - {error_content}")
-            raise APIError(
-                f"HTTP error occurred: {http_err} - {error_content}"
-            ) from http_err
+            exception = self._handle_api_error(response, error_content)
+            raise exception from http_err
         except Exception as e:
             logger.error(f"API request failed: {str(e)}")
             raise APIError(f"API request failed: {str(e)}") from e
 
-    def get(self, endpoint: str, **kwargs):
+    def _handle_api_error(self, response, error_content):
+        status_code = response.status_code
+        error_details = error_content.get("_errors", [{}])[0]
+        error_code = error_details.get("code", "")
+        error_message = error_details.get("message", "An error occurred.")
+        error_type = error_details.get("details", {}).get("errorType", "")
+        request_id = error_content.get("_request_id")
+
+        # Map HTTP status codes to exceptions
+        if status_code == 400:
+            if error_type == "Object Already Exists":
+                return ObjectAlreadyExistsError(
+                    error_message,
+                    error_code=error_code,
+                    details=error_details,
+                    request_id=request_id,
+                )
+            elif error_type == "Invalid Object":
+                return ValidationError(
+                    error_message,
+                    error_code=error_code,
+                    details=error_details,
+                    request_id=request_id,
+                )
+            else:
+                return BadRequestError(
+                    error_message,
+                    error_code=error_code,
+                    details=error_details,
+                    request_id=request_id,
+                )
+        elif status_code == 401:
+            return AuthenticationError(error_message)
+        elif status_code == 403:
+            return AuthorizationError(error_message)
+        elif status_code == 404:
+            return NotFoundError(error_message)
+        elif status_code == 405:
+            return MethodNotAllowedError(error_message)
+        elif status_code == 409:
+            if error_type == "Name Not Unique":
+                return ConflictError(error_message)
+            elif error_type == "Reference Not Zero":
+                return ReferenceNotZeroError(error_message)
+            else:
+                return ConflictError(error_message)
+        elif status_code == 500:
+            return ServerError(error_message)
+        elif status_code == 501:
+            return VersionNotSupportedError(error_message)
+        elif status_code == 504:
+            return SessionTimeoutError(error_message)
+        else:
+            return APIError(
+                f"HTTP {status_code}: {error_message}",
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs):
         if self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
-        return self.request("GET", endpoint, **kwargs)
+        return self.request("GET", endpoint, params=params, **kwargs)
 
     def post(self, endpoint: str, **kwargs):
         if self.oauth_client.is_expired:

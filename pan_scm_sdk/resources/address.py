@@ -1,75 +1,103 @@
 # pan_scm_sdk/resources/address.py
 
-from typing import List, Optional
-from pan_scm_sdk.client import APIClient
+from typing import List, Dict, Any, Optional
+from pan_scm_sdk.resources.base import BaseObject
 from pan_scm_sdk.models.address import Address
-from pan_scm_sdk.endpoints.addresses import ADDRESSES_ENDPOINTS
-from pan_scm_sdk.utils.logging import setup_logger
-
-logger = setup_logger(__name__)
+from pan_scm_sdk.exceptions import ValidationError
 
 
-class AddressClient:
+class AddressObject(BaseObject):
     """
-    A client class for managing addresses in Palo Alto Networks' Strata Cloud Manager.
+    Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
 
-    This class provides methods to list, get, create, update, and delete addresses
-    using the Strata Cloud Manager API.
+    This class provides methods to create, retrieve, update, and list Address objects
+    using the Strata Cloud Manager API. It supports operations within folders, snippets,
+    or devices, and allows filtering of Address objects based on various criteria.
 
     Attributes:
-        api_client (APIClient): An instance of the APIClient for making API requests.
+        ENDPOINT (str): The API endpoint for Address object operations.
 
     Error:
-        APIError: May be raised for any API-related errors during requests.
+        ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        Various methods return Address objects or lists of Address objects.
+        Address: For create, get, and update methods.
+        List[Address]: For the list method.
     """
 
-    def __init__(self, api_client: APIClient):
-        self.api_client = api_client
+    ENDPOINT = "/config/objects/v1/addresses"
 
-    def list_addresses(
-        self,
-        name: Optional[str] = None,
-        folder: str = "Shared",
-        snippet: Optional[str] = None,
-        device: Optional[str] = None,
-        offset: int = 0,
-        limit: int = 200,
-    ) -> List[Address]:
-        endpoint = ADDRESSES_ENDPOINTS["list_addresses"]
-        params = {
-            "name": name,
-            "folder": folder,
-            "snippet": snippet,
-            "device": device,
-            "offset": offset,
-            "limit": limit,
-        }
-        params = {k: v for k, v in params.items() if v is not None}
+    def __init__(self, api_client):
+        super().__init__(api_client)
 
-        response = self.api_client.get(endpoint, params=params)
-        addresses = [Address(**item) for item in response.get("data", [])]
-        return addresses
+    def create(self, data: Dict[str, Any]) -> Address:
+        address = Address(**data)
+        payload = address.model_dump(exclude_unset=True)
+        response = self.api_client.post(self.ENDPOINT, json=payload)
+        return Address(**response)
 
-    def get_address(self, address_id: str) -> Address:
-        endpoint = ADDRESSES_ENDPOINTS["get_address"].format(id=address_id)
+    def get(self, object_id: str) -> Address:
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
         return Address(**response)
 
-    def create_address(self, address: Address) -> Address:
-        endpoint = ADDRESSES_ENDPOINTS["create_address"]
+    def update(self, object_id: str, data: Dict[str, Any]) -> Address:
+        address = Address(**data)
         payload = address.model_dump(exclude_unset=True)
-        response = self.api_client.post(endpoint, json=payload)
-        return Address(**response)
-
-    def update_address(self, address_id: str, address: Address) -> Address:
-        endpoint = ADDRESSES_ENDPOINTS["update_address"].format(id=address_id)
-        payload = address.model_dump(exclude_unset=True)
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.put(endpoint, json=payload)
         return Address(**response)
 
-    def delete_address(self, address_id: str) -> None:
-        endpoint = ADDRESSES_ENDPOINTS["delete_address"].format(id=address_id)
-        self.api_client.delete(endpoint)
+    def list(
+        self,
+        folder: Optional[str] = None,
+        snippet: Optional[str] = None,
+        device: Optional[str] = None,
+        **filters,
+    ) -> List[Address]:
+        params = {}
+
+        # Include container type parameter
+        container_params = {"folder": folder, "snippet": snippet, "device": device}
+        provided_containers = {
+            k: v for k, v in container_params.items() if v is not None
+        }
+
+        if len(provided_containers) != 1:
+            raise ValidationError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            )
+
+        params.update(provided_containers)
+
+        # Handle specific filters for addresses
+        if "types" in filters:
+            params["type"] = ",".join(filters["types"])
+        if "values" in filters:
+            params["value"] = ",".join(filters["values"])
+        if "names" in filters:
+            params["name"] = ",".join(filters["names"])
+        if "tags" in filters:
+            params["tag"] = ",".join(filters["tags"])
+
+        # Include any additional filters provided
+        params.update(
+            {
+                k: v
+                for k, v in filters.items()
+                if k
+                not in [
+                    "types",
+                    "values",
+                    "names",
+                    "tags",
+                    "folder",
+                    "snippet",
+                    "device",
+                ]
+            }
+        )
+
+        response = self.api_client.get(self.ENDPOINT, params=params)
+        addresses = [Address(**item) for item in response.get("data", [])]
+        return addresses
