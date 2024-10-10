@@ -10,7 +10,26 @@ from jwt.exceptions import ExpiredSignatureError
 
 logger = setup_logger(__name__)
 
+
 class OAuth2Client:
+    """
+    A client for OAuth2 authentication with Palo Alto Networks' Strata Cloud Manager.
+
+    This class handles OAuth2 token acquisition, validation, and refresh for authenticating
+    with Palo Alto Networks' services. It supports token decoding and expiration checking.
+
+    Attributes:
+        auth_request (AuthRequest): An object containing authentication parameters.
+        session (OAuth2Session): The authenticated OAuth2 session.
+        signing_key (PyJWK): The key used for verifying the JWT token.
+
+    Error:
+        ExpiredSignatureError: Raised when the token has expired.
+
+    Return:
+        payload (dict): Decoded JWT token payload when using decode_token method.
+    """
+
     def __init__(self, auth_request: AuthRequest):
         self.auth_request = auth_request
         self.session = self._create_session()
@@ -27,15 +46,15 @@ class OAuth2Client:
             client_secret=self.auth_request.client_secret,
             scope=self.auth_request.scope,
             include_client_id=True,
-            client_kwargs={'tsg_id': self.auth_request.tsg_id}
+            client_kwargs={"tsg_id": self.auth_request.tsg_id},
         )
         logger.debug(f"Token fetched successfully. {token}")
         return oauth
 
     def _get_signing_key(self):
-        jwks_uri = "/".join(
-            self.auth_request.token_url.split("/")[:-1]
-        ) + "/connect/jwk_uri"
+        jwks_uri = (
+            "/".join(self.auth_request.token_url.split("/")[:-1]) + "/connect/jwk_uri"
+        )
         jwks_client = PyJWKClient(jwks_uri)
         signing_key = jwks_client.get_signing_key_from_jwt(
             self.session.token["access_token"]
@@ -76,7 +95,7 @@ class OAuth2Client:
             client_secret=self.auth_request.client_secret,
             scope=self.auth_request.scope,
             include_client_id=True,
-            client_kwargs={'tsg_id': self.auth_request.tsg_id}
+            client_kwargs={"tsg_id": self.auth_request.tsg_id},
         )
         logger.debug(f"Token refreshed successfully. {token}")
         self.signing_key = self._get_signing_key()
