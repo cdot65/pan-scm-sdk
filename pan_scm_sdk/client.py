@@ -56,7 +56,9 @@ class APIClient:
         # Create the AuthRequest object
         try:
             auth_request = AuthRequest(
-                client_id=client_id, client_secret=client_secret, tsg_id=tsg_id
+                client_id=client_id,
+                client_secret=client_secret,
+                tsg_id=tsg_id,
             )
         except ValueError as e:
             logger.error(f"Authentication initialization failed: {e}")
@@ -65,23 +67,39 @@ class APIClient:
         self.oauth_client = OAuth2Client(auth_request)
         self.session = self.oauth_client.session
 
-    def request(self, method: str, endpoint: str, **kwargs):
+    def request(
+        self,
+        method: str,
+        endpoint: str,
+        **kwargs,
+    ):
         url = f"{self.api_base_url}{endpoint}"
         logger.debug(f"Making {method} request to {url} with params {kwargs}")
         try:
-            response = self.session.request(method, url, **kwargs)
+            response = self.session.request(
+                method,
+                url,
+                **kwargs,
+            )
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as http_err:
             error_content = response.json() if response.content else {}
             logger.error(f"HTTP error occurred: {http_err} - {error_content}")
-            exception = self._handle_api_error(response, error_content)
+            exception = self._handle_api_error(
+                response,
+                error_content,
+            )
             raise exception from http_err
         except Exception as e:
             logger.error(f"API request failed: {str(e)}")
             raise APIError(f"API request failed: {str(e)}") from e
 
-    def _handle_api_error(self, response, error_content):
+    @staticmethod
+    def _handle_api_error(
+        response,
+        error_content,
+    ):
         status_code = response.status_code
         error_details = error_content.get("_errors", [{}])[0]
         error_code = error_details.get("code", "")
