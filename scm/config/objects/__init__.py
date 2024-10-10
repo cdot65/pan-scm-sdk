@@ -1,4 +1,3 @@
-# scm/config/objects/__init__.py
+# scm/config/__init__.py
 
-from .addresses import Addresses
-from .address_groups import AddressGroups
+from .addresses import AddressObject
