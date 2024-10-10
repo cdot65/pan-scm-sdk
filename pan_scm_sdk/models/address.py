@@ -35,11 +35,6 @@ class Address(BaseModel):
     )
 
     # Required fields
-    id: str = Field(
-        ...,
-        description="The UUID of the address object",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
     name: str = Field(
         ...,
         max_length=63,
@@ -47,6 +42,11 @@ class Address(BaseModel):
     )
 
     # Optional fields
+    id: Optional[str] = Field(
+        None,
+        description="The UUID of the address object",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
     description: Optional[str] = Field(
         None,
         max_length=1023,
