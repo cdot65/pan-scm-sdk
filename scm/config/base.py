@@ -1,8 +1,7 @@
-# pan_scm_sdk/resources/base.py
+# scm/config/base.py
 
-from pan_scm_sdk.client import Scm
-from pan_scm_sdk.exceptions import APIError
-from typing import Optional, List, Dict, Any
+from scm.client import Scm
+from typing import List, Dict, Any
 
 
 class BaseObject:

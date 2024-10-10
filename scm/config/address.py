@@ -1,9 +1,9 @@
-# pan_scm_sdk/resources/address.py
+# scm/config/address.py
 
 from typing import List, Dict, Any, Optional
-from pan_scm_sdk.resources.base import BaseObject
-from pan_scm_sdk.models.address import Address
-from pan_scm_sdk.exceptions import ValidationError
+from scm.config.base import BaseObject
+from scm.models.address import Address
+from scm.exceptions import ValidationError
 
 
 class AddressObject(BaseObject):

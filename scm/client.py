@@ -1,12 +1,12 @@
-# pan_scm_sdk/client.py
+# scm/client.py
 from typing import Optional, Dict, Any
 
 import requests
 
-from pan_scm_sdk.auth.oauth2 import OAuth2Client
-from pan_scm_sdk.models.auth import AuthRequest
-from pan_scm_sdk.utils.logging import setup_logger
-from pan_scm_sdk.exceptions import (
+from scm.auth import OAuth2Client
+from scm.models.auth import AuthRequest
+from scm.utils.logging import setup_logger
+from scm.exceptions import (
     APIError,
     ObjectAlreadyExistsError,
     ValidationError,
@@ -100,7 +100,19 @@ class Scm:
         response,
         error_content,
     ):
+        """
+        Args:
+            response: The HTTP response object returned from the API call.
+            error_content: The parsed content of the error response from the API.
+
+        Returns:
+            An instance of an appropriate exception class based on the HTTP status code and error details provided in the response.
+        """
+
+        # extract status code from response
         status_code = response.status_code
+
+        # extract error details
         error_details = error_content.get("_errors", [{}])[0]
         error_code = error_details.get("code", "")
         error_message = error_details.get("message", "An error occurred.")
@@ -108,6 +120,7 @@ class Scm:
         request_id = error_content.get("_request_id")
 
         # Map HTTP status codes to exceptions
+        # 400 Bad Request
         if status_code == 400:
             if error_type == "Object Already Exists":
                 return ObjectAlreadyExistsError(
@@ -130,27 +143,93 @@ class Scm:
                     details=error_details,
                     request_id=request_id,
                 )
+
+        # 401 Unauthorized
         elif status_code == 401:
-            return AuthenticationError(error_message)
+            return AuthenticationError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+        # 403 Forbidden
         elif status_code == 403:
-            return AuthorizationError(error_message)
+            return AuthorizationError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+        # 404 Not Found
         elif status_code == 404:
-            return NotFoundError(error_message)
+            return NotFoundError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+        # 405 Method Not Allowed
         elif status_code == 405:
-            return MethodNotAllowedError(error_message)
+            return MethodNotAllowedError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+        # 409 Conflict
         elif status_code == 409:
             if error_type == "Name Not Unique":
-                return ConflictError(error_message)
+                return ConflictError(
+                    error_message,
+                    error_code=error_code,
+                    details=error_details,
+                    request_id=request_id,
+                )
             elif error_type == "Reference Not Zero":
-                return ReferenceNotZeroError(error_message)
+                return ReferenceNotZeroError(
+                    error_message,
+                    error_code=error_code,
+                    details=error_details,
+                    request_id=request_id,
+                )
             else:
-                return ConflictError(error_message)
+                return ConflictError(
+                    error_message,
+                    error_code=error_code,
+                    details=error_details,
+                    request_id=request_id,
+                )
+
+        # 500 Internal Server Error
         elif status_code == 500:
-            return ServerError(error_message)
+            return ServerError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+        # 501 Not Implemented
         elif status_code == 501:
-            return VersionNotSupportedError(error_message)
+            return VersionNotSupportedError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
+
+        # 504 Gateway Timeout
         elif status_code == 504:
-            return SessionTimeoutError(error_message)
+            return SessionTimeoutError(
+                error_message,
+                error_code=error_code,
+                details=error_details,
+                request_id=request_id,
+            )
         else:
             return APIError(
                 f"HTTP {status_code}: {error_message}",
