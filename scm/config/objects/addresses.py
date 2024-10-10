@@ -1,7 +1,7 @@
-# scm/config/address.py
+# scm/config/addresses.py
 
 from typing import List, Dict, Any, Optional
-from scm.config.base import BaseObject
+from scm.config import BaseObject
 from scm.models.address import Address
 from scm.exceptions import ValidationError
 
