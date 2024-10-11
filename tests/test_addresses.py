@@ -1,6 +1,5 @@
 # tests/test_addresses.py
 
-from scm.client import Scm
 from scm.config.objects import Addresses
 from scm.models.address import Address
 from tests.factories import AddressFactory

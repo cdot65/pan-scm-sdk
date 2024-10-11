@@ -2,8 +2,6 @@
 
 import pytest
 
-from scm.client import Scm
-from scm.config.objects import AddressGroups, Addresses
 from scm.models import (
     Address,
     AddressGroup,
