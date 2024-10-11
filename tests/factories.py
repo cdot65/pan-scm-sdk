@@ -1,7 +1,7 @@
 # tests/factories.py
 
 import factory
-from scm.models.address_model import AddressModel
+from scm.models.address import AddressModel
 from scm.models.address_group import AddressGroupModel, DynamicFilter
 
 
