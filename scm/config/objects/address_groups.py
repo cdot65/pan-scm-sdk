@@ -1,52 +1,52 @@
-# scm/config/address.py
+# scm/config/objects/address_groups.py
 
 from typing import List, Dict, Any, Optional
-from scm.config.base import BaseObject
-from scm.models.address import Address
+from scm.config import BaseObject
+from scm.models import AddressGroup
 from scm.exceptions import ValidationError
 
 
-class AddressObject(BaseObject):
+class AddressGroups(BaseObject):
     """
-    Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
+    Manages Address Groups in Palo Alto Networks' Strata Cloud Manager.
 
-    This class provides methods to create, retrieve, update, and list Address objects
+    This class provides methods to create, retrieve, update, and list Address Groups
     using the Strata Cloud Manager API. It supports operations within folders, snippets,
-    or devices, and allows filtering of Address objects based on various criteria.
+    or devices, and allows filtering of Address Groups based on various criteria.
 
     Attributes:
-        ENDPOINT (str): The API endpoint for Address object operations.
+        ENDPOINT (str): The API endpoint for Address Group operations.
 
     Error:
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        Address: For create, get, and update methods.
+        AddressGroup: For create, get, and update methods.
         List[Address]: For the list method.
     """
 
-    ENDPOINT = "/config/objects/v1/addresses"
+    ENDPOINT = "/config/objects/v1/address-groups"
 
     def __init__(self, api_client):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> Address:
-        address = Address(**data)
-        payload = address.model_dump(exclude_unset=True)
+    def create(self, data: Dict[str, Any]) -> AddressGroup:
+        address_group = AddressGroup(**data)
+        payload = address_group.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
-        return Address(**response)
+        return AddressGroup(**response)
 
-    def get(self, object_id: str) -> Address:
+    def get(self, object_id: str) -> AddressGroup:
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
-        return Address(**response)
+        return AddressGroup(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> Address:
-        address = Address(**data)
+    def update(self, object_id: str, data: Dict[str, Any]) -> AddressGroup:
+        address = AddressGroup(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.put(endpoint, json=payload)
-        return Address(**response)
+        return AddressGroup(**response)
 
     def list(
         self,
@@ -54,7 +54,7 @@ class AddressObject(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         **filters,
-    ) -> List[Address]:
+    ) -> List[AddressGroup]:
         params = {}
 
         # Include container type parameter
@@ -99,5 +99,5 @@ class AddressObject(BaseObject):
         )
 
         response = self.api_client.get(self.ENDPOINT, params=params)
-        addresses = [Address(**item) for item in response.get("data", [])]
+        addresses = [AddressGroup(**item) for item in response.get("data", [])]
         return addresses

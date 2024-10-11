@@ -1,3 +1,6 @@
+# scm/models/address.py
+
+import uuid
 from typing import Optional, List
 
 from pydantic import BaseModel, Field, model_validator, ConfigDict
@@ -107,6 +110,15 @@ class Address(BaseModel):
     )
 
     # Custom Validators
+    @model_validator(mode="before")
+    def validate_uuid(cls, values):
+        if "id" in values and values["id"] is not None:
+            try:
+                uuid.UUID(values["id"])
+            except ValueError:
+                raise ValueError("Invalid UUID format for 'id'")
+        return values
+
     @model_validator(mode="after")
     def validate_address_type(self) -> "Address":
         address_fields = [

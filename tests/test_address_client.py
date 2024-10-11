@@ -2,8 +2,7 @@
 
 from unittest.mock import MagicMock
 from scm.client import Scm
-from scm.config.address import AddressClient
-from scm.models.address import Address
+from scm.config.objects.addresses import AddressClient
 
 
 def test_list_addresses():
