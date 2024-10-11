@@ -1,12 +1,12 @@
-# scm/config/addresses.py
+# scm/config/objects/addresses.py
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models.address import Address
+from scm.models import Address
 from scm.exceptions import ValidationError
 
 
-class AddressObject(BaseObject):
+class Addresses(BaseObject):
     """
     Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
 
