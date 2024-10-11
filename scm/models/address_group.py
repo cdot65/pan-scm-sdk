@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 class DynamicFilter(BaseModel):
     """
-    Represents the dynamic filter for an Address Group in Palo Alto Networks' Strata Cloud Manager.
+    Represents the dynamic filter for an AddressModel Group in Palo Alto Networks' Strata Cloud Manager.
 
     Attributes:
         filter (str): Tag-based filter defining group membership.
@@ -22,11 +22,11 @@ class DynamicFilter(BaseModel):
     )
 
 
-class AddressGroup(BaseModel):
+class AddressGroupModel(BaseModel):
     """
-    Represents an Address Group for Palo Alto Networks' Strata Cloud Manager.
+    Represents an AddressModel Group for Palo Alto Networks' Strata Cloud Manager.
 
-    This class defines the structure and validation rules for an Address Group,
+    This class defines the structure and validation rules for an AddressModel Group,
     including required fields, optional fields, address types, and container types.
 
     Attributes:
@@ -35,7 +35,7 @@ class AddressGroup(BaseModel):
         description (Optional[str]): The description of the address object.
         tag (Optional[List[str]]): Tags associated with the address object.
         dynamic (Optional[DynamicFilter]): Dynamic filter defining group membership.
-        static (str):Container type of Static Address Group.
+        static (str):Container type of Static AddressModel Group.
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
@@ -75,14 +75,14 @@ class AddressGroup(BaseModel):
         description="Tags associated with the address object",
     )
 
-    # Address Types
+    # AddressModel Types
     dynamic: Optional[DynamicFilter] = Field(
         None,
         description="Dynamic filter defining group membership",
     )
     static: Optional[List[str]] = Field(
         None,
-        description="Container type of Static Address Group",
+        description="Container type of Static AddressModel Group",
         min_length=1,
         max_length=255,
         examples=["database-servers"],
@@ -122,7 +122,7 @@ class AddressGroup(BaseModel):
         return values
 
     @model_validator(mode="after")
-    def validate_address_group_type(self) -> "AddressGroup":
+    def validate_address_group_type(self) -> "AddressGroupModel":
         group_type_fields = [
             "dynamic",
             "static",
@@ -135,7 +135,7 @@ class AddressGroup(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_container_type(self) -> "AddressGroup":
+    def validate_container_type(self) -> "AddressGroupModel":
         container_fields = [
             "folder",
             "snippet",

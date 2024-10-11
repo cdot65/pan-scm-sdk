@@ -1,17 +1,17 @@
 # tests/factories.py
 
 import factory
-from scm.models.address import Address
-from scm.models.address_group import AddressGroup, DynamicFilter
+from scm.models.address_model import AddressModel
+from scm.models.address_group import AddressGroupModel, DynamicFilter
 
 
 class AddressFactory(factory.Factory):
     class Meta:
-        model = Address
+        model = AddressModel
 
     name = factory.Faker("word")
     id = factory.Faker("uuid4")
-    description = "PyTest Address"
+    description = "PyTest AddressModel"
     ip_netmask = "192.168.1.1/32"
     folder = "Prisma Access"
 
@@ -25,7 +25,7 @@ class DynamicFilterFactory(factory.Factory):
 
 class AddressGroupDynamicFactory(factory.Factory):
     class Meta:
-        model = AddressGroup
+        model = AddressGroupModel
 
     name = "ValidDynamicAddressGroup"
     description = "This is just a pytest that will fail"
@@ -36,10 +36,10 @@ class AddressGroupDynamicFactory(factory.Factory):
 
 class AddressGroupStaticFactory(factory.Factory):
     class Meta:
-        model = AddressGroup
+        model = AddressGroupModel
 
     name = "ValidStaticAddressGroup"
-    description = "Static Address Group Test"
+    description = "Static AddressModel Group Test"
     static = [
         "address-object1",
         "address-object2",

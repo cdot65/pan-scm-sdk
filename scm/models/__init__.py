@@ -1,4 +1,4 @@
 # scm/models/__init__.py
 
-from .address import Address
-from .address_group import AddressGroup
+from .address_model import AddressModel
+from .address_group import AddressGroupModel

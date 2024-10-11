@@ -4,11 +4,11 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 
-class Address(BaseModel):
+class AddressModel(BaseModel):
     """
-    Represents an Address object for Palo Alto Networks' Strata Cloud Manager.
+    Represents an AddressModel object for Palo Alto Networks' Strata Cloud Manager.
 
-    This class defines the structure and validation rules for an Address object,
+    This class defines the structure and validation rules for an AddressModel object,
     including required fields, optional fields, address types, and container types.
 
     Attributes:
@@ -59,7 +59,7 @@ class Address(BaseModel):
         description="Tags associated with the address object",
     )
 
-    # Address Types
+    # AddressModel Types
     ip_netmask: Optional[str] = Field(
         None,
         description="IP address with or without CIDR notation",
@@ -118,7 +118,7 @@ class Address(BaseModel):
         return values
 
     @model_validator(mode="after")
-    def validate_address_type(self) -> "Address":
+    def validate_address_type(self) -> "AddressModel":
         address_fields = [
             "ip_netmask",
             "ip_range",
@@ -135,7 +135,7 @@ class Address(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_container_type(self) -> "Address":
+    def validate_container_type(self) -> "AddressModel":
         container_fields = [
             "folder",
             "snippet",
