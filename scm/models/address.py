@@ -1,5 +1,3 @@
-# scm/models/address.py
-
 import uuid
 from typing import Optional, List
 
