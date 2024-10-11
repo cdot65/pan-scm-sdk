@@ -1,4 +1,4 @@
-# scm/auth/auth.py
+# scm/auth.py
 
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
