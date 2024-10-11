@@ -1,23 +1,11 @@
 # tests/test_address_groups.py
 
-from scm.client import Scm
 from scm.config.objects import AddressGroups
 from scm.models import AddressGroup
 from tests.factories import AddressGroupStaticFactory, AddressGroupDynamicFactory
 
 
-def test_list_address_groups(load_env, mocker):
-    """
-    Integration test for listing addresses.
-    This test requires valid API credentials and a reachable API endpoint.
-    """
-    client_id = load_env["client_id"]
-    client_secret = load_env["client_secret"]
-    tsg_id = load_env["tsg_id"]
-
-    # Initialize the API client
-    api_client = Scm(client_id=client_id, client_secret=client_secret, tsg_id=tsg_id)
-
+def test_list_address_groups(load_env, mock_scm):
     # Mock the API client's get method if you don't want to make real API calls
     mock_response = {
         "data": [
@@ -71,26 +59,29 @@ def test_list_address_groups(load_env, mocker):
         "limit": 200,
     }
 
-    mocked_get = mocker.patch.object(api_client, "get", return_value=mock_response)
+    # Configure the mock_scm.get method to return the mock_response
+    mock_scm.get.return_value = mock_response
 
-    # Create an instance of Addresses
-    address_groups_client = AddressGroups(api_client)
+    # Create an instance of AddressGroups with the mocked Scm
+    address_groups_client = AddressGroups(mock_scm)
 
     # Call the list method
     address_groups = address_groups_client.list(folder="All")
 
     # Assertions
-    mocked_get.assert_called_once_with(
+    mock_scm.get.assert_called_once_with(
         "/config/objects/v1/address-groups", params={"folder": "All"}
     )
     assert isinstance(address_groups, list)
     assert isinstance(address_groups[0], AddressGroup)
     assert len(address_groups) == 7
+
     assert address_groups[0].name == "DAG_test"
     assert (
         address_groups[0].dynamic.filter
         == "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
     )
+
     assert address_groups[1].name == "Moishy_Test"
     assert address_groups[1].description == "test"
 
@@ -100,28 +91,22 @@ def test_list_address_groups(load_env, mocker):
     assert address_groups[2].static == ["shachar_test2"]
 
 
-def test_create_address_group_with_dynamic_filter(load_env, mocker):
-    # Initialize the API client
-    api_client = Scm(
-        client_id=load_env["client_id"],
-        client_secret=load_env["client_secret"],
-        tsg_id=load_env["tsg_id"],
-    )
-
-    # Create an instance of AddressGroups
-    address_groups_client = AddressGroups(api_client)
-
+def test_create_address_group_with_dynamic_filter(load_env, mock_scm):
+    """
+    Test creating an address group with a dynamic filter.
+    """
     # Create a test AddressGroup instance using Factory Boy
     test_address_group = AddressGroupDynamicFactory()
 
-    # Mock the API client's post method
+    # Define the mock response for the post method
     mock_response = test_address_group.model_dump()
     mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"  # Mocked ID
-    mocked_post = mocker.patch.object(
-        api_client,
-        "post",
-        return_value=mock_response,
-    )
+
+    # Configure the mock_scm.post method to return the mock_response
+    mock_scm.post.return_value = mock_response
+
+    # Create an instance of AddressGroups with the mocked Scm
+    address_groups_client = AddressGroups(mock_scm)
 
     # Call the create method
     created_group = address_groups_client.create(
@@ -129,7 +114,7 @@ def test_create_address_group_with_dynamic_filter(load_env, mocker):
     )
 
     # Assertions
-    mocked_post.assert_called_once_with(
+    mock_scm.post.assert_called_once_with(
         "/config/objects/v1/address-groups",
         json=test_address_group.model_dump(exclude_unset=True),
     )
@@ -139,28 +124,22 @@ def test_create_address_group_with_dynamic_filter(load_env, mocker):
     assert created_group.folder == test_address_group.folder
 
 
-def test_create_address_group_with_static_entries(load_env, mocker):
-    # Initialize the API client
-    api_client = Scm(
-        client_id=load_env["client_id"],
-        client_secret=load_env["client_secret"],
-        tsg_id=load_env["tsg_id"],
-    )
-
-    # Create an instance of AddressGroups
-    address_groups_client = AddressGroups(api_client)
-
+def test_create_address_group_with_static_entries(load_env, mock_scm):
+    """
+    Test creating an address group with static entries.
+    """
     # Create a test AddressGroup instance using Factory Boy
     test_address_group = AddressGroupStaticFactory()
 
-    # Mock the API client's post method
+    # Define the mock response for the post method
     mock_response = test_address_group.model_dump()
     mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"  # Mocked ID
-    mocked_post = mocker.patch.object(
-        api_client,
-        "post",
-        return_value=mock_response,
-    )
+
+    # Configure the mock_scm.post method to return the mock_response
+    mock_scm.post.return_value = mock_response
+
+    # Create an instance of AddressGroups with the mocked Scm
+    address_groups_client = AddressGroups(mock_scm)
 
     # Call the create method
     created_group = address_groups_client.create(
@@ -168,7 +147,7 @@ def test_create_address_group_with_static_entries(load_env, mocker):
     )
 
     # Assertions
-    mocked_post.assert_called_once_with(
+    mock_scm.post.assert_called_once_with(
         "/config/objects/v1/address-groups",
         json=test_address_group.model_dump(exclude_unset=True),
     )

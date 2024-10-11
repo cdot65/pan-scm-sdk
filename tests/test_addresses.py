@@ -6,18 +6,10 @@ from scm.models.address import Address
 from tests.factories import AddressFactory
 
 
-def test_list_addresses(load_env, mocker):
+def test_list_addresses(load_env, mock_scm):
     """
     Integration test for listing addresses.
-    This test requires valid API credentials and a reachable API endpoint.
     """
-    client_id = load_env["client_id"]
-    client_secret = load_env["client_secret"]
-    tsg_id = load_env["tsg_id"]
-
-    # Initialize the API client
-    api_client = Scm(client_id=client_id, client_secret=client_secret, tsg_id=tsg_id)
-
     # Mock the API client's get method if you don't want to make real API calls
     mock_response = {
         "data": [
@@ -36,16 +28,17 @@ def test_list_addresses(load_env, mocker):
         ]
     }
 
-    mocked_get = mocker.patch.object(api_client, "get", return_value=mock_response)
+    # Configure the mock_scm.get method to return the mock_response
+    mock_scm.get.return_value = mock_response
 
-    # Create an instance of Addresses
-    addresses_client = Addresses(api_client)
+    # Create an instance of AddressGroups with the mocked Scm
+    addresses_client = Addresses(mock_scm)
 
     # Call the list method
     addresses = addresses_client.list(folder="MainFolder")
 
     # Assertions
-    mocked_get.assert_called_once_with(
+    mock_scm.get.assert_called_once_with(
         "/config/objects/v1/addresses", params={"folder": "MainFolder"}
     )
     assert isinstance(addresses, list)
@@ -55,34 +48,25 @@ def test_list_addresses(load_env, mocker):
     assert addresses[1].ip_netmask == "192.168.1.2/32"
 
 
-def test_create_addresses(load_env, mocker):
-    # Initialize the API client
-    api_client = Scm(
-        client_id=load_env["client_id"],
-        client_secret=load_env["client_secret"],
-        tsg_id=load_env["tsg_id"],
-    )
-
-    # Create an instance of AddressGroups
-    address_client = Addresses(api_client)
-
+def test_create_addresses(load_env, mock_scm):
     # Create a test AddressGroup instance using Factory Boy
     test_address = AddressFactory()
 
     # Mock the API client's post method
     mock_response = test_address.model_dump()
     mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"  # Mocked ID
-    mocked_post = mocker.patch.object(
-        api_client,
-        "post",
-        return_value=mock_response,
-    )
+
+    # Configure the mock_scm.post method to return the mock_response
+    mock_scm.post.return_value = mock_response
+
+    # Create an instance of Addresses with the mocked Scm
+    address_client = Addresses(mock_scm)
 
     # Call the create method
     created_group = address_client.create(test_address.model_dump(exclude_unset=True))
 
     # Assertions
-    mocked_post.assert_called_once_with(
+    mock_scm.post.assert_called_once_with(
         "/config/objects/v1/addresses",
         json=test_address.model_dump(exclude_unset=True),
     )
