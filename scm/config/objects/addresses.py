@@ -1,4 +1,4 @@
-# scm/config/addresses.py
+# scm/config/objects/addresses.py
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
