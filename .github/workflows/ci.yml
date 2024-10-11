@@ -1,3 +1,5 @@
+# .github/workflows/ci.yml
+
 name: CI
 
 on:
@@ -23,6 +25,10 @@ jobs:
         pip install poetry
         poetry install
 
-#    - name: Run Tests
-#      run: |
-#        poetry run pytest
+    - name: Run Tests
+      env:
+        CLIENT_ID: fake_client_id
+        CLIENT_SECRET: fake_client_secret
+        TSG_ID: fake_tsg_id
+      run: |
+        poetry run pytest -m "not api"
