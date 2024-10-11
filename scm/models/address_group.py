@@ -18,11 +18,7 @@ class DynamicFilter(BaseModel):
         ...,
         max_length=1024,
         description="Tag based filter defining group membership",
-<<<<<<< HEAD
         examples=["'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"],
-=======
-        example="'aws.ec2.key.Name.value.scm-test-scm-test-vpc'",
->>>>>>> c4adc8b (Address groups (#5))
     )
 
 
