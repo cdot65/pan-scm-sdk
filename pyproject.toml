@@ -34,6 +34,9 @@ factory-boy = "^3.3.1"
 termynal = "^0.12.1"
 invoke = "^2.2.0"
 ipython = "^8.28.0"
+python-dotenv = "^1.0.1"
+pytest-mock = "^3.14.0"
+pytest-cov = "^5.0.0"
 
 [build-system]
 requires = ["poetry-core"]
