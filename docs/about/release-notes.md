@@ -5,6 +5,17 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.3
+
+**Release Date:** October 12, 2024
+
+### Application
+
+- **New Object**: Add the ability to support Applications.
+- **Docs Update**: Revamp the readme and mkdocs site.
+
+---
+
 ## Version 0.1.2
 
 **Release Date:** October 10, 2024
