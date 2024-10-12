@@ -1,12 +1,12 @@
-# scm/config/objects/addresses.py
+# scm/config/objects/address.py
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models import Address
+from scm.models import AddressRequestModel, AddressResponseModel
 from scm.exceptions import ValidationError
 
 
-class Addresses(BaseObject):
+class Address(BaseObject):
     """
     Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
 
@@ -21,7 +21,7 @@ class Addresses(BaseObject):
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        Address: For create, get, and update methods.
+        AddressRequestModel: For create, get, and update methods.
         List[Address]: For the list method.
     """
 
@@ -30,23 +30,23 @@ class Addresses(BaseObject):
     def __init__(self, api_client):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> Address:
-        address = Address(**data)
+    def create(self, data: Dict[str, Any]) -> AddressResponseModel:
+        address = AddressRequestModel(**data)
         payload = address.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
-        return Address(**response)
+        return AddressResponseModel(**response)
 
-    def get(self, object_id: str) -> Address:
+    def get(self, object_id: str) -> AddressResponseModel:
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
-        return Address(**response)
+        return AddressResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> Address:
-        address = Address(**data)
+    def update(self, object_id: str, data: Dict[str, Any]) -> AddressResponseModel:
+        address = AddressRequestModel(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.put(endpoint, json=payload)
-        return Address(**response)
+        return AddressResponseModel(**response)
 
     def list(
         self,
@@ -54,7 +54,7 @@ class Addresses(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         **filters,
-    ) -> List[Address]:
+    ) -> List[AddressResponseModel]:
         params = {}
 
         # Include container type parameter
@@ -99,5 +99,5 @@ class Addresses(BaseObject):
         )
 
         response = self.api_client.get(self.ENDPOINT, params=params)
-        addresses = [Address(**item) for item in response.get("data", [])]
+        addresses = [AddressResponseModel(**item) for item in response.get("data", [])]
         return addresses

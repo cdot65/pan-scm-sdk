@@ -3,7 +3,7 @@
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from scm.utils.logging import setup_logger
-from scm.models.auth import AuthRequest
+from scm.models.auth import AuthRequestModel
 import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import ExpiredSignatureError
@@ -19,7 +19,7 @@ class OAuth2Client:
     with Palo Alto Networks' services. It supports token decoding and expiration checking.
 
     Attributes:
-        auth_request (AuthRequest): An object containing authentication parameters.
+        auth_request (AuthRequestModel): An object containing authentication parameters.
         session (OAuth2Session): The authenticated OAuth2 session.
         signing_key (PyJWK): The key used for verifying the JWT token.
 
@@ -30,7 +30,7 @@ class OAuth2Client:
         payload (dict): Decoded JWT token payload when using decode_token method.
     """
 
-    def __init__(self, auth_request: AuthRequest):
+    def __init__(self, auth_request: AuthRequestModel):
         self.auth_request = auth_request
         self.session = self._create_session()
         self.signing_key = self._get_signing_key()

@@ -1,17 +1,19 @@
 # tests/factories.py
 
 import factory
-from scm.models.address import Address
-from scm.models.address_group import AddressGroup, DynamicFilter
+
+from scm.models import ApplicationRequestModel
+from scm.models.address import AddressRequestModel
+from scm.models.address_group import AddressGroupRequestModel, DynamicFilter
 
 
 class AddressFactory(factory.Factory):
     class Meta:
-        model = Address
+        model = AddressRequestModel
 
     name = factory.Faker("word")
     id = factory.Faker("uuid4")
-    description = "PyTest Address"
+    description = "PyTest AddressRequestModel"
     ip_netmask = "192.168.1.1/32"
     folder = "Prisma Access"
 
@@ -25,7 +27,7 @@ class DynamicFilterFactory(factory.Factory):
 
 class AddressGroupDynamicFactory(factory.Factory):
     class Meta:
-        model = AddressGroup
+        model = AddressGroupRequestModel
 
     name = "ValidDynamicAddressGroup"
     description = "This is just a pytest that will fail"
@@ -36,10 +38,10 @@ class AddressGroupDynamicFactory(factory.Factory):
 
 class AddressGroupStaticFactory(factory.Factory):
     class Meta:
-        model = AddressGroup
+        model = AddressGroupRequestModel
 
     name = "ValidStaticAddressGroup"
-    description = "Static Address Group Test"
+    description = "Static AddressRequestModel Group Test"
     static = [
         "address-object1",
         "address-object2",
@@ -48,3 +50,26 @@ class AddressGroupStaticFactory(factory.Factory):
     ]
     folder = "MainFolder"
     tag = ["tag1", "tag2"]
+
+
+class ApplicationFactory(factory.Factory):
+    class Meta:
+        model = ApplicationRequestModel
+
+    name = "ValidApplication"
+    description = "Application from pan-scm-sdk Test"
+    category = "collaboration"
+    subcategory = "file-sharing"
+    technology = "client-server"
+    risk = 1
+    ports = ["tcp/80,443", "udp/3478"]
+    folder = "Prisma Access"
+    evasive = False
+    pervasive = False
+    excessive_bandwidth_use = False
+    used_by_malware = False
+    transfers_files = False
+    has_known_vulnerabilities = True
+    tunnels_other_apps = False
+    prone_to_misuse = False
+    no_certifications = False

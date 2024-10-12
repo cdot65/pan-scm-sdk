@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 import requests
 
 from scm.auth import OAuth2Client
-from scm.models.auth import AuthRequest
+from scm.models.auth import AuthRequestModel
 from scm.utils.logging import setup_logger
 from scm.exceptions import (
     APIError,
@@ -53,9 +53,9 @@ class Scm:
     ):
         self.api_base_url = api_base_url
 
-        # Create the AuthRequest object
+        # Create the AuthRequestModel object
         try:
-            auth_request = AuthRequest(
+            auth_request = AuthRequestModel(
                 client_id=client_id,
                 client_secret=client_secret,
                 tsg_id=tsg_id,

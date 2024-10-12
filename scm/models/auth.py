@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field, model_validator
 
 
-class AuthRequest(BaseModel):
+class AuthRequestModel(BaseModel):
     """
     Represents an authentication request for Palo Alto Network's Strata Cloud Manager.
 
