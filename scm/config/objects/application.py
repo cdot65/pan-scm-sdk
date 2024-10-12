@@ -2,26 +2,26 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models import AddressModel
+from scm.models import ApplicationRequestModel, ApplicationResponseModel
 from scm.exceptions import ValidationError
 
 
 class Application(BaseObject):
     """
-    Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
+    Manages Application in Palo Alto Networks' Strata Cloud Manager.
 
-    This class provides methods to create, retrieve, update, and list Address objects
+    This class provides methods to create, retrieve, update, and list Applications
     using the Strata Cloud Manager API. It supports operations within folders, snippets,
-    or devices, and allows filtering of Address objects based on various criteria.
+    or devices, and allows filtering of Application based on various criteria.
 
     Attributes:
-        ENDPOINT (str): The API endpoint for Address object operations.
+        ENDPOINT (str): The API endpoint for Application operations.
 
     Error:
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        AddressModel: For create, get, and update methods.
+        ApplicationRequestModel: For create, get, and update methods.
         List[Address]: For the list method.
     """
 
@@ -30,23 +30,23 @@ class Application(BaseObject):
     def __init__(self, api_client):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> AddressModel:
-        address = AddressModel(**data)
-        payload = address.model_dump(exclude_unset=True)
+    def create(self, data: Dict[str, Any]) -> ApplicationResponseModel:
+        app_request = ApplicationRequestModel(**data)
+        payload = app_request.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
-        return AddressModel(**response)
+        return ApplicationResponseModel(**response)
 
-    def get(self, object_id: str) -> AddressModel:
+    def get(self, object_id: str) -> ApplicationResponseModel:
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
-        return AddressModel(**response)
+        return ApplicationResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> AddressModel:
-        address = AddressModel(**data)
+    def update(self, object_id: str, data: Dict[str, Any]) -> ApplicationResponseModel:
+        address = ApplicationRequestModel(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.put(endpoint, json=payload)
-        return AddressModel(**response)
+        return ApplicationResponseModel(**response)
 
     def list(
         self,
@@ -54,11 +54,15 @@ class Application(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         **filters,
-    ) -> List[AddressModel]:
+    ) -> List[ApplicationResponseModel]:
         params = {}
 
         # Include container type parameter
-        container_params = {"folder": folder, "snippet": snippet, "device": device}
+        container_params = {
+            "folder": folder,
+            "snippet": snippet,
+            "device": device,
+        }
         provided_containers = {
             k: v for k, v in container_params.items() if v is not None
         }
@@ -99,5 +103,7 @@ class Application(BaseObject):
         )
 
         response = self.api_client.get(self.ENDPOINT, params=params)
-        addresses = [AddressModel(**item) for item in response.get("data", [])]
+        addresses = [
+            ApplicationResponseModel(**item) for item in response.get("data", [])
+        ]
         return addresses

@@ -1,6 +1,8 @@
 # tests/factories.py
 
 import factory
+
+from scm.models import ApplicationRequestModel
 from scm.models.address import AddressModel
 from scm.models.address_group import AddressGroupModel, DynamicFilter
 
@@ -48,3 +50,26 @@ class AddressGroupStaticFactory(factory.Factory):
     ]
     folder = "MainFolder"
     tag = ["tag1", "tag2"]
+
+
+class ApplicationFactory(factory.Factory):
+    class Meta:
+        model = ApplicationRequestModel
+
+    name = "ValidApplication"
+    description = "Application from pan-scm-sdk Test"
+    category = "collaboration"
+    subcategory = "file-sharing"
+    technology = "client-server"
+    risk = 1
+    ports = ["tcp/80,443", "udp/3478"]
+    folder = "Prisma Access"
+    evasive = False
+    pervasive = False
+    excessive_bandwidth_use = False
+    used_by_malware = False
+    transfers_files = False
+    has_known_vulnerabilities = True
+    tunnels_other_apps = False
+    prone_to_misuse = False
+    no_certifications = False
