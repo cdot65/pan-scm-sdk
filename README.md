@@ -15,10 +15,15 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 - [Installation](#installation)
 - [Usage](#usage)
     - [Authentication](#authentication)
-    - [Creating Address Objects](#creating-address-objects)
-    - [Listing Addresses](#listing-addresses)
-    - [Updating an Address](#updating-an-address)
-    - [Deleting an Address](#deleting-an-address)
+    - [Managing Address Objects](#managing-address-objects)
+        - [Listing Addresses](#listing-addresses)
+        - [Creating an Address](#creating-an-address)
+    - [Managing Address Groups](#managing-address-groups)
+        - [Listing Address Groups](#listing-address-groups)
+        - [Creating an Address Group](#creating-an-address-group)
+    - [Managing Applications](#managing-applications)
+        - [Listing Applications](#listing-applications)
+        - [Creating an Application](#creating-an-application)
 - [Contributing](#contributing)
 - [License](#license)
 - [Support](#support)
@@ -27,7 +32,8 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 
 - **OAuth2 Authentication**: Securely authenticate with the Strata Cloud Manager API using OAuth2 client credentials
   flow.
-- **Resource Management**: Create, read, update, and delete configuration objects such as addresses.
+- **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups, and
+  applications.
 - **Data Validation**: Utilize Pydantic models for data validation and serialization.
 - **Exception Handling**: Comprehensive error handling with custom exceptions for API errors.
 - **Extensibility**: Designed for easy extension to support additional resources and endpoints.
@@ -51,70 +57,131 @@ pip install pan-scm-sdk
 Before interacting with the SDK, you need to authenticate using your Strata Cloud Manager credentials.
 
 ```python
-from pan_scm_sdk.client import APIClient
+from scm.client import Scm
 
 # Initialize the API client with your credentials
-api_client = APIClient(
+scm = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
-# The api_client is now ready to use
+# The SCM client is now ready to use
 ```
 
-### Creating Address Objects
+### Managing Address Objects
+
+#### Listing Addresses
 
 ```python
-from pan_scm_sdk.resources.address import AddressClient
-from pan_scm_sdk.models.address import Address
+from scm.config.objects import Address
 
-# Create an AddressClient instance
-address_client = AddressClient(api_client)
+# Create an Address instance
+address = Address(scm)
 
+# List addresses in a specific folder
+addresses = address.list(folder='Prisma Access')
+
+# Iterate through the addresses
+for addr in addresses:
+    print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
+```
+
+#### Creating an Address
+
+```python
 # Define a new address object
-address = Address(
-    name="MyAddress",
-    ip_netmask="192.168.1.1/32",
-    folder="Shared",
-)
+address_data = {
+    "name": "test123",
+    "fqdn": "test123.example.com",
+    "description": "Created via pan-scm-sdk",
+    "folder": "Prisma Access",
+}
 
 # Create the address in Strata Cloud Manager
-created_address = address_client.create_address(address)
-print(f"Created address with ID: {created_address.id}")
+new_address = address.create(address_data)
+print(f"Created address with ID: {new_address.id}")
 ```
 
-### Listing Addresses
+### Managing Address Groups
+
+#### Listing Address Groups
 
 ```python
-# List addresses with optional filtering
-addresses = address_client.list_addresses(limit=10)
-for addr in addresses:
-    print(f"AddressRequestModel ID: {addr.id}, Name: {addr.name}, IP: {addr.ip_netmask}")
+from scm.config.objects import AddressGroup
+
+# Create an AddressGroup instance
+address_group = AddressGroup(scm)
+
+# List address groups in a specific folder
+address_groups = address_group.list(folder='Prisma Access')
+
+# Iterate through the address groups
+for ag in address_groups:
+    print(f"Address Group Name: {ag.name}, Description: {ag.description}")
 ```
 
-### Updating an Address
+#### Creating an Address Group
 
 ```python
-# Retrieve an existing address
-address_id = "123e4567-e89b-12d3-a456-426655440000"
-address = address_client.get_address(address_id)
+# Define a new address group
+address_group_data = {
+    "name": "example-group",
+    "description": "This is a test address group",
+    "static": ["Branch-test1", "Branch-test2"],
+    "folder": "Prisma Access",
+}
 
-# Update the address properties
-address.description = "Updated description"
-
-# Send the update to Strata Cloud Manager
-updated_address = address_client.update_address(address_id, address)
-print(f"Updated address with ID: {updated_address.id}")
+# Create the address group in Strata Cloud Manager
+new_address_group = address_group.create(address_group_data)
+print(f"Created address group with ID: {new_address_group.id}")
 ```
 
-### Deleting an Address
+### Managing Applications
+
+#### Listing Applications
 
 ```python
-# Delete an address by ID
-address_id = "123e4567-e89b-12d3-a456-426655440000"
-address_client.delete_address(address_id)
-print(f"Deleted address with ID: {address_id}")
+from scm.config.objects import Application
+
+# Create an Application instance
+application = Application(scm)
+
+# List applications in a specific folder
+applications = application.list(folder='Prisma Access')
+
+# Iterate through the applications
+for app in applications:
+    print(f"Application Name: {app.name}, Category: {app.category}")
+```
+
+#### Creating an Application
+
+```python
+# Define a new application
+application_data = {
+    "name": "test123",
+    "category": "collaboration",
+    "subcategory": "internet-conferencing",
+    "technology": "client-server",
+    "risk": 1,
+    "description": "Created via pan-scm-sdk",
+    "ports": ["tcp/80,443", "udp/3478"],
+    "folder": "Prisma Access",
+    "evasive": False,
+    "pervasive": False,
+    "excessive_bandwidth_use": False,
+    "used_by_malware": False,
+    "transfers_files": False,
+    "has_known_vulnerabilities": True,
+    "tunnels_other_apps": False,
+    "prone_to_misuse": False,
+    "no_certifications": False,
+}
+
+# Create the application in Strata Cloud Manager
+new_application = application.create(application_data)
+print(f"Created application with ID: {new_application.id}")
 ```
 
 ## Contributing
