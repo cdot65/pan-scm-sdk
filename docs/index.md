@@ -1,6 +1,6 @@
 ---
 hide:
-    - navigation
+  - navigation
 ---
 
 <style>
@@ -33,27 +33,15 @@ hide:
 
 ---
 
-**Documentation**: <a href="https://cdot65.github.io/pan-scm-sdk/" target="_blank">https://cdot65.github.io/pan-scm-sdk/</a>
+**Documentation
+**: <a href="https://cdot65.github.io/pan-scm-sdk/" target="_blank">https://cdot65.github.io/pan-scm-sdk/</a>
 
-**Source Code**: <a href="https://github.com/cdot65/pan-scm-sdk" target="_blank">https://github.com/cdot65/pan-scm-sdk</a>
+**Source Code
+**: <a href="https://github.com/cdot65/pan-scm-sdk" target="_blank">https://github.com/cdot65/pan-scm-sdk</a>
 
 ---
 
 `pan-scm-sdk` is a Python SDK for Palo Alto Networks Strata Cloud Manager.
-
-## Key Features
-
-- **feature1**: will add later
-- **feature2**: will add later
-- **feature3**: will add later
-
-## Workflow
-
-1. **workflow1**: will add later
-2. **workflow2**: will add later
-3. **workflow3**: will add later
-
----
 
 ## Installation
 
@@ -66,18 +54,21 @@ Install the package via pip:
 <div class="termy">
 
 <!-- termynal -->
+
 ```bash
 $ pip install pan-scm-sdk
 ```
+
 </div>
 
-For more detailed usage instructions and examples, refer to the [User Guide](user-guide/introduction.md).
+For more detailed usage instructions and examples, refer to the [User Guide](about/introduction.md).
 
 ---
 
 ## Contributing
 
-Contributions are welcome and greatly appreciated. Visit the [Contributing](about/contributing.md) page for guidelines on how to contribute.
+Contributions are welcome and greatly appreciated. Visit the [Contributing](about/contributing.md) page for guidelines
+on how to contribute.
 
 ## License
 

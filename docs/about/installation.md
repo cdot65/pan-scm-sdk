@@ -21,10 +21,12 @@ It's good practice to use a virtual environment to manage dependencies.
 <div class="termy">
 
 <!-- termynal -->
+
 ```bash
 $ python3 -m venv scm-env
 $ source scm-env/bin/activate
 ```
+
 </div>
 
 **On Windows:**
@@ -32,10 +34,12 @@ $ source scm-env/bin/activate
 <div class="termy">
 
 <!-- termynal -->
+
 ```bash
 $ python3 -m venv scm-env
 $ scm-env\Scripts\activate
 ```
+
 </div>
 
 ### 2. Install `pan-scm-sdk` via pip
@@ -45,13 +49,16 @@ Within the activated environment, install the package using pip:
 <div class="termy">
 
 <!-- termynal -->
+
 ```bash
 $ pip install pan-scm-sdk
 ---> 100%
 Successfully pan-scm-sdk
 ```
+
 </div>
 
 ---
 
-Now you're ready to use `pan-scm-sdk`. Proceed to the [Getting Started](getting-started.md) guide to begin cloning configurations.
+Now you're ready to use `pan-scm-sdk`. Proceed to the [Getting Started](getting-started.md) guide to begin cloning
+configurations.

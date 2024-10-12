@@ -21,17 +21,25 @@ plugins:
             show_source: true
 nav:
   - Home: index.md
-  - User Guide:
-      - Introduction: user-guide/introduction.md
-      - Installation: user-guide/installation.md
-      - Getting Started: user-guide/getting-started.md
-      - Commands: user-guide/commands.md
-      - Examples: user-guide/examples.md
-      - Troubleshooting: user-guide/troubleshooting.md
-  - About:
-      - License: about/license.md
-      - Contributing: about/contributing.md
-      - Release Notes: about/release-notes.md
+  - Introduction: about/introduction.md
+  - Installation: about/installation.md
+  - Getting Started: about/getting-started.md
+  - SDK Developer Documentation:
+      - Overview: sdk/index.md
+      - Configuration Objects:
+          - Address: sdk/address.md
+          - Address Group: sdk/address_group.md
+          - Application: sdk/application.md
+      - Data Models:
+          - Overview: sdk/models.md
+          - Address Models: sdk/models/address_models.md
+          - Address Group Models: sdk/models/address_group_models.md
+          - Application Models: sdk/models/application_models.md
+      - Authentication Module: sdk/auth.md
+      - SCM Client: sdk/client.md
+  - Troubleshooting: about/troubleshooting.md
+  - Contributing: about/contributing.md
+  - License: about/license.md
 extra_css:
   - css/termynal.css
   - css/custom.css
