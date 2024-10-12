@@ -1,7 +1,7 @@
 # tests/test_addresses.py
 
 from scm.config.objects import Address
-from scm.models.address import AddressModel
+from scm.models import AddressResponseModel
 from tests.factories import AddressFactory
 
 
@@ -41,14 +41,14 @@ def test_list_addresses(load_env, mock_scm):
         "/config/objects/v1/addresses", params={"folder": "MainFolder"}
     )
     assert isinstance(addresses, list)
-    assert isinstance(addresses[0], AddressModel)
+    assert isinstance(addresses[0], AddressResponseModel)
     assert len(addresses) == 2
     assert addresses[0].name == "Address1"
     assert addresses[1].ip_netmask == "192.168.1.2/32"
 
 
 def test_create_addresses(load_env, mock_scm):
-    # Create a test AddressGroupModel instance using Factory Boy
+    # Create a test AddressGroupRequestModel instance using Factory Boy
     test_address = AddressFactory()
 
     # Mock the API client's post method

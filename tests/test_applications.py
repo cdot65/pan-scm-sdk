@@ -1,7 +1,7 @@
 # tests/test_applications.py
 
 from scm.config.objects import Application
-from scm.models import ApplicationRequestModel, ApplicationResponseModel
+from scm.models import ApplicationResponseModel
 from tests.factories import ApplicationFactory
 
 

@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models import AddressModel
+from scm.models import AddressRequestModel, AddressResponseModel
 from scm.exceptions import ValidationError
 
 
@@ -21,7 +21,7 @@ class Address(BaseObject):
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        AddressModel: For create, get, and update methods.
+        AddressRequestModel: For create, get, and update methods.
         List[Address]: For the list method.
     """
 
@@ -30,23 +30,23 @@ class Address(BaseObject):
     def __init__(self, api_client):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> AddressModel:
-        address = AddressModel(**data)
+    def create(self, data: Dict[str, Any]) -> AddressResponseModel:
+        address = AddressRequestModel(**data)
         payload = address.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
-        return AddressModel(**response)
+        return AddressResponseModel(**response)
 
-    def get(self, object_id: str) -> AddressModel:
+    def get(self, object_id: str) -> AddressResponseModel:
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
-        return AddressModel(**response)
+        return AddressResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> AddressModel:
-        address = AddressModel(**data)
+    def update(self, object_id: str, data: Dict[str, Any]) -> AddressResponseModel:
+        address = AddressRequestModel(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.put(endpoint, json=payload)
-        return AddressModel(**response)
+        return AddressResponseModel(**response)
 
     def list(
         self,
@@ -54,7 +54,7 @@ class Address(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         **filters,
-    ) -> List[AddressModel]:
+    ) -> List[AddressResponseModel]:
         params = {}
 
         # Include container type parameter
@@ -99,5 +99,5 @@ class Address(BaseObject):
         )
 
         response = self.api_client.get(self.ENDPOINT, params=params)
-        addresses = [AddressModel(**item) for item in response.get("data", [])]
+        addresses = [AddressResponseModel(**item) for item in response.get("data", [])]
         return addresses

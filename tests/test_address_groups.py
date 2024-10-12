@@ -1,7 +1,7 @@
 # tests/test_address_groups.py
 
 from scm.config.objects import AddressGroup
-from scm.models import AddressGroupModel
+from scm.models import AddressGroupResponseModel
 from tests.factories import AddressGroupStaticFactory, AddressGroupDynamicFactory
 
 
@@ -73,7 +73,7 @@ def test_list_address_groups(load_env, mock_scm):
         "/config/objects/v1/address-groups", params={"folder": "All"}
     )
     assert isinstance(address_groups, list)
-    assert isinstance(address_groups[0], AddressGroupModel)
+    assert isinstance(address_groups[0], AddressGroupResponseModel)
     assert len(address_groups) == 7
 
     assert address_groups[0].name == "DAG_test"
@@ -95,7 +95,7 @@ def test_create_address_group_with_dynamic_filter(load_env, mock_scm):
     """
     Test creating an address group with a dynamic filter.
     """
-    # Create a test AddressGroupModel instance using Factory Boy
+    # Create a test AddressGroupRequestModel instance using Factory Boy
     test_address_group = AddressGroupDynamicFactory()
 
     # Define the mock response for the post method
@@ -128,7 +128,7 @@ def test_create_address_group_with_static_entries(load_env, mock_scm):
     """
     Test creating an address group with static entries.
     """
-    # Create a test AddressGroupModel instance using Factory Boy
+    # Create a test AddressGroupRequestModel instance using Factory Boy
     test_address_group = AddressGroupStaticFactory()
 
     # Define the mock response for the post method

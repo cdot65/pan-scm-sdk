@@ -38,7 +38,7 @@ $ scm-clone clone-address-objects
 $ scm-clone clone-address-groupsStarting address objects migration...
 Retrieved 15 address objects from source.
 Successfully created 15 address objects in destination.
-AddressModel objects migration completed successfully.
+AddressRequestModel objects migration completed successfully.
 ```
 
 </div>
@@ -66,7 +66,7 @@ $ scm-clone clone-address-groups
 Starting address groups migration...
 Retrieved 8 address groups from source.
 Successfully created 8 address groups in destination.
-AddressModel groups migration completed successfully.
+AddressRequestModel groups migration completed successfully.
 ```
 
 </div>

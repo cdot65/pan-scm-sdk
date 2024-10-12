@@ -90,7 +90,7 @@ print(f"Created address with ID: {created_address.id}")
 # List addresses with optional filtering
 addresses = address_client.list_addresses(limit=10)
 for addr in addresses:
-    print(f"AddressModel ID: {addr.id}, Name: {addr.name}, IP: {addr.ip_netmask}")
+    print(f"AddressRequestModel ID: {addr.id}, Name: {addr.name}, IP: {addr.ip_netmask}")
 ```
 
 ### Updating an Address

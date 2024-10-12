@@ -3,8 +3,8 @@
 import pytest
 
 from scm.models import (
-    AddressModel,
-    AddressGroupModel,
+    AddressRequestModel,
+    AddressGroupRequestModel,
 )
 from scm.models.address_group import DynamicFilter
 from pydantic import ValidationError
@@ -21,24 +21,24 @@ from tests.factories import (
 # -------------------------------------------------------------------------- #
 def test_address_name_exists():
     with pytest.raises(ValidationError) as exc_info:
-        AddressModel(
+        AddressRequestModel(
             ip_netmask="192.168.1.1/32",
             folder="MainFolder",
         )
     assert (
-        "1 validation error for AddressModel\nname\n  Field required [type=missing,"
+        "1 validation error for AddressRequestModel\nname\n  Field required [type=missing,"
         in str(exc_info.value)
     )
 
 
 def test_address_group_name_exists():
     with pytest.raises(ValidationError) as exc_info:
-        AddressGroupModel(
+        AddressGroupRequestModel(
             description="this is just a pytest that will fail",
             folder="MainFolder",
         )
     assert (
-        "1 validation error for AddressGroupModel\nname\n  Field required [type=missing,"
+        "1 validation error for AddressGroupRequestModel\nname\n  Field required [type=missing,"
         in str(exc_info.value)
     )
 
@@ -48,7 +48,7 @@ def test_address_group_name_exists():
 # -------------------------------------------------------------------------- #
 def test_address_name_max_length():
     with pytest.raises(ValidationError) as exc_info:
-        AddressModel(
+        AddressRequestModel(
             name="A" * 64,  # Exceeds max_length=63
             ip_netmask="192.168.1.1/32",
             folder="MainFolder",
@@ -58,7 +58,7 @@ def test_address_name_max_length():
 
 def test_address_group_name_max_length():
     with pytest.raises(ValidationError) as exc_info:
-        AddressGroupModel(
+        AddressGroupRequestModel(
             name="A" * 64,  # Exceeds max_length=63
             description="This is just a pytest that will fail",
             dynamic={"filter": "'this-is-a-tag"},
@@ -71,7 +71,7 @@ def test_address_group_name_max_length():
 # Testing the valid creations
 # -------------------------------------------------------------------------- #
 def test_address_valid_creation():
-    address = AddressModel(
+    address = AddressRequestModel(
         name="ValidAddress",
         fqdn="valid.example.com",
         folder="MainFolder",
@@ -87,10 +87,10 @@ def test_address_valid_creation():
 
 
 def test_address_group_static_valid_creation():
-    # Create an AddressGroupModel instance using the factory
+    # Create an AddressGroupRequestModel instance using the factory
     address = AddressGroupStaticFactory()
     assert address.name == "ValidStaticAddressGroup"
-    assert address.description == "Static AddressModel Group Test"
+    assert address.description == "Static AddressRequestModel Group Test"
     assert address.static == [
         "address-object1",
         "address-object2",
@@ -103,7 +103,7 @@ def test_address_group_static_valid_creation():
 
 
 def test_address_group_dynamic_valid_creation():
-    # Create an AddressGroupModel instance using the factory
+    # Create an AddressGroupRequestModel instance using the factory
     address_group = AddressGroupDynamicFactory()
 
     # Assertions
@@ -148,7 +148,7 @@ def test_address_group_creation_with_factory():
 # -------------------------------------------------------------------------- #
 def test_address_single_address_type():
     with pytest.raises(ValueError) as exc_info:
-        AddressModel(
+        AddressRequestModel(
             name="TestAddress",
             ip_netmask="192.168.1.1/32",
             fqdn="example.com",  # Both ip_netmask and fqdn provided

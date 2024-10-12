@@ -3,17 +3,17 @@
 import factory
 
 from scm.models import ApplicationRequestModel
-from scm.models.address import AddressModel
-from scm.models.address_group import AddressGroupModel, DynamicFilter
+from scm.models.address import AddressRequestModel
+from scm.models.address_group import AddressGroupRequestModel, DynamicFilter
 
 
 class AddressFactory(factory.Factory):
     class Meta:
-        model = AddressModel
+        model = AddressRequestModel
 
     name = factory.Faker("word")
     id = factory.Faker("uuid4")
-    description = "PyTest AddressModel"
+    description = "PyTest AddressRequestModel"
     ip_netmask = "192.168.1.1/32"
     folder = "Prisma Access"
 
@@ -27,7 +27,7 @@ class DynamicFilterFactory(factory.Factory):
 
 class AddressGroupDynamicFactory(factory.Factory):
     class Meta:
-        model = AddressGroupModel
+        model = AddressGroupRequestModel
 
     name = "ValidDynamicAddressGroup"
     description = "This is just a pytest that will fail"
@@ -38,10 +38,10 @@ class AddressGroupDynamicFactory(factory.Factory):
 
 class AddressGroupStaticFactory(factory.Factory):
     class Meta:
-        model = AddressGroupModel
+        model = AddressGroupRequestModel
 
     name = "ValidStaticAddressGroup"
-    description = "Static AddressModel Group Test"
+    description = "Static AddressRequestModel Group Test"
     static = [
         "address-object1",
         "address-object2",
