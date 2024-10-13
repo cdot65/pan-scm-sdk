@@ -33,8 +33,8 @@ def test_list_addresses(load_env, mock_scm):
     # Configure the mock_scm.get method to return the mock_response
     mock_scm.get = MagicMock(return_value=mock_response)
 
-    # Create an instance of AddressGroups with the mocked Scm
-    addresses_client = Addresses(mock_scm)
+    # Create an instance of AddressGroup with the mocked Scm
+    addresses_client = Address(mock_scm)
 
     # Call the list method
     addresses = addresses_client.list(folder="MainFolder")
@@ -44,14 +44,14 @@ def test_list_addresses(load_env, mock_scm):
         "/config/objects/v1/addresses", params={"folder": "MainFolder"}
     )
     assert isinstance(addresses, list)
-    assert isinstance(addresses[0], Address)
+    assert isinstance(addresses[0], AddressResponseModel)
     assert len(addresses) == 2
     assert addresses[0].name == "Address1"
     assert addresses[1].ip_netmask == "192.168.1.2/32"
 
 
 def test_create_addresses(load_env, mock_scm):
-    # Create a test AddressGroup instance using Factory Boy
+    # Create a test AddressGroupRequestModel instance using Factory Boy
     test_address = AddressFactory()
 
     # Mock the API client's post method
@@ -61,8 +61,8 @@ def test_create_addresses(load_env, mock_scm):
     # Configure the mock_scm.post method to return the mock_response
     mock_scm.post = MagicMock(return_value=mock_response)
 
-    # Create an instance of Addresses with the mocked Scm
-    address_client = Addresses(mock_scm)
+    # Create an instance of Address with the mocked Scm
+    address_client = Address(mock_scm)
 
     # Call the create method
     created_group = address_client.create(test_address.model_dump(exclude_unset=True))

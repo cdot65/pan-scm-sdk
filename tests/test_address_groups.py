@@ -66,8 +66,8 @@ def test_list_address_groups(load_env, mock_scm):
     # Mock the get method on the Scm instance
     mock_scm.get = MagicMock(return_value=mock_response)
 
-    # Create an instance of AddressGroups with the mocked Scm
-    address_groups_client = AddressGroups(mock_scm)
+    # Create an instance of AddressGroup with the mocked Scm
+    address_groups_client = AddressGroup(mock_scm)
 
     # Call the list method
     address_groups = address_groups_client.list(folder="All")
@@ -77,7 +77,7 @@ def test_list_address_groups(load_env, mock_scm):
         "/config/objects/v1/address-groups", params={"folder": "All"}
     )
     assert isinstance(address_groups, list)
-    assert isinstance(address_groups[0], AddressGroup)
+    assert isinstance(address_groups[0], AddressGroupResponseModel)
     assert len(address_groups) == 7
 
     assert address_groups[0].name == "DAG_test"
@@ -99,7 +99,7 @@ def test_create_address_group_with_dynamic_filter(load_env, mock_scm):
     """
     Test creating an address group with a dynamic filter.
     """
-    # Create a test AddressGroup instance using Factory Boy
+    # Create a test AddressGroupRequestModel instance using Factory Boy
     test_address_group = AddressGroupDynamicFactory()
 
     # Define the mock response for the post method
@@ -109,8 +109,8 @@ def test_create_address_group_with_dynamic_filter(load_env, mock_scm):
     # Mock the get method on the Scm instance
     mock_scm.post = MagicMock(return_value=mock_response)
 
-    # Create an instance of AddressGroups with the mocked Scm
-    address_groups_client = AddressGroups(mock_scm)
+    # Create an instance of AddressGroup with the mocked Scm
+    address_groups_client = AddressGroup(mock_scm)
 
     # Call the create method
     created_group = address_groups_client.create(
@@ -132,7 +132,7 @@ def test_create_address_group_with_static_entries(load_env, mock_scm):
     """
     Test creating an address group with static entries.
     """
-    # Create a test AddressGroup instance using Factory Boy
+    # Create a test AddressGroupRequestModel instance using Factory Boy
     test_address_group = AddressGroupStaticFactory()
 
     # Define the mock response for the post method
@@ -142,8 +142,8 @@ def test_create_address_group_with_static_entries(load_env, mock_scm):
     # Configure the mock_scm.post method to return the mock_response
     mock_scm.post = MagicMock(return_value=mock_response)
 
-    # Create an instance of AddressGroups with the mocked Scm
-    address_groups_client = AddressGroups(mock_scm)
+    # Create an instance of AddressGroup with the mocked Scm
+    address_groups_client = AddressGroup(mock_scm)
 
     # Call the create method
     created_group = address_groups_client.create(
