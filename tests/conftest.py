@@ -3,7 +3,9 @@
 import os
 from dotenv import load_dotenv
 import pytest
-from unittest.mock import Mock
+from unittest.mock import MagicMock, patch
+
+from scm.client import Scm
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,15 +30,20 @@ def load_env():
 
 
 @pytest.fixture
-def mock_scm(mocker):
+def mock_scm():
     """
-    Fixture to mock the Scm class to prevent real API calls.
+    Fixture to provide a mocked Scm instance with mocked OAuth2Client and session.
     """
-    # Mock the Scm class in the scm.client module
-    mock_scm_class = mocker.patch("scm.client.Scm")
+    with patch("scm.client.OAuth2Client") as MockOAuth2Client:
+        mock_oauth2client_instance = MagicMock()
+        mock_session = MagicMock()
+        mock_oauth2client_instance.session = mock_session
+        mock_oauth2client_instance.is_expired = False  # Default to not expired
+        MockOAuth2Client.return_value = mock_oauth2client_instance
 
-    # Create a mock instance of Scm
-    mock_scm_instance = Mock()
-    mock_scm_class.return_value = mock_scm_instance
-
-    return mock_scm_instance
+        scm = Scm(
+            client_id="test_client_id",
+            client_secret="test_client_secret",
+            tsg_id="test_tsg_id",
+        )
+        yield scm  # Only yield the Scm instance

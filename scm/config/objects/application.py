@@ -81,8 +81,6 @@ class Application(BaseObject):
             params["value"] = ",".join(filters["values"])
         if "names" in filters:
             params["name"] = ",".join(filters["names"])
-        if "tags" in filters:
-            params["tag"] = ",".join(filters["tags"])
 
         # Include any additional filters provided
         params.update(
