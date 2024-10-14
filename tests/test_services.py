@@ -1,12 +1,13 @@
 # tests/test_services.py
+
 import pytest
-from pydantic import ValidationError  # Correct import
+from unittest.mock import MagicMock
+from pydantic import ValidationError as PydanticValidationError
+from scm.exceptions import ValidationError as SCMValidationError
 
 from scm.config.objects import Service
 from scm.models import ServiceRequestModel, ServiceResponseModel
-from scm.models.service import Protocol, TCPProtocol, UDPProtocol
 from tests.factories import ServiceFactory
-from unittest.mock import MagicMock
 
 
 def test_list_services(load_env, mock_scm):
@@ -186,18 +187,18 @@ def test_update_service(load_env, mock_scm):
     assert updated_service.description == "An updated service"
 
 
-# def test_service_list_validation_error(load_env, mock_scm):
-#     # Create an instance of Service with the mocked Scm
-#     service_client = Service(mock_scm)
-#
-#     # Attempt to call the list method with multiple containers
-#     with pytest.raises(ValidationError) as exc_info:
-#         service_client.list(folder="Shared", snippet="TestSnippet")
-#
-#     # Assertions
-#     assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
-#         exc_info.value
-#     )
+def test_service_list_validation_error(load_env, mock_scm):
+    # Create an instance of Service with the mocked Scm
+    service_client = Service(mock_scm)
+
+    # Attempt to call the list method with multiple containers
+    with pytest.raises(SCMValidationError) as exc_info:
+        service_client.list(folder="Shared", snippet="TestSnippet")
+
+    # Assertions
+    assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+        exc_info.value
+    )
 
 
 def test_service_list_with_filters(load_env, mock_scm):
@@ -261,7 +262,7 @@ def test_service_request_model_no_protocol_provided():
         "folder": "Shared",
         # No protocol provided
     }
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(PydanticValidationError) as exc_info:
         ServiceRequestModel(**data)
     assert "Field required" in str(exc_info.value)
 
@@ -288,7 +289,7 @@ def test_service_request_model_no_container_provided():
         "protocol": {"tcp": {"port": "80"}},
         # No container provided
     }
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(PydanticValidationError) as exc_info:
         ServiceRequestModel(**data)
     assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
         exc_info.value
@@ -303,7 +304,7 @@ def test_service_request_model_multiple_containers_provided():
         "snippet": "TestSnippet",
         # Multiple containers provided
     }
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(PydanticValidationError) as exc_info:
         ServiceRequestModel(**data)
     assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
         exc_info.value
@@ -342,7 +343,7 @@ def test_service_request_model_multiple_containers_with_device():
         "folder": "Shared",
         "device": "Device1",
     }
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(PydanticValidationError) as exc_info:
         ServiceRequestModel(**data)
     assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
         exc_info.value

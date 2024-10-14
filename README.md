@@ -184,6 +184,51 @@ new_application = application.create(application_data)
 print(f"Created application with ID: {new_application.id}")
 ```
 
+### Managing Services
+
+#### Listing Services
+
+```python
+from scm.config.objects import Service
+
+# Create a Service instance
+service = Service(scm)
+
+# List services in a specific folder
+services = service.list(folder='Prisma Access')
+
+# Iterate through the services
+for svc in services:
+    protocol = 'TCP' if svc.protocol.tcp else 'UDP'
+    ports = svc.protocol.tcp.port if svc.protocol.tcp else svc.protocol.udp.port
+    print(f"Service Name: {svc.name}, Protocol: {protocol}, Ports: {ports}")
+```
+
+#### Creating a Service
+
+```python
+# Define a new service
+service_data = {
+    "name": "dns-service",
+    "protocol": {
+        "udp": {
+            "port": "53",
+            "override": {
+                "timeout": 60,
+            },
+        }
+    },
+    "description": "DNS service",
+    "folder": "Prisma Access",
+}
+
+# Create the service in Strata Cloud Manager
+new_service = service.create(service_data)
+print(f"Created service with ID: {new_service.id}")
+```
+
+---
+
 ## Contributing
 
 We welcome contributions! To contribute:
