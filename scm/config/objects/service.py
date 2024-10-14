@@ -64,6 +64,10 @@ class Service(BaseObject):
         if "names" in filters:
             params["name"] = ",".join(filters["names"])
 
+        # Add this block to handle 'tags' filter
+        if "tags" in filters:
+            params["tag"] = ",".join(filters["tags"])
+
         response = self.api_client.get(self.ENDPOINT, params=params)
         services = [ServiceResponseModel(**item) for item in response.get("data", [])]
         return services

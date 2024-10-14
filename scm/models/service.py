@@ -108,32 +108,46 @@ class ServiceRequestModel(BaseModel):
             {"udp": {"port": "53,67"}},
         ],
     )
-    folder: str = Field(
-        ...,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The folder where the service is defined.",
-        examples=["Shared"],
-    )
-
     # Optional fields
     description: Optional[str] = Field(
         None,
         max_length=1023,
         description="Description about the service.",
-        examples=["HTTP service for web traffic."],
     )
     tag: Optional[List[str]] = Field(
         None,
         description="The tag(s) associated with the service.",
     )
+
+    # Container Types
+    folder: Optional[str] = Field(
+        None,
+        max_length=64,
+        description="The folder where the service is defined.",
+    )
     snippet: Optional[str] = Field(
         None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
         description="The snippet where the service is defined.",
-        examples=["predefined-snippet"],
     )
+    device: Optional[str] = Field(
+        None,
+        max_length=64,
+        description="The device where the service is defined.",
+    )
+
+    # Custom Validators
+    @model_validator(mode="after")
+    def validate_container_type(self) -> "ServiceRequestModel":
+        container_fields = ["folder", "snippet", "device"]
+        provided = [
+            field for field in container_fields if getattr(self, field) is not None
+        ]
+        if len(provided) != 1:
+            raise ValueError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            )
+        return self
 
 
 class ServiceResponseModel(BaseModel):

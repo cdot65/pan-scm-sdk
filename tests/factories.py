@@ -2,7 +2,7 @@
 
 import factory
 
-from scm.models import ApplicationRequestModel
+from scm.models import ApplicationRequestModel, ServiceRequestModel
 from scm.models.address import AddressRequestModel
 from scm.models.address_group import AddressGroupRequestModel, DynamicFilter
 
@@ -73,3 +73,14 @@ class ApplicationFactory(factory.Factory):
     tunnels_other_apps = False
     prone_to_misuse = False
     no_certifications = False
+
+
+class ServiceFactory(factory.Factory):
+    class Meta:
+        model = ServiceRequestModel
+
+    name = factory.Faker("word")
+    description = "PyTest ServiceRequestModel test"
+    tag = ["Automation"]
+    folder = "Prisma Access"
+    protocol = {"tcp": {"port": "80,443"}}
