@@ -30,11 +30,13 @@ nav:
           - Address: sdk/address.md
           - Address Group: sdk/address_group.md
           - Application: sdk/application.md
+          - Application: sdk/service.md
       - Data Models:
           - Overview: sdk/models.md
           - Address Models: sdk/models/address_models.md
           - Address Group Models: sdk/models/address_group_models.md
           - Application Models: sdk/models/application_models.md
+          - Service Models: sdk/models/service_models.md
       - Authentication Module: sdk/auth.md
       - SCM Client: sdk/client.md
   - Troubleshooting: about/troubleshooting.md
