@@ -5,6 +5,17 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.4
+
+**Release Date:** October 12, 2024
+
+### Application
+
+- **New Object**: Add the ability to support Services.
+- **Docs Update**: Update the mkdocs site.
+
+---
+
 ## Version 0.1.3
 
 **Release Date:** October 12, 2024

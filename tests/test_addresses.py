@@ -10,9 +10,9 @@ from unittest.mock import MagicMock
 
 def test_list_addresses(load_env, mock_scm):
     """
-    Integration test for listing addresses.
+    Test for listing addresses.
     """
-    # Mock the API client's get method if you don't want to make real API calls
+    # Mock the API client's get method to prevent from making real API calls
     mock_response = {
         "data": [
             {
@@ -33,7 +33,7 @@ def test_list_addresses(load_env, mock_scm):
     # Configure the mock_scm.get method to return the mock_response
     mock_scm.get = MagicMock(return_value=mock_response)
 
-    # Create an instance of AddressGroup with the mocked Scm
+    # Create an instance of Address with the mocked Scm
     addresses_client = Address(mock_scm)
 
     # Call the list method
@@ -51,7 +51,7 @@ def test_list_addresses(load_env, mock_scm):
 
 
 def test_create_addresses(load_env, mock_scm):
-    # Create a test AddressGroupRequestModel instance using Factory Boy
+    # Create a test AddressRequestModel instance using Factory Boy
     test_address = AddressFactory()
 
     # Mock the API client's post method
@@ -65,18 +65,18 @@ def test_create_addresses(load_env, mock_scm):
     address_client = Address(mock_scm)
 
     # Call the create method
-    created_group = address_client.create(test_address.model_dump(exclude_unset=True))
+    created_address = address_client.create(test_address.model_dump(exclude_unset=True))
 
     # Assertions
     mock_scm.post.assert_called_once_with(
         "/config/objects/v1/addresses",
         json=test_address.model_dump(exclude_unset=True),
     )
-    assert created_group.id == "123e4567-e89b-12d3-a456-426655440000"
-    assert created_group.name == test_address.name
-    assert created_group.description == test_address.description
-    assert created_group.ip_netmask == test_address.ip_netmask
-    assert created_group.folder == test_address.folder
+    assert created_address.id == "123e4567-e89b-12d3-a456-426655440000"
+    assert created_address.name == test_address.name
+    assert created_address.description == test_address.description
+    assert created_address.ip_netmask == test_address.ip_netmask
+    assert created_address.folder == test_address.folder
 
 
 def test_get_address(load_env, mock_scm):
