@@ -27,7 +27,7 @@ jobs:
           CLIENT_SECRET: fake_client_secret
           TSG_ID: fake_tsg_id
         run: |
-          poetry run pytest --cov=scm --cov-report=xml --cov-report=term-missing
+          poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:

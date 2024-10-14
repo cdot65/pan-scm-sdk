@@ -30,6 +30,7 @@ nav:
           - Address: sdk/address.md
           - Address Group: sdk/address_group.md
           - Application: sdk/application.md
+          - Application: sdk/service.md
           - Service: sdk/service.md
       - Data Models:
           - Overview: sdk/models.md

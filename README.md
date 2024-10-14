@@ -1,7 +1,7 @@
 # Strata Cloud Manager SDK
 
 ![Banner Image](https://raw.githubusercontent.com/cdot65/pan-scm-sdk/main/docs/images/logo.svg)
-
+[![codecov](https://codecov.io/github/cdot65/scm-config-clone/graph/badge.svg?token=V8RCE3R7LS)](https://codecov.io/github/cdot65/scm-config-clone)
 [![Build Status](https://github.com/cdot65/pan-scm-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/cdot65/pan-scm-sdk/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/pan-scm-sdk.svg)](https://badge.fury.io/py/pan-scm-sdk)
 [![Python versions](https://img.shields.io/pypi/pyversions/pan-scm-sdk.svg)](https://pypi.org/project/pan-scm-sdk/)
