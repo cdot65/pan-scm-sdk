@@ -11,7 +11,7 @@ hide:
     <a href="https://paloaltonetworks.com"><img src="https://github.com/cdot65/pan-scm-sdk/blob/main/docs/images/logo.svg?raw=true" alt="PaloAltoNetworks"></a>
 </p>
 <p align="center">
-    <em><code>pan-scm-sdk</code>: Clone configuration objects between SCM tenants</em>
+    <em><code>pan-scm-sdk</code>: Python SDK to manage Palo Alto Networks Strata Cloud Manager</em>
 </p>
 <p align="center">
 <a href="https://github.com/cdot65/pan-scm-sdk/graphs/contributors" target="_blank">

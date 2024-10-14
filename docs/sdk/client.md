@@ -40,6 +40,11 @@ scm = Scm(
     tsg_id="your_tsg_id",
 )
 
-# Make a GET request
-response = scm.get("/path/to/endpoint")
+# Import Address from SDK and pass the `scm` instance into the Address class
+from scm.config.objects import Address
+
+addresses = Address(scm)
+
+# list all configured addresses in Prisma Access folder
+addresses.list(folder='Prisma Access')
 ```
