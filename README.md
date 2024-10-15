@@ -9,6 +9,9 @@
 
 Python SDK for Palo Alto Networks Strata Cloud Manager.
 
+> **NOTE**: Please refer to the [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/) for all
+> examples
+
 ## Table of Contents
 
 - [Features](#features)
@@ -18,15 +21,6 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
     - [Managing Address Objects](#managing-address-objects)
         - [Listing Addresses](#listing-addresses)
         - [Creating an Address](#creating-an-address)
-    - [Managing Address Groups](#managing-address-groups)
-        - [Listing Address Groups](#listing-address-groups)
-        - [Creating an Address Group](#creating-an-address-group)
-    - [Managing Applications](#managing-applications)
-        - [Listing Applications](#listing-applications)
-        - [Creating an Application](#creating-an-application)
-    - [Managing Services](#managing-services)
-        - [Listing Services](#listing-services)
-        - [Creating a Service](#creating-a-service)
 - [Contributing](#contributing)
 - [License](#license)
 - [Support](#support)
@@ -74,12 +68,23 @@ scm = Scm(
 
 ### Managing Address Objects
 
+> **NOTE**: Please refer to the [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/) for all
+> examples
+
 #### Listing Addresses
 
 ```python
+from scm.client import Scm
 from scm.config.objects import Address
 
-# Create an Address instance
+# Create an authenticated session with SCM
+scm = Scm(
+    client_id="this is an example",
+    client_secret="this is an example",
+    tsg_id="this is an example"
+)
+
+# Create an Address instance by passing the SCM instance into it
 address = Address(scm)
 
 # List addresses in a specific folder
@@ -106,130 +111,6 @@ new_address = address.create(address_data)
 print(f"Created address with ID: {new_address.id}")
 ```
 
-### Managing Address Groups
-
-#### Listing Address Groups
-
-```python
-from scm.config.objects import AddressGroup
-
-# Create an AddressGroup instance
-address_group = AddressGroup(scm)
-
-# List address groups in a specific folder
-address_groups = address_group.list(folder='Prisma Access')
-
-# Iterate through the address groups
-for ag in address_groups:
-    print(f"Address Group Name: {ag.name}, Description: {ag.description}")
-```
-
-#### Creating an Address Group
-
-```python
-# Define a new address group
-address_group_data = {
-    "name": "example-group",
-    "description": "This is a test address group",
-    "static": ["Branch-test1", "Branch-test2"],
-    "folder": "Prisma Access",
-}
-
-# Create the address group in Strata Cloud Manager
-new_address_group = address_group.create(address_group_data)
-print(f"Created address group with ID: {new_address_group.id}")
-```
-
-### Managing Applications
-
-#### Listing Applications
-
-```python
-from scm.config.objects import Application
-
-# Create an Application instance
-application = Application(scm)
-
-# List applications in a specific folder
-applications = application.list(folder='Prisma Access')
-
-# Iterate through the applications
-for app in applications:
-    print(f"Application Name: {app.name}, Category: {app.category}")
-```
-
-#### Creating an Application
-
-```python
-# Define a new application
-application_data = {
-    "name": "test123",
-    "category": "collaboration",
-    "subcategory": "internet-conferencing",
-    "technology": "client-server",
-    "risk": 1,
-    "description": "Created via pan-scm-sdk",
-    "ports": ["tcp/80,443", "udp/3478"],
-    "folder": "Prisma Access",
-    "evasive": False,
-    "pervasive": False,
-    "excessive_bandwidth_use": False,
-    "used_by_malware": False,
-    "transfers_files": False,
-    "has_known_vulnerabilities": True,
-    "tunnels_other_apps": False,
-    "prone_to_misuse": False,
-    "no_certifications": False,
-}
-
-# Create the application in Strata Cloud Manager
-new_application = application.create(application_data)
-print(f"Created application with ID: {new_application.id}")
-```
-
-### Managing Services
-
-#### Listing Services
-
-```python
-from scm.config.objects import Service
-
-# Create a Service instance
-service = Service(scm)
-
-# List services in a specific folder
-services = service.list(folder='Prisma Access')
-
-# Iterate through the services
-for svc in services:
-    protocol = 'TCP' if svc.protocol.tcp else 'UDP'
-    ports = svc.protocol.tcp.port if svc.protocol.tcp else svc.protocol.udp.port
-    print(f"Service Name: {svc.name}, Protocol: {protocol}, Ports: {ports}")
-```
-
-#### Creating a Service
-
-```python
-# Define a new service
-service_data = {
-    "name": "dns-service",
-    "protocol": {
-        "udp": {
-            "port": "53",
-            "override": {
-                "timeout": 60,
-            },
-        }
-    },
-    "description": "DNS service",
-    "folder": "Prisma Access",
-}
-
-# Create the service in Strata Cloud Manager
-new_service = service.create(service_data)
-print(f"Created service with ID: {new_service.id}")
-```
-
 ---
 
 ## Contributing
@@ -254,4 +135,4 @@ For support and questions, please refer to the [SUPPORT.md](./SUPPORT.md) file i
 
 ---
 
-*Detailed documentation is available on our [GitHub Pages site](https://cdot65.github.io/pan-scm-sdk/).*
+*Detailed documentation is available on our [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/).*

@@ -1,6 +1,7 @@
 # scm/config/objects/application_group.py
 
 from typing import List, Dict, Any, Optional
+
 from scm.config import BaseObject
 from scm.models import ApplicationGroupRequestModel, ApplicationGroupResponseModel
 from scm.exceptions import ValidationError
@@ -73,8 +74,6 @@ class ApplicationGroup(BaseObject):
         params.update(provided_containers)
 
         # Handle specific filters for applications
-        if "members" in filters:
-            params["member"] = ",".join(filters["members"])
         if "names" in filters:
             params["name"] = ",".join(filters["names"])
 

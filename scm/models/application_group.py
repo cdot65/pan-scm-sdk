@@ -118,18 +118,19 @@ class ApplicationGroupResponseModel(BaseModel):
         description="The name of the application group",
     )
 
-    id: Optional[str] = Field(
-        ...,
-        description="The UUID of the application group",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
-
     members: List[str] = Field(
         ...,
         min_length=1,
         max_length=1024,
         description="List of application / group / filter names",
         examples=[["office365-consumer-access", "office365-enterprise-access"]],
+    )
+
+    # Optional fields
+    id: Optional[str] = Field(
+        None,
+        description="The UUID of the application group",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
 
     # Container Types

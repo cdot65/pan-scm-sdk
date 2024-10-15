@@ -2,7 +2,11 @@
 
 import factory
 
-from scm.models import ApplicationRequestModel, ServiceRequestModel
+from scm.models import (
+    ApplicationRequestModel,
+    ServiceRequestModel,
+    ApplicationGroupRequestModel,
+)
 from scm.models.address import AddressRequestModel
 from scm.models.address_group import AddressGroupRequestModel, DynamicFilter
 
@@ -73,6 +77,18 @@ class ApplicationFactory(factory.Factory):
     tunnels_other_apps = False
     prone_to_misuse = False
     no_certifications = False
+
+
+class ApplicationGroupFactory(factory.Factory):
+    class Meta:
+        model = ApplicationGroupRequestModel
+
+    name = "ValidStaticApplicationGroup"
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Prisma Access"
 
 
 class ServiceFactory(factory.Factory):
