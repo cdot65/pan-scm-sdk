@@ -5,7 +5,17 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
-## Version 0.1.4
+## Version 0.1.6
+
+**Release Date:** October 15, 2024
+
+### Logging
+
+- **Logging**: Changed logging to INFO by default.
+
+---
+
+## Version 0.1.5
 
 **Release Date:** October 15, 2024
 
