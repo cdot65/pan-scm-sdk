@@ -20,11 +20,11 @@ def setup_logger(name: str) -> logging.Logger:
 
     """Set up and return a logger with the given name."""
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # Console handler
     ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.INFO)
 
     # Formatter
     formatter = logging.Formatter(
