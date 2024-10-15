@@ -7,9 +7,20 @@ enhancements, and fixes in each version of the tool.
 
 ## Version 0.1.4
 
-**Release Date:** October 12, 2024
+**Release Date:** October 15, 2024
 
-### Application
+### Application Groups
+
+- **New Object**: Add the ability to support Address Groups.
+- **Docs Update**: Update the mkdocs site.
+
+---
+
+## Version 0.1.4
+
+**Release Date:** October 13, 2024
+
+### Services
 
 - **New Object**: Add the ability to support Services.
 - **Docs Update**: Update the mkdocs site.

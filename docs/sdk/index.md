@@ -9,11 +9,13 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - [Address](address.md)
     - [Address Group](address_group.md)
     - [Application](application.md)
+    - [Application Group](application_group.md)
     - [Service](service.md)
 - [Data Models](models.md)
     - [Address Models](models/address_models.md)
     - [Address Group Models](models/address_group_models.md)
     - [Application Models](models/application_models.md)
+    - [Application Group Models](models/application_group_models.md)
     - [Service Models](models/service_models.md)
 
 ---
