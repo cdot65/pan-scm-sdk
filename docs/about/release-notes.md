@@ -1,7 +1,17 @@
-# Release Notes
+~~# Release Notes
 
 Welcome to the release notes for the `pan-scm-sdk` tool. This document provides a detailed record of changes,
 enhancements, and fixes in each version of the tool.
+
+---
+
+## Version 0.1.7
+
+**Release Date:** October 16, 2024
+
+### Anti Spyware Profiles
+
+- **Anti Spyware Profiles**: Add the ability to support Anti Spyware Profiles.
 
 ---
 
