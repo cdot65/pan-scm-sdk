@@ -273,19 +273,3 @@ class AddressResponseModel(BaseModel):
                 "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
             )
         return self
-
-    @model_validator(mode="after")
-    def validate_container_type(self) -> "AddressRequestModel":
-        container_fields = [
-            "folder",
-            "snippet",
-            "device",
-        ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
-        if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
-        return self
