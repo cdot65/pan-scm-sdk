@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models import AddressRequestModel, AddressResponseModel
+from scm.models.objects import AddressRequestModel, AddressResponseModel
 from scm.exceptions import ValidationError
 
 

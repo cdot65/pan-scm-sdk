@@ -3,7 +3,7 @@ import pytest
 
 from scm.config.objects import Address
 from scm.exceptions import ValidationError
-from scm.models import AddressResponseModel, AddressRequestModel
+from scm.models.objects import AddressResponseModel, AddressRequestModel
 from tests.factories import AddressFactory
 from unittest.mock import MagicMock
 

@@ -2,11 +2,11 @@
 
 import pytest
 
-from scm.models import (
+from scm.models.objects import (
     AddressRequestModel,
     AddressGroupRequestModel,
 )
-from scm.models.address_group import DynamicFilter
+from scm.models.objects.address_group import DynamicFilter
 from pydantic import ValidationError
 
 from tests.factories import (
