@@ -1,4 +1,4 @@
-# scm/models/service.py
+# scm/models/objects/service.py
 import uuid
 from typing import Optional, List
 

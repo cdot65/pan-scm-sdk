@@ -1,4 +1,4 @@
-# scm/models/address_group.py
+# scm/models/objects/address_group.py
 
 import uuid
 from typing import Optional, List
