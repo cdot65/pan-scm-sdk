@@ -173,5 +173,5 @@ for app in applications:
 
 ## Related Models
 
-- [ApplicationRequestModel](models/application_models.md#applicationrequestmodel)
-- [ApplicationResponseModel](models/application_models.md#applicationresponsemodel)
+- [ApplicationRequestModel](../../models/objects/application_models.md#applicationrequestmodel)
+- [ApplicationResponseModel](../../models/objects/application_models.md#applicationresponsemodel)

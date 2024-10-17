@@ -155,5 +155,5 @@ print(f"Created application group with ID: {new_group.id}")
 
 ## Related Models
 
-- [ApplicationGroupRequestModel](models/application_group_models.md#ApplicationGrouprequestmodel)
-- [ApplicationGroupResponseModel](models/application_group_models.md#ApplicationGroupresponsemodel)
+- [ApplicationGroupRequestModel](../../models/objects/application_group_models.md#ApplicationGrouprequestmodel)
+- [ApplicationGroupResponseModel](../../models/objects/application_group_models.md#ApplicationGroupresponsemodel)

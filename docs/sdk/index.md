@@ -5,18 +5,24 @@ configuration objects and data models used to interact with Palo Alto Networks S
 
 ## Contents
 
-- [Configuration Objects](configuration_objects.md)
-    - [Address](address.md)
-    - [Address Group](address_group.md)
-    - [Application](application.md)
-    - [Application Group](application_group.md)
-    - [Service](service.md)
-- [Data Models](models.md)
-    - [Address Models](models/address_models.md)
-    - [Address Group Models](models/address_group_models.md)
-    - [Application Models](models/application_models.md)
-    - [Application Group Models](models/application_group_models.md)
-    - [Service Models](models/service_models.md)
+- Configuration
+    - [Objects](config/objects/index)
+        - [Address](config/objects/address.md)
+        - [Address Group](config/objects/address_group.md)
+        - [Application](config/objects/application.md)
+        - [Application Group](config/objects/application_group.md)
+        - [Service](config/objects/service.md)
+    - [Security Services](config/security_services/index)
+        - [Anti-Spyware](config/security_services/anti_spyware.md)
+- Data Models
+    - [Objects](models/objects/index)
+        - [Address Models](models/objects/address_models.md)
+        - [Address Group Models](models/objects/address_group_models.md)
+        - [Application Models](models/objects/application_models.md)
+        - [Application Group Models](models/objects/application_group_models.md)
+        - [Service Models](models/objects/service_models.md)
+    - [Security Services](models/security_services/index)
+        - [Anti-Spyware](models/security_services/anti_spyware_profile_models.md)
 
 ---
 
@@ -25,5 +31,6 @@ configuration objects and data models used to interact with Palo Alto Networks S
 The `pan-scm-sdk` provides a set of classes and models to simplify interaction with the Strata Cloud Manager API. By
 utilizing this SDK, developers can programmatically manage configurations, ensuring consistency and efficiency.
 
-Proceed to the [Configuration Objects](configuration_objects.md) section to learn more about the objects you can manage
+Proceed to the [Configuration Objects](config/objects/index) section to learn more about the objects you can
+manage
 using the SDK.

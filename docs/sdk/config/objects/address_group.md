@@ -163,5 +163,5 @@ for group in groups:
 
 ## Related Models
 
-- [AddressGroupRequestModel](models/address_group_models.md#addressgrouprequestmodel)
-- [AddressGroupResponseModel](models/address_group_models.md#addressgroupresponsemodel)
+- [AddressGroupRequestModel](../../models/objects/address_group_models.md#addressgrouprequestmodel)
+- [AddressGroupResponseModel](../../models/objects/address_group_models.md#addressgroupresponsemodel)

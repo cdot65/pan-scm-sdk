@@ -147,5 +147,5 @@ for addr in addresses:
 
 ## Related Models
 
-- [AddressRequestModel](models/address_models.md#addressrequestmodel)
-- [AddressResponseModel](models/address_models.md#addressresponsemodel)
+- [AddressRequestModel](../../models/objects/address_models.md#addressrequestmodel)
+- [AddressResponseModel](../../models/objects/address_models.md#addressresponsemodel)
