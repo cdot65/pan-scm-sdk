@@ -6,6 +6,10 @@ The `ApplicationGroup` class is used to manage application groups in the Strata 
 
 ## Importing the ApplicationGroup Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import ApplicationGroup
@@ -21,6 +25,8 @@ scm = Scm(
 application_group = ApplicationGroup(scm)
 ```
 
+</div>
+
 ## Methods
 
 ### `create(data: Dict[str, Any]) -> ApplicationGroupResponseModel`
@@ -33,6 +39,10 @@ Creates a new application group.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application_group_data = {
     "name": "example-group",
@@ -44,6 +54,8 @@ new_application_group = application_group.create(application_group_data)
 print(f"Created application group with ID: {new_application_group.id}")
 ```
 
+</div>
+
 ### `get(object_id: str) -> ApplicationGroupResponseModel`
 
 Retrieves an application group by its ID.
@@ -54,11 +66,17 @@ Retrieves an application group by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 group_id = "123e4567-e89b-12d3-a456-426655440000"
 group_object = application_group.get(group_id)
 print(f"application Group Name: {group_object.name}")
 ```
+
+</div>
 
 ### `update(object_id: str, data: Dict[str, Any]) -> ApplicationGroupResponseModel`
 
@@ -71,6 +89,10 @@ Updates an existing application group.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 update_data = {
     "name": "Test123",
@@ -82,6 +104,8 @@ updated_group = application_group.update(group_id, update_data)
 print(f"Updated application group with ID: {updated_group.id}")
 ```
 
+</div>
+
 ### `delete(object_id: str) -> None`
 
 Deletes an application group by its ID.
@@ -92,10 +116,16 @@ Deletes an application group by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application_group.delete(group_id)
 print(f"Deleted application group with ID: {group_id}")
 ```
+
+</div>
 
 ###
 
@@ -112,6 +142,10 @@ Lists application groups, optionally filtered by folder, snippet, device, or oth
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 groups = application_group.list(folder='Prisma Access')
 
@@ -119,9 +153,16 @@ for group in groups:
     print(f"application Group Name: {group.name}, Members: {group.members}")
 ```
 
+</div>
+
+
 ---
 
 ## Usage Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -150,6 +191,8 @@ application_group_data = {
 new_group = application_group.create(application_group_data)
 print(f"Created application group with ID: {new_group.id}")
 ```
+
+</div>
 
 ---
 

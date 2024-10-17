@@ -7,9 +7,15 @@ retrieve, update, delete, and list service objects.
 
 ## Importing the Service Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.config.objects import Service
 ```
+
+</div>
 
 ## Methods
 
@@ -22,6 +28,10 @@ Creates a new service object.
 - `data` (Dict[str, Any]): A dictionary containing the service object data.
 
 **Example:**
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 service_data = {
@@ -43,6 +53,8 @@ new_service = service.create(service_data)
 print(f"Created service with ID: {new_service.id}")
 ```
 
+</div>
+
 ### `get(object_id: str) -> ServiceResponseModel`
 
 Retrieves a service object by its ID.
@@ -53,11 +65,17 @@ Retrieves a service object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 service_id = "123e4567-e89b-12d3-a456-426655440000"
 service_object = service.get(service_id)
 print(f"Service Name: {service_object.name}")
 ```
+
+</div>
 
 ### `update(object_id: str, data: Dict[str, Any]) -> ServiceResponseModel`
 
@@ -69,6 +87,10 @@ Updates an existing service object.
 - `data` (Dict[str, Any]): A dictionary containing the updated service data.
 
 **Example:**
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 update_data = {
@@ -84,6 +106,8 @@ updated_service = service.update(service_id, update_data)
 print(f"Updated service with ID: {updated_service.id}")
 ```
 
+</div>
+
 ### `delete(object_id: str) -> None`
 
 Deletes a service object by its ID.
@@ -94,10 +118,16 @@ Deletes a service object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 service.delete(service_id)
 print(f"Deleted service with ID: {service_id}")
 ```
+
+</div>
 
 ###
 
@@ -114,6 +144,10 @@ Lists service objects, optionally filtered by folder, snippet, device, or other 
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 services = service.list(folder='Prisma Access', names=['web-service', 'ssh-service'])
 
@@ -123,9 +157,16 @@ for svc in services:
     print(f"Service Name: {svc.name}, Protocol: {protocol}, Ports: {ports}")
 ```
 
+</div>
+
+
 ---
 
 ## Usage Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -163,6 +204,9 @@ for svc in services:
     ports = svc.protocol.tcp.port if svc.protocol.tcp else svc.protocol.udp.port
     print(f"Service Name: {svc.name}, Protocol: {protocol}, Ports: {ports}")
 ```
+
+</div>
+
 
 ---
 

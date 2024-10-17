@@ -33,6 +33,10 @@ Used when creating or updating an application.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application_request = ApplicationRequestModel(
     name="test-app",
@@ -46,6 +50,9 @@ application_request = ApplicationRequestModel(
     has_known_vulnerabilities=True,
 )
 ```
+
+</div>
+
 
 ---
 
@@ -79,6 +86,10 @@ Used when parsing applications retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application_response = ApplicationResponseModel(
     id="123e4567-e89b-12d3-a456-426655440000",
@@ -93,3 +104,6 @@ application_response = ApplicationResponseModel(
     has_known_vulnerabilities=True,
 )
 ```
+
+</div>
+

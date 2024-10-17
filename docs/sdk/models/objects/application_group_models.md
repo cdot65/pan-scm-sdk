@@ -19,6 +19,10 @@ Used when creating or updating an application object.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application_group_request = ApplicationGroupRequestModel(
     name="test-application",
@@ -26,6 +30,9 @@ application_group_request = ApplicationGroupRequestModel(
     members=["test1", "test2"]
 )
 ```
+
+</div>
+
 
 ---
 
@@ -45,6 +52,10 @@ Used when parsing application objects retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application_response = ApplicationGroupResponseModel(
     id="123e4567-e89b-12d3-a456-426655440000",
@@ -53,3 +64,6 @@ application_response = ApplicationGroupResponseModel(
     members=["test1", "test2"]
 )
 ```
+
+</div>
+

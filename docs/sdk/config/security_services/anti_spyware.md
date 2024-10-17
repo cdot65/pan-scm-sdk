@@ -7,9 +7,15 @@ methods to create, retrieve, update, delete, and list anti-spyware profile objec
 
 ## Importing the AntiSpywareProfile Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.config.security import AntiSpywareProfile
 ```
+
+</div>
 
 ## Methods
 
@@ -22,6 +28,10 @@ Creates a new anti-spyware profile object.
 - `data` (Dict[str, Any]): A dictionary containing the anti-spyware profile object data.
 
 **Example:**
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 profile_data = {
@@ -42,6 +52,8 @@ new_profile = anti_spyware_profile.create(profile_data)
 print(f"Created anti-spyware profile with ID: {new_profile.id}")
 ```
 
+</div>
+
 ### `get(object_id: str) -> AntiSpywareProfileResponseModel`
 
 Retrieves an anti-spyware profile object by its ID.
@@ -52,11 +64,17 @@ Retrieves an anti-spyware profile object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
 profile_object = anti_spyware_profile.get(profile_id)
 print(f"Anti-Spyware Profile Name: {profile_object.name}")
 ```
+
+</div>
 
 ### `update(object_id: str, data: Dict[str, Any]) -> AntiSpywareProfileResponseModel`
 
@@ -69,6 +87,10 @@ Updates an existing anti-spyware profile object.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 update_data = {
     "description": "Updated anti-spyware profile description",
@@ -77,6 +99,8 @@ update_data = {
 updated_profile = anti_spyware_profile.update(profile_id, update_data)
 print(f"Updated anti-spyware profile with ID: {updated_profile.id}")
 ```
+
+</div>
 
 ### `delete(object_id: str) -> None`
 
@@ -88,10 +112,16 @@ Deletes an anti-spyware profile object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 anti_spyware_profile.delete(profile_id)
 print(f"Deleted anti-spyware profile with ID: {profile_id}")
 ```
+
+</div>
 
 ###
 
@@ -111,6 +141,10 @@ Lists anti-spyware profile objects, optionally filtered by folder, snippet, devi
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 profiles = anti_spyware_profile.list(folder='Prisma Access', limit=10)
 
@@ -118,9 +152,16 @@ for profile in profiles:
     print(f"Anti-Spyware Profile Name: {profile.name}, ID: {profile.id}")
 ```
 
+</div>
+
+
 ---
 
 ## Usage Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -159,6 +200,9 @@ profiles = anti_spyware_profile.list(folder='Prisma Access', limit=10)
 for profile in profiles:
     print(f"Anti-Spyware Profile Name: {profile.name}, ID: {profile.id}")
 ```
+
+</div>
+
 
 ---
 

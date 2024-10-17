@@ -7,9 +7,15 @@ retrieve, update, delete, and list address objects.
 
 ## Importing the Address Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.config.objects import Address
 ```
+
+</div>
 
 ## Methods
 
@@ -23,6 +29,10 @@ Creates a new address object.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address_data = {
     "name": "test123",
@@ -35,6 +45,8 @@ new_address = address.create(address_data)
 print(f"Created address with ID: {new_address.id}")
 ```
 
+</div>
+
 ### `get(object_id: str) -> AddressResponseModel`
 
 Retrieves an address object by its ID.
@@ -45,11 +57,17 @@ Retrieves an address object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address_id = "123e4567-e89b-12d3-a456-426655440000"
 address_object = address.get(address_id)
 print(f"Address Name: {address_object.name}")
 ```
+
+</div>
 
 ### `update(object_id: str, data: Dict[str, Any]) -> AddressResponseModel`
 
@@ -62,6 +80,10 @@ Updates an existing address object.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 update_data = {
     "description": "Updated description",
@@ -70,6 +92,8 @@ update_data = {
 updated_address = address.update(address_id, update_data)
 print(f"Updated address with ID: {updated_address.id}")
 ```
+
+</div>
 
 ### `delete(object_id: str) -> None`
 
@@ -81,10 +105,16 @@ Deletes an address object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address.delete(address_id)
 print(f"Deleted address with ID: {address_id}")
 ```
+
+</div>
 
 ###
 
@@ -101,6 +131,10 @@ Lists address objects, optionally filtered by folder, snippet, device, or other 
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 addresses = address.list(folder='Prisma Access')
 
@@ -108,9 +142,16 @@ for addr in addresses:
     print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
 ```
 
+</div>
+
+
 ---
 
 ## Usage Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -142,6 +183,9 @@ addresses = address.list(folder='Prisma Access')
 for addr in addresses:
     print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
 ```
+
+</div>
+
 
 ---
 

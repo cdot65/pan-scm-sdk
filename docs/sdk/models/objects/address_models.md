@@ -25,6 +25,10 @@ Used when creating or updating an address object.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address_request = AddressRequestModel(
     name="test-address",
@@ -33,6 +37,9 @@ address_request = AddressRequestModel(
     folder="Prisma Access",
 )
 ```
+
+</div>
+
 
 ---
 
@@ -58,6 +65,10 @@ Used when parsing address objects retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address_response = AddressResponseModel(
     id="123e4567-e89b-12d3-a456-426655440000",
@@ -67,3 +78,6 @@ address_response = AddressResponseModel(
     folder="Prisma Access",
 )
 ```
+
+</div>
+

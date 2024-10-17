@@ -26,6 +26,10 @@ Used when creating or updating an anti-spyware profile object.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 anti_spyware_profile_request = AntiSpywareProfileRequestModel(
     name="test_profile",
@@ -41,6 +45,9 @@ anti_spyware_profile_request = AntiSpywareProfileRequestModel(
     ]
 )
 ```
+
+</div>
+
 
 ---
 
@@ -67,6 +74,10 @@ Used when parsing anti-spyware profile objects retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 anti_spyware_profile_response = AntiSpywareProfileResponseModel(
     id="123e4567-e89b-12d3-a456-426655440000",
@@ -83,6 +94,9 @@ anti_spyware_profile_response = AntiSpywareProfileResponseModel(
     ]
 )
 ```
+
+</div>
+
 
 ---
 

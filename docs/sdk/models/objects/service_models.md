@@ -45,6 +45,10 @@ Used when creating or updating a service object.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.models.service import ServiceRequestModel, Protocol, TCPProtocol, Override
 
@@ -63,6 +67,9 @@ service_request = ServiceRequestModel(
     folder="Prisma Access",
 )
 ```
+
+</div>
+
 
 ---
 
@@ -85,6 +92,10 @@ Used when parsing service objects retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.models.service import ServiceResponseModel, Protocol, TCPProtocol
 
@@ -101,5 +112,8 @@ service_response = ServiceResponseModel(
     description="HTTP service",
 )
 ```
+
+</div>
+
 
 ---

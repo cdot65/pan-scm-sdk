@@ -7,9 +7,15 @@ retrieve, update, delete, and list applications.
 
 ## Importing the Application Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.config.objects import Application
 ```
+
+</div>
 
 ## Methods
 
@@ -22,6 +28,10 @@ Creates a new application.
 - `data` (Dict[str, Any]): A dictionary containing the application data.
 
 **Example:**
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 application_data = {
@@ -48,6 +58,8 @@ new_application = application.create(application_data)
 print(f"Created application with ID: {new_application.id}")
 ```
 
+</div>
+
 ### `get(object_id: str) -> ApplicationResponseModel`
 
 Retrieves an application by its ID.
@@ -58,11 +70,17 @@ Retrieves an application by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 app_id = "123e4567-e89b-12d3-a456-426655440000"
 app_object = application.get(app_id)
 print(f"Application Name: {app_object.name}")
 ```
+
+</div>
 
 ### `update(object_id: str, data: Dict[str, Any]) -> ApplicationResponseModel`
 
@@ -75,6 +93,10 @@ Updates an existing application.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 update_data = {
     "description": "Updated application description",
@@ -83,6 +105,8 @@ update_data = {
 updated_app = application.update(app_id, update_data)
 print(f"Updated application with ID: {updated_app.id}")
 ```
+
+</div>
 
 ### `delete(object_id: str) -> None`
 
@@ -94,10 +118,16 @@ Deletes an application by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 application.delete(app_id)
 print(f"Deleted application with ID: {app_id}")
 ```
+
+</div>
 
 ###
 
@@ -114,6 +144,10 @@ Lists applications, optionally filtered by folder, snippet, device, or other cri
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 applications = application.list(folder='Prisma Access')
 
@@ -121,9 +155,16 @@ for app in applications:
     print(f"Application Name: {app.name}, Category: {app.category}")
 ```
 
+</div>
+
+
 ---
 
 ## Usage Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -168,6 +209,9 @@ applications = application.list(folder='Prisma Access')
 for app in applications:
     print(f"Application Name: {app.name}, Category: {app.category}")
 ```
+
+</div>
+
 
 ---
 

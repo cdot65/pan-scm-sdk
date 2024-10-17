@@ -27,6 +27,10 @@ Used when creating or updating an address group.
 
 ### Example (Static Group)
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address_group_request = AddressGroupRequestModel(
     name="example-group",
@@ -36,7 +40,13 @@ address_group_request = AddressGroupRequestModel(
 )
 ```
 
+</div>
+
 ### Example (Dynamic Group)
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 address_group_request = AddressGroupRequestModel(
@@ -46,6 +56,9 @@ address_group_request = AddressGroupRequestModel(
     folder="Prisma Access",
 )
 ```
+
+</div>
+
 
 ---
 
@@ -69,6 +82,10 @@ Used when parsing address groups retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 address_group_response = AddressGroupResponseModel(
     id="123e4567-e89b-12d3-a456-426655440000",
@@ -78,3 +95,6 @@ address_group_response = AddressGroupResponseModel(
     folder="Prisma Access",
 )
 ```
+
+</div>
+

@@ -6,9 +6,15 @@ The `Scm` class provides methods to interact with the Palo Alto Networks Strata 
 
 ## Importing the Scm Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 ```
+
+</div>
 
 ## Class: Scm
 
@@ -31,6 +37,10 @@ Manages authentication and API requests.
 
 ### Usage Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 
@@ -48,3 +58,6 @@ addresses = Address(scm)
 # list all configured addresses in Prisma Access folder
 addresses.list(folder='Prisma Access')
 ```
+
+</div>
+

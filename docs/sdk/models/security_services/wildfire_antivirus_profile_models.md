@@ -23,6 +23,10 @@ Used when creating or updating a WildFire Antivirus Profile object.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 profile_request = WildfireAntivirusProfileRequestModel(
     name="test-profile",
@@ -37,6 +41,9 @@ profile_request = WildfireAntivirusProfileRequestModel(
     ]
 )
 ```
+
+</div>
+
 
 ---
 
@@ -60,6 +67,10 @@ Used when parsing WildFire Antivirus Profile objects retrieved from the API.
 
 ### Example
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 profile_response = WildfireAntivirusProfileResponseModel(
     id="123e4567-e89b-12d3-a456-426655440000",
@@ -75,6 +86,9 @@ profile_response = WildfireAntivirusProfileResponseModel(
     ]
 )
 ```
+
+</div>
+
 
 ---
 

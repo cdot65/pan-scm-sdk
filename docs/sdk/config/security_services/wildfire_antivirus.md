@@ -7,9 +7,15 @@ It provides methods to create, retrieve, update, delete, and list WildFire Antiv
 
 ## Importing the WildfireAntivirusProfile Class
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.config.security import WildfireAntivirusProfile
 ```
+
+</div>
 
 ## Methods
 
@@ -22,6 +28,10 @@ Creates a new WildFire Antivirus Profile object.
 - `data` (Dict[str, Any]): A dictionary containing the WildFire Antivirus Profile object data.
 
 **Example:**
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 profile_data = {
@@ -41,6 +51,8 @@ new_profile = wildfire_antivirus_profile.create(profile_data)
 print(f"Created WildFire Antivirus Profile with ID: {new_profile.id}")
 ```
 
+</div>
+
 ### `get(object_id: str) -> WildfireAntivirusProfileResponseModel`
 
 Retrieves a WildFire Antivirus Profile object by its ID.
@@ -51,11 +63,17 @@ Retrieves a WildFire Antivirus Profile object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
 profile_object = wildfire_antivirus_profile.get(profile_id)
 print(f"Profile Name: {profile_object.name}")
 ```
+
+</div>
 
 ### `update(object_id: str, data: Dict[str, Any]) -> WildfireAntivirusProfileResponseModel`
 
@@ -68,6 +86,10 @@ Updates an existing WildFire Antivirus Profile object.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 update_data = {
     "description": "Updated description",
@@ -76,6 +98,8 @@ update_data = {
 updated_profile = wildfire_antivirus_profile.update(profile_id, update_data)
 print(f"Updated WildFire Antivirus Profile with ID: {updated_profile.id}")
 ```
+
+</div>
 
 ### `delete(object_id: str) -> None`
 
@@ -87,10 +111,16 @@ Deletes a WildFire Antivirus Profile object by its ID.
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 wildfire_antivirus_profile.delete(profile_id)
 print(f"Deleted WildFire Antivirus Profile with ID: {profile_id}")
 ```
+
+</div>
 
 ###
 
@@ -110,6 +140,10 @@ Lists WildFire Antivirus Profile objects, optionally filtered by folder, snippet
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 profiles = wildfire_antivirus_profile.list(folder='Prisma Access', limit=10)
 
@@ -117,9 +151,16 @@ for profile in profiles:
     print(f"Profile Name: {profile.name}, ID: {profile.id}")
 ```
 
+</div>
+
+
 ---
 
 ## Usage Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -157,6 +198,9 @@ profiles = wildfire_antivirus_profile.list(folder='Prisma Access', limit=10)
 for profile in profiles:
     print(f"Profile Name: {profile.name}, ID: {profile.id}")
 ```
+
+</div>
+
 
 ---
 
