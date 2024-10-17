@@ -3,7 +3,10 @@
 from typing import List, Dict, Any, Optional
 
 from scm.config import BaseObject
-from scm.models import ApplicationGroupRequestModel, ApplicationGroupResponseModel
+from scm.models.objects import (
+    ApplicationGroupRequestModel,
+    ApplicationGroupResponseModel,
+)
 from scm.exceptions import ValidationError
 
 

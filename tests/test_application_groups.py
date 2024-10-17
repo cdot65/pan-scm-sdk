@@ -4,7 +4,10 @@ import pytest
 
 from scm.config.objects import ApplicationGroup
 from scm.exceptions import ValidationError
-from scm.models import ApplicationGroupResponseModel, ApplicationGroupRequestModel
+from scm.models.objects import (
+    ApplicationGroupResponseModel,
+    ApplicationGroupRequestModel,
+)
 from tests.factories import ApplicationGroupFactory
 from unittest.mock import MagicMock
 

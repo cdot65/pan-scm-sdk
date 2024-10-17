@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models import ApplicationRequestModel, ApplicationResponseModel
+from scm.models.objects import ApplicationRequestModel, ApplicationResponseModel
 from scm.exceptions import ValidationError
 
 

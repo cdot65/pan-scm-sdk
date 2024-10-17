@@ -3,8 +3,8 @@ import pytest
 
 from scm.config.objects import AddressGroup
 from scm.exceptions import ValidationError
-from scm.models import AddressGroupResponseModel, AddressGroupRequestModel
-from scm.models.address_group import DynamicFilter
+from scm.models.objects import AddressGroupResponseModel, AddressGroupRequestModel
+from scm.models.objects.address_group import DynamicFilter
 from tests.factories import AddressGroupStaticFactory, AddressGroupDynamicFactory
 from unittest.mock import MagicMock
 

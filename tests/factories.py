@@ -2,13 +2,13 @@
 
 import factory
 
-from scm.models import (
+from scm.models.objects import (
     ApplicationRequestModel,
     ServiceRequestModel,
     ApplicationGroupRequestModel,
 )
-from scm.models.address import AddressRequestModel
-from scm.models.address_group import AddressGroupRequestModel, DynamicFilter
+from scm.models.objects.address import AddressRequestModel
+from scm.models.objects.address_group import AddressGroupRequestModel, DynamicFilter
 
 
 class AddressFactory(factory.Factory):

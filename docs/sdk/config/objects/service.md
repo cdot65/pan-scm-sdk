@@ -168,7 +168,7 @@ for svc in services:
 
 ## Related Models
 
-- [ServiceRequestModel](models/service_models.md#servicerequestmodel)
-- [ServiceResponseModel](models/service_models.md#serviceresponsemodel)
+- [ServiceRequestModel](../../models/objects/service_models.md#servicerequestmodel)
+- [ServiceResponseModel](../../models/objects/service_models.md#serviceresponsemodel)
 
 ---

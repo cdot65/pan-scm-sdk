@@ -6,7 +6,7 @@ from pydantic import ValidationError as PydanticValidationError
 from scm.exceptions import ValidationError as SCMValidationError
 
 from scm.config.objects import Service
-from scm.models import ServiceRequestModel, ServiceResponseModel
+from scm.models.objects import ServiceRequestModel, ServiceResponseModel
 from tests.factories import ServiceFactory
 
 

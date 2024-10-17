@@ -1,4 +1,4 @@
-# Configuration Objects
+# Objects
 
 This section covers the configuration objects provided by the `pan-scm-sdk`:
 

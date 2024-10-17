@@ -3,7 +3,7 @@ import pytest
 
 from scm.config.objects import Application
 from scm.exceptions import ValidationError
-from scm.models import ApplicationResponseModel, ApplicationRequestModel
+from scm.models.objects import ApplicationResponseModel, ApplicationRequestModel
 from tests.factories import ApplicationFactory
 from unittest.mock import MagicMock
 

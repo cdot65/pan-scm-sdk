@@ -1,4 +1,4 @@
-# scm/models/address_group.py
+# scm/models/objects/address_group.py
 
 import uuid
 from typing import Optional, List
@@ -254,20 +254,4 @@ class AddressGroupResponseModel(BaseModel):
         ]
         if len(provided) != 1:
             raise ValueError("Exactly one of 'static' or 'dynamic' must be provided.")
-        return self
-
-    @model_validator(mode="after")
-    def validate_container_type(self) -> "AddressGroupRequestModel":
-        container_fields = [
-            "folder",
-            "snippet",
-            "device",
-        ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
-        if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
         return self

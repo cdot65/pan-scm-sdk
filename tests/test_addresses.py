@@ -1,9 +1,11 @@
 # tests/test_addresses.py
+import uuid
+
 import pytest
 
 from scm.config.objects import Address
 from scm.exceptions import ValidationError
-from scm.models import AddressResponseModel, AddressRequestModel
+from scm.models.objects import AddressResponseModel, AddressRequestModel
 from tests.factories import AddressFactory
 from unittest.mock import MagicMock
 
@@ -388,3 +390,96 @@ def test_address_request_model_multiple_containers_with_device():
     assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
         exc_info.value
     )
+
+
+def test_address_request_model_validation():
+    """
+    Test validation in AddressRequestModel.
+    """
+    # Valid input with exactly one address type
+    valid_data = {
+        "name": "TestAddress",
+        "ip_netmask": "192.168.1.1/24",
+        "folder": "Shared",
+    }
+    address = AddressRequestModel(**valid_data)
+    assert address.name == "TestAddress"
+    assert address.ip_netmask == "192.168.1.1/24"
+
+    # No address type provided
+    invalid_data_no_address = {
+        "name": "InvalidAddress",
+        "folder": "Shared",
+    }
+    with pytest.raises(ValueError) as exc_info:
+        AddressRequestModel(**invalid_data_no_address)
+    assert (
+        "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+        in str(exc_info.value)
+    )
+
+    # Multiple address types provided
+    invalid_data_multiple_addresses = {
+        "name": "InvalidAddress",
+        "ip_netmask": "192.168.1.1/24",
+        "fqdn": "example.com",
+        "folder": "Shared",
+    }
+    with pytest.raises(ValueError) as exc_info:
+        AddressRequestModel(**invalid_data_multiple_addresses)
+    assert (
+        "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+        in str(exc_info.value)
+    )
+
+    # Test each address type individually
+    address_types = ["ip_netmask", "ip_range", "ip_wildcard", "fqdn"]
+    for address_type in address_types:
+        valid_data = {
+            "name": f"TestAddress_{address_type}",
+            address_type: "test_value",
+            "folder": "Shared",
+        }
+        address = AddressRequestModel(**valid_data)
+        assert getattr(address, address_type) == "test_value"
+
+    # Test valid UUID
+    valid_uuid = str(uuid.uuid4())
+    valid_uuid_data = {
+        "id": valid_uuid,
+        "name": "ValidUUIDAddress",
+        "ip_netmask": "192.168.1.1/24",
+        "folder": "Shared",
+    }
+    address = AddressResponseModel(**valid_uuid_data)
+    assert address.id == valid_uuid
+
+    # Test invalid UUID
+    invalid_uuid_data = {
+        "id": "invalid-uuid",
+        "name": "InvalidUUIDAddress",
+        "ip_netmask": "192.168.1.1/24",
+        "folder": "Shared",
+    }
+    with pytest.raises(ValueError) as exc_info:
+        AddressRequestModel(**invalid_uuid_data)
+    assert "Invalid UUID format for 'id'" in str(exc_info.value)
+
+    # Test with None UUID
+    none_uuid_data = {
+        "id": None,
+        "name": "NoneUUIDAddress",
+        "ip_netmask": "192.168.1.1/24",
+        "folder": "Shared",
+    }
+    address = AddressResponseModel(**none_uuid_data)
+    assert address.id is None
+
+    # Test without UUID field
+    no_uuid_data = {
+        "name": "NoUUIDAddress",
+        "ip_netmask": "192.168.1.1/24",
+        "folder": "Shared",
+    }
+    address = AddressRequestModel(**no_uuid_data)
+    assert not hasattr(address, "id")
