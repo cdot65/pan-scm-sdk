@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.8
+
+**Release Date:** October 16, 2024
+
+### Anti Spyware Profiles
+
+- **Pytests**: Add the pytests to support Anti Spyware Profiles.
+
+---
+
 ## Version 0.1.7
 
 **Release Date:** October 16, 2024
