@@ -27,7 +27,7 @@ Creates a new address object.
 
 - `data` (Dict[str, Any]): A dictionary containing the address object data.
 
-**Example:**
+**Example 1: Creating an IP/Netmask Address**
 
 <div class="termy">
 
@@ -35,9 +35,29 @@ Creates a new address object.
 
 ```python
 address_data = {
-    "name": "test123",
-    "fqdn": "test123.example.com",
-    "description": "Created via pan-scm-sdk",
+    "name": "internal_network",
+    "ip_netmask": "192.168.1.0/24",
+    "description": "Internal network address",
+    "folder": "Shared",
+}
+
+new_address = address.create(address_data)
+print(f"Created address with ID: {new_address.id}")
+```
+
+</div>
+
+**Example 2: Creating an FQDN Address**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+address_data = {
+    "name": "example_website",
+    "fqdn": "www.example.com",
+    "description": "Example website address",
     "folder": "Prisma Access",
 }
 
@@ -65,6 +85,7 @@ Retrieves an address object by its ID.
 address_id = "123e4567-e89b-12d3-a456-426655440000"
 address_object = address.get(address_id)
 print(f"Address Name: {address_object.name}")
+print(f"Address Type: {address_object.ip_netmask or address_object.fqdn}")
 ```
 
 </div>
@@ -86,11 +107,14 @@ Updates an existing address object.
 
 ```python
 update_data = {
-    "description": "Updated description",
+    "description": "Updated internal network description",
+    "tag": ["internal", "updated"],
 }
 
 updated_address = address.update(address_id, update_data)
 print(f"Updated address with ID: {updated_address.id}")
+print(f"New description: {updated_address.description}")
+print(f"New tags: {updated_address.tag}")
 ```
 
 </div>
@@ -117,7 +141,6 @@ print(f"Deleted address with ID: {address_id}")
 </div>
 
 ###
-
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[AddressResponseModel]`
 
 Lists address objects, optionally filtered by folder, snippet, device, or other criteria.
@@ -129,7 +152,7 @@ Lists address objects, optionally filtered by folder, snippet, device, or other 
 - `device` (Optional[str]): The device to list addresses from.
 - `**filters`: Additional filters (e.g., `types`, `values`, `names`, `tags`).
 
-**Example:**
+**Example 1: Listing Addresses in a Folder**
 
 <div class="termy">
 
@@ -139,15 +162,35 @@ Lists address objects, optionally filtered by folder, snippet, device, or other 
 addresses = address.list(folder='Prisma Access')
 
 for addr in addresses:
-    print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
+    print(f"Address Name: {addr.name}, Type: {addr.ip_netmask or addr.fqdn}")
 ```
 
 </div>
 
+**Example 2: Listing Addresses with Filters**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+filtered_addresses = address.list(
+    folder='Shared',
+    types=['ip-netmask'],
+    tags=['internal']
+)
+
+for addr in filtered_addresses:
+    print(f"Address Name: {addr.name}, IP/Netmask: {addr.ip_netmask}")
+```
+
+</div>
 
 ---
 
-## Usage Example
+## Full Usage Example
+
+Here's a complete example demonstrating how to use the Address configuration object:
 
 <div class="termy">
 
@@ -169,23 +212,41 @@ address = Address(scm)
 
 # Create a new address
 address_data = {
-    "name": "test123",
-    "fqdn": "test123.example.com",
-    "description": "Created via pan-scm-sdk",
-    "folder": "Prisma Access",
+    "name": "example_network",
+    "ip_netmask": "10.0.0.0/16",
+    "description": "Example network address",
+    "folder": "Shared",
+    "tag": ["example", "network"]
 }
 
 new_address = address.create(address_data)
 print(f"Created address with ID: {new_address.id}")
 
+# Get the created address
+retrieved_address = address.get(new_address.id)
+print(f"Retrieved address: {retrieved_address.name}")
+
+# Update the address
+update_data = {
+    "description": "Updated example network address",
+    "tag": ["example", "network", "updated"]
+}
+
+updated_address = address.update(new_address.id, update_data)
+print(f"Updated address description: {updated_address.description}")
+print(f"Updated address tags: {updated_address.tag}")
+
 # List addresses
-addresses = address.list(folder='Prisma Access')
+addresses = address.list(folder='Shared', types=['ip-netmask'])
 for addr in addresses:
-    print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
+    print(f"Address Name: {addr.name}, IP/Netmask: {addr.ip_netmask}")
+
+# Delete the address
+address.delete(new_address.id)
+print(f"Deleted address with ID: {new_address.id}")
 ```
 
 </div>
-
 
 ---
 
