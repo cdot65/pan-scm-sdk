@@ -36,7 +36,7 @@ nav:
             - Service: sdk/config/objects/service.md
         - Security Services:
             - Overview: sdk/config/security_services/index.md
-            - Address: sdk/config/security_services/anti_spyware.md
+            - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware.md
       - Data Models:
           - Objects:
             - Overview: sdk/models/objects/index.md
@@ -47,7 +47,7 @@ nav:
             - Service Models: sdk/models/objects/service_models.md
           - Security Services:
             - Overview: sdk/models/security_services/index.md
-            - Address: sdk/models/security_services/anti_spyware.md
+            - Anti Spyware Security Profile: sdk/models/security_services/anti_spyware.md
       - Authentication Module: sdk/auth.md
       - SCM Client: sdk/client.md
   - Troubleshooting: about/troubleshooting.md
