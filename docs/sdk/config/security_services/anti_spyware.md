@@ -94,6 +94,14 @@ Updates an existing anti-spyware profile object.
 ```python
 update_data = {
     "description": "Updated anti-spyware profile description",
+    "rules": [
+        {
+            "name": "updated_rule",
+            "severity": ["high"],
+            "category": "dns-security",
+            "action": {"block_ip": {"track_by": "source", "duration": 300}}
+        }
+    ]
 }
 
 updated_profile = anti_spyware_profile.update(profile_id, update_data)
@@ -124,7 +132,6 @@ print(f"Deleted anti-spyware profile with ID: {profile_id}")
 </div>
 
 ###
-
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[AntiSpywareProfileResponseModel]`
 
 Lists anti-spyware profile objects, optionally filtered by folder, snippet, device, or other criteria.
@@ -154,10 +161,172 @@ for profile in profiles:
 
 </div>
 
+---
+
+## Usage Examples
+
+### Example 1: Creating a profile with multiple rules
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile_data = {
+    "name": "multi_rule_profile",
+    "description": "Profile with multiple rules",
+    "folder": "Prisma Access",
+    "rules": [
+        {
+            "name": "rule1",
+            "severity": ["critical", "high"],
+            "category": "spyware",
+            "action": {"alert": {}}
+        },
+        {
+            "name": "rule2",
+            "severity": ["medium"],
+            "category": "dns-security",
+            "action": {"drop": {}}
+        }
+    ]
+}
+
+new_profile = anti_spyware_profile.create(profile_data)
+print(f"Created profile with ID: {new_profile.id}")
+```
+
+</div>
+
+### Example 2: Updating a profile with threat exceptions
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+update_data = {
+    "threat_exception": [
+        {
+            "name": "exception1",
+            "packet_capture": "single-packet",
+            "action": {"allow": {}},
+            "exempt_ip": [{"name": "10.0.0.1"}]
+        }
+    ]
+}
+
+updated_profile = anti_spyware_profile.update(profile_id, update_data)
+print(f"Updated profile with ID: {updated_profile.id}")
+```
+
+</div>
+
+### Example 3: Listing profiles with filters
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+filtered_profiles = anti_spyware_profile.list(
+    folder='Prisma Access',
+    limit=5,
+    name='test',
+    cloud_inline_analysis=True
+)
+
+for profile in filtered_profiles:
+    print(f"Filtered Profile: {profile.name}")
+```
+
+</div>
+
+### Example 4: Creating a profile with MICA engine settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile_data = {
+    "name": "mica_profile",
+    "description": "Profile with MICA engine settings",
+    "folder": "Prisma Access",
+    "mica_engine_spyware_enabled": [
+        {
+            "name": "mica_detector1",
+            "inline_policy_action": "alert"
+        },
+        {
+            "name": "mica_detector2",
+            "inline_policy_action": "drop"
+        }
+    ],
+    "rules": [
+        {
+            "name": "mica_rule",
+            "severity": ["any"],
+            "category": "any",
+            "action": {"default": {}}
+        }
+    ]
+}
+
+new_profile = anti_spyware_profile.create(profile_data)
+print(f"Created MICA profile with ID: {new_profile.id}")
+```
+
+</div>
+
+### Example 5: Updating a profile with inline exceptions
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+update_data = {
+    "inline_exception_edl_url": ["http://example.com/edl1", "http://example.com/edl2"],
+    "inline_exception_ip_address": ["192.168.1.1", "192.168.1.2"]
+}
+
+updated_profile = anti_spyware_profile.update(profile_id, update_data)
+print(f"Updated profile with inline exceptions, ID: {updated_profile.id}")
+```
+
+</div>
+
+### Example 6: Creating a profile in a snippet
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile_data = {
+    "name": "snippet_profile",
+    "description": "Profile in a snippet",
+    "snippet": "MySnippet",
+    "rules": [
+        {
+            "name": "snippet_rule",
+            "severity": ["high"],
+            "category": "command-and-control",
+            "action": {"reset_both": {}}
+        }
+    ]
+}
+
+new_profile = anti_spyware_profile.create(profile_data)
+print(f"Created profile in snippet with ID: {new_profile.id}")
+```
+
+</div>
 
 ---
 
-## Usage Example
+## Full Example
 
 <div class="termy">
 
@@ -179,30 +348,72 @@ anti_spyware_profile = AntiSpywareProfile(scm)
 
 # Create a new anti-spyware profile
 profile_data = {
-    "name": "test_profile",
-    "description": "Test anti-spyware profile",
+    "name": "comprehensive_profile",
+    "description": "A comprehensive anti-spyware profile",
     "folder": "Prisma Access",
+    "cloud_inline_analysis": True,
+    "inline_exception_edl_url": ["http://example.com/edl1"],
+    "inline_exception_ip_address": ["192.168.1.1"],
+    "mica_engine_spyware_enabled": [
+        {
+            "name": "mica_detector1",
+            "inline_policy_action": "alert"
+        }
+    ],
     "rules": [
         {
             "name": "rule1",
             "severity": ["critical", "high"],
             "category": "spyware",
             "action": {"alert": {}}
+        },
+        {
+            "name": "rule2",
+            "severity": ["medium"],
+            "category": "dns-security",
+            "action": {"drop": {}}
+        }
+    ],
+    "threat_exception": [
+        {
+            "name": "exception1",
+            "packet_capture": "single-packet",
+            "action": {"allow": {}},
+            "exempt_ip": [{"name": "10.0.0.1"}]
         }
     ]
 }
 
 new_profile = anti_spyware_profile.create(profile_data)
-print(f"Created anti-spyware profile with ID: {new_profile.id}")
+print(f"Created comprehensive anti-spyware profile with ID: {new_profile.id}")
 
 # List anti-spyware profiles
 profiles = anti_spyware_profile.list(folder='Prisma Access', limit=10)
 for profile in profiles:
     print(f"Anti-Spyware Profile Name: {profile.name}, ID: {profile.id}")
+
+# Update the profile
+update_data = {
+    "description": "Updated comprehensive anti-spyware profile",
+    "rules": [
+        {
+            "name": "updated_rule",
+            "severity": ["high"],
+            "category": "command-and-control",
+            "action": {"block_ip": {"track_by": "source", "duration": 300}}
+        }
+    ]
+}
+
+updated_profile = anti_spyware_profile.update(new_profile.id, update_data)
+print(f"Updated anti-spyware profile with ID: {updated_profile.id}")
+
+# Delete the profile
+anti_spyware_profile.delete(new_profile.id)
+print(f"Deleted anti-spyware profile with ID: {new_profile.id}")
 ```
 
 </div>
-
 
 ---
 
@@ -210,4 +421,3 @@ for profile in profiles:
 
 - [AntiSpywareProfileRequestModel](../../models/security_services/anti_spyware_profile_models.md#AntiSpywareProfileRequestModel)
 - [AntiSpywareProfileResponseModel](../../models/security_services/anti_spyware_profile_models.md#AntiSpywareProfileResponseModel)
-
