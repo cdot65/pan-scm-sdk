@@ -33,9 +33,13 @@ class MicaEngineSpywareEnabledEntry(BaseModel):
         inline_policy_action (InlinePolicyAction): Action to be taken by the inline policy.
     """
 
-    name: str = Field(..., description="Name of the MICA engine spyware detector")
+    name: str = Field(
+        ...,
+        description="Name of the MICA engine spyware detector",
+    )
     inline_policy_action: InlinePolicyAction = Field(
-        InlinePolicyAction.alert, description="Inline policy action"
+        InlinePolicyAction.alert,
+        description="Inline policy action, defaults to 'alert'",
     )
 
 
@@ -53,7 +57,12 @@ class BlockIpAction(BaseModel):
         description="Tracking method",
         pattern="^(source-and-destination|source)$",
     )
-    duration: int = Field(..., description="Duration in seconds", ge=1, le=3600)
+    duration: int = Field(
+        ...,
+        description="Duration in seconds",
+        ge=1,
+        le=3600,
+    )
 
 
 class ActionRequest(RootModel[dict]):
@@ -197,7 +206,10 @@ class ExemptIpEntry(BaseModel):
         name (str): Name of the IP address or range to exempt.
     """
 
-    name: str = Field(..., description="Exempt IP name")
+    name: str = Field(
+        ...,
+        description="Exempt IP name",
+    )
 
 
 class RuleBase(BaseModel):
@@ -205,12 +217,26 @@ class RuleBase(BaseModel):
     Base class for Rule.
     """
 
-    name: str = Field(..., description="Rule name")
-    severity: List[Severity] = Field(..., description="List of severities")
-    category: Category = Field(..., description="Category")
-    threat_name: Optional[str] = Field(None, description="Threat name", min_length=3)
+    name: str = Field(
+        ...,
+        description="Rule name",
+    )
+    severity: List[Severity] = Field(
+        ...,
+        description="List of severities",
+    )
+    category: Category = Field(
+        ...,
+        description="Category",
+    )
+    threat_name: Optional[str] = Field(
+        None,
+        description="Threat name",
+        min_length=3,
+    )
     packet_capture: Optional[PacketCapture] = Field(
-        None, description="Packet capture setting"
+        None,
+        description="Packet capture setting",
     )
 
     @field_validator("threat_name", mode="before")
@@ -220,11 +246,17 @@ class RuleBase(BaseModel):
 
 
 class RuleRequest(RuleBase):
-    action: Optional[ActionRequest] = Field(None, description="Action")
+    action: Optional[ActionRequest] = Field(
+        None,
+        description="Action",
+    )
 
 
 class RuleResponse(RuleBase):
-    action: Optional[ActionResponse] = Field(None, description="Action")
+    action: Optional[ActionResponse] = Field(
+        None,
+        description="Action",
+    )
 
 
 class ThreatExceptionBase(BaseModel):
@@ -232,18 +264,36 @@ class ThreatExceptionBase(BaseModel):
     Base class for ThreatException.
     """
 
-    name: str = Field(..., description="Threat exception name")
-    packet_capture: PacketCapture = Field(..., description="Packet capture setting")
-    exempt_ip: Optional[List[ExemptIpEntry]] = Field(None, description="Exempt IP list")
-    notes: Optional[str] = Field(None, description="Notes")
+    name: str = Field(
+        ...,
+        description="Threat exception name",
+    )
+    packet_capture: PacketCapture = Field(
+        ...,
+        description="Packet capture setting",
+    )
+    exempt_ip: Optional[List[ExemptIpEntry]] = Field(
+        None,
+        description="Exempt IP list",
+    )
+    notes: Optional[str] = Field(
+        None,
+        description="Notes",
+    )
 
 
 class ThreatExceptionRequest(ThreatExceptionBase):
-    action: ActionRequest = Field(..., description="Action")
+    action: ActionRequest = Field(
+        ...,
+        description="Action",
+    )
 
 
 class ThreatExceptionResponse(ThreatExceptionBase):
-    action: ActionResponse = Field(..., description="Action")
+    action: ActionResponse = Field(
+        ...,
+        description="Action",
+    )
 
 
 class AntiSpywareProfileBaseModel(BaseModel):
@@ -251,19 +301,29 @@ class AntiSpywareProfileBaseModel(BaseModel):
     Base model for AntiSpywareProfile, containing common fields.
     """
 
-    name: str = Field(..., description="Profile name")
-    description: Optional[str] = Field(None, description="Description")
+    name: str = Field(
+        ...,
+        description="Profile name",
+    )
+    description: Optional[str] = Field(
+        None,
+        description="Description",
+    )
     cloud_inline_analysis: Optional[bool] = Field(
-        False, description="Cloud inline analysis"
+        False,
+        description="Cloud inline analysis",
     )
     inline_exception_edl_url: Optional[List[str]] = Field(
-        None, description="Inline exception EDL URLs"
+        None,
+        description="Inline exception EDL URLs",
     )
     inline_exception_ip_address: Optional[List[str]] = Field(
-        None, description="Inline exception IP addresses"
+        None,
+        description="Inline exception IP addresses",
     )
     mica_engine_spyware_enabled: Optional[List[MicaEngineSpywareEnabledEntry]] = Field(
-        None, description="List of MICA engine spyware enabled entries"
+        None,
+        description="List of MICA engine spyware enabled entries",
     )
 
 
@@ -273,24 +333,41 @@ class AntiSpywareProfileRequestModel(AntiSpywareProfileBaseModel):
     """
 
     folder: Optional[str] = Field(
-        None, description="Folder", max_length=64, pattern=r"^[a-zA-Z\d\-_. ]+$"
+        None,
+        description="Folder",
+        max_length=64,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
     snippet: Optional[str] = Field(
-        None, description="Snippet", max_length=64, pattern=r"^[a-zA-Z\d\-_. ]+$"
+        None,
+        description="Snippet",
+        max_length=64,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
     device: Optional[str] = Field(
-        None, description="Device", max_length=64, pattern=r"^[a-zA-Z\d\-_. ]+$"
+        None,
+        description="Device",
+        max_length=64,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
-    rules: List[RuleRequest] = Field(..., description="List of rules")
+    rules: List[RuleRequest] = Field(
+        ...,
+        description="List of rules",
+    )
     threat_exception: Optional[List[ThreatExceptionRequest]] = Field(
-        None, description="List of threat exceptions"
+        None,
+        description="List of threat exceptions",
     )
 
     model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
 
     @model_validator(mode="after")
     def validate_container(self) -> "AntiSpywareProfileRequestModel":
-        container_fields = ["folder", "snippet", "device"]
+        container_fields = [
+            "folder",
+            "snippet",
+            "device",
+        ]
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None
         ]
@@ -308,13 +385,29 @@ class AntiSpywareProfileResponseModel(AntiSpywareProfileBaseModel):
     Represents an anti-spyware profile for API responses.
     """
 
-    id: str = Field(..., description="Profile ID")
-    folder: Optional[str] = Field(None, description="Folder")
-    snippet: Optional[str] = Field(None, description="Snippet")
-    device: Optional[str] = Field(None, description="Device")
-    rules: List[RuleResponse] = Field(..., description="List of rules")
+    id: str = Field(
+        ...,
+        description="Profile ID",
+    )
+    folder: Optional[str] = Field(
+        None,
+        description="Folder",
+    )
+    snippet: Optional[str] = Field(
+        None,
+        description="Snippet",
+    )
+    device: Optional[str] = Field(
+        None,
+        description="Device",
+    )
+    rules: List[RuleResponse] = Field(
+        ...,
+        description="List of rules",
+    )
     threat_exception: Optional[List[ThreatExceptionResponse]] = Field(
-        None, description="List of threat exceptions"
+        None,
+        description="List of threat exceptions",
     )
 
     @field_validator("id")

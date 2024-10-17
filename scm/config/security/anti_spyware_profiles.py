@@ -68,6 +68,19 @@ class AntiSpywareProfile(BaseObject):
         **filters,
     ) -> List[AntiSpywareProfileResponseModel]:
         params = {}
+        error_messages = []
+
+        # Validate offset and limit
+        if offset is not None:
+            if not isinstance(offset, int) or offset < 0:
+                error_messages.append("Offset must be a non-negative integer")
+        if limit is not None:
+            if not isinstance(limit, int) or limit <= 0:
+                error_messages.append("Limit must be a positive integer")
+
+        # If there are any validation errors, raise ValueError with all error messages
+        if error_messages:
+            raise ValueError(". ".join(error_messages))
 
         # Include container type parameter
         container_params = {"folder": folder, "snippet": snippet, "device": device}
