@@ -21,10 +21,15 @@ plugins:
             show_source: true
 nav:
   - Home: index.md
-  - Introduction: about/introduction.md
-  - Installation: about/installation.md
-  - Getting Started: about/getting-started.md
-  - SDK Developer Documentation:
+  - About:
+    - Introduction: about/introduction.md
+    - Installation: about/installation.md
+    - Getting Started: about/getting-started.md
+    - Troubleshooting: about/troubleshooting.md
+    - Contributing: about/contributing.md
+    - Release Notes: about/release-notes.md
+    - License: about/license.md
+  - Developer Documentation:
       - Overview: sdk/index.md
       - Configuration:
         - Objects:
@@ -50,9 +55,6 @@ nav:
             - Anti Spyware Security Profile: sdk/models/security_services/anti_spyware.md
       - Authentication Module: sdk/auth.md
       - SCM Client: sdk/client.md
-  - Troubleshooting: about/troubleshooting.md
-  - Contributing: about/contributing.md
-  - License: about/license.md
 extra_css:
   - css/termynal.css
   - css/custom.css

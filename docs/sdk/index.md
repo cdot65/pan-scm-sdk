@@ -14,6 +14,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service](config/objects/service.md)
     - [Security Services](config/security_services/index)
         - [Anti-Spyware](config/security_services/anti_spyware.md)
+        - [Wildfire Antivirus](config/security_services/wildfire_antivirus.md)
 - Data Models
     - [Objects](models/objects/index)
         - [Address Models](models/objects/address_models.md)
@@ -23,6 +24,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service Models](models/objects/service_models.md)
     - [Security Services](models/security_services/index)
         - [Anti-Spyware](models/security_services/anti_spyware_profile_models.md)
+        - [Wildfire Antivirus](models/security_services/wildfire_antivirus_profile_models.md)
 
 ---
 

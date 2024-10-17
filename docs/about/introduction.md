@@ -33,7 +33,7 @@ automate these tasks, ensuring consistency and efficiency.
 
 ## Getting Help
 
-- **Documentation**: Explore the [SDK Developer Documentation](../sdk/index.md) for detailed guidance.
+- **Documentation**: Explore the [Developer Documentation](../sdk/index.md) for detailed guidance.
 - **GitHub Repository**: Visit the [pan-scm-sdk GitHub repository](https://github.com/cdot65/pan-scm-sdk) for source
   code and issue tracking.
 

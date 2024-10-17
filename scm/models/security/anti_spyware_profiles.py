@@ -1,4 +1,4 @@
-# scm/models/security/anti_spyware_profiles.py
+# scm/models/security/anti_spyware_profile.py
 
 from typing import List, Optional
 from pydantic import (
