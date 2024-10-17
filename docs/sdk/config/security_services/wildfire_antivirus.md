@@ -93,6 +93,7 @@ print(f"Deleted WildFire Antivirus Profile with ID: {profile_id}")
 ```
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[WildfireAntivirusProfileResponseModel]`
 
 Lists WildFire Antivirus Profile objects, optionally filtered by folder, snippet, device, or other criteria.
@@ -161,5 +162,5 @@ for profile in profiles:
 
 ## Related Models
 
-- [WildfireAntivirusProfileRequestModel](models/wildfire_antivirus_profile_models.md#wildfireantivirusprofilerequest)
-- [WildfireAntivirusProfileResponseModel](models/wildfire_antivirus_profile_models.md#wildfireantivirusprofileresponse)
+- [WildfireAntivirusProfileRequestModel](../../models/security_services/wildfire_antivirus_profile_models.md#WildfireAntivirusProfileRequestModel)
+- [WildfireAntivirusProfileResponseModel](../../models/security_services/wildfire_antivirus_profile_models.md#WildfireAntivirusProfileResponseModel)
