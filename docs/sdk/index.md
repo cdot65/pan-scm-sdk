@@ -32,5 +32,7 @@ The `pan-scm-sdk` provides a set of classes and models to simplify interaction w
 utilizing this SDK, developers can programmatically manage configurations, ensuring consistency and efficiency.
 
 Proceed to the [Configuration Objects](config/objects/index) section to learn more about the objects you can
-manage
-using the SDK.
+manage using the SDK.
+
+Proceed to the [Data Models](config/objects/index) section to learn more about how the Python dictionaries that are
+passed into the SDK are structured.
