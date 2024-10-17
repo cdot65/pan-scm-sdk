@@ -35,23 +35,16 @@ Creates a new application.
 
 ```python
 application_data = {
-    "name": "test-app",
-    "category": "collaboration",
-    "subcategory": "internet-conferencing",
+    "name": "custom-app",
+    "category": "business-systems",
+    "subcategory": "database",
     "technology": "client-server",
-    "risk": 1,
-    "description": "Created via pan-scm-sdk",
-    "ports": ["tcp/80,443", "udp/3478"],
-    "folder": "Prisma Access",
-    "evasive": False,
-    "pervasive": False,
-    "excessive_bandwidth_use": False,
-    "used_by_malware": False,
-    "transfers_files": False,
+    "risk": 3,
+    "description": "Custom application for internal use",
+    "ports": ["tcp/1234", "udp/5678"],
+    "folder": "Custom Apps",
     "has_known_vulnerabilities": True,
-    "tunnels_other_apps": False,
-    "prone_to_misuse": False,
-    "no_certifications": False,
+    "transfers_files": True
 }
 
 new_application = application.create(application_data)
@@ -77,7 +70,7 @@ Retrieves an application by its ID.
 ```python
 app_id = "123e4567-e89b-12d3-a456-426655440000"
 app_object = application.get(app_id)
-print(f"Application Name: {app_object.name}")
+print(f"Application Name: {app_object.name}, Category: {app_object.category}")
 ```
 
 </div>
@@ -99,11 +92,13 @@ Updates an existing application.
 
 ```python
 update_data = {
-    "description": "Updated application description",
+    "description": "Updated custom application description",
+    "risk": 4,
+    "prone_to_misuse": True
 }
 
 updated_app = application.update(app_id, update_data)
-print(f"Updated application with ID: {updated_app.id}")
+print(f"Updated application: {updated_app.name}, New risk level: {updated_app.risk}")
 ```
 
 </div>
@@ -130,7 +125,6 @@ print(f"Deleted application with ID: {app_id}")
 </div>
 
 ###
-
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[ApplicationResponseModel]`
 
 Lists applications, optionally filtered by folder, snippet, device, or other criteria.
@@ -149,18 +143,24 @@ Lists applications, optionally filtered by folder, snippet, device, or other cri
 <!-- termynal -->
 
 ```python
-applications = application.list(folder='Prisma Access')
+# List applications in a specific folder
+folder_apps = application.list(folder='Custom Apps')
+for app in folder_apps:
+    print(f"Application: {app.name}, Technology: {app.technology}")
 
-for app in applications:
-    print(f"Application Name: {app.name}, Category: {app.category}")
+# List applications with specific filters
+filtered_apps = application.list(folder='Prisma Access', category='collaboration', risk=4)
+for app in filtered_apps:
+    print(f"High-risk app: {app.name}, Subcategory: {app.subcategory}")
 ```
 
 </div>
 
-
 ---
 
 ## Usage Example
+
+Here's a comprehensive example demonstrating the usage of the `Application` class:
 
 <div class="termy">
 
@@ -181,37 +181,50 @@ scm = Scm(
 application = Application(scm)
 
 # Create a new application
-application_data = {
-    "name": "test-app",
+new_app_data = {
+    "name": "custom-collab-app",
     "category": "collaboration",
-    "subcategory": "internet-conferencing",
-    "technology": "client-server",
-    "risk": 1,
-    "description": "Created via pan-scm-sdk",
-    "ports": ["tcp/80,443", "udp/3478"],
-    "folder": "Prisma Access",
+    "subcategory": "video-conferencing",
+    "technology": "browser-based",
+    "risk": 2,
+    "description": "Custom video conferencing application",
+    "ports": ["tcp/8080", "udp/9000-9010"],
+    "folder": "Custom Collaboration Apps",
     "evasive": False,
-    "pervasive": False,
-    "excessive_bandwidth_use": False,
-    "used_by_malware": False,
-    "transfers_files": False,
-    "has_known_vulnerabilities": True,
-    "tunnels_other_apps": False,
-    "prone_to_misuse": False,
-    "no_certifications": False,
+    "pervasive": True,
+    "excessive_bandwidth_use": True,
+    "transfers_files": True,
+    "has_known_vulnerabilities": False
 }
 
-new_application = application.create(application_data)
-print(f"Created application with ID: {new_application.id}")
+new_app = application.create(new_app_data)
+print(f"Created new application: {new_app.name} (ID: {new_app.id})")
 
-# List applications
-applications = application.list(folder='Prisma Access')
-for app in applications:
-    print(f"Application Name: {app.name}, Category: {app.category}")
+# Retrieve the created application
+retrieved_app = application.get(new_app.id)
+print(f"Retrieved application: {retrieved_app.name}, Risk: {retrieved_app.risk}")
+
+# Update the application
+update_data = {
+    "description": "Updated custom video conferencing application",
+    "risk": 3,
+    "has_known_vulnerabilities": True
+}
+updated_app = application.update(new_app.id, update_data)
+print(f"Updated application: {updated_app.name}, New risk: {updated_app.risk}")
+
+# List applications in the folder
+folder_apps = application.list(folder='Custom Collaboration Apps')
+print("Applications in 'Custom Collaboration Apps' folder:")
+for app in folder_apps:
+    print(f"- {app.name} ({app.technology})")
+
+# Delete the application
+application.delete(new_app.id)
+print(f"Deleted application: {new_app.name}")
 ```
 
 </div>
-
 
 ---
 
