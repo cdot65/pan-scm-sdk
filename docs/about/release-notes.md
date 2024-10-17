@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.9
+
+**Release Date:** October 17, 2024
+
+### Wildfire Antivirus Security Profiles
+
+- **Wildfire Antivirus**: Add support for managing Wildfire Anti-Virus Security Profiles.
+
+---
+
 ## Version 0.1.8
 
 **Release Date:** October 16, 2024

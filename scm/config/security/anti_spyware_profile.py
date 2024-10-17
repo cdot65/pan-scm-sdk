@@ -1,4 +1,4 @@
-# scm/config/security/anti_spyware_profiles.py
+# scm/config/security/anti_spyware_profile.py
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject

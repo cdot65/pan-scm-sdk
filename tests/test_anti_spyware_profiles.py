@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import MagicMock
 
-from scm.config.security.anti_spyware_profiles import AntiSpywareProfile
+from scm.config.security.anti_spyware_profile import AntiSpywareProfile
 from scm.exceptions import ValidationError
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileRequestModel,
