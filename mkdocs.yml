@@ -54,7 +54,7 @@ nav:
           - Security Services:
             - Overview: sdk/models/security_services/index.md
             - Anti Spyware Security Profile: sdk/models/security_services/anti_spyware_profile_models.md
-            - Anti Spyware Security Profile: sdk/models/security_services/wildfire_antivirus_profile_models.md
+            - Wildfire Anti Virus Security Profile: sdk/models/security_services/wildfire_antivirus_profile_models.md
       - Authentication Module: sdk/auth.md
       - SCM Client: sdk/client.md
 extra_css:
