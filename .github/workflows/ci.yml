@@ -13,14 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install dependencies
         run: |
           pip install poetry
           poetry install
+
       - name: Run Tests with Coverage
         env:
           CLIENT_ID: fake_client_id
@@ -28,8 +31,15 @@ jobs:
           TSG_ID: fake_tsg_id
         run: |
           poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
