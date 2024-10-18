@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.10
+
+**Release Date:** October 18, 2024
+
+### Bug fix
+
+- **Update Methods**: Added support for empty responses from the API, common for PUT updates.
+
+---
+
 ## Version 0.1.9
 
 **Release Date:** October 17, 2024

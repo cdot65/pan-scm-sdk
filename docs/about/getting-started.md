@@ -27,6 +27,10 @@ Before using the SDK, you need to authenticate with Strata Cloud Manager using y
 
 **Example:**
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 
@@ -40,6 +44,8 @@ scm = Scm(
 # The SCM client is now ready to use
 ```
 
+</div>
+
 - `client_id`: Your OAuth2 client ID.
 - `client_secret`: Your OAuth2 client secret.
 - `tsg_id`: Your Tenant Service Group ID.
@@ -50,6 +56,10 @@ The SDK provides classes to manage various configuration objects. Below are exam
 addresses, address groups, and applications.
 
 ### Managing Addresses
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.config.objects import Address
@@ -74,7 +84,13 @@ for addr in addresses:
     print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
 ```
 
+</div>
+
 ### Managing Address Groups
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.config.objects import AddressGroup
@@ -99,7 +115,13 @@ for group in groups:
     print(f"Address Group Name: {group.name}")
 ```
 
+</div>
+
 ### Managing Applications
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.config.objects import Application
@@ -127,6 +149,8 @@ applications = application.list(folder='Prisma Access')
 for app in applications:
     print(f"Application Name: {app.name}, Category: {app.category}")
 ```
+
+</div>
 
 ## Next Steps
 

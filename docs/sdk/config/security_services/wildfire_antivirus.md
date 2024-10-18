@@ -5,6 +5,27 @@ It provides methods to create, retrieve, update, delete, and list WildFire Antiv
 
 ---
 
+## Creating an API client object
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import Scm
+
+api_client = Scm(
+    client_id="this-is-a-placeholder",
+    client_secret="this-is-a-placeholder",
+    tsg_id="this-is-a-placeholder",
+)
+```
+
+</div>
+
+
+---
+
 ## Importing the WildfireAntivirusProfile Class
 
 <div class="termy">
@@ -13,6 +34,9 @@ It provides methods to create, retrieve, update, delete, and list WildFire Antiv
 
 ```python
 from scm.config.security import WildfireAntivirusProfile
+
+wildfire_antivirus_profile = WildfireAntivirusProfile(api_client)
+
 ```
 
 </div>
@@ -42,7 +66,17 @@ profile_data = {
         {
             "name": "rule1",
             "direction": "both",
-            "analysis": "public-cloud"
+            "analysis": "public-cloud",
+            "application": [
+                "facebook-uploading",
+                "facebook-posting",
+                "facebook-downloading",
+                "facebook-base"
+            ],
+            "file_type": [
+                "flash",
+                "jar"
+            ]
         }
     ]
 }
@@ -68,7 +102,7 @@ Retrieves a WildFire Antivirus Profile object by its ID.
 <!-- termynal -->
 
 ```python
-profile_id = "123e4567-e89b-12d3-a456-426655440000"
+profile_id = "ddcf8352-65cd-4cf3-a9b5-e2b344bbdb08"
 profile_object = wildfire_antivirus_profile.get(profile_id)
 print(f"Profile Name: {profile_object.name}")
 ```
@@ -92,12 +126,24 @@ Updates an existing WildFire Antivirus Profile object.
 
 ```python
 update_data = {
+    "name": "Updated123",
     "description": "Updated description",
+    "folder": "Prisma Access",
     "rules": [
         {
             "name": "updated_rule",
             "direction": "upload",
-            "analysis": "private-cloud"
+            "analysis": "private-cloud",
+            "application": [
+                "facebook-uploading",
+                "facebook-posting",
+                "facebook-downloading",
+                "facebook-base"
+            ],
+            "file_type": [
+                "flash",
+                "jar"
+            ]
         }
     ]
 }
@@ -130,6 +176,7 @@ print(f"Deleted WildFire Antivirus Profile with ID: {profile_id}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[WildfireAntivirusProfileResponseModel]`
 
 Lists WildFire Antivirus Profile objects, optionally filtered by folder, snippet, device, or other criteria.
