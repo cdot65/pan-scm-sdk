@@ -5,6 +5,24 @@ methods to create, retrieve, update, delete, and list anti-spyware profile objec
 
 ---
 
+## Creating an API client object
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import Scm
+
+api_client = Scm(
+    client_id="this-is-a-placeholder",
+    client_secret="this-is-a-placeholder",
+    tsg_id="this-is-a-placeholder",
+)
+```
+
+</div>
+
 ## Importing the AntiSpywareProfile Class
 
 <div class="termy">
@@ -13,6 +31,8 @@ methods to create, retrieve, update, delete, and list anti-spyware profile objec
 
 ```python
 from scm.config.security import AntiSpywareProfile
+
+anti_spyware_profile = AntiSpywareProfile(api_client)
 ```
 
 </div>
@@ -93,6 +113,8 @@ Updates an existing anti-spyware profile object.
 
 ```python
 update_data = {
+    "name": "Updated name",
+    "folder": "Prisma Access",
     "description": "Updated anti-spyware profile description",
     "rules": [
         {
@@ -132,6 +154,7 @@ print(f"Deleted anti-spyware profile with ID: {profile_id}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[AntiSpywareProfileResponseModel]`
 
 Lists anti-spyware profile objects, optionally filtered by folder, snippet, device, or other criteria.
@@ -200,15 +223,35 @@ print(f"Created profile with ID: {new_profile.id}")
 
 ### Example 2: Updating a profile with threat exceptions
 
+> Note: There is currently a schema validation error if an update is made with either `threat_name` or `category` set to
+> the value of `any`, it suggests that a minimum of four characters is required and that `any` is not a valid category
+
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
 update_data = {
+    "name": "updated profile",
+    "description": "Profile with multiple rules",
+    "folder": "Prisma Access",
+    "rules": [
+        {
+            "name": "rule1",
+            "severity": ["critical", "high"],
+            "category": "spyware",
+            "action": {"alert": {}}
+        },
+        {
+            "name": "rule2",
+            "severity": ["medium"],
+            "category": "dns-security",
+            "action": {"drop": {}}
+        }
+    ],
     "threat_exception": [
         {
-            "name": "exception1",
+            "name": "10001",
             "packet_capture": "single-packet",
             "action": {"allow": {}},
             "exempt_ip": [{"name": "10.0.0.1"}]
@@ -232,8 +275,7 @@ print(f"Updated profile with ID: {updated_profile.id}")
 filtered_profiles = anti_spyware_profile.list(
     folder='Prisma Access',
     limit=5,
-    name='test',
-    cloud_inline_analysis=True
+    name='updated profile',
 )
 
 for profile in filtered_profiles:
@@ -255,12 +297,12 @@ profile_data = {
     "folder": "Prisma Access",
     "mica_engine_spyware_enabled": [
         {
-            "name": "mica_detector1",
+            "name": "HTTP Command and Control detector",
             "inline_policy_action": "alert"
         },
         {
-            "name": "mica_detector2",
-            "inline_policy_action": "drop"
+            "name": "HTTP2 Command and Control detector",
+            "inline_policy_action": "reset-both"
         }
     ],
     "rules": [
@@ -268,7 +310,7 @@ profile_data = {
             "name": "mica_rule",
             "severity": ["any"],
             "category": "any",
-            "action": {"default": {}}
+            "action": {"reset_both": {}}
         }
     ]
 }
@@ -307,7 +349,7 @@ print(f"Updated profile with inline exceptions, ID: {updated_profile.id}")
 profile_data = {
     "name": "snippet_profile",
     "description": "Profile in a snippet",
-    "snippet": "MySnippet",
+    "snippet": "cdot.io Best Practices",
     "rules": [
         {
             "name": "snippet_rule",
@@ -352,11 +394,9 @@ profile_data = {
     "description": "A comprehensive anti-spyware profile",
     "folder": "Prisma Access",
     "cloud_inline_analysis": True,
-    "inline_exception_edl_url": ["http://example.com/edl1"],
-    "inline_exception_ip_address": ["192.168.1.1"],
     "mica_engine_spyware_enabled": [
         {
-            "name": "mica_detector1",
+            "name": "HTTP Command and Control detector",
             "inline_policy_action": "alert"
         }
     ],
@@ -376,7 +416,7 @@ profile_data = {
     ],
     "threat_exception": [
         {
-            "name": "exception1",
+            "name": "10001",
             "packet_capture": "single-packet",
             "action": {"allow": {}},
             "exempt_ip": [{"name": "10.0.0.1"}]
