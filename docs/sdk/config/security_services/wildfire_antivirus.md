@@ -378,14 +378,14 @@ from scm.client import Scm
 from scm.config.security import WildfireAntivirusProfile
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create a WildfireAntivirusProfile instance
-wildfire_antivirus_profile = WildfireAntivirusProfile(scm)
+wildfire_antivirus_profile = WildfireAntivirusProfile(api_client)
 
 # Create a new WildFire Antivirus Profile
 profile_data = {

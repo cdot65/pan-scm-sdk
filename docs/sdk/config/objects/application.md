@@ -125,6 +125,7 @@ print(f"Deleted application with ID: {app_id}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[ApplicationResponseModel]`
 
 Lists applications, optionally filtered by folder, snippet, device, or other criteria.
@@ -171,14 +172,14 @@ from scm.client import Scm
 from scm.config.objects import Application
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create an Application instance
-application = Application(scm)
+application = Application(api_client)
 
 # Create a new application
 new_app_data = {

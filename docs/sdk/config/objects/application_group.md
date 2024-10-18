@@ -15,14 +15,14 @@ from scm.client import Scm
 from scm.config.objects import ApplicationGroup
 
 # create a SCM session
-scm = Scm(
+api_client = Scm(
     client_id="example",
     client_secret="example",
     tsg_id="example"
 )
 
 # pass SCM session into the ApplicationGroup object
-application_group = ApplicationGroup(scm)
+application_group = ApplicationGroup(api_client)
 ```
 
 </div>
@@ -151,6 +151,7 @@ print(f"Deleted application group with ID: {group_id_to_delete}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[ApplicationGroupResponseModel]`
 
 Lists application groups, optionally filtered by folder, snippet, device, or other criteria.
@@ -207,14 +208,14 @@ from scm.client import Scm
 from scm.config.objects import ApplicationGroup
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create an ApplicationGroup instance
-application_group = ApplicationGroup(scm)
+application_group = ApplicationGroup(api_client)
 
 # Create a new application group
 new_group_data = {

@@ -35,7 +35,7 @@ Before using the SDK, you need to authenticate with Strata Cloud Manager using y
 from scm.client import Scm
 
 # Initialize the SCM client with your credentials
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
@@ -65,7 +65,7 @@ addresses, address groups, and applications.
 from scm.config.objects import Address
 
 # Create an Address instance
-address = Address(scm)
+address = Address(api_client)
 
 # Create a new address
 address_data = {
@@ -96,7 +96,7 @@ for addr in addresses:
 from scm.config.objects import AddressGroup
 
 # Create an AddressGroup instance
-address_group = AddressGroup(scm)
+address_group = AddressGroup(api_client)
 
 # Create a new address group
 address_group_data = {
@@ -127,7 +127,7 @@ for group in groups:
 from scm.config.objects import Application
 
 # Create an Application instance
-application = Application(scm)
+application = Application(api_client)
 
 # Create a new application
 application_data = {

@@ -44,7 +44,7 @@ Manages authentication and API requests.
 ```python
 from scm.client import Scm
 
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
@@ -53,7 +53,7 @@ scm = Scm(
 # Import Address from SDK and pass the `scm` instance into the Address class
 from scm.config.objects import Address
 
-addresses = Address(scm)
+addresses = Address(api_client)
 
 # list all configured addresses in Prisma Access folder
 addresses.list(folder='Prisma Access')

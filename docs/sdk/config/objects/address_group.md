@@ -163,6 +163,7 @@ print(f"Deleted address group with ID: {group_id}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[AddressGroupResponseModel]`
 
 Lists address groups, optionally filtered by folder, snippet, device, or other criteria.
@@ -225,14 +226,14 @@ from scm.client import Scm
 from scm.config.objects import AddressGroup
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create an AddressGroup instance
-address_group = AddressGroup(scm)
+address_group = AddressGroup(api_client)
 
 # Create a new static address group
 static_group_data = {

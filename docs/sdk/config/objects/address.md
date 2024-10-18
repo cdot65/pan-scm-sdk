@@ -141,6 +141,7 @@ print(f"Deleted address with ID: {address_id}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[AddressResponseModel]`
 
 Lists address objects, optionally filtered by folder, snippet, device, or other criteria.
@@ -201,14 +202,14 @@ from scm.client import Scm
 from scm.config.objects import Address
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create an Address instance
-address = Address(scm)
+address = Address(api_client)
 
 # Create a new address
 address_data = {

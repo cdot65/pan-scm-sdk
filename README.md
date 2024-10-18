@@ -57,7 +57,7 @@ Before interacting with the SDK, you need to authenticate using your Strata Clou
 from scm.client import Scm
 
 # Initialize the API client with your credentials
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
@@ -78,14 +78,14 @@ from scm.client import Scm
 from scm.config.objects import Address
 
 # Create an authenticated session with SCM
-scm = Scm(
+api_client = Scm(
     client_id="this is an example",
     client_secret="this is an example",
     tsg_id="this is an example"
 )
 
 # Create an Address instance by passing the SCM instance into it
-address = Address(scm)
+address = Address(api_client)
 
 # List addresses in a specific folder
 addresses = address.list(folder='Prisma Access')

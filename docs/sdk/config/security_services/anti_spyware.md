@@ -379,14 +379,14 @@ from scm.client import Scm
 from scm.config.security import AntiSpywareProfile
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create an AntiSpywareProfile instance
-anti_spyware_profile = AntiSpywareProfile(scm)
+anti_spyware_profile = AntiSpywareProfile(api_client)
 
 # Create a new anti-spyware profile
 profile_data = {

@@ -130,6 +130,7 @@ print(f"Deleted service with ID: {service_id}")
 </div>
 
 ###
+
 `list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[ServiceResponseModel]`
 
 Lists service objects, optionally filtered by folder, snippet, device, or other criteria.
@@ -323,14 +324,14 @@ from scm.client import Scm
 from scm.config.objects import Service
 
 # Initialize the SCM client
-scm = Scm(
+api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
 )
 
 # Create a Service instance
-service = Service(scm)
+service = Service(api_client)
 
 # Create a new service
 service_data = {
