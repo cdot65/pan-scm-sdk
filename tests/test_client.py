@@ -350,3 +350,21 @@ def test_request_json_exception(mock_scm):
         scm.request("GET", "/test-endpoint")
 
     assert "API request failed: Invalid JSON" in str(exc_info.value)
+
+
+def test_request_empty_response(mock_scm):
+    scm = mock_scm
+    mock_session = scm.session
+
+    # Mock the response to simulate a successful request with empty content
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None  # No exception raised
+    mock_response.content = b""  # Empty content
+    mock_session.request.return_value = mock_response
+
+    result = scm.request("GET", "/test-endpoint")
+
+    # Assertions
+    mock_response.raise_for_status.assert_called_once()
+    mock_response.json.assert_not_called()  # json() should not be called for empty content
+    assert result is None  # The method should return None for empty content

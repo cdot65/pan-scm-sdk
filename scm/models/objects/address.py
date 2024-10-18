@@ -258,20 +258,3 @@ class AddressResponseModel(BaseModel):
             except ValueError:
                 raise ValueError("Invalid UUID format for 'id'")
         return values
-
-    @model_validator(mode="after")
-    def validate_address_type(self) -> "AddressRequestModel":
-        address_fields = [
-            "ip_netmask",
-            "ip_range",
-            "ip_wildcard",
-            "fqdn",
-        ]
-        provided = [
-            field for field in address_fields if getattr(self, field) is not None
-        ]
-        if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            )
-        return self

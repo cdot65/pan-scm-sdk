@@ -483,3 +483,46 @@ def test_address_request_model_validation():
     }
     address = AddressRequestModel(**no_uuid_data)
     assert not hasattr(address, "id")
+
+
+def test_address_request_model_address_type_validation():
+    """
+    Test the custom validator for address type in AddressRequestModel.
+    """
+    # Test with no address type provided
+    with pytest.raises(ValueError) as exc_info:
+        AddressRequestModel(name="TestAddress", folder="Shared")
+    assert (
+        "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+        in str(exc_info.value)
+    )
+
+    # Test with multiple address types provided
+    with pytest.raises(ValueError) as exc_info:
+        AddressRequestModel(
+            name="TestAddress",
+            folder="Shared",
+            ip_netmask="192.168.1.1/24",
+            fqdn="example.com",
+        )
+    assert (
+        "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+        in str(exc_info.value)
+    )
+
+    # Test with each valid address type
+    valid_address_types = {
+        "ip_netmask": "192.168.1.1/24",
+        "ip_range": "192.168.1.1-192.168.1.10",
+        "ip_wildcard": "192.168.1.0/0.0.0.255",
+        "fqdn": "example.com",
+    }
+
+    for address_type, value in valid_address_types.items():
+        valid_data = {
+            "name": f"TestAddress_{address_type}",
+            "folder": "Shared",
+            address_type: value,
+        }
+        model = AddressRequestModel(**valid_data)
+        assert getattr(model, address_type) == value
