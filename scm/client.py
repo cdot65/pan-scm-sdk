@@ -82,7 +82,10 @@ class Scm:
                 **kwargs,
             )
             response.raise_for_status()
-            return response.json()
+            if response.content and response.content.strip():
+                return response.json()
+            else:
+                return None  # Return None or an empty dict
         except requests.exceptions.HTTPError as http_err:
             error_content = response.json() if response.content else {}
             logger.error(f"HTTP error occurred: {http_err} - {error_content}")
