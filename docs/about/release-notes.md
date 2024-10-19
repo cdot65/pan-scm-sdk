@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.12
+
+**Release Date:** October 18, 2024
+
+### Adding DNS Security Profiles
+
+- **New Configuration**: Added support for DNS Security Profiles.
+
+---
+
 ## Version 0.1.11
 
 **Release Date:** October 18, 2024
