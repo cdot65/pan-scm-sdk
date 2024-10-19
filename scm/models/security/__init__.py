@@ -4,6 +4,10 @@ from .anti_spyware_profiles import (
     AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
 )
+from .decryption_profiles import (
+    DecryptionProfileRequestModel,
+    DecryptionProfileResponseModel,
+)
 from .dns_security_profiles import (
     DNSSecurityProfileRequestModel,
     DNSSecurityProfileResponseModel,

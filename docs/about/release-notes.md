@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.13
+
+**Release Date:** October 19, 2024
+
+### Adding Decryption Profiles
+
+- **New Configuration**: Added support for Decryption Profiles.
+
+---
+
 ## Version 0.1.12
 
 **Release Date:** October 18, 2024
