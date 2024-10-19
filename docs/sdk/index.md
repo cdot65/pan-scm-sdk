@@ -14,6 +14,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service](config/objects/service.md)
     - [Security Services](config/security_services/index)
         - [Anti-Spyware Profile](config/security_services/anti_spyware.md)
+        - [DNS Security Profile](config/security_services/dns_security_profile.md)
         - [Vulnerability Protection Profile](config/security_services/vulnerability_protection_profile.md)
         - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
 - Data Models
@@ -25,6 +26,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service Models](models/objects/service_models.md)
     - [Security Services](models/security_services/index)
         - [Anti-Spyware Profile Models](models/security_services/anti_spyware_profile_models.md)
+        - [DNS Security Profile Models](models/security_services/dns_security_profile_models.md)
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
         - [Wildfire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
 
