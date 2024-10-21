@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.14
+
+**Release Date:** October 21, 2024
+
+### Adding Security Rules
+
+- **New Configuration**: Added support for Security Rules.
+
+---
+
 ## Version 0.1.13
 
 **Release Date:** October 19, 2024
