@@ -9,6 +9,7 @@ from scm.models.objects import (
 )
 from scm.models.objects.address import AddressRequestModel
 from scm.models.objects.address_group import AddressGroupRequestModel, DynamicFilter
+from scm.models.security.security_rules import SecurityRuleRequestModel, ProfileSetting
 
 
 class AddressFactory(factory.Factory):
@@ -100,3 +101,38 @@ class ServiceFactory(factory.Factory):
     tag = ["Automation"]
     folder = "Prisma Access"
     protocol = {"tcp": {"port": "80,443"}}
+
+
+class SecurityRuleFactory(factory.Factory):
+    class Meta:
+        model = SecurityRuleRequestModel
+
+    name = factory.Faker("word")
+    description = factory.Faker("sentence")
+    action = "allow"
+    folder = "Shared"  # One of folder, snippet, or device must be provided
+
+    # Optional fields with defaults
+    disabled = False
+    source = ["any"]
+    destination = ["any"]
+    application = ["any"]
+    service = ["any"]
+    source_user = ["any"]
+    source_hip = ["any"]
+    destination_hip = ["any"]
+    category = ["any"]
+    log_start = False
+    log_end = True
+    log_setting = "Cortex Data Lake"
+    # Add other fields as needed
+
+    # If you want to include a profile_setting
+    profile_setting = factory.SubFactory("tests.factories.ProfileSettingFactory")
+
+
+class ProfileSettingFactory(factory.Factory):
+    class Meta:
+        model = ProfileSetting
+
+    group = ["best-practice"]

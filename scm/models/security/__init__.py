@@ -12,6 +12,10 @@ from .dns_security_profiles import (
     DNSSecurityProfileRequestModel,
     DNSSecurityProfileResponseModel,
 )
+from .security_rules import (
+    SecurityRuleRequestModel,
+    SecurityRuleResponseModel,
+)
 from .vulnerability_protection_profiles import (
     VulnerabilityProtectionProfileRequestModel,
     VulnerabilityProtectionProfileResponseModel,

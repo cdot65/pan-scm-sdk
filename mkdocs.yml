@@ -44,6 +44,7 @@ nav:
             - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware.md
             - Decryption Profile: sdk/config/security_services/decryption_profile.md
             - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
+            - Security Rule: sdk/config/security_services/security_rule.md
             - Vulnerability Protection Security Profile: sdk/config/security_services/vulnerability_protection_profile.md
             - Wildfire Anti Virus Security Profile: sdk/config/security_services/wildfire_antivirus.md
       - Data Models:
@@ -59,6 +60,7 @@ nav:
             - Anti Spyware Security Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
             - Decryption Profile Models: sdk/models/security_services/decryption_profile_models.md
             - DNS Security Profile Models: sdk/models/security_services/dns_security_profile_models.md
+            - Security Rule Models: sdk/models/security_services/security_rule_models.md
             - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
             - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
       - SCM Client: sdk/client.md
