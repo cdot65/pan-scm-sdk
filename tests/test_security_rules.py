@@ -2,6 +2,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError as PydanticValidationError
 from scm.exceptions import ValidationError
 from scm.models.security.security_rules import (
     SecurityRuleRequestModel,
@@ -439,6 +440,65 @@ def test_create_security_rule(load_env, mock_scm):
     assert created_rule.name == test_security_rule.name
     assert created_rule.description == test_security_rule.description
     assert created_rule.folder == test_security_rule.folder
+
+
+def test_create_security_rule_with_invalid_names(load_env, mock_scm):
+    """
+    Test creating security rules with invalid names that do not match the regex pattern.
+    """
+    # List of invalid names that include characters not allowed by the regex
+    invalid_names = [
+        "Invalid@Name",
+        "Name!",
+        "Name#",
+        "Name$",
+        "Name%",
+        "Name^",
+        "Name&",
+        "Name*",
+        "Name(",
+        "Name)",
+        "Name+",
+        "Name=",
+        "Name{",
+        "Name}",
+        "Name[",
+        "Name]",
+        "Name|",
+        "Name\\",
+        "Name/",
+        "Name<",
+        "Name>",
+        "Name?",
+        "Name~",
+        "Name`",
+        'Name"',
+        "Name'",
+        "Name:",
+        "Name;",
+    ]
+
+    for name in invalid_names:
+        # We also need to provide at least one container field to pass the model validation
+        with pytest.raises(PydanticValidationError) as exc_info:
+            SecurityRuleRequestModel(
+                name=name,
+                folder="test-folder",  # Added this to satisfy the container validation
+            )
+
+        errors = exc_info.value.errors()
+        assert len(errors) >= 1, f"No validation errors found for name: {name}"
+
+        name_errors = [error for error in errors if error["loc"] == ("name",)]
+        assert name_errors, f"No validation error for 'name' field with value: {name}"
+
+        error = name_errors[0]
+        assert (
+            error["type"] == "string_pattern_mismatch"
+        ), f"Unexpected error type: {error['type']}"
+        assert (
+            "should match pattern" in error["msg"]
+        ), f"Unexpected error message: {error['msg']}"
 
 
 def test_update_security_rule(load_env, mock_scm):

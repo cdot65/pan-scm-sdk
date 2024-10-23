@@ -82,7 +82,7 @@ class ProfileSetting(BaseModel):
 
 # Base model for Security Rule
 class SecurityRuleBaseModel(BaseModel):
-    name: constr(pattern=r"^[a-zA-Z0-9_ -]+$") = Field(
+    name: constr(pattern=r"^[a-zA-Z0-9_ \.-]+$") = Field(
         ...,
         description="The name of the security rule",
     )

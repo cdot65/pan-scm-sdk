@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.15
+
+**Release Date:** October 23, 2024
+
+### Correcting pattern for Security Policy name
+
+- **Updated pattern**: Added support for periods (.) within the name of security policies.
+
+---
+
 ## Version 0.1.14
 
 **Release Date:** October 21, 2024
