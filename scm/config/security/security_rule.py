@@ -35,9 +35,7 @@ class SecurityRule(BaseObject):
 
     def create(self, data: Dict[str, Any]) -> SecurityRuleResponseModel:
         profile = SecurityRuleRequestModel(**data)
-        payload = profile.model_dump(
-            exclude_unset=True, by_alias=True
-        )  # Include aliases
+        payload = profile.model_dump(exclude_none=True, by_alias=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return SecurityRuleResponseModel(**response)
 

@@ -409,7 +409,7 @@ def test_create_security_rule(load_env, mock_scm):
 
     # Define the mock response for the post method
     mock_response = test_security_rule.model_dump(
-        exclude_unset=True,
+        exclude_none=True,  # Use exclude_none instead of exclude_unset
         by_alias=True,
     )
     mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"  # Mocked ID
@@ -423,7 +423,7 @@ def test_create_security_rule(load_env, mock_scm):
     # Call the create method
     created_rule = security_rules_client.create(
         test_security_rule.model_dump(
-            exclude_unset=True,
+            exclude_none=True,  # Use exclude_none here as well
             by_alias=True,
         )
     )
@@ -432,7 +432,7 @@ def test_create_security_rule(load_env, mock_scm):
     mock_scm.post.assert_called_once_with(
         "/config/security/v1/security-rules",
         json=test_security_rule.model_dump(
-            exclude_unset=True,
+            exclude_none=True,  # Ensure consistency in model_dump calls
             by_alias=True,
         ),
     )
