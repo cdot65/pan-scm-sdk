@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.16
+
+**Release Date:** October 23, 2024
+
+### Correcting `create` method for Security Policy
+
+- **Updated `create` method**: Missing keys within a dictionary will now be properly set with default values.
+
+---
+
 ## Version 0.1.15
 
 **Release Date:** October 23, 2024
