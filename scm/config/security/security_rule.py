@@ -5,6 +5,7 @@ from scm.config import BaseObject
 from scm.models.security import (
     SecurityRuleRequestModel,
     SecurityRuleResponseModel,
+    RuleBasedMove,
 )
 from scm.exceptions import ValidationError
 
@@ -18,7 +19,7 @@ class SecurityRule(BaseObject):
     or devices, and allows filtering of profiles based on various criteria.
 
     Attributes:
-        ENDPOINT (str): The API endpoint for Anti-Spyware Profile operations.
+        ENDPOINT (str): The API endpoint for Security Rule operations.
 
     Errors:
         ValidationError: Raised when invalid container parameters are provided.
@@ -26,6 +27,7 @@ class SecurityRule(BaseObject):
     Returns:
         SecurityRuleResponseModel: For create, get, and update methods.
         List[SecurityRuleResponseModel]: For the list method.
+        None: For move and delete methods.
     """
 
     ENDPOINT = "/config/security/v1/security-rules"
