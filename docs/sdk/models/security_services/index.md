@@ -17,4 +17,9 @@ For each configuration object, there are corresponding request and response mode
 ## Models by Configuration Object
 
 - [Anti Spyware Security Profile Models](anti_spyware_profile_models.md)
+- [Decryption Profile Models](decryption_profile_models.md)
+- [DNS Security Profile Models](dns_security_profile_models.md)
+- [Security Rule Models](security_rule_models.md)
+- [Security Rule Move Models](security_rule_move_models.md)
+- [Vulnerability Protection Profile Models](vulnerability_protection_profile_models.md)
 - [Wildfire Antivirus Security Profile Models](wildfire_antivirus_profile_models.md)

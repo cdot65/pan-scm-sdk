@@ -41,7 +41,7 @@ nav:
             - Service: sdk/config/objects/service.md
         - Security Services:
             - Overview: sdk/config/security_services/index.md
-            - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware.md
+            - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware_profile.md
             - Decryption Profile: sdk/config/security_services/decryption_profile.md
             - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
             - Security Rule: sdk/config/security_services/security_rule.md
