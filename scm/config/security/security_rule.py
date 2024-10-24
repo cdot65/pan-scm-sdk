@@ -5,7 +5,7 @@ from scm.config import BaseObject
 from scm.models.security import (
     SecurityRuleRequestModel,
     SecurityRuleResponseModel,
-    RuleBasedMove,
+    SecurityRuleMoveModel,
 )
 from scm.exceptions import ValidationError
 

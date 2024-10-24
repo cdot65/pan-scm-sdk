@@ -12,6 +12,7 @@ from .dns_security_profiles import (
     DNSSecurityProfileRequestModel,
     DNSSecurityProfileResponseModel,
 )
+from .security_rule_move import SecurityRuleMoveModel
 from .security_rules import (
     SecurityRuleRequestModel,
     SecurityRuleResponseModel,
