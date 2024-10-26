@@ -6,6 +6,7 @@ from scm.models.security import (
     SecurityRuleRequestModel,
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
+    Rulebase,
 )
 from scm.exceptions import ValidationError
 
@@ -20,29 +21,140 @@ class SecurityRule(BaseObject):
     def __init__(self, api_client):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> SecurityRuleResponseModel:
+    def create(
+        self,
+        data: Dict[str, Any],
+        rulebase: str = "pre",
+    ) -> SecurityRuleResponseModel:
+        """
+        Create a new security rule.
+
+        Args:
+            data: Dictionary containing the security rule configuration
+            rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+
+        Example:
+            >>> security_rule.create({
+            ...     "name": "Allow_HTTPS_With_Profile",
+            ...     "description": "Allow HTTPS traffic with security profiles",
+            ...     "folder": "Texas",
+            ...     "from": ["lan"],
+            ...     "to": ["wan"],
+            ...     "action": "allow",
+            ...     "profile_setting": {"group": ["best-practice"]},
+            ...     "log_end": True
+            ... }, rulebase="post")
+        """
+        # Validate rulebase using the enum
+        if not isinstance(rulebase, Rulebase):
+            try:
+                rulebase = Rulebase(rulebase.lower())
+            except ValueError:
+                raise ValueError("rulebase must be either 'pre' or 'post'")
+
+        # Validate the request data
         profile = SecurityRuleRequestModel(**data)
-        payload = profile.model_dump(exclude_none=True, by_alias=True)
-        response = self.api_client.post(self.ENDPOINT, json=payload)
+        payload = profile.model_dump(
+            exclude_none=True,
+            by_alias=True,
+        )
+
+        # Make API call with rulebase as position query parameter
+        response = self.api_client.post(
+            self.ENDPOINT,
+            params={"position": rulebase.value},
+            json=payload,
+        )
         return SecurityRuleResponseModel(**response)
 
-    def get(self, object_id: str) -> SecurityRuleResponseModel:
+    def get(
+        self,
+        object_id: str,
+        rulebase: str = "pre",
+    ) -> SecurityRuleResponseModel:
+        """
+        Get a security rule by ID.
+
+        Args:
+            object_id: The UUID of the security rule
+            rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+        """
+        if not isinstance(rulebase, Rulebase):
+            try:
+                rulebase = Rulebase(rulebase.lower())
+            except ValueError:
+                raise ValueError("rulebase must be either 'pre' or 'post'")
+
         endpoint = f"{self.ENDPOINT}/{object_id}"
-        response = self.api_client.get(endpoint)
+        response = self.api_client.get(
+            endpoint,
+            params={"position": rulebase.value},
+        )
         return SecurityRuleResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> SecurityRuleResponseModel:
+    def update(
+        self,
+        object_id: str,
+        data: Dict[str, Any],
+        rulebase: str = "pre",
+    ) -> SecurityRuleResponseModel:
+        """
+        Update an existing security rule.
+
+        Args:
+            object_id: The UUID of the security rule to update
+            data: Dictionary containing the updated configuration
+            rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+        """
+        if not isinstance(rulebase, Rulebase):
+            try:
+                rulebase = Rulebase(rulebase.lower())
+            except ValueError:
+                raise ValueError("rulebase must be either 'pre' or 'post'")
+
         profile = SecurityRuleRequestModel(**data)
-        payload = profile.model_dump(exclude_unset=True, by_alias=True)
+        payload = profile.model_dump(
+            exclude_unset=True,
+            by_alias=True,
+        )
+
         endpoint = f"{self.ENDPOINT}/{object_id}"
-        response = self.api_client.put(endpoint, json=payload)
+        response = self.api_client.put(
+            endpoint,
+            params={"position": rulebase.value},
+            json=payload,
+        )
         return SecurityRuleResponseModel(**response)
 
-    def delete(self, object_id: str) -> None:
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        self.api_client.delete(endpoint)
+    def delete(
+        self,
+        object_id: str,
+        rulebase: str = "pre",
+    ) -> None:
+        """
+        Delete a security rule.
 
-    def move(self, rule_id: str, data: Dict[str, Any]) -> None:
+        Args:
+            object_id: The UUID of the security rule to delete
+            rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+        """
+        if not isinstance(rulebase, Rulebase):
+            try:
+                rulebase = Rulebase(rulebase.lower())
+            except ValueError:
+                raise ValueError("rulebase must be either 'pre' or 'post'")
+
+        endpoint = f"{self.ENDPOINT}/{object_id}"
+        self.api_client.delete(
+            endpoint,
+            params={"position": rulebase.value},
+        )
+
+    def move(
+        self,
+        rule_id: str,
+        data: Dict[str, Any],
+    ) -> None:
         """
         Move a security rule to a new position within the rulebase.
 
@@ -61,14 +173,20 @@ class SecurityRule(BaseObject):
             ... })
         """
         # Create move configuration with the provided rule_id and data
-        move_config = SecurityRuleMoveModel(source_rule=rule_id, **data)
+        move_config = SecurityRuleMoveModel(
+            source_rule=rule_id,
+            **data,
+        )
 
         # Convert to dict for API request, excluding None values
         payload = move_config.model_dump(exclude_none=True)
 
         # Make the API call
         endpoint = f"{self.ENDPOINT}/{rule_id}:move"
-        self.api_client.post(endpoint, json=payload)
+        self.api_client.post(
+            endpoint,
+            json=payload,
+        )
 
     def list(
         self,
@@ -78,9 +196,29 @@ class SecurityRule(BaseObject):
         offset: Optional[int] = None,
         limit: Optional[int] = None,
         name: Optional[str] = None,
+        rulebase: str = "pre",
         **filters,
     ) -> List[SecurityRuleResponseModel]:
-        params = {}
+        """
+        List security rules with the given filters.
+
+        Args:
+            folder: Folder in which the resource is defined
+            snippet: Snippet in which the resource is defined
+            device: Device in which the resource is defined
+            offset: The offset into the list of results returned
+            limit: The maximum number of results per page
+            name: The name of the configuration resource
+            rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+            **filters: Additional filters to apply
+        """
+        if not isinstance(rulebase, Rulebase):
+            try:
+                rulebase = Rulebase(rulebase.lower())
+            except ValueError:
+                raise ValueError("rulebase must be either 'pre' or 'post'")
+
+        params = {"position": rulebase.value}
         error_messages = []
 
         # Validate offset and limit
@@ -95,7 +233,11 @@ class SecurityRule(BaseObject):
             raise ValueError(". ".join(error_messages))
 
         # Include container type parameter
-        container_params = {"folder": folder, "snippet": snippet, "device": device}
+        container_params = {
+            "folder": folder,
+            "snippet": snippet,
+            "device": device,
+        }
         provided_containers = {
             k: v for k, v in container_params.items() if v is not None
         }
@@ -128,7 +270,10 @@ class SecurityRule(BaseObject):
             }
         )
 
-        response = self.api_client.get(self.ENDPOINT, params=params)
+        response = self.api_client.get(
+            self.ENDPOINT,
+            params=params,
+        )
         profiles = [
             SecurityRuleResponseModel(**item) for item in response.get("data", [])
         ]

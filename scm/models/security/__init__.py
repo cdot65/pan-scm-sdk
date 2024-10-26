@@ -16,6 +16,7 @@ from .security_rules import (
     SecurityRuleRequestModel,
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
+    Rulebase,
 )
 from .vulnerability_protection_profiles import (
     VulnerabilityProtectionProfileRequestModel,
