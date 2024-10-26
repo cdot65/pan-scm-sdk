@@ -1,4 +1,5 @@
 # tests/factories.py
+import uuid
 
 import factory
 
@@ -9,7 +10,14 @@ from scm.models.objects import (
 )
 from scm.models.objects.address import AddressRequestModel
 from scm.models.objects.address_group import AddressGroupRequestModel, DynamicFilter
-from scm.models.security.security_rules import SecurityRuleRequestModel, ProfileSetting
+from scm.models.security.security_rules import (
+    SecurityRuleRequestModel,
+    ProfileSetting,
+    Rulebase,
+    SecurityRuleMoveModel,
+    RuleMoveDestination,
+    SecurityRuleResponseModel,
+)
 
 
 class AddressFactory(factory.Factory):
@@ -103,17 +111,14 @@ class ServiceFactory(factory.Factory):
     protocol = {"tcp": {"port": "80,443"}}
 
 
-class SecurityRuleFactory(factory.Factory):
-    class Meta:
-        model = SecurityRuleRequestModel
+class BaseSecurityRuleFactory(factory.Factory):
+    """Base factory for common security rule fields."""
 
-    name = factory.Faker("word")
+    name = factory.Sequence(lambda n: f"security_rule_{n}")
     description = factory.Faker("sentence")
     action = "allow"
-    folder = "Shared"  # One of folder, snippet, or device must be provided
 
-    # Optional fields with defaults
-    disabled = False
+    # Lists with default values
     source = ["any"]
     destination = ["any"]
     application = ["any"]
@@ -122,17 +127,109 @@ class SecurityRuleFactory(factory.Factory):
     source_hip = ["any"]
     destination_hip = ["any"]
     category = ["any"]
+    tag = factory.List([factory.Faker("word") for _ in range(2)])
+
+    # Boolean fields
+    disabled = False
     log_start = False
     log_end = True
-    log_setting = "Cortex Data Lake"
-    # Add other fields as needed
 
-    # If you want to include a profile_setting
+    # Other fields
+    log_setting = "Cortex Data Lake"
     profile_setting = factory.SubFactory("tests.factories.ProfileSettingFactory")
 
 
+class SecurityRuleRequestFactory(BaseSecurityRuleFactory):
+    """Factory for creating SecurityRuleRequestModel instances."""
+
+    class Meta:
+        model = SecurityRuleRequestModel
+
+    folder = "Shared"  # Default container type
+
+    @classmethod
+    def with_snippet(cls, **kwargs) -> SecurityRuleRequestModel:
+        """Create a security rule with snippet container."""
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs) -> SecurityRuleRequestModel:
+        """Create a security rule with device container."""
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def create_batch_with_names(
+        cls, names: list[str], **kwargs
+    ) -> list[SecurityRuleRequestModel]:
+        """Create multiple security rules with specified names."""
+        return [cls(name=name, **kwargs) for name in names]
+
+
+class SecurityRuleResponseFactory(BaseSecurityRuleFactory):
+    """Factory for creating SecurityRuleResponseModel instances."""
+
+    class Meta:
+        model = SecurityRuleResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    folder = factory.SelfAttribute("..folder")  # Inherits from request if provided
+
+    @classmethod
+    def from_request(
+        cls,
+        request_model: SecurityRuleRequestModel,
+        **kwargs,
+    ) -> SecurityRuleResponseModel:
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data.update(kwargs)
+        return cls(**data)
+
+
+class SecurityRuleMoveFactory(factory.Factory):
+    """Factory for creating SecurityRuleMoveModel instances."""
+
+    class Meta:
+        model = SecurityRuleMoveModel
+
+    source_rule = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    destination = RuleMoveDestination.TOP
+    rulebase = Rulebase.PRE
+    destination_rule = None
+
+    @classmethod
+    def before_rule(cls, **kwargs) -> SecurityRuleMoveModel:
+        """Create a move configuration for placing before another rule."""
+        return cls(
+            destination=RuleMoveDestination.BEFORE,
+            destination_rule=str(uuid.uuid4()),
+            **kwargs,
+        )
+
+    @classmethod
+    def after_rule(cls, **kwargs) -> SecurityRuleMoveModel:
+        """Create a move configuration for placing after another rule."""
+        return cls(
+            destination=RuleMoveDestination.AFTER,
+            destination_rule=str(uuid.uuid4()),
+            **kwargs,
+        )
+
+    @classmethod
+    def to_post_rulebase(cls, **kwargs) -> SecurityRuleMoveModel:
+        """Create a move configuration for the post rulebase."""
+        return cls(rulebase=Rulebase.POST, **kwargs)
+
+
 class ProfileSettingFactory(factory.Factory):
+    """Factory for creating ProfileSetting instances."""
+
     class Meta:
         model = ProfileSetting
 
     group = ["best-practice"]
+
+    @classmethod
+    def with_groups(cls, groups: list[str]) -> ProfileSetting:
+        """Create a profile setting with specific groups."""
+        return cls(group=groups)
