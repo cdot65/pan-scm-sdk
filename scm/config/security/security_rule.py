@@ -13,21 +13,6 @@ from scm.exceptions import ValidationError
 class SecurityRule(BaseObject):
     """
     Manages Security Rules in Palo Alto Networks' Strata Cloud Manager.
-
-    This class provides methods to create, retrieve, update, delete, and list Security Rules
-    using the Strata Cloud Manager API. It supports operations within folders, snippets,
-    or devices, and allows filtering of profiles based on various criteria.
-
-    Attributes:
-        ENDPOINT (str): The API endpoint for Security Rule operations.
-
-    Errors:
-        ValidationError: Raised when invalid container parameters are provided.
-
-    Returns:
-        SecurityRuleResponseModel: For create, get, and update methods.
-        List[SecurityRuleResponseModel]: For the list method.
-        None: For move and delete methods.
     """
 
     ENDPOINT = "/config/security/v1/security-rules"
@@ -57,6 +42,34 @@ class SecurityRule(BaseObject):
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
 
+    def move(self, rule_id: str, data: Dict[str, Any]) -> None:
+        """
+        Move a security rule to a new position within the rulebase.
+
+        Args:
+            rule_id (str): The UUID of the rule to move
+            data (Dict[str, Any]): Dictionary containing move parameters:
+                - destination: Where to move the rule ('top', 'bottom', 'before', 'after')
+                - rulebase: Which rulebase to use ('pre', 'post')
+                - destination_rule: UUID of reference rule (required for 'before'/'after')
+
+        Example:
+            >>> security_rule.move("123e4567-e89b-12d3-a456-426655440000", {
+            ...     "destination": "before",
+            ...     "rulebase": "pre",
+            ...     "destination_rule": "987fcdeb-51d3-a456-426655440000"
+            ... })
+        """
+        # Create move configuration with the provided rule_id and data
+        move_config = SecurityRuleMoveModel(source_rule=rule_id, **data)
+
+        # Convert to dict for API request, excluding None values
+        payload = move_config.model_dump(exclude_none=True)
+
+        # Make the API call
+        endpoint = f"{self.ENDPOINT}/{rule_id}:move"
+        self.api_client.post(endpoint, json=payload)
+
     def list(
         self,
         folder: Optional[str] = None,
@@ -78,7 +91,6 @@ class SecurityRule(BaseObject):
             if not isinstance(limit, int) or limit <= 0:
                 error_messages.append("Limit must be a positive integer")
 
-        # If there are any validation errors, raise ValueError with all error messages
         if error_messages:
             raise ValueError(". ".join(error_messages))
 

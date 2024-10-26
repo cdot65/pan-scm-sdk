@@ -1,5 +1,6 @@
 # tests/test_security_rules.py
-from unittest.mock import MagicMock
+import uuid
+from unittest.mock import MagicMock, patch, Mock
 
 import pytest
 from pydantic import ValidationError as PydanticValidationError
@@ -9,6 +10,9 @@ from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     ProfileSetting,
     string_validator,
+    RuleMoveDestination,
+    Rulebase,
+    SecurityRuleMoveModel,
 )
 from scm.config.security import SecurityRule
 from tests.factories import SecurityRuleFactory
@@ -934,3 +938,226 @@ def test_ensure_unique_items():
     with pytest.raises(ValueError) as exc_info:
         SecurityRuleRequestModel(**data)
     assert "List items must be unique" in str(exc_info.value)
+
+
+class TestSecurityRuleMoveModel:
+    """Test suite for SecurityRuleMoveModel validation."""
+
+    def test_validate_uuid_fields_none_value(self):
+        """Test that None values are allowed and returned as-is."""
+        model = SecurityRuleMoveModel(
+            source_rule="123e4567-e89b-12d3-a456-426655440000",
+            destination=RuleMoveDestination.TOP,
+            rulebase=Rulebase.PRE,
+            destination_rule=None,
+        )
+        assert model.destination_rule is None
+
+    def test_validate_uuid_fields_valid_uuid(self):
+        """Test that valid UUIDs are accepted."""
+        valid_uuid = str(uuid.uuid4())
+        model = SecurityRuleMoveModel(
+            source_rule=valid_uuid,
+            destination=RuleMoveDestination.TOP,
+            rulebase=Rulebase.PRE,
+        )
+        assert model.source_rule == valid_uuid
+
+    def test_validate_uuid_fields_invalid_uuid(self):
+        """Test that invalid UUIDs raise ValueError."""
+        with pytest.raises(ValueError, match="Field must be a valid UUID"):
+            SecurityRuleMoveModel(
+                source_rule="not-a-uuid",
+                destination=RuleMoveDestination.TOP,
+                rulebase=Rulebase.PRE,
+            )
+
+    def test_validate_uuid_fields_both_fields(self):
+        """Test UUID validation on both source_rule and destination_rule fields."""
+        valid_uuid1 = str(uuid.uuid4())
+        valid_uuid2 = str(uuid.uuid4())
+        model = SecurityRuleMoveModel(
+            source_rule=valid_uuid1,
+            destination=RuleMoveDestination.BEFORE,
+            rulebase=Rulebase.PRE,
+            destination_rule=valid_uuid2,
+        )
+        assert model.source_rule == valid_uuid1
+        assert model.destination_rule == valid_uuid2
+
+    def test_validate_move_configuration_before_with_destination_rule(self):
+        """Test valid move configuration with BEFORE and destination_rule."""
+        model = SecurityRuleMoveModel(
+            source_rule=str(uuid.uuid4()),
+            destination=RuleMoveDestination.BEFORE,
+            rulebase=Rulebase.PRE,
+            destination_rule=str(uuid.uuid4()),
+        )
+        assert model is not None  # Validates successful return of self
+
+    def test_validate_move_configuration_after_with_destination_rule(self):
+        """Test valid move configuration with AFTER and destination_rule."""
+        model = SecurityRuleMoveModel(
+            source_rule=str(uuid.uuid4()),
+            destination=RuleMoveDestination.AFTER,
+            rulebase=Rulebase.PRE,
+            destination_rule=str(uuid.uuid4()),
+        )
+        assert model is not None  # Validates successful return of self
+
+    def test_validate_move_configuration_before_without_destination_rule(self):
+        """Test that BEFORE without destination_rule raises ValueError."""
+        with pytest.raises(
+            ValueError,
+            match="destination_rule is required when destination is 'before'",
+        ):
+            SecurityRuleMoveModel(
+                source_rule=str(uuid.uuid4()),
+                destination=RuleMoveDestination.BEFORE,
+                rulebase=Rulebase.PRE,
+            )
+
+    def test_validate_move_configuration_after_without_destination_rule(self):
+        """Test that AFTER without destination_rule raises ValueError."""
+        with pytest.raises(
+            ValueError, match="destination_rule is required when destination is 'after'"
+        ):
+            SecurityRuleMoveModel(
+                source_rule=str(uuid.uuid4()),
+                destination=RuleMoveDestination.AFTER,
+                rulebase=Rulebase.PRE,
+            )
+
+    def test_validate_move_configuration_top_with_destination_rule(self):
+        """Test that TOP with destination_rule raises ValueError."""
+        with pytest.raises(
+            ValueError,
+            match="destination_rule should not be provided when destination is 'top'",
+        ):
+            SecurityRuleMoveModel(
+                source_rule=str(uuid.uuid4()),
+                destination=RuleMoveDestination.TOP,
+                rulebase=Rulebase.PRE,
+                destination_rule=str(uuid.uuid4()),
+            )
+
+    def test_validate_move_configuration_bottom_with_destination_rule(self):
+        """Test that BOTTOM with destination_rule raises ValueError."""
+        with pytest.raises(
+            ValueError,
+            match="destination_rule should not be provided when destination is 'bottom'",
+        ):
+            SecurityRuleMoveModel(
+                source_rule=str(uuid.uuid4()),
+                destination=RuleMoveDestination.BOTTOM,
+                rulebase=Rulebase.PRE,
+                destination_rule=str(uuid.uuid4()),
+            )
+
+    def test_validate_move_configuration_successful_return(self):
+        """Test that validation returns self for valid configurations."""
+        model_data = {
+            "source_rule": str(uuid.uuid4()),
+            "destination": RuleMoveDestination.TOP,
+            "rulebase": Rulebase.PRE,
+        }
+        model = SecurityRuleMoveModel(**model_data)
+        validated_model = model.validate_move_configuration()
+        assert validated_model == model
+
+
+class TestSecurityRule:
+    """Test suite for SecurityRule SDK."""
+
+    @pytest.fixture
+    def api_client(self):
+        """Create a mock API client."""
+        return Mock()
+
+    @pytest.fixture
+    def security_rule(self, api_client):
+        """Create a SecurityRule instance with mock API client."""
+        return SecurityRule(api_client)
+
+    def test_move_model_instantiation(self, security_rule):
+        """Test that move() correctly instantiates SecurityRuleMoveModel."""
+        rule_id = str(uuid.uuid4())
+        move_data = {
+            "destination": "before",
+            "rulebase": "pre",
+            "destination_rule": str(uuid.uuid4()),
+        }
+
+        security_rule.move(rule_id, move_data)
+
+        # Verify the model was created with correct data
+        expected_model_data = {
+            "source_rule": rule_id,
+            **move_data,
+        }
+        actual_model = SecurityRuleMoveModel(**expected_model_data)
+        assert actual_model.source_rule == rule_id
+        assert actual_model.destination == RuleMoveDestination.BEFORE
+        assert actual_model.rulebase == Rulebase.PRE
+        assert actual_model.destination_rule == move_data["destination_rule"]
+
+    def test_move_payload_generation(self, security_rule):
+        """Test that move() generates correct payload from model."""
+        rule_id = str(uuid.uuid4())
+        dest_rule_id = str(uuid.uuid4())
+        move_data = {
+            "destination": "before",
+            "rulebase": "pre",
+            "destination_rule": dest_rule_id,
+        }
+
+        # Patch post method to capture payload
+        with patch.object(security_rule.api_client, "post") as mock_post:
+            security_rule.move(rule_id, move_data)
+
+            # Verify payload structure
+            expected_payload = {
+                "source_rule": rule_id,
+                "destination": "before",
+                "rulebase": "pre",
+                "destination_rule": dest_rule_id,
+            }
+            mock_post.assert_called_once()
+            actual_payload = mock_post.call_args[1]["json"]
+            assert actual_payload == expected_payload
+
+    def test_move_endpoint_construction(self, security_rule):
+        """Test that move() constructs correct endpoint URL."""
+        rule_id = str(uuid.uuid4())
+        move_data = {
+            "destination": "top",
+            "rulebase": "pre",
+        }
+
+        # Patch post method to capture endpoint
+        with patch.object(security_rule.api_client, "post") as mock_post:
+            security_rule.move(rule_id, move_data)
+
+            # Verify endpoint construction
+            expected_endpoint = f"{security_rule.ENDPOINT}/{rule_id}:move"
+            mock_post.assert_called_once()
+            actual_endpoint = mock_post.call_args[0][0]
+            assert actual_endpoint == expected_endpoint
+
+    def test_move_api_call(self, security_rule):
+        """Test that move() makes correct API call."""
+        rule_id = str(uuid.uuid4())
+        move_data = {
+            "destination": "top",
+            "rulebase": "pre",
+        }
+
+        # Test API call
+        with patch.object(security_rule.api_client, "post") as mock_post:
+            security_rule.move(rule_id, move_data)
+
+            # Verify API call was made with correct arguments
+            mock_post.assert_called_once()
+            assert mock_post.call_args[1]["json"]["source_rule"] == rule_id
+            assert mock_post.call_args[1]["json"]["destination"] == "top"
+            assert mock_post.call_args[1]["json"]["rulebase"] == "pre"

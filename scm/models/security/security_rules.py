@@ -23,30 +23,40 @@ def string_validator(v):
 StringList = conlist(item_type=string_validator, min_length=1)
 
 
-# Enums
+# Moved Enums from security_rule_move.py
+class RuleMoveDestination(str, Enum):
+    """
+    Enum representing valid destination values for rule movement.
+
+    Attributes:
+        TOP: Move rule to the top of the rulebase
+        BOTTOM: Move rule to the bottom of the rulebase
+        BEFORE: Move rule before a specified rule
+        AFTER: Move rule after a specified rule
+    """
+
+    TOP = "top"
+    BOTTOM = "bottom"
+    BEFORE = "before"
+    AFTER = "after"
+
+
+class Rulebase(str, Enum):
+    """
+    Enum representing valid rulebase values.
+
+    Attributes:
+        PRE: Pre-rulebase
+        POST: Post-rulebase
+    """
+
+    PRE = "pre"
+    POST = "post"
+
+
 class Action(str, Enum):
     """
     Enum representing various network actions.
-
-    class Action:
-
-        allow:
-            Represents an action that allows the network traffic.
-
-        deny:
-            Represents an action that denies the network traffic.
-
-        drop:
-            Represents an action that drops the network traffic without responding to the sender.
-
-        reset_client:
-            Represents an action that resets the client-side connection.
-
-        reset_server:
-            Represents an action that resets the server-side connection.
-
-        reset_both:
-            Represents an action that resets both client and server-side connections.
     """
 
     allow = "allow"
@@ -57,15 +67,9 @@ class Action(str, Enum):
     reset_both = "reset-both"
 
 
-# Model for profile_setting
 class ProfileSetting(BaseModel):
     """
-    class ProfileSetting(BaseModel):
-
-        group: Optional[List[str]] = Field(
-            default_factory=lambda: ["best-practice"],
-            description="The security profile group",
-        )
+    Model for security profile settings.
     """
 
     group: Optional[List[str]] = Field(
@@ -80,23 +84,21 @@ class ProfileSetting(BaseModel):
         return v
 
 
-# Base model for Security Rule
 class SecurityRuleBaseModel(BaseModel):
+    """
+    Base model for Security Rules containing fields common to both requests and responses.
+    """
+
     name: constr(pattern=r"^[a-zA-Z0-9_ \.-]+$") = Field(
         ...,
         description="The name of the security rule",
     )
-    disabled: bool = Field(
-        False,
-        description="Is the security rule disabled?",
-    )
+    disabled: bool = Field(False, description="Is the security rule disabled?")
     description: Optional[str] = Field(
-        None,
-        description="The description of the security rule",
+        None, description="The description of the security rule"
     )
     tag: List[str] = Field(
-        default_factory=list,
-        description="The tags associated with the security rule",
+        default_factory=list, description="The tags associated with the security rule"
     )
     from_: List[str] = Field(
         default_factory=lambda: ["any"],
@@ -107,16 +109,10 @@ class SecurityRuleBaseModel(BaseModel):
         default_factory=lambda: ["any"],
         description="The source addresses(es)",
     )
-    negate_source: bool = Field(
-        False,
-        description="Negate the source address(es)?",
-    )
+    negate_source: bool = Field(False, description="Negate the source address(es)?")
     source_user: List[str] = Field(
         default_factory=lambda: ["any"],
-        description=(
-            "List of source users and/or groups. Reserved words include `any`, "
-            "`pre-login`, `known-user`, and `unknown`."
-        ),
+        description="List of source users and/or groups",
     )
     source_hip: List[str] = Field(
         default_factory=lambda: ["any"],
@@ -132,8 +128,7 @@ class SecurityRuleBaseModel(BaseModel):
         description="The destination address(es)",
     )
     negate_destination: bool = Field(
-        False,
-        description="Negate the destination address(es)?",
+        False, description="Negate the destination addresses(es)?"
     )
     destination_hip: List[str] = Field(
         default_factory=lambda: ["any"],
@@ -155,28 +150,17 @@ class SecurityRuleBaseModel(BaseModel):
         default="allow",
         description="The action to be taken when the rule is matched",
     )
-    profile_setting: Optional[ProfileSetting] = Field(
-        None,
-        description="The security profile object",
-    )
-    log_setting: Optional[str] = Field(
-        None,
-        description="The external log forwarding profile",
-    )
-    schedule: Optional[str] = Field(
-        None,
-        description="Schedule in which this rule will be applied",
-    )
-    log_start: Optional[bool] = Field(
-        None,
-        description="Log at session start?",
-    )
-    log_end: Optional[bool] = Field(
-        None,
-        description="Log at session end?",
-    )
+    profile_setting: Optional[ProfileSetting] = None
+    log_setting: Optional[str] = None
+    schedule: Optional[str] = None
+    log_start: Optional[bool] = None
+    log_end: Optional[bool] = None
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
 
     @field_validator(
         "from_",
@@ -241,6 +225,7 @@ class SecurityRuleRequestModel(SecurityRuleBaseModel):
         Validates that exactly one of the optional fields (folder, snippet, or device) is provided. Raises a ValueError if this condition is not met.
     """
 
+    # Container fields
     folder: Optional[str] = Field(
         None,
         description="Folder in which the resource is defined",
@@ -259,11 +244,14 @@ class SecurityRuleRequestModel(SecurityRuleBaseModel):
         max_length=64,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
-
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+    rulebase: Optional[Rulebase] = Field(
+        None,
+        description="Which rulebase to use (pre or post)",
+    )
 
     @model_validator(mode="after")
     def validate_container(self) -> "SecurityRuleRequestModel":
+        """Validates that exactly one container field is provided."""
         container_fields = ["folder", "snippet", "device"]
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None
@@ -348,3 +336,79 @@ class SecurityRulesResponse(BaseModel):
     offset: int
     total: int
     limit: int
+
+
+class SecurityRuleMoveModel(BaseModel):
+    """
+    Model for security rule move operations.
+
+    This model defines and validates the fields required for moving a security rule
+    within a rulebase. It handles the move operation independently from other security
+    rule operations.
+
+    Attributes:
+        source_rule (str): UUID of the security rule to be moved
+        destination (RuleMoveDestination): Where to move the rule (top, bottom, before, after)
+        rulebase (Rulebase): Which rulebase to use (pre or post)
+        destination_rule (Optional[str]): UUID of the reference rule, required for
+            'before' and 'after' operations
+
+    Example:
+        >>> move_config = SecurityRuleMoveModel(
+        ...     source_rule="123e4567-e89b-12d3-a456-426655440000",
+        ...     destination=RuleMoveDestination.BEFORE,
+        ...     rulebase=Rulebase.PRE,
+        ...     destination_rule="987fcdeb-51d3-a456-426655440000"
+        ... )
+    """
+
+    source_rule: str = Field(
+        ...,
+        description="UUID of the security rule to be moved",
+    )
+    destination: RuleMoveDestination = Field(
+        ...,
+        description="Where to move the rule (top, bottom, before, after)",
+    )
+    rulebase: Rulebase = Field(
+        ...,
+        description="Which rulebase to use (pre or post)",
+    )
+    destination_rule: Optional[str] = Field(
+        None,
+        description="UUID of the reference rule for before/after moves",
+    )
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
+    @field_validator("source_rule", "destination_rule")
+    def validate_uuid_fields(cls, v: Optional[str]) -> Optional[str]:
+        """Validate UUID format for rule identifiers."""
+        if v is not None:
+            try:
+                uuid.UUID(v)
+            except ValueError:
+                raise ValueError("Field must be a valid UUID")
+        return v
+
+    @model_validator(mode="after")
+    def validate_move_configuration(self) -> "SecurityRuleMoveModel":
+        """
+        Validates the combination of move operation fields.
+
+        Ensures that destination_rule is provided when required (for before/after moves)
+        and not provided when it shouldn't be (for top/bottom moves).
+        """
+        if self.destination in (RuleMoveDestination.BEFORE, RuleMoveDestination.AFTER):
+            if not self.destination_rule:
+                raise ValueError(
+                    f"destination_rule is required when destination is '{self.destination.value}'"
+                )
+        elif self.destination_rule is not None:
+            raise ValueError(
+                f"destination_rule should not be provided when destination is '{self.destination.value}'"
+            )
+        return self
