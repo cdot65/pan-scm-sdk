@@ -15,6 +15,8 @@ from .dns_security_profiles import (
 from .security_rules import (
     SecurityRuleRequestModel,
     SecurityRuleResponseModel,
+    SecurityRuleMoveModel,
+    Rulebase,
 )
 from .vulnerability_protection_profiles import (
     VulnerabilityProtectionProfileRequestModel,

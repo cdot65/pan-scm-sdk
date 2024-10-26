@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.1.17
+
+**Release Date:** October 26, 2024
+
+### Added `move` method for Security Policy
+
+- **New `move` method**: Add ability to move security rules within the rule base.
+
+---
+
 ## Version 0.1.16
 
 **Release Date:** October 23, 2024
