@@ -16,14 +16,6 @@ Manage Security Rules, which define the core security policies for your network 
 - Security profiles to be applied
 - Logging and monitoring settings
 
-### [Rule Based Move](security_rule_move.md)
-
-Manage the positioning of Security Rules within rulebases. Supports:
-
-- Moving rules to top/bottom positions
-- Positioning rules before/after specific rules
-- Operations in both pre and post rulebases
-
 ---
 
 ## Security Profiles
