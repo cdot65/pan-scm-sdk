@@ -9,16 +9,12 @@ from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
     RuleRequest,
-    RuleResponse,
     ThreatExceptionRequest,
-    ThreatExceptionResponse,
     Severity,
     Category,
-    PacketCapture,
     ActionRequest,
     ActionResponse,
 )
-from typing import List
 
 
 def test_list_anti_spyware_profiles(load_env, mock_scm):
@@ -563,7 +559,7 @@ def test_anti_spyware_profile_list_with_invalid_pagination(load_env, mock_scm):
 
 def test_action_request_check_and_transform_action():
     # Test string input
-    action = ActionRequest("alert")
+    action = ActionRequest("alert")  # noqa
     assert action.root == {"alert": {}}
 
     # Test dict input
@@ -574,7 +570,7 @@ def test_action_request_check_and_transform_action():
     with pytest.raises(
         ValueError, match="Invalid action format; must be a string or dict."
     ):
-        ActionRequest(123)
+        ActionRequest(123)  # noqa
 
     # Test multiple actions
     with pytest.raises(
@@ -590,7 +586,7 @@ def test_action_request_check_and_transform_action():
 
 
 def test_action_request_get_action_name():
-    action = ActionRequest("alert")
+    action = ActionRequest("alert")  # noqa
     assert action.get_action_name() == "alert"
 
     action = ActionRequest({"drop": {}})
@@ -599,7 +595,7 @@ def test_action_request_get_action_name():
 
 def test_action_response_check_action():
     # Test string input
-    action = ActionResponse("alert")
+    action = ActionResponse("alert")  # noqa
     assert action.root == {"alert": {}}
 
     # Test dict input
@@ -610,7 +606,7 @@ def test_action_response_check_action():
     with pytest.raises(
         ValueError, match="Invalid action format; must be a string or dict."
     ):
-        ActionResponse(123)
+        ActionResponse(123)  # noqa
 
     # Test multiple actions
     with pytest.raises(
@@ -624,7 +620,7 @@ def test_action_response_check_action():
 
 
 def test_action_response_get_action_name():
-    action = ActionResponse("alert")
+    action = ActionResponse("alert")  # noqa
     assert action.get_action_name() == "alert"
 
     action = ActionResponse({"drop": {}})

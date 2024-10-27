@@ -9,14 +9,9 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAntivirusProfileRequestModel,
     WildfireAntivirusProfileResponseModel,
     RuleRequest,
-    RuleResponse,
-    MlavExceptionEntry,
-    ThreatExceptionEntry,
     Analysis,
     Direction,
 )
-from typing import List
-import uuid
 
 
 def test_list_wildfire_antivirus_profiles(load_env, mock_scm):

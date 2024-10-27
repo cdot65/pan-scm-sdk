@@ -288,7 +288,7 @@ class ListEntryRequestFactory(factory.Factory):
 
     name = factory.Faker("word")
     packet_capture = PacketCaptureEnum.disable
-    action = factory.LazyFunction(lambda: ListActionRequest("sinkhole"))
+    action = factory.LazyFunction(lambda: ListActionRequest("sinkhole"))  # noqa
 
 
 class BotnetDomainsRequestFactory(factory.Factory):

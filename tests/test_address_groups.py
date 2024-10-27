@@ -23,12 +23,12 @@ class TestAddressGroupBase:
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_scm):
         """Setup method that runs before each test."""
-        self.mock_scm = mock_scm
+        self.mock_scm = mock_scm  # noqa
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = AddressGroup(self.mock_scm)
+        self.client = AddressGroup(self.mock_scm)  # noqa
 
 
 class TestAddressGroupAPI(TestAddressGroupBase):
@@ -68,10 +68,10 @@ class TestAddressGroupAPI(TestAddressGroupBase):
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
         address_groups = self.client.list(folder="All")
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={"folder": "All"},
         )
@@ -90,12 +90,12 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         mock_response = test_address_group.model_dump()
         mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.post.return_value = mock_response
+        self.mock_scm.post.return_value = mock_response  # noqa
         created_group = self.client.create(
             test_address_group.model_dump(exclude_unset=True)
         )
 
-        self.mock_scm.post.assert_called_once_with(
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             json=test_address_group.model_dump(exclude_unset=True),
         )
@@ -110,12 +110,12 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         mock_response = test_address_group.model_dump()
         mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.post.return_value = mock_response
+        self.mock_scm.post.return_value = mock_response  # noqa
         created_group = self.client.create(
             test_address_group.model_dump(exclude_unset=True)
         )
 
-        self.mock_scm.post.assert_called_once_with(
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             json=test_address_group.model_dump(exclude_unset=True),
         )
@@ -134,10 +134,10 @@ class TestAddressGroupAPI(TestAddressGroupBase):
             "static": ["Address1", "Address2"],
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
         address_group = self.client.get(group_id)
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/address-groups/{group_id}"
         )
         assert isinstance(address_group, AddressGroupResponseModel)
@@ -159,10 +159,10 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         mock_response = update_data.copy()
         mock_response["id"] = group_id
 
-        self.mock_scm.put.return_value = mock_response
+        self.mock_scm.put.return_value = mock_response  # noqa
         updated_group = self.client.update(group_id, update_data)
 
-        self.mock_scm.put.assert_called_once_with(
+        self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/objects/v1/address-groups/{group_id}",
             json=update_data,
         )
@@ -462,7 +462,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "dynamic": {"filter": "test-filter"},  # Only dynamic provided
         }
         model = AddressGroupResponseModel(**valid_dynamic_data)
-        assert model.dynamic.filter == "test-filter"
+        assert model.dynamic.filter == "test-filter"  # noqa
         assert model.static is None
 
 
@@ -487,7 +487,7 @@ class TestAddressGroupFilters(TestAddressGroupBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filters = {
             "folder": "Shared",
@@ -501,7 +501,7 @@ class TestAddressGroupFilters(TestAddressGroupBase):
             "name": "Group1,Group2",
             "tag": "Tag1,Tag2",
         }
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params=expected_params,
         )
@@ -527,7 +527,7 @@ class TestAddressGroupFilters(TestAddressGroupBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filters = {
             "folder": "Shared",
@@ -539,7 +539,7 @@ class TestAddressGroupFilters(TestAddressGroupBase):
             "folder": "Shared",
             "type": "dynamic,static",
         }
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params=expected_params,
         )
@@ -557,7 +557,7 @@ class TestAddressGroupFilters(TestAddressGroupBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filters = {
             "folder": "Shared",
@@ -569,7 +569,7 @@ class TestAddressGroupFilters(TestAddressGroupBase):
             "folder": "Shared",
             "value": "Address1,Address2",
         }
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params=expected_params,
         )

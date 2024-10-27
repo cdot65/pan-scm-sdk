@@ -26,13 +26,13 @@ class TestDNSSecurityProfileBase:
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_scm):
         """Setup method that runs before each test."""
-        self.mock_scm = mock_scm
+        self.mock_scm = mock_scm  # noqa
         # Create new MagicMock instances for each HTTP method
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = DNSSecurityProfile(self.mock_scm)
+        self.client = DNSSecurityProfile(self.mock_scm)  # noqa
 
 
 class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
@@ -146,10 +146,10 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
         profiles = self.client.list(folder="All")
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"folder": "All"},
         )
@@ -183,13 +183,13 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             profile_request, id="333e4567-e89b-12d3-a456-426655440002"
         )
 
-        self.mock_scm.post.return_value = mock_response.model_dump()
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
 
         # Create a clean request payload without None values
         request_payload = profile_request.model_dump(exclude_none=True)
         created_profile = self.client.create(request_payload)
 
-        self.mock_scm.post.assert_called_once_with(
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             json=request_payload,
         )
@@ -223,10 +223,10 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             },
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
         profile = self.client.get(profile_id)
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/security/v1/dns-security-profiles/{profile_id}"
         )
         assert isinstance(profile, DNSSecurityProfileResponseModel)
@@ -269,10 +269,10 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
         mock_response = update_data.copy()
         mock_response["id"] = profile_id
 
-        self.mock_scm.put.return_value = mock_response
+        self.mock_scm.put.return_value = mock_response  # noqa
         updated_profile = self.client.update(profile_id, update_data)
 
-        self.mock_scm.put.assert_called_once_with(
+        self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/security/v1/dns-security-profiles/{profile_id}",
             json=update_data,
         )
@@ -294,10 +294,10 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
         """Test deleting a DNS security profile."""
         profile_id = "e4af4e61-29aa-4454-86f7-269a6e6c5868"
 
-        self.mock_scm.delete.return_value = None
+        self.mock_scm.delete.return_value = None  # noqa
         self.client.delete(profile_id)
 
-        self.mock_scm.delete.assert_called_once_with(
+        self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/security/v1/dns-security-profiles/{profile_id}"
         )
 
@@ -396,14 +396,14 @@ class TestListActionValidation:
     def test_list_action_request_validation(self):
         """Test validation in ListActionRequest."""
         # Valid action
-        valid_action = ListActionRequest("sinkhole")
+        valid_action = ListActionRequest("sinkhole")  # noqa
         assert valid_action.root == {"sinkhole": {}}
 
         # Invalid action format
         with pytest.raises(
             ValueError, match="Invalid action format; must be a string or dict."
         ):
-            ListActionRequest(123)
+            ListActionRequest(123)  # noqa
 
         # Multiple actions
         with pytest.raises(
@@ -426,7 +426,7 @@ class TestListActionValidation:
     def test_list_action_response_validation(self):
         """Test validation in ListActionResponse."""
         # Valid action
-        valid_action = ListActionResponse("sinkhole")
+        valid_action = ListActionResponse("sinkhole")  # noqa
         assert valid_action.root == {"sinkhole": {}}
 
         # Empty dict (no action specified)
@@ -437,7 +437,7 @@ class TestListActionValidation:
         with pytest.raises(
             ValueError, match="Invalid action format; must be a string or dict."
         ):
-            ListActionResponse(123)
+            ListActionResponse(123)  # noqa
 
         # Multiple actions
         with pytest.raises(
@@ -453,7 +453,7 @@ class TestListActionValidation:
 
     def test_list_action_get_action_name(self):
         """Test get_action_name method in ListActionRequest and ListActionResponse."""
-        action_req = ListActionRequest("sinkhole")
+        action_req = ListActionRequest("sinkhole")  # noqa
         assert action_req.get_action_name() == "sinkhole"
 
         action_res = ListActionResponse({"block": {}})
@@ -514,7 +514,7 @@ class TestModelValidation:
 
         # Test that the validator handles None (though it shouldn't occur due to field requirements)
         invalid_data = valid_data.copy()
-        invalid_data["id"] = None
+        invalid_data["id"] = None  # noqa
         with pytest.raises(ValueError):
             DNSSecurityProfileResponseModel(**invalid_data)
 
@@ -540,14 +540,14 @@ class TestDNSSecurityProfilePagination(TestDNSSecurityProfileBase):
             "limit": 1,
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
         profiles = self.client.list(
             folder="All",
             offset=1,
             limit=1,
         )
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
                 "folder": "All",
@@ -576,10 +576,10 @@ class TestDNSSecurityProfilePagination(TestDNSSecurityProfileBase):
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
         profiles = self.client.list(folder="All", name="SpecificProfile")
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"folder": "All", "name": "SpecificProfile"},
         )

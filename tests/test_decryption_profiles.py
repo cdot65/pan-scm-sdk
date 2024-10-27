@@ -15,7 +15,6 @@ from scm.models.security.decryption_profiles import (
     SSLVersion,
     DecryptionProfilesResponse,
 )
-import uuid
 
 
 def test_list_decryption_profiles(load_env, mock_scm):
