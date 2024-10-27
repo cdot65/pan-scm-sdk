@@ -10,6 +10,23 @@ from scm.models.objects import (
 )
 from scm.models.objects.address import AddressRequestModel
 from scm.models.objects.address_group import AddressGroupRequestModel, DynamicFilter
+from scm.models.security import (
+    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileResponseModel,
+)
+from scm.models.security.dns_security_profiles import (
+    BotnetDomainsRequest,
+    ListActionRequest,
+    PacketCaptureEnum,
+    ListEntryRequest,
+    WhitelistEntry,
+    IPv6AddressEnum,
+    IPv4AddressEnum,
+    SinkholeSettings,
+    LogLevelEnum,
+    ActionEnum,
+    DNSSecurityCategoryEntry,
+)
 from scm.models.security.security_rules import (
     SecurityRuleRequestModel,
     ProfileSetting,
@@ -233,3 +250,82 @@ class ProfileSettingFactory(factory.Factory):
     def with_groups(cls, groups: list[str]) -> ProfileSetting:
         """Create a profile setting with specific groups."""
         return cls(group=groups)
+
+
+class DNSSecurityCategoryEntryFactory(factory.Factory):
+    class Meta:
+        model = DNSSecurityCategoryEntry
+
+    name = "pan-dns-sec-malware"
+    action = ActionEnum.default
+    log_level = LogLevelEnum.default
+    packet_capture = PacketCaptureEnum.disable
+
+
+class SinkholeSettingsFactory(factory.Factory):
+    class Meta:
+        model = SinkholeSettings
+
+    ipv4_address = IPv4AddressEnum.default_ip
+    ipv6_address = IPv6AddressEnum.localhost
+
+
+class WhitelistEntryFactory(factory.Factory):
+    class Meta:
+        model = WhitelistEntry
+
+    name = factory.Faker("domain_name")
+    description = factory.Faker("sentence")
+
+
+class ListEntryRequestFactory(factory.Factory):
+    class Meta:
+        model = ListEntryRequest
+
+    name = factory.Faker("word")
+    packet_capture = PacketCaptureEnum.disable
+    action = factory.LazyFunction(lambda: ListActionRequest("sinkhole"))
+
+
+class BotnetDomainsRequestFactory(factory.Factory):
+    class Meta:
+        model = BotnetDomainsRequest
+
+    dns_security_categories = factory.List(
+        [factory.SubFactory(DNSSecurityCategoryEntryFactory)]
+    )
+    sinkhole = factory.SubFactory(SinkholeSettingsFactory)
+    lists = factory.List([factory.SubFactory(ListEntryRequestFactory)])
+    whitelist = factory.List([factory.SubFactory(WhitelistEntryFactory)])
+
+
+class DNSSecurityProfileRequestFactory(factory.Factory):
+    class Meta:
+        model = DNSSecurityProfileRequestModel
+
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    folder = "All"
+    description = factory.Faker("sentence")
+    botnet_domains = factory.SubFactory(BotnetDomainsRequestFactory)
+    snippet = None
+    device = None
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Override the create method to exclude None values."""
+        # Remove None values before creating the model
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return super()._create(model_class, *args, **kwargs)
+
+
+class DNSSecurityProfileResponseFactory(DNSSecurityProfileRequestFactory):
+    class Meta:
+        model = DNSSecurityProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+    @classmethod
+    def from_request(cls, request_model: DNSSecurityProfileRequestModel, **kwargs):
+        data = request_model.model_dump()
+        data.update(kwargs)
+        return cls(**data)
