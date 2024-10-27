@@ -2,26 +2,13 @@
 
 import pytest
 from unittest.mock import MagicMock
-from typing import List
-import uuid
 
 from scm.config.security.dns_security_profile import DNSSecurityProfile
 from scm.exceptions import ValidationError
 from scm.models.security.dns_security_profiles import (
     DNSSecurityProfileRequestModel,
     DNSSecurityProfileResponseModel,
-    DNSSecurityCategoryEntry,
-    ListEntryRequest,
-    ListEntryResponse,
-    SinkholeSettings,
-    WhitelistEntry,
-    BotnetDomainsRequest,
-    BotnetDomainsResponse,
     ActionEnum,
-    LogLevelEnum,
-    PacketCaptureEnum,
-    IPv4AddressEnum,
-    IPv6AddressEnum,
     ListActionRequest,
     ListActionResponse,
 )
@@ -29,10 +16,6 @@ from scm.models.security.dns_security_profiles import (
 from tests.factories import (
     DNSSecurityProfileRequestFactory,
     DNSSecurityProfileResponseFactory,
-    BotnetDomainsRequestFactory,
-    DNSSecurityCategoryEntryFactory,
-    ListEntryRequestFactory,
-    WhitelistEntryFactory,
 )
 
 
