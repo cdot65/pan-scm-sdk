@@ -8,7 +8,7 @@ from scm.models.objects import (
     ServiceRequestModel,
     ApplicationGroupRequestModel,
 )
-from scm.models.objects.address import AddressRequestModel
+from scm.models.objects import AddressResponseModel, AddressRequestModel
 from scm.models.objects.address_group import (
     AddressGroupRequestModel,
     DynamicFilter,
@@ -42,14 +42,39 @@ from scm.models.security.security_rules import (
 
 
 class AddressFactory(factory.Factory):
+    """Factory for creating AddressRequestModel instances."""
+
     class Meta:
         model = AddressRequestModel
 
-    name = factory.Faker("word")
-    id = factory.Faker("uuid4")
-    description = "PyTest AddressRequestModel"
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = "Test Address"
     ip_netmask = "192.168.1.1/32"
-    folder = "Prisma Access"
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class AddressResponseFactory(AddressFactory):
+    """Factory for creating AddressResponseModel instances."""
+
+    class Meta:
+        model = AddressResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+    @classmethod
+    def from_request(cls, request_model: AddressRequestModel, **kwargs):
+        data = request_model.model_dump()
+        data.update(kwargs)
+        return cls(**data)
 
 
 class DynamicFilterFactory(factory.Factory):
