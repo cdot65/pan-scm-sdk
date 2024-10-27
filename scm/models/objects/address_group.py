@@ -105,15 +105,6 @@ class AddressGroupRequestModel(BaseModel):
     )
 
     # Custom Validators
-    @model_validator(mode="before")
-    def validate_uuid(cls, values):
-        if "id" in values and values["id"] is not None:
-            try:
-                uuid.UUID(values["id"])
-            except ValueError:
-                raise ValueError("Invalid UUID format for 'id'")
-        return values
-
     @model_validator(mode="after")
     def validate_address_group_type(self) -> "AddressGroupRequestModel":
         group_type_fields = [
@@ -244,7 +235,7 @@ class AddressGroupResponseModel(BaseModel):
         return values
 
     @model_validator(mode="after")
-    def validate_address_group_type(self) -> "AddressGroupRequestModel":
+    def validate_address_group_type(self) -> "AddressGroupResponseModel":
         group_type_fields = [
             "dynamic",
             "static",

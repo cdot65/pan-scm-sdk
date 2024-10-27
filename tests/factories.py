@@ -9,7 +9,11 @@ from scm.models.objects import (
     ApplicationGroupRequestModel,
 )
 from scm.models.objects.address import AddressRequestModel
-from scm.models.objects.address_group import AddressGroupRequestModel, DynamicFilter
+from scm.models.objects.address_group import (
+    AddressGroupRequestModel,
+    DynamicFilter,
+    AddressGroupResponseModel,
+)
 from scm.models.security import (
     DNSSecurityProfileRequestModel,
     DNSSecurityProfileResponseModel,
@@ -326,6 +330,44 @@ class DNSSecurityProfileResponseFactory(DNSSecurityProfileRequestFactory):
 
     @classmethod
     def from_request(cls, request_model: DNSSecurityProfileRequestModel, **kwargs):
+        data = request_model.model_dump()
+        data.update(kwargs)
+        return cls(**data)
+
+
+class AddressGroupDynamicFilterFactory(factory.Factory):
+    class Meta:
+        model = DynamicFilter
+
+    filter = "'test-tag' and 'environment-prod'"
+
+
+class AddressGroupRequestFactory(factory.Factory):
+    class Meta:
+        model = AddressGroupRequestModel
+
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = "Test Address Group"
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class AddressGroupResponseFactory(AddressGroupRequestFactory):
+    class Meta:
+        model = AddressGroupResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+    @classmethod
+    def from_request(cls, request_model: AddressGroupRequestModel, **kwargs):
         data = request_model.model_dump()
         data.update(kwargs)
         return cls(**data)
