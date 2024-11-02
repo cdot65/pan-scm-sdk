@@ -13,7 +13,6 @@ from scm.exceptions import (
     MethodNotAllowedError,
     ConflictError,
     ReferenceNotZeroError,
-    ServerError,
     VersionNotSupportedError,
     SessionTimeoutError,
     BadRequestError,

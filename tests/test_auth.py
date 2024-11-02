@@ -75,7 +75,7 @@ def test_is_expired_true(oauth2client):
 def test_refresh_token_success(oauth2client):
     new_token = {"access_token": "new_access_token"}
 
-    def mock_fetch_token(*args, **kwargs):
+    def mock_fetch_token(*args, **kwargs):  # noqa
         oauth2client.session.token = new_token
         return new_token
 

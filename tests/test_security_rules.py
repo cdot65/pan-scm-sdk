@@ -1333,7 +1333,7 @@ class TestSecurityRuleMoveModel:
             "rulebase": Rulebase.PRE,
         }
         model = SecurityRuleMoveModel(**model_data)
-        validated_model = model.validate_move_configuration()
+        validated_model = model.validate_move_configuration()  # noqa
         assert validated_model == model
 
 
