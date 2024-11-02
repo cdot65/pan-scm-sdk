@@ -3,6 +3,7 @@
 from .anti_spyware_profiles import (
     AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
+    AntiSpywareProfileUpdateModel,
 )
 from .decryption_profiles import (
     DecryptionProfileRequestModel,
