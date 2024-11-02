@@ -119,7 +119,17 @@ class Scm:
         error_details = error_content.get("_errors", [{}])[0]
         error_code = error_details.get("code", "")
         error_message = error_details.get("message", "An error occurred.")
-        error_type = error_details.get("details", {}).get("errorType", "")
+        details = error_details.get("details", {})
+
+        # Check if 'details' is a dict or list
+        if isinstance(details, dict):
+            error_type = details.get("errorType", "")
+        elif isinstance(details, list) and details:
+            # If it's a list, join the messages
+            error_type = "; ".join(details)
+        else:
+            error_type = ""
+
         request_id = error_content.get("_request_id")
 
         # Map HTTP status codes to exceptions
