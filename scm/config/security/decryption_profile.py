@@ -1,12 +1,12 @@
 # scm/config/security/decryption_profile.py
-
+from types import NoneType
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
 from scm.models.security import (
     DecryptionProfileRequestModel,
     DecryptionProfileResponseModel,
 )
-from scm.exceptions import ValidationError
+from scm.exceptions import ValidationError, NotFoundError, APIError
 
 
 class DecryptionProfile(BaseObject):
@@ -30,31 +30,85 @@ class DecryptionProfile(BaseObject):
 
     ENDPOINT = "/config/security/v1/decryption-profiles"
 
-    def __init__(self, api_client):
+    def __init__(
+        self,
+        api_client,
+    ):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> DecryptionProfileResponseModel:
+    def create(
+        self,
+        data: Dict[str, Any],
+    ) -> DecryptionProfileResponseModel:
         profile = DecryptionProfileRequestModel(**data)
         payload = profile.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return DecryptionProfileResponseModel(**response)
 
-    def get(self, object_id: str) -> DecryptionProfileResponseModel:
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+    def get(
+        self,
+        uuid: str,
+    ) -> DecryptionProfileResponseModel:
+        endpoint = f"{self.ENDPOINT}/{uuid}"
         response = self.api_client.get(endpoint)
         return DecryptionProfileResponseModel(**response)
 
     def update(
-        self, object_id: str, data: Dict[str, Any]
-    ) -> DecryptionProfileResponseModel:
-        profile = DecryptionProfileRequestModel(**data)
-        payload = profile.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        response = self.api_client.put(endpoint, json=payload)
-        return DecryptionProfileResponseModel(**response)
+        self,
+        data: Dict[str, Any],
+    ) -> DecryptionProfileRequestModel | DecryptionProfileResponseModel:
+        """
+        Updates an existing Decryption Profile.
 
-    def delete(self, object_id: str) -> None:
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        Args:
+            data (Dict[str, Any]): The Decryption Profile data including the 'id' key.
+
+        Returns:
+            DecryptionProfileResponseModel: The updated Decryption Profile.
+        """
+        if "id" not in data:
+            raise ValueError("The 'id' field is required in the data for update.")
+
+        uuid = data.pop("id")  # Extract 'id' and remove it from the data
+
+        # Pass the remaining data into the model for validation
+        profile = DecryptionProfileRequestModel(**data)
+
+        # Set the endpoint API, leveraging the `uuid` in the path
+        endpoint = f"{self.ENDPOINT}/{uuid}"
+
+        # Perform the update operation
+        response = self.api_client.put(
+            endpoint,
+            json=profile.model_dump(
+                exclude_unset=True,
+                exclude_none=True,
+            ),
+        )
+
+        # Handle response
+        if isinstance(response, dict) and "id" in response:
+            profile = DecryptionProfileResponseModel(**response)
+            return profile
+        elif isinstance(response, dict) and "data" in response:
+            data = response["data"]
+            if len(data) == 1:
+                profile = DecryptionProfileResponseModel(**data[0])
+                return profile
+            elif len(data) == 0:
+                raise NotFoundError("Decryption profile not found")
+            else:
+                raise APIError("Multiple decryption profiles found with the same name")
+        elif isinstance(response, NoneType):
+            return profile
+        else:
+            raise APIError("Unexpected response format")
+
+    def delete(
+        self,
+        uuid: str,
+    ) -> None:
+        endpoint = f"{self.ENDPOINT}/{uuid}"
         self.api_client.delete(endpoint)
 
     def list(

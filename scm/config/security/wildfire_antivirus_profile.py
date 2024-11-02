@@ -63,13 +63,13 @@ class WildfireAntivirusProfile(BaseObject):
         return WildfireAntivirusProfileResponseModel(**response)
 
     def update(
-        self, object_id: str, data: Dict[str, Any]
+        self,
+        data: Dict[str, Any],
     ) -> WildfireAntivirusProfileResponseModel:
         """
         Update an existing WildFire Antivirus Profile.
 
         Args:
-            object_id (str): The ID of the profile to update.
             data (Dict[str, Any]): The updated data for the profile.
 
         Returns:
@@ -77,7 +77,7 @@ class WildfireAntivirusProfile(BaseObject):
         """
         profile = WildfireAntivirusProfileRequestModel(**data)
         payload = profile.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
         return WildfireAntivirusProfileResponseModel(**response)
 

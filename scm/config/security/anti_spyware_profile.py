@@ -46,11 +46,12 @@ class AntiSpywareProfile(BaseObject):
         return AntiSpywareProfileResponseModel(**response)
 
     def update(
-        self, object_id: str, data: Dict[str, Any]
+        self,
+        data: Dict[str, Any],
     ) -> AntiSpywareProfileResponseModel:
         profile = AntiSpywareProfileUpdateModel(**data)
         payload = profile.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
         return AntiSpywareProfileResponseModel(**response)
 

@@ -94,7 +94,6 @@ class SecurityRule(BaseObject):
 
     def update(
         self,
-        object_id: str,
         data: Dict[str, Any],
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
@@ -118,7 +117,7 @@ class SecurityRule(BaseObject):
             by_alias=True,
         )
 
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(
             endpoint,
             params={"position": rulebase.value},
