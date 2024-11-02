@@ -101,3 +101,83 @@ class Address(BaseObject):
         response = self.api_client.get(self.ENDPOINT, params=params)
         addresses = [AddressResponseModel(**item) for item in response.get("data", [])]
         return addresses
+
+    def fetch(
+        self,
+        name: str,
+        folder: Optional[str] = None,
+        snippet: Optional[str] = None,
+        device: Optional[str] = None,
+        **filters,
+    ) -> Dict[str, Any]:
+        """
+        Fetches a single address object by name.
+
+        Args:
+            name (str): The name of the address object to fetch.
+            folder (str, optional): The folder in which the resource is defined.
+            snippet (str, optional): The snippet in which the resource is defined.
+            device (str, optional): The device in which the resource is defined.
+            **filters: Additional filters to apply to the request.
+
+        Returns:
+            AddressResponseModel: The fetched security rule object.
+
+        Raises:
+            ValidationError: If invalid parameters are provided.
+            NotFoundError: If the security rule object is not found.
+        """
+        if not name:
+            raise ValidationError("Parameter 'name' must be provided for fetch method.")
+
+        params = {}
+
+        # Include container type parameter
+        container_params = {
+            "folder": folder,
+            "snippet": snippet,
+            "device": device,
+        }
+        provided_containers = {
+            k: v for k, v in container_params.items() if v is not None
+        }
+
+        if len(provided_containers) != 1:
+            raise ValidationError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            )
+
+        params.update(provided_containers)
+        params["name"] = name  # Set the 'name' parameter
+
+        # Include any additional filters provided
+        params.update(
+            {
+                k: v
+                for k, v in filters.items()
+                if k
+                not in [
+                    "types",
+                    "values",
+                    "names",
+                    "tags",
+                    "folder",
+                    "snippet",
+                    "device",
+                    "name",
+                ]
+            }
+        )
+
+        response = self.api_client.get(
+            self.ENDPOINT,
+            params=params,
+        )
+
+        # Since response is a single object when 'name' is provided
+        # We can directly create the AddressResponseModel
+        address = AddressResponseModel(**response)
+        return address.model_dump(
+            exclude_unset=True,
+            exclude_none=True,
+        )
