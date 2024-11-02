@@ -36,8 +36,8 @@ class BaseObject:
         response = self.api_client.get(endpoint)
         return response
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+    def update(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=data)
         return response
 
