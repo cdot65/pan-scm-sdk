@@ -41,10 +41,13 @@ class AddressGroup(BaseObject):
         response = self.api_client.get(endpoint)
         return AddressGroupResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> AddressGroupResponseModel:
+    def update(
+        self,
+        data: Dict[str, Any],
+    ) -> AddressGroupResponseModel:
         address = AddressGroupRequestModel(**data)
         payload = address.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
         return AddressGroupResponseModel(**response)
 

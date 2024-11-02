@@ -46,11 +46,12 @@ class ApplicationGroup(BaseObject):
         return ApplicationGroupResponseModel(**response)
 
     def update(
-        self, object_id: str, data: Dict[str, Any]
+        self,
+        data: Dict[str, Any],
     ) -> ApplicationGroupResponseModel:
         app_group = ApplicationGroupRequestModel(**data)
         payload = app_group.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
         return ApplicationGroupResponseModel(**response)
 

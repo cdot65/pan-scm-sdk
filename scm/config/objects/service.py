@@ -26,10 +26,13 @@ class Service(BaseObject):
         response = self.api_client.get(endpoint)
         return ServiceResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> ServiceResponseModel:
+    def update(
+        self,
+        data: Dict[str, Any],
+    ) -> ServiceResponseModel:
         service = ServiceRequestModel(**data)
         payload = service.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
         return ServiceResponseModel(**response)
 
