@@ -1,4 +1,4 @@
-# tests/test_anti_spyware_profile.py
+# tests/scm/config/security/test_anti_spyware_profile.py
 
 import pytest
 from unittest.mock import MagicMock

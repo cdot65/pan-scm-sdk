@@ -3,7 +3,7 @@ from types import NoneType
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
 from scm.models.security import (
-    DecryptionProfileRequestModel,
+    DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
 )
 from scm.exceptions import ValidationError, NotFoundError, APIError
@@ -40,7 +40,7 @@ class DecryptionProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DecryptionProfileResponseModel:
-        profile = DecryptionProfileRequestModel(**data)
+        profile = DecryptionProfileCreateModel(**data)
         payload = profile.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return DecryptionProfileResponseModel(**response)
@@ -56,7 +56,7 @@ class DecryptionProfile(BaseObject):
     def update(
         self,
         data: Dict[str, Any],
-    ) -> DecryptionProfileRequestModel | DecryptionProfileResponseModel:
+    ) -> DecryptionProfileCreateModel | DecryptionProfileResponseModel:
         """
         Updates an existing Decryption Profile.
 
@@ -72,7 +72,7 @@ class DecryptionProfile(BaseObject):
         uuid = data.pop("id")  # Extract 'id' and remove it from the data
 
         # Pass the remaining data into the model for validation
-        profile = DecryptionProfileRequestModel(**data)
+        profile = DecryptionProfileCreateModel(**data)
 
         # Set the endpoint API, leveraging the `uuid` in the path
         endpoint = f"{self.ENDPOINT}/{uuid}"

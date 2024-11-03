@@ -6,7 +6,7 @@ from .anti_spyware_profiles import (
     AntiSpywareProfileUpdateModel,
 )
 from .decryption_profiles import (
-    DecryptionProfileRequestModel,
+    DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
 )
 from .dns_security_profiles import (
