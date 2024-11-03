@@ -5,7 +5,7 @@ import factory
 
 from scm.models.objects import (
     ApplicationCreateModel,
-    ServiceRequestModel,
+    ServiceCreateModel,
     ApplicationGroupCreateModel,
 )
 from scm.models.objects import (
@@ -210,10 +210,10 @@ class ApplicationGroupFactory(factory.Factory):
 
 class ServiceFactory(factory.Factory):
     class Meta:
-        model = ServiceRequestModel
+        model = ServiceCreateModel
 
     name = factory.Faker("word")
-    description = "PyTest ServiceRequestModel test"
+    description = "PyTest ServiceCreateModel test"
     tag = ["Automation"]
     folder = "Prisma Access"
     protocol = {"tcp": {"port": "80,443"}}
