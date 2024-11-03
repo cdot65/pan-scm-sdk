@@ -125,6 +125,7 @@ class AddressBaseModel(BaseModel):
 
     @model_validator(mode="after")
     def validate_address_type(self) -> "AddressBaseModel":
+        """Validates that exactly one address type is provided."""
         address_fields = [
             "ip_netmask",
             "ip_range",
@@ -134,10 +135,16 @@ class AddressBaseModel(BaseModel):
         provided = [
             field for field in address_fields if getattr(self, field) is not None
         ]
-        if len(provided) != 1:
+
+        if len(provided) == 0:
+            raise ValueError(
+                "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+            )
+        elif len(provided) > 1:
             raise ValueError(
                 "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
             )
+
         return self
 
 
@@ -159,6 +166,7 @@ class AddressCreateModel(AddressBaseModel):
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "AddressCreateModel":
+        """Validates that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
