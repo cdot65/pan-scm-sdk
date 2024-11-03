@@ -1,16 +1,19 @@
 # scm/models/objects/service.py
-import uuid
+
 from typing import Optional, List
+from uuid import UUID
 
 from pydantic import (
     BaseModel,
     Field,
-    ConfigDict,
     model_validator,
+    ConfigDict,
 )
 
 
 class Override(BaseModel):
+    """Settings for protocol override configurations."""
+
     timeout: Optional[int] = Field(
         None,
         description="Timeout in seconds.",
@@ -29,6 +32,8 @@ class Override(BaseModel):
 
 
 class TCPProtocol(BaseModel):
+    """TCP protocol configuration."""
+
     port: str = Field(
         ...,
         description="TCP port(s) associated with the service.",
@@ -41,6 +46,8 @@ class TCPProtocol(BaseModel):
 
 
 class UDPProtocol(BaseModel):
+    """UDP protocol configuration."""
+
     port: str = Field(
         ...,
         description="UDP port(s) associated with the service.",
@@ -53,6 +60,8 @@ class UDPProtocol(BaseModel):
 
 
 class Protocol(BaseModel):
+    """Protocol configuration with TCP/UDP validation."""
+
     tcp: Optional[TCPProtocol] = None
     udp: Optional[UDPProtocol] = None
 
@@ -69,35 +78,25 @@ class Protocol(BaseModel):
         return self
 
 
-class ServiceRequestModel(BaseModel):
+class ServiceBaseModel(BaseModel):
     """
-    Represents a Service creation for Palo Alto Networks' Strata Cloud Manager.
+    Base model for Service objects containing fields common to all CRUD operations.
 
-    This class defines the structure and validation rules for creating a Service,
-    including required fields, optional fields, and various attributes defining
-    the application's characteristics and behaviors.
-
-    Attributes:
-        name (str): The name of the service.
-        protocol (str): Detailed information about the service.
-        description (Optional[str]): Description about the service.
-        protocol (str): The protocol (tcp or udp) associated with the service.
-        tag (Optional[str]): The tag(s) associated with the service.
-        folder (Optional[str]): The folder where the service configuration is stored.
-        snippet (Optional[str]): The configuration snippet for the service.
+    This model serves as the foundation for create, update, and response models,
+    containing all shared fields and validation logic.
     """
 
-    # Model configuration
     model_config = ConfigDict(
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        populate_by_name=True,
     )
 
-    # Required fields
     name: str = Field(
         ...,
         max_length=63,
         description="The name of the service.",
+        pattern=r"^[a-zA-Z0-9_ \.-]+$",
         examples=["service-http"],
     )
     protocol: Protocol = Field(
@@ -108,7 +107,6 @@ class ServiceRequestModel(BaseModel):
             {"udp": {"port": "53,67"}},
         ],
     )
-    # Optional fields
     description: Optional[str] = Field(
         None,
         max_length=1023,
@@ -118,27 +116,37 @@ class ServiceRequestModel(BaseModel):
         None,
         description="The tag(s) associated with the service.",
     )
-
-    # Container Types
     folder: Optional[str] = Field(
         None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
         description="The folder where the service is defined.",
+        examples=["Shared"],
     )
     snippet: Optional[str] = Field(
         None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
         description="The snippet where the service is defined.",
+        examples=["predefined-snippet"],
     )
     device: Optional[str] = Field(
         None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
         description="The device where the service is defined.",
+        examples=["my-device"],
     )
 
-    # Custom Validators
+
+class ServiceCreateModel(ServiceBaseModel):
+    """
+    Model for creating a new Service.
+    Inherits from ServiceBaseModel and adds container type validation.
+    """
+
     @model_validator(mode="after")
-    def validate_container_type(self) -> "ServiceRequestModel":
+    def validate_container_type(self) -> "ServiceCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided = [
             field for field in container_fields if getattr(self, field) is not None
@@ -150,72 +158,21 @@ class ServiceRequestModel(BaseModel):
         return self
 
 
-class ServiceResponseModel(BaseModel):
+class ServiceUpdateModel(ServiceBaseModel):
     """
-    Represents a Service response for Palo Alto Networks' Strata Cloud Manager.
+    Model for updating an existing Service.
+    All fields are optional to allow partial updates.
     """
 
-    # Model configuration
-    model_config = ConfigDict(
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
 
-    # Optional 'id' field
-    id: Optional[str] = Field(
+class ServiceResponseModel(ServiceBaseModel):
+    """
+    Model for Service responses.
+    Includes all base fields plus the optional id field.
+    """
+
+    id: Optional[UUID] = Field(
         None,
         description="The UUID of the service.",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    # Required fields
-    name: str = Field(
-        ...,
-        max_length=63,
-        description="The name of the service.",
-        examples=["service-http"],
-    )
-    protocol: Protocol = Field(
-        ...,
-        description="The protocol (tcp or udp) and associated ports.",
-        examples=[
-            {"tcp": {"port": "80"}},
-            {"udp": {"port": "53,67"}},
-        ],
-    )
-    folder: str = Field(
-        ...,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The folder where the service is defined.",
-        examples=["Shared"],
-    )
-
-    # Optional fields
-    description: Optional[str] = Field(
-        None,
-        max_length=1023,
-        description="Description about the service.",
-        examples=["HTTP service for web traffic."],
-    )
-    tag: Optional[List[str]] = Field(
-        None,
-        description="The tag(s) associated with the service.",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The snippet where the service is defined.",
-        examples=["predefined-snippet"],
-    )
-
-    # Custom Validators
-    @model_validator(mode="before")
-    def validate_uuid(cls, values):
-        if "id" in values and values["id"] is not None:
-            try:
-                uuid.UUID(values["id"])
-            except (ValueError, TypeError):
-                raise ValueError("Invalid UUID format for 'id'")
-        return values
