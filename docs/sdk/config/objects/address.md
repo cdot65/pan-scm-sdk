@@ -253,5 +253,5 @@ print(f"Deleted address with ID: {new_address.id}")
 
 ## Related Models
 
-- [AddressRequestModel](../../models/objects/address_models.md#addressrequestmodel)
+- [AddressCreateModel](../../models/objects/address_models.md#addressrequestmodel)
 - [AddressResponseModel](../../models/objects/address_models.md#addressresponsemodel)

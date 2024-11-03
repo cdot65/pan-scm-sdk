@@ -4,7 +4,7 @@ This section covers the data models associated with the `Address` configuration 
 
 ---
 
-## AddressRequestModel
+## AddressCreateModel
 
 Used when creating or updating an address object.
 
@@ -32,7 +32,7 @@ Used when creating or updating an address object.
 <!-- termynal -->
 
 ```python
-address_request = AddressRequestModel(
+address_request = AddressCreateModel(
     name="internal_network",
     ip_netmask="192.168.1.0/24",
     description="Internal network address",
@@ -59,7 +59,7 @@ address_dict = {
 <!-- termynal -->
 
 ```python
-address_request = AddressRequestModel(
+address_request = AddressCreateModel(
     name="example_website",
     fqdn="www.example.com",
     description="Example website address",
@@ -84,7 +84,7 @@ address_dict = {
 <!-- termynal -->
 
 ```python
-address_request = AddressRequestModel(
+address_request = AddressCreateModel(
     name="dhcp_range",
     ip_range="10.0.0.100-10.0.0.200",
     description="DHCP address range",
@@ -220,15 +220,15 @@ Here's a complete example demonstrating how to create and use Address models:
 <!-- termynal -->
 
 ```python
-from scm.models.objects import AddressRequestModel, AddressResponseModel
+from scm.models.objects import AddressCreateModel, AddressResponseModel
 
-# Create an AddressRequestModel
-address_request = AddressRequestModel(
-    name="corporate_network",
-    ip_netmask="172.16.0.0/16",
-    description="Corporate network address space",
-    folder="Global",
-    tag=["corporate", "internal"]
+# Create an AddressCreateModel
+address_request = AddressCreateModel(
+  name="corporate_network",
+  ip_netmask="172.16.0.0/16",
+  description="Corporate network address space",
+  folder="Global",
+  tag=["corporate", "internal"]
 )
 
 # Convert to dictionary for API request
@@ -236,12 +236,12 @@ address_dict = address_request.model_dump(exclude_unset=True)
 
 # Simulate API response
 api_response = {
-    "id": "456f7890-h01e-45f6-d789-759988773333",
-    "name": "corporate_network",
-    "ip_netmask": "172.16.0.0/16",
-    "description": "Corporate network address space",
-    "folder": "Global",
-    "tag": ["corporate", "internal"]
+  "id": "456f7890-h01e-45f6-d789-759988773333",
+  "name": "corporate_network",
+  "ip_netmask": "172.16.0.0/16",
+  "description": "Corporate network address space",
+  "folder": "Global",
+  "tag": ["corporate", "internal"]
 }
 
 # Create an AddressResponseModel from API response
@@ -258,6 +258,6 @@ print(f"Tags: {', '.join(address_response.tag)}")
 
 </div>
 
-This example shows how to create an `AddressRequestModel`, convert it to a dictionary for an API request, and then
+This example shows how to create an `AddressCreateModel`, convert it to a dictionary for an API request, and then
 create an `AddressResponseModel` from a simulated API response. It demonstrates the full lifecycle of working with
 Address models in the SDK.
