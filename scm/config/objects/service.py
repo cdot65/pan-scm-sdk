@@ -3,7 +3,7 @@
 from typing import List, Dict, Any, Optional
 
 from scm.config import BaseObject
-from scm.models.objects import ServiceRequestModel, ServiceResponseModel
+from scm.models.objects import ServiceCreateModel, ServiceResponseModel
 from scm.exceptions import ValidationError
 
 
@@ -16,7 +16,7 @@ class Service(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> ServiceResponseModel:
-        service_request = ServiceRequestModel(**data)
+        service_request = ServiceCreateModel(**data)
         payload = service_request.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return ServiceResponseModel(**response)
@@ -30,7 +30,7 @@ class Service(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceResponseModel:
-        service = ServiceRequestModel(**data)
+        service = ServiceCreateModel(**data)
         payload = service.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
@@ -61,7 +61,7 @@ class Service(BaseObject):
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
 
-        params.update(provided_containers)
+        params.update(provided_containers)  # noqa
 
         # Handle specific filters for services
         if "names" in filters:
