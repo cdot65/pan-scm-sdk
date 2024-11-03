@@ -3,7 +3,7 @@
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
 from scm.models.objects import AddressGroupRequestModel, AddressGroupResponseModel
-from scm.exceptions import ValidationError
+from scm.exceptions import ValidationError, NotFoundError, APIError
 
 
 class AddressGroup(BaseObject):
@@ -179,10 +179,18 @@ class AddressGroup(BaseObject):
             params=params,
         )
 
-        # Since response is a single object when 'name' is provided
-        # We can directly create the AddressGroupResponseModel
-        address_group = AddressGroupResponseModel(**response)
-        return address_group.model_dump(
-            exclude_unset=True,
-            exclude_none=True,
-        )
+        # Handle different response formats
+        if isinstance(response, dict) and "id" in response:
+            # Single object returned directly
+            return response
+        elif "data" in response:
+            # List of objects returned under 'data'
+            data = response["data"]
+            if len(data) == 1:
+                return data[0]
+            elif len(data) == 0:
+                raise NotFoundError(f"Address group '{name}' not found.")
+            else:
+                raise APIError(f"Multiple address groups found with the name '{name}'.")
+        else:
+            raise APIError("Unexpected response format.")
