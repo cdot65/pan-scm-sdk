@@ -1,3 +1,5 @@
+# tests/scm/config/objects/test_application_group.py
+
 import pytest
 from unittest.mock import MagicMock
 from scm.config.objects import ApplicationGroup

@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from scm.config.objects import Application
-from scm.exceptions import ValidationError, NotFoundError, APIError
+from scm.exceptions import ValidationError
 from scm.models.objects import ApplicationResponseModel, ApplicationCreateModel
 from tests.factories import ApplicationFactory
 
