@@ -6,7 +6,7 @@ import factory
 from scm.models.objects import (
     ApplicationCreateModel,
     ServiceRequestModel,
-    ApplicationGroupRequestModel,
+    ApplicationGroupCreateModel,
 )
 from scm.models.objects import (
     AddressResponseModel,
@@ -198,7 +198,7 @@ class ApplicationFactory(factory.Factory):
 
 class ApplicationGroupFactory(factory.Factory):
     class Meta:
-        model = ApplicationGroupRequestModel
+        model = ApplicationGroupCreateModel
 
     name = "ValidStaticApplicationGroup"
     members = [
