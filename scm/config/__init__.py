@@ -25,6 +25,14 @@ class BaseObject:
     ENDPOINT: str  # Should be defined in subclasses
 
     def __init__(self, api_client: Scm):
+        # Check if ENDPOINT is defined
+        if not hasattr(self, "ENDPOINT"):
+            raise AttributeError("ENDPOINT must be defined in the subclass")
+
+        # Validate api_client type
+        if not isinstance(api_client, Scm):
+            raise TypeError("api_client must be an instance of Scm")
+
         self.api_client = api_client
 
     def create(self, data: Dict[str, Any]) -> Dict[str, Any]:
