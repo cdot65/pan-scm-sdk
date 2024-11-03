@@ -119,8 +119,6 @@ class Scm:
             error_type = details.get("errorType", "")
         elif isinstance(details, list) and details:
             error_type = "; ".join(details)
-        else:
-            error_type = ""
 
         # Handle API-specific error codes first
         if error_code == "API_I00013":
