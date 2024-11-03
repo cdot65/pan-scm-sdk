@@ -16,7 +16,8 @@ from .application import (
     ApplicationUpdateModel,
 )
 from .application_group import (
-    ApplicationGroupRequestModel,
+    ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
+    ApplicationGroupUpdateModel,
 )
 from .service import ServiceRequestModel, ServiceResponseModel
