@@ -2,7 +2,11 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models.objects import AddressRequestModel, AddressResponseModel
+from scm.models.objects import (
+    AddressCreateModel,
+    AddressResponseModel,
+    AddressUpdateModel,
+)
 from scm.exceptions import ValidationError
 
 
@@ -21,7 +25,7 @@ class Address(BaseObject):
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        AddressRequestModel: For create, get, and update methods.
+        AddressCreateModel: For create, get, and update methods.
         List[Address]: For the list method.
     """
 
@@ -31,7 +35,7 @@ class Address(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> AddressResponseModel:
-        address = AddressRequestModel(**data)
+        address = AddressCreateModel(**data)
         payload = address.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return AddressResponseModel(**response)
@@ -45,7 +49,7 @@ class Address(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AddressResponseModel:
-        address = AddressRequestModel(**data)
+        address = AddressUpdateModel(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
