@@ -2,7 +2,11 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models.objects import AddressGroupRequestModel, AddressGroupResponseModel
+from scm.models.objects import (
+    AddressGroupCreateModel,
+    AddressGroupResponseModel,
+    AddressGroupUpdateModel,
+)
 from scm.exceptions import ValidationError, NotFoundError, APIError
 
 
@@ -31,7 +35,7 @@ class AddressGroup(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> AddressGroupResponseModel:
-        address_group = AddressGroupRequestModel(**data)
+        address_group = AddressGroupCreateModel(**data)
         payload = address_group.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return AddressGroupResponseModel(**response)
@@ -45,7 +49,7 @@ class AddressGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AddressGroupResponseModel:
-        address = AddressGroupRequestModel(**data)
+        address = AddressGroupUpdateModel(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)

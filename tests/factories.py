@@ -14,7 +14,7 @@ from scm.models.objects import (
     AddressUpdateModel,
 )
 from scm.models.objects.address_group import (
-    AddressGroupRequestModel,
+    AddressGroupCreateModel,
     DynamicFilter,
     AddressGroupResponseModel,
 )
@@ -148,7 +148,7 @@ class DynamicFilterFactory(factory.Factory):
 
 class AddressGroupDynamicFactory(factory.Factory):
     class Meta:
-        model = AddressGroupRequestModel
+        model = AddressGroupCreateModel
 
     name = "ValidDynamicAddressGroup"
     description = "This is just a pytest that will fail"
@@ -159,7 +159,7 @@ class AddressGroupDynamicFactory(factory.Factory):
 
 class AddressGroupStaticFactory(factory.Factory):
     class Meta:
-        model = AddressGroupRequestModel
+        model = AddressGroupCreateModel
 
     name = "ValidStaticAddressGroup"
     description = "Static AddressCreateModel Group Test"
@@ -431,7 +431,7 @@ class AddressGroupDynamicFilterFactory(factory.Factory):
 
 class AddressGroupRequestFactory(factory.Factory):
     class Meta:
-        model = AddressGroupRequestModel
+        model = AddressGroupCreateModel
 
     name = factory.Sequence(lambda n: f"address_group_{n}")
     description = "Test Address Group"
@@ -454,7 +454,7 @@ class AddressGroupResponseFactory(AddressGroupRequestFactory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
     @classmethod
-    def from_request(cls, request_model: AddressGroupRequestModel, **kwargs):
+    def from_request(cls, request_model: AddressGroupCreateModel, **kwargs):
         data = request_model.model_dump()
         data.update(kwargs)
         return cls(**data)

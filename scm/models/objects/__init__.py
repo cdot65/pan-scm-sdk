@@ -5,7 +5,11 @@ from .address import (
     AddressUpdateModel,
     AddressResponseModel,
 )
-from .address_group import AddressGroupRequestModel, AddressGroupResponseModel
+from .address_group import (
+    AddressGroupResponseModel,
+    AddressGroupCreateModel,
+    AddressGroupUpdateModel,
+)
 from .application import (
     ApplicationRequestModel,
     ApplicationResponseModel,

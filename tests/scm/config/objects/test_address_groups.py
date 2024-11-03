@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 from scm.config.objects import AddressGroup
 from scm.exceptions import ValidationError, NotFoundError, APIError
-from scm.models.objects import AddressGroupResponseModel, AddressGroupRequestModel
+from scm.models.objects import AddressGroupResponseModel, AddressGroupCreateModel
 from scm.models.objects.address_group import DynamicFilter
 
 from tests.factories import (
@@ -467,7 +467,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             # Neither 'static' nor 'dynamic' provided
         }
         with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupRequestModel(**data)
+            AddressGroupCreateModel(**data)
         assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
             exc_info.value
         )
@@ -483,7 +483,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             ),  # Provide as an instance, not dict
         }
         with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupRequestModel(**data)
+            AddressGroupCreateModel(**data)
         assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
             exc_info.value
         )
@@ -495,7 +495,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "static": ["Address1"],
         }
         with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupRequestModel(**data)
+            AddressGroupCreateModel(**data)
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
@@ -510,7 +510,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "snippet": "TestSnippet",
         }
         with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupRequestModel(**data)
+            AddressGroupCreateModel(**data)
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
@@ -541,7 +541,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
 
         for test_case in test_cases:
             with pytest.raises(ValueError) as exc_info:
-                AddressGroupRequestModel(**test_case["data"])
+                AddressGroupCreateModel(**test_case["data"])
             assert test_case["expected_error"] in str(exc_info.value)
 
         # Positive test cases - should not raise errors
@@ -561,7 +561,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
         ]
 
         for valid_case in valid_cases:
-            model = AddressGroupRequestModel(**valid_case)
+            model = AddressGroupCreateModel(**valid_case)
             assert model is not None
 
     def test_address_group_container_validation_comprehensive(self):
@@ -595,7 +595,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
 
         for test_case in test_cases:
             try:
-                AddressGroupRequestModel(**test_case["data"])
+                AddressGroupCreateModel(**test_case["data"])
                 pytest.fail("Should have raised a validation error")
             except (PydanticValidationError, ValueError) as exc:
                 assert any(error in str(exc) for error in test_case["expected_errors"])
@@ -623,7 +623,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "static": ["Address1"],
             "device": "Device1",
         }
-        model = AddressGroupRequestModel(**data)
+        model = AddressGroupCreateModel(**data)
         assert model.device == "Device1"
         assert model.folder is None
         assert model.snippet is None
@@ -635,7 +635,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "static": ["Address1"],
             "snippet": "Snippet1",
         }
-        model = AddressGroupRequestModel(**data)
+        model = AddressGroupCreateModel(**data)
         assert model.snippet == "Snippet1"
         assert model.folder is None
         assert model.device is None
@@ -665,7 +665,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
 
         for test_case in test_cases:
             with pytest.raises(ValueError) as exc_info:
-                AddressGroupRequestModel(**test_case["data"])
+                AddressGroupCreateModel(**test_case["data"])
             assert test_case["expected_error"] in str(exc_info.value)
 
         # Test valid cases
@@ -674,7 +674,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "folder": "Shared",
             "static": ["Address1"],
         }
-        static_model = AddressGroupRequestModel(**valid_static)
+        static_model = AddressGroupCreateModel(**valid_static)
         assert static_model.static == ["Address1"]
         assert static_model.dynamic is None
 
@@ -683,7 +683,7 @@ class TestAddressGroupValidation(TestAddressGroupBase):
             "folder": "Shared",
             "dynamic": {"filter": "'Tag1'"},
         }
-        dynamic_model = AddressGroupRequestModel(**valid_dynamic)
+        dynamic_model = AddressGroupCreateModel(**valid_dynamic)
         assert dynamic_model.dynamic.filter == "'Tag1'"
         assert dynamic_model.static is None
 
