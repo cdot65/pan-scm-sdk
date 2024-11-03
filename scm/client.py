@@ -20,6 +20,10 @@ from scm.exceptions import (
     ServerError,
     VersionNotSupportedError,
     SessionTimeoutError,
+    ObjectNotPresentError,
+    FolderNotFoundError,
+    MalformedRequestError,
+    EmptyFieldError,
 )
 
 logger = setup_logger(__name__)
@@ -87,7 +91,7 @@ class Scm:
             else:
                 return None  # Return None or an empty dict
         except requests.exceptions.HTTPError as http_err:
-            error_content = response.json() if response.content else {}
+            error_content = response.json() if response.content else {}  # noqa
             logger.error(f"HTTP error occurred: {http_err} - {error_content}")
             exception = self._handle_api_error(
                 response,
@@ -99,40 +103,68 @@ class Scm:
             raise APIError(f"API request failed: {str(e)}") from e
 
     @staticmethod
-    def _handle_api_error(
-        response,
-        error_content,
-    ):
+    def _handle_api_error(response, error_content):
         """
-        Args:
-            response: The HTTP response object returned from the API call.
-            error_content: The parsed content of the error response from the API.
-
-        Returns:
-            An instance of an appropriate exception class based on the HTTP status code and error details provided in the response.
+        Enhanced error handling based on API error codes and types.
         """
-
-        # extract status code from response
         status_code = response.status_code
-
-        # extract error details
         error_details = error_content.get("_errors", [{}])[0]
         error_code = error_details.get("code", "")
         error_message = error_details.get("message", "An error occurred.")
         details = error_details.get("details", {})
+        request_id = error_content.get("_request_id")
 
-        # Check if 'details' is a dict or list
+        # Extract error type from details
         if isinstance(details, dict):
             error_type = details.get("errorType", "")
         elif isinstance(details, list) and details:
-            # If it's a list, join the messages
             error_type = "; ".join(details)
         else:
             error_type = ""
 
-        request_id = error_content.get("_request_id")
+        # Handle API-specific error codes first
+        if error_code == "API_I00013":
+            if error_type == "Object Not Present":
+                return ObjectNotPresentError(
+                    error_message,
+                    error_code=error_code,
+                    details=details,
+                    request_id=request_id,
+                )
+            elif error_type == "Operation Impossible":
+                return FolderNotFoundError(
+                    error_message,
+                    error_code=error_code,
+                    details=details,
+                    request_id=request_id,
+                )
+            elif error_type == "Object Already Exists":
+                return ObjectAlreadyExistsError(
+                    error_message,
+                    error_code=error_code,
+                    details=details,
+                    request_id=request_id,
+                )
+            elif error_type == "Malformed Command":
+                return MalformedRequestError(
+                    error_message,
+                    error_code=error_code,
+                    details=details,
+                    request_id=request_id,
+                )
 
-        # Map HTTP status codes to exceptions
+        if error_code == "API_I00035":
+            if isinstance(details, list) and any(
+                "is not allowed to be empty" in str(d) for d in details
+            ):
+                return EmptyFieldError(
+                    error_message,
+                    error_code=error_code,
+                    details=details,  # noqa
+                    request_id=request_id,
+                )
+
+        # Then fall back to HTTP status code based handling
         # 400 Bad Request
         if status_code == 400:
             if error_type == "Object Already Exists":
@@ -247,7 +279,7 @@ class Scm:
             return APIError(
                 f"HTTP {status_code}: {error_message}",
                 error_code=error_code,
-                details=error_details,
+                details=details,
                 request_id=request_id,
             )
 
