@@ -4,8 +4,9 @@ from typing import List, Dict, Any, Optional
 
 from scm.config import BaseObject
 from scm.models.objects import (
-    ApplicationGroupRequestModel,
+    ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
+    ApplicationGroupUpdateModel,
 )
 from scm.exceptions import ValidationError
 
@@ -25,7 +26,7 @@ class ApplicationGroup(BaseObject):
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        ApplicationGroupRequestModel: For create, get, and update methods.
+        ApplicationGroupCreateModel: For create, get, and update methods.
         List[ApplicationGroup]: For the list method.
     """
 
@@ -35,7 +36,7 @@ class ApplicationGroup(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> ApplicationGroupResponseModel:
-        app_group_request = ApplicationGroupRequestModel(**data)
+        app_group_request = ApplicationGroupCreateModel(**data)
         payload = app_group_request.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return ApplicationGroupResponseModel(**response)
@@ -49,7 +50,7 @@ class ApplicationGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationGroupResponseModel:
-        app_group = ApplicationGroupRequestModel(**data)
+        app_group = ApplicationGroupUpdateModel(**data)
         payload = app_group.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
