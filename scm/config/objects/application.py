@@ -2,7 +2,11 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models.objects import ApplicationRequestModel, ApplicationResponseModel
+from scm.models.objects import (
+    ApplicationCreateModel,
+    ApplicationResponseModel,
+    ApplicationUpdateModel,
+)
 from scm.exceptions import ValidationError
 
 
@@ -21,7 +25,7 @@ class Application(BaseObject):
         ValueError: Raised when invalid container parameters are provided.
 
     Return:
-        ApplicationRequestModel: For create, get, and update methods.
+        ApplicationCreateModel: For create, get, and update methods.
         List[Address]: For the list method.
     """
 
@@ -31,7 +35,7 @@ class Application(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> ApplicationResponseModel:
-        app_request = ApplicationRequestModel(**data)
+        app_request = ApplicationCreateModel(**data)
         payload = app_request.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return ApplicationResponseModel(**response)
@@ -45,7 +49,7 @@ class Application(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationResponseModel:
-        address = ApplicationRequestModel(**data)
+        address = ApplicationUpdateModel(**data)
         payload = address.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
@@ -82,8 +86,6 @@ class Application(BaseObject):
             params["type"] = ",".join(filters["types"])
         if "values" in filters:
             params["value"] = ",".join(filters["values"])
-        if "names" in filters:
-            params["name"] = ",".join(filters["names"])
 
         # Include any additional filters provided
         params.update(
