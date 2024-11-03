@@ -7,26 +7,18 @@ from scm.models.objects import (
     AddressResponseModel,
     AddressUpdateModel,
 )
-from scm.exceptions import ValidationError
+from scm.exceptions import (
+    ValidationError,
+    EmptyFieldError,
+    APIError,
+    ErrorHandler,
+    ObjectNotPresentError,
+)
 
 
 class Address(BaseObject):
     """
     Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
-
-    This class provides methods to create, retrieve, update, and list Address objects
-    using the Strata Cloud Manager API. It supports operations within folders, snippets,
-    or devices, and allows filtering of Address objects based on various criteria.
-
-    Attributes:
-        ENDPOINT (str): The API endpoint for Address object operations.
-
-    Error:
-        ValueError: Raised when invalid container parameters are provided.
-
-    Return:
-        AddressCreateModel: For create, get, and update methods.
-        List[Address]: For the list method.
     """
 
     ENDPOINT = "/config/objects/v1/addresses"
@@ -35,25 +27,64 @@ class Address(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> AddressResponseModel:
-        address = AddressCreateModel(**data)
-        payload = address.model_dump(exclude_unset=True)
-        response = self.api_client.post(self.ENDPOINT, json=payload)
-        return AddressResponseModel(**response)
+        """
+        Creates a new address object.
+
+        Raises:
+            EmptyFieldError: If required fields are empty
+            ObjectAlreadyExistsError: If an object with the same name already exists
+            ValidationError: If the data is invalid
+            FolderNotFoundError: If the specified folder doesn't exist
+        """
+        try:
+            address = AddressCreateModel(**data)
+            payload = address.model_dump(exclude_unset=True)
+            response = self.api_client.post(self.ENDPOINT, json=payload)
+            return AddressResponseModel(**response)
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
     def get(self, object_id: str) -> AddressResponseModel:
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        response = self.api_client.get(endpoint)
-        return AddressResponseModel(**response)
+        """
+        Gets an address object by ID.
+
+        Raises:
+            ObjectNotPresentError: If the object with given ID doesn't exist
+            MalformedRequestError: If the request is malformed
+        """
+        try:
+            endpoint = f"{self.ENDPOINT}/{object_id}"
+            response = self.api_client.get(endpoint)
+            return AddressResponseModel(**response)
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
     def update(
         self,
         data: Dict[str, Any],
     ) -> AddressResponseModel:
-        address = AddressUpdateModel(**data)
-        payload = address.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
-        response = self.api_client.put(endpoint, json=payload)
-        return AddressResponseModel(**response)
+        """
+        Updates an existing address object.
+
+        Raises:
+            ObjectNotPresentError: If the object doesn't exist
+            EmptyFieldError: If required fields are empty
+            ValidationError: If the data is invalid
+        """
+        try:
+            address = AddressUpdateModel(**data)
+            payload = address.model_dump(exclude_unset=True)
+            endpoint = f"{self.ENDPOINT}/{data['id']}"
+            response = self.api_client.put(endpoint, json=payload)
+            return AddressResponseModel(**response)
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
     def list(
         self,
@@ -62,9 +93,24 @@ class Address(BaseObject):
         device: Optional[str] = None,
         **filters,
     ) -> List[AddressResponseModel]:
-        params = {}
+        """
+        Lists address objects with optional filtering.
 
-        # Include container type parameter
+        Raises:
+            EmptyFieldError: If provided container fields are empty
+            FolderNotFoundError: If the specified folder doesn't exist
+            ValidationError: If the container parameters are invalid
+            APIError: If response format is invalid
+        """
+
+        if folder == "":
+            raise EmptyFieldError(
+                message="Field 'folder' cannot be empty",
+                error_code="API_I00035",
+                details=['"folder" is not allowed to be empty'],  # noqa
+            )
+
+        params = {}
         container_params = {"folder": folder, "snippet": snippet, "device": device}
         provided_containers = {
             k: v for k, v in container_params.items() if v is not None
@@ -75,9 +121,9 @@ class Address(BaseObject):
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
 
-        params.update(provided_containers)
+        params.update(provided_containers)  # noqa
 
-        # Handle specific filters for addresses
+        # Handle specific filters
         if "types" in filters:
             params["type"] = ",".join(filters["types"])
         if "values" in filters:
@@ -87,7 +133,6 @@ class Address(BaseObject):
         if "tags" in filters:
             params["tag"] = ",".join(filters["tags"])
 
-        # Include any additional filters provided
         params.update(
             {
                 k: v
@@ -105,9 +150,26 @@ class Address(BaseObject):
             }
         )
 
-        response = self.api_client.get(self.ENDPOINT, params=params)
-        addresses = [AddressResponseModel(**item) for item in response.get("data", [])]
-        return addresses
+        try:
+            response = self.api_client.get(self.ENDPOINT, params=params)
+
+            # Validate response format
+            if not isinstance(response, dict):
+                raise APIError("Invalid response format: expected dictionary")
+
+            if "data" not in response:
+                raise APIError("Invalid response format: missing 'data' field")
+
+            if not isinstance(response["data"], list):
+                raise APIError("Invalid response format: 'data' field must be a list")
+
+            addresses = [AddressResponseModel(**item) for item in response["data"]]
+            return addresses
+
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
     def fetch(
         self,
@@ -118,28 +180,30 @@ class Address(BaseObject):
         **filters,
     ) -> Dict[str, Any]:
         """
-        Fetches a single address object by name.
-
-        Args:
-            name (str): The name of the address object to fetch.
-            folder (str, optional): The folder in which the resource is defined.
-            snippet (str, optional): The snippet in which the resource is defined.
-            device (str, optional): The device in which the resource is defined.
-            **filters: Additional filters to apply to the request.
-
-        Returns:
-            AddressResponseModel: The fetched security rule object.
+        Fetches a single object by name.
 
         Raises:
-            ValidationError: If invalid parameters are provided.
-            NotFoundError: If the security rule object is not found.
+            EmptyFieldError: If name or container fields are empty
+            FolderNotFoundError: If the specified folder doesn't exist
+            ObjectNotPresentError: If the object is not found
+            ValidationError: If the parameters are invalid
+            APIError: For other API-related errors
         """
         if not name:
-            raise ValidationError("Parameter 'name' must be provided for fetch method.")
+            raise EmptyFieldError(
+                message="Field 'name' cannot be empty",
+                error_code="API_I00035",
+                details=['"name" is not allowed to be empty'],  # noqa
+            )
+
+        if folder == "":
+            raise EmptyFieldError(
+                message="Field 'folder' cannot be empty",
+                error_code="API_I00035",
+                details=['"folder" is not allowed to be empty'],  # noqa
+            )
 
         params = {}
-
-        # Include container type parameter
         container_params = {
             "folder": folder,
             "snippet": snippet,
@@ -155,9 +219,8 @@ class Address(BaseObject):
             )
 
         params.update(provided_containers)
-        params["name"] = name  # Set the 'name' parameter
+        params["name"] = name
 
-        # Include any additional filters provided
         params.update(
             {
                 k: v
@@ -176,15 +239,58 @@ class Address(BaseObject):
             }
         )
 
-        response = self.api_client.get(
-            self.ENDPOINT,
-            params=params,
-        )
+        try:
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
+            )
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
-        # Since response is a single object when 'name' is provided
-        # We can directly create the AddressResponseModel
-        address = AddressResponseModel(**response)
-        return address.model_dump(
-            exclude_unset=True,
-            exclude_none=True,
-        )
+        if isinstance(response, dict):
+            if "_errors" in response:
+                ErrorHandler.raise_for_error(response)
+            elif "id" in response:
+                address = AddressResponseModel(**response)
+                return address.model_dump(
+                    exclude_unset=True,
+                    exclude_none=True,
+                )
+            elif "data" in response:
+                data = response["data"]
+                if len(data) == 1:
+                    return data[0]
+                elif len(data) == 0:
+                    raise ObjectNotPresentError(
+                        message=f"Address '{name}' not found.",
+                        error_code="API_I00013",
+                        details={"errorType": "Object Not Present"},
+                    )
+                else:
+                    raise APIError(
+                        f"Multiple address groups found with the name '{name}'."
+                    )
+
+        raise APIError("Unexpected response format.")
+
+    def delete(self, object_id: str) -> None:
+        """
+        Deletes an address object.
+
+        Args:
+            object_id (str): The ID of the object to delete.
+
+        Raises:
+            ObjectNotPresentError: If the object doesn't exist
+            ReferenceNotZeroError: If the object is still referenced by other objects
+            MalformedRequestError: If the request is malformed
+        """
+        try:
+            endpoint = f"{self.ENDPOINT}/{object_id}"
+            self.api_client.delete(endpoint)
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
