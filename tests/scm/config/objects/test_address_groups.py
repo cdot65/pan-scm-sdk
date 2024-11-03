@@ -1,4 +1,4 @@
-# tests/test_address_groups.py
+# tests/scm/config/objects/test_address_groups.py
 
 import pytest
 from unittest.mock import MagicMock
