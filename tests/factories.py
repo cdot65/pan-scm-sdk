@@ -4,7 +4,7 @@ import uuid
 import factory
 
 from scm.models.objects import (
-    ApplicationRequestModel,
+    ApplicationCreateModel,
     ServiceRequestModel,
     ApplicationGroupRequestModel,
 )
@@ -175,7 +175,7 @@ class AddressGroupStaticFactory(factory.Factory):
 
 class ApplicationFactory(factory.Factory):
     class Meta:
-        model = ApplicationRequestModel
+        model = ApplicationCreateModel
 
     name = "ValidApplication"
     description = "Application from pan-scm-sdk Test"
