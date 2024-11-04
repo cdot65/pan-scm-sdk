@@ -19,7 +19,7 @@ from scm.models.objects.address_group import (
     AddressGroupResponseModel,
 )
 from scm.models.security import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
     AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
@@ -33,17 +33,17 @@ from scm.models.security.anti_spyware_profiles import (
     RuleRequest,
 )
 from scm.models.security.dns_security_profiles import (
-    BotnetDomainsRequest,
-    ListActionRequest,
+    BotnetDomainsModel,
+    ListActionRequestModel,
     PacketCaptureEnum,
-    ListEntryRequest,
-    WhitelistEntry,
+    ListEntryBaseModel,
+    WhitelistEntryModel,
     IPv6AddressEnum,
     IPv4AddressEnum,
-    SinkholeSettings,
+    SinkholeSettingsModel,
     LogLevelEnum,
     ActionEnum,
-    DNSSecurityCategoryEntry,
+    DNSSecurityCategoryEntryModel,
 )
 from scm.models.security.security_rules import (
     SecurityRuleRequestModel,
@@ -345,7 +345,7 @@ class ProfileSettingFactory(factory.Factory):
 
 class DNSSecurityCategoryEntryFactory(factory.Factory):
     class Meta:
-        model = DNSSecurityCategoryEntry
+        model = DNSSecurityCategoryEntryModel
 
     name = "pan-dns-sec-malware"
     action = ActionEnum.default
@@ -355,7 +355,7 @@ class DNSSecurityCategoryEntryFactory(factory.Factory):
 
 class SinkholeSettingsFactory(factory.Factory):
     class Meta:
-        model = SinkholeSettings
+        model = SinkholeSettingsModel
 
     ipv4_address = IPv4AddressEnum.default_ip
     ipv6_address = IPv6AddressEnum.localhost
@@ -363,7 +363,7 @@ class SinkholeSettingsFactory(factory.Factory):
 
 class WhitelistEntryFactory(factory.Factory):
     class Meta:
-        model = WhitelistEntry
+        model = WhitelistEntryModel
 
     name = factory.Faker("domain_name")
     description = factory.Faker("sentence")
@@ -371,16 +371,16 @@ class WhitelistEntryFactory(factory.Factory):
 
 class ListEntryRequestFactory(factory.Factory):
     class Meta:
-        model = ListEntryRequest
+        model = ListEntryBaseModel
 
     name = factory.Faker("word")
     packet_capture = PacketCaptureEnum.disable
-    action = factory.LazyFunction(lambda: ListActionRequest("sinkhole"))  # noqa
+    action = factory.LazyFunction(lambda: ListActionRequestModel("sinkhole"))  # noqa
 
 
 class BotnetDomainsRequestFactory(factory.Factory):
     class Meta:
-        model = BotnetDomainsRequest
+        model = BotnetDomainsModel
 
     dns_security_categories = factory.List(
         [factory.SubFactory(DNSSecurityCategoryEntryFactory)]
@@ -392,7 +392,7 @@ class BotnetDomainsRequestFactory(factory.Factory):
 
 class DNSSecurityProfileRequestFactory(factory.Factory):
     class Meta:
-        model = DNSSecurityProfileRequestModel
+        model = DNSSecurityProfileCreateModel
 
     name = factory.Sequence(lambda n: f"profile_{n}")
     folder = "All"
@@ -416,7 +416,7 @@ class DNSSecurityProfileResponseFactory(DNSSecurityProfileRequestFactory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
     @classmethod
-    def from_request(cls, request_model: DNSSecurityProfileRequestModel, **kwargs):
+    def from_request(cls, request_model: DNSSecurityProfileCreateModel, **kwargs):
         data = request_model.model_dump()
         data.update(kwargs)
         return cls(**data)
