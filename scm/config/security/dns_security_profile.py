@@ -3,10 +3,11 @@
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
 from scm.models.security import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
 )
 from scm.exceptions import ValidationError
+from scm.models.security.dns_security_profiles import DNSSecurityProfileUpdateModel
 
 
 class DNSSecurityProfile(BaseObject):
@@ -34,7 +35,7 @@ class DNSSecurityProfile(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> DNSSecurityProfileResponseModel:
-        profile = DNSSecurityProfileRequestModel(**data)
+        profile = DNSSecurityProfileCreateModel(**data)
         payload = profile.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return DNSSecurityProfileResponseModel(**response)
@@ -48,10 +49,26 @@ class DNSSecurityProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DNSSecurityProfileResponseModel:
-        profile = DNSSecurityProfileRequestModel(**data)
-        payload = profile.model_dump(exclude_unset=True)
+        """
+        Updates an existing DNS Security Profile.
+
+        Args:
+            data (Dict[str, Any]): The profile data to update
+
+        Returns:
+            DNSSecurityProfileResponseModel: The updated profile
+        """
+        # Create update model from data
+        profile = DNSSecurityProfileUpdateModel(**data)
+
+        # Create endpoint with object_id
         endpoint = f"{self.ENDPOINT}/{data['id']}"
-        response = self.api_client.put(endpoint, json=payload)
+
+        # Perform update
+        response = self.api_client.put(
+            endpoint, json=profile.model_dump(exclude_unset=True, exclude_none=True)
+        )
+
         return DNSSecurityProfileResponseModel(**response)
 
     def delete(self, object_id: str) -> None:

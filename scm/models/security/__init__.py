@@ -10,7 +10,7 @@ from .decryption_profiles import (
     DecryptionProfileResponseModel,
 )
 from .dns_security_profiles import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
 )
 from .security_rules import (
