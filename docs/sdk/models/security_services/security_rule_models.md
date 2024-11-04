@@ -1,226 +1,251 @@
 # Security Rule Models
 
-This section covers the data models used for Security Rule configuration in the Strata Cloud Manager SDK.
+## Overview
 
----
+The Security Rule models provide a structured way to manage security rules in Palo Alto Networks' Strata Cloud Manager.
+These models support defining security policies with source/destination zones, addresses, applications, and actions.
+Rules
+can be defined in folders, snippets, or devices and placed in either pre or post rulebases. The models handle validation
+of inputs and outputs when interacting with the SCM API.
 
-## SecurityRuleRequestModel
+## Attributes
 
-Model used for creating and updating Security Rules.
+| Attribute          | Type           | Required | Default | Description                                                                     |
+|--------------------|----------------|----------|---------|---------------------------------------------------------------------------------|
+| name               | str            | Yes      | None    | Name of the rule. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| disabled           | bool           | No       | False   | Whether the rule is disabled                                                    |
+| description        | str            | No       | None    | Description of the rule                                                         |
+| tag                | List[str]      | No       | []      | List of tags                                                                    |
+| from_              | List[str]      | No       | ["any"] | Source security zones                                                           |
+| source             | List[str]      | No       | ["any"] | Source addresses                                                                |
+| negate_source      | bool           | No       | False   | Negate source addresses                                                         |
+| source_user        | List[str]      | No       | ["any"] | Source users/groups                                                             |
+| source_hip         | List[str]      | No       | ["any"] | Source Host Integrity Profiles                                                  |
+| to_                | List[str]      | No       | ["any"] | Destination security zones                                                      |
+| destination        | List[str]      | No       | ["any"] | Destination addresses                                                           |
+| negate_destination | bool           | No       | False   | Negate destination addresses                                                    |
+| destination_hip    | List[str]      | No       | ["any"] | Destination Host Integrity Profiles                                             |
+| application        | List[str]      | No       | ["any"] | Applications                                                                    |
+| service            | List[str]      | No       | ["any"] | Services                                                                        |
+| category           | List[str]      | No       | ["any"] | URL categories                                                                  |
+| action             | Action         | No       | "allow" | Rule action (allow/deny/drop/reset-client/reset-server/reset-both)              |
+| profile_setting    | ProfileSetting | No       | None    | Security profile settings                                                       |
+| log_setting        | str            | No       | None    | Log forwarding profile                                                          |
+| schedule           | str            | No       | None    | Schedule profile                                                                |
+| log_start          | bool           | No       | None    | Log at session start                                                            |
+| log_end            | bool           | No       | None    | Log at session end                                                              |
+| folder             | str            | No*      | None    | Folder where rule is defined. Max length: 64 chars                              |
+| snippet            | str            | No*      | None    | Snippet where rule is defined. Max length: 64 chars                             |
+| device             | str            | No*      | None    | Device where rule is defined. Max length: 64 chars                              |
+| id                 | UUID           | Yes**    | None    | UUID of the rule (response only)                                                |
 
-### Key Attributes
+\* Exactly one container type (folder/snippet/device) must be provided
+\** Only required for response model
 
-- `name` (str): **Required.** Name of the Security Rule (pattern: `^[a-zA-Z0-9_ \.-]+$`)
-- `disabled` (bool): Whether the rule is disabled (default: `False`)
-- `description` (Optional[str]): Rule description
-- `tag` (List[str]): Tags associated with the rule
-- `from_` (List[str]): Source security zones (aliased as "from" in API)
-- `to_` (List[str]): Destination security zones (aliased as "to" in API)
-- `action` (Action): Rule action (allow, deny, drop, reset-client, reset-server, reset-both)
+## Model Validators
 
-### Important Field Aliases
+### Container Type Validation
 
-- `from_` → `from`: Source zones field is aliased in the API
-- `to_` → `to`: Destination zones field is aliased in the API
-
-### Example with Dictionary
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-rule_data = {
-    "name": "Allow_Web_Traffic",
-    "folder": "Shared",
-    "from": ["trust"],  # Note: Using "from" instead of "from_"
-    "to": ["untrust"],  # Note: Using "to" instead of "to_"
-    "source": ["10.0.0.0/8"],
-    "destination": ["any"],
-    "application": ["web-browsing"],
-    "action": "allow"
-}
-```
+# Using dictionary
+from scm.config.security import SecurityRule
 
-</div>
+# Error: multiple containers specified
+try:
+    rule_dict = {
+        "name": "invalid-rule",
+        "folder": "Shared",
+        "device": "fw01",  # Can't specify both folder and device
+        "action": "allow"
+    }
+    security_rule = SecurityRule(api_client)
+    response = security_rule.create(rule_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 
-### Example with Pydantic Model
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
+# Using model directly
 from scm.models.security import SecurityRuleRequestModel
 
+# Error: no container specified
+try:
+    rule = SecurityRuleRequestModel(
+        name="invalid-rule",
+        action="allow"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+```
+
+</div>
+
+### List Field Validation
+
+All list fields are validated to ensure they contain only unique string values:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+try:
+    rule_dict = {
+        "name": "invalid-rule",
+        "folder": "Shared",
+        "source": ["10.0.0.0/8", "10.0.0.0/8"],  # Duplicate values not allowed
+        "action": "allow"
+    }
+    response = security_rule.create(rule_dict)
+except ValueError as e:
+    print(e)  # "List items must be unique"
+
+# Using model directly
+try:
+    rule = SecurityRuleRequestModel(
+        name="invalid-rule",
+        folder="Shared",
+        source=["10.0.0.0/8", "10.0.0.0/8"]
+    )
+except ValueError as e:
+    print(e)  # "List items must be unique"
+```
+
+</div>
+
+## Usage Examples
+
+### Creating a Basic Security Rule
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+rule_dict = {
+    "name": "allow-web",
+    "description": "Allow web traffic",
+    "folder": "Shared",
+    "from_": ["trust"],
+    "to_": ["untrust"],
+    "source": ["10.0.0.0/8"],
+    "destination": ["any"],
+    "application": ["web-browsing", "ssl"],
+    "service": ["application-default"],
+    "action": "allow",
+    "log_end": True
+}
+
+response = security_rule.create(rule_dict)
+
+# Using model directly
 rule = SecurityRuleRequestModel(
-    name="Allow_Web_Traffic",
+    name="allow-web",
+    description="Allow web traffic",
     folder="Shared",
     from_=["trust"],
     to_=["untrust"],
     source=["10.0.0.0/8"],
     destination=["any"],
-    application=["web-browsing"],
-    action="allow"
-)
-```
-
-</div>
-
-## SecurityRuleResponseModel
-
-Model used for Security Rule responses from the API.
-
-### Additional Attributes
-
-- `id` (str): UUID of the Security Rule
-- All attributes from SecurityRuleRequestModel
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security import SecurityRuleResponseModel
-
-response = SecurityRuleResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="Allow_Web_Traffic",
-    folder="Shared",
-    from_=["trust"],
-    to_=["untrust"],
-    source=["10.0.0.0/8"],
-    destination=["any"],
-    application=["web-browsing"],
-    action="allow"
-)
-```
-
-</div>
-
-## ProfileSetting
-
-Model for security profile settings within a rule.
-
-### Attributes
-
-- `group` (Optional[List[str]]): Security profile groups
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security import ProfileSetting
-
-profile = ProfileSetting(
-    group=["strict-security", "best-practice"]
-)
-```
-
-</div>
-
-## SecurityRuleMoveModel
-
-Model for rule movement operations.
-
-### Attributes
-
-- `source_rule` (str): UUID of rule to move
-- `destination` (RuleMoveDestination): Move destination (top, bottom, before, after)
-- `rulebase` (Rulebase): Target rulebase (pre, post)
-- `destination_rule` (Optional[str]): Reference rule UUID for before/after moves
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security import SecurityRuleMoveModel
-
-move_config = SecurityRuleMoveModel(
-    source_rule="123e4567-e89b-12d3-a456-426655440000",
-    destination="before",
-    rulebase="pre",
-    destination_rule="987fcdeb-51d3-a456-426655440000"
-)
-```
-
-</div>
-
-## Enums
-
-### Action
-
-- `allow`
-- `deny`
-- `drop`
-- `reset_client`
-- `reset_server`
-- `reset_both`
-
-### RuleMoveDestination
-
-- `TOP`
-- `BOTTOM`
-- `BEFORE`
-- `AFTER`
-
-### Rulebase
-
-- `PRE`
-- `POST`
-
-## Complete Example: Building a Comprehensive Security Rule Model
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security import (
-    SecurityRuleRequestModel,
-    ProfileSetting,
-    Action
-)
-
-# Create a comprehensive security rule
-rule = SecurityRuleRequestModel(
-    name="Comprehensive_Security_Rule",
-    description="Complete example of security rule configuration",
-    folder="Shared",
-    from_=["trust", "internal"],
-    to_=["untrust"],
-    source=["10.0.0.0/8", "192.168.0.0/16"],
-    negate_source=False,
-    source_user=["domain\\vpn-users"],
-    source_hip=["host-profile"],
-    destination=["any"],
-    negate_destination=False,
-    application=["web-browsing", "ssl", "http2"],
+    application=["web-browsing", "ssl"],
     service=["application-default"],
-    category=["any"],
-    action=Action.allow,
+    action="allow",
+    log_end=True
+)
+
+payload = rule.model_dump(exclude_unset=True)
+response = security_rule.create(payload)
+```
+
+</div>
+
+### Creating a Rule with Security Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+rule_dict = {
+    "name": "secure-web",
+    "folder": "Shared",
+    "from_": ["trust"],
+    "to_": ["untrust"],
+    "source": ["10.0.0.0/8"],
+    "destination": ["any"],
+    "application": ["web-browsing", "ssl"],
+    "action": "allow",
+    "profile_setting": {
+        "group": ["strict-security"]
+    },
+    "log_setting": "detailed-logging",
+    "log_start": True,
+    "log_end": True
+}
+
+response = security_rule.create(rule_dict)
+
+# Using model directly
+from scm.models.security import SecurityRuleRequestModel, ProfileSetting
+
+rule = SecurityRuleRequestModel(
+    name="secure-web",
+    folder="Shared",
+    from_=["trust"],
+    to_=["untrust"],
+    source=["10.0.0.0/8"],
+    destination=["any"],
+    application=["web-browsing", "ssl"],
+    action="allow",
     profile_setting=ProfileSetting(
         group=["strict-security"]
     ),
-    log_setting="default-logging",
+    log_setting="detailed-logging",
     log_start=True,
-    log_end=True,
-    tag=["production", "web-traffic"],
-    disabled=False
+    log_end=True
 )
 
-# Validate and export the model
-validated_data = rule.model_dump(exclude_none=True, by_alias=True)
-print("Validated Rule Configuration:")
-print(validated_data)
+payload = rule.model_dump(exclude_unset=True)
+response = security_rule.create(payload)
+```
+
+</div>
+
+### Moving a Security Rule
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+move_dict = {
+    "destination": "before",
+    "rulebase": "pre",
+    "destination_rule": "987fcdeb-51d3-a456-426655440000"
+}
+
+security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_dict)
+
+# Using model directly
+from scm.models.security import SecurityRuleMoveModel, RuleMoveDestination, Rulebase
+
+move_config = SecurityRuleMoveModel(
+    source_rule="123e4567-e89b-12d3-a456-426655440000",
+    destination=RuleMoveDestination.BEFORE,
+    rulebase=Rulebase.PRE,
+    destination_rule="987fcdeb-51d3-a456-426655440000"
+)
+
+payload = move_config.model_dump(exclude_unset=True)
+security_rule.move(move_config.source_rule, payload)
 ```
 
 </div>

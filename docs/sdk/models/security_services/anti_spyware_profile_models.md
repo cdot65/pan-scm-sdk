@@ -1,278 +1,235 @@
 # Anti-Spyware Profile Models
 
-This section covers the data models associated with the `AntiSpywareProfile` configuration object.
+## Overview
 
----
+The Anti-Spyware Profile models provide a structured way to manage anti-spyware security profiles in Palo Alto Networks'
+Strata Cloud Manager.
+These models support configuring rules, threat exceptions, and MICA engine settings to detect and prevent spyware
+threats. Profiles can be defined
+in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-## AntiSpywareProfileRequestModel
+## Attributes
 
-Used when creating or updating an anti-spyware profile object.
+| Attribute                   | Type                                | Required | Default | Description                                            |
+|-----------------------------|-------------------------------------|----------|---------|--------------------------------------------------------|
+| name                        | str                                 | Yes      | None    | Name of the profile                                    |
+| description                 | str                                 | No       | None    | Description of the profile                             |
+| cloud_inline_analysis       | bool                                | No       | False   | Enable/disable cloud inline analysis                   |
+| inline_exception_edl_url    | List[str]                           | No       | None    | List of inline exception EDL URLs                      |
+| inline_exception_ip_address | List[str]                           | No       | None    | List of inline exception IP addresses                  |
+| mica_engine_spyware_enabled | List[MicaEngineSpywareEnabledEntry] | No       | None    | List of MICA engine spyware enabled entries            |
+| folder                      | str                                 | No*      | None    | Folder where profile is defined. Max length: 64 chars  |
+| snippet                     | str                                 | No*      | None    | Snippet where profile is defined. Max length: 64 chars |
+| device                      | str                                 | No*      | None    | Device where profile is defined. Max length: 64 chars  |
+| rules                       | List[RuleRequest]                   | Yes      | None    | List of anti-spyware rules                             |
+| threat_exception            | List[ThreatExceptionRequest]        | No       | None    | List of threat exceptions                              |
+| id                          | UUID                                | Yes**    | None    | UUID of the profile (response only)                    |
 
-### Attributes
+\* Exactly one container type (folder/snippet/device) must be provided
+\** Only required for response model
 
-- `name` (str): **Required.** The name of the anti-spyware profile.
-- `description` (Optional[str]): A description of the anti-spyware profile.
-- `cloud_inline_analysis` (Optional[bool]): Enable or disable cloud inline analysis. Defaults to False.
-- `inline_exception_edl_url` (Optional[List[str]]): List of inline exception EDL URLs.
-- `inline_exception_ip_address` (Optional[List[str]]): List of inline exception IP addresses.
-- `mica_engine_spyware_enabled` (Optional[List[MicaEngineSpywareEnabledEntry]]): List of MICA engine spyware enabled
-  entries.
-- **Container Type Fields** (Exactly one must be provided):
-    - `folder` (Optional[str]): The folder where the profile is defined.
-    - `snippet` (Optional[str]): The snippet where the profile is defined.
-    - `device` (Optional[str]): The device where the profile is defined.
-- `rules` (List[RuleRequest]): **Required.** List of rules for the profile.
-- `threat_exception` (Optional[List[ThreatExceptionRequest]]): List of threat exceptions for the profile.
+## Model Validators
 
-### Example
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-anti_spyware_profile_request = AntiSpywareProfileRequestModel(
-    name="test_profile",
-    description="Test anti-spyware profile",
-    folder="Prisma Access",
-    rules=[
-        RuleRequest(
-            name="rule1",
-            severity=["critical", "high"],
-            category="spyware",
-            action=ActionRequest(root={"alert": {}})
-        )
-    ]
-)
+# Using dictionary
+from scm.config.security import AntiSpywareProfile
+
+# Error: multiple containers specified
+try:
+    profile_dict = {
+        "name": "invalid-profile",
+        "folder": "Shared",
+        "device": "fw01",  # Can't specify both folder and device
+        "rules": [{
+            "name": "rule1",
+            "severity": ["critical"],
+            "category": "spyware",
+            "action": {"alert": {}}
+        }]
+    }
+    profile = AntiSpywareProfile(api_client)
+    response = profile.create(profile_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+
+# Using model directly
+from scm.models.security import AntiSpywareProfileRequestModel
+
+# Error: no container specified
+try:
+    profile = AntiSpywareProfileRequestModel(
+        name="invalid-profile",
+        rules=[{
+            "name": "rule1",
+            "severity": ["critical"],
+            "category": "spyware",
+            "action": {"alert": {}}
+        }]
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
 </div>
 
----
+### Action Validation
 
-## AntiSpywareProfileResponseModel
-
-Used when parsing anti-spyware profile objects retrieved from the API.
-
-### Attributes
-
-- `id` (str): The UUID of the anti-spyware profile object.
-- `name` (str): The name of the anti-spyware profile.
-- `description` (Optional[str]): A description of the anti-spyware profile.
-- `cloud_inline_analysis` (Optional[bool]): Cloud inline analysis setting.
-- `inline_exception_edl_url` (Optional[List[str]]): List of inline exception EDL URLs.
-- `inline_exception_ip_address` (Optional[List[str]]): List of inline exception IP addresses.
-- `mica_engine_spyware_enabled` (Optional[List[MicaEngineSpywareEnabledEntry]]): List of MICA engine spyware enabled
-  entries.
-- **Container Type Fields**:
-    - `folder` (Optional[str]): The folder where the profile is defined.
-    - `snippet` (Optional[str]): The snippet where the profile is defined.
-    - `device` (Optional[str]): The device where the profile is defined.
-- `rules` (List[RuleResponse]): List of rules for the profile.
-- `threat_exception` (Optional[List[ThreatExceptionResponse]]): List of threat exceptions for the profile.
-
-### Example
+For rules and threat exceptions, exactly one action type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-anti_spyware_profile_response = AntiSpywareProfileResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="test_profile",
-    description="Test anti-spyware profile",
-    folder="Prisma Access",
-    rules=[
-        RuleResponse(
-            name="rule1",
-            severity=["critical", "high"],
-            category="spyware",
-            action=ActionResponse(root={"alert": {}})
-        )
-    ]
-)
+# Using dictionary
+try:
+    rule_dict = {
+        "name": "invalid-rule",
+        "severity": ["critical"],
+        "category": "spyware",
+        "action": {
+            "alert": {},
+            "drop": {}  # Can't specify multiple actions
+        }
+    }
+    profile_dict = {
+        "name": "test-profile",
+        "folder": "Shared",
+        "rules": [rule_dict]
+    }
+    response = profile.create(profile_dict)
+except ValueError as e:
+    print(e)  # "Exactly one action must be provided in 'action' field."
+
+# Using model directly
+from scm.models.security import RuleRequest, ActionRequest
+
+try:
+    action = ActionRequest(root={"alert": {}, "drop": {}})
+    rule = RuleRequest(
+        name="invalid-rule",
+        severity=["critical"],
+        category="spyware",
+        action=action
+    )
+except ValueError as e:
+    print(e)  # "Exactly one action must be provided in 'action' field."
 ```
 
 </div>
 
----
+## Usage Examples
 
-## Additional Models
-
-### MicaEngineSpywareEnabledEntry
-
-Represents an entry in the 'mica_engine_spyware_enabled' list.
-
-#### Attributes
-
-- `name` (str): Name of the MICA engine spyware detector.
-- `inline_policy_action` (InlinePolicyAction): Action to be taken by the inline policy.
-
-### Example
+### Creating a Basic Profile
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-mica_entry = MicaEngineSpywareEnabledEntry(
-    name="mica_detector1",
-    inline_policy_action=InlinePolicyAction.alert
-)
-```
+# Using dictionary
+basic_dict = {
+    "name": "basic-profile",
+    "description": "Basic anti-spyware profile",
+    "folder": "Shared",
+    "rules": [{
+        "name": "basic-rule",
+        "severity": ["critical", "high"],
+        "category": "spyware",
+        "action": {"alert": {}}
+    }]
+}
 
-</div>
+profile = AntiSpywareProfile(api_client)
+response = profile.create(basic_dict)
 
-### RuleRequest and RuleResponse
-
-Represents a rule in the anti-spyware profile.
-
-#### Attributes
-
-- `name` (str): Rule name.
-- `severity` (List[Severity]): List of severities.
-- `category` (Category): Category of the rule.
-- `threat_name` (Optional[str]): Threat name.
-- `packet_capture` (Optional[PacketCapture]): Packet capture setting.
-- `action` (ActionRequest or ActionResponse): Action to be taken.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-rule_request = RuleRequest(
-    name="rule1",
-    severity=[Severity.critical, Severity.high],
-    category=Category.spyware,
-    action=ActionRequest(root={"alert": {}})
-)
-```
-
-</div>
-
-### ThreatExceptionRequest and ThreatExceptionResponse
-
-Represents a threat exception in the anti-spyware profile.
-
-#### Attributes
-
-- `name` (str): Threat exception name.
-- `packet_capture` (PacketCapture): Packet capture setting.
-- `exempt_ip` (Optional[List[ExemptIpEntry]]): Exempt IP list.
-- `notes` (Optional[str]): Notes.
-- `action` (ActionRequest or ActionResponse): Action to be taken.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-threat_exception_request = ThreatExceptionRequest(
-    name="exception1",
-    packet_capture=PacketCapture.single_packet,
-    action=ActionRequest(root={"allow": {}}),
-    exempt_ip=[ExemptIpEntry(name="10.0.0.1")]
-)
-```
-
-</div>
-
-### ActionRequest and ActionResponse
-
-Represents the 'action' field in rules and threat exceptions.
-
-#### Methods
-
-- `get_action_name() -> str`: Returns the name of the action.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-action_request = ActionRequest(root={"block_ip": {"track_by": "source", "duration": 300}})
-print(f"Action name: {action_request.get_action_name()}")
-```
-
-</div>
-
-### Enums
-
-- `InlinePolicyAction`: Enumeration of allowed inline policy actions.
-- `PacketCapture`: Enumeration of packet capture options.
-- `Severity`: Enumeration of severity levels.
-- `Category`: Enumeration of threat categories.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-severity = Severity.high
-category = Category.dns_security
-packet_capture = PacketCapture.extended_capture
-```
-
-</div>
-
----
-
-## Full Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
+# Using model directly
 from scm.models.security import (
     AntiSpywareProfileRequestModel,
     RuleRequest,
     ActionRequest,
-    ThreatExceptionRequest,
-    MicaEngineSpywareEnabledEntry,
-    ExemptIpEntry,
     Severity,
-    Category,
-    PacketCapture,
-    InlinePolicyAction
+    Category
 )
 
-# Create a comprehensive anti-spyware profile request
-profile_request = AntiSpywareProfileRequestModel(
-    name="comprehensive_profile",
-    description="A comprehensive anti-spyware profile",
-    folder="Prisma Access",
-    cloud_inline_analysis=True,
-    inline_exception_edl_url=["http://example.com/edl1"],
-    inline_exception_ip_address=["192.168.1.1"],
-    mica_engine_spyware_enabled=[
-        MicaEngineSpywareEnabledEntry(
-            name="mica_detector1",
-            inline_policy_action=InlinePolicyAction.alert
-        )
-    ],
+basic_profile = AntiSpywareProfileRequestModel(
+    name="basic-profile",
+    description="Basic anti-spyware profile",
+    folder="Shared",
     rules=[
         RuleRequest(
-            name="rule1",
+            name="basic-rule",
             severity=[Severity.critical, Severity.high],
             category=Category.spyware,
             action=ActionRequest(root={"alert": {}})
-        ),
+        )
+    ]
+)
+
+payload = basic_profile.model_dump(exclude_unset=True)
+response = profile.create(payload)
+```
+
+</div>
+
+### Creating a Profile with Threat Exceptions
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+advanced_dict = {
+    "name": "advanced-profile",
+    "folder": "Security",
+    "cloud_inline_analysis": True,
+    "rules": [{
+        "name": "strict-rule",
+        "severity": ["critical"],
+        "category": "spyware",
+        "action": {"block_ip": {"track_by": "source", "duration": 300}}
+    }],
+    "threat_exception": [{
+        "name": "exception1",
+        "packet_capture": "single-packet",
+        "action": {"allow": {}},
+        "exempt_ip": [{"name": "10.0.0.1"}]
+    }]
+}
+
+response = profile.create(advanced_dict)
+
+# Using model directly
+from scm.models.security import (
+    ThreatExceptionRequest,
+    ExemptIpEntry,
+    PacketCapture
+)
+
+advanced_profile = AntiSpywareProfileRequestModel(
+    name="advanced-profile",
+    folder="Security",
+    cloud_inline_analysis=True,
+    rules=[
         RuleRequest(
-            name="rule2",
-            severity=[Severity.medium],
-            category=Category.dns_security,
-            action=ActionRequest(root={"drop": {}})
+            name="strict-rule",
+            severity=[Severity.critical],
+            category=Category.spyware,
+            action=ActionRequest(root={
+                "block_ip": {
+                    "track_by": "source",
+                    "duration": 300
+                }
+            })
         )
     ],
     threat_exception=[
@@ -285,15 +242,53 @@ profile_request = AntiSpywareProfileRequestModel(
     ]
 )
 
-# Convert the model to a dictionary
-profile_dict = profile_request.model_dump(exclude_unset=True)
-
-print("Anti-Spyware Profile Request:")
-print(profile_dict)
+payload = advanced_profile.model_dump(exclude_unset=True)
+response = profile.create(payload)
 ```
 
 </div>
 
-This example demonstrates how to create a comprehensive `AntiSpywareProfileRequestModel` object with various settings,
-including rules, threat exceptions, and MICA engine configurations. The resulting object can be used with the
-`AntiSpywareProfile.create()` method to create a new anti-spyware profile in the Strata Cloud Manager.
+### Updating a Profile
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+update_dict = {
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "updated-profile",
+    "description": "Updated profile",
+    "rules": [{
+        "name": "updated-rule",
+        "severity": ["high"],
+        "category": "dns-security",
+        "action": {"drop": {}}
+    }]
+}
+
+response = profile.update(update_dict)
+
+# Using model directly
+from scm.models.security import AntiSpywareProfileUpdateModel
+
+update_profile = AntiSpywareProfileUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="updated-profile",
+    description="Updated profile",
+    rules=[
+        RuleRequest(
+            name="updated-rule",
+            severity=[Severity.high],
+            category=Category.dns_security,
+            action=ActionRequest(root={"drop": {}})
+        )
+    ]
+)
+
+payload = update_profile.model_dump(exclude_unset=True)
+response = profile.update(payload)
+```
+
+</div>

@@ -1,263 +1,214 @@
-# Address Models
+# Address Group Models
 
-This section covers the data models associated with the `Address` configuration object.
+## Overview
 
----
+The Address Group models provide a structured way to manage address groups in Palo Alto Networks' Strata Cloud Manager.
+These models support both static and dynamic address groups, which can be defined in folders, snippets, or devices. The
+models handle validation of inputs and outputs when interacting with the SCM API.
 
-## AddressCreateModel
+## Attributes
 
-Used when creating or updating an address object.
+| Attribute   | Type          | Required | Default | Description                                                                              |
+|-------------|---------------|----------|---------|------------------------------------------------------------------------------------------|
+| name        | str           | Yes      | None    | Name of the address group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| description | str           | No       | None    | Description of the address group. Max length: 1023 chars                                 |
+| tag         | List[str]     | No       | None    | List of tags. Each tag max length: 64 chars                                              |
+| dynamic     | DynamicFilter | No*      | None    | Dynamic filter for group membership                                                      |
+| static      | List[str]     | No*      | None    | List of static addresses. Min: 1, Max: 255                                               |
+| folder      | str           | No**     | None    | Folder where group is defined. Max length: 64 chars                                      |
+| snippet     | str           | No**     | None    | Snippet where group is defined. Max length: 64 chars                                     |
+| device      | str           | No**     | None    | Device where group is defined. Max length: 64 chars                                      |
+| id          | str           | Yes***   | None    | UUID of the address group (response only)                                                |
 
-### Attributes
+\* Either dynamic or static must be provided, but not both
+\** Exactly one container type (folder/snippet/device) must be provided
+\*** Only required for response model
 
-- `name` (str): **Required.** The name of the address object.
-- `description` (Optional[str]): A description of the address object.
-- `tag` (Optional[List[str]]): Tags associated with the address object.
-- **Address Type Fields** (Exactly one must be provided):
-    - `ip_netmask` (Optional[str]): IP address with or without CIDR notation.
-    - `ip_range` (Optional[str]): IP address range.
-    - `ip_wildcard` (Optional[str]): IP wildcard mask.
-    - `fqdn` (Optional[str]): Fully qualified domain name.
-- **Container Type Fields** (Exactly one must be provided):
-    - `folder` (Optional[str]): The folder where the address is defined.
-    - `snippet` (Optional[str]): The snippet where the address is defined.
-    - `device` (Optional[str]): The device where the address is defined.
+## Model Validators
 
-### Examples
+### Address Group Type Validation
 
-**Example 1: IP/Netmask Address**
+The models enforce that exactly one group type (static or dynamic) must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-address_request = AddressCreateModel(
-    name="internal_network",
-    ip_netmask="192.168.1.0/24",
-    description="Internal network address",
-    folder="Shared",
-    tag=["internal"]
-)
+# Using dictionary
+from scm.config.objects import AddressGroup
 
-# As a dictionary
-address_dict = {
-    "name": "internal_network",
-    "ip_netmask": "192.168.1.0/24",
-    "description": "Internal network address",
+# Error: both static and dynamic provided
+try:
+    group_dict = {
+        "name": "invalid-group",
+        "static": ["addr1"],
+        "dynamic": {"filter": "'tag1'"},
+        "folder": "Shared"
+    }
+    address_group = AddressGroup(api_client)
+    response = address_group.create(group_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
+
+# Using model directly
+from scm.models.objects import AddressGroupCreateModel
+
+# Error: neither static nor dynamic provided
+try:
+    group = AddressGroupCreateModel(
+        name="invalid-group",
+        folder="Shared"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
+```
+
+</div>
+
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+try:
+    group_dict = {
+        "name": "invalid-group",
+        "static": ["addr1"],
+        "folder": "Shared",
+        "device": "fw01"  # Can't specify both folder and device
+    }
+    response = address_group.create(group_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+
+# Using model directly
+try:
+    group = AddressGroupCreateModel(
+        name="invalid-group",
+        static=["addr1"],
+        folder="Shared",
+        device="fw01"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+```
+
+</div>
+
+## Usage Examples
+
+### Creating a Static Address Group
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+from scm.config.objects import AddressGroup
+
+static_group_dict = {
+    "name": "web-servers",
+    "description": "Web server group",
+    "static": ["web1", "web2", "web3"],
     "folder": "Shared",
-    "tag": ["internal"]
+    "tag": ["web", "production"]
 }
-```
 
-</div>
+address_group = AddressGroup(api_client)
+response = address_group.create(static_group_dict)
 
-**Example 2: FQDN Address**
+# Using model directly
+from scm.models.objects import AddressGroupCreateModel
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-address_request = AddressCreateModel(
-    name="example_website",
-    fqdn="www.example.com",
-    description="Example website address",
-    folder="Prisma Access"
-)
-
-# As a dictionary
-address_dict = {
-    "name": "example_website",
-    "fqdn": "www.example.com",
-    "description": "Example website address",
-    "folder": "Prisma Access"
-}
-```
-
-</div>
-
-**Example 3: IP Range Address**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-address_request = AddressCreateModel(
-    name="dhcp_range",
-    ip_range="10.0.0.100-10.0.0.200",
-    description="DHCP address range",
-    snippet="Network Config"
-)
-
-# As a dictionary
-address_dict = {
-    "name": "dhcp_range",
-    "ip_range": "10.0.0.100-10.0.0.200",
-    "description": "DHCP address range",
-    "snippet": "Network Config"
-}
-```
-
-</div>
-
----
-
-## AddressResponseModel
-
-Used when parsing address objects retrieved from the API.
-
-### Attributes
-
-- `id` (str): The UUID of the address object.
-- `name` (str): The name of the address object.
-- `description` (Optional[str]): A description of the address object.
-- `tag` (Optional[List[str]]): Tags associated with the address object.
-- **Address Type Fields**:
-    - `ip_netmask` (Optional[str]): IP address with or without CIDR notation.
-    - `ip_range` (Optional[str]): IP address range.
-    - `ip_wildcard` (Optional[str]): IP wildcard mask.
-    - `fqdn` (Optional[str]): Fully qualified domain name.
-- **Container Type Fields**:
-    - `folder` (Optional[str]): The folder where the address is defined.
-    - `snippet` (Optional[str]): The snippet where the address is defined.
-    - `device` (Optional[str]): The device where the address is defined.
-
-### Examples
-
-**Example 1: IP/Netmask Address Response**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-address_response = AddressResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="internal_network",
-    ip_netmask="192.168.1.0/24",
-    description="Internal network address",
+static_group = AddressGroupCreateModel(
+    name="web-servers",
+    description="Web server group",
+    static=["web1", "web2", "web3"],
     folder="Shared",
-    tag=["internal"]
+    tag=["web", "production"]
 )
 
-# As a dictionary
-address_dict = {
+payload = static_group.model_dump(exclude_unset=True)
+response = address_group.create(payload)
+```
+
+</div>
+
+### Creating a Dynamic Address Group
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+dynamic_group_dict = {
+    "name": "aws-instances",
+    "description": "AWS EC2 instances",
+    "dynamic": {
+        "filter": "'aws-tag' and 'production'"
+    },
+    "folder": "Cloud",
+    "tag": ["aws", "dynamic"]
+}
+
+response = address_group.create(dynamic_group_dict)
+
+# Using model directly
+from scm.models.objects import AddressGroupCreateModel, DynamicFilter
+
+dynamic_group = AddressGroupCreateModel(
+    name="aws-instances",
+    description="AWS EC2 instances",
+    dynamic=DynamicFilter(filter="'aws-tag' and 'production'"),
+    folder="Cloud",
+    tag=["aws", "dynamic"]
+)
+
+payload = dynamic_group.model_dump(exclude_unset=True)
+response = address_group.create(payload)
+```
+
+</div>
+
+### Updating an Address Group
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+update_dict = {
     "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "internal_network",
-    "ip_netmask": "192.168.1.0/24",
-    "description": "Internal network address",
-    "folder": "Shared",
-    "tag": ["internal"]
+    "name": "web-servers-updated",
+    "description": "Updated web server group",
+    "static": ["web1", "web2", "web3", "web4"],
+    "tag": ["web", "production", "updated"]
 }
-```
 
-</div>
+response = address_group.update(update_dict)
 
-**Example 2: FQDN Address Response**
+# Using model directly
+from scm.models.objects import AddressGroupUpdateModel
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-address_response = AddressResponseModel(
-    id="234e5678-f89c-23d4-b567-537766551111",
-    name="example_website",
-    fqdn="www.example.com",
-    description="Example website address",
-    folder="Prisma Access"
+update_group = AddressGroupUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="web-servers-updated",
+    description="Updated web server group",
+    static=["web1", "web2", "web3", "web4"],
+    tag=["web", "production", "updated"]
 )
 
-# As a dictionary
-address_dict = {
-    "id": "234e5678-f89c-23d4-b567-537766551111",
-    "name": "example_website",
-    "fqdn": "www.example.com",
-    "description": "Example website address",
-    "folder": "Prisma Access"
-}
+payload = update_group.model_dump(exclude_unset=True)
+response = address_group.update(payload)
 ```
 
 </div>
-
-**Example 3: IP Range Address Response**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-address_response = AddressResponseModel(
-    id="345e6789-g90d-34e5-c678-648877662222",
-    name="dhcp_range",
-    ip_range="10.0.0.100-10.0.0.200",
-    description="DHCP address range",
-    snippet="Network Config"
-)
-
-# As a dictionary
-address_dict = {
-    "id": "345e6789-g90d-34e5-c678-648877662222",
-    "name": "dhcp_range",
-    "ip_range": "10.0.0.100-10.0.0.200",
-    "description": "DHCP address range",
-    "snippet": "Network Config"
-}
-```
-
-</div>
-
----
-
-## Full Example: Creating and Using Address Models
-
-Here's a complete example demonstrating how to create and use Address models:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import AddressCreateModel, AddressResponseModel
-
-# Create an AddressCreateModel
-address_request = AddressCreateModel(
-  name="corporate_network",
-  ip_netmask="172.16.0.0/16",
-  description="Corporate network address space",
-  folder="Global",
-  tag=["corporate", "internal"]
-)
-
-# Convert to dictionary for API request
-address_dict = address_request.model_dump(exclude_unset=True)
-
-# Simulate API response
-api_response = {
-  "id": "456f7890-h01e-45f6-d789-759988773333",
-  "name": "corporate_network",
-  "ip_netmask": "172.16.0.0/16",
-  "description": "Corporate network address space",
-  "folder": "Global",
-  "tag": ["corporate", "internal"]
-}
-
-# Create an AddressResponseModel from API response
-address_response = AddressResponseModel(**api_response)
-
-# Use the response model
-print(f"Address ID: {address_response.id}")
-print(f"Address Name: {address_response.name}")
-print(f"IP/Netmask: {address_response.ip_netmask}")
-print(f"Description: {address_response.description}")
-print(f"Folder: {address_response.folder}")
-print(f"Tags: {', '.join(address_response.tag)}")
-```
-
-</div>
-
-This example shows how to create an `AddressCreateModel`, convert it to a dictionary for an API request, and then
-create an `AddressResponseModel` from a simulated API response. It demonstrates the full lifecycle of working with
-Address models in the SDK.

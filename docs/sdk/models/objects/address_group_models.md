@@ -1,241 +1,197 @@
 # Address Group Models
 
-This section covers the data models associated with the `AddressGroup` configuration object.
+## Overview
 
----
+The Address Group models provide a structured way to manage address groups in Palo Alto Networks' Strata Cloud Manager.
+These models support both static and dynamic address groups, which can be defined in folders, snippets, or devices. The
+models handle validation of inputs and outputs when interacting with the SCM API.
 
-## AddressGroupRequestModel
+## Attributes
 
-Used when creating or updating an address group.
+| Attribute   | Type          | Required | Default | Description                                                                              |
+|-------------|---------------|----------|---------|------------------------------------------------------------------------------------------|
+| name        | str           | Yes      | None    | Name of the address group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| description | str           | No       | None    | Description of the address group. Max length: 1023 chars                                 |
+| tag         | List[str]     | No       | None    | List of tags. Each tag max length: 64 chars                                              |
+| dynamic     | DynamicFilter | No*      | None    | Dynamic filter for group membership                                                      |
+| static      | List[str]     | No*      | None    | List of static addresses. Min: 1, Max: 255                                               |
+| folder      | str           | No**     | None    | Folder where group is defined. Max length: 64 chars                                      |
+| snippet     | str           | No**     | None    | Snippet where group is defined. Max length: 64 chars                                     |
+| device      | str           | No**     | None    | Device where group is defined. Max length: 64 chars                                      |
+| id          | str           | Yes***   | None    | UUID of the address group (response only)                                                |
 
-### Attributes
+\* Either dynamic or static must be provided, but not both
+\** Exactly one container type (folder/snippet/device) must be provided
+\*** Only required for response model
 
-- `name` (str): **Required.** The name of the address group. Max length: 63 characters.
-- `description` (Optional[str]): A description of the address group. Max length: 1023 characters.
-- `tag` (Optional[List[str]]): Tags associated with the address group. Max length: 64 characters per tag.
-- **Group Type Fields** (Exactly one must be provided):
-    - `static` (Optional[List[str]]): List of address names for static groups. Min length: 1, Max length: 255.
-    - `dynamic` (Optional[DynamicFilter]): Dynamic filter for dynamic groups.
-- **Container Type Fields** (Exactly one must be provided):
-    - `folder` (Optional[str]): The folder where the group is defined. Max length: 64 characters.
-    - `snippet` (Optional[str]): The snippet where the group is defined. Max length: 64 characters.
-    - `device` (Optional[str]): The device where the group is defined. Max length: 64 characters.
+## Model Validators
 
-### DynamicFilter Model
+### Address Group Type Validation
 
-- `filter` (str): **Required.** Tag-based filter defining group membership. Max length: 1024 characters.
-
-### Example 1 (Static Group)
+The models enforce that exactly one group type (static or dynamic) must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.objects import AddressGroupRequestModel
+# This will raise a validation error
+from scm.models.objects import AddressGroupCreateModel
 
-address_group_request = AddressGroupRequestModel(
-    name="example-static-group",
-    description="Test static address group",
-    static=["server1", "server2", "server3"],
-    folder="Prisma Access",
-    tag=["production", "web-servers"]
-)
+# Error: both static and dynamic provided
+try:
+    group = AddressGroupCreateModel(
+        name="invalid-group",
+        static=["addr1"],
+        dynamic={"filter": "'tag1'"},
+        folder="Shared"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
 
-print(address_group_request.model_dump_json(indent=2))
+# Error: neither static nor dynamic provided
+try:
+    group = AddressGroupCreateModel(
+        name="invalid-group",
+        folder="Shared"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
 ```
 
 </div>
 
-### Example 2 (Dynamic Group)
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.objects import AddressGroupRequestModel, DynamicFilter
-
-address_group_request = AddressGroupRequestModel(
-    name="example-dynamic-group",
-    description="Test dynamic address group",
-    dynamic=DynamicFilter(filter="'aws-tag' and 'production'"),
-    folder="Prisma Access",
-    tag=["dynamic", "aws"]
-)
-
-print(address_group_request.model_dump_json(indent=2))
+# This will raise a validation error
+try:
+    group = AddressGroupCreateModel(
+        name="invalid-group",
+        static=["addr1"],
+        folder="Shared",
+        device="fw01"  # Can't specify both folder and device
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
 </div>
 
-### Example 3 (Static Group with Snippet)
+## Usage Examples
+
+### Creating a Static Address Group
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-address_group_request = AddressGroupRequestModel(
-    name="snippet-static-group",
-    description="Static group in a snippet",
-    static=["app1", "app2"],
-    snippet="MySnippet",
-    tag=["snippet", "apps"]
-)
+# Using dictionary
+from scm.config.objects import AddressGroup
 
-print(address_group_request.model_dump_json(indent=2))
-```
+static_group_dict = {
+    "name": "web-servers",
+    "description": "Web server group",
+    "static": ["web1", "web2", "web3"],
+    "folder": "Shared",
+    "tag": ["web", "production"]
+}
 
-</div>
+address_group = AddressGroup(api_client)
+response = address_group.create(static_group_dict)
 
----
+# Using model directly
+from scm.models.objects import AddressGroupCreateModel
 
-## AddressGroupResponseModel
-
-Used when parsing address groups retrieved from the API.
-
-### Attributes
-
-- `id` (Optional[str]): The UUID of the address group.
-- `name` (str): The name of the address group. Max length: 63 characters.
-- `description` (Optional[str]): A description of the address group. Max length: 1023 characters.
-- `tag` (Optional[List[str]]): Tags associated with the address group. Max length: 64 characters per tag.
-- **Group Type Fields**:
-    - `static` (Optional[List[str]]): List of address names for static groups. Min length: 1, Max length: 255.
-    - `dynamic` (Optional[DynamicFilter]): Dynamic filter for dynamic groups.
-- **Container Type Fields**:
-    - `folder` (Optional[str]): The folder where the group is defined. Max length: 64 characters.
-    - `snippet` (Optional[str]): The snippet where the group is defined. Max length: 64 characters.
-    - `device` (Optional[str]): The device where the group is defined. Max length: 64 characters.
-
-### Example 4 (Static Group Response)
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import AddressGroupResponseModel
-
-address_group_response = AddressGroupResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="example-static-group",
-    description="Test static address group",
-    static=["server1", "server2", "server3"],
-    folder="Prisma Access",
-    tag=["production", "web-servers"]
-)
-
-print(address_group_response.model_dump_json(indent=2))
-```
-
-</div>
-
-### Example 5 (Dynamic Group Response)
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import AddressGroupResponseModel, DynamicFilter
-
-address_group_response = AddressGroupResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440001",
-    name="example-dynamic-group",
-    description="Test dynamic address group",
-    dynamic=DynamicFilter(filter="'aws-tag' and 'production'"),
-    folder="Prisma Access",
-    tag=["dynamic", "aws"]
-)
-
-print(address_group_response.model_dump_json(indent=2))
-```
-
-</div>
-
-### Example 6 (Static Group Response with Device)
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-address_group_response = AddressGroupResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440002",
-    name="device-static-group",
-    description="Static group on a device",
-    static=["internal1", "internal2"],
-    device="firewall-01",
-    tag=["device", "internal"]
-)
-
-print(address_group_response.model_dump_json(indent=2))
-```
-
-</div>
-
----
-
-## Full Pydantic Model Usage Example
-
-Here's a complete example demonstrating how to use the AddressGroup Pydantic models:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import AddressGroupRequestModel, AddressGroupResponseModel, DynamicFilter
-
-# Create a static address group request
-static_group_request = AddressGroupRequestModel(
+static_group = AddressGroupCreateModel(
     name="web-servers",
-    description="Web server address group",
-    static=["web1.example.com", "web2.example.com"],
-    folder="Prisma Access",
-    tag=["production", "web"]
+    description="Web server group",
+    static=["web1", "web2", "web3"],
+    folder="Shared",
+    tag=["web", "production"]
 )
 
-print("Static Group Request:")
-print(static_group_request.model_dump_json(indent=2))
-print("\n")
-
-# Create a dynamic address group request
-dynamic_group_request = AddressGroupRequestModel(
-    name="dynamic-db-servers",
-    description="Dynamic database server address group",
-    dynamic=DynamicFilter(filter="'database-server' and 'production'"),
-    folder="Prisma Access",
-    tag=["production", "database"]
-)
-
-print("Dynamic Group Request:")
-print(dynamic_group_request.model_dump_json(indent=2))
-print("\n")
-
-# Simulate API response for static group
-static_group_response = AddressGroupResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    **static_group_request.model_dump()
-)
-
-print("Static Group Response:")
-print(static_group_response.model_dump_json(indent=2))
-print("\n")
-
-# Simulate API response for dynamic group
-dynamic_group_response = AddressGroupResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440001",
-    **dynamic_group_request.model_dump()
-)
-
-print("Dynamic Group Response:")
-print(dynamic_group_response.model_dump_json(indent=2))
+payload = static_group.model_dump(exclude_unset=True)
+response = address_group.create(payload)
 ```
 
 </div>
 
-This example shows how to create both static and dynamic address group requests, and how the response models would look
-after the groups are created.
+### Creating a Dynamic Address Group
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+dynamic_group_dict = {
+    "name": "aws-instances",
+    "description": "AWS EC2 instances",
+    "dynamic": {
+        "filter": "'aws-tag' and 'production'"
+    },
+    "folder": "Cloud",
+    "tag": ["aws", "dynamic"]
+}
+
+response = address_group.create(dynamic_group_dict)
+
+# Using model directly
+from scm.models.objects import AddressGroupCreateModel, DynamicFilter
+
+dynamic_group = AddressGroupCreateModel(
+    name="aws-instances",
+    description="AWS EC2 instances",
+    dynamic=DynamicFilter(filter="'aws-tag' and 'production'"),
+    folder="Cloud",
+    tag=["aws", "dynamic"]
+)
+
+payload = dynamic_group.model_dump(exclude_unset=True)
+response = address_group.create(payload)
+```
+
+</div>
+
+### Updating an Address Group
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+update_dict = {
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "web-servers-updated",
+    "description": "Updated web server group",
+    "static": ["web1", "web2", "web3", "web4"],
+    "tag": ["web", "production", "updated"]
+}
+
+response = address_group.update(update_dict)
+
+# Using model directly
+from scm.models.objects import AddressGroupUpdateModel
+
+update_group = AddressGroupUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="web-servers-updated",
+    description="Updated web server group",
+    static=["web1", "web2", "web3", "web4"],
+    tag=["web", "production", "updated"]
+)
+
+payload = update_group.model_dump(exclude_unset=True)
+response = address_group.update(payload)
+```
+
+</div>
