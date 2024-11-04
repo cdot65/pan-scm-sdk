@@ -3,8 +3,9 @@
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileRequestModel,
+    WildfireAntivirusProfileCreateModel,
     WildfireAntivirusProfileResponseModel,
+    WildfireAntivirusProfileUpdateModel,
 )
 from scm.exceptions import ValidationError
 
@@ -43,7 +44,7 @@ class WildfireAntivirusProfile(BaseObject):
         Returns:
             WildfireAntivirusProfileResponseModel: The created profile.
         """
-        profile = WildfireAntivirusProfileRequestModel(**data)
+        profile = WildfireAntivirusProfileCreateModel(**data)
         payload = profile.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return WildfireAntivirusProfileResponseModel(**response)
@@ -75,7 +76,7 @@ class WildfireAntivirusProfile(BaseObject):
         Returns:
             WildfireAntivirusProfileResponseModel: The updated profile.
         """
-        profile = WildfireAntivirusProfileRequestModel(**data)
+        profile = WildfireAntivirusProfileUpdateModel(**data)
         payload = profile.model_dump(exclude_unset=True)
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)

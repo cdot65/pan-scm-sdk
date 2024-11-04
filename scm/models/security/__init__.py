@@ -25,6 +25,7 @@ from .vulnerability_protection_profiles import (
     VulnerabilityProtectionProfileUpdateModel,
 )
 from .wildfire_antivirus_profiles import (
+    WildfireAntivirusProfileCreateModel,
     WildfireAntivirusProfileResponseModel,
-    WildfireAntivirusProfileRequestModel,
+    WildfireAntivirusProfileUpdateModel,
 )
