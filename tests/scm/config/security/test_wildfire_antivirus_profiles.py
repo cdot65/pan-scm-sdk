@@ -601,6 +601,43 @@ class TestWildfireAntivirusProfileValidation(TestWildfireAntivirusProfileBase):
         assert "Offset must be a non-negative integer" in str(exc_info.value)
         assert "Limit must be a positive integer" in str(exc_info.value)
 
+    def test_response_model_id_validation(self):
+        """Test UUID validation in ResponseModel."""
+        # Test invalid UUID format
+        invalid_data = {
+            "id": "not-a-uuid",
+            "name": "TestProfile",
+            "folder": "All",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "direction": "both",
+                    "application": ["any"],
+                    "file_type": ["any"],
+                }
+            ],
+        }
+        with pytest.raises(ValueError) as exc_info:
+            WildfireAntivirusProfileResponseModel(**invalid_data)
+        assert "Invalid UUID format for 'id'" in str(exc_info.value)
+
+        # Test valid UUID format
+        valid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "All",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "direction": "both",
+                    "application": ["any"],
+                    "file_type": ["any"],
+                }
+            ],
+        }
+        model = WildfireAntivirusProfileResponseModel(**valid_data)
+        assert model.id == "123e4567-e89b-12d3-a456-426655440000"
+
 
 class TestSuite(
     TestWildfireAntivirusProfileAPI,
