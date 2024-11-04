@@ -1,6 +1,6 @@
 # scm/models/security/decryption_profiles.py
 
-from typing import List, Optional
+from typing import Optional
 from pydantic import (
     BaseModel,
     Field,
@@ -24,7 +24,7 @@ class SSLVersion(str, Enum):
     max = "max"
 
 
-# Define the order of SSL/TLS versions
+# Constants
 SSL_VERSIONS_ORDER = [
     "sslv3",
     "tls1-0",
@@ -35,7 +35,7 @@ SSL_VERSIONS_ORDER = [
 ]
 
 
-# Models for ssl_protocol_settings
+# Component Models
 class SSLProtocolSettings(BaseModel):
     """Represents SSL protocol settings."""
 
@@ -113,7 +113,6 @@ class SSLProtocolSettings(BaseModel):
         return self
 
 
-# Models for ssl_forward_proxy
 class SSLForwardProxy(BaseModel):
     """Represents SSL Forward Proxy settings."""
 
@@ -134,8 +133,7 @@ class SSLForwardProxy(BaseModel):
         description="Block certificates that have timed out",
     )
     block_tls13_downgrade_no_resource: bool = Field(
-        False,
-        description="Block TLS 1.3 downgrade when no resource is available",
+        False, description="Block TLS 1.3 downgrade when no resource is available,"
     )
     block_unknown_cert: bool = Field(
         False,
@@ -163,13 +161,12 @@ class SSLForwardProxy(BaseModel):
     )
 
 
-# Models for ssl_inbound_proxy
 class SSLInboundProxy(BaseModel):
     """Represents SSL Inbound Proxy settings."""
 
     block_if_hsm_unavailable: bool = Field(
         False,
-        description="Block if HSM (Hardware Security Module) is unavailable",
+        description="Block if HSM is unavailable",
     )
     block_if_no_resource: bool = Field(
         False,
@@ -185,7 +182,6 @@ class SSLInboundProxy(BaseModel):
     )
 
 
-# Models for ssl_no_proxy
 class SSLNoProxy(BaseModel):
     """Represents SSL No Proxy settings."""
 
@@ -200,16 +196,16 @@ class SSLNoProxy(BaseModel):
 
 
 class DecryptionProfileBaseModel(BaseModel):
-    """
-    Base model for Decryption Profile, containing common fields.
-    """
+    """Base model for Decryption Profile containing common fields."""
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
 
     name: str = Field(
         ...,
-        description=(
-            "Must start with alphanumeric char and should contain only alphanumeric, "
-            "underscore, hyphen, dot or space"
-        ),
+        description="Must start with alphanumeric char and contain only alphanumeric, underscore, hyphen, dot or space",
         pattern=r"^[A-Za-z0-9]{1}[A-Za-z0-9_\-\.\s]{0,}$",
     )
     ssl_forward_proxy: Optional[SSLForwardProxy] = Field(
@@ -229,12 +225,6 @@ class DecryptionProfileBaseModel(BaseModel):
         description="SSL Protocol settings",
     )
 
-
-class DecryptionProfileRequestModel(DecryptionProfileBaseModel):
-    """
-    Represents a Decryption Profile for API requests.
-    """
-
     folder: Optional[str] = Field(
         None,
         description="Folder in which the resource is defined",
@@ -254,48 +244,34 @@ class DecryptionProfileRequestModel(DecryptionProfileBaseModel):
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+
+class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
+    """Model for creating a new Decryption Profile."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "DecryptionProfileRequestModel":
-        container_fields = [
-            "folder",
-            "snippet",
-            "device",
-        ]
+    def validate_container(self) -> "DecryptionProfileCreateModel":
+        container_fields = ["folder", "snippet", "device"]
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None
         ]
-
         if len(provided_containers) != 1:
             raise ValueError(
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
-
         return self
 
 
+class DecryptionProfileUpdateModel(DecryptionProfileBaseModel):
+    """Model for updating an existing Decryption Profile."""
+
+
 class DecryptionProfileResponseModel(DecryptionProfileBaseModel):
-    """
-    Represents a Decryption Profile for API responses.
-    """
+    """Model for Decryption Profile API responses."""
 
     id: str = Field(
         ...,
         description="UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
-    folder: Optional[str] = Field(
-        None,
-        description="Folder in which the resource is defined",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        description="Snippet in which the resource is defined",
-    )
-    device: Optional[str] = Field(
-        None,
-        description="Device in which the resource is defined",
     )
 
     @field_validator("id")
@@ -305,20 +281,3 @@ class DecryptionProfileResponseModel(DecryptionProfileBaseModel):
         except ValueError:
             raise ValueError("Invalid UUID format for 'id'")
         return v
-
-
-class DecryptionProfilesResponse(BaseModel):
-    """
-    Represents the API response containing a list of Decryption Profiles.
-
-    Attributes:
-        data (List[DecryptionProfileResponseModel]): List of Decryption Profiles.
-        offset (int): Offset used in pagination.
-        total (int): Total number of profiles available.
-        limit (int): Maximum number of profiles returned.
-    """
-
-    data: List[DecryptionProfileResponseModel]
-    offset: int
-    total: int
-    limit: int

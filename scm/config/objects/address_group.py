@@ -2,8 +2,12 @@
 
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
-from scm.models.objects import AddressGroupRequestModel, AddressGroupResponseModel
-from scm.exceptions import ValidationError
+from scm.models.objects import (
+    AddressGroupCreateModel,
+    AddressGroupResponseModel,
+    AddressGroupUpdateModel,
+)
+from scm.exceptions import ValidationError, NotFoundError, APIError
 
 
 class AddressGroup(BaseObject):
@@ -31,7 +35,7 @@ class AddressGroup(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> AddressGroupResponseModel:
-        address_group = AddressGroupRequestModel(**data)
+        address_group = AddressGroupCreateModel(**data)
         payload = address_group.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return AddressGroupResponseModel(**response)
@@ -41,10 +45,13 @@ class AddressGroup(BaseObject):
         response = self.api_client.get(endpoint)
         return AddressGroupResponseModel(**response)
 
-    def update(self, object_id: str, data: Dict[str, Any]) -> AddressGroupResponseModel:
-        address = AddressGroupRequestModel(**data)
+    def update(
+        self,
+        data: Dict[str, Any],
+    ) -> AddressGroupResponseModel:
+        address = AddressGroupUpdateModel(**data)
         payload = address.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(endpoint, json=payload)
         return AddressGroupResponseModel(**response)
 
@@ -103,3 +110,91 @@ class AddressGroup(BaseObject):
             AddressGroupResponseModel(**item) for item in response.get("data", [])
         ]
         return addresses
+
+    def fetch(
+        self,
+        name: str,
+        folder: Optional[str] = None,
+        snippet: Optional[str] = None,
+        device: Optional[str] = None,
+        **filters,
+    ) -> Dict[str, Any]:
+        """
+        Fetches a single address group by name.
+
+        Args:
+            name (str): The name of the address group to fetch.
+            folder (str, optional): The folder in which the resource is defined.
+            snippet (str, optional): The snippet in which the resource is defined.
+            device (str, optional): The device in which the resource is defined.
+            **filters: Additional filters to apply to the request.
+
+        Returns:
+            AddressGroupResponseModel: The fetched security rule object.
+
+        Raises:
+            ValidationError: If invalid parameters are provided.
+            NotFoundError: If the security rule object is not found.
+        """
+        if not name:
+            raise ValidationError("Parameter 'name' must be provided for fetch method.")
+
+        params = {}
+
+        # Include container type parameter
+        container_params = {
+            "folder": folder,
+            "snippet": snippet,
+            "device": device,
+        }
+        provided_containers = {
+            k: v for k, v in container_params.items() if v is not None
+        }
+
+        if len(provided_containers) != 1:
+            raise ValidationError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            )
+
+        params.update(provided_containers)
+        params["name"] = name  # Set the 'name' parameter
+
+        # Include any additional filters provided
+        params.update(
+            {
+                k: v
+                for k, v in filters.items()
+                if k
+                not in [
+                    "types",
+                    "values",
+                    "names",
+                    "tags",
+                    "folder",
+                    "snippet",
+                    "device",
+                    "name",
+                ]
+            }
+        )
+
+        response = self.api_client.get(
+            self.ENDPOINT,
+            params=params,
+        )
+
+        # Handle different response formats
+        if isinstance(response, dict) and "id" in response:
+            # Single object returned directly
+            return response
+        elif "data" in response:
+            # List of objects returned under 'data'
+            data = response["data"]
+            if len(data) == 1:
+                return data[0]
+            elif len(data) == 0:
+                raise NotFoundError(f"Address group '{name}' not found.")
+            else:
+                raise APIError(f"Multiple address groups found with the name '{name}'.")
+        else:
+            raise APIError("Unexpected response format.")

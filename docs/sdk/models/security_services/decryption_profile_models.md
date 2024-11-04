@@ -1,311 +1,270 @@
 # Decryption Profile Models
 
-This section covers the data models associated with the `DecryptionProfile` configuration object.
+## Overview
 
----
+The Decryption Profile models provide a structured way to manage SSL/TLS decryption settings in Palo Alto Networks'
+Strata Cloud Manager.
+These models support configuring forward proxy, inbound proxy, and no-proxy SSL settings, as well as protocol-specific
+settings like
+allowed algorithms and TLS versions. The models handle validation of inputs and outputs when interacting with the SCM
+API.
 
-## DecryptionProfileRequestModel
+## Attributes
 
-Used when creating or updating a decryption profile object.
+| Attribute             | Type                | Required | Default | Description                                            |
+|-----------------------|---------------------|----------|---------|--------------------------------------------------------|
+| name                  | str                 | Yes      | None    | Name of profile. Must start with alphanumeric char     |
+| ssl_forward_proxy     | SSLForwardProxy     | No       | None    | SSL Forward Proxy settings                             |
+| ssl_inbound_proxy     | SSLInboundProxy     | No       | None    | SSL Inbound Proxy settings                             |
+| ssl_no_proxy          | SSLNoProxy          | No       | None    | SSL No Proxy settings                                  |
+| ssl_protocol_settings | SSLProtocolSettings | No       | None    | SSL Protocol settings                                  |
+| folder                | str                 | No*      | None    | Folder where profile is defined. Max length: 64 chars  |
+| snippet               | str                 | No*      | None    | Snippet where profile is defined. Max length: 64 chars |
+| device                | str                 | No*      | None    | Device where profile is defined. Max length: 64 chars  |
+| id                    | UUID                | Yes**    | None    | UUID of the profile (response only)                    |
 
-### Attributes
+\* Exactly one container type (folder/snippet/device) must be provided
+\** Only required for response model
 
-- `name` (str): **Required.** The name of the decryption profile.
-- `folder` (Optional[str]): The folder where the profile is defined.
-- `snippet` (Optional[str]): The snippet where the profile is defined.
-- `device` (Optional[str]): The device where the profile is defined.
-- `ssl_forward_proxy` (Optional[SSLForwardProxy]): SSL Forward Proxy settings.
-- `ssl_inbound_proxy` (Optional[SSLInboundProxy]): SSL Inbound Proxy settings.
-- `ssl_no_proxy` (Optional[SSLNoProxy]): SSL No Proxy settings.
-- `ssl_protocol_settings` (Optional[SSLProtocolSettings]): SSL Protocol settings.
+### SSL Protocol Settings Attributes
 
-### Example
+| Attribute            | Type       | Required | Default | Description                     |
+|----------------------|------------|----------|---------|---------------------------------|
+| min_version          | SSLVersion | Yes      | tls1_0  | Minimum allowed SSL/TLS version |
+| max_version          | SSLVersion | Yes      | tls1_2  | Maximum allowed SSL/TLS version |
+| auth_algo_md5        | bool       | No       | True    | Allow MD5 authentication        |
+| auth_algo_sha1       | bool       | No       | True    | Allow SHA1 authentication       |
+| auth_algo_sha256     | bool       | No       | True    | Allow SHA256 authentication     |
+| auth_algo_sha384     | bool       | No       | True    | Allow SHA384 authentication     |
+| enc_algo_3des        | bool       | No       | True    | Allow 3DES encryption           |
+| enc_algo_aes_128_cbc | bool       | No       | True    | Allow AES-128-CBC encryption    |
+| enc_algo_aes_256_cbc | bool       | No       | True    | Allow AES-256-CBC encryption    |
+| enc_algo_rc4         | bool       | No       | True    | Allow RC4 encryption            |
+
+## Model Validators
+
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-decryption_profile_request = DecryptionProfileRequestModel(
-    name="test_profile",
-    folder="Prisma Access",
-    ssl_forward_proxy=SSLForwardProxy(
-        auto_include_altname=True,
-        block_client_cert=False,
-        block_expired_certificate=True
-    ),
-    ssl_protocol_settings=SSLProtocolSettings(
-        min_version=SSLVersion.tls1_0,
-        max_version=SSLVersion.tls1_2
+# Using dictionary
+from scm.config.security import DecryptionProfile
+
+# Error: multiple containers specified
+try:
+    profile_dict = {
+        "name": "invalid-profile",
+        "folder": "Shared",
+        "device": "fw01",  # Can't specify both folder and device
+        "ssl_protocol_settings": {
+            "min_version": "tls1-2",
+            "max_version": "tls1-3"
+        }
+    }
+    profile = DecryptionProfile(api_client)
+    response = profile.create(profile_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+
+# Using model directly
+from scm.models.security import DecryptionProfileCreateModel
+
+# Error: no container specified
+try:
+    profile = DecryptionProfileCreateModel(
+        name="invalid-profile",
+        ssl_protocol_settings={
+            "min_version": "tls1-2",
+            "max_version": "tls1-3"
+        }
     )
-)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
 </div>
 
----
+### SSL Version Validation
 
-## DecryptionProfileResponseModel
-
-Used when parsing decryption profile objects retrieved from the API.
-
-### Attributes
-
-- `id` (str): The UUID of the decryption profile object.
-- `name` (str): The name of the decryption profile.
-- `folder` (Optional[str]): The folder where the profile is defined.
-- `snippet` (Optional[str]): The snippet where the profile is defined.
-- `device` (Optional[str]): The device where the profile is defined.
-- `ssl_forward_proxy` (Optional[SSLForwardProxy]): SSL Forward Proxy settings.
-- `ssl_inbound_proxy` (Optional[SSLInboundProxy]): SSL Inbound Proxy settings.
-- `ssl_no_proxy` (Optional[SSLNoProxy]): SSL No Proxy settings.
-- `ssl_protocol_settings` (Optional[SSLProtocolSettings]): SSL Protocol settings.
-
-### Example
+The SSL protocol settings enforce that max_version cannot be less than min_version:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-decryption_profile_response = DecryptionProfileResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="test_profile",
-    folder="Prisma Access",
-    ssl_forward_proxy=SSLForwardProxy(
-        auto_include_altname=True,
-        block_client_cert=False,
-        block_expired_certificate=True
-    ),
-    ssl_protocol_settings=SSLProtocolSettings(
-        min_version=SSLVersion.tls1_0,
-        max_version=SSLVersion.tls1_2
+# Using dictionary
+try:
+    profile_dict = {
+        "name": "invalid-profile",
+        "folder": "Shared",
+        "ssl_protocol_settings": {
+            "min_version": "tls1-2",
+            "max_version": "tls1-1"  # Invalid: max < min
+        }
+    }
+    response = profile.create(profile_dict)
+except ValueError as e:
+    print(e)  # "max_version cannot be less than min_version"
+
+# Using model directly
+from scm.models.security import SSLProtocolSettings
+
+try:
+    settings = SSLProtocolSettings(
+        min_version="tls1-2",
+        max_version="tls1-1"  # Invalid: max < min
     )
-)
+except ValueError as e:
+    print(e)  # "max_version cannot be less than min_version"
 ```
 
 </div>
 
----
+## Usage Examples
 
-## Additional Models
-
-### SSLForwardProxy
-
-Represents SSL Forward Proxy settings.
-
-#### Attributes
-
-- `auto_include_altname` (bool): Automatically include alternative names.
-- `block_client_cert` (bool): Block client certificate.
-- `block_expired_certificate` (bool): Block expired certificates.
-- `block_timeout_cert` (bool): Block certificates that have timed out.
-- `block_tls13_downgrade_no_resource` (bool): Block TLS 1.3 downgrade when no resource is available.
-- `block_unknown_cert` (bool): Block unknown certificates.
-- `block_unsupported_cipher` (bool): Block unsupported cipher suites.
-- `block_unsupported_version` (bool): Block unsupported SSL/TLS versions.
-- `block_untrusted_issuer` (bool): Block untrusted certificate issuers.
-- `restrict_cert_exts` (bool): Restrict certificate extensions.
-- `strip_alpn` (bool): Strip ALPN (Application-Layer Protocol Negotiation).
-
-### Example
+### Creating a Basic Decryption Profile
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-ssl_forward_proxy = SSLForwardProxy(
-    auto_include_altname=True,
-    block_client_cert=False,
-    block_expired_certificate=True,
-    block_untrusted_issuer=True,
-    strip_alpn=False
-)
-```
+# Using dictionary
+profile_dict = {
+    "name": "basic-profile",
+    "folder": "Shared",
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3",
+        "auth_algo_sha256": True,
+        "auth_algo_sha384": True
+    }
+}
 
-</div>
+profile = DecryptionProfile(api_client)
+response = profile.create(profile_dict)
 
-### SSLInboundProxy
-
-Represents SSL Inbound Proxy settings.
-
-#### Attributes
-
-- `block_if_hsm_unavailable` (bool): Block if HSM (Hardware Security Module) is unavailable.
-- `block_if_no_resource` (bool): Block if no resources are available.
-- `block_unsupported_cipher` (bool): Block unsupported cipher suites.
-- `block_unsupported_version` (bool): Block unsupported SSL/TLS versions.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-ssl_inbound_proxy = SSLInboundProxy(
-    block_if_hsm_unavailable=False,
-    block_if_no_resource=True,
-    block_unsupported_cipher=True,
-    block_unsupported_version=True
-)
-```
-
-</div>
-
-### SSLNoProxy
-
-Represents SSL No Proxy settings.
-
-#### Attributes
-
-- `block_expired_certificate` (bool): Block expired certificates.
-- `block_untrusted_issuer` (bool): Block untrusted certificate issuers.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-ssl_no_proxy = SSLNoProxy(
-    block_expired_certificate=True,
-    block_untrusted_issuer=False
-)
-```
-
-</div>
-
-### SSLProtocolSettings
-
-Represents SSL Protocol settings.
-
-#### Attributes
-
-- `auth_algo_md5` (bool): Allow MD5 authentication algorithm.
-- `auth_algo_sha1` (bool): Allow SHA1 authentication algorithm.
-- `auth_algo_sha256` (bool): Allow SHA256 authentication algorithm.
-- `auth_algo_sha384` (bool): Allow SHA384 authentication algorithm.
-- `enc_algo_3des` (bool): Allow 3DES encryption algorithm.
-- `enc_algo_aes_128_cbc` (bool): Allow AES-128-CBC encryption algorithm.
-- `enc_algo_aes_128_gcm` (bool): Allow AES-128-GCM encryption algorithm.
-- `enc_algo_aes_256_cbc` (bool): Allow AES-256-CBC encryption algorithm.
-- `enc_algo_aes_256_gcm` (bool): Allow AES-256-GCM encryption algorithm.
-- `enc_algo_chacha20_poly1305` (bool): Allow ChaCha20-Poly1305 encryption algorithm.
-- `enc_algo_rc4` (bool): Allow RC4 encryption algorithm.
-- `keyxchg_algo_dhe` (bool): Allow DHE key exchange algorithm.
-- `keyxchg_algo_ecdhe` (bool): Allow ECDHE key exchange algorithm.
-- `keyxchg_algo_rsa` (bool): Allow RSA key exchange algorithm.
-- `max_version` (SSLVersion): Maximum allowed SSL/TLS version.
-- `min_version` (SSLVersion): Minimum allowed SSL/TLS version.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-ssl_protocol_settings = SSLProtocolSettings(
-    min_version=SSLVersion.tls1_1,
-    max_version=SSLVersion.tls1_3,
-    auth_algo_sha256=True,
-    auth_algo_sha384=True,
-    enc_algo_aes_256_gcm=True,
-    enc_algo_chacha20_poly1305=True,
-    keyxchg_algo_ecdhe=True
-)
-```
-
-</div>
-
-### SSLVersion
-
-Enumeration of SSL/TLS versions.
-
-#### Values
-
-- `sslv3`
-- `tls1_0`
-- `tls1_1`
-- `tls1_2`
-- `tls1_3`
-- `max`
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-min_version = SSLVersion.tls1_1
-max_version = SSLVersion.tls1_3
-```
-
-</div>
-
----
-
-## Full Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
+# Using model directly
 from scm.models.security import (
-    DecryptionProfileRequestModel,
-    SSLForwardProxy,
-    SSLInboundProxy,
-    SSLNoProxy,
+    DecryptionProfileCreateModel,
     SSLProtocolSettings,
     SSLVersion
 )
 
-# Create a comprehensive decryption profile request
-profile_request = DecryptionProfileRequestModel(
-    name="comprehensive_profile",
-    folder="Prisma Access",
-    ssl_forward_proxy=SSLForwardProxy(
-        auto_include_altname=True,
-        block_client_cert=False,
-        block_expired_certificate=True,
-        block_untrusted_issuer=True,
-        strip_alpn=False
-    ),
-    ssl_inbound_proxy=SSLInboundProxy(
-        block_if_hsm_unavailable=False,
-        block_if_no_resource=True,
-        block_unsupported_cipher=True,
-        block_unsupported_version=True
-    ),
-    ssl_no_proxy=SSLNoProxy(
-        block_expired_certificate=True,
-        block_untrusted_issuer=False
-    ),
+profile = DecryptionProfileCreateModel(
+    name="basic-profile",
+    folder="Shared",
     ssl_protocol_settings=SSLProtocolSettings(
         min_version=SSLVersion.tls1_2,
         max_version=SSLVersion.tls1_3,
         auth_algo_sha256=True,
-        auth_algo_sha384=True,
-        enc_algo_aes_256_gcm=True,
-        enc_algo_chacha20_poly1305=True,
-        keyxchg_algo_ecdhe=True
+        auth_algo_sha384=True
     )
 )
 
-# Convert the model to a dictionary
-profile_dict = profile_request.model_dump(exclude_unset=True)
-
-print("Decryption Profile Request:")
-print(profile_dict)
+payload = profile.model_dump(exclude_unset=True)
+response = profile.create(payload)
 ```
 
 </div>
 
-This example demonstrates how to create a comprehensive `DecryptionProfileRequestModel` object with various SSL
-settings, including forward proxy, inbound proxy, no proxy, and protocol settings. The resulting object can be used with
-the `DecryptionProfile.create()` method to create a new decryption profile in the Strata Cloud Manager.
+### Creating a Profile with Forward Proxy Settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+forward_proxy_dict = {
+    "name": "forward-proxy-profile",
+    "folder": "Shared",
+    "ssl_forward_proxy": {
+        "auto_include_altname": True,
+        "block_expired_certificate": True,
+        "block_untrusted_issuer": True,
+        "strip_alpn": False
+    },
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3"
+    }
+}
+
+response = profile.create(forward_proxy_dict)
+
+# Using model directly
+from scm.models.security import (
+    DecryptionProfileCreateModel,
+    SSLForwardProxy,
+    SSLProtocolSettings,
+    SSLVersion
+)
+
+forward_proxy = DecryptionProfileCreateModel(
+    name="forward-proxy-profile",
+    folder="Shared",
+    ssl_forward_proxy=SSLForwardProxy(
+        auto_include_altname=True,
+        block_expired_certificate=True,
+        block_untrusted_issuer=True,
+        strip_alpn=False
+    ),
+    ssl_protocol_settings=SSLProtocolSettings(
+        min_version=SSLVersion.tls1_2,
+        max_version=SSLVersion.tls1_3
+    )
+)
+
+payload = forward_proxy.model_dump(exclude_unset=True)
+response = profile.create(payload)
+```
+
+</div>
+
+### Updating a Decryption Profile
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+update_dict = {
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "updated-profile",
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3",
+        "auth_algo_sha384": True,
+        "enc_algo_aes_256_gcm": True
+    }
+}
+
+response = profile.update(update_dict)
+
+# Using model directly
+from scm.models.security import DecryptionProfileUpdateModel
+
+update = DecryptionProfileUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="updated-profile",
+    ssl_protocol_settings=SSLProtocolSettings(
+        min_version=SSLVersion.tls1_2,
+        max_version=SSLVersion.tls1_3,
+        auth_algo_sha384=True,
+        enc_algo_aes_256_gcm=True
+    )
+)
+
+payload = update.model_dump(exclude_unset=True)
+response = profile.update(payload)
+```
+
+</div>

@@ -3,13 +3,14 @@
 from .anti_spyware_profiles import (
     AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
+    AntiSpywareProfileUpdateModel,
 )
 from .decryption_profiles import (
-    DecryptionProfileRequestModel,
+    DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
 )
 from .dns_security_profiles import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
 )
 from .security_rules import (
@@ -19,10 +20,12 @@ from .security_rules import (
     Rulebase,
 )
 from .vulnerability_protection_profiles import (
-    VulnerabilityProtectionProfileRequestModel,
+    VulnerabilityProtectionProfileCreateModel,
     VulnerabilityProtectionProfileResponseModel,
+    VulnerabilityProtectionProfileUpdateModel,
 )
 from .wildfire_antivirus_profiles import (
+    WildfireAntivirusProfileCreateModel,
     WildfireAntivirusProfileResponseModel,
-    WildfireAntivirusProfileRequestModel,
+    WildfireAntivirusProfileUpdateModel,
 )

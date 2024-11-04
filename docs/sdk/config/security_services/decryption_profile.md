@@ -1,88 +1,99 @@
 # Decryption Profile Configuration Object
 
-The `DecryptionProfile` class is used to manage decryption profile objects in the Strata Cloud Manager. It provides
-methods to create, retrieve, update, delete, and list decryption profile objects.
+The `DecryptionProfile` class provides functionality to manage decryption profiles in Palo Alto Networks' Strata Cloud
+Manager.
+Decryption profiles define SSL/TLS inspection settings for both forward proxy and inbound proxy scenarios, allowing
+granular
+control over encryption protocols, algorithms, and certificate validation.
 
----
+## Overview
 
-## Creating an API client object
+Decryption profiles in Strata Cloud Manager allow you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-
-api_client = Scm(
-    client_id="this-is-a-placeholder",
-    client_secret="this-is-a-placeholder",
-    tsg_id="this-is-a-placeholder",
-)
-```
-
-</div>
-
-## Importing the DecryptionProfile Class
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.security import DecryptionProfile
-
-decryption_profile = DecryptionProfile(api_client)
-```
-
-</div>
+- Configure SSL/TLS protocol versions and cipher suites
+- Define forward proxy settings for outbound traffic inspection
+- Set up inbound proxy settings for inbound traffic inspection
+- Specify certificate validation requirements
+- Control protocol downgrades and extensions
+- Organize profiles within folders, snippets, or devices
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> DecryptionProfileResponseModel`
+| Method     | Description                                     |
+|------------|-------------------------------------------------|
+| `create()` | Creates a new decryption profile                |
+| `get()`    | Retrieves a decryption profile by ID            |
+| `update()` | Updates an existing decryption profile          |
+| `delete()` | Deletes a decryption profile                    |
+| `list()`   | Lists decryption profiles with optional filters |
+| `fetch()`  | Retrieves a single decryption profile by name   |
 
-Creates a new decryption profile object.
+## Creating Decryption Profiles
 
-**Parameters:**
+The `create()` method allows you to define new decryption profiles. You must specify a name and exactly one container
+type
+(folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the decryption profile object data.
-
-**Example:**
+**Example: Forward Proxy Profile**
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-profile_data = {
-    "name": "test_profile",
-    "folder": "Prisma Access",
+forward_proxy = {
+    "name": "forward-proxy",
+    "folder": "Shared",
     "ssl_forward_proxy": {
         "auto_include_altname": True,
-        "block_client_cert": False,
-        "block_expired_certificate": True
+        "block_expired_certificate": True,
+        "block_untrusted_issuer": True,
+        "strip_alpn": False
     },
     "ssl_protocol_settings": {
-        "min_version": "tls1-0",
-        "max_version": "tls1-2"
+        "min_version": "tls1-2",
+        "max_version": "tls1-3"
     }
 }
 
-new_profile = decryption_profile.create(profile_data)
-print(f"Created decryption profile with ID: {new_profile.id}")
+new_profile = decryption_profile.create(forward_proxy)
+print(f"Created profile: {new_profile['name']}")
 ```
 
 </div>
 
-### `get(object_id: str) -> DecryptionProfileResponseModel`
+**Example: Inbound Proxy Profile**
 
-Retrieves a decryption profile object by its ID.
+<div class="termy">
 
-**Parameters:**
+<!-- termynal -->
 
-- `object_id` (str): The UUID of the decryption profile object.
+```python
+inbound_proxy = {
+    "name": "inbound-proxy",
+    "folder": "Shared",
+    "ssl_inbound_proxy": {
+        "block_if_no_resource": True,
+        "block_unsupported_cipher": True,
+        "block_unsupported_version": True
+    },
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3",
+        "auth_algo_sha256": True,
+        "auth_algo_sha384": True
+    }
+}
 
-**Example:**
+new_profile = decryption_profile.create(inbound_proxy)
+print(f"Created profile: {new_profile['name']}")
+```
+
+</div>
+
+## Getting Decryption Profiles
+
+Use the `get()` method to retrieve a decryption profile by its ID.
 
 <div class="termy">
 
@@ -90,22 +101,15 @@ Retrieves a decryption profile object by its ID.
 
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-profile_object = decryption_profile.get(profile_id)
-print(f"Decryption Profile Name: {profile_object.name}")
+profile = decryption_profile.get(profile_id)
+print(f"Profile Name: {profile['name']}")
 ```
 
 </div>
 
-### `update(object_id: str, data: Dict[str, Any]) -> DecryptionProfileResponseModel`
+## Updating Decryption Profiles
 
-Updates an existing decryption profile object.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the decryption profile object.
-- `data` (Dict[str, Any]): A dictionary containing the updated decryption profile data.
-
-**Example:**
+The `update()` method allows you to modify existing decryption profiles.
 
 <div class="termy">
 
@@ -113,210 +117,118 @@ Updates an existing decryption profile object.
 
 ```python
 update_data = {
-    "name": "Updated Profile",
-    "folder": "Prisma Access",
-    "ssl_inbound_proxy": {
-        "block_if_no_resource": True,
-        "block_unsupported_cipher": True
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "updated-proxy",
+    "folder": "Shared",
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3",
+        "enc_algo_aes_256_gcm": True,
+        "enc_algo_chacha20_poly1305": True
     }
 }
 
-updated_profile = decryption_profile.update(profile_id, update_data)
-print(f"Updated decryption profile with ID: {updated_profile.id}")
+updated_profile = decryption_profile.update(update_data)
+print(f"Updated profile: {updated_profile['name']}")
 ```
 
 </div>
 
-### `delete(object_id: str) -> None`
+## Deleting Decryption Profiles
 
-Deletes a decryption profile object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the decryption profile object.
-
-**Example:**
+Use the `delete()` method to remove a decryption profile.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
 decryption_profile.delete(profile_id)
-print(f"Deleted decryption profile with ID: {profile_id}")
+print("Profile deleted successfully")
 ```
 
 </div>
 
-###
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[DecryptionProfileResponseModel]`
+## Listing Decryption Profiles
 
-Lists decryption profile objects, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list decryption profiles from.
-- `snippet` (Optional[str]): The snippet to list decryption profiles from.
-- `device` (Optional[str]): The device to list decryption profiles from.
-- `offset` (Optional[int]): The offset for pagination.
-- `limit` (Optional[int]): The limit for pagination.
-- `name` (Optional[str]): Filter profiles by name.
-- `**filters`: Additional filters.
-
-**Example:**
+The `list()` method retrieves multiple decryption profiles with optional filtering.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-profiles = decryption_profile.list(folder='Prisma Access', limit=10)
+# List all profiles in a folder
+profiles = decryption_profile.list(
+    folder="Shared",
+    limit=10,
+    offset=0
+)
 
 for profile in profiles:
-    print(f"Decryption Profile Name: {profile.name}, ID: {profile.id}")
-```
+    print(f"Name: {profile['name']}")
 
-</div>
-
----
-
-## Usage Examples
-
-### Example 1: Creating a profile with SSL Forward Proxy settings
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_data = {
-    "name": "forward_proxy_profile",
-    "folder": "Prisma Access",
-    "ssl_forward_proxy": {
-        "auto_include_altname": True,
-        "block_client_cert": False,
-        "block_expired_certificate": True,
-        "block_untrusted_issuer": True,
-        "strip_alpn": False
-    }
-}
-
-new_profile = decryption_profile.create(profile_data)
-print(f"Created profile with ID: {new_profile.id}")
-```
-
-</div>
-
-### Example 2: Updating a profile with SSL Inbound Proxy settings
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-update_data = {
-    "name": "inbound_proxy_profile",
-    "folder": "Prisma Access",
-    "ssl_inbound_proxy": {
-        "block_if_hsm_unavailable": True,
-        "block_if_no_resource": True,
-        "block_unsupported_cipher": False,
-        "block_unsupported_version": True
-    }
-}
-
-updated_profile = decryption_profile.update(profile_id, update_data)
-print(f"Updated profile with ID: {updated_profile.id}")
-```
-
-</div>
-
-### Example 3: Creating a profile with SSL Protocol settings
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_data = {
-    "name": "protocol_settings_profile",
-    "folder": "Prisma Access",
-    "ssl_protocol_settings": {
-        "min_version": "tls1-1",
-        "max_version": "tls1-3",
-        "auth_algo_sha256": True,
-        "auth_algo_sha384": True,
-        "enc_algo_aes_256_gcm": True,
-        "enc_algo_chacha20_poly1305": True,
-        "keyxchg_algo_ecdhe": True
-    }
-}
-
-new_profile = decryption_profile.create(profile_data)
-print(f"Created profile with ID: {new_profile.id}")
-```
-
-</div>
-
-### Example 4: Listing profiles with filters
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
+# List profiles with name filter
 filtered_profiles = decryption_profile.list(
-    folder='Prisma Access',
-    limit=5,
-    name='proxy_profile'
+    folder="Shared",
+    name="forward"
 )
 
 for profile in filtered_profiles:
-    print(f"Filtered Profile: {profile.name}")
+    print(f"Filtered profile: {profile['name']}")
 ```
 
 </div>
 
-### Example 5: Creating a profile with SSL No Proxy settings
+## Fetching Decryption Profiles
+
+The `fetch()` method retrieves a single decryption profile by name from a specific container.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-profile_data = {
-    "name": "no_proxy_profile",
-    "folder": "Prisma Access",
-    "ssl_no_proxy": {
-        "block_expired_certificate": True,
-        "block_untrusted_issuer": False
-    }
-}
+profile = decryption_profile.fetch(
+    name="forward-proxy",
+    folder="Shared"
+)
 
-new_profile = decryption_profile.create(profile_data)
-print(f"Created profile with ID: {new_profile.id}")
+print(f"Found profile: {profile['name']}")
+print(f"Current settings: {profile['ssl_protocol_settings']}")
 ```
 
 </div>
 
-### Example 6: Updating a profile with multiple SSL settings
+## Full Workflow Example
+
+Here's a complete example demonstrating the full lifecycle of a decryption profile:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-update_data = {
-    "name": "comprehensive_profile",
-    "folder": "Prisma Access",
+from scm.client import Scm
+from scm.config.security import DecryptionProfile
+
+# Initialize client
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Initialize decryption profile object
+decryption_profile = DecryptionProfile(client)
+
+# Create new profile
+create_data = {
+    "name": "test-profile",
+    "folder": "Shared",
     "ssl_forward_proxy": {
         "auto_include_altname": True,
-        "block_client_cert": False
-    },
-    "ssl_inbound_proxy": {
-        "block_if_no_resource": True
-    },
-    "ssl_no_proxy": {
         "block_expired_certificate": True
     },
     "ssl_protocol_settings": {
@@ -325,98 +237,37 @@ update_data = {
     }
 }
 
-updated_profile = decryption_profile.update(profile_id, update_data)
-print(f"Updated profile with ID: {updated_profile.id}")
-```
+new_profile = decryption_profile.create(create_data)
+print(f"Created profile: {new_profile['name']}")
 
-</div>
-
----
-
-## Full Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-from scm.config.security import DecryptionProfile
-
-# Initialize the SCM client
-api_client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+# Fetch the profile by name
+fetched_profile = decryption_profile.fetch(
+    name="test-profile",
+    folder="Shared"
 )
 
-# Create a DecryptionProfile instance
-decryption_profile = DecryptionProfile(api_client)
+# Modify the fetched profile
+fetched_profile["ssl_forward_proxy"]["block_untrusted_issuer"] = True
+fetched_profile["ssl_protocol_settings"]["auth_algo_sha384"] = True
 
-# Create a new decryption profile
-profile_data = {
-    "name": "comprehensive_profile",
-    "folder": "Prisma Access",
-    "ssl_forward_proxy": {
-        "auto_include_altname": True,
-        "block_client_cert": False,
-        "block_expired_certificate": True,
-        "block_untrusted_issuer": True,
-        "strip_alpn": False
-    },
-    "ssl_inbound_proxy": {
-        "block_if_hsm_unavailable": False,
-        "block_if_no_resource": True,
-        "block_unsupported_cipher": True,
-        "block_unsupported_version": True
-    },
-    "ssl_no_proxy": {
-        "block_expired_certificate": True,
-        "block_untrusted_issuer": False
-    },
-    "ssl_protocol_settings": {
-        "min_version": "tls1-2",
-        "max_version": "tls1-3",
-        "auth_algo_sha256": True,
-        "auth_algo_sha384": True,
-        "enc_algo_aes_256_gcm": True,
-        "enc_algo_chacha20_poly1305": True,
-        "keyxchg_algo_ecdhe": True
-    }
-}
+# Update using the modified object
+updated_profile = decryption_profile.update(fetched_profile)
+print(f"Updated profile: {updated_profile['name']}")
 
-new_profile = decryption_profile.create(profile_data)
-print(f"Created comprehensive decryption profile with ID: {new_profile.id}")
-
-# List decryption profiles
-profiles = decryption_profile.list(folder='Prisma Access', limit=10)
+# List all profiles
+profiles = decryption_profile.list(folder="Shared")
 for profile in profiles:
-    print(f"Decryption Profile Name: {profile.name}, ID: {profile.id}")
+    print(f"Listed profile: {profile['name']}")
 
-# Update the profile
-update_data = {
-    "name": "updated_comprehensive_profile",
-    "ssl_forward_proxy": {
-        "block_tls13_downgrade_no_resource": True
-    },
-    "ssl_protocol_settings": {
-        "min_version": "tls1-1"
-    }
-}
-
-updated_profile = decryption_profile.update(new_profile.id, update_data)
-print(f"Updated decryption profile with ID: {updated_profile.id}")
-
-# Delete the profile
-decryption_profile.delete(new_profile.id)
-print(f"Deleted decryption profile with ID: {new_profile.id}")
+# Clean up
+decryption_profile.delete(new_profile['id'])
+print("Profile deleted successfully")
 ```
 
 </div>
-
----
 
 ## Related Models
 
-- [DecryptionProfileRequestModel](../../models/security_services/decryption_profile_models.md#DecryptionProfileRequestModel)
-- [DecryptionProfileResponseModel](../../models/security_services/decryption_profile_models.md#DecryptionProfileResponseModel)
+- [DecryptionProfileCreateModel](../../models/security/decryption_profile_models.md#decryptionprofilecreatemodel)
+- [DecryptionProfileUpdateModel](../../models/security/decryption_profile_models.md#decryptionprofileupdatemodel)
+- [DecryptionProfileResponseModel](../../models/security/decryption_profile_models.md#decryptionprofileresponsemodel)

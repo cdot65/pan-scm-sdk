@@ -4,18 +4,22 @@ import uuid
 import factory
 
 from scm.models.objects import (
-    ApplicationRequestModel,
-    ServiceRequestModel,
-    ApplicationGroupRequestModel,
+    ApplicationCreateModel,
+    ServiceCreateModel,
+    ApplicationGroupCreateModel,
 )
-from scm.models.objects import AddressResponseModel, AddressRequestModel
+from scm.models.objects import (
+    AddressResponseModel,
+    AddressCreateModel,
+    AddressUpdateModel,
+)
 from scm.models.objects.address_group import (
-    AddressGroupRequestModel,
+    AddressGroupCreateModel,
     DynamicFilter,
     AddressGroupResponseModel,
 )
 from scm.models.security import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
     AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
@@ -29,17 +33,17 @@ from scm.models.security.anti_spyware_profiles import (
     RuleRequest,
 )
 from scm.models.security.dns_security_profiles import (
-    BotnetDomainsRequest,
-    ListActionRequest,
+    BotnetDomainsModel,
+    ListActionRequestModel,
     PacketCaptureEnum,
-    ListEntryRequest,
-    WhitelistEntry,
+    ListEntryBaseModel,
+    WhitelistEntryModel,
     IPv6AddressEnum,
     IPv4AddressEnum,
-    SinkholeSettings,
+    SinkholeSettingsModel,
     LogLevelEnum,
     ActionEnum,
-    DNSSecurityCategoryEntry,
+    DNSSecurityCategoryEntryModel,
 )
 from scm.models.security.security_rules import (
     SecurityRuleRequestModel,
@@ -51,11 +55,11 @@ from scm.models.security.security_rules import (
 )
 
 
-class AddressFactory(factory.Factory):
-    """Factory for creating AddressRequestModel instances."""
+class AddressCreateIpNetmaskFactory(factory.Factory):
+    """Factory for creating AddressCreateModel instances."""
 
     class Meta:
-        model = AddressRequestModel
+        model = AddressCreateModel
 
     name = factory.Sequence(lambda n: f"address_{n}")
     description = "Test Address"
@@ -72,19 +76,67 @@ class AddressFactory(factory.Factory):
         return cls(folder=None, device="TestDevice", **kwargs)
 
 
-class AddressResponseFactory(AddressFactory):
-    """Factory for creating AddressResponseModel instances."""
+class AddressCreateFqdnFactory(factory.Factory):
+    """Factory for creating AddressCreateModel instances."""
 
     class Meta:
-        model = AddressResponseModel
+        model = AddressCreateModel
 
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = "Test Address"
+    fqdn = "pytest.example.com"
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
 
     @classmethod
-    def from_request(cls, request_model: AddressRequestModel, **kwargs):
-        data = request_model.model_dump()
-        data.update(kwargs)
-        return cls(**data)
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class AddressCreateIpRangeFactory(factory.Factory):
+    """Factory for creating AddressCreateModel instances."""
+
+    class Meta:
+        model = AddressCreateModel
+
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = "Test Address"
+    ip_range = "192.168.255.100-192.168.255.105"
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class AddressCreateIpWildcardFactory(factory.Factory):
+    """Factory for creating AddressCreateModel instances."""
+
+    class Meta:
+        model = AddressCreateModel
+
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = "Test Address"
+    ip_wildcard = "10.20.1.0/0.0.248.255"
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
 
 
 class DynamicFilterFactory(factory.Factory):
@@ -96,7 +148,7 @@ class DynamicFilterFactory(factory.Factory):
 
 class AddressGroupDynamicFactory(factory.Factory):
     class Meta:
-        model = AddressGroupRequestModel
+        model = AddressGroupCreateModel
 
     name = "ValidDynamicAddressGroup"
     description = "This is just a pytest that will fail"
@@ -107,10 +159,10 @@ class AddressGroupDynamicFactory(factory.Factory):
 
 class AddressGroupStaticFactory(factory.Factory):
     class Meta:
-        model = AddressGroupRequestModel
+        model = AddressGroupCreateModel
 
     name = "ValidStaticAddressGroup"
-    description = "Static AddressRequestModel Group Test"
+    description = "Static AddressCreateModel Group Test"
     static = [
         "address-object1",
         "address-object2",
@@ -123,7 +175,7 @@ class AddressGroupStaticFactory(factory.Factory):
 
 class ApplicationFactory(factory.Factory):
     class Meta:
-        model = ApplicationRequestModel
+        model = ApplicationCreateModel
 
     name = "ValidApplication"
     description = "Application from pan-scm-sdk Test"
@@ -146,7 +198,7 @@ class ApplicationFactory(factory.Factory):
 
 class ApplicationGroupFactory(factory.Factory):
     class Meta:
-        model = ApplicationGroupRequestModel
+        model = ApplicationGroupCreateModel
 
     name = "ValidStaticApplicationGroup"
     members = [
@@ -158,10 +210,10 @@ class ApplicationGroupFactory(factory.Factory):
 
 class ServiceFactory(factory.Factory):
     class Meta:
-        model = ServiceRequestModel
+        model = ServiceCreateModel
 
     name = factory.Faker("word")
-    description = "PyTest ServiceRequestModel test"
+    description = "PyTest ServiceCreateModel test"
     tag = ["Automation"]
     folder = "Prisma Access"
     protocol = {"tcp": {"port": "80,443"}}
@@ -293,7 +345,7 @@ class ProfileSettingFactory(factory.Factory):
 
 class DNSSecurityCategoryEntryFactory(factory.Factory):
     class Meta:
-        model = DNSSecurityCategoryEntry
+        model = DNSSecurityCategoryEntryModel
 
     name = "pan-dns-sec-malware"
     action = ActionEnum.default
@@ -303,7 +355,7 @@ class DNSSecurityCategoryEntryFactory(factory.Factory):
 
 class SinkholeSettingsFactory(factory.Factory):
     class Meta:
-        model = SinkholeSettings
+        model = SinkholeSettingsModel
 
     ipv4_address = IPv4AddressEnum.default_ip
     ipv6_address = IPv6AddressEnum.localhost
@@ -311,7 +363,7 @@ class SinkholeSettingsFactory(factory.Factory):
 
 class WhitelistEntryFactory(factory.Factory):
     class Meta:
-        model = WhitelistEntry
+        model = WhitelistEntryModel
 
     name = factory.Faker("domain_name")
     description = factory.Faker("sentence")
@@ -319,16 +371,16 @@ class WhitelistEntryFactory(factory.Factory):
 
 class ListEntryRequestFactory(factory.Factory):
     class Meta:
-        model = ListEntryRequest
+        model = ListEntryBaseModel
 
     name = factory.Faker("word")
     packet_capture = PacketCaptureEnum.disable
-    action = factory.LazyFunction(lambda: ListActionRequest("sinkhole"))  # noqa
+    action = factory.LazyFunction(lambda: ListActionRequestModel("sinkhole"))  # noqa
 
 
 class BotnetDomainsRequestFactory(factory.Factory):
     class Meta:
-        model = BotnetDomainsRequest
+        model = BotnetDomainsModel
 
     dns_security_categories = factory.List(
         [factory.SubFactory(DNSSecurityCategoryEntryFactory)]
@@ -340,7 +392,7 @@ class BotnetDomainsRequestFactory(factory.Factory):
 
 class DNSSecurityProfileRequestFactory(factory.Factory):
     class Meta:
-        model = DNSSecurityProfileRequestModel
+        model = DNSSecurityProfileCreateModel
 
     name = factory.Sequence(lambda n: f"profile_{n}")
     folder = "All"
@@ -364,7 +416,7 @@ class DNSSecurityProfileResponseFactory(DNSSecurityProfileRequestFactory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
     @classmethod
-    def from_request(cls, request_model: DNSSecurityProfileRequestModel, **kwargs):
+    def from_request(cls, request_model: DNSSecurityProfileCreateModel, **kwargs):
         data = request_model.model_dump()
         data.update(kwargs)
         return cls(**data)
@@ -379,7 +431,7 @@ class AddressGroupDynamicFilterFactory(factory.Factory):
 
 class AddressGroupRequestFactory(factory.Factory):
     class Meta:
-        model = AddressGroupRequestModel
+        model = AddressGroupCreateModel
 
     name = factory.Sequence(lambda n: f"address_group_{n}")
     description = "Test Address Group"
@@ -402,7 +454,7 @@ class AddressGroupResponseFactory(AddressGroupRequestFactory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
     @classmethod
-    def from_request(cls, request_model: AddressGroupRequestModel, **kwargs):
+    def from_request(cls, request_model: AddressGroupCreateModel, **kwargs):
         data = request_model.model_dump()
         data.update(kwargs)
         return cls(**data)

@@ -94,7 +94,6 @@ class SecurityRule(BaseObject):
 
     def update(
         self,
-        object_id: str,
         data: Dict[str, Any],
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
@@ -102,7 +101,6 @@ class SecurityRule(BaseObject):
         Update an existing security rule.
 
         Args:
-            object_id: The UUID of the security rule to update
             data: Dictionary containing the updated configuration
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
         """
@@ -118,7 +116,7 @@ class SecurityRule(BaseObject):
             by_alias=True,
         )
 
-        endpoint = f"{self.ENDPOINT}/{object_id}"
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(
             endpoint,
             params={"position": rulebase.value},
@@ -278,3 +276,83 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel(**item) for item in response.get("data", [])
         ]
         return profiles
+
+    def fetch(
+        self,
+        name: str,
+        folder: Optional[str] = None,
+        snippet: Optional[str] = None,
+        device: Optional[str] = None,
+        **filters,
+    ) -> Dict[str, Any]:
+        """
+        Fetches a single Security Rule object by name.
+
+        Args:
+            name (str): The name of the Security Rule to fetch.
+            folder (str, optional): The folder in which the resource is defined.
+            snippet (str, optional): The snippet in which the resource is defined.
+            device (str, optional): The device in which the resource is defined.
+            **filters: Additional filters to apply to the request.
+
+        Returns:
+            SecurityRuleResponseModel: The fetched security rule object.
+
+        Raises:
+            ValidationError: If invalid parameters are provided.
+            NotFoundError: If the security rule object is not found.
+        """
+        if not name:
+            raise ValidationError("Parameter 'name' must be provided for fetch method.")
+
+        params = {}
+
+        # Include container type parameter
+        container_params = {
+            "folder": folder,
+            "snippet": snippet,
+            "device": device,
+        }
+        provided_containers = {
+            k: v for k, v in container_params.items() if v is not None
+        }
+
+        if len(provided_containers) != 1:
+            raise ValidationError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            )
+
+        params.update(provided_containers)
+        params["name"] = name  # Set the 'name' parameter
+
+        # Include any additional filters provided
+        params.update(
+            {
+                k: v
+                for k, v in filters.items()
+                if k
+                not in [
+                    "types",
+                    "values",
+                    "names",
+                    "tags",
+                    "folder",
+                    "snippet",
+                    "device",
+                    "name",
+                ]
+            }
+        )
+
+        response = self.api_client.get(
+            self.ENDPOINT,
+            params=params,
+        )
+
+        # Since response is a single object when 'name' is provided
+        # We can directly create the SecurityRuleResponseModel
+        rule = SecurityRuleResponseModel(**response)
+        return rule.model_dump(
+            exclude_unset=True,
+            exclude_none=True,
+        )

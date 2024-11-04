@@ -1,306 +1,296 @@
 # WildFire Antivirus Profile Models
 
-This section covers the data models associated with the `WildfireAntivirusProfile` configuration object.
+## Overview
 
----
+The WildFire Antivirus Profile models provide a structured way to manage WildFire antivirus profiles in Palo Alto
+Networks'
+Strata Cloud Manager. These profiles define rules for malware analysis using either public or private cloud
+infrastructure,
+with support for packet capture, MLAV exceptions, and threat exceptions. The models handle validation of inputs and
+outputs
+when interacting with the SCM API.
 
-## WildfireAntivirusProfileRequestModel
+## Attributes
 
-Used when creating or updating a WildFire Antivirus Profile object.
+| Attribute        | Type                       | Required | Default | Description                                            |
+|------------------|----------------------------|----------|---------|--------------------------------------------------------|
+| name             | str                        | Yes      | None    | Profile name. Must match pattern: ^[a-zA-Z0-9._-]+$    |
+| description      | str                        | No       | None    | Description of the profile                             |
+| packet_capture   | bool                       | No       | False   | Whether packet capture is enabled                      |
+| mlav_exception   | List[MlavExceptionEntry]   | No       | None    | List of MLAV exceptions                                |
+| rules            | List[RuleBase]             | Yes      | None    | List of rules for the profile                          |
+| threat_exception | List[ThreatExceptionEntry] | No       | None    | List of threat exceptions                              |
+| folder           | str                        | No*      | None    | Folder where profile is defined. Max length: 64 chars  |
+| snippet          | str                        | No*      | None    | Snippet where profile is defined. Max length: 64 chars |
+| device           | str                        | No*      | None    | Device where profile is defined. Max length: 64 chars  |
+| id               | UUID                       | Yes**    | None    | UUID of the profile (response only)                    |
 
-### Attributes
+\* Exactly one container type (folder/snippet/device) must be provided
+\** Only required for response model
 
-- `name` (str): **Required.** The name of the WildFire Antivirus Profile object.
-- `description` (Optional[str]): A description of the WildFire Antivirus Profile object.
-- `packet_capture` (Optional[bool]): Whether packet capture is enabled.
-- `mlav_exception` (Optional[List[MlavExceptionEntry]]): List of MLAV exceptions.
-- `rules` (List[RuleBase]): **Required.** List of rules for the profile.
-- `threat_exception` (Optional[List[ThreatExceptionEntry]]): List of threat exceptions.
-- **Container Type Fields** (Exactly one must be provided):
-    - `folder` (Optional[str]): The folder where the profile is defined.
-    - `snippet` (Optional[str]): The snippet where the profile is defined.
-    - `device` (Optional[str]): The device where the profile is defined.
+## Model Validators
 
-### Example
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.security.wildfire_antivirus_profiles import WildfireAntivirusProfileRequestModel, RuleRequest, Analysis,
-    Direction
+# Using dictionary
+from scm.config.security import WildfireAntivirusProfile
 
-profile_request = WildfireAntivirusProfileRequestModel(
-    name="test-profile",
-    description="Sample WildFire Antivirus Profile",
-    folder="Prisma Access",
-    packet_capture=True,
-    rules=[
-        RuleRequest(
-            name="rule1",
-            direction=Direction.both,
-            analysis=Analysis.public_cloud,
-            application=["web-browsing", "ssl"],
-            file_type=["pe", "pdf"]
-        )
-    ]
-)
+# Error: multiple containers specified
+try:
+    profile_dict = {
+        "name": "invalid-profile",
+        "rules": [{
+            "name": "rule1",
+            "direction": "both"
+        }],
+        "folder": "Shared",
+        "device": "fw01"  # Can't specify both folder and device
+    }
+    profile = WildfireAntivirusProfile(api_client)
+    response = profile.create(profile_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 
-print(profile_request.model_dump_json(indent=2))
+# Using model directly
+from scm.models.security.wildfire_antivirus_profiles import WildfireAntivirusProfileCreateModel
+
+# Error: no container specified
+try:
+    profile = WildfireAntivirusProfileCreateModel(
+        name="invalid-profile",
+        rules=[{
+            "name": "rule1",
+            "direction": "both"
+        }]
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
 </div>
 
----
+### UUID Validation
 
-## WildfireAntivirusProfileResponseModel
-
-Used when parsing WildFire Antivirus Profile objects retrieved from the API.
-
-### Attributes
-
-- `id` (str): The UUID of the WildFire Antivirus Profile object.
-- `name` (str): The name of the WildFire Antivirus Profile object.
-- `description` (Optional[str]): A description of the WildFire Antivirus Profile object.
-- `packet_capture` (Optional[bool]): Whether packet capture is enabled.
-- `mlav_exception` (Optional[List[MlavExceptionEntry]]): List of MLAV exceptions.
-- `rules` (List[RuleBase]): List of rules for the profile.
-- `threat_exception` (Optional[List[ThreatExceptionEntry]]): List of threat exceptions.
-- **Container Type Fields**:
-    - `folder` (Optional[str]): The folder where the profile is defined.
-    - `snippet` (Optional[str]): The snippet where the profile is defined.
-    - `device` (Optional[str]): The device where the profile is defined.
-
-### Example
+For response models, the ID field must be a valid UUID:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.security.wildfire_antivirus_profiles import WildfireAntivirusProfileResponseModel, RuleResponse,
-    Analysis, Direction
+from scm.models.security.wildfire_antivirus_profiles import WildfireAntivirusProfileResponseModel
 
-profile_response = WildfireAntivirusProfileResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="test-profile",
-    description="Sample WildFire Antivirus Profile",
-    folder="Prisma Access",
-    packet_capture=True,
-    rules=[
-        RuleResponse(
-            name="rule1",
-            direction=Direction.both,
-            analysis=Analysis.public_cloud,
-            application=["web-browsing", "ssl"],
-            file_type=["pe", "pdf"]
-        )
-    ]
-)
-
-print(profile_response.model_dump_json(indent=2))
+# Error: invalid UUID
+try:
+    profile = WildfireAntivirusProfileResponseModel(
+        id="invalid-uuid",
+        name="test-profile",
+        rules=[{
+            "name": "rule1",
+            "direction": "both"
+        }],
+        folder="Shared"
+    )
+except ValueError as e:
+    print(e)  # "Invalid UUID format for 'id'"
 ```
 
 </div>
 
----
+## Usage Examples
 
-## RuleBase
-
-Base class for Rule objects used in WildFire Antivirus Profiles.
-
-### Attributes
-
-- `name` (str): **Required.** Rule name.
-- `analysis` (Optional[Analysis]): Analysis type (public-cloud or private-cloud).
-- `application` (List[str]): List of applications (default: ["any"]).
-- `direction` (Direction): **Required.** Direction (download, upload, or both).
-- `file_type` (List[str]): List of file types (default: ["any"]).
-
-### Example
+### Creating a Basic Profile
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.security.wildfire_antivirus_profiles import RuleBase, Analysis, Direction
+# Using dictionary
+from scm.config.security import WildfireAntivirusProfile
 
-rule = RuleBase(
-    name="example_rule",
-    analysis=Analysis.public_cloud,
-    application=["web-browsing", "ssl"],
-    direction=Direction.both,
-    file_type=["pe", "pdf"]
-)
+profile_dict = {
+    "name": "basic-profile",
+    "description": "Basic WildFire profile",
+    "folder": "Shared",
+    "packet_capture": True,
+    "rules": [{
+        "name": "rule1",
+        "direction": "both",
+        "analysis": "public-cloud",
+        "application": ["web-browsing", "ssl"],
+        "file_type": ["pe", "pdf"]
+    }]
+}
 
-print(rule.model_dump_json(indent=2))
-```
+profile = WildfireAntivirusProfile(api_client)
+response = profile.create(profile_dict)
 
-</div>
-
----
-
-## MlavExceptionEntry
-
-Represents an entry in the 'mlav_exception' list.
-
-### Attributes
-
-- `name` (str): **Required.** Exception name.
-- `description` (Optional[str]): Description of the exception.
-- `filename` (str): **Required.** Filename for the exception.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security.wildfire_antivirus_profiles import MlavExceptionEntry
-
-mlav_exception = MlavExceptionEntry(
-    name="exception1",
-    description="MLAV exception for specific file",
-    filename="allowed_file.exe"
-)
-
-print(mlav_exception.model_dump_json(indent=2))
-```
-
-</div>
-
----
-
-## ThreatExceptionEntry
-
-Represents an entry in the 'threat_exception' list.
-
-### Attributes
-
-- `name` (str): **Required.** Threat exception name.
-- `notes` (Optional[str]): Notes for the threat exception.
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security.wildfire_antivirus_profiles import ThreatExceptionEntry
-
-threat_exception = ThreatExceptionEntry(
-    name="threat_exception1",
-    notes="Exception for known false positive"
-)
-
-print(threat_exception.model_dump_json(indent=2))
-```
-
-</div>
-
----
-
-## Enums
-
-### Analysis
-
-Enumeration of analysis types:
-
-- `public_cloud`
-- `private_cloud`
-
-### Direction
-
-Enumeration of directions:
-
-- `download`
-- `upload`
-- `both`
-
-### Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.security.wildfire_antivirus_profiles import Analysis, Direction
-
-print(f"Analysis types: {[a.value for a in Analysis]}")
-print(f"Direction types: {[d.value for d in Direction]}")
-```
-
-</div>
-
----
-
-## Full Example: Creating a Comprehensive WildFire Antivirus Profile Model
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
+# Using model directly
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileRequestModel,
-    RuleRequest,
+    WildfireAntivirusProfileCreateModel,
+    RuleBase,
+    Analysis,
+    Direction
+)
+
+profile = WildfireAntivirusProfileCreateModel(
+    name="basic-profile",
+    description="Basic WildFire profile",
+    folder="Shared",
+    packet_capture=True,
+    rules=[
+        RuleBase(
+            name="rule1",
+            direction=Direction.both,
+            analysis=Analysis.public_cloud,
+            application=["web-browsing", "ssl"],
+            file_type=["pe", "pdf"]
+        )
+    ]
+)
+
+payload = profile.model_dump(exclude_unset=True)
+response = profile.create(payload)
+```
+
+</div>
+
+### Creating a Profile with Exceptions
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+profile_dict = {
+    "name": "advanced-profile",
+    "description": "Profile with exceptions",
+    "folder": "Shared",
+    "packet_capture": True,
+    "rules": [{
+        "name": "rule1",
+        "direction": "both",
+        "analysis": "public-cloud",
+        "application": ["any"],
+        "file_type": ["any"]
+    }],
+    "mlav_exception": [{
+        "name": "exception1",
+        "description": "Test exception",
+        "filename": "test.exe"
+    }],
+    "threat_exception": [{
+        "name": "threat1",
+        "notes": "Known false positive"
+    }]
+}
+
+response = profile.create(profile_dict)
+
+# Using model directly
+from scm.models.security.wildfire_antivirus_profiles import (
+    WildfireAntivirusProfileCreateModel,
+    RuleBase,
     MlavExceptionEntry,
     ThreatExceptionEntry,
     Analysis,
     Direction
 )
 
-# Create a comprehensive WildFire Antivirus Profile model
-comprehensive_profile = WildfireAntivirusProfileRequestModel(
-    name="comprehensive_profile",
-    description="Comprehensive WildFire Antivirus Profile",
-    folder="Prisma Access",
+profile = WildfireAntivirusProfileCreateModel(
+    name="advanced-profile",
+    description="Profile with exceptions",
+    folder="Shared",
     packet_capture=True,
     rules=[
-        RuleRequest(
+        RuleBase(
             name="rule1",
             direction=Direction.both,
             analysis=Analysis.public_cloud,
-            application=["web-browsing", "ssl"],
-            file_type=["pe", "pdf"]
-        ),
-        RuleRequest(
-            name="rule2",
-            direction=Direction.upload,
-            analysis=Analysis.private_cloud,
-            application=["ftp", "sftp"],
+            application=["any"],
             file_type=["any"]
         )
     ],
     mlav_exception=[
         MlavExceptionEntry(
-            name="mlav_exception1",
-            description="MLAV exception for specific file",
-            filename="allowed_file.exe"
+            name="exception1",
+            description="Test exception",
+            filename="test.exe"
         )
     ],
     threat_exception=[
         ThreatExceptionEntry(
-            name="threat_exception1",
-            notes="Exception for known false positive"
+            name="threat1",
+            notes="Known false positive"
         )
     ]
 )
 
-# Print the JSON representation of the model
-print(comprehensive_profile.model_dump_json(indent=2))
-
-# Validate the model
-comprehensive_profile.model_validate(comprehensive_profile.model_dump())
-print("Model validation successful")
+payload = profile.model_dump(exclude_unset=True)
+response = profile.create(payload)
 ```
 
 </div>
 
-This example demonstrates how to create a comprehensive WildFire Antivirus Profile model using the provided classes and
-enums. It includes multiple rules, MLAV exceptions, and threat exceptions to showcase the full capabilities of the
-model.
+### Updating a Profile
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+update_dict = {
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "updated-profile",
+    "description": "Updated description",
+    "packet_capture": False,
+    "rules": [{
+        "name": "updated-rule",
+        "direction": "download",
+        "analysis": "private-cloud",
+        "application": ["ftp"],
+        "file_type": ["pe"]
+    }]
+}
+
+response = profile.update(update_dict)
+
+# Using model directly
+from scm.models.security.wildfire_antivirus_profiles import (
+    WildfireAntivirusProfileUpdateModel,
+    RuleBase,
+    Analysis,
+    Direction
+)
+
+update = WildfireAntivirusProfileUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="updated-profile",
+    description="Updated description",
+    packet_capture=False,
+    rules=[
+        RuleBase(
+            name="updated-rule",
+            direction=Direction.download,
+            analysis=Analysis.private_cloud,
+            application=["ftp"],
+            file_type=["pe"]
+        )
+    ]
+)
+
+payload = update.model_dump(exclude_unset=True)
+response = profile.update(payload)
+```
+
+</div>

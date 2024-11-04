@@ -1,216 +1,40 @@
 # WildFire Antivirus Profile Configuration Object
 
-The `WildfireAntivirusProfile` class is used to manage WildFire Antivirus Profile objects in the Strata Cloud Manager.
-It provides methods to create, retrieve, update, delete, and list WildFire Antivirus Profile objects.
+The `WildfireAntivirusProfile` class provides functionality to manage WildFire antivirus profiles in Palo Alto Networks'
+Strata
+Cloud Manager. WildFire profiles define settings for malware analysis, file inspection, and threat detection using both
+cloud
+and local analysis capabilities.
 
----
+## Overview
 
-## Creating an API client object
+WildFire antivirus profiles in Strata Cloud Manager allow you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-
-api_client = Scm(
-    client_id="this-is-a-placeholder",
-    client_secret="this-is-a-placeholder",
-    tsg_id="this-is-a-placeholder",
-)
-```
-
-</div>
-
-
----
-
-## Importing the WildfireAntivirusProfile Class
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.security import WildfireAntivirusProfile
-
-wildfire_antivirus_profile = WildfireAntivirusProfile(api_client)
-
-```
-
-</div>
+- Configure rules for file analysis in WildFire cloud
+- Define direction-based scanning (upload, download, or both)
+- Specify application and file type filters
+- Set up MLAV (Machine Learning Anti-Virus) exceptions
+- Configure threat exceptions for known cases
+- Organize profiles within folders, snippets, or devices
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> WildfireAntivirusProfileResponseModel`
+| Method     | Description                                             |
+|------------|---------------------------------------------------------|
+| `create()` | Creates a new WildFire antivirus profile                |
+| `get()`    | Retrieves a WildFire antivirus profile by ID            |
+| `update()` | Updates an existing WildFire antivirus profile          |
+| `delete()` | Deletes a WildFire antivirus profile                    |
+| `list()`   | Lists WildFire antivirus profiles with optional filters |
+| `fetch()`  | Retrieves a single WildFire antivirus profile by name   |
 
-Creates a new WildFire Antivirus Profile object.
+## Creating WildFire Antivirus Profiles
 
-**Parameters:**
+The `create()` method allows you to define new WildFire antivirus profiles. You must specify a name, rules, and exactly
+one
+container type (folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the WildFire Antivirus Profile object data.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_data = {
-    "name": "test_profile",
-    "description": "Created via pan-scm-sdk",
-    "folder": "Prisma Access",
-    "rules": [
-        {
-            "name": "rule1",
-            "direction": "both",
-            "analysis": "public-cloud",
-            "application": [
-                "facebook-uploading",
-                "facebook-posting",
-                "facebook-downloading",
-                "facebook-base"
-            ],
-            "file_type": [
-                "flash",
-                "jar"
-            ]
-        }
-    ]
-}
-
-new_profile = wildfire_antivirus_profile.create(profile_data)
-print(f"Created WildFire Antivirus Profile with ID: {new_profile.id}")
-```
-
-</div>
-
-### `get(object_id: str) -> WildfireAntivirusProfileResponseModel`
-
-Retrieves a WildFire Antivirus Profile object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the WildFire Antivirus Profile object.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_id = "ddcf8352-65cd-4cf3-a9b5-e2b344bbdb08"
-profile_object = wildfire_antivirus_profile.get(profile_id)
-print(f"Profile Name: {profile_object.name}")
-```
-
-</div>
-
-### `update(object_id: str, data: Dict[str, Any]) -> WildfireAntivirusProfileResponseModel`
-
-Updates an existing WildFire Antivirus Profile object.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the WildFire Antivirus Profile object.
-- `data` (Dict[str, Any]): A dictionary containing the updated WildFire Antivirus Profile data.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-update_data = {
-    "name": "Updated123",
-    "description": "Updated description",
-    "folder": "Prisma Access",
-    "rules": [
-        {
-            "name": "updated_rule",
-            "direction": "upload",
-            "analysis": "private-cloud",
-            "application": [
-                "facebook-uploading",
-                "facebook-posting",
-                "facebook-downloading",
-                "facebook-base"
-            ],
-            "file_type": [
-                "flash",
-                "jar"
-            ]
-        }
-    ]
-}
-
-updated_profile = wildfire_antivirus_profile.update(profile_id, update_data)
-print(f"Updated WildFire Antivirus Profile with ID: {updated_profile.id}")
-```
-
-</div>
-
-### `delete(object_id: str) -> None`
-
-Deletes a WildFire Antivirus Profile object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the WildFire Antivirus Profile object.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-wildfire_antivirus_profile.delete(profile_id)
-print(f"Deleted WildFire Antivirus Profile with ID: {profile_id}")
-```
-
-</div>
-
-###
-
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[WildfireAntivirusProfileResponseModel]`
-
-Lists WildFire Antivirus Profile objects, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list profiles from.
-- `snippet` (Optional[str]): The snippet to list profiles from.
-- `device` (Optional[str]): The device to list profiles from.
-- `offset` (Optional[int]): The pagination offset.
-- `limit` (Optional[int]): The pagination limit.
-- `name` (Optional[str]): Filter profiles by name.
-- `**filters`: Additional filters.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profiles = wildfire_antivirus_profile.list(folder='Prisma Access', limit=10)
-
-for profile in profiles:
-    print(f"Profile Name: {profile.name}, ID: {profile.id}")
-```
-
-</div>
-
----
-
-## Usage Examples
-
-### Example 1: Creating a WildFire Antivirus Profile
+**Example: Basic Profile with Single Rule**
 
 <div class="termy">
 
@@ -218,106 +42,89 @@ for profile in profiles:
 
 ```python
 profile_data = {
-    "name": "example_profile",
-    "description": "Example WildFire Antivirus Profile",
-    "folder": "Prisma Access",
-    "packet_capture": True,
-    "rules": [
-        {
-            "name": "rule1",
-            "direction": "both",
-            "analysis": "public-cloud",
-            "application": ["web-browsing", "ssl"],
-            "file_type": ["pe", "pdf"]
-        }
-    ]
-}
-
-new_profile = wildfire_antivirus_profile.create(profile_data)
-print(f"Created profile: {new_profile.name} with ID: {new_profile.id}")
-```
-
-</div>
-
-### Example 2: Updating a WildFire Antivirus Profile
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-update_data = {
-    "description": "Updated WildFire Antivirus Profile",
-    "packet_capture": False,
-    "rules": [
-        {
-            "name": "updated_rule",
-            "direction": "upload",
-            "analysis": "private-cloud",
-            "application": ["any"],
-            "file_type": ["any"]
-        }
-    ]
-}
-
-updated_profile = wildfire_antivirus_profile.update(new_profile.id, update_data)
-print(f"Updated profile: {updated_profile.name}")
-```
-
-</div>
-
-### Example 3: Listing WildFire Antivirus Profiles with Filters
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profiles = wildfire_antivirus_profile.list(
-    folder='Prisma Access',
-    limit=5,
-    name='example'
-)
-
-for profile in profiles:
-    print(f"Profile: {profile.name}, Description: {profile.description}")
-```
-
-</div>
-
-### Example 4: Creating a Profile with MLAV Exceptions
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_data = {
-    "name": "mlav_exception_profile",
+    "name": "basic-profile",
+    "description": "Basic WildFire profile",
     "folder": "Shared",
     "rules": [
         {
-            "name": "default_rule",
+            "name": "basic-rule",
             "direction": "both",
-            "analysis": "public-cloud"
+            "analysis": "public-cloud",
+            "application": ["web-browsing"],
+            "file_type": ["pdf", "pe"]
+        }
+    ]
+}
+
+new_profile = wildfire_antivirus_profile.create(profile_data)
+print(f"Created profile: {new_profile['name']}")
+```
+
+</div>
+
+**Example: Profile with Multiple Rules and Exceptions**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile_data = {
+    "name": "advanced-profile",
+    "description": "Advanced WildFire profile",
+    "folder": "Shared",
+    "packet_capture": True,
+    "rules": [
+        {
+            "name": "upload-rule",
+            "direction": "upload",
+            "analysis": "private-cloud",
+            "application": ["ftp", "sftp"],
+            "file_type": ["any"]
+        },
+        {
+            "name": "download-rule",
+            "direction": "download",
+            "analysis": "public-cloud",
+            "application": ["web-browsing"],
+            "file_type": ["pdf", "doc"]
         }
     ],
     "mlav_exception": [
         {
             "name": "exception1",
-            "description": "MLAV exception example",
-            "filename": "test_file.exe"
+            "filename": "trusted.exe",
+            "description": "Trusted application"
         }
     ]
 }
 
 new_profile = wildfire_antivirus_profile.create(profile_data)
-print(f"Created profile with MLAV exception: {new_profile.name}")
+print(f"Created profile: {new_profile['name']}")
 ```
 
 </div>
 
-### Example 5: Updating a Profile with Threat Exceptions
+## Getting WildFire Antivirus Profiles
+
+Use the `get()` method to retrieve a WildFire antivirus profile by its ID.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+profile = wildfire_antivirus_profile.get(profile_id)
+print(f"Profile Name: {profile['name']}")
+print(f"Number of Rules: {len(profile['rules'])}")
+```
+
+</div>
+
+## Updating WildFire Antivirus Profiles
+
+The `update()` method allows you to modify existing WildFire antivirus profiles.
 
 <div class="termy">
 
@@ -325,49 +132,104 @@ print(f"Created profile with MLAV exception: {new_profile.name}")
 
 ```python
 update_data = {
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "description": "Updated profile description",
+    "folder": "Shared",
+    "rules": [
+        {
+            "name": "updated-rule",
+            "direction": "both",
+            "analysis": "public-cloud",
+            "application": ["any"],
+            "file_type": ["any"]
+        }
+    ],
     "threat_exception": [
         {
-            "name": "threat_exception1",
-            "notes": "Example threat exception"
+            "name": "exception1",
+            "notes": "Known false positive"
         }
     ]
 }
 
-updated_profile = wildfire_antivirus_profile.update(new_profile.id, update_data)
-print(f"Updated profile with threat exception: {updated_profile.name}")
+updated_profile = wildfire_antivirus_profile.update(update_data)
+print(f"Updated profile: {updated_profile['name']}")
 ```
 
 </div>
 
-### Example 6: Creating a Profile in a Snippet
+## Deleting WildFire Antivirus Profiles
+
+Use the `delete()` method to remove a WildFire antivirus profile.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-profile_data = {
-    "name": "snippet_profile",
-    "description": "Profile in a snippet",
-    "snippet": "Example Snippet",
-    "rules": [
-        {
-            "name": "snippet_rule",
-            "direction": "download",
-            "analysis": "public-cloud"
-        }
-    ]
-}
-
-new_profile = wildfire_antivirus_profile.create(profile_data)
-print(f"Created profile in snippet: {new_profile.name}")
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+wildfire_antivirus_profile.delete(profile_id)
+print("Profile deleted successfully")
 ```
 
 </div>
 
----
+## Listing WildFire Antivirus Profiles
 
-## Full Example: Creating and Managing a WildFire Antivirus Profile
+The `list()` method retrieves multiple WildFire antivirus profiles with optional filtering.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List all profiles in a folder
+profiles = wildfire_antivirus_profile.list(
+    folder="Shared",
+    limit=10,
+    offset=0
+)
+
+for profile in profiles:
+    print(f"Name: {profile['name']}")
+    print(f"Rules: {len(profile['rules'])}")
+    print("---")
+
+# List profiles with name filter
+filtered_profiles = wildfire_antivirus_profile.list(
+    folder="Shared",
+    name="basic"
+)
+
+for profile in filtered_profiles:
+    print(f"Filtered profile: {profile['name']}")
+```
+
+</div>
+
+## Fetching WildFire Antivirus Profiles
+
+The `fetch()` method retrieves a single WildFire antivirus profile by name from a specific container.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile = wildfire_antivirus_profile.fetch(
+    name="basic-profile",
+    folder="Shared"
+)
+
+print(f"Found profile: {profile['name']}")
+print(f"Current rules: {len(profile['rules'])}")
+```
+
+</div>
+
+## Full Workflow Example
+
+Here's a complete example demonstrating the full lifecycle of a WildFire antivirus profile:
 
 <div class="termy">
 
@@ -377,94 +239,70 @@ print(f"Created profile in snippet: {new_profile.name}")
 from scm.client import Scm
 from scm.config.security import WildfireAntivirusProfile
 
-# Initialize the SCM client
-api_client = Scm(
+# Initialize client
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+    tsg_id="your_tsg_id"
 )
 
-# Create a WildfireAntivirusProfile instance
-wildfire_antivirus_profile = WildfireAntivirusProfile(api_client)
+# Initialize WildFire antivirus profile object
+wildfire_antivirus_profile = WildfireAntivirusProfile(client)
 
-# Create a new WildFire Antivirus Profile
-profile_data = {
-    "name": "comprehensive_profile",
-    "description": "Comprehensive WildFire Antivirus Profile",
-    "folder": "Prisma Access",
-    "packet_capture": True,
+# Create new profile
+create_data = {
+    "name": "test-profile",
+    "description": "Test WildFire profile",
+    "folder": "Shared",
     "rules": [
         {
-            "name": "rule1",
+            "name": "test-rule",
             "direction": "both",
             "analysis": "public-cloud",
-            "application": ["web-browsing", "ssl"],
-            "file_type": ["pe", "pdf"]
-        },
-        {
-            "name": "rule2",
-            "direction": "upload",
-            "analysis": "private-cloud",
-            "application": ["ftp", "sftp"],
-            "file_type": ["any"]
-        }
-    ],
-    "mlav_exception": [
-        {
-            "name": "mlav_exception1",
-            "description": "MLAV exception for specific file",
-            "filename": "allowed_file.exe"
-        }
-    ],
-    "threat_exception": [
-        {
-            "name": "threat_exception1",
-            "notes": "Exception for known false positive"
+            "application": ["web-browsing"],
+            "file_type": ["pdf", "pe"]
         }
     ]
 }
 
-new_profile = wildfire_antivirus_profile.create(profile_data)
-print(f"Created comprehensive profile: {new_profile.name} with ID: {new_profile.id}")
+new_profile = wildfire_antivirus_profile.create(create_data)
+print(f"Created profile: {new_profile['name']}")
 
-# Retrieve the created profile
-retrieved_profile = wildfire_antivirus_profile.get(new_profile.id)
-print(f"Retrieved profile: {retrieved_profile.name}")
+# Fetch the profile by name
+fetched_profile = wildfire_antivirus_profile.fetch(
+    name="test-profile",
+    folder="Shared"
+)
 
-# Update the profile
-update_data = {
-    "description": "Updated comprehensive WildFire Antivirus Profile",
-    "packet_capture": False,
-    "rules": [
-        {
-            "name": "updated_rule",
-            "direction": "both",
-            "analysis": "public-cloud",
-            "application": ["any"],
-            "file_type": ["any"]
-        }
-    ]
-}
+# Modify the fetched profile
+fetched_profile["description"] = "Updated test profile"
+fetched_profile["rules"].append({
+    "name": "additional-rule",
+    "direction": "upload",
+    "analysis": "private-cloud",
+    "application": ["ftp"],
+    "file_type": ["any"]
+})
 
-updated_profile = wildfire_antivirus_profile.update(new_profile.id, update_data)
-print(f"Updated profile: {updated_profile.name}")
+# Update using the modified object
+updated_profile = wildfire_antivirus_profile.update(fetched_profile)
+print(f"Updated profile: {updated_profile['name']}")
+print(f"New description: {updated_profile['description']}")
 
-# List profiles
-profiles = wildfire_antivirus_profile.list(folder='Prisma Access', limit=10)
-print("List of profiles:")
+# List all profiles
+profiles = wildfire_antivirus_profile.list(folder="Shared")
 for profile in profiles:
-    print(f"- {profile.name} (ID: {profile.id})")
+    print(f"Listed profile: {profile['name']}")
 
-# Delete the profile
-wildfire_antivirus_profile.delete(new_profile.id)
-print(f"Deleted profile: {new_profile.name}")
+# Clean up
+wildfire_antivirus_profile.delete(new_profile['id'])
+print("Profile deleted successfully")
 ```
 
 </div>
 
----
-
 ## Related Models
 
-- [WildfireAntivirusProfileRequestModel](../../models/security_services/wildfire_antivirus_profile_models.md#WildfireAntivirusProfileRequestModel)
-- [WildfireAntivirusProfileResponseModel](../../models/security_services/wildfire_antivirus_profile_models.md#WildfireAntivirusProfileResponseModel)
+- [WildfireAntivirusProfileCreateModel](../../models/security/wildfire_antivirus_profile_models.md#wildfireantivirusprofilecreatemodel)
+- [WildfireAntivirusProfileUpdateModel](../../models/security/wildfire_antivirus_profile_models.md#wildfireantivirusprofileupdatemodel)
+- [WildfireAntivirusProfileResponseModel](../../models/security/wildfire_antivirus_profile_models.md#wildfireantivirusprofileresponsemodel)

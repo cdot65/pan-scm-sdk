@@ -1,6 +1,6 @@
 # tests/test_security_rules.py
 import uuid
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from pydantic import ValidationError as PydanticValidationError
@@ -553,24 +553,30 @@ class TestSecurityRuleAPI:
             exclude_unset=True,
             by_alias=True,
         )
-        mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        mock_response["id"] = rule_id
 
         mock_scm.put = MagicMock(return_value=mock_response)
         security_rules_client = SecurityRule(mock_scm)
 
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
         update_data = test_security_rule.model_dump(
             exclude_unset=True,
             by_alias=True,
         )
+        update_data["id"] = (
+            rule_id  # Include the 'id' in update_data for endpoint construction
+        )
 
-        updated_rule = security_rules_client.update(rule_id, update_data)
+        updated_rule = security_rules_client.update(update_data)
 
-        # Updated assertion to include position parameter
+        # Create a copy of update_data without 'id' for the expected JSON payload
+        expected_json = update_data.copy()
+        expected_json.pop("id")
+
         mock_scm.put.assert_called_once_with(
             f"/config/security/v1/security-rules/{rule_id}",
             params={"position": "pre"},  # pre is default
-            json=update_data,
+            json=expected_json,
         )
         assert updated_rule.id == rule_id
 
@@ -868,12 +874,16 @@ class TestSecurityRuleAPI:
             exclude_unset=True,
             by_alias=True,
         )
+        update_data["id"] = rule_id  # Include 'id' in update_data
 
         # Ensure mock_scm.put is a MagicMock object
         mock_scm.put = MagicMock()
 
         with pytest.raises(ValueError, match="rulebase must be either 'pre' or 'post'"):
-            security_rules_client.update(rule_id, update_data, rulebase="invalid_value")
+            security_rules_client.update(
+                update_data,
+                rulebase="invalid_value",
+            )
 
         # Verify no API call was made
         mock_scm.put.assert_not_called()
@@ -889,25 +899,31 @@ class TestSecurityRuleAPI:
             exclude_unset=True,
             by_alias=True,
         )
-        mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        mock_response["id"] = rule_id
 
         mock_scm.put = MagicMock(return_value=mock_response)
         security_rules_client = SecurityRule(mock_scm)
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
         update_data = test_security_rule.model_dump(
             exclude_unset=True,
             by_alias=True,
         )
+        update_data["id"] = rule_id  # Include 'id' in update_data
 
         # Test with uppercase value
         updated_rule = security_rules_client.update(
-            rule_id, update_data, rulebase="PRE"
+            update_data,
+            rulebase="PRE",
         )
+
+        # Create a copy of update_data without 'id' for the expected JSON payload
+        expected_json = update_data.copy()
+        expected_json.pop("id")
 
         mock_scm.put.assert_called_once_with(
             f"/config/security/v1/security-rules/{rule_id}",
             params={"position": "pre"},
-            json=update_data,
+            json=expected_json,
         )
         assert updated_rule.id == rule_id
 
@@ -1341,14 +1357,9 @@ class TestSecurityRule:
     """Test suite for SecurityRule SDK."""
 
     @pytest.fixture
-    def api_client(self):
-        """Create a mock API client."""
-        return Mock()
-
-    @pytest.fixture
-    def security_rule(self, api_client):
+    def security_rule(self, mock_scm):
         """Create a SecurityRule instance with mock API client."""
-        return SecurityRule(api_client)
+        return SecurityRule(mock_scm)
 
     def test_move_model_instantiation(self, security_rule):
         """Test that move() correctly instantiates SecurityRuleMoveModel."""
@@ -1432,3 +1443,214 @@ class TestSecurityRule:
             assert mock_post.call_args[1]["json"]["source_rule"] == rule_id
             assert mock_post.call_args[1]["json"]["destination"] == "top"
             assert mock_post.call_args[1]["json"]["rulebase"] == "pre"
+
+
+class TestSecurityRuleFetch:
+    """Tests for the fetch method of SecurityRule."""
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self, load_env, mock_scm):
+        """Setup method that runs before each test."""
+        self.mock_scm = mock_scm
+        # Create new MagicMock instances for each HTTP method
+        self.mock_scm.get = MagicMock()
+        self.security_rules_client = SecurityRule(self.mock_scm)
+
+    def test_fetch_security_rule_success(self):
+        """
+        Test successful fetch of a security rule.
+
+        **Objective:** Test fetching a security rule with all fields populated.
+        """
+        mock_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "Allow_HTTP",
+            "folder": "Shared",
+            "action": "allow",
+            "from": ["zone1"],
+            "to": ["zone2"],
+            "source": ["10.0.0.0/24"],
+            "destination": ["0.0.0.0/0"],
+            "application": ["web-browsing"],
+            "service": ["application-default"],
+            "log_setting": "Cortex Data Lake",
+            "description": "Allow HTTP traffic",
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/security-rules",
+            params={"folder": "Shared", "name": "Allow_HTTP"},
+        )
+        assert isinstance(result, dict)
+        assert result["name"] == "Allow_HTTP"
+        assert result["action"] == "allow"
+        assert result["from_"] == ["zone1"]
+        assert result["to_"] == ["zone2"]
+
+    def test_fetch_security_rule_validations(self):
+        """
+        Test fetch method parameter validations.
+
+        **Objective:** Test all validation scenarios for fetch parameters.
+        """
+        # Test empty name
+        with pytest.raises(ValidationError) as exc_info:
+            self.security_rules_client.fetch(name="", folder="Shared")
+        assert "Parameter 'name' must be provided for fetch method." in str(
+            exc_info.value
+        )
+
+        # Test no container provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.security_rules_client.fetch(name="Allow_HTTP")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+        # Test multiple containers provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.security_rules_client.fetch(
+                name="Allow_HTTP", folder="Shared", snippet="TestSnippet"
+            )
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_fetch_security_rule_with_different_containers(self):
+        """
+        Test fetch with different container types.
+
+        **Objective:** Test fetch using different container parameters.
+        """
+        mock_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "Allow_HTTP",
+            "action": "allow",
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test with folder
+        self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/security-rules",
+            params={"folder": "Shared", "name": "Allow_HTTP"},
+        )
+
+        # Test with snippet
+        self.security_rules_client.fetch(name="Allow_HTTP", snippet="TestSnippet")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/security-rules",
+            params={"snippet": "TestSnippet", "name": "Allow_HTTP"},
+        )
+
+        # Test with device
+        self.security_rules_client.fetch(name="Allow_HTTP", device="TestDevice")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/security-rules",
+            params={"device": "TestDevice", "name": "Allow_HTTP"},
+        )
+
+    def test_fetch_security_rule_with_filters(self):
+        """
+        Test fetch with additional filters.
+
+        **Objective:** Test handling of additional filter parameters.
+        """
+        mock_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "Allow_HTTP",
+            "action": "allow",
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test with allowed and excluded filters
+        result = self.security_rules_client.fetch(
+            name="Allow_HTTP",
+            folder="Shared",
+            custom_filter="value",
+            types=["excluded"],
+            values=["excluded"],
+            names=["excluded"],
+            tags=["excluded"],
+        )
+
+        # Verify only allowed filters are included
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/security-rules",
+            params={"folder": "Shared", "name": "Allow_HTTP", "custom_filter": "value"},
+        )
+        assert isinstance(result, dict)
+        assert result["name"] == "Allow_HTTP"
+
+    def test_fetch_security_rule_response_handling(self):
+        """
+        Test fetch response handling.
+
+        **Objective:** Test handling of different response scenarios.
+        """
+        # Test with all fields present
+        complete_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "Allow_HTTP",
+            "folder": "Shared",
+            "description": "Allow HTTP traffic",
+            "action": "allow",
+            "from": ["zone1"],
+            "to": ["zone2"],
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["web-browsing"],
+            "service": ["application-default"],
+        }
+        self.mock_scm.get.return_value = complete_response  # noqa
+        result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+        assert result["description"] == "Allow HTTP traffic"
+        assert result["application"] == ["web-browsing"]
+
+        # Test with minimal fields
+        minimal_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "Allow_HTTP",
+            "folder": "Shared",
+            "action": "allow",
+        }
+        self.mock_scm.get.return_value = minimal_response  # noqa
+        result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+        assert "description" not in result
+        assert "application" not in result
+
+    def test_fetch_security_rule_not_found(self):
+        """
+        Test fetch when the security rule is not found.
+
+        **Objective:** Test handling when the API returns an error or empty response.
+        """
+        # Simulate a NotFoundError from the API client
+        from scm.exceptions import NotFoundError
+
+        self.mock_scm.get.side_effect = NotFoundError("Security rule not found")  # noqa
+
+        with pytest.raises(NotFoundError) as exc_info:
+            self.security_rules_client.fetch(name="NonExistentRule", folder="Shared")
+
+        assert "Security rule not found" in str(exc_info.value)
+
+    def test_fetch_security_rule_api_error(self):
+        """
+        Test fetch when the API client raises an unexpected error.
+
+        **Objective:** Ensure that unexpected API errors are propagated.
+        """
+        from scm.exceptions import APIError
+
+        self.mock_scm.get.side_effect = APIError("API is unavailable")  # noqa
+
+        with pytest.raises(APIError) as exc_info:
+            self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+
+        assert "API is unavailable" in str(exc_info.value)

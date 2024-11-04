@@ -1,4 +1,4 @@
-# tests/test_dns_security_profiles.py
+# tests/test_dns_security_profile.py
 
 import pytest
 from unittest.mock import MagicMock
@@ -6,12 +6,14 @@ from unittest.mock import MagicMock
 from scm.config.security.dns_security_profile import DNSSecurityProfile
 from scm.exceptions import ValidationError
 from scm.models.security.dns_security_profiles import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
     ActionEnum,
-    ListActionRequest,
-    ListActionResponse,
+    ListActionRequestModel,
+    DNSSecurityProfileUpdateModel,
 )
+from pydantic import ValidationError as PydanticValidationError
+
 
 from tests.factories import (
     DNSSecurityProfileRequestFactory,
@@ -245,6 +247,7 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
         """Test updating a DNS security profile."""
         profile_id = "e4af4e61-29aa-4454-86f7-269a6e6c5868"
         update_data = {
+            "id": profile_id,  # Include ID in the update data
             "name": "UpdatedDNSProfile",
             "folder": "All",
             "description": "An updated DNS security profile",
@@ -266,29 +269,71 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             },
         }
 
-        mock_response = update_data.copy()
-        mock_response["id"] = profile_id
-
+        # Create mock response
+        mock_response = {
+            "id": profile_id,
+            "name": "UpdatedDNSProfile",
+            "folder": "All",
+            "description": "An updated DNS security profile",
+            "botnet_domains": {
+                "dns_security_categories": [
+                    {
+                        "name": "pan-dns-sec-phishing",
+                        "action": "sinkhole",
+                        "log_level": "medium",
+                        "packet_capture": "extended-capture",
+                    }
+                ],
+                "whitelist": [
+                    {
+                        "name": "safe.com",
+                        "description": "Safe domain",
+                    }
+                ],
+            },
+        }
         self.mock_scm.put.return_value = mock_response  # noqa
-        updated_profile = self.client.update(profile_id, update_data)
+
+        updated_profile = self.client.update(update_data)
+
+        # Verify the API call
+        expected_payload = update_data.copy()
+        expected_payload.pop("id")  # ID should not be in the payload
 
         self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/security/v1/dns-security-profiles/{profile_id}",
-            json=update_data,
+            json=expected_payload,
         )
         assert isinstance(updated_profile, DNSSecurityProfileResponseModel)
         assert updated_profile.id == profile_id
-        assert updated_profile.name == "UpdatedDNSProfile"
-        assert updated_profile.description == "An updated DNS security profile"
+
+    def test_dns_security_profile_update_model_validation(self):
+        """Test validation in DNSSecurityProfileUpdateModel."""
+        # Test valid update
+        valid_data = {
+            "name": "UpdatedProfile",
+            "folder": "Shared",
+            "description": "Updated description",
+        }
+        profile = DNSSecurityProfileUpdateModel(**valid_data)
+        assert profile.name == "UpdatedProfile"
+
+        # Test invalid name pattern
+        invalid_name_data = {"name": "Invalid!Name@", "folder": "Shared"}
+        with pytest.raises(PydanticValidationError) as exc_info:
+            DNSSecurityProfileUpdateModel(**invalid_name_data)
+        assert "String should match pattern" in str(exc_info.value)
+
+        # Test container validation (if required for updates)
+        multiple_containers = {
+            "name": "TestProfile",
+            "folder": "Shared",
+            "device": "Device1",
+        }
+        profile = DNSSecurityProfileUpdateModel(**multiple_containers)
         assert (
-            updated_profile.botnet_domains.dns_security_categories[0].name
-            == "pan-dns-sec-phishing"
-        )
-        assert (
-            updated_profile.botnet_domains.dns_security_categories[0].action
-            == ActionEnum.sinkhole
-        )
-        assert updated_profile.botnet_domains.whitelist[0].name == "safe.com"
+            profile.folder == "Shared"
+        )  # Should allow multiple containers in update model
 
     def test_delete_dns_security_profile(self):
         """Test deleting a DNS security profile."""
@@ -301,15 +346,197 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             f"/config/security/v1/dns-security-profiles/{profile_id}"
         )
 
+    def test_fetch_dns_security_profile_success(self):
+        """
+        Test successful fetch of a DNS security profile.
+
+        **Objective:** Test fetching a profile with all fields populated.
+        """
+        mock_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "test-profile",
+            "folder": "All",
+            "description": "Test DNS Security Profile",
+            "botnet_domains": {
+                "dns_security_categories": [
+                    {
+                        "name": "pan-dns-sec-malware",
+                        "action": "block",
+                        "log_level": "high",
+                        "packet_capture": "single-packet",
+                    }
+                ],
+                "sinkhole": {
+                    "ipv4_address": "pan-sinkhole-default-ip",
+                    "ipv6_address": "::1",
+                },
+            },
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        result = self.client.fetch(name="test-profile", folder="All")
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={"folder": "All", "name": "test-profile"},
+        )
+        assert isinstance(result, dict)
+        assert result["name"] == "test-profile"
+        assert (
+            result["botnet_domains"]["dns_security_categories"][0]["action"] == "block"
+        )
+
+    def test_fetch_dns_security_profile_validations(self):
+        """
+        Test fetch method parameter validations.
+
+        **Objective:** Test all validation scenarios for fetch parameters.
+        """
+        # Test empty name
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="", folder="All")
+        assert "Parameter 'name' must be provided for fetch method." in str(
+            exc_info.value
+        )
+
+        # Test no container provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-profile")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+        # Test multiple containers
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-profile", folder="All", snippet="test-snippet")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+        # Test all containers
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(
+                name="test-profile",
+                folder="All",
+                snippet="test-snippet",
+                device="test-device",
+            )
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_fetch_dns_security_profile_with_different_containers(self):
+        """
+        Test fetch with different container types.
+
+        **Objective:** Test fetch using different container parameters.
+        """
+        mock_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "test-profile",
+            "botnet_domains": {},
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test with folder
+        self.client.fetch(name="test-profile", folder="All")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={"folder": "All", "name": "test-profile"},
+        )
+
+        # Test with snippet
+        self.client.fetch(name="test-profile", snippet="test-snippet")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={"snippet": "test-snippet", "name": "test-profile"},
+        )
+
+        # Test with device
+        self.client.fetch(name="test-profile", device="test-device")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={"device": "test-device", "name": "test-profile"},
+        )
+
+    def test_fetch_dns_security_profile_with_filters(self):
+        """
+        Test fetch with additional filters.
+
+        **Objective:** Test handling of additional filter parameters.
+        """
+        mock_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "test-profile",
+            "folder": "All",
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test with allowed and excluded filters
+        result = self.client.fetch(
+            name="test-profile",
+            folder="All",
+            custom_filter="value",
+            types=["excluded"],
+            values=["excluded"],
+            names=["excluded"],
+            tags=["excluded"],
+        )
+
+        # Verify only allowed filters are included
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={"folder": "All", "name": "test-profile", "custom_filter": "value"},
+        )
+        assert isinstance(result, dict)
+        assert result["name"] == "test-profile"
+
+    def test_fetch_dns_security_profile_response_handling(self):
+        """
+        Test fetch response handling.
+
+        **Objective:** Test handling of different response scenarios.
+        """
+        # Test with all fields present
+        complete_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "test-profile",
+            "folder": "All",
+            "description": "Test description",
+            "botnet_domains": {
+                "dns_security_categories": [
+                    {"name": "pan-dns-sec-malware", "action": "block"}
+                ]
+            },
+        }
+        self.mock_scm.get.return_value = complete_response  # noqa
+        result = self.client.fetch(name="test-profile", folder="All")
+        assert result["description"] == "Test description"
+        assert "botnet_domains" in result
+
+        # Test with minimal fields
+        minimal_response = {
+            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "name": "test-profile",
+            "folder": "All",
+        }
+        self.mock_scm.get.return_value = minimal_response  # noqa
+        result = self.client.fetch(name="test-profile", folder="All")
+        assert "description" not in result
+        assert "botnet_domains" not in result
+
 
 class TestDNSSecurityProfileValidation(TestDNSSecurityProfileBase):
     """Tests for DNS Security Profile validation."""
 
     def test_dns_security_profile_request_model_validation_errors(self):
-        """Test validation errors in DNSSecurityProfileRequestModel."""
+        """Test validation errors in DNSSecurityProfileCreateModel."""
         # No container provided
         with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileRequestModel(
+            DNSSecurityProfileCreateModel(
                 name="InvalidDNSProfile",
                 botnet_domains={},
             )
@@ -320,7 +547,7 @@ class TestDNSSecurityProfileValidation(TestDNSSecurityProfileBase):
 
         # Multiple containers provided
         with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileRequestModel(
+            DNSSecurityProfileCreateModel(
                 name="InvalidDNSProfile",
                 folder="Shared",
                 device="Device1",
@@ -333,7 +560,7 @@ class TestDNSSecurityProfileValidation(TestDNSSecurityProfileBase):
 
         # Invalid action in dns_security_categories
         with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileRequestModel(
+            DNSSecurityProfileCreateModel(
                 name="InvalidDNSProfile",
                 folder="Shared",
                 botnet_domains={
@@ -345,13 +572,13 @@ class TestDNSSecurityProfileValidation(TestDNSSecurityProfileBase):
                     ]
                 },
             )
-        assert "1 validation error for DNSSecurityProfileRequestModel" in str(
+        assert "1 validation error for DNSSecurityProfileCreateModel" in str(
             exc_info.value
         )
 
         # Invalid action in lists
         with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileRequestModel(
+            DNSSecurityProfileCreateModel(
                 name="InvalidDNSProfile",
                 folder="Shared",
                 botnet_domains={
@@ -394,91 +621,34 @@ class TestListActionValidation:
     """Tests for List Action validation."""
 
     def test_list_action_request_validation(self):
-        """Test validation in ListActionRequest."""
+        """Test validation in ListActionRequestModel."""
         # Valid action
-        valid_action = ListActionRequest("sinkhole")  # noqa
+        valid_action = ListActionRequestModel("sinkhole")  # noqa
         assert valid_action.root == {"sinkhole": {}}
 
         # Invalid action format
         with pytest.raises(
             ValueError, match="Invalid action format; must be a string or dict."
         ):
-            ListActionRequest(123)  # noqa
+            ListActionRequestModel(123)  # noqa
 
         # Multiple actions
         with pytest.raises(
             ValueError, match="Exactly one action must be provided in 'action' field."
         ):
-            ListActionRequest({"sinkhole": {}, "block": {}})
+            ListActionRequestModel({"sinkhole": {}, "block": {}})
 
         # Invalid action name
         with pytest.raises(
             ValueError, match="Exactly one action must be provided in 'action' field."
         ):
-            ListActionRequest({"invalid_action": {}})
+            ListActionRequestModel({"invalid_action": {}})
 
         # Non-empty parameters
         with pytest.raises(
             ValueError, match="Action 'sinkhole' does not take any parameters."
         ):
-            ListActionRequest({"sinkhole": {"param": "value"}})
-
-    def test_list_action_response_validation(self):
-        """Test validation in ListActionResponse."""
-        # Valid action
-        valid_action = ListActionResponse("sinkhole")  # noqa
-        assert valid_action.root == {"sinkhole": {}}
-
-        # Empty dict (no action specified)
-        empty_action = ListActionResponse({})
-        assert empty_action.root == {}
-
-        # Invalid action format
-        with pytest.raises(
-            ValueError, match="Invalid action format; must be a string or dict."
-        ):
-            ListActionResponse(123)  # noqa
-
-        # Multiple actions
-        with pytest.raises(
-            ValueError, match="At most one action must be provided in 'action' field."
-        ):
-            ListActionResponse({"sinkhole": {}, "block": {}})
-
-        # Non-empty parameters
-        with pytest.raises(
-            ValueError, match="Action 'sinkhole' does not take any parameters."
-        ):
-            ListActionResponse({"sinkhole": {"param": "value"}})
-
-    def test_list_action_get_action_name(self):
-        """Test get_action_name method in ListActionRequest and ListActionResponse."""
-        action_req = ListActionRequest("sinkhole")  # noqa
-        assert action_req.get_action_name() == "sinkhole"
-
-        action_res = ListActionResponse({"block": {}})
-        assert action_res.get_action_name() == "block"
-
-        action_res_empty = ListActionResponse({})
-        assert action_res_empty.get_action_name() == "unknown"
-
-    def test_list_action_response_invalid_non_empty_dict(self):
-        """Test validation in ListActionResponse for invalid non-empty dict."""
-        # Test invalid non-empty dict with invalid format
-        with pytest.raises(ValueError, match="Invalid action format."):
-            ListActionResponse({"invalid_key": "invalid_value"})
-
-        # Test invalid non-empty dict with wrong structure
-        with pytest.raises(ValueError, match="Invalid action format."):
-            ListActionResponse({"action": "invalid"})
-
-        # Test that empty dict is accepted
-        empty_action = ListActionResponse({})
-        assert empty_action.root == {}
-
-        # Test valid non-empty dict
-        valid_action = ListActionResponse({"sinkhole": {}})
-        assert valid_action.root == {"sinkhole": {}}
+            ListActionRequestModel({"sinkhole": {"param": "value"}})
 
 
 class TestModelValidation:

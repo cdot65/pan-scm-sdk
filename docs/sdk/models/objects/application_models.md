@@ -1,261 +1,211 @@
 # Application Models
 
-This section covers the data models associated with the `Application` configuration object.
+## Overview
 
----
+The Application models provide a structured way to manage custom applications in Palo Alto Networks' Strata Cloud
+Manager.
+These models support defining application characteristics like category, risk level, and behavioral attributes.
+Applications
+can be defined in folders or snippets. The models handle validation of inputs and outputs when interacting with the SCM
+API.
 
-## ApplicationRequestModel
+## Attributes
 
-Used when creating or updating an application.
+| Attribute                 | Type      | Required | Default | Description                                                                            |
+|---------------------------|-----------|----------|---------|----------------------------------------------------------------------------------------|
+| name                      | str       | Yes      | None    | Name of the application. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| category                  | str       | Yes      | None    | High-level category. Max length: 50 chars                                              |
+| subcategory               | str       | Yes      | None    | Specific sub-category. Max length: 50 chars                                            |
+| technology                | str       | Yes      | None    | Underlying technology. Max length: 50 chars                                            |
+| risk                      | int       | Yes      | None    | Risk level associated with the application                                             |
+| description               | str       | No       | None    | Description of the application. Max length: 1023 chars                                 |
+| ports                     | List[str] | No       | None    | List of TCP/UDP ports                                                                  |
+| folder                    | str       | No*      | None    | Folder where application is defined. Max length: 64 chars                              |
+| snippet                   | str       | No*      | None    | Snippet where application is defined. Max length: 64 chars                             |
+| evasive                   | bool      | No       | False   | Uses evasive techniques                                                                |
+| pervasive                 | bool      | No       | False   | Widely used                                                                            |
+| excessive_bandwidth_use   | bool      | No       | False   | Uses excessive bandwidth                                                               |
+| used_by_malware           | bool      | No       | False   | Commonly used by malware                                                               |
+| transfers_files           | bool      | No       | False   | Transfers files                                                                        |
+| has_known_vulnerabilities | bool      | No       | False   | Has known vulnerabilities                                                              |
+| tunnels_other_apps        | bool      | No       | False   | Tunnels other applications                                                             |
+| prone_to_misuse           | bool      | No       | False   | Prone to misuse                                                                        |
+| no_certifications         | bool      | No       | False   | Lacks certifications                                                                   |
+| id                        | UUID      | Yes**    | None    | UUID of the application (response only)                                                |
 
-### Attributes
+\* Exactly one container type (folder/snippet) must be provided
+\** Only required for response model
 
-- `name` (str): **Required.** The name of the application. Max length: 63 characters.
-- `category` (str): **Required.** The high-level category of the application. Max length: 50 characters.
-- `subcategory` (str): **Required.** The specific subcategory. Max length: 50 characters.
-- `technology` (str): **Required.** The underlying technology. Max length: 50 characters.
-- `risk` (int): **Required.** The risk level associated with the application.
-- `description` (Optional[str]): A description of the application. Max length: 1023 characters.
-- `ports` (Optional[List[str]]): List of ports associated with the application.
-- **Container Type Fields** (Exactly one must be provided):
-    - `folder` (Optional[str]): The folder where the application is defined. Max length: 64 characters.
-    - `snippet` (Optional[str]): The snippet where the application is defined. Max length: 64 characters.
-- **Boolean Attributes**:
-    - `evasive` (Optional[bool])
-    - `pervasive` (Optional[bool])
-    - `excessive_bandwidth_use` (Optional[bool])
-    - `used_by_malware` (Optional[bool])
-    - `transfers_files` (Optional[bool])
-    - `has_known_vulnerabilities` (Optional[bool])
-    - `tunnels_other_apps` (Optional[bool])
-    - `prone_to_misuse` (Optional[bool])
-    - `no_certifications` (Optional[bool])
+## Model Validators
 
-### Examples
+### Container Type Validation
 
-1. Basic Application Request:
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-application_request = ApplicationRequestModel(
-    name="custom-app",
+# Using dictionary
+from scm.config.objects import Application
+
+# Error: multiple containers specified
+try:
+    app_dict = {
+        "name": "invalid-app",
+        "category": "business-systems",
+        "subcategory": "database",
+        "technology": "client-server",
+        "risk": 3,
+        "folder": "Shared",
+        "snippet": "Config"  # Can't specify both folder and snippet
+    }
+    app = Application(api_client)
+    response = app.create(app_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder' or 'snippet' must be provided."
+
+# Using model directly
+from scm.models.objects import ApplicationCreateModel
+
+# Error: no container specified
+try:
+    app = ApplicationCreateModel(
+        name="invalid-app",
+        category="business-systems",
+        subcategory="database",
+        technology="client-server",
+        risk=3
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder' or 'snippet' must be provided."
+```
+
+</div>
+
+## Usage Examples
+
+### Creating a Basic Application
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+from scm.config.objects import Application
+
+app_dict = {
+    "name": "custom-db",
+    "category": "business-systems",
+    "subcategory": "database",
+    "technology": "client-server",
+    "risk": 3,
+    "folder": "Custom Apps",
+    "ports": ["tcp/1433"]
+}
+
+app = Application(api_client)
+response = app.create(app_dict)
+
+# Using model directly
+from scm.models.objects import ApplicationCreateModel
+
+app = ApplicationCreateModel(
+    name="custom-db",
     category="business-systems",
     subcategory="database",
     technology="client-server",
     risk=3,
-    folder="Custom Apps"
+    folder="Custom Apps",
+    ports=["tcp/1433"]
 )
+
+payload = app.model_dump(exclude_unset=True)
+response = app.create(payload)
 ```
 
 </div>
 
-2. Detailed Application Request:
+### Creating an Application with Behavioral Attributes
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-application_request = ApplicationRequestModel(
-    name="video-chat-app",
-    category="collaboration",
-    subcategory="video-conferencing",
-    technology="browser-based",
-    risk=2,
-    description="Custom video conferencing application",
-    ports=["tcp/8080", "udp/9000-9010"],
-    folder="Collaboration Apps",
-    evasive=False,
-    pervasive=True,
-    excessive_bandwidth_use=True,
-    transfers_files=True,
-    has_known_vulnerabilities=False
-)
-```
-
-</div>
-
-3. Application Request with Snippet:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-application_request = ApplicationRequestModel(
-    name="legacy-app",
-    category="business-systems",
-    subcategory="erp",
-    technology="client-server",
-    risk=4,
-    snippet="Legacy Apps",
-    used_by_malware=False,
-    no_certifications=True
-)
-```
-
-</div>
-
----
-
-## ApplicationResponseModel
-
-Used when parsing applications retrieved from the API.
-
-### Attributes
-
-- `id` (UUID): The UUID of the application.
-- `name` (str): The name of the application. Max length: 63 characters.
-- `category` (str): The high-level category. Max length: 50 characters.
-- `subcategory` (str): The specific subcategory. Max length: 50 characters.
-- `technology` (str): The underlying technology. Max length: 50 characters.
-- `risk` (int): The risk level associated with the application.
-- `description` (Optional[str]): A description of the application. Max length: 1023 characters.
-- `ports` (Optional[List[str]]): List of ports associated with the application.
-- **Container Type Fields**:
-    - `folder` (Optional[str]): The folder where the application is defined. Max length: 64 characters.
-    - `snippet` (Optional[str]): The snippet where the application is defined. Max length: 64 characters.
-- **Boolean Attributes**:
-    - `evasive` (Optional[bool])
-    - `pervasive` (Optional[bool])
-    - `excessive_bandwidth_use` (Optional[bool])
-    - `used_by_malware` (Optional[bool])
-    - `transfers_files` (Optional[bool])
-    - `has_known_vulnerabilities` (Optional[bool])
-    - `tunnels_other_apps` (Optional[bool])
-    - `prone_to_misuse` (Optional[bool])
-    - `no_certifications` (Optional[bool])
-
-### Examples
-
-1. Basic Application Response:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-application_response = ApplicationResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="custom-app",
-    category="business-systems",
-    subcategory="database",
-    technology="client-server",
-    risk=3,
-    folder="Custom Apps"
-)
-```
-
-</div>
-
-2. Detailed Application Response:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-application_response = ApplicationResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440001",
-    name="video-chat-app",
-    category="collaboration",
-    subcategory="video-conferencing",
-    technology="browser-based",
-    risk=2,
-    description="Custom video conferencing application",
-    ports=["tcp/8080", "udp/9000-9010"],
-    folder="Collaboration Apps",
-    evasive=False,
-    pervasive=True,
-    excessive_bandwidth_use=True,
-    transfers_files=True,
-    has_known_vulnerabilities=False
-)
-```
-
-</div>
-
-3. Application Response with Snippet:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-application_response = ApplicationResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440002",
-    name="legacy-app",
-    category="business-systems",
-    subcategory="erp",
-    technology="client-server",
-    risk=4,
-    snippet="Legacy Apps",
-    used_by_malware=False,
-    no_certifications=True
-)
-```
-
-</div>
-
----
-
-## Full Example
-
-Here's a comprehensive example demonstrating the usage of both `ApplicationRequestModel` and `ApplicationResponseModel`:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from uuid import UUID
-from scm.models.objects import ApplicationRequestModel, ApplicationResponseModel
-
-# Create an ApplicationRequestModel
-request_data = {
-    "name": "advanced-collab-app",
+# Using dictionary
+app_dict = {
+    "name": "file-share",
     "category": "collaboration",
     "subcategory": "file-sharing",
-    "technology": "cloud-based",
-    "risk": 3,
-    "description": "Advanced collaboration and file sharing application",
-    "ports": ["tcp/443", "tcp/8443"],
-    "folder": "Advanced Apps",
-    "evasive": False,
-    "pervasive": True,
-    "excessive_bandwidth_use": False,
-    "used_by_malware": False,
+    "technology": "peer-to-peer",
+    "risk": 4,
+    "folder": "Shared",
+    "description": "Custom file sharing application",
+    "ports": ["tcp/6346", "tcp/6347"],
+    "evasive": True,
     "transfers_files": True,
-    "has_known_vulnerabilities": False,
-    "tunnels_other_apps": False,
-    "prone_to_misuse": True,
-    "no_certifications": False
+    "excessive_bandwidth_use": True,
+    "prone_to_misuse": True
 }
 
-app_request = ApplicationRequestModel(**request_data)
-print(f"Application Request: {app_request}")
+response = app.create(app_dict)
 
-# Simulate API response
-response_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440003",
-    **request_data
-}
+# Using model directly
+app = ApplicationCreateModel(
+    name="file-share",
+    category="collaboration",
+    subcategory="file-sharing",
+    technology="peer-to-peer",
+    risk=4,
+    folder="Shared",
+    description="Custom file sharing application",
+    ports=["tcp/6346", "tcp/6347"],
+    evasive=True,
+    transfers_files=True,
+    excessive_bandwidth_use=True,
+    prone_to_misuse=True
+)
 
-# Create an ApplicationResponseModel
-app_response = ApplicationResponseModel(**response_data)
-print(f"Application Response: {app_response}")
-
-# Access specific attributes
-print(f"Application Name: {app_response.name}")
-print(f"Risk Level: {app_response.risk}")
-print(f"Folder: {app_response.folder}")
-print(f"Transfers Files: {app_response.transfers_files}")
+payload = app.model_dump(exclude_unset=True)
+response = app.create(payload)
 ```
 
 </div>
 
-This example shows how to create both request and response models, demonstrating the full lifecycle of an application
-object in the Strata Cloud Manager.
+### Updating an Application
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+update_dict = {
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "custom-db-updated",
+    "risk": 4,
+    "description": "Updated database application",
+    "has_known_vulnerabilities": True
+}
+
+response = app.update(update_dict)
+
+# Using model directly
+from scm.models.objects import ApplicationUpdateModel
+
+update = ApplicationUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="custom-db-updated",
+    risk=4,
+    description="Updated database application",
+    has_known_vulnerabilities=True
+)
+
+payload = update.model_dump(exclude_unset=True)
+response = app.update(payload)
+```
+
+</div>

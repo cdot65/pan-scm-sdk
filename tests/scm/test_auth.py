@@ -1,4 +1,4 @@
-# tests/test_auth.py
+# tests/scm/test_auth.py
 
 import pytest
 from unittest.mock import patch, MagicMock
@@ -105,3 +105,60 @@ def test_refresh_token_exception(oauth2client):
         with pytest.raises(Exception) as exc_info:
             oauth2client.refresh_token()
         assert "Network Error" in str(exc_info.value)
+
+
+def test_auth_request_model_with_scope():
+    """Test AuthRequestModel when scope is explicitly provided"""
+    auth_request = AuthRequestModel(
+        client_id="test_client_id",
+        client_secret="test_client_secret",
+        tsg_id="test_tsg_id",
+        scope="custom_scope",
+    )
+    assert auth_request.scope == "custom_scope"
+    assert auth_request.tsg_id == "test_tsg_id"
+
+
+def test_auth_request_model_scope_construction():
+    """Test automatic scope construction when scope is not provided"""
+    auth_request = AuthRequestModel(
+        client_id="test_client_id",
+        client_secret="test_client_secret",
+        tsg_id="test_tsg_id",
+    )
+    assert auth_request.scope == "tsg_id:test_tsg_id"
+
+
+def test_auth_request_model_missing_tsg_id():
+    """Test that ValueError is raised when tsg_id is missing and scope is not provided"""
+    with pytest.raises(ValueError) as exc_info:
+        AuthRequestModel(
+            client_id="test_client_id", client_secret="test_client_secret", tsg_id=None
+        )
+    assert "1 validation error for AuthRequestModel" in str(exc_info.value)
+    assert "Value error, tsg_id is required to construct scope" in str(exc_info.value)
+
+
+def test_auth_request_model_default_token_url():
+    """Test that default token_url is set correctly"""
+    auth_request = AuthRequestModel(
+        client_id="test_client_id",
+        client_secret="test_client_secret",
+        tsg_id="test_tsg_id",
+    )
+    assert (
+        auth_request.token_url
+        == "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token"
+    )
+
+
+def test_auth_request_model_custom_token_url():
+    """Test that custom token_url overrides default"""
+    custom_url = "https://custom.example.com/token"
+    auth_request = AuthRequestModel(
+        client_id="test_client_id",
+        client_secret="test_client_secret",
+        tsg_id="test_tsg_id",
+        token_url=custom_url,
+    )
+    assert auth_request.token_url == custom_url

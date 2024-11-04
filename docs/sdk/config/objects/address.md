@@ -1,33 +1,35 @@
 # Address Configuration Object
 
-The `Address` class is used to manage address objects in the Strata Cloud Manager. It provides methods to create,
-retrieve, update, delete, and list address objects.
+The `Address` class provides functionality to manage address objects in Palo Alto Networks' Strata Cloud Manager. This
+includes creating, retrieving, updating, and deleting address objects of various types including IP/Netmask, IP Range,
+IP Wildcard, and FQDN (Fully Qualified Domain Name).
 
----
+## Overview
 
-## Importing the Address Class
+Address objects are fundamental building blocks used in security policies and NAT rules. They can represent:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.objects import Address
-```
-
-</div>
+- Individual IP addresses or networks (using CIDR notation)
+- IP address ranges
+- IP addresses with wildcard masks
+- Fully Qualified Domain Names (FQDNs)
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> AddressResponseModel`
+| Method     | Description                                   |
+|------------|-----------------------------------------------|
+| `create()` | Creates a new address object                  |
+| `get()`    | Retrieves an address object by ID             |
+| `update()` | Updates an existing address object            |
+| `delete()` | Deletes an address object                     |
+| `list()`   | Lists address objects with optional filtering |
+| `fetch()`  | Retrieves a single address object by name     |
 
-Creates a new address object.
+## Creating Address Objects
 
-**Parameters:**
+The `create()` method allows you to create new address objects. You must specify exactly one address type (ip_netmask,
+ip_range, ip_wildcard, or fqdn) and one container type (folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the address object data.
-
-**Example 1: Creating an IP/Netmask Address**
+**Example: Creating an IP/Netmask Address**
 
 <div class="termy">
 
@@ -37,17 +39,18 @@ Creates a new address object.
 address_data = {
     "name": "internal_network",
     "ip_netmask": "192.168.1.0/24",
-    "description": "Internal network address",
+    "description": "Internal network segment",
     "folder": "Shared",
+    "tag": ["internal", "network"]
 }
 
 new_address = address.create(address_data)
-print(f"Created address with ID: {new_address.id}")
+print(f"Created address with ID: {new_address['id']}")
 ```
 
 </div>
 
-**Example 2: Creating an FQDN Address**
+**Example: Creating an FQDN Address**
 
 <div class="termy">
 
@@ -59,23 +62,18 @@ address_data = {
     "fqdn": "www.example.com",
     "description": "Example website address",
     "folder": "Prisma Access",
+    "tag": ["external", "web"]
 }
 
 new_address = address.create(address_data)
-print(f"Created address with ID: {new_address.id}")
+print(f"Created address with ID: {new_address['id']}")
 ```
 
 </div>
 
-### `get(object_id: str) -> AddressResponseModel`
+## Getting Address Objects
 
-Retrieves an address object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the address object.
-
-**Example:**
+Use the `get()` method to retrieve an address object by its ID.
 
 <div class="termy">
 
@@ -83,23 +81,16 @@ Retrieves an address object by its ID.
 
 ```python
 address_id = "123e4567-e89b-12d3-a456-426655440000"
-address_object = address.get(address_id)
-print(f"Address Name: {address_object.name}")
-print(f"Address Type: {address_object.ip_netmask or address_object.fqdn}")
+address_obj = address.get(address_id)
+print(f"Address Name: {address_obj['name']}")
+print(f"Address Type: {address_obj.get('ip_netmask') or address_obj.get('fqdn')}")
 ```
 
 </div>
 
-### `update(object_id: str, data: Dict[str, Any]) -> AddressResponseModel`
+## Updating Address Objects
 
-Updates an existing address object.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the address object.
-- `data` (Dict[str, Any]): A dictionary containing the updated address data.
-
-**Example:**
+The `update()` method allows you to modify existing address objects.
 
 <div class="termy">
 
@@ -107,91 +98,77 @@ Updates an existing address object.
 
 ```python
 update_data = {
-    "description": "Updated internal network description",
-    "tag": ["internal", "updated"],
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "description": "Updated network description",
+    "tag": ["internal", "updated", "2023"]
 }
 
-updated_address = address.update(address_id, update_data)
-print(f"Updated address with ID: {updated_address.id}")
-print(f"New description: {updated_address.description}")
-print(f"New tags: {updated_address.tag}")
+updated_address = address.update(update_data)
+print(f"Updated address description: {updated_address['description']}")
 ```
 
 </div>
 
-### `delete(object_id: str) -> None`
+## Deleting Address Objects
 
-Deletes an address object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the address object.
-
-**Example:**
+Use the `delete()` method to remove an address object.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
+address_id = "123e4567-e89b-12d3-a456-426655440000"
 address.delete(address_id)
-print(f"Deleted address with ID: {address_id}")
+print("Address object deleted successfully")
 ```
 
 </div>
 
-###
+## Listing Address Objects
 
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[AddressResponseModel]`
-
-Lists address objects, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list addresses from.
-- `snippet` (Optional[str]): The snippet to list addresses from.
-- `device` (Optional[str]): The device to list addresses from.
-- `**filters`: Additional filters (e.g., `types`, `values`, `names`, `tags`).
-
-**Example 1: Listing Addresses in a Folder**
+The `list()` method retrieves multiple address objects with optional filtering.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-addresses = address.list(folder='Prisma Access')
-
-for addr in addresses:
-    print(f"Address Name: {addr.name}, Type: {addr.ip_netmask or addr.fqdn}")
-```
-
-</div>
-
-**Example 2: Listing Addresses with Filters**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-filtered_addresses = address.list(
-    folder='Shared',
-    types=['ip-netmask'],
-    tags=['internal']
+# List all addresses in a folder with specific tags
+addresses = address.list(
+    folder="Shared",
+    tags=["internal"],
+    types=["ip-netmask"]
 )
 
-for addr in filtered_addresses:
-    print(f"Address Name: {addr.name}, IP/Netmask: {addr.ip_netmask}")
+for addr in addresses:
+    print(f"Name: {addr['name']}, Value: {addr.get('ip_netmask')}")
 ```
 
 </div>
 
----
+## Fetching Address Objects
 
-## Full Usage Example
+The `fetch()` method retrieves a single address object by name and container.
 
-Here's a complete example demonstrating how to use the Address configuration object:
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch an address by name from a specific folder
+address_obj = address.fetch(
+    name="internal_network",
+    folder="Shared"
+)
+print(f"Found address: {address_obj['name']}")
+```
+
+</div>
+
+## Full Workflow Example
+
+Here's a complete example demonstrating the full lifecycle of an address object:
 
 <div class="termy">
 
@@ -201,57 +178,57 @@ Here's a complete example demonstrating how to use the Address configuration obj
 from scm.client import Scm
 from scm.config.objects import Address
 
-# Initialize the SCM client
-api_client = Scm(
+# Initialize client
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+    tsg_id="your_tsg_id"
 )
 
-# Create an Address instance
-address = Address(api_client)
+# Initialize address object
+address = Address(client)
 
-# Create a new address
-address_data = {
-    "name": "example_network",
-    "ip_netmask": "10.0.0.0/16",
-    "description": "Example network address",
+# Create new address
+create_data = {
+    "name": "test_network",
+    "ip_netmask": "10.0.0.0/24",
+    "description": "Test network segment",
     "folder": "Shared",
-    "tag": ["example", "network"]
+    "tag": ["test"]
 }
 
-new_address = address.create(address_data)
-print(f"Created address with ID: {new_address.id}")
+new_address = address.create(create_data)
+print(f"Created address: {new_address['name']}")
 
-# Get the created address
-retrieved_address = address.get(new_address.id)
-print(f"Retrieved address: {retrieved_address.name}")
+# Fetch the address by name
+fetched = address.fetch(name="test_network", folder="Shared")
 
-# Update the address
-update_data = {
-    "description": "Updated example network address",
-    "tag": ["example", "network", "updated"]
-}
+# Modify the fetched object
+fetched["description"] = "Updated test network segment"
+fetched["tag"] = ["test", "updated"]
 
-updated_address = address.update(new_address.id, update_data)
-print(f"Updated address description: {updated_address.description}")
-print(f"Updated address tags: {updated_address.tag}")
+# Update using the modified object
+updated = address.update(fetched)
+print(f"Updated description: {updated['description']}")
 
-# List addresses
-addresses = address.list(folder='Shared', types=['ip-netmask'])
+# List addresses with filters
+addresses = address.list(
+    folder="Shared",
+    tags=["test"]
+)
+
 for addr in addresses:
-    print(f"Address Name: {addr.name}, IP/Netmask: {addr.ip_netmask}")
+    print(f"Listed address: {addr['name']}")
 
-# Delete the address
-address.delete(new_address.id)
-print(f"Deleted address with ID: {new_address.id}")
+# Clean up
+address.delete(new_address['id'])
+print("Address deleted successfully")
 ```
 
 </div>
 
----
-
 ## Related Models
 
-- [AddressRequestModel](../../models/objects/address_models.md#addressrequestmodel)
+- [AddressCreateModel](../../models/objects/address_models.md#addresscreatemodel)
+- [AddressUpdateModel](../../models/objects/address_models.md#addressupdatemodel)
 - [AddressResponseModel](../../models/objects/address_models.md#addressresponsemodel)

@@ -1,4 +1,4 @@
-# tests/test_anti_spyware_profiles.py
+# tests/scm/config/security/test_anti_spyware_profile.py
 
 import pytest
 from unittest.mock import MagicMock
@@ -12,6 +12,7 @@ from scm.models.security.anti_spyware_profiles import (
     Category,
     ActionRequest,
     ActionResponse,
+    AntiSpywareProfileUpdateModel,
 )
 
 from tests.factories import (
@@ -149,6 +150,7 @@ class TestAntiSpywareProfileAPI(TestAntiSpywareProfileBase):
         """Test updating an anti-spyware profile."""
         profile_id = "123e4567-e89b-12d3-a456-426655440000"
         update_data = {
+            "id": profile_id,  # Add the ID field here
             "name": "UpdatedProfile",
             "folder": "Prisma Access",
             "description": "An updated anti-spyware profile",
@@ -168,7 +170,7 @@ class TestAntiSpywareProfileAPI(TestAntiSpywareProfileBase):
         mock_response["id"] = profile_id
 
         self.mock_scm.put.return_value = mock_response  # noqa
-        updated_profile = self.client.update(profile_id, update_data)
+        updated_profile = self.client.update(update_data)
 
         self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/security/v1/anti-spyware-profiles/{profile_id}",
@@ -186,6 +188,181 @@ class TestAntiSpywareProfileAPI(TestAntiSpywareProfileBase):
         self.client.delete(profile_id)
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/security/v1/anti-spyware-profiles/{profile_id}"
+        )
+
+    def test_fetch_anti_spyware_profile_success(self):
+        """
+        Test successful fetch of an anti-spyware profile.
+
+        **Objective:** Test successful fetch of a profile by name.
+        **Workflow:**
+            1. Mocks API response for a successful fetch
+            2. Verifies correct parameter handling
+            3. Validates response transformation
+        """
+        mock_response = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "folder": "Shared",
+            "description": "Test Anti-Spyware Profile",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+            "threat_exception": None,  # Should be excluded in the result
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        result = self.client.fetch(name="test-profile", folder="Shared")
+
+        # Verify API call
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/anti-spyware-profiles",
+            params={"folder": "Shared", "name": "test-profile"},
+        )
+
+        # Verify result
+        assert isinstance(result, dict)
+        assert "id" in result
+        assert result["name"] == "test-profile"
+        assert result["rules"][0]["severity"] == ["critical"]
+        assert "threat_exception" not in result  # None values should be excluded
+
+    def test_fetch_anti_spyware_profile_empty_name(self):
+        """
+        Test fetch with empty name parameter.
+
+        **Objective:** Test fetch validation with empty name.
+        **Workflow:**
+            1. Attempts to fetch with empty name
+            2. Verifies ValidationError is raised
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="", folder="Shared")
+        assert "Parameter 'name' must be provided for fetch method." in str(
+            exc_info.value
+        )
+
+    def test_fetch_anti_spyware_profile_container_validation(self):
+        """
+        Test container parameter validation in fetch.
+
+        **Objective:** Test various invalid container combinations.
+        **Workflow:**
+            1. Tests multiple invalid container scenarios
+            2. Verifies proper error handling
+        """
+        # Test no container provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-profile")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+        # Test multiple containers provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(
+                name="test-profile", folder="Shared", snippet="TestSnippet"
+            )
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_fetch_anti_spyware_profile_with_filters(self):
+        """
+        Test fetch with additional filter parameters.
+
+        **Objective:** Test handling of additional filters.
+        **Workflow:**
+            1. Tests handling of allowed and excluded filters
+            2. Verifies correct parameter passing
+        """
+        mock_response = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "folder": "Shared",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test with mixed allowed and excluded filters
+        result = self.client.fetch(
+            name="test-profile",
+            folder="Shared",
+            custom_filter="value",  # Should be included
+            types=["type1"],  # Should be excluded
+            values=["value1"],  # Should be excluded
+            names=["name1"],  # Should be excluded
+            tags=["tag1"],  # Should be excluded
+        )
+
+        # Verify only allowed filters were passed
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/anti-spyware-profiles",
+            params={
+                "folder": "Shared",
+                "name": "test-profile",
+                "custom_filter": "value",
+            },
+        )
+        assert isinstance(result, dict)
+
+    def test_fetch_anti_spyware_profile_with_different_containers(self):
+        """
+        Test fetch with different container types.
+
+        **Objective:** Test fetch with each container type.
+        **Workflow:**
+            1. Tests fetch with folder, snippet, and device containers
+            2. Verifies correct parameter handling for each
+        """
+        mock_response = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test with folder
+        self.client.fetch(name="test-profile", folder="Shared")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/anti-spyware-profiles",
+            params={"folder": "Shared", "name": "test-profile"},
+        )
+
+        # Test with snippet
+        self.client.fetch(name="test-profile", snippet="TestSnippet")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/anti-spyware-profiles",
+            params={"snippet": "TestSnippet", "name": "test-profile"},
+        )
+
+        # Test with device
+        self.client.fetch(name="test-profile", device="TestDevice")
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/security/v1/anti-spyware-profiles",
+            params={"device": "TestDevice", "name": "test-profile"},
         )
 
 
@@ -251,6 +428,118 @@ class TestAntiSpywareProfileValidation(TestAntiSpywareProfileBase):
         with pytest.raises(ValueError) as exc_info:
             ThreatExceptionRequestFactory(action=None)
         assert "1 validation error for ThreatExceptionRequest" in str(exc_info.value)
+
+    def test_anti_spyware_profile_response_model_invalid_uuid(self):
+        """
+        Test UUID validation in AntiSpywareProfileResponseModel.
+
+        **Objective:** Test validation of UUID format in response model.
+        **Workflow:**
+            1. Tests various invalid UUID formats
+            2. Verifies validation error handling
+            3. Tests valid UUID format
+        """
+        # Test invalid UUID format
+        invalid_data = {
+            "id": "invalid-uuid-format",
+            "name": "TestProfile",
+            "folder": "Prisma Access",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+            "threat_exception": [],
+        }
+        with pytest.raises(ValueError) as exc_info:
+            AntiSpywareProfileResponseModel(**invalid_data)
+        assert "Invalid UUID format for 'id'" in str(exc_info.value)
+
+        # Test valid UUID format
+        valid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Prisma Access",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+            "threat_exception": [],
+        }
+        profile = AntiSpywareProfileResponseModel(**valid_data)
+        assert profile.id == "123e4567-e89b-12d3-a456-426655440000"
+
+        # Test completely malformed UUID
+        malformed_data = {
+            "id": "123",
+            "name": "TestProfile",
+            "folder": "Prisma Access",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+            "threat_exception": [],
+        }
+        with pytest.raises(ValueError) as exc_info:
+            AntiSpywareProfileResponseModel(**malformed_data)
+        assert "Invalid UUID format for 'id'" in str(exc_info.value)
+
+    def test_anti_spyware_profile_update_model_id_validation(self):
+        """
+        Test ID validation in AntiSpywareProfileUpdateModel.
+
+        **Objective:** Test validation of ID format in update model.
+        **Workflow:**
+            1. Tests invalid ID format validation
+            2. Tests valid UUID format acceptance
+        """
+        # Test data with invalid UUID format
+        invalid_data = {
+            "id": "invalid-uuid-format",
+            "name": "TestProfile",
+            "folder": "Prisma Access",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            AntiSpywareProfileUpdateModel(**invalid_data)
+        assert "Invalid UUID format for 'id'" in str(exc_info.value)
+
+        # Test data with valid UUID format
+        valid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Prisma Access",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "severity": ["critical"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                }
+            ],
+        }
+
+        profile = AntiSpywareProfileUpdateModel(**valid_data)
+        assert profile.id == "123e4567-e89b-12d3-a456-426655440000"
 
 
 class TestAntiSpywareProfilePagination(TestAntiSpywareProfileBase):

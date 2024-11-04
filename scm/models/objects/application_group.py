@@ -1,17 +1,22 @@
 # scm/models/objects/application_group.py
 
-import uuid
 from typing import Optional, List
+from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator, ConfigDict
+from pydantic import (
+    BaseModel,
+    Field,
+    model_validator,
+    ConfigDict,
+)
 
 
-class ApplicationGroupRequestModel(BaseModel):
+class ApplicationGroupBaseModel(BaseModel):
     """
-    Represents an Application Group for Palo Alto Networks' Strata Cloud Manager.
+    Base model for Application Group objects containing fields common to all CRUD operations.
 
-    This class defines the structure and validation rules for an Application Group,
-    including required fields, optional fields, address types, and container types.
+    This model serves as the foundation for create, update, and response models,
+    containing all shared fields and validation logic.
 
     Attributes:
         name (str): The name of the application group.
@@ -19,22 +24,19 @@ class ApplicationGroupRequestModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
-
-    Error:
-        ValueError: Raised when address type or container type validation fails.
     """
 
-    # Model configuration
     model_config = ConfigDict(
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        populate_by_name=True,
     )
 
-    # Required fields
     name: str = Field(
         ...,
         max_length=63,
         description="The name of the application group",
+        pattern=r"^[a-zA-Z0-9_ \.-]+$",
     )
 
     members: List[str] = Field(
@@ -45,7 +47,6 @@ class ApplicationGroupRequestModel(BaseModel):
         examples=[["office365-consumer-access", "office365-enterprise-access"]],
     )
 
-    # Container Types
     folder: Optional[str] = Field(
         None,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
@@ -68,8 +69,15 @@ class ApplicationGroupRequestModel(BaseModel):
         examples=["My Device"],
     )
 
+
+class ApplicationGroupCreateModel(ApplicationGroupBaseModel):
+    """
+    Model for creating a new Application Group.
+    Inherits from ApplicationGroupBaseModel and adds container type validation.
+    """
+
     @model_validator(mode="after")
-    def validate_container_type(self) -> "ApplicationGroupRequestModel":
+    def validate_container_type(self) -> "ApplicationGroupCreateModel":
         container_fields = [
             "folder",
             "snippet",
@@ -85,83 +93,21 @@ class ApplicationGroupRequestModel(BaseModel):
         return self
 
 
-class ApplicationGroupResponseModel(BaseModel):
+class ApplicationGroupUpdateModel(ApplicationGroupBaseModel):
     """
-    Represents an ApplicationGroup response for Palo Alto Networks' Strata Cloud Manager.
-
-    This class defines the structure and validation rules for an Application Group,
-    including required fields, optional fields, address types, and container types.
-
-    Attributes:
-        id (UUID): The UUID of the application group.
-        name (str): The name of the application group.
-        members (List[str]): List of application / group / filter names.
-        folder (Optional[str]): The folder in which the resource is defined.
-        snippet (Optional[str]): The snippet in which the resource is defined.
-        device (Optional[str]): The device in which the resource is defined.
-
-    Error:
-        ValueError: Raised when address type or container type validation fails.
-
+    Model for updating an existing Application Group.
+    All fields are optional to allow partial updates.
     """
 
-    # Model configuration
-    model_config = ConfigDict(
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
 
-    # Required fields
-    name: str = Field(
+class ApplicationGroupResponseModel(ApplicationGroupBaseModel):
+    """
+    Model for Application Group responses.
+    Includes all base fields plus the id field.
+    """
+
+    id: UUID = Field(
         ...,
-        max_length=63,
-        description="The name of the application group",
-    )
-
-    members: List[str] = Field(
-        ...,
-        min_length=1,
-        max_length=1024,
-        description="List of application / group / filter names",
-        examples=[["office365-consumer-access", "office365-enterprise-access"]],
-    )
-
-    # Optional fields
-    id: Optional[str] = Field(
-        None,
         description="The UUID of the application group",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    # Container Types
-    folder: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The folder in which the resource is defined",
-        examples=["Prisma Access"],
-    )
-    snippet: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The snippet in which the resource is defined",
-        examples=["My Snippet"],
-    )
-    device: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The device in which the resource is defined",
-        examples=["My Device"],
-    )
-
-    # Custom Validators
-    @model_validator(mode="before")
-    def validate_uuid(cls, values):
-        if "id" in values and values["id"] is not None:
-            try:
-                uuid.UUID(values["id"])
-            except ValueError:
-                raise ValueError("Invalid UUID format for 'id'")
-        return values

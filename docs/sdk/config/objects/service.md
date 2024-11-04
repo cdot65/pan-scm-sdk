@@ -1,69 +1,91 @@
 # Service Configuration Object
 
-The `Service` class is used to manage service objects in the Strata Cloud Manager. It provides methods to create,
-retrieve, update, delete, and list service objects.
+The `Service` class provides functionality to manage service objects in Palo Alto Networks' Strata Cloud Manager.
+Services
+define network protocols and ports that can be referenced in security policies and NAT rules.
 
----
+## Overview
 
-## Importing the Service Class
+Services in Strata Cloud Manager allow you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.objects import Service
-```
-
-</div>
+- Define TCP and UDP services with specific ports
+- Configure protocol timeout overrides
+- Organize services within folders, snippets, or devices
+- Apply tags for better organization
+- Reference services in security policies and other configurations
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> ServiceResponseModel`
+| Method     | Description                            |
+|------------|----------------------------------------|
+| `create()` | Creates a new service                  |
+| `get()`    | Retrieves a service by ID              |
+| `update()` | Updates an existing service            |
+| `delete()` | Deletes a service                      |
+| `list()`   | Lists services with optional filtering |
+| `fetch()`  | Retrieves a single service by name     |
 
-Creates a new service object.
+## Creating Services
 
-**Parameters:**
+The `create()` method allows you to define new services. You must specify exactly one protocol type (TCP or UDP) and one
+container type (folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the service object data.
-
-**Example:**
+**Example: Creating a TCP Service**
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-service_data = {
+tcp_service = {
     "name": "web-service",
     "protocol": {
         "tcp": {
-            "port": "80,8080",
+            "port": "80,443",
             "override": {
-                "timeout": 30,
-                "halfclose_timeout": 15,
-            },
+                "timeout": 60,
+                "halfclose_timeout": 30
+            }
         }
     },
-    "description": "HTTP service for web traffic",
-    "folder": "Prisma Access",
+    "description": "Web service for HTTP/HTTPS",
+    "folder": "Shared",
+    "tag": ["web"]
 }
 
-new_service = service.create(service_data)
-print(f"Created service with ID: {new_service.id}")
+new_service = service.create(tcp_service)
+print(f"Created service: {new_service['name']}")
 ```
 
 </div>
 
-### `get(object_id: str) -> ServiceResponseModel`
+**Example: Creating a UDP Service**
 
-Retrieves a service object by its ID.
+<div class="termy">
 
-**Parameters:**
+<!-- termynal -->
 
-- `object_id` (str): The UUID of the service object.
+```python
+udp_service = {
+    "name": "dns-service",
+    "protocol": {
+        "udp": {
+            "port": "53"
+        }
+    },
+    "description": "DNS service",
+    "folder": "Shared"
+}
 
-**Example:**
+new_service = service.create(udp_service)
+print(f"Created service: {new_service['name']}")
+```
+
+</div>
+
+## Getting Services
+
+Use the `get()` method to retrieve a service by its ID.
 
 <div class="termy">
 
@@ -71,22 +93,16 @@ Retrieves a service object by its ID.
 
 ```python
 service_id = "123e4567-e89b-12d3-a456-426655440000"
-service_object = service.get(service_id)
-print(f"Service Name: {service_object.name}")
+service_obj = service.get(service_id)
+print(f"Service: {service_obj['name']}")
+print(f"Protocol: {'TCP' if 'tcp' in service_obj['protocol'] else 'UDP'}")
 ```
 
 </div>
 
-### `update(object_id: str, data: Dict[str, Any]) -> ServiceResponseModel`
+## Updating Services
 
-Updates an existing service object.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the service object.
-- `data` (Dict[str, Any]): A dictionary containing the updated service data.
-
-**Example:**
+The `update()` method allows you to modify existing services.
 
 <div class="termy">
 
@@ -94,226 +110,88 @@ Updates an existing service object.
 
 ```python
 update_data = {
-    "description": "Updated HTTP service description",
-    "protocol": {
-        "tcp": {
-            "port": "80,8080,8000",
-        }
-    },
-}
-
-updated_service = service.update(service_id, update_data)
-print(f"Updated service with ID: {updated_service.id}")
-```
-
-</div>
-
-### `delete(object_id: str) -> None`
-
-Deletes a service object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the service object.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-service.delete(service_id)
-print(f"Deleted service with ID: {service_id}")
-```
-
-</div>
-
-###
-
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[ServiceResponseModel]`
-
-Lists service objects, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list services from.
-- `snippet` (Optional[str]): The snippet to list services from.
-- `device` (Optional[str]): The device to list services from.
-- `**filters`: Additional filters (e.g., `names`, `tags`).
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-services = service.list(folder='Prisma Access', names=['web-service', 'ssh-service'])
-
-for svc in services:
-    protocol = 'TCP' if svc.protocol.tcp else 'UDP'
-    ports = svc.protocol.tcp.port if svc.protocol.tcp else svc.protocol.udp.port
-    print(f"Service Name: {svc.name}, Protocol: {protocol}, Ports: {ports}")
-```
-
-</div>
-
----
-
-## Usage Examples
-
-### Example 1: Creating a TCP Service
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-tcp_service_data = {
-    "name": "web-service",
-    "protocol": {
-        "tcp": {
-            "port": "80,443",
-            "override": {
-                "timeout": 60,
-            },
-        }
-    },
-    "description": "Web service for HTTP and HTTPS traffic",
-    "folder": "Shared",
-    "tag": ["web", "production"],
-}
-
-new_tcp_service = service.create(tcp_service_data)
-print(f"Created TCP service with ID: {new_tcp_service.id}")
-```
-
-</div>
-
-### Example 2: Creating a UDP Service
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-udp_service_data = {
-    "name": "dns-service",
-    "protocol": {
-        "udp": {
-            "port": "53",
-        }
-    },
-    "description": "DNS service",
-    "snippet": "network-services",
-}
-
-new_udp_service = service.create(udp_service_data)
-print(f"Created UDP service with ID: {new_udp_service.id}")
-```
-
-</div>
-
-### Example 3: Updating a Service
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-update_data = {
-    "description": "Updated web service description",
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "description": "Updated web service",
     "protocol": {
         "tcp": {
             "port": "80,443,8080",
             "override": {
-                "timeout": 120,
-                "halfclose_timeout": 30,
-            },
+                "timeout": 120
+            }
         }
-    },
-    "tag": ["web", "production", "updated"],
-}
-
-updated_service = service.update(new_tcp_service.id, update_data)
-print(f"Updated service: {updated_service.name}")
-```
-
-</div>
-
-### Example 4: Listing Services with Filters
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-filtered_services = service.list(
-    folder='Shared',
-    names=['web-service', 'dns-service'],
-    tags=['production']
-)
-
-for svc in filtered_services:
-    print(f"Service: {svc.name}, Tags: {svc.tag}")
-```
-
-</div>
-
-### Example 5: Creating a Service in a Device Container
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-device_service_data = {
-    "name": "custom-app-service",
-    "protocol": {
-        "tcp": {
-            "port": "9000-9100",
-        }
-    },
-    "description": "Custom application service",
-    "device": "firewall-01",
-}
-
-new_device_service = service.create(device_service_data)
-print(f"Created device-specific service with ID: {new_device_service.id}")
-```
-
-</div>
-
-### Example 6: Bulk Service Creation and Listing
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-bulk_services = [
-    {
-        "name": f"app-service-{i}",
-        "protocol": {"tcp": {"port": f"{8000 + i}"}},
-        "folder": "Applications",
-        "description": f"Application service {i}",
     }
-    for i in range(1, 6)
-]
+}
 
-created_services = [service.create(svc_data) for svc_data in bulk_services]
-
-listed_services = service.list(folder='Applications')
-for svc in listed_services:
-    print(f"Listed service: {svc.name}, Port: {svc.protocol.tcp.port}")
+updated_service = service.update(update_data)
+print(f"Updated service: {updated_service['name']}")
 ```
 
 </div>
 
----
+## Deleting Services
 
-## Full Example
+Use the `delete()` method to remove a service.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+service_id = "123e4567-e89b-12d3-a456-426655440000"
+service.delete(service_id)
+print("Service deleted successfully")
+```
+
+</div>
+
+## Listing Services
+
+The `list()` method retrieves multiple services with optional filtering.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List all services in a folder
+services = service.list(folder="Shared")
+for svc in services:
+    print(f"Name: {svc['name']}")
+
+# List with specific filters
+filtered_services = service.list(
+    folder="Shared",
+    names=["web-service", "dns-service"],
+    tags=["web"]
+)
+for svc in filtered_services:
+    print(f"Filtered service: {svc['name']}")
+```
+
+</div>
+
+## Fetching Services
+
+The `fetch()` method retrieves a single service by name from a specific container.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+service_obj = service.fetch(
+    name="web-service",
+    folder="Shared"
+)
+print(f"Found service: {service_obj['name']}")
+print(f"Current ports: {service_obj['protocol']['tcp']['port']}")
+```
+
+</div>
+
+## Full Workflow Example
+
+Here's a complete example demonstrating the full lifecycle of a service:
 
 <div class="termy">
 
@@ -323,75 +201,63 @@ for svc in listed_services:
 from scm.client import Scm
 from scm.config.objects import Service
 
-# Initialize the SCM client
-api_client = Scm(
+# Initialize client
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+    tsg_id="your_tsg_id"
 )
 
-# Create a Service instance
-service = Service(api_client)
+# Initialize service object
+service = Service(client)
 
-# Create a new service
-service_data = {
-    "name": "complex-web-service",
+# Create new service
+create_data = {
+    "name": "test-service",
     "protocol": {
         "tcp": {
-            "port": "80,443,8080-8090",
+            "port": "8080",
             "override": {
-                "timeout": 300,
-                "halfclose_timeout": 60,
-                "timewait_timeout": 30,
-            },
+                "timeout": 30
+            }
         }
     },
-    "description": "Complex HTTP service with multiple ports",
-    "folder": "Web Services",
-    "tag": ["web", "complex", "high-availability"],
+    "description": "Test service",
+    "folder": "Shared"
 }
 
-new_service = service.create(service_data)
-print(f"Created service with ID: {new_service.id}")
+new_service = service.create(create_data)
+print(f"Created service: {new_service['name']}")
 
-# Get the created service
-retrieved_service = service.get(new_service.id)
-print(f"Retrieved service: {retrieved_service.name}")
+# Fetch the service by name
+fetched_service = service.fetch(
+    name="test-service",
+    folder="Shared"
+)
 
-# Update the service
-update_data = {
-    "description": "Updated complex HTTP service",
-    "protocol": {
-        "tcp": {
-            "port": "80,443,8080-8095",
-            "override": {
-                "timeout": 360,
-            },
-        }
-    },
-    "tag": ["web", "complex", "high-availability", "updated"],
-}
+# Modify the fetched service
+fetched_service["description"] = "Updated test service"
+fetched_service["protocol"]["tcp"]["port"] = "8080,8443"
 
-updated_service = service.update(new_service.id, update_data)
-print(f"Updated service: {updated_service.name}")
+# Update using the modified object
+updated_service = service.update(fetched_service)
+print(f"Updated service: {updated_service['name']}")
+print(f"New ports: {updated_service['protocol']['tcp']['port']}")
 
-# List services
-services = service.list(folder='Web Services', tags=['complex'])
+# List all services
+services = service.list(folder="Shared")
 for svc in services:
-    print(f"Service Name: {svc.name}, Ports: {svc.protocol.tcp.port}")
+    print(f"Listed service: {svc['name']}")
 
-# Delete the service
-service.delete(new_service.id)
-print(f"Deleted service with ID: {new_service.id}")
+# Clean up
+service.delete(new_service['id'])
+print("Service deleted successfully")
 ```
 
 </div>
 
----
-
 ## Related Models
 
-- [ServiceRequestModel](../../models/objects/service_models.md#servicerequestmodel)
+- [ServiceCreateModel](../../models/objects/service_models.md#servicecreatemodel)
+- [ServiceUpdateModel](../../models/objects/service_models.md#serviceupdatemodel)
 - [ServiceResponseModel](../../models/objects/service_models.md#serviceresponsemodel)
-
----

@@ -1,83 +1,83 @@
 # Address Group Configuration Object
 
-The `AddressGroup` class is used to manage address groups in the Strata Cloud Manager. Address groups can be either
-static (containing a list of addresses) or dynamic (using a tag-based filter).
+The `AddressGroup` class provides functionality to manage address groups in Palo Alto Networks' Strata Cloud Manager.
+Address
+groups can be used to organize and manage collections of addresses either statically (by explicitly listing addresses)
+or
+dynamically (using tag-based filters).
 
----
+## Overview
 
-## Importing the AddressGroup Class
+Address groups are essential components in network security policy management, allowing you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.objects import AddressGroup
-```
-
-</div>
+- Create static groups with explicit lists of addresses
+- Define dynamic groups that automatically update based on tag filters
+- Organize addresses within folders, snippets, or devices
+- Apply tags for better organization and management
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> AddressGroupResponseModel`
+| Method     | Description                                  |
+|------------|----------------------------------------------|
+| `create()` | Creates a new address group                  |
+| `get()`    | Retrieves an address group by ID             |
+| `update()` | Updates an existing address group            |
+| `delete()` | Deletes an address group                     |
+| `list()`   | Lists address groups with optional filtering |
+| `fetch()`  | Retrieves a single address group by name     |
 
-Creates a new address group.
+## Creating Address Groups
 
-**Parameters:**
+The `create()` method allows you to create new address groups. You must specify either a static list of addresses or a
+dynamic filter, along with exactly one container type (folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the address group data.
-
-**Example 1 (Static Group):**
+**Example: Creating a Static Address Group**
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-address_group_data = {
-    "name": "example-static-group",
-    "description": "This is a static address group",
-    "static": ["server1", "server2", "server3"],
-    "folder": "Prisma Access",
+static_group = {
+    "name": "web_servers",
+    "description": "Web server group",
+    "static": ["web1", "web2", "web3"],
+    "folder": "Shared",
+    "tag": ["production", "web"]
 }
 
-new_address_group = address_group.create(address_group_data)
-print(f"Created static address group with ID: {new_address_group.id}")
+new_group = address_group.create(static_group)
+print(f"Created group: {new_group['name']}")
 ```
 
 </div>
 
-**Example 2 (Dynamic Group):**
+**Example: Creating a Dynamic Address Group**
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-address_group_data = {
-    "name": "example-dynamic-group",
-    "description": "This is a dynamic address group",
+dynamic_group = {
+    "name": "prod_servers",
+    "description": "Production servers",
     "dynamic": {
-        "filter": "'aws-tag' and 'production'"
+        "filter": "'production' and 'server'"
     },
-    "folder": "Prisma Access",
+    "folder": "Shared",
+    "tag": ["production"]
 }
 
-new_address_group = address_group.create(address_group_data)
-print(f"Created dynamic address group with ID: {new_address_group.id}")
+new_group = address_group.create(dynamic_group)
+print(f"Created group: {new_group['name']}")
 ```
 
 </div>
 
-### `get(object_id: str) -> AddressGroupResponseModel`
+## Getting Address Groups
 
-Retrieves an address group by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the address group.
-
-**Example:**
+Use the `get()` method to retrieve an address group by its ID.
 
 <div class="termy">
 
@@ -85,23 +85,16 @@ Retrieves an address group by its ID.
 
 ```python
 group_id = "123e4567-e89b-12d3-a456-426655440000"
-group_object = address_group.get(group_id)
-print(f"Address Group Name: {group_object.name}")
-print(f"Address Group Type: {'Dynamic' if group_object.dynamic else 'Static'}")
+group = address_group.get(group_id)
+print(f"Group Name: {group['name']}")
+print(f"Type: {'Dynamic' if 'dynamic' in group else 'Static'}")
 ```
 
 </div>
 
-### `update(object_id: str, data: Dict[str, Any]) -> AddressGroupResponseModel`
+## Updating Address Groups
 
-Updates an existing address group.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the address group.
-- `data` (Dict[str, Any]): A dictionary containing the updated address group data.
-
-**Example 3 (Updating a Static Group):**
+The `update()` method allows you to modify existing address groups.
 
 <div class="termy">
 
@@ -109,113 +102,76 @@ Updates an existing address group.
 
 ```python
 update_data = {
-    "description": "Updated static group description",
-    "static": ["server1", "server2", "server3", "server4"],
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "description": "Updated server group",
+    "tag": ["production", "updated"]
 }
 
-updated_group = address_group.update(group_id, update_data)
-print(f"Updated static address group with ID: {updated_group.id}")
-print(f"New static addresses: {updated_group.static}")
+updated_group = address_group.update(update_data)
+print(f"Updated group: {updated_group['name']}")
 ```
 
 </div>
 
-**Example 4 (Updating a Dynamic Group):**
+## Deleting Address Groups
+
+Use the `delete()` method to remove an address group.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-update_data = {
-    "description": "Updated dynamic group description",
-    "dynamic": {
-        "filter": "'aws-tag' and 'production' or 'staging'"
-    },
-}
-
-updated_group = address_group.update(group_id, update_data)
-print(f"Updated dynamic address group with ID: {updated_group.id}")
-print(f"New dynamic filter: {updated_group.dynamic.filter}")
-```
-
-</div>
-
-### `delete(object_id: str) -> None`
-
-Deletes an address group by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the address group.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
+group_id = "123e4567-e89b-12d3-a456-426655440000"
 address_group.delete(group_id)
-print(f"Deleted address group with ID: {group_id}")
+print("Group deleted successfully")
 ```
 
 </div>
 
-###
+## Listing Address Groups
 
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[AddressGroupResponseModel]`
-
-Lists address groups, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list address groups from.
-- `snippet` (Optional[str]): The snippet to list address groups from.
-- `device` (Optional[str]): The device to list address groups from.
-- `**filters`: Additional filters.
-
-**Example 5 (Listing Address Groups in a Folder):**
+The `list()` method retrieves multiple address groups with optional filtering.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-groups = address_group.list(folder='Prisma Access')
+# List all groups in a folder with specific tags
+groups = address_group.list(
+    folder="Shared",
+    tags=["production"]
+)
 
 for group in groups:
-    print(f"Address Group Name: {group.name}")
-    print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
-    print(f"Description: {group.description}")
-    print("---")
+    print(f"Name: {group['name']}")
+    print(f"Type: {'Dynamic' if 'dynamic' in group else 'Static'}")
 ```
 
 </div>
 
-**Example 6 (Listing Address Groups with Filters):**
+## Fetching Address Groups
+
+The `fetch()` method retrieves a single address group by name from a specific container.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-groups = address_group.list(folder='Prisma Access', names=['web-servers', 'db-servers'], tags=['production'])
-
-for group in groups:
-    print(f"Address Group Name: {group.name}")
-    print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
-    print(f"Tags: {group.tag}")
-    print("---")
+group = address_group.fetch(
+    name="web_servers",
+    folder="Shared"
+)
+print(f"Found group: {group['name']}")
 ```
 
 </div>
 
----
+## Full Workflow Example
 
-## Full Usage Example
-
-Here's a complete example demonstrating how to use the `AddressGroup` class:
+Here's a complete example demonstrating the full lifecycle of an address group:
 
 <div class="termy">
 
@@ -225,70 +181,56 @@ Here's a complete example demonstrating how to use the `AddressGroup` class:
 from scm.client import Scm
 from scm.config.objects import AddressGroup
 
-# Initialize the SCM client
-api_client = Scm(
+# Initialize client
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+    tsg_id="your_tsg_id"
 )
 
-# Create an AddressGroup instance
-address_group = AddressGroup(api_client)
+# Initialize address group object
+address_group = AddressGroup(client)
 
-# Create a new static address group
-static_group_data = {
-    "name": "web-servers",
-    "description": "Web server address group",
-    "static": ["web1.example.com", "web2.example.com"],
-    "folder": "Prisma Access",
-    "tag": ["production", "web"]
+# Create a new static group
+static_group = {
+    "name": "app_servers",
+    "description": "Application servers",
+    "static": ["app1", "app2"],
+    "folder": "Shared",
+    "tag": ["production"]
 }
 
-new_static_group = address_group.create(static_group_data)
-print(f"Created static address group with ID: {new_static_group.id}")
+new_group = address_group.create(static_group)
+print(f"Created group: {new_group['name']}")
 
-# Create a new dynamic address group
-dynamic_group_data = {
-    "name": "dynamic-db-servers",
-    "description": "Dynamic database server address group",
-    "dynamic": {
-        "filter": "'database-server' and 'production'"
-    },
-    "folder": "Prisma Access",
-    "tag": ["production", "database"]
-}
+# Fetch the group by name
+fetched_group = address_group.fetch(
+    name="app_servers",
+    folder="Shared"
+)
 
-new_dynamic_group = address_group.create(dynamic_group_data)
-print(f"Created dynamic address group with ID: {new_dynamic_group.id}")
+# Modify the fetched group
+fetched_group["description"] = "Updated application servers"
+fetched_group["tag"] = ["production", "updated"]
 
-# List all address groups in the folder
-groups = address_group.list(folder='Prisma Access')
+# Update the group
+updated_group = address_group.update(fetched_group)
+print(f"Updated group description: {updated_group['description']}")
+
+# List all groups
+groups = address_group.list(folder="Shared")
 for group in groups:
-    print(f"Address Group: {group.name}")
-    print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
-    print(f"Description: {group.description}")
-    print(f"Tags: {group.tag}")
-    print("---")
+    print(f"Listed group: {group['name']}")
 
-# Update the static group
-update_static_data = {
-    "description": "Updated web server address group",
-    "static": ["web1.example.com", "web2.example.com", "web3.example.com"],
-}
-updated_static_group = address_group.update(new_static_group.id, update_static_data)
-print(f"Updated static group: {updated_static_group.name}")
-print(f"New static addresses: {updated_static_group.static}")
-
-# Delete the dynamic group
-address_group.delete(new_dynamic_group.id)
-print(f"Deleted dynamic group with ID: {new_dynamic_group.id}")
+# Clean up
+address_group.delete(new_group['id'])
+print("Group deleted successfully")
 ```
 
 </div>
 
----
-
 ## Related Models
 
-- [AddressGroupRequestModel](../../models/objects/address_group_models.md#addressgrouprequestmodel)
+- [AddressGroupCreateModel](../../models/objects/address_group_models.md#addressgroupcreatemodel)
+- [AddressGroupUpdateModel](../../models/objects/address_group_models.md#addressgroupupdatemodel)
 - [AddressGroupResponseModel](../../models/objects/address_group_models.md#addressgroupresponsemodel)

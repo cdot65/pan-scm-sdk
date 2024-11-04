@@ -3,10 +3,11 @@
 from typing import List, Dict, Any, Optional
 from scm.config import BaseObject
 from scm.models.security import (
-    DNSSecurityProfileRequestModel,
+    DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
 )
 from scm.exceptions import ValidationError
+from scm.models.security.dns_security_profiles import DNSSecurityProfileUpdateModel
 
 
 class DNSSecurityProfile(BaseObject):
@@ -34,7 +35,7 @@ class DNSSecurityProfile(BaseObject):
         super().__init__(api_client)
 
     def create(self, data: Dict[str, Any]) -> DNSSecurityProfileResponseModel:
-        profile = DNSSecurityProfileRequestModel(**data)
+        profile = DNSSecurityProfileCreateModel(**data)
         payload = profile.model_dump(exclude_unset=True)
         response = self.api_client.post(self.ENDPOINT, json=payload)
         return DNSSecurityProfileResponseModel(**response)
@@ -45,12 +46,29 @@ class DNSSecurityProfile(BaseObject):
         return DNSSecurityProfileResponseModel(**response)
 
     def update(
-        self, object_id: str, data: Dict[str, Any]
+        self,
+        data: Dict[str, Any],
     ) -> DNSSecurityProfileResponseModel:
-        profile = DNSSecurityProfileRequestModel(**data)
-        payload = profile.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        response = self.api_client.put(endpoint, json=payload)
+        """
+        Updates an existing DNS Security Profile.
+
+        Args:
+            data (Dict[str, Any]): The profile data to update
+
+        Returns:
+            DNSSecurityProfileResponseModel: The updated profile
+        """
+        # Create update model from data
+        profile = DNSSecurityProfileUpdateModel(**data)
+
+        # Create endpoint with object_id
+        endpoint = f"{self.ENDPOINT}/{data['id']}"
+
+        # Perform update
+        response = self.api_client.put(
+            endpoint, json=profile.model_dump(exclude_unset=True, exclude_none=True)
+        )
+
         return DNSSecurityProfileResponseModel(**response)
 
     def delete(self, object_id: str) -> None:
@@ -121,3 +139,83 @@ class DNSSecurityProfile(BaseObject):
             DNSSecurityProfileResponseModel(**item) for item in response.get("data", [])
         ]
         return profiles
+
+    def fetch(
+        self,
+        name: str,
+        folder: Optional[str] = None,
+        snippet: Optional[str] = None,
+        device: Optional[str] = None,
+        **filters,
+    ) -> Dict[str, Any]:
+        """
+        Fetches a single DNSSecurity Profile object by name.
+
+        Args:
+            name (str): The name of the DNS Security Profile to fetch.
+            folder (str, optional): The folder in which the resource is defined.
+            snippet (str, optional): The snippet in which the resource is defined.
+            device (str, optional): The device in which the resource is defined.
+            **filters: Additional filters to apply to the request.
+
+        Returns:
+            DNSSecurityProfileResponseModel: The fetched security rule object.
+
+        Raises:
+            ValidationError: If invalid parameters are provided.
+            NotFoundError: If the security rule object is not found.
+        """
+        if not name:
+            raise ValidationError("Parameter 'name' must be provided for fetch method.")
+
+        params = {}
+
+        # Include container type parameter
+        container_params = {
+            "folder": folder,
+            "snippet": snippet,
+            "device": device,
+        }
+        provided_containers = {
+            k: v for k, v in container_params.items() if v is not None
+        }
+
+        if len(provided_containers) != 1:
+            raise ValidationError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            )
+
+        params.update(provided_containers)
+        params["name"] = name  # Set the 'name' parameter
+
+        # Include any additional filters provided
+        params.update(
+            {
+                k: v
+                for k, v in filters.items()
+                if k
+                not in [
+                    "types",
+                    "values",
+                    "names",
+                    "tags",
+                    "folder",
+                    "snippet",
+                    "device",
+                    "name",
+                ]
+            }
+        )
+
+        response = self.api_client.get(
+            self.ENDPOINT,
+            params=params,
+        )
+
+        # Since response is a single object when 'name' is provided
+        # We can directly create the DNSSecurityProfileResponseModel
+        profile = DNSSecurityProfileResponseModel(**response)
+        return profile.model_dump(
+            exclude_unset=True,
+            exclude_none=True,
+        )

@@ -56,97 +56,44 @@ class IPv6AddressEnum(str, Enum):
     localhost = "::1"
 
 
-# Action classes for 'lists' entries
-class ListActionRequest(RootModel[dict]):
-    """
-    Represents the 'action' field in 'lists' entries for requests.
-    Enforces that exactly one action is provided.
-    """
+# Component Models
+class ListActionBaseModel(RootModel[dict]):
+    """Base class for list actions with common validation logic."""
+
+    def get_action_name(self) -> str:
+        return next(iter(self.root.keys()), "unknown")
+
+
+class ListActionRequestModel(ListActionBaseModel):
+    """Action field validator for requests requiring exactly one action."""
 
     @model_validator(mode="before")
-    @classmethod
     def check_and_transform_action(cls, values):
         if isinstance(values, str):
             values = {values: {}}
         elif not isinstance(values, dict):
             raise ValueError("Invalid action format; must be a string or dict.")
 
-        action_fields = [
-            "alert",
-            "allow",
-            "block",
-            "sinkhole",
-        ]
-
+        action_fields = ["alert", "allow", "block", "sinkhole"]
         provided_actions = [field for field in action_fields if field in values]
 
         if len(provided_actions) != 1:
             raise ValueError("Exactly one action must be provided in 'action' field.")
 
         action_name = provided_actions[0]
-        action_value = values[action_name]
-
-        if action_value != {}:
+        if values[action_name] != {}:
             raise ValueError(f"Action '{action_name}' does not take any parameters.")
 
         return values
 
-    def get_action_name(self) -> str:
-        return next(iter(self.root.keys()), "unknown")
 
+class DNSSecurityCategoryEntryModel(BaseModel):
+    """DNS Security Category configuration."""
 
-class ListActionResponse(RootModel[dict]):
-    """
-    Represents the 'action' field in 'lists' entries for responses.
-    Accepts empty dictionaries.
-    """
-
-    @model_validator(mode="before")
-    @classmethod
-    def check_action(cls, values):
-        if isinstance(values, str):
-            values = {values: {}}
-        elif not isinstance(values, dict):
-            raise ValueError("Invalid action format; must be a string or dict.")
-
-        action_fields = [
-            "alert",
-            "allow",
-            "block",
-            "sinkhole",
-        ]
-
-        provided_actions = [field for field in action_fields if field in values]
-
-        if len(provided_actions) > 1:
-            raise ValueError("At most one action must be provided in 'action' field.")
-
-        if provided_actions:
-            action_name = provided_actions[0]
-            action_value = values[action_name]
-
-            if action_value != {}:
-                raise ValueError(
-                    f"Action '{action_name}' does not take any parameters."
-                )
-        else:
-            # Accept empty dicts (no action specified)
-            if values != {}:
-                raise ValueError("Invalid action format.")
-
-        return values
-
-    def get_action_name(self) -> str:
-        return next(iter(self.root.keys()), "unknown")
-
-
-# Model for DNS Security Categories
-class DNSSecurityCategoryEntry(BaseModel):
-    """
-    Represents an entry in 'dns_security_categories'.
-    """
-
-    name: str = Field(..., description="DNS Security Category Name")
+    name: str = Field(
+        ...,
+        description="DNS Security Category Name",
+    )
     action: ActionEnum = Field(
         default=ActionEnum.default,
         description="Action to be taken",
@@ -161,120 +108,92 @@ class DNSSecurityCategoryEntry(BaseModel):
     )
 
 
-# Models for 'lists' entries
-class ListEntryBase(BaseModel):
-    """
-    Base class for 'lists' entries.
-    """
+class ListEntryBaseModel(BaseModel):
+    """Base configuration for list entries."""
 
-    name: str = Field(..., description="List name")
+    name: str = Field(
+        ...,
+        description="List name",
+    )
     packet_capture: Optional[PacketCaptureEnum] = Field(
         None,
         description="Packet capture setting",
     )
-
-
-class ListEntryRequest(ListEntryBase):
-    """
-    Represents a 'lists' entry for requests.
-    """
-
-    action: ListActionRequest = Field(..., description="Action")
-
-
-class ListEntryResponse(ListEntryBase):
-    """
-    Represents a 'lists' entry for responses.
-    """
-
-    action: ListActionResponse = Field(..., description="Action")
-
-
-# Model for Sinkhole Settings
-class SinkholeSettings(BaseModel):
-    """
-    Represents the 'sinkhole' settings.
-    """
-
-    ipv4_address: IPv4AddressEnum = Field(..., description="IPv4 address for sinkhole")
-    ipv6_address: IPv6AddressEnum = Field(..., description="IPv6 address for sinkhole")
-
-
-# Model for Whitelist entries
-class WhitelistEntry(BaseModel):
-    """
-    Represents an entry in the 'whitelist'.
-    """
-
-    name: str = Field(..., description="DNS domain or FQDN to be whitelisted")
-    description: Optional[str] = Field(None, description="Description")
-
-
-# Botnet Domains models
-class BotnetDomainsRequest(BaseModel):
-    """
-    Represents 'botnet_domains' in requests.
-    """
-
-    dns_security_categories: Optional[List[DNSSecurityCategoryEntry]] = Field(
-        None, description="DNS security categories"
-    )
-    lists: Optional[List[ListEntryRequest]] = Field(
-        None, description="Lists of DNS domains"
-    )
-    sinkhole: Optional[SinkholeSettings] = Field(
-        None, description="DNS sinkhole settings"
-    )
-    whitelist: Optional[List[WhitelistEntry]] = Field(
-        None, description="DNS security overrides"
+    action: ListActionRequestModel = Field(
+        ...,
+        description="Action",
     )
 
 
-class BotnetDomainsResponse(BaseModel):
-    """
-    Represents 'botnet_domains' in responses.
-    """
+class SinkholeSettingsModel(BaseModel):
+    """Sinkhole configuration settings."""
 
-    dns_security_categories: Optional[List[DNSSecurityCategoryEntry]] = Field(
-        None, description="DNS security categories"
+    ipv4_address: IPv4AddressEnum = Field(
+        ...,
+        description="IPv4 address for sinkhole",
     )
-    lists: Optional[List[ListEntryResponse]] = Field(
-        None, description="Lists of DNS domains"
-    )
-    sinkhole: Optional[SinkholeSettings] = Field(
-        None, description="DNS sinkhole settings"
-    )
-    whitelist: Optional[List[WhitelistEntry]] = Field(
-        None, description="DNS security overrides"
+    ipv6_address: IPv6AddressEnum = Field(
+        ...,
+        description="IPv6 address for sinkhole",
     )
 
 
-# Base model for DNS Security Profile
-class DNSSecurityProfileBaseModel(BaseModel):
-    """
-    Base model for DNS Security Profile.
-    """
+class WhitelistEntryModel(BaseModel):
+    """Whitelist entry configuration."""
 
     name: str = Field(
         ...,
-        description="Profile name",
+        description="DNS domain or FQDN to be whitelisted",
     )
     description: Optional[str] = Field(
         None,
         description="Description",
     )
-    botnet_domains: Optional[BotnetDomainsRequest] = Field(
+
+
+class BotnetDomainsModel(BaseModel):
+    """Botnet domains configuration."""
+
+    dns_security_categories: Optional[List[DNSSecurityCategoryEntryModel]] = Field(
         None,
-        description="Botnet domains settings",
+        description="DNS security categories",
+    )
+    lists: Optional[List[ListEntryBaseModel]] = Field(
+        None,
+        description="Lists of DNS domains",
+    )
+    sinkhole: Optional[SinkholeSettingsModel] = Field(
+        None,
+        description="DNS sinkhole settings",
+    )
+    whitelist: Optional[List[WhitelistEntryModel]] = Field(
+        None,
+        description="DNS security overrides",
     )
 
 
-# Request model
-class DNSSecurityProfileRequestModel(DNSSecurityProfileBaseModel):
-    """
-    Represents a DNS Security Profile for API requests.
-    """
+class DNSSecurityProfileBaseModel(BaseModel):
+    """Base model for DNS Security Profile containing common fields."""
 
+    model_config = ConfigDict(
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
+    name: str = Field(
+        ...,
+        description="Profile name",
+        pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_\-\.\s]*$",
+    )
+    description: Optional[str] = Field(
+        None,
+        description="Description",
+    )
+    botnet_domains: Optional[BotnetDomainsModel] = Field(
+        None,
+        description="Botnet domains settings",
+    )
     folder: Optional[str] = Field(
         None,
         description="Folder",
@@ -293,15 +212,13 @@ class DNSSecurityProfileRequestModel(DNSSecurityProfileBaseModel):
         max_length=64,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
-    botnet_domains: Optional[BotnetDomainsRequest] = Field(
-        None,
-        description="Botnet domains settings",
-    )
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+
+class DNSSecurityProfileCreateModel(DNSSecurityProfileBaseModel):
+    """Model for creating a new DNS Security Profile."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "DNSSecurityProfileRequestModel":
+    def validate_container(self) -> "DNSSecurityProfileCreateModel":
         container_fields = [
             "folder",
             "snippet",
@@ -310,59 +227,30 @@ class DNSSecurityProfileRequestModel(DNSSecurityProfileBaseModel):
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None
         ]
-
         if len(provided_containers) != 1:
             raise ValueError(
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
-
         return self
 
 
-# Response model
+class DNSSecurityProfileUpdateModel(DNSSecurityProfileBaseModel):
+    """Model for updating an existing DNS Security Profile."""
+
+
 class DNSSecurityProfileResponseModel(DNSSecurityProfileBaseModel):
-    """
-    Represents a DNS Security Profile for API responses.
-    """
+    """Model for DNS Security Profile API responses."""
 
     id: str = Field(
         ...,
-        description="Profile ID",
-    )
-    folder: Optional[str] = Field(
-        None,
-        description="Folder",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        description="Snippet",
-    )
-    device: Optional[str] = Field(
-        None,
-        description="Device",
-    )
-    botnet_domains: Optional[BotnetDomainsResponse] = Field(
-        None,
-        description="Botnet domains settings",
+        description="UUID of the resource",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
 
     @field_validator("id")
-    @classmethod
     def validate_id(cls, v):
         try:
             uuid.UUID(v)
         except ValueError:
             raise ValueError("Invalid UUID format for 'id'")
         return v
-
-
-# Response model for list of profiles
-class DNSSecurityProfilesResponse(BaseModel):
-    """
-    Represents the API response containing a list of DNS Security Profiles.
-    """
-
-    data: List[DNSSecurityProfileResponseModel]
-    offset: int
-    total: int
-    limit: int

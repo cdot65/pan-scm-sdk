@@ -1,253 +1,161 @@
 # Application Group Models
 
-This section covers the data models associated with the `ApplicationGroup` configuration object.
+## Overview
 
----
+The Application Group models provide a structured way to manage application groups in Palo Alto Networks' Strata Cloud
+Manager.
+These models support grouping applications together and defining them within folders, snippets, or devices. The models
+handle
+validation of inputs and outputs when interacting with the SCM API.
 
-## ApplicationGroupRequestModel
+## Attributes
 
-Used when creating or updating an application group object.
+| Attribute | Type      | Required | Default | Description                                                                                  |
+|-----------|-----------|----------|---------|----------------------------------------------------------------------------------------------|
+| name      | str       | Yes      | None    | Name of the application group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| members   | List[str] | Yes      | None    | List of application names. Min length: 1, Max length: 1024                                   |
+| folder    | str       | No*      | None    | Folder where group is defined. Max length: 64 chars                                          |
+| snippet   | str       | No*      | None    | Snippet where group is defined. Max length: 64 chars                                         |
+| device    | str       | No*      | None    | Device where group is defined. Max length: 64 chars                                          |
+| id        | UUID      | Yes**    | None    | UUID of the application group (response only)                                                |
 
-### Attributes
+\* Exactly one container type (folder/snippet/device) must be provided
+\** Only required for response model
 
-- `name` (str): **Required.** The name of the application group object.
-- `members` (Optional[List[str]]): Members of Application objects associated with the application group object.
-- `dynamic` (Optional[Dict[str, str]]): Dynamic filter for the application group.
-- **Container Type Fields** (Exactly one must be provided):
-    - `folder` (Optional[str]): The folder where the application group is defined.
-    - `snippet` (Optional[str]): The snippet where the application group is defined.
-    - `device` (Optional[str]): The device where the application group is defined.
+## Model Validators
 
-### Example 1: Static Application Group
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.objects import ApplicationGroupRequestModel
+# Using dictionary
+from scm.config.objects import ApplicationGroup
 
-static_group = ApplicationGroupRequestModel(
-    name="static-app-group",
-    folder="Prisma Access",
-    members=["app1", "app2", "app3"]
-)
+# Error: multiple containers specified
+try:
+    app_group_dict = {
+        "name": "invalid-group",
+        "members": ["app1", "app2"],
+        "folder": "Shared",
+        "device": "fw01"  # Can't specify both folder and device
+    }
+    app_group = ApplicationGroup(api_client)
+    response = app_group.create(app_group_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 
-print(f"Static group name: {static_group.name}")
-print(f"Static group members: {static_group.members}")
+# Using model directly
+from scm.models.objects import ApplicationGroupCreateModel
+
+# Error: no container specified
+try:
+    app_group = ApplicationGroupCreateModel(
+        name="invalid-group",
+        members=["app1", "app2"]
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
 </div>
 
-### Example 2: Dynamic Application Group
+## Usage Examples
+
+### Creating an Application Group
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.objects import ApplicationGroupRequestModel
+# Using dictionary
+from scm.config.objects import ApplicationGroup
 
-dynamic_group = ApplicationGroupRequestModel(
-    name="dynamic-app-group",
-    folder="Prisma Access",
-    dynamic={"filter": "'aws.ec2.tag.AppType' eq 'web'"}
+app_group_dict = {
+    "name": "web-apps",
+    "members": ["http", "https", "web-browsing"],
+    "folder": "Shared",
+}
+
+app_group = ApplicationGroup(api_client)
+response = app_group.create(app_group_dict)
+
+# Using model directly
+from scm.models.objects import ApplicationGroupCreateModel
+
+app_group = ApplicationGroupCreateModel(
+    name="web-apps",
+    members=["http", "https", "web-browsing"],
+    folder="Shared"
 )
 
-print(f"Dynamic group name: {dynamic_group.name}")
-print(f"Dynamic group filter: {dynamic_group.dynamic['filter']}")
+payload = app_group.model_dump(exclude_unset=True)
+response = app_group.create(payload)
 ```
 
 </div>
 
-### Example 3: Application Group in a Snippet
+### Creating an Application Group in a Snippet
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.objects import ApplicationGroupRequestModel
+# Using dictionary
+snippet_group_dict = {
+    "name": "database-apps",
+    "members": ["mysql", "postgresql", "mongodb"],
+    "snippet": "Database Config"
+}
 
-snippet_group = ApplicationGroupRequestModel(
-    name="snippet-app-group",
-    snippet="My Snippet",
-    members=["app4", "app5"]
+response = app_group.create(snippet_group_dict)
+
+# Using model directly
+snippet_group = ApplicationGroupCreateModel(
+    name="database-apps",
+    members=["mysql", "postgresql", "mongodb"],
+    snippet="Database Config"
 )
 
-print(f"Snippet group name: {snippet_group.name}")
-print(f"Snippet group container: {snippet_group.snippet}")
+payload = snippet_group.model_dump(exclude_unset=True)
+response = app_group.create(payload)
 ```
 
 </div>
 
----
-
-## ApplicationGroupResponseModel
-
-Used when parsing application group objects retrieved from the API.
-
-### Attributes
-
-- `id` (str): The UUID of the application group object.
-- `name` (str): The name of the application group object.
-- `members` (Optional[List[str]]): Members of Application objects associated with the application group object.
-- `dynamic` (Optional[Dict[str, str]]): Dynamic filter for the application group.
-- **Container Type Fields** (Exactly one will be provided):
-    - `folder` (Optional[str]): The folder where the application group is defined.
-    - `snippet` (Optional[str]): The snippet where the application group is defined.
-    - `device` (Optional[str]): The device where the application group is defined.
-
-### Example 4: Parsing API Response
+### Updating an Application Group
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.models.objects import ApplicationGroupResponseModel
-
-api_response = {
+# Using dictionary
+update_dict = {
     "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "api-app-group",
-    "folder": "Prisma Access",
-    "members": ["app1", "app2"]
+    "name": "web-apps-updated",
+    "members": ["http", "https", "web-browsing", "ssl"],
 }
 
-group_response = ApplicationGroupResponseModel(**api_response)
+response = app_group.update(update_dict)
 
-print(f"Group ID: {group_response.id}")
-print(f"Group name: {group_response.name}")
-print(f"Group members: {group_response.members}")
-```
+# Using model directly
+from scm.models.objects import ApplicationGroupUpdateModel
 
-</div>
-
-### Example 5: Dynamic Group Response
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import ApplicationGroupResponseModel
-
-dynamic_response = {
-    "id": "123e4567-e89b-12d3-a456-426655440001",
-    "name": "dynamic-api-group",
-    "folder": "Prisma Access",
-    "dynamic": {"filter": "'aws.ec2.tag.Environment' eq 'production'"}
-}
-
-dynamic_group_response = ApplicationGroupResponseModel(**dynamic_response)
-
-print(f"Dynamic Group ID: {dynamic_group_response.id}")
-print(f"Dynamic Group name: {dynamic_group_response.name}")
-print(f"Dynamic Group filter: {dynamic_group_response.dynamic['filter']}")
-```
-
-</div>
-
-### Example 6: Device-based Group Response
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import ApplicationGroupResponseModel
-
-device_response = {
-    "id": "123e4567-e89b-12d3-a456-426655440002",
-    "name": "device-app-group",
-    "device": "firewall-01",
-    "members": ["app3", "app4", "app5"]
-}
-
-device_group_response = ApplicationGroupResponseModel(**device_response)
-
-print(f"Device Group ID: {device_group_response.id}")
-print(f"Device Group name: {device_group_response.name}")
-print(f"Device: {device_group_response.device}")
-print(f"Device Group members: {device_group_response.members}")
-```
-
-</div>
-
----
-
-## Full Example: Creating and Using Application Group Models
-
-Here's a comprehensive example that demonstrates creating and using both ApplicationGroupRequestModel and
-ApplicationGroupResponseModel:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.objects import ApplicationGroupRequestModel, ApplicationGroupResponseModel
-
-# Create a new ApplicationGroupRequestModel
-new_group_request = ApplicationGroupRequestModel(
-    name="example-app-group",
-    folder="Prisma Access",
-    members=["app1", "app2", "app3"]
+update_group = ApplicationGroupUpdateModel(
+    id="123e4567-e89b-12d3-a456-426655440000",
+    name="web-apps-updated",
+    members=["http", "https", "web-browsing", "ssl"]
 )
 
-print("Application Group Request:")
-print(f"Name: {new_group_request.name}")
-print(f"Folder: {new_group_request.folder}")
-print(f"Members: {new_group_request.members}")
-
-# Simulate API response
-api_response = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": new_group_request.name,
-    "folder": new_group_request.folder,
-    "members": new_group_request.members
-}
-
-# Create ApplicationGroupResponseModel from API response
-new_group_response = ApplicationGroupResponseModel(**api_response)
-
-print("\nApplication Group Response:")
-print(f"ID: {new_group_response.id}")
-print(f"Name: {new_group_response.name}")
-print(f"Folder: {new_group_response.folder}")
-print(f"Members: {new_group_response.members}")
-
-# Create a dynamic group request
-dynamic_group_request = ApplicationGroupRequestModel(
-    name="dynamic-web-apps",
-    folder="Prisma Access",
-    dynamic={"filter": "'aws.ec2.tag.AppType' eq 'web'"}
-)
-
-print("\nDynamic Application Group Request:")
-print(f"Name: {dynamic_group_request.name}")
-print(f"Folder: {dynamic_group_request.folder}")
-print(f"Dynamic Filter: {dynamic_group_request.dynamic['filter']}")
-
-# Simulate API response for dynamic group
-dynamic_api_response = {
-    "id": "123e4567-e89b-12d3-a456-426655440001",
-    "name": dynamic_group_request.name,
-    "folder": dynamic_group_request.folder,
-    "dynamic": dynamic_group_request.dynamic
-}
-
-# Create ApplicationGroupResponseModel for dynamic group
-dynamic_group_response = ApplicationGroupResponseModel(**dynamic_api_response)
-
-print("\nDynamic Application Group Response:")
-print(f"ID: {dynamic_group_response.id}")
-print(f"Name: {dynamic_group_response.name}")
-print(f"Folder: {dynamic_group_response.folder}")
-print(f"Dynamic Filter: {dynamic_group_response.dynamic['filter']}")
+payload = update_group.model_dump(exclude_unset=True)
+response = app_group.update(payload)
 ```
 
 </div>
-
-This example showcases the creation of both static and dynamic application groups using the request model, and then
-demonstrates how to work with the response model after receiving data from the API.

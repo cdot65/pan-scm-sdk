@@ -1,51 +1,37 @@
 # Security Rule Configuration Object
 
-The `SecurityRule` class manages Security Rules in Palo Alto Networks' Strata Cloud Manager.
-It provides methods to create, retrieve, update, delete, list, and move Security Rule objects.
+The `SecurityRule` class provides functionality to manage security rules in Palo Alto Networks' Strata Cloud Manager.
+Security rules define network access policies, controlling traffic flow between zones, applications, and users.
 
----
+## Overview
 
-## Creating an API client object
+Security rules in Strata Cloud Manager allow you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-
-api_client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-)
-```
-
-</div>
-
----
-
-## Importing the SecurityRule Class
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.security import SecurityRule
-
-security_rule = SecurityRule(api_client)
-```
-
-</div>
+- Define traffic control policies between security zones
+- Specify source and destination addresses
+- Control application and service access
+- Apply security profiles and logging settings
+- Organize rules within pre and post rulebases
+- Position rules for optimal policy enforcement
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> SecurityRuleResponseModel`
+| Method     | Description                                  |
+|------------|----------------------------------------------|
+| `create()` | Creates a new security rule                  |
+| `get()`    | Retrieves a security rule by ID              |
+| `update()` | Updates an existing security rule            |
+| `delete()` | Deletes a security rule                      |
+| `list()`   | Lists security rules with optional filtering |
+| `fetch()`  | Retrieves a single security rule by name     |
+| `move()`   | Moves a security rule within the rulebase    |
 
-Creates a new Security Rule object.
+## Creating Security Rules
 
-**Example 1: Basic Allow Rule**
+The `create()` method allows you to define new security rules. You must specify a name, zones, and exactly one
+container type (folder, snippet, or device). You can also specify which rulebase to use (pre or post).
+
+**Example: Basic Allow Rule**
 
 <div class="termy">
 
@@ -53,7 +39,7 @@ Creates a new Security Rule object.
 
 ```python
 rule_data = {
-    "name": "Allow_Web",
+    "name": "allow-web",
     "folder": "Shared",
     "from_": ["trust"],
     "to": ["untrust"],
@@ -64,13 +50,13 @@ rule_data = {
     "log_end": True
 }
 
-new_rule = security_rule.create(rule_data)
-print(f"Created rule: {new_rule.name}")
+new_rule = security_rule.create(rule_data, rulebase="pre")
+print(f"Created rule: {new_rule['name']}")
 ```
 
 </div>
 
-**Example 2: Rule with Profile Settings**
+**Example: Rule with Security Profiles**
 
 <div class="termy">
 
@@ -78,78 +64,47 @@ print(f"Created rule: {new_rule.name}")
 
 ```python
 rule_data = {
-    "name": "Secure_Web",
+    "name": "secure-web",
     "folder": "Shared",
     "from_": ["trust"],
     "to": ["untrust"],
-    "source": ["any"],
+    "source": ["internal-subnet"],
     "destination": ["any"],
-    "application": ["web-browsing"],
+    "application": ["web-browsing", "ssl"],
     "profile_setting": {
         "group": ["strict-security"]
     },
-    "action": "allow"
+    "action": "allow",
+    "log_setting": "default-logging",
+    "log_end": True
 }
 
-new_rule = security_rule.create(rule_data)
+new_rule = security_rule.create(rule_data, rulebase="pre")
+print(f"Created rule: {new_rule['name']}")
 ```
 
 </div>
 
-### `move(rule_id: str, data: Dict[str, Any]) -> None`
+## Getting Security Rules
 
-Moves a security rule to a new position within the rulebase.
-
-**Example:**
+Use the `get()` method to retrieve a security rule by its ID. You can specify which rulebase to search.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-move_data = {
-    "destination": "before",
-    "rulebase": "pre",
-    "destination_rule": "987fcdeb-51d3-a456-426655440000"
-}
-
-security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+rule_id = "123e4567-e89b-12d3-a456-426655440000"
+rule = security_rule.get(rule_id, rulebase="pre")
+print(f"Rule Name: {rule['name']}")
+print(f"Applications: {rule['application']}")
 ```
 
 </div>
 
-###
+## Updating Security Rules
 
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[SecurityRuleResponseModel]`
-
-Lists Security Rule objects with optional filtering.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# List rules with pagination
-rules = security_rule.list(
-    folder="Shared",
-    offset=0,
-    limit=10,
-    name="Allow"
-)
-
-for rule in rules:
-    print(f"Rule: {rule.name}")
-```
-
-</div>
-
-### `update(object_id: str, data: Dict[str, Any]) -> SecurityRuleResponseModel`
-
-Updates an existing Security Rule object.
-
-**Example:**
+The `update()` method allows you to modify existing security rules.
 
 <div class="termy">
 
@@ -157,33 +112,122 @@ Updates an existing Security Rule object.
 
 ```python
 update_data = {
-    "description": "Updated rule description",
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "description": "Updated web access rule",
     "application": ["web-browsing", "ssl", "http2"],
-    "tag": ["updated", "modified"]
+    "profile_setting": {
+        "group": ["strict-security"]
+    },
+    "folder": "Shared"
 }
 
-updated_rule = security_rule.update(rule_id, update_data)
+updated_rule = security_rule.update(update_data, rulebase="pre")
+print(f"Updated rule: {updated_rule['name']}")
 ```
 
 </div>
 
-### `delete(object_id: str) -> None`
+## Deleting Security Rules
 
-Deletes a Security Rule object.
-
-**Example:**
+Use the `delete()` method to remove a security rule.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-security_rule.delete(rule_id)
+rule_id = "123e4567-e89b-12d3-a456-426655440000"
+security_rule.delete(rule_id, rulebase="pre")
+print("Rule deleted successfully")
 ```
 
 </div>
 
-## Complete Example: Managing Security Rules
+## Moving Security Rules
+
+The `move()` method allows you to reposition rules within the rulebase.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Move rule to top of pre-rulebase
+move_data = {
+    "destination": "top",
+    "rulebase": "pre"
+}
+security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+
+# Move rule before another rule
+move_data = {
+    "destination": "before",
+    "rulebase": "pre",
+    "destination_rule": "987fcdeb-51d3-a456-426655440000"
+}
+security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+```
+
+</div>
+
+## Listing Security Rules
+
+The `list()` method retrieves multiple security rules with optional filtering.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List all rules in a folder
+rules = security_rule.list(
+    folder="Shared",
+    limit=10,
+    offset=0,
+    rulebase="pre"
+)
+
+for rule in rules:
+    print(f"Name: {rule['name']}")
+    print(f"Action: {rule['action']}")
+    print("---")
+
+# List rules with name filter
+filtered_rules = security_rule.list(
+    folder="Shared",
+    name="web",
+    rulebase="pre"
+)
+
+for rule in filtered_rules:
+    print(f"Filtered rule: {rule['name']}")
+```
+
+</div>
+
+## Fetching Security Rules
+
+The `fetch()` method retrieves a single security rule by name from a specific container.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+rule = security_rule.fetch(
+    name="allow-web",
+    folder="Shared"
+)
+
+print(f"Found rule: {rule['name']}")
+print(f"Current applications: {rule['application']}")
+```
+
+</div>
+
+## Full Workflow Example
+
+Here's a complete example demonstrating the full lifecycle of a security rule:
 
 <div class="termy">
 
@@ -194,60 +238,68 @@ from scm.client import Scm
 from scm.config.security import SecurityRule
 
 # Initialize client
-api_client = Scm(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Create SecurityRule instance
-security_rule = SecurityRule(api_client)
+# Initialize security rule object
+security_rule = SecurityRule(client)
 
-# Create a new rule
-rule_data = {
-    "name": "Comprehensive_Web_Rule",
-    "description": "Allow web traffic with security profiles",
+# Create new rule
+create_data = {
+    "name": "test-web-access",
+    "description": "Test web access rule",
     "folder": "Shared",
-    "from_": ["trust", "internal"],
+    "from_": ["trust"],
     "to": ["untrust"],
-    "source": ["10.0.0.0/8"],
+    "source": ["internal-net"],
     "destination": ["any"],
-    "application": ["web-browsing", "ssl", "http2"],
-    "service": ["application-default"],
+    "application": ["web-browsing", "ssl"],
     "action": "allow",
-    "profile_setting": {
-        "group": ["strict-security"]
-    },
-    "tag": ["web", "internal"],
-    "log_setting": "default-logging",
     "log_end": True
 }
 
-new_rule = security_rule.create(rule_data)
-print(f"Created rule: {new_rule.name}")
+new_rule = security_rule.create(create_data, rulebase="pre")
+print(f"Created rule: {new_rule['name']}")
 
-# Move the rule
+# Move rule to top
 move_data = {
     "destination": "top",
     "rulebase": "pre"
 }
-security_rule.move(new_rule.id, move_data)
+security_rule.move(new_rule['id'], move_data)
 
-# Update the rule
-update_data = {
-    "description": "Updated comprehensive web rule",
-    "application": ["web-browsing", "ssl", "http2", "webex-meeting"],
-}
-updated_rule = security_rule.update(new_rule.id, update_data)
+# Fetch the rule by name
+fetched_rule = security_rule.fetch(
+    name="test-web-access",
+    folder="Shared"
+)
 
-# List rules
-rules = security_rule.list(folder="Shared", limit=5)
+# Modify the fetched rule
+fetched_rule["description"] = "Updated web access rule"
+fetched_rule["application"].append("http2")
+
+# Update using the modified object
+updated_rule = security_rule.update(fetched_rule, rulebase="pre")
+print(f"Updated rule: {updated_rule['name']}")
+print(f"New description: {updated_rule['description']}")
+
+# List all rules
+rules = security_rule.list(folder="Shared", rulebase="pre")
 for rule in rules:
-    print(f"Rule: {rule.name}")
+    print(f"Listed rule: {rule['name']}")
 
 # Clean up
-security_rule.delete(new_rule.id)
+security_rule.delete(new_rule['id'], rulebase="pre")
+print("Rule deleted successfully")
 ```
 
 </div>
 
+## Related Models
+
+- [SecurityRuleRequestModel](../../models/security/security_rule_models.md#securityrulerequestmodel)
+- [SecurityRuleUpdateModel](../../models/security/security_rule_models.md#securityruleupdatemodel)
+- [SecurityRuleResponseModel](../../models/security/security_rule_models.md#securityruleresponsemodel)

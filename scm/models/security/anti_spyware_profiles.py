@@ -380,6 +380,54 @@ class AntiSpywareProfileRequestModel(AntiSpywareProfileBaseModel):
         return self
 
 
+class AntiSpywareProfileUpdateModel(AntiSpywareProfileBaseModel):
+    """
+    Represents an anti-spyware profile for API requests.
+    """
+
+    id: str = Field(
+        ...,
+        description="Profile ID",
+    )
+    folder: Optional[str] = Field(
+        None,
+        description="Folder",
+        max_length=64,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+    )
+    snippet: Optional[str] = Field(
+        None,
+        description="Snippet",
+        max_length=64,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+    )
+    device: Optional[str] = Field(
+        None,
+        description="Device",
+        max_length=64,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+    )
+    rules: List[RuleRequest] = Field(
+        ...,
+        description="List of rules",
+    )
+    threat_exception: Optional[List[ThreatExceptionRequest]] = Field(
+        None,
+        description="List of threat exceptions",
+    )
+
+    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+
+    @field_validator("id")
+    @classmethod
+    def validate_id(cls, v):
+        try:
+            uuid.UUID(v)
+        except ValueError:
+            raise ValueError("Invalid UUID format for 'id'")
+        return v
+
+
 class AntiSpywareProfileResponseModel(AntiSpywareProfileBaseModel):
     """
     Represents an anti-spyware profile for API responses.

@@ -1,89 +1,59 @@
 # Application Group Configuration Object
 
-The `ApplicationGroup` class is used to manage application groups in the Strata Cloud Manager.
+The `ApplicationGroup` class provides functionality to manage application groups in Palo Alto Networks' Strata Cloud
+Manager.
+Application groups allow you to organize and manage collections of applications for use in security policies and other
+configurations.
 
----
+## Overview
 
-## Importing the ApplicationGroup Class
+Application groups in Strata Cloud Manager allow you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-from scm.config.objects import ApplicationGroup
-
-# create a SCM session
-api_client = Scm(
-    client_id="example",
-    client_secret="example",
-    tsg_id="example"
-)
-
-# pass SCM session into the ApplicationGroup object
-application_group = ApplicationGroup(api_client)
-```
-
-</div>
+- Group multiple applications together for easier management
+- Create static groups with explicit lists of applications
+- Organize application groups within folders, snippets, or devices
+- Reference groups in security policies and other configurations
+- Fetch and manage groups by name or ID
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> ApplicationGroupResponseModel`
+| Method     | Description                                      |
+|------------|--------------------------------------------------|
+| `create()` | Creates a new application group                  |
+| `get()`    | Retrieves an application group by ID             |
+| `update()` | Updates an existing application group            |
+| `delete()` | Deletes an application group                     |
+| `list()`   | Lists application groups with optional filtering |
+| `fetch()`  | Retrieves a single application group by name     |
 
-Creates a new application group.
+## Creating Application Groups
 
-**Parameters:**
+The `create()` method allows you to create new application groups. You must specify a name, members list, and exactly
+one
+container type (folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the application group data.
-
-**Example 1: Creating a static application group**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-static_group_data = {
-    "name": "static-app-group",
-    "folder": "Prisma Access",
-    "members": ["office365-consumer-access", "office365-enterprise-access"],
-}
-
-new_static_group = application_group.create(static_group_data)
-print(f"Created static application group with ID: {new_static_group.id}")
-```
-
-</div>
-
-**Example 2: Creating a dynamic application group**
+**Example: Creating an Application Group**
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-dynamic_group_data = {
-    "name": "dynamic-app-group",
-    "folder": "Prisma Access",
-    "dynamic": {"filter": "'aws.ec2.tag.AppType' eq 'web'"},
+group_data = {
+    "name": "web-apps",
+    "members": ["http", "https", "web-browsing"],
+    "folder": "Shared",
 }
 
-new_dynamic_group = application_group.create(dynamic_group_data)
-print(f"Created dynamic application group with ID: {new_dynamic_group.id}")
+new_group = application_group.create(group_data)
+print(f"Created group: {new_group['name']}")
 ```
 
 </div>
 
-### `get(object_id: str) -> ApplicationGroupResponseModel`
+## Getting Application Groups
 
-Retrieves an application group by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the application group.
-
-**Example:**
+Use the `get()` method to retrieve an application group by its ID.
 
 <div class="termy">
 
@@ -91,23 +61,16 @@ Retrieves an application group by its ID.
 
 ```python
 group_id = "123e4567-e89b-12d3-a456-426655440000"
-group_object = application_group.get(group_id)
-print(f"Application Group Name: {group_object.name}")
-print(f"Members: {group_object.members}")
+group = application_group.get(group_id)
+print(f"Group Name: {group['name']}")
+print(f"Members: {group['members']}")
 ```
 
 </div>
 
-### `update(object_id: str, data: Dict[str, Any]) -> ApplicationGroupResponseModel`
+## Updating Application Groups
 
-Updates an existing application group.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the application group.
-- `data` (Dict[str, Any]): A dictionary containing the updated application group data.
-
-**Example:**
+The `update()` method allows you to modify existing application groups.
 
 <div class="termy">
 
@@ -115,89 +78,81 @@ Updates an existing application group.
 
 ```python
 update_data = {
-    "name": "updated-app-group",
-    "folder": "Prisma Access",
-    "members": ["updated-app-1", "updated-app-2"],
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "name": "updated-web-apps",
+    "members": ["http", "https", "web-browsing", "ssl"],
+    "folder": "Shared"
 }
 
-updated_group = application_group.update(group_id, update_data)
-print(f"Updated application group with ID: {updated_group.id}")
-print(f"New name: {updated_group.name}")
-print(f"New members: {updated_group.members}")
+updated_group = application_group.update(update_data)
+print(f"Updated group: {updated_group['name']}")
 ```
 
 </div>
 
-### `delete(object_id: str) -> None`
+## Deleting Application Groups
 
-Deletes an application group by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the application group.
-
-**Example:**
+Use the `delete()` method to remove an application group.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-group_id_to_delete = "123e4567-e89b-12d3-a456-426655440000"
-application_group.delete(group_id_to_delete)
-print(f"Deleted application group with ID: {group_id_to_delete}")
+group_id = "123e4567-e89b-12d3-a456-426655440000"
+application_group.delete(group_id)
+print("Group deleted successfully")
 ```
 
 </div>
 
-###
+## Listing Application Groups
 
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, **filters) -> List[ApplicationGroupResponseModel]`
-
-Lists application groups, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list application groups from.
-- `snippet` (Optional[str]): The snippet to list application groups from.
-- `device` (Optional[str]): The device to list application groups from.
-- `**filters`: Additional filters.
-
-**Example 1: Listing all application groups in a folder**
+The `list()` method retrieves multiple application groups with optional filtering.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-groups = application_group.list(folder='Prisma Access')
-
+# List all groups in a folder
+groups = application_group.list(folder="Shared")
 for group in groups:
-    print(f"Application Group Name: {group.name}, Members: {group.members}")
+    print(f"Name: {group['name']}, Members: {group['members']}")
+
+# List groups with specific names
+filtered_groups = application_group.list(
+    folder="Shared",
+    names=["web-apps", "db-apps"]
+)
+for group in filtered_groups:
+    print(f"Filtered group: {group['name']}")
 ```
 
 </div>
 
-**Example 2: Listing application groups with specific names**
+## Fetching Application Groups
+
+The `fetch()` method retrieves a single application group by name from a specific container.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-groups = application_group.list(folder='Prisma Access', names=['web-apps', 'db-apps'])
-
-for group in groups:
-    print(f"Application Group Name: {group.name}, Members: {group.members}")
+group = application_group.fetch(
+    name="web-apps",
+    folder="Shared"
+)
+print(f"Found group: {group['name']}")
+print(f"Current members: {group['members']}")
 ```
 
 </div>
 
----
+## Full Workflow Example
 
-## Full Usage Example
-
-Here's a comprehensive example that demonstrates creating, retrieving, updating, and deleting an application group:
+Here's a complete example demonstrating the full lifecycle of an application group:
 
 <div class="termy">
 
@@ -207,58 +162,54 @@ Here's a comprehensive example that demonstrates creating, retrieving, updating,
 from scm.client import Scm
 from scm.config.objects import ApplicationGroup
 
-# Initialize the SCM client
-api_client = Scm(
+# Initialize client
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+    tsg_id="your_tsg_id"
 )
 
-# Create an ApplicationGroup instance
-application_group = ApplicationGroup(api_client)
+# Initialize application group object
+application_group = ApplicationGroup(client)
 
-# Create a new application group
-new_group_data = {
-    "name": "example-app-group",
-    "folder": "Prisma Access",
-    "members": ["app1", "app2", "app3"]
+# Create new group
+create_data = {
+    "name": "test-apps",
+    "members": ["http", "https"],
+    "folder": "Shared"
 }
 
-new_group = application_group.create(new_group_data)
-print(f"Created application group with ID: {new_group.id}")
+new_group = application_group.create(create_data)
+print(f"Created group: {new_group['name']}")
 
-# Retrieve the created group
-retrieved_group = application_group.get(new_group.id)
-print(f"Retrieved group name: {retrieved_group.name}")
-print(f"Retrieved group members: {retrieved_group.members}")
+# Fetch the group by name
+fetched_group = application_group.fetch(
+    name="test-apps",
+    folder="Shared"
+)
 
-# Update the group
-update_data = {
-    "name": "updated-app-group",
-    "folder": "Prisma Access",
-    "members": ["app1", "app2", "app3", "app4"]
-}
+# Modify the fetched group
+fetched_group["members"] = ["http", "https", "ssl"]
 
-updated_group = application_group.update(new_group.id, update_data)
-print(f"Updated group name: {updated_group.name}")
-print(f"Updated group members: {updated_group.members}")
+# Update using the modified object
+updated_group = application_group.update(fetched_group)
+print(f"Updated group: {updated_group['name']}")
+print(f"New members: {updated_group['members']}")
 
-# List all groups in the folder
-all_groups = application_group.list(folder="Prisma Access")
-print("All groups in Prisma Access folder:")
-for group in all_groups:
-    print(f"- {group.name}")
+# List all groups
+groups = application_group.list(folder="Shared")
+for group in groups:
+    print(f"Listed group: {group['name']}")
 
-# Delete the group
-application_group.delete(new_group.id)
-print(f"Deleted application group with ID: {new_group.id}")
+# Clean up
+application_group.delete(new_group['id'])
+print("Group deleted successfully")
 ```
 
 </div>
 
----
-
 ## Related Models
 
-- [ApplicationGroupRequestModel](../../models/objects/application_group_models.md#applicationgrouprequestmodel)
+- [ApplicationGroupCreateModel](../../models/objects/application_group_models.md#applicationgroupcreatemodel)
+- [ApplicationGroupUpdateModel](../../models/objects/application_group_models.md#applicationgroupupdatemodel)
 - [ApplicationGroupResponseModel](../../models/objects/application_group_models.md#applicationgroupresponsemodel)
