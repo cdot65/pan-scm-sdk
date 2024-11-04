@@ -1,55 +1,39 @@
 # DNS Security Profile Configuration Object
 
-The `DNSSecurityProfile` class is used to manage DNS Security Profile objects in the Strata Cloud Manager.
-It provides methods to create, retrieve, update, delete, and list DNS Security Profile objects.
+The `DNSSecurityProfile` class provides functionality to manage DNS Security profiles in Palo Alto Networks' Strata
+Cloud Manager.
+DNS Security profiles define policies for protecting against DNS-based threats, including botnet domains, malware, and
+phishing
+attempts.
 
----
+## Overview
 
-## Creating an API client object
+DNS Security profiles in Strata Cloud Manager allow you to:
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-
-api_client = Scm(
-    client_id="this-is-a-placeholder",
-    client_secret="this-is-a-placeholder",
-    tsg_id="this-is-a-placeholder",
-)
-```
-
-</div>
-
----
-
-## Importing the DNSSecurityProfile Class
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.config.security import DNSSecurityProfile
-
-dns_security_profile = DNSSecurityProfile(api_client)
-```
-
-</div>
+- Configure actions for different DNS security categories
+- Define custom blocklists and allowlists
+- Set up sinkhole configurations for malicious domains
+- Specify whitelist entries for trusted domains
+- Control packet capture and logging behavior
+- Organize profiles within folders, snippets, or devices
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> DNSSecurityProfileResponseModelModel`
+| Method     | Description                                       |
+|------------|---------------------------------------------------|
+| `create()` | Creates a new DNS Security profile                |
+| `get()`    | Retrieves a DNS Security profile by ID            |
+| `update()` | Updates an existing DNS Security profile          |
+| `delete()` | Deletes a DNS Security profile                    |
+| `list()`   | Lists DNS Security profiles with optional filters |
+| `fetch()`  | Retrieves a single DNS Security profile by name   |
 
-Creates a new DNS Security Profile object.
+## Creating DNS Security Profiles
 
-**Parameters:**
+The `create()` method allows you to define new DNS Security profiles. You must specify a name and exactly one container
+type (folder, snippet, or device).
 
-- `data` (Dict[str, Any]): A dictionary containing the DNS Security Profile object data.
-
-**Example:**
+**Example: Basic Profile with DNS Security Categories**
 
 <div class="termy">
 
@@ -57,8 +41,8 @@ Creates a new DNS Security Profile object.
 
 ```python
 profile_data = {
-    "name": "test_profile",
-    "description": "Created via pan-scm-sdk",
+    "name": "basic-profile",
+    "description": "Basic DNS Security profile",
     "folder": "Shared",
     "botnet_domains": {
         "dns_security_categories": [
@@ -68,150 +52,17 @@ profile_data = {
                 "log_level": "medium",
                 "packet_capture": "single-packet"
             }
-        ],
-        "lists": [
-            {
-                "name": "custom_list",
-                "action": {"block": {}},
-                "packet_capture": "disable"
-            }
-        ],
-        "sinkhole": {
-            "ipv4_address": "pan-sinkhole-default-ip",
-            "ipv6_address": "::1"
-        },
-        "whitelist": [
-            {
-                "name": "example.com",
-                "description": "Whitelisted domain"
-            }
         ]
     }
 }
 
 new_profile = dns_security_profile.create(profile_data)
-print(f"Created DNS Security Profile with ID: {new_profile.id}")
+print(f"Created profile: {new_profile['name']}")
 ```
 
 </div>
 
-### `get(object_id: str) -> DNSSecurityProfileResponseModelModel`
-
-Retrieves a DNS Security Profile object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the DNS Security Profile object.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_id = "12345678-1234-1234-1234-123456789012"
-profile_object = dns_security_profile.get(profile_id)
-print(f"Profile Name: {profile_object.name}")
-```
-
-</div>
-
-### `update(object_id: str, data: Dict[str, Any]) -> DNSSecurityProfileResponseModelModel`
-
-Updates an existing DNS Security Profile object.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the DNS Security Profile object.
-- `data` (Dict[str, Any]): A dictionary containing the updated DNS Security Profile data.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-update_data = {
-    "name": "updated_profile",
-    "description": "Updated via pan-scm-sdk",
-    "folder": "Shared",
-    "botnet_domains": {
-        "dns_security_categories": [
-            {
-                "name": "malware",
-                "action": "sinkhole",
-                "log_level": "high",
-                "packet_capture": "extended-capture"
-            }
-        ]
-    }
-}
-
-updated_profile = dns_security_profile.update(profile_id, update_data)
-print(f"Updated DNS Security Profile with ID: {updated_profile.id}")
-```
-
-</div>
-
-### `delete(object_id: str) -> None`
-
-Deletes a DNS Security Profile object by its ID.
-
-**Parameters:**
-
-- `object_id` (str): The UUID of the DNS Security Profile object.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-dns_security_profile.delete(profile_id)
-print(f"Deleted DNS Security Profile with ID: {profile_id}")
-```
-
-</div>
-
-###
-
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[DNSSecurityProfileResponseModelModel]`
-
-Lists DNS Security Profile objects, optionally filtered by folder, snippet, device, or other criteria.
-
-**Parameters:**
-
-- `folder` (Optional[str]): The folder to list profiles from.
-- `snippet` (Optional[str]): The snippet to list profiles from.
-- `device` (Optional[str]): The device to list profiles from.
-- `offset` (Optional[int]): The pagination offset.
-- `limit` (Optional[int]): The pagination limit.
-- `name` (Optional[str]): Filter profiles by name.
-- `**filters`: Additional filters.
-
-**Example:**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profiles = dns_security_profile.list(folder='Shared', limit=10)
-
-for profile in profiles:
-    print(f"Profile Name: {profile.name}, ID: {profile.id}")
-```
-
-</div>
-
----
-
-## Usage Examples
-
-### Example 1: Creating a DNS Security Profile with Custom Lists
+**Example: Profile with Custom Lists and Sinkhole**
 
 <div class="termy">
 
@@ -219,136 +70,50 @@ for profile in profiles:
 
 ```python
 profile_data = {
-    "name": "custom_list_profile",
-    "description": "Profile with custom lists",
+    "name": "advanced-profile",
+    "description": "Advanced DNS Security profile",
     "folder": "Shared",
     "botnet_domains": {
         "lists": [
             {
-                "name": "custom_blocklist",
+                "name": "custom-blocklist",
                 "action": {"block": {}},
                 "packet_capture": "single-packet"
-            },
-            {
-                "name": "custom_allowlist",
-                "action": {"allow": {}},
-                "packet_capture": "disable"
             }
-        ]
-    }
-}
-
-new_profile = dns_security_profile.create(profile_data)
-print(f"Created profile: {new_profile.name} with ID: {new_profile.id}")
-```
-
-</div>
-
-### Example 2: Updating a DNS Security Profile with Sinkhole Settings
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-update_data = {
-    "botnet_domains": {
+        ],
         "sinkhole": {
-            "ipv4_address": "127.0.0.1",
+            "ipv4_address": "pan-sinkhole-default-ip",
             "ipv6_address": "::1"
         }
     }
 }
 
-updated_profile = dns_security_profile.update(new_profile.id, update_data)
-print(f"Updated profile: {updated_profile.name}")
-```
-
-</div>
-
-### Example 3: Creating a Profile with DNS Security Categories
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_data = {
-    "name": "category_profile",
-    "folder": "Shared",
-    "botnet_domains": {
-        "dns_security_categories": [
-            {
-                "name": "grayware",
-                "action": "alert",
-                "log_level": "informational"
-            },
-            {
-                "name": "malware",
-                "action": "block",
-                "log_level": "critical",
-                "packet_capture": "extended-capture"
-            }
-        ]
-    }
-}
-
 new_profile = dns_security_profile.create(profile_data)
-print(f"Created profile with categories: {new_profile.name}")
+print(f"Created profile: {new_profile['name']}")
 ```
 
 </div>
 
-### Example 4: Listing DNS Security Profiles with Filters
+## Getting DNS Security Profiles
+
+Use the `get()` method to retrieve a DNS Security profile by its ID.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-profiles = dns_security_profile.list(
-    folder='Shared',
-    limit=5,
-    name='custom'
-)
-
-for profile in profiles:
-    print(f"Profile: {profile.name}, Description: {profile.description}")
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+profile = dns_security_profile.get(profile_id)
+print(f"Profile Name: {profile['name']}")
+print(f"Description: {profile['description']}")
 ```
 
 </div>
 
-### Example 5: Creating a Profile with Whitelist Entries
+## Updating DNS Security Profiles
 
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-profile_data = {
-    "name": "whitelist_profile",
-    "folder": "Shared",
-    "botnet_domains": {
-        "whitelist": [
-            {
-                "name": "example.com",
-                "description": "Trusted domain"
-            },
-            {
-                "name": "safedomain.org",
-                "description": "Another trusted domain"
-            }
-        ]
-    }
-}
-
-new_profile = dns_security_profile.create(profile_data)
-print(f"Created profile with whitelist: {new_profile.name}")
-```
-
-</div>
-
-### Example 6: Updating a Profile with Multiple Components
+The `update()` method allows you to modify existing DNS Security profiles.
 
 <div class="termy">
 
@@ -356,44 +121,96 @@ print(f"Created profile with whitelist: {new_profile.name}")
 
 ```python
 update_data = {
-    "description": "Comprehensive DNS Security Profile",
+    "id": "123e4567-e89b-12d3-a456-426655440000",
+    "description": "Updated DNS Security profile",
     "botnet_domains": {
         "dns_security_categories": [
             {
-                "name": "phishing",
-                "action": "block",
-                "log_level": "high"
-            }
-        ],
-        "lists": [
-            {
-                "name": "custom_blocklist",
-                "action": {"sinkhole": {}},
-                "packet_capture": "single-packet"
-            }
-        ],
-        "sinkhole": {
-            "ipv4_address": "pan-sinkhole-default-ip",
-            "ipv6_address": "::1"
-        },
-        "whitelist": [
-            {
-                "name": "trusteddomain.com",
-                "description": "Whitelisted domain"
+                "name": "malware",
+                "action": "sinkhole",
+                "log_level": "critical",
+                "packet_capture": "extended-capture"
             }
         ]
     }
 }
 
-updated_profile = dns_security_profile.update(new_profile.id, update_data)
-print(f"Updated profile with multiple components: {updated_profile.name}")
+updated_profile = dns_security_profile.update(update_data)
+print(f"Updated profile: {updated_profile['name']}")
 ```
 
 </div>
 
----
+## Deleting DNS Security Profiles
 
-## Full Example: Creating and Managing a DNS Security Profile
+Use the `delete()` method to remove a DNS Security profile.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+dns_security_profile.delete(profile_id)
+print("Profile deleted successfully")
+```
+
+</div>
+
+## Listing DNS Security Profiles
+
+The `list()` method retrieves multiple DNS Security profiles with optional filtering.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List all profiles in a folder
+profiles = dns_security_profile.list(
+    folder="Shared",
+    limit=10,
+    offset=0
+)
+
+for profile in profiles:
+    print(f"Name: {profile['name']}")
+
+# List profiles with name filter
+filtered_profiles = dns_security_profile.list(
+    folder="Shared",
+    name="basic"
+)
+
+for profile in filtered_profiles:
+    print(f"Filtered profile: {profile['name']}")
+```
+
+</div>
+
+## Fetching DNS Security Profiles
+
+The `fetch()` method retrieves a single DNS Security profile by name from a specific container.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+profile = dns_security_profile.fetch(
+    name="basic-profile",
+    folder="Shared"
+)
+
+print(f"Found profile: {profile['name']}")
+print(f"Current settings: {profile['botnet_domains']}")
+```
+
+</div>
+
+## Full Workflow Example
+
+Here's a complete example demonstrating the full lifecycle of a DNS Security profile:
 
 <div class="termy">
 
@@ -403,106 +220,69 @@ print(f"Updated profile with multiple components: {updated_profile.name}")
 from scm.client import Scm
 from scm.config.security import DNSSecurityProfile
 
-# Initialize the SCM client
-scm = Scm(
+# Initialize client
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
+    tsg_id="your_tsg_id"
 )
 
-# Create a DNSSecurityProfile instance
-dns_security_profile = DNSSecurityProfile(scm)
+# Initialize DNS Security profile object
+dns_security_profile = DNSSecurityProfile(client)
 
-# Create a new DNS Security Profile
-profile_data = {
-    "name": "comprehensive_profile",
-    "description": "Comprehensive DNS Security Profile",
+# Create new profile
+create_data = {
+    "name": "test-profile",
+    "description": "Test DNS Security profile",
     "folder": "Shared",
     "botnet_domains": {
         "dns_security_categories": [
             {
                 "name": "grayware",
                 "action": "block",
-                "log_level": "medium",
-                "packet_capture": "single-packet"
-            },
-            {
-                "name": "malware",
-                "action": "sinkhole",
-                "log_level": "critical",
-                "packet_capture": "extended-capture"
-            }
-        ],
-        "lists": [
-            {
-                "name": "custom_blocklist",
-                "action": {"block": {}},
-                "packet_capture": "disable"
-            },
-            {
-                "name": "custom_sinkhole_list",
-                "action": {"sinkhole": {}},
-                "packet_capture": "single-packet"
-            }
-        ],
-        "sinkhole": {
-            "ipv4_address": "pan-sinkhole-default-ip",
-            "ipv6_address": "::1"
-        },
-        "whitelist": [
-            {
-                "name": "example.com",
-                "description": "Whitelisted domain"
-            },
-            {
-                "name": "trusteddomain.org",
-                "description": "Another trusted domain"
+                "log_level": "medium"
             }
         ]
     }
 }
 
-new_profile = dns_security_profile.create(profile_data)
-print(f"Created comprehensive profile: {new_profile.name} with ID: {new_profile.id}")
+new_profile = dns_security_profile.create(create_data)
+print(f"Created profile: {new_profile['name']}")
 
-# Retrieve the created profile
-retrieved_profile = dns_security_profile.get(new_profile.id)
-print(f"Retrieved profile: {retrieved_profile.name}")
+# Fetch the profile by name
+fetched_profile = dns_security_profile.fetch(
+    name="test-profile",
+    folder="Shared"
+)
 
-# Update the profile
-update_data = {
-    "description": "Updated comprehensive DNS Security Profile",
-    "botnet_domains": {
-        "dns_security_categories": [
-            {
-                "name": "phishing",
-                "action": "block",
-                "log_level": "high",
-                "packet_capture": "extended-capture"
-            }
-        ]
-    }
-}
+# Modify the fetched profile
+fetched_profile["description"] = "Updated test profile"
+fetched_profile["botnet_domains"]["dns_security_categories"].append({
+    "name": "malware",
+    "action": "sinkhole",
+    "log_level": "critical",
+    "packet_capture": "extended-capture"
+})
 
-updated_profile = dns_security_profile.update(new_profile.id, update_data)
-print(f"Updated profile: {updated_profile.name}")
+# Update using the modified object
+updated_profile = dns_security_profile.update(fetched_profile)
+print(f"Updated profile: {updated_profile['name']}")
+print(f"New description: {updated_profile['description']}")
 
-# List profiles
-profiles = dns_security_profile.list(folder='Shared', limit=10)
-print("List of profiles:")
+# List all profiles
+profiles = dns_security_profile.list(folder="Shared")
 for profile in profiles:
-    print(f"- {profile.name} (ID: {profile.id})")
+    print(f"Listed profile: {profile['name']}")
 
-# Delete the profile
-dns_security_profile.delete(new_profile.id)
-print(f"Deleted profile: {new_profile.name}")
+# Clean up
+dns_security_profile.delete(new_profile['id'])
+print("Profile deleted successfully")
 ```
 
 </div>
 
----
-
 ## Related Models
 
-- [DNSSecurityProfileRequestModel](../../models/security_services/dns_security_profile_models.md#DNSSecurityProfileRequestModel)
-- [DNSSecurityProfileResponseModelModel](../../models/security_services/dns_security_profile_models.md#DNSSecurityProfileResponseModel)
+- [DNSSecurityProfileCreateModel](../../models/security/dns_security_profile_models.md#dnssecurityprofilecreatemodel)
+- [DNSSecurityProfileUpdateModel](../../models/security/dns_security_profile_models.md#dnssecurityprofileupdatemodel)
+- [DNSSecurityProfileResponseModel](../../models/security/dns_security_profile_models.md#dnssecurityprofileresponsemodel)
