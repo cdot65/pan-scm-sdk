@@ -20,8 +20,9 @@ from .security_rules import (
     Rulebase,
 )
 from .vulnerability_protection_profiles import (
-    VulnerabilityProtectionProfileRequestModel,
+    VulnerabilityProtectionProfileCreateModel,
     VulnerabilityProtectionProfileResponseModel,
+    VulnerabilityProtectionProfileUpdateModel,
 )
 from .wildfire_antivirus_profiles import (
     WildfireAntivirusProfileResponseModel,
