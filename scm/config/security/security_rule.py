@@ -101,7 +101,6 @@ class SecurityRule(BaseObject):
         Update an existing security rule.
 
         Args:
-            object_id: The UUID of the security rule to update
             data: Dictionary containing the updated configuration
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
         """
