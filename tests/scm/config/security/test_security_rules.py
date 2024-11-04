@@ -1,6 +1,6 @@
 # tests/test_security_rules.py
 import uuid
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from pydantic import ValidationError as PydanticValidationError
@@ -1476,11 +1476,11 @@ class TestSecurityRuleFetch:
             "log_setting": "Cortex Data Lake",
             "description": "Allow HTTP traffic",
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
             params={"folder": "Shared", "name": "Allow_HTTP"},
         )
@@ -1532,25 +1532,25 @@ class TestSecurityRuleFetch:
             "name": "Allow_HTTP",
             "action": "allow",
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test with folder
         self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/security-rules",
             params={"folder": "Shared", "name": "Allow_HTTP"},
         )
 
         # Test with snippet
         self.security_rules_client.fetch(name="Allow_HTTP", snippet="TestSnippet")
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/security-rules",
             params={"snippet": "TestSnippet", "name": "Allow_HTTP"},
         )
 
         # Test with device
         self.security_rules_client.fetch(name="Allow_HTTP", device="TestDevice")
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/security-rules",
             params={"device": "TestDevice", "name": "Allow_HTTP"},
         )
@@ -1566,7 +1566,7 @@ class TestSecurityRuleFetch:
             "name": "Allow_HTTP",
             "action": "allow",
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test with allowed and excluded filters
         result = self.security_rules_client.fetch(
@@ -1580,7 +1580,7 @@ class TestSecurityRuleFetch:
         )
 
         # Verify only allowed filters are included
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/security-rules",
             params={"folder": "Shared", "name": "Allow_HTTP", "custom_filter": "value"},
         )
@@ -1607,7 +1607,7 @@ class TestSecurityRuleFetch:
             "application": ["web-browsing"],
             "service": ["application-default"],
         }
-        self.mock_scm.get.return_value = complete_response
+        self.mock_scm.get.return_value = complete_response  # noqa
         result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
         assert result["description"] == "Allow HTTP traffic"
         assert result["application"] == ["web-browsing"]
@@ -1619,7 +1619,7 @@ class TestSecurityRuleFetch:
             "folder": "Shared",
             "action": "allow",
         }
-        self.mock_scm.get.return_value = minimal_response
+        self.mock_scm.get.return_value = minimal_response  # noqa
         result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
         assert "description" not in result
         assert "application" not in result
@@ -1633,7 +1633,7 @@ class TestSecurityRuleFetch:
         # Simulate a NotFoundError from the API client
         from scm.exceptions import NotFoundError
 
-        self.mock_scm.get.side_effect = NotFoundError("Security rule not found")
+        self.mock_scm.get.side_effect = NotFoundError("Security rule not found")  # noqa
 
         with pytest.raises(NotFoundError) as exc_info:
             self.security_rules_client.fetch(name="NonExistentRule", folder="Shared")
@@ -1648,7 +1648,7 @@ class TestSecurityRuleFetch:
         """
         from scm.exceptions import APIError
 
-        self.mock_scm.get.side_effect = APIError("API is unavailable")
+        self.mock_scm.get.side_effect = APIError("API is unavailable")  # noqa
 
         with pytest.raises(APIError) as exc_info:
             self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
