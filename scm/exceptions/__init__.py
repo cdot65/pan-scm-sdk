@@ -49,6 +49,7 @@ class APIError(Exception):
         references: Optional[List[str]] = None,
     ):
         super().__init__(message)
+        self.message = message
         self.error_code = error_code
         self.details = details or {}
         self.request_id = request_id
