@@ -372,11 +372,11 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
                 },
             },
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         result = self.client.fetch(name="test-profile", folder="All")
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"folder": "All", "name": "test-profile"},
         )
@@ -439,25 +439,25 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             "name": "test-profile",
             "botnet_domains": {},
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test with folder
         self.client.fetch(name="test-profile", folder="All")
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"folder": "All", "name": "test-profile"},
         )
 
         # Test with snippet
         self.client.fetch(name="test-profile", snippet="test-snippet")
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"snippet": "test-snippet", "name": "test-profile"},
         )
 
         # Test with device
         self.client.fetch(name="test-profile", device="test-device")
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"device": "test-device", "name": "test-profile"},
         )
@@ -473,7 +473,7 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             "name": "test-profile",
             "folder": "All",
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test with allowed and excluded filters
         result = self.client.fetch(
@@ -487,7 +487,7 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
         )
 
         # Verify only allowed filters are included
-        self.mock_scm.get.assert_called_with(
+        self.mock_scm.get.assert_called_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={"folder": "All", "name": "test-profile", "custom_filter": "value"},
         )
@@ -512,7 +512,7 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
                 ]
             },
         }
-        self.mock_scm.get.return_value = complete_response
+        self.mock_scm.get.return_value = complete_response  # noqa
         result = self.client.fetch(name="test-profile", folder="All")
         assert result["description"] == "Test description"
         assert "botnet_domains" in result
@@ -523,7 +523,7 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             "name": "test-profile",
             "folder": "All",
         }
-        self.mock_scm.get.return_value = minimal_response
+        self.mock_scm.get.return_value = minimal_response  # noqa
         result = self.client.fetch(name="test-profile", folder="All")
         assert "description" not in result
         assert "botnet_domains" not in result
