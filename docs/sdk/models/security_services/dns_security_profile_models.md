@@ -26,9 +26,11 @@ Used when creating or updating a DNS Security Profile object.
 
 ```python
 from scm.models.security.dns_security_profiles import DNSSecurityProfileRequestModel, BotnetDomainsRequest,
-    DNSSecurityCategoryEntry, ListEntryRequest, SinkholeSettings, WhitelistEntry
+
+DNSSecurityCategoryEntryModel, ListEntryRequest, SinkholeSettingsModel, WhitelistEntryModel
 from scm.models.security.dns_security_profiles import ActionEnum, LogLevelEnum, PacketCaptureEnum, IPv4AddressEnum,
-    IPv6AddressEnum
+
+IPv6AddressEnum
 
 profile_request = DNSSecurityProfileRequestModel(
     name="test-profile",
@@ -36,7 +38,7 @@ profile_request = DNSSecurityProfileRequestModel(
     folder="Shared",
     botnet_domains=BotnetDomainsRequest(
         dns_security_categories=[
-            DNSSecurityCategoryEntry(
+            DNSSecurityCategoryEntryModel(
                 name="grayware",
                 action=ActionEnum.block,
                 log_level=LogLevelEnum.medium,
@@ -50,12 +52,12 @@ profile_request = DNSSecurityProfileRequestModel(
                 packet_capture=PacketCaptureEnum.disable
             )
         ],
-        sinkhole=SinkholeSettings(
+        sinkhole=SinkholeSettingsModel(
             ipv4_address=IPv4AddressEnum.default_ip,
             ipv6_address=IPv6AddressEnum.localhost
         ),
         whitelist=[
-            WhitelistEntry(
+            WhitelistEntryModel(
                 name="example.com",
                 description="Whitelisted domain"
             )
@@ -70,7 +72,7 @@ print(profile_request.model_dump_json(indent=2))
 
 ---
 
-## DNSSecurityProfileResponseModel
+## DNSSecurityProfileResponseModelModel
 
 Used when parsing DNS Security Profile objects retrieved from the API.
 
@@ -92,43 +94,45 @@ Used when parsing DNS Security Profile objects retrieved from the API.
 <!-- termynal -->
 
 ```python
-from scm.models.security.dns_security_profiles import DNSSecurityProfileResponseModel, BotnetDomainsResponse,
-    DNSSecurityCategoryEntry, ListEntryResponse, SinkholeSettings, WhitelistEntry
-from scm.models.security.dns_security_profiles import ActionEnum, LogLevelEnum, PacketCaptureEnum, IPv4AddressEnum,
-    IPv6AddressEnum
+from scm.models.security.dns_security_profiles import DNSSecurityProfileResponseModelModel, BotnetDomainsResponse,
 
-profile_response = DNSSecurityProfileResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="test-profile",
-    description="Sample DNS Security Profile",
-    folder="Shared",
-    botnet_domains=BotnetDomainsResponse(
-        dns_security_categories=[
-            DNSSecurityCategoryEntry(
-                name="grayware",
-                action=ActionEnum.block,
-                log_level=LogLevelEnum.medium,
-                packet_capture=PacketCaptureEnum.single_packet
-            )
-        ],
-        lists=[
-            ListEntryResponse(
-                name="custom_list",
-                action={"block": {}},
-                packet_capture=PacketCaptureEnum.disable
-            )
-        ],
-        sinkhole=SinkholeSettings(
-            ipv4_address=IPv4AddressEnum.default_ip,
-            ipv6_address=IPv6AddressEnum.localhost
-        ),
-        whitelist=[
-            WhitelistEntry(
-                name="example.com",
-                description="Whitelisted domain"
-            )
-        ]
-    )
+DNSSecurityCategoryEntryModel, ListEntryResponse, SinkholeSettingsModel, WhitelistEntryModel
+from scm.models.security.dns_security_profiles import ActionEnum, LogLevelEnum, PacketCaptureEnum, IPv4AddressEnum,
+
+IPv6AddressEnum
+
+profile_response = DNSSecurityProfileResponseModelModel(
+  id="123e4567-e89b-12d3-a456-426655440000",
+  name="test-profile",
+  description="Sample DNS Security Profile",
+  folder="Shared",
+  botnet_domains=BotnetDomainsResponse(
+    dns_security_categories=[
+      DNSSecurityCategoryEntryModel(
+        name="grayware",
+        action=ActionEnum.block,
+        log_level=LogLevelEnum.medium,
+        packet_capture=PacketCaptureEnum.single_packet
+      )
+    ],
+    lists=[
+      ListEntryResponse(
+        name="custom_list",
+        action={"block": {}},
+        packet_capture=PacketCaptureEnum.disable
+      )
+    ],
+    sinkhole=SinkholeSettingsModel(
+      ipv4_address=IPv4AddressEnum.default_ip,
+      ipv6_address=IPv6AddressEnum.localhost
+    ),
+    whitelist=[
+      WhitelistEntryModel(
+        name="example.com",
+        description="Whitelisted domain"
+      )
+    ]
+  )
 )
 
 print(profile_response.model_dump_json(indent=2))
@@ -144,10 +148,10 @@ Represents the 'botnet_domains' settings for requests.
 
 ### Attributes
 
-- `dns_security_categories` (Optional[List[DNSSecurityCategoryEntry]]): DNS security categories.
+- `dns_security_categories` (Optional[List[DNSSecurityCategoryEntryModel]]): DNS security categories.
 - `lists` (Optional[List[ListEntryRequest]]): Lists of DNS domains.
-- `sinkhole` (Optional[SinkholeSettings]): DNS sinkhole settings.
-- `whitelist` (Optional[List[WhitelistEntry]]): DNS security overrides.
+- `sinkhole` (Optional[SinkholeSettingsModel]): DNS sinkhole settings.
+- `whitelist` (Optional[List[WhitelistEntryModel]]): DNS security overrides.
 
 ### Example
 
@@ -156,37 +160,40 @@ Represents the 'botnet_domains' settings for requests.
 <!-- termynal -->
 
 ```python
-from scm.models.security.dns_security_profiles import BotnetDomainsRequest, DNSSecurityCategoryEntry, ListEntryRequest,
-    SinkholeSettings, WhitelistEntry
+from scm.models.security.dns_security_profiles import BotnetDomainsRequest, DNSSecurityCategoryEntryModel,
+  ListEntryRequest,
+
+SinkholeSettingsModel, WhitelistEntryModel
 from scm.models.security.dns_security_profiles import ActionEnum, LogLevelEnum, PacketCaptureEnum, IPv4AddressEnum,
-    IPv6AddressEnum
+
+IPv6AddressEnum
 
 botnet_domains = BotnetDomainsRequest(
-    dns_security_categories=[
-        DNSSecurityCategoryEntry(
-            name="malware",
-            action=ActionEnum.sinkhole,
-            log_level=LogLevelEnum.high,
-            packet_capture=PacketCaptureEnum.extended_capture
-        )
-    ],
-    lists=[
-        ListEntryRequest(
-            name="custom_blocklist",
-            action={"block": {}},
-            packet_capture=PacketCaptureEnum.single_packet
-        )
-    ],
-    sinkhole=SinkholeSettings(
-        ipv4_address=IPv4AddressEnum.localhost,
-        ipv6_address=IPv6AddressEnum.localhost
-    ),
-    whitelist=[
-        WhitelistEntry(
-            name="trusteddomain.com",
-            description="Trusted domain"
-        )
-    ]
+  dns_security_categories=[
+    DNSSecurityCategoryEntryModel(
+      name="malware",
+      action=ActionEnum.sinkhole,
+      log_level=LogLevelEnum.high,
+      packet_capture=PacketCaptureEnum.extended_capture
+    )
+  ],
+  lists=[
+    ListEntryRequest(
+      name="custom_blocklist",
+      action={"block": {}},
+      packet_capture=PacketCaptureEnum.single_packet
+    )
+  ],
+  sinkhole=SinkholeSettingsModel(
+    ipv4_address=IPv4AddressEnum.localhost,
+    ipv6_address=IPv6AddressEnum.localhost
+  ),
+  whitelist=[
+    WhitelistEntryModel(
+      name="trusteddomain.com",
+      description="Trusted domain"
+    )
+  ]
 )
 
 print(botnet_domains.model_dump_json(indent=2))
@@ -196,7 +203,7 @@ print(botnet_domains.model_dump_json(indent=2))
 
 ---
 
-## DNSSecurityCategoryEntry
+## DNSSecurityCategoryEntryModel
 
 Represents an entry in 'dns_security_categories'.
 
@@ -214,10 +221,11 @@ Represents an entry in 'dns_security_categories'.
 <!-- termynal -->
 
 ```python
-from scm.models.security.dns_security_profiles import DNSSecurityCategoryEntry, ActionEnum, LogLevelEnum,
-    PacketCaptureEnum
+from scm.models.security.dns_security_profiles import DNSSecurityCategoryEntryModel, ActionEnum, LogLevelEnum,
 
-category_entry = DNSSecurityCategoryEntry(
+PacketCaptureEnum
+
+category_entry = DNSSecurityCategoryEntryModel(
     name="phishing",
     action=ActionEnum.block,
     log_level=LogLevelEnum.critical,
@@ -238,7 +246,7 @@ Represents a 'lists' entry for requests.
 ### Attributes
 
 - `name` (str): **Required.** List name.
-- `action` (ListActionRequest): **Required.** Action to be taken.
+- `action` (ListActionRequestModel): **Required.** Action to be taken.
 - `packet_capture` (Optional[PacketCaptureEnum]): Packet capture setting.
 
 ### Example
@@ -263,7 +271,7 @@ print(list_entry.model_dump_json(indent=2))
 
 ---
 
-## SinkholeSettings
+## SinkholeSettingsModel
 
 Represents the 'sinkhole' settings.
 
@@ -279,9 +287,9 @@ Represents the 'sinkhole' settings.
 <!-- termynal -->
 
 ```python
-from scm.models.security.dns_security_profiles import SinkholeSettings, IPv4AddressEnum, IPv6AddressEnum
+from scm.models.security.dns_security_profiles import SinkholeSettingsModel, IPv4AddressEnum, IPv6AddressEnum
 
-sinkhole = SinkholeSettings(
+sinkhole = SinkholeSettingsModel(
     ipv4_address=IPv4AddressEnum.pan_sinkhole_default_ip,
     ipv6_address=IPv6AddressEnum.localhost
 )
@@ -293,7 +301,7 @@ print(sinkhole.model_dump_json(indent=2))
 
 ---
 
-## WhitelistEntry
+## WhitelistEntryModel
 
 Represents an entry in the 'whitelist'.
 
@@ -309,9 +317,9 @@ Represents an entry in the 'whitelist'.
 <!-- termynal -->
 
 ```python
-from scm.models.security.dns_security_profiles import WhitelistEntry
+from scm.models.security.dns_security_profiles import WhitelistEntryModel
 
-whitelist_entry = WhitelistEntry(
+whitelist_entry = WhitelistEntryModel(
     name="example.com",
     description="Trusted domain for our organization"
 )
@@ -375,7 +383,8 @@ Enumeration of allowed IPv6 sinkhole addresses:
 
 ```python
 from scm.models.security.dns_security_profiles import ActionEnum, LogLevelEnum, PacketCaptureEnum, IPv4AddressEnum,
-    IPv6AddressEnum
+
+IPv6AddressEnum
 
 print(f"Action types: {[a.value for a in ActionEnum]}")
 print(f"Log levels: {[l.value for l in LogLevelEnum]}")
@@ -396,66 +405,66 @@ print(f"IPv6 sinkhole addresses: {[i.value for i in IPv6AddressEnum]}")
 
 ```python
 from scm.models.security.dns_security_profiles import (
-    DNSSecurityProfileRequestModel,
-    BotnetDomainsRequest,
-    DNSSecurityCategoryEntry,
-    ListEntryRequest,
-    SinkholeSettings,
-    WhitelistEntry,
-    ActionEnum,
-    LogLevelEnum,
-    PacketCaptureEnum,
-    IPv4AddressEnum,
-    IPv6AddressEnum
+  DNSSecurityProfileRequestModel,
+  BotnetDomainsRequest,
+  DNSSecurityCategoryEntryModel,
+  ListEntryRequest,
+  SinkholeSettingsModel,
+  WhitelistEntryModel,
+  ActionEnum,
+  LogLevelEnum,
+  PacketCaptureEnum,
+  IPv4AddressEnum,
+  IPv6AddressEnum
 )
 
 # Create a comprehensive DNS Security Profile model
 comprehensive_profile = DNSSecurityProfileRequestModel(
-    name="comprehensive_profile",
-    description="Comprehensive DNS Security Profile",
-    folder="Shared",
-    botnet_domains=BotnetDomainsRequest(
-        dns_security_categories=[
-            DNSSecurityCategoryEntry(
-                name="grayware",
-                action=ActionEnum.block,
-                log_level=LogLevelEnum.medium,
-                packet_capture=PacketCaptureEnum.single_packet
-            ),
-            DNSSecurityCategoryEntry(
-                name="malware",
-                action=ActionEnum.sinkhole,
-                log_level=LogLevelEnum.critical,
-                packet_capture=PacketCaptureEnum.extended_capture
-            )
-        ],
-        lists=[
-            ListEntryRequest(
-                name="custom_blocklist",
-                action={"block": {}},
-                packet_capture=PacketCaptureEnum.disable
-            ),
-            ListEntryRequest(
-                name="custom_sinkhole_list",
-                action={"sinkhole": {}},
-                packet_capture=PacketCaptureEnum.single_packet
-            )
-        ],
-        sinkhole=SinkholeSettings(
-            ipv4_address=IPv4AddressEnum.pan_sinkhole_default_ip,
-            ipv6_address=IPv6AddressEnum.localhost
-        ),
-        whitelist=[
-            WhitelistEntry(
-                name="example.com",
-                description="Whitelisted domain"
-            ),
-            WhitelistEntry(
-                name="trusteddomain.org",
-                description="Another trusted domain"
-            )
-        ]
-    )
+  name="comprehensive_profile",
+  description="Comprehensive DNS Security Profile",
+  folder="Shared",
+  botnet_domains=BotnetDomainsRequest(
+    dns_security_categories=[
+      DNSSecurityCategoryEntryModel(
+        name="grayware",
+        action=ActionEnum.block,
+        log_level=LogLevelEnum.medium,
+        packet_capture=PacketCaptureEnum.single_packet
+      ),
+      DNSSecurityCategoryEntryModel(
+        name="malware",
+        action=ActionEnum.sinkhole,
+        log_level=LogLevelEnum.critical,
+        packet_capture=PacketCaptureEnum.extended_capture
+      )
+    ],
+    lists=[
+      ListEntryRequest(
+        name="custom_blocklist",
+        action={"block": {}},
+        packet_capture=PacketCaptureEnum.disable
+      ),
+      ListEntryRequest(
+        name="custom_sinkhole_list",
+        action={"sinkhole": {}},
+        packet_capture=PacketCaptureEnum.single_packet
+      )
+    ],
+    sinkhole=SinkholeSettingsModel(
+      ipv4_address=IPv4AddressEnum.pan_sinkhole_default_ip,
+      ipv6_address=IPv6AddressEnum.localhost
+    ),
+    whitelist=[
+      WhitelistEntryModel(
+        name="example.com",
+        description="Whitelisted domain"
+      ),
+      WhitelistEntryModel(
+        name="trusteddomain.org",
+        description="Another trusted domain"
+      )
+    ]
+  )
 )
 
 # Print the JSON representation of the model

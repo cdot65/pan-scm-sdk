@@ -41,7 +41,7 @@ dns_security_profile = DNSSecurityProfile(api_client)
 
 ## Methods
 
-### `create(data: Dict[str, Any]) -> DNSSecurityProfileResponseModel`
+### `create(data: Dict[str, Any]) -> DNSSecurityProfileResponseModelModel`
 
 Creates a new DNS Security Profile object.
 
@@ -95,7 +95,7 @@ print(f"Created DNS Security Profile with ID: {new_profile.id}")
 
 </div>
 
-### `get(object_id: str) -> DNSSecurityProfileResponseModel`
+### `get(object_id: str) -> DNSSecurityProfileResponseModelModel`
 
 Retrieves a DNS Security Profile object by its ID.
 
@@ -117,7 +117,7 @@ print(f"Profile Name: {profile_object.name}")
 
 </div>
 
-### `update(object_id: str, data: Dict[str, Any]) -> DNSSecurityProfileResponseModel`
+### `update(object_id: str, data: Dict[str, Any]) -> DNSSecurityProfileResponseModelModel`
 
 Updates an existing DNS Security Profile object.
 
@@ -177,7 +177,8 @@ print(f"Deleted DNS Security Profile with ID: {profile_id}")
 </div>
 
 ###
-`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[DNSSecurityProfileResponseModel]`
+
+`list(folder: Optional[str] = None, snippet: Optional[str] = None, device: Optional[str] = None, offset: Optional[int] = None, limit: Optional[int] = None, name: Optional[str] = None, **filters) -> List[DNSSecurityProfileResponseModelModel]`
 
 Lists DNS Security Profile objects, optionally filtered by folder, snippet, device, or other criteria.
 
@@ -504,4 +505,4 @@ print(f"Deleted profile: {new_profile.name}")
 ## Related Models
 
 - [DNSSecurityProfileRequestModel](../../models/security_services/dns_security_profile_models.md#DNSSecurityProfileRequestModel)
-- [DNSSecurityProfileResponseModel](../../models/security_services/dns_security_profile_models.md#DNSSecurityProfileResponseModel)
+- [DNSSecurityProfileResponseModelModel](../../models/security_services/dns_security_profile_models.md#DNSSecurityProfileResponseModel)
