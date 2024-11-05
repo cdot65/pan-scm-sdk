@@ -40,12 +40,12 @@ address_data = {
     "name": "internal_network",
     "ip_netmask": "192.168.1.0/24",
     "description": "Internal network segment",
-    "folder": "Shared",
-    "tag": ["internal", "network"]
+    "folder": "Texas",
+    "tag": ["Python", "Automation"]
 }
 
-new_address = address.create(address_data)
-print(f"Created address with ID: {new_address['id']}")
+new_address = addresses.create(address_data)
+print(f"Created address with ID: {new_address.id}")
 ```
 
 </div>
@@ -61,12 +61,12 @@ address_data = {
     "name": "example_website",
     "fqdn": "www.example.com",
     "description": "Example website address",
-    "folder": "Prisma Access",
-    "tag": ["external", "web"]
+    "folder": "Texas",
+    "tag": ["Python", "Automation"]
 }
 
-new_address = address.create(address_data)
-print(f"Created address with ID: {new_address['id']}")
+new_address = addresses.create(address_data)
+print(f"Created address with ID: {new_address.id}")
 ```
 
 </div>
@@ -81,9 +81,8 @@ Use the `get()` method to retrieve an address object by its ID.
 
 ```python
 address_id = "123e4567-e89b-12d3-a456-426655440000"
-address_obj = address.get(address_id)
-print(f"Address Name: {address_obj['name']}")
-print(f"Address Type: {address_obj.get('ip_netmask') or address_obj.get('fqdn')}")
+address_obj = addresses.get(address_id)
+print(f"Address Name: {address_obj.name}")
 ```
 
 </div>
@@ -97,14 +96,12 @@ The `update()` method allows you to modify existing address objects.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "description": "Updated network description",
-    "tag": ["internal", "updated", "2023"]
-}
+# first fetch an existing object by its folder and name
+example_website = addresses.fetch(folder='Texas', name='example_website')
 
-updated_address = address.update(update_data)
-print(f"Updated address description: {updated_address['description']}")
+# update the dictionary's description
+example_website['description'] = "this is just a test"
+addresses.update(example_website)
 ```
 
 </div>
@@ -119,7 +116,7 @@ Use the `delete()` method to remove an address object.
 
 ```python
 address_id = "123e4567-e89b-12d3-a456-426655440000"
-address.delete(address_id)
+addresses.delete(address_id)
 print("Address object deleted successfully")
 ```
 
@@ -134,15 +131,20 @@ The `list()` method retrieves multiple address objects with optional filtering.
 <!-- termynal -->
 
 ```python
-# List all addresses in a folder with specific tags
-addresses = address.list(
-    folder="Shared",
-    tags=["internal"],
-    types=["ip-netmask"]
+# List all addresses in a folder
+texas_addresses = addresses.list(
+    folder="Texas",
 )
 
-for addr in addresses:
-    print(f"Name: {addr['name']}, Value: {addr.get('ip_netmask')}")
+for addr in texas_addresses:
+    if addr.ip_netmask:
+        print(f"Name: {addr.name}, Value: {addr.ip_netmask}")
+    elif addr.fqdn:
+        print(f"Name: {addr.name}, Value: {addr.fqdn}")
+    elif addr.ip_range:
+        print(f"Name: {addr.name}, Value: {addr.ip_range}")
+    else:
+        print(f"Name: {addr.name}, Value: {addr.wildcard}")
 ```
 
 </div>
@@ -157,11 +159,13 @@ The `fetch()` method retrieves a single address object by name and container.
 
 ```python
 # Fetch an address by name from a specific folder
-address_obj = address.fetch(
-    name="internal_network",
-    folder="Shared"
+desktop1 = addresses.fetch(
+    name="dallas-desktop1",
+    folder="Texas"
 )
-print(f"Found address: {address_obj['name']}")
+
+# fetch will return a Python dictionary, not a pydantic model
+print(f"Found address: {desktop1['name']}")
 ```
 
 </div>
@@ -186,42 +190,33 @@ client = Scm(
 )
 
 # Initialize address object
-address = Address(client)
+addresses = Address(client)
 
 # Create new address
 create_data = {
     "name": "test_network",
     "ip_netmask": "10.0.0.0/24",
     "description": "Test network segment",
-    "folder": "Shared",
-    "tag": ["test"]
+    "folder": "Texas",
+    "tag": ["Python", "Automation"]
 }
 
-new_address = address.create(create_data)
-print(f"Created address: {new_address['name']}")
+new_address = addresses.create(create_data)
+print(f"Created address: {new_address.name}")
 
 # Fetch the address by name
-fetched = address.fetch(name="test_network", folder="Shared")
+fetched = addresses.fetch(name="test_network", folder="Texas")
 
 # Modify the fetched object
 fetched["description"] = "Updated test network segment"
-fetched["tag"] = ["test", "updated"]
+fetched["tag"] = ["Python"]
 
 # Update using the modified object
-updated = address.update(fetched)
-print(f"Updated description: {updated['description']}")
-
-# List addresses with filters
-addresses = address.list(
-    folder="Shared",
-    tags=["test"]
-)
-
-for addr in addresses:
-    print(f"Listed address: {addr['name']}")
+updated = addresses.update(fetched)
+print(f"Updated description: {updated.description}")
 
 # Clean up
-address.delete(new_address['id'])
+addresses.delete(new_address.id)
 print("Address deleted successfully")
 ```
 
