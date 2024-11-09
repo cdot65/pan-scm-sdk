@@ -397,11 +397,11 @@ class TestAddressAPI(TestAddressBase):
         """
         Test fetching an address group when the API returns an unexpected response format.
 
-        **Objective:** Ensure that the fetch method raises APIError when the response format is not as expected.
+        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
         **Workflow:**
             1. Mocks the API response to return an unexpected format.
             2. Calls the `fetch` method.
-            3. Asserts that APIError is raised.
+            3. Asserts that BadResponseError is raised.
         """
         group_name = "TestGroup"
         folder_name = "Shared"
@@ -1205,13 +1205,13 @@ class TestAddressValidation(TestAddressBase):
         # Test malformed response
         self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
 
-        with pytest.raises(APIError):
+        with pytest.raises(BadResponseError):
             self.client.list(folder="Shared")
 
         # Test invalid data format
         self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
 
-        with pytest.raises(APIError):
+        with pytest.raises(BadResponseError):
             self.client.list(folder="Shared")
 
     def test_error_handler_raise_through(self):
@@ -1241,27 +1241,27 @@ class TestAddressValidation(TestAddressBase):
         **Objective:** Test list method handling of non-dictionary response.
         **Workflow:**
             1. Mocks a non-dictionary response from the API
-            2. Verifies that APIError is raised with correct message
+            2. Verifies that BadResponseError is raised with correct message
             3. Tests different non-dict response types
         """
         # Test with list response
         self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(BadResponseError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
         # Test with string response
         self.mock_scm.get.return_value = "string response"  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(BadResponseError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
         # Test with None response
         self.mock_scm.get.return_value = None  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(BadResponseError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 

@@ -10,7 +10,6 @@ from scm.models.objects import (
 from scm.exceptions import (
     ValidationError,
     EmptyFieldError,
-    APIError,
     ErrorHandler,
     BadResponseError,
 )
@@ -227,7 +226,7 @@ class Address(BaseObject):
             EmptyFieldError: If provided container fields are empty
             FolderNotFoundError: If the specified folder doesn't exist
             ValidationError: If the container parameters are invalid
-            APIError: If response format is invalid
+            BadResponseError: If response format is invalid
         """
 
         # If the folder object is empty, raise exception
@@ -266,13 +265,15 @@ class Address(BaseObject):
 
             # return errors if invalid structure
             if not isinstance(response, dict):
-                raise APIError("Invalid response format: expected dictionary")
+                raise BadResponseError("Invalid response format: expected dictionary")
 
             if "data" not in response:
-                raise APIError("Invalid response format: missing 'data' field")
+                raise BadResponseError("Invalid response format: missing 'data' field")
 
             if not isinstance(response["data"], list):
-                raise APIError("Invalid response format: 'data' field must be a list")
+                raise BadResponseError(
+                    "Invalid response format: 'data' field must be a list"
+                )
 
             # Return a list object of the entries as Pydantic modeled objects
             addresses = [AddressResponseModel(**item) for item in response["data"]]
@@ -310,7 +311,7 @@ class Address(BaseObject):
             FolderNotFoundError: If the specified folder doesn't exist
             ObjectNotPresentError: If the object is not found
             ValidationError: If the parameters are invalid
-            APIError: For other API-related errors
+            BadResponseError: For other API-related errors
         """
         if not name:
             raise EmptyFieldError(
