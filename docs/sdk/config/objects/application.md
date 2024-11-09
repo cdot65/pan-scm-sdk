@@ -47,13 +47,13 @@ app_data = {
     "risk": 2,
     "description": "Internal chat application",
     "ports": ["tcp/8443"],
-    "folder": "Custom Apps",
+    "folder": "Texas",
     "transfers_files": True,
     "has_known_vulnerabilities": False
 }
 
-new_app = application.create(app_data)
-print(f"Created application: {new_app['name']}")
+new_app = applications.create(app_data)
+print(f"Created application: {new_app.name}")
 ```
 
 </div>
@@ -68,9 +68,9 @@ Use the `get()` method to retrieve an application by its ID.
 
 ```python
 app_id = "123e4567-e89b-12d3-a456-426655440000"
-app = application.get(app_id)
-print(f"Application: {app['name']}")
-print(f"Risk Level: {app['risk']}")
+app = applications.get(app_id)
+print(f"Application: {app.name}")
+print(f"Risk Level: {app.risk}")
 ```
 
 </div>
@@ -84,15 +84,12 @@ The `update()` method allows you to modify existing applications.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "description": "Updated chat application",
-    "risk": 3,
-    "has_known_vulnerabilities": True
-}
+fetched_app = applications.fetch(folder='Texas', name='internal-chat')
 
-updated_app = application.update(update_data)
-print(f"Updated application: {updated_app['name']}")
+fetched_app['description'] = 'Updated description for internal chat application'
+
+updated_app = applications.update(fetched_app)
+print(f"Updated application: {updated_app.name}")
 ```
 
 </div>
@@ -107,7 +104,7 @@ Use the `delete()` method to remove an application.
 
 ```python
 app_id = "123e4567-e89b-12d3-a456-426655440000"
-application.delete(app_id)
+applications.delete(app_id)
 print("Application deleted successfully")
 ```
 
@@ -123,18 +120,20 @@ The `list()` method retrieves multiple applications with optional filtering.
 
 ```python
 # List all applications in a folder
-apps = application.list(folder="Custom Apps")
-for app in apps:
-    print(f"Name: {app['name']}, Risk: {app['risk']}")
+apps = applications.list(folder="Texas")
 
-# List with specific filters
-high_risk_apps = application.list(
-    folder="Custom Apps",
-    risk=4,
-    has_known_vulnerabilities=True
-)
-for app in high_risk_apps:
-    print(f"High-risk app: {app['name']}")
+# Default behavior of API is to return first 200 objects
+if len(apps) == 200:
+    print(True)
+
+# Passing the filter of `limit` with an integer will increase amount of retrieved objects
+apps = applications.list(folder="Texas", limit=5000)
+len(apps)
+4868
+
+for app in apps:
+    print(f"Name: {app.name}, Risk: {app.risk}")
+
 ```
 
 </div>
@@ -150,7 +149,7 @@ The `fetch()` method retrieves a single application by name from a specific cont
 ```python
 app = application.fetch(
     name="internal-chat",
-    folder="Custom Apps"
+    folder="Texas"
 )
 print(f"Found application: {app['name']}")
 print(f"Current risk level: {app['risk']}")
@@ -178,7 +177,7 @@ client = Scm(
 )
 
 # Initialize application object
-application = Application(client)
+applications = Application(client)
 
 # Create new application
 app_data = {
@@ -189,17 +188,17 @@ app_data = {
     "risk": 3,
     "description": "Custom database application",
     "ports": ["tcp/1521"],
-    "folder": "Custom Apps",
+    "folder": "Texas",
     "transfers_files": True
 }
 
-new_app = application.create(app_data)
-print(f"Created application: {new_app['name']}")
+new_app = applications.create(app_data)
+print(f"Created application: {new_app.name}")
 
 # Fetch the application by name
-fetched_app = application.fetch(
+fetched_app = applications.fetch(
     name="custom-app",
-    folder="Custom Apps"
+    folder="Texas"
 )
 
 # Modify the fetched application
@@ -208,17 +207,17 @@ fetched_app["risk"] = 4
 fetched_app["has_known_vulnerabilities"] = True
 
 # Update using the modified object
-updated_app = application.update(fetched_app)
-print(f"Updated application: {updated_app['name']}")
-print(f"New risk level: {updated_app['risk']}")
+updated_app = applications.update(fetched_app)
+print(f"Updated application: {updated_app.name}")
+print(f"New risk level: {updated_app.risk}")
 
 # List all applications
-apps = application.list(folder="Custom Apps")
+apps = applications.list(folder="Texas")
 for app in apps:
-    print(f"Listed application: {app['name']}")
+    print(f"Listed application: {app.name}")
 
 # Clean up
-application.delete(new_app['id'])
+applications.delete(new_app.id)
 print("Application deleted successfully")
 ```
 

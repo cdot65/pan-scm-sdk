@@ -49,12 +49,12 @@ tcp_service = {
         }
     },
     "description": "Web service for HTTP/HTTPS",
-    "folder": "Shared",
-    "tag": ["web"]
+    "folder": "Texas",
+    "tag": ["Automation"]
 }
 
-new_service = service.create(tcp_service)
-print(f"Created service: {new_service['name']}")
+new_service = services.create(tcp_service)
+print(f"Created service: {new_service.name}")
 ```
 
 </div>
@@ -74,11 +74,11 @@ udp_service = {
         }
     },
     "description": "DNS service",
-    "folder": "Shared"
+    "folder": "Texas"
 }
 
-new_service = service.create(udp_service)
-print(f"Created service: {new_service['name']}")
+new_service = services.create(udp_service)
+print(f"Created service: {new_service.name}")
 ```
 
 </div>
@@ -94,8 +94,8 @@ Use the `get()` method to retrieve a service by its ID.
 ```python
 service_id = "123e4567-e89b-12d3-a456-426655440000"
 service_obj = service.get(service_id)
-print(f"Service: {service_obj['name']}")
-print(f"Protocol: {'TCP' if 'tcp' in service_obj['protocol'] else 'UDP'}")
+print(f"Service: {service_obj.name}")
+print(f"Protocol: {'TCP' if 'tcp' in service_obj.protocol else 'UDP'}")
 ```
 
 </div>
@@ -109,21 +109,10 @@ The `update()` method allows you to modify existing services.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "description": "Updated web service",
-    "protocol": {
-        "tcp": {
-            "port": "80,443,8080",
-            "override": {
-                "timeout": 120
-            }
-        }
-    }
-}
-
-updated_service = service.update(update_data)
-print(f"Updated service: {updated_service['name']}")
+service_object = services.fetch(folder='Texas', name='dns-service')
+service_object['description'] = 'updated description'
+updated_service = services.update(service_object)
+print(f"Updated service: {updated_service.name}")
 ```
 
 </div>
@@ -138,7 +127,7 @@ Use the `delete()` method to remove a service.
 
 ```python
 service_id = "123e4567-e89b-12d3-a456-426655440000"
-service.delete(service_id)
+services.delete(service_id)
 print("Service deleted successfully")
 ```
 
@@ -154,18 +143,9 @@ The `list()` method retrieves multiple services with optional filtering.
 
 ```python
 # List all services in a folder
-services = service.list(folder="Shared")
+services = services.list(folder="Texas")
 for svc in services:
-    print(f"Name: {svc['name']}")
-
-# List with specific filters
-filtered_services = service.list(
-    folder="Shared",
-    names=["web-service", "dns-service"],
-    tags=["web"]
-)
-for svc in filtered_services:
-    print(f"Filtered service: {svc['name']}")
+    print(f"Name: {svc.name}")
 ```
 
 </div>
@@ -179,10 +159,7 @@ The `fetch()` method retrieves a single service by name from a specific containe
 <!-- termynal -->
 
 ```python
-service_obj = service.fetch(
-    name="web-service",
-    folder="Shared"
-)
+service_obj = services.fetch(name="web-service", folder="Texas")
 print(f"Found service: {service_obj['name']}")
 print(f"Current ports: {service_obj['protocol']['tcp']['port']}")
 ```
@@ -209,7 +186,7 @@ client = Scm(
 )
 
 # Initialize service object
-service = Service(client)
+services = Service(client)
 
 # Create new service
 create_data = {
@@ -223,16 +200,16 @@ create_data = {
         }
     },
     "description": "Test service",
-    "folder": "Shared"
+    "folder": "Texas"
 }
 
-new_service = service.create(create_data)
-print(f"Created service: {new_service['name']}")
+new_service = services.create(create_data)
+print(f"Created service: {new_service.name}")
 
 # Fetch the service by name
-fetched_service = service.fetch(
+fetched_service = services.fetch(
     name="test-service",
-    folder="Shared"
+    folder="Texas"
 )
 
 # Modify the fetched service
@@ -240,17 +217,17 @@ fetched_service["description"] = "Updated test service"
 fetched_service["protocol"]["tcp"]["port"] = "8080,8443"
 
 # Update using the modified object
-updated_service = service.update(fetched_service)
-print(f"Updated service: {updated_service['name']}")
-print(f"New ports: {updated_service['protocol']['tcp']['port']}")
+updated_service = services.update(fetched_service)
+print(f"Updated service: {updated_service.name}")
+print(f"New ports: {updated_service.protocol.tcp.port}")
 
 # List all services
-services = service.list(folder="Shared")
+services = services.list(folder="Texas")
 for svc in services:
-    print(f"Listed service: {svc['name']}")
+    print(f"Listed service: {svc.name}")
 
 # Clean up
-service.delete(new_service['id'])
+services.delete(new_service.id)
 print("Service deleted successfully")
 ```
 

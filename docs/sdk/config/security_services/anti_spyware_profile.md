@@ -43,7 +43,7 @@ container type (folder, snippet, or device).
 profile_data = {
     "name": "basic-profile",
     "description": "Basic anti-spyware profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "rules": [
         {
             "name": "block-critical",
@@ -54,8 +54,8 @@ profile_data = {
     ]
 }
 
-new_profile = anti_spyware_profile.create(profile_data)
-print(f"Created profile: {new_profile['name']}")
+new_profile = profiles.create(profile_data)
+print(f"Created profile: {new_profile.name}")
 ```
 
 </div>
@@ -70,7 +70,7 @@ print(f"Created profile: {new_profile['name']}")
 profile_data = {
     "name": "advanced-profile",
     "description": "Advanced anti-spyware profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "cloud_inline_analysis": True,
     "mica_engine_spyware_enabled": [
         {
@@ -94,8 +94,8 @@ profile_data = {
     ]
 }
 
-new_profile = anti_spyware_profile.create(profile_data)
-print(f"Created profile: {new_profile['name']}")
+new_profile = profiles.create(profile_data)
+print(f"Created profile: {new_profile.name}")
 ```
 
 </div>
@@ -110,14 +110,18 @@ Use the `get()` method to retrieve an anti-spyware profile by its ID.
 
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-profile = anti_spyware_profile.get(profile_id)
-print(f"Profile Name: {profile['name']}")
-print(f"Number of Rules: {len(profile['rules'])}")
+profile = profiles.get(profile_id)
+print(f"Profile Name: {profile.name}")
+print(f"Number of Rules: {len(profile.rules)}")
 ```
 
 </div>
 
 ## Updating Anti-Spyware Profiles
+
+> There is currently a requirement by the SCM API to have at least four characters for objects like `threat_name`, but
+> this unfortunately conflicts with defaults like `any`. The SDK will conform to the API, but note that this affects
+> methods like `update()` from being able to edit existing rules that have attributes with values of `any`. Sorry :'(
 
 The `update()` method allows you to modify existing anti-spyware profiles.
 
@@ -126,29 +130,10 @@ The `update()` method allows you to modify existing anti-spyware profiles.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "description": "Updated profile description",
-    "folder": "Shared",
-    "rules": [
-        {
-            "name": "updated-rule",
-            "severity": ["critical", "high"],
-            "category": "spyware",
-            "action": {"reset_both": {}}
-        }
-    ],
-    "threat_exception": [
-        {
-            "name": "exception-1",
-            "packet_capture": "single-packet",
-            "action": {"allow": {}},
-            "exempt_ip": [{"name": "10.0.0.1"}]
-        }
-    ]
-}
+fetched_profile = profiles.fetch(folder='Texas', name='advanced-profile')
+fetched_profile['description'] = 'updated description'
 
-updated_profile = anti_spyware_profile.update(update_data)
+updated_profile = profiles.update(fetched_profile)
 print(f"Updated profile: {updated_profile['name']}")
 ```
 
@@ -164,7 +149,7 @@ Use the `delete()` method to remove an anti-spyware profile.
 
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-anti_spyware_profile.delete(profile_id)
+profiles.delete(profile_id)
 print("Profile deleted successfully")
 ```
 
@@ -180,25 +165,13 @@ The `list()` method retrieves multiple anti-spyware profiles with optional filte
 
 ```python
 # List all profiles in a folder
-profiles = anti_spyware_profile.list(
-    folder="Shared",
-    limit=10,
-    offset=0
-)
+existing_profiles = profiles.list(folder="Texas")
 
-for profile in profiles:
-    print(f"Name: {profile['name']}")
-    print(f"Rules: {len(profile['rules'])}")
+for profile in existing_profiles:
+    print(f"Name: {profile.name}")
+    print(f"Rules: {len(profile.rules)}")
     print("---")
 
-# List profiles with name filter
-filtered_profiles = anti_spyware_profile.list(
-    folder="Shared",
-    name="basic"
-)
-
-for profile in filtered_profiles:
-    print(f"Filtered profile: {profile['name']}")
 ```
 
 </div>
@@ -212,9 +185,9 @@ The `fetch()` method retrieves a single anti-spyware profile by name from a spec
 <!-- termynal -->
 
 ```python
-profile = anti_spyware_profile.fetch(
+profile = profiles.fetch(
     name="basic-profile",
-    folder="Shared"
+    folder="Texas"
 )
 
 print(f"Found profile: {profile['name']}")
@@ -243,13 +216,13 @@ client = Scm(
 )
 
 # Initialize anti-spyware profile object
-anti_spyware_profile = AntiSpywareProfile(client)
+profiles = AntiSpywareProfile(client)
 
 # Create new profile
 create_data = {
     "name": "test-profile",
     "description": "Test anti-spyware profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "rules": [
         {
             "name": "test-rule",
@@ -260,13 +233,13 @@ create_data = {
     ]
 }
 
-new_profile = anti_spyware_profile.create(create_data)
-print(f"Created profile: {new_profile['name']}")
+new_profile = profiles.create(create_data)
+print(f"Created profile: {new_profile.name}")
 
 # Fetch the profile by name
-fetched_profile = anti_spyware_profile.fetch(
+fetched_profile = profiles.fetch(
     name="test-profile",
-    folder="Shared"
+    folder="Texas"
 )
 
 # Modify the fetched profile
@@ -279,17 +252,17 @@ fetched_profile["rules"].append({
 })
 
 # Update using the modified object
-updated_profile = anti_spyware_profile.update(fetched_profile)
-print(f"Updated profile: {updated_profile['name']}")
-print(f"New description: {updated_profile['description']}")
+updated_profile = profiles.update(fetched_profile)
+print(f"Updated profile: {updated_profile.name}")
+print(f"New description: {updated_profile.description}")
 
 # List all profiles
-profiles = anti_spyware_profile.list(folder="Shared")
-for profile in profiles:
-    print(f"Listed profile: {profile['name']}")
+existing_profiles = profiles.list(folder="Texas")
+for profile in existing_profiles:
+    print(f"Listed profile: {profile.name}")
 
 # Clean up
-anti_spyware_profile.delete(new_profile['id'])
+profiles.delete(new_profile.id)
 print("Profile deleted successfully")
 ```
 
