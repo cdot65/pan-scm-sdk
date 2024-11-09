@@ -78,6 +78,10 @@ class BadRequestError(APIError):
     """Raised when the API request is invalid."""
 
 
+class BadResponseError(APIError):
+    """Raised when the API request is invalid."""
+
+
 class NotFoundError(APIError):
     """Raised when a requested resource is not found."""
 
