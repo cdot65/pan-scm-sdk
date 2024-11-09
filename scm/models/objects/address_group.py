@@ -101,6 +101,22 @@ class AddressGroupBaseModel(BaseModel):
         examples=["My Device"],
     )
 
+    # Custom Validators
+    @field_validator("tag", mode="before")
+    def ensure_list_of_strings(cls, v):  # noqa
+        if isinstance(v, str):
+            return [v]
+        elif isinstance(v, list):
+            return v
+        else:
+            raise ValueError("Tag must be a string or a list of strings")
+
+    @field_validator("tag")
+    def ensure_unique_items(cls, v):  # noqa
+        if len(v) != len(set(v)):
+            raise ValueError("List items must be unique")
+        return v
+
     @model_validator(mode="after")
     def validate_address_group_type(self) -> "AddressGroupBaseModel":
         group_type_fields = ["dynamic", "static"]
