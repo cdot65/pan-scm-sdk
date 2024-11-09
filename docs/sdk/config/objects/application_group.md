@@ -41,12 +41,12 @@ container type (folder, snippet, or device).
 ```python
 group_data = {
     "name": "web-apps",
-    "members": ["http", "https", "web-browsing"],
-    "folder": "Shared",
+    "members": ["ssl", "web-browsing"],
+    "folder": "Texas",
 }
 
-new_group = application_group.create(group_data)
-print(f"Created group: {new_group['name']}")
+new_group = application_groups.create(group_data)
+print(f"Created group: {new_group.name}")
 ```
 
 </div>
@@ -61,9 +61,9 @@ Use the `get()` method to retrieve an application group by its ID.
 
 ```python
 group_id = "123e4567-e89b-12d3-a456-426655440000"
-group = application_group.get(group_id)
-print(f"Group Name: {group['name']}")
-print(f"Members: {group['members']}")
+group = application_groups.get(group_id)
+print(f"Group Name: {group.name}")
+print(f"Members: {group.members}")
 ```
 
 </div>
@@ -77,15 +77,11 @@ The `update()` method allows you to modify existing application groups.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "updated-web-apps",
-    "members": ["http", "https", "web-browsing", "ssl"],
-    "folder": "Shared"
-}
+web_apps = application_groups.fetch(folder='Texas', name='web-apps')
+web_apps['members'] = ['ssl', 'web-browsing', 'dns-base']
 
-updated_group = application_group.update(update_data)
-print(f"Updated group: {updated_group['name']}")
+updated_group = application_groups.update(web_apps)
+print(f"Updated group: {updated_group.name}")
 ```
 
 </div>
@@ -100,7 +96,7 @@ Use the `delete()` method to remove an application group.
 
 ```python
 group_id = "123e4567-e89b-12d3-a456-426655440000"
-application_group.delete(group_id)
+application_groups.delete(group_id)
 print("Group deleted successfully")
 ```
 
@@ -116,17 +112,10 @@ The `list()` method retrieves multiple application groups with optional filterin
 
 ```python
 # List all groups in a folder
-groups = application_group.list(folder="Shared")
+groups = application_groups.list(folder="Texas")
 for group in groups:
-    print(f"Name: {group['name']}, Members: {group['members']}")
+    print(f"Name: {group.name}, Members: {group.members}")
 
-# List groups with specific names
-filtered_groups = application_group.list(
-    folder="Shared",
-    names=["web-apps", "db-apps"]
-)
-for group in filtered_groups:
-    print(f"Filtered group: {group['name']}")
 ```
 
 </div>
@@ -140,9 +129,9 @@ The `fetch()` method retrieves a single application group by name from a specifi
 <!-- termynal -->
 
 ```python
-group = application_group.fetch(
+group = application_groups.fetch(
     name="web-apps",
-    folder="Shared"
+    folder="Texas"
 )
 print(f"Found group: {group['name']}")
 print(f"Current members: {group['members']}")
@@ -170,39 +159,39 @@ client = Scm(
 )
 
 # Initialize application group object
-application_group = ApplicationGroup(client)
+application_groups = ApplicationGroup(client)
 
 # Create new group
-create_data = {
-    "name": "test-apps",
-    "members": ["http", "https"],
-    "folder": "Shared"
+group_data = {
+    "name": "web-apps",
+    "members": ["ssl", "web-browsing"],
+    "folder": "Texas",
 }
 
-new_group = application_group.create(create_data)
-print(f"Created group: {new_group['name']}")
+new_group = application_groups.create(group_data)
+print(f"Created group: {new_group.name}")
 
 # Fetch the group by name
-fetched_group = application_group.fetch(
-    name="test-apps",
-    folder="Shared"
+fetched_group = application_groups.fetch(
+    name="web-apps",
+    folder="Texas"
 )
 
 # Modify the fetched group
-fetched_group["members"] = ["http", "https", "ssl"]
+fetched_group["members"] = ['ssl', 'web-browsing', 'dns-base']
 
 # Update using the modified object
-updated_group = application_group.update(fetched_group)
-print(f"Updated group: {updated_group['name']}")
-print(f"New members: {updated_group['members']}")
+updated_group = application_groups.update(fetched_group)
+print(f"Updated group: {updated_group.name}")
+print(f"New members: {updated_group.members}")
 
 # List all groups
-groups = application_group.list(folder="Shared")
+groups = application_groups.list(folder="Texas")
 for group in groups:
-    print(f"Listed group: {group['name']}")
+    print(f"Listed group: {group.name}")
 
 # Clean up
-application_group.delete(new_group['id'])
+application_groups.delete(new_group.id)
 print("Group deleted successfully")
 ```
 
