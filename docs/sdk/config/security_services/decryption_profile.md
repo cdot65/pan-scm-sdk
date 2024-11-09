@@ -43,7 +43,7 @@ type
 ```python
 forward_proxy = {
     "name": "forward-proxy",
-    "folder": "Shared",
+    "folder": "Texas",
     "ssl_forward_proxy": {
         "auto_include_altname": True,
         "block_expired_certificate": True,
@@ -56,8 +56,8 @@ forward_proxy = {
     }
 }
 
-new_profile = decryption_profile.create(forward_proxy)
-print(f"Created profile: {new_profile['name']}")
+new_profile = decryption_profiles.create(forward_proxy)
+print(f"Created profile: {new_profile.name}")
 ```
 
 </div>
@@ -85,8 +85,8 @@ inbound_proxy = {
     }
 }
 
-new_profile = decryption_profile.create(inbound_proxy)
-print(f"Created profile: {new_profile['name']}")
+new_profile = decryption_profiles.create(inbound_proxy)
+print(f"Created profile: {new_profile.name}")
 ```
 
 </div>
@@ -101,8 +101,8 @@ Use the `get()` method to retrieve a decryption profile by its ID.
 
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-profile = decryption_profile.get(profile_id)
-print(f"Profile Name: {profile['name']}")
+profile = decryption_profiles.get(profile_id)
+print(f"Profile Name: {profile.name}")
 ```
 
 </div>
@@ -116,20 +116,11 @@ The `update()` method allows you to modify existing decryption profiles.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "updated-proxy",
-    "folder": "Shared",
-    "ssl_protocol_settings": {
-        "min_version": "tls1-2",
-        "max_version": "tls1-3",
-        "enc_algo_aes_256_gcm": True,
-        "enc_algo_chacha20_poly1305": True
-    }
-}
+fetched_profile = decryption_profiles.fetch(folder='Texas', name="forward-proxy")
+fetched_profile["ssl_forward_proxy"]["auto_include_altname"] = False
 
-updated_profile = decryption_profile.update(update_data)
-print(f"Updated profile: {updated_profile['name']}")
+updated_profile = decryption_profiles.update(fetched_profile)
+print(f"Updated profile: {updated_profile.name}")
 ```
 
 </div>
@@ -144,7 +135,7 @@ Use the `delete()` method to remove a decryption profile.
 
 ```python
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-decryption_profile.delete(profile_id)
+decryption_profiles.delete(profile_id)
 print("Profile deleted successfully")
 ```
 
@@ -160,23 +151,11 @@ The `list()` method retrieves multiple decryption profiles with optional filteri
 
 ```python
 # List all profiles in a folder
-profiles = decryption_profile.list(
-    folder="Shared",
-    limit=10,
-    offset=0
-)
+profiles = decryption_profiles.list(folder="Texas")
 
 for profile in profiles:
-    print(f"Name: {profile['name']}")
+    print(f"Name: {profile.name}")
 
-# List profiles with name filter
-filtered_profiles = decryption_profile.list(
-    folder="Shared",
-    name="forward"
-)
-
-for profile in filtered_profiles:
-    print(f"Filtered profile: {profile['name']}")
 ```
 
 </div>
@@ -190,10 +169,7 @@ The `fetch()` method retrieves a single decryption profile by name from a specif
 <!-- termynal -->
 
 ```python
-profile = decryption_profile.fetch(
-    name="forward-proxy",
-    folder="Shared"
-)
+profile = decryption_profiles.fetch(name="Oblivion", folder="Texas")
 
 print(f"Found profile: {profile['name']}")
 print(f"Current settings: {profile['ssl_protocol_settings']}")
@@ -221,15 +197,17 @@ client = Scm(
 )
 
 # Initialize decryption profile object
-decryption_profile = DecryptionProfile(client)
+decryption_profiles = DecryptionProfile(client)
 
 # Create new profile
-create_data = {
-    "name": "test-profile",
-    "folder": "Shared",
+forward_proxy = {
+    "name": "forward-proxy",
+    "folder": "Texas",
     "ssl_forward_proxy": {
         "auto_include_altname": True,
-        "block_expired_certificate": True
+        "block_expired_certificate": True,
+        "block_untrusted_issuer": True,
+        "strip_alpn": False
     },
     "ssl_protocol_settings": {
         "min_version": "tls1-2",
@@ -237,30 +215,29 @@ create_data = {
     }
 }
 
-new_profile = decryption_profile.create(create_data)
-print(f"Created profile: {new_profile['name']}")
+new_profile = decryption_profiles.create(forward_proxy)
+print(f"Created profile: {new_profile.name}")
 
 # Fetch the profile by name
-fetched_profile = decryption_profile.fetch(
-    name="test-profile",
-    folder="Shared"
+fetched_profile = decryption_profiles.fetch(
+    name="forward-proxy",
+    folder="Texas"
 )
 
 # Modify the fetched profile
-fetched_profile["ssl_forward_proxy"]["block_untrusted_issuer"] = True
-fetched_profile["ssl_protocol_settings"]["auth_algo_sha384"] = True
+fetched_profile["ssl_forward_proxy"]["auto_include_altname"] = False
 
 # Update using the modified object
-updated_profile = decryption_profile.update(fetched_profile)
-print(f"Updated profile: {updated_profile['name']}")
+updated_profile = decryption_profiles.update(fetched_profile)
+print(f"Updated profile: {updated_profile.name}")
 
 # List all profiles
-profiles = decryption_profile.list(folder="Shared")
+profiles = decryption_profiles.list(folder="Texas")
 for profile in profiles:
-    print(f"Listed profile: {profile['name']}")
+    print(f"Listed profile: {profile.name}")
 
 # Clean up
-decryption_profile.delete(new_profile['id'])
+decryption_profiles.delete(new_profile.id)
 print("Profile deleted successfully")
 ```
 
