@@ -13,6 +13,7 @@ from scm.exceptions import (
     ObjectAlreadyExistsError,
     MalformedRequestError,
     FolderNotFoundError,
+    BadResponseError,
 )
 from scm.models.objects import (
     AddressCreateModel,
@@ -105,7 +106,10 @@ class TestAddressAPI(TestAddressBase):
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            params={"folder": "All"},
+            params={
+                "limit": 10000,
+                "folder": "All",
+            },
         )
         assert isinstance(addresses, list)
         assert isinstance(addresses[0], AddressResponseModel)
@@ -405,9 +409,9 @@ class TestAddressAPI(TestAddressBase):
         mock_response = {"unexpected_key": "unexpected_value"}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(BadResponseError) as exc_info:
             self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Unexpected response format."
+        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
 
     def test_delete_referenced_object(self):
         """
@@ -784,7 +788,6 @@ class TestAddressValidation(TestAddressBase):
         filters = {
             "types": ["type1", "type2"],
             "values": ["value1", "value2"],
-            "names": ["name1", "name2"],
             "tags": ["tag1", "tag2"],
         }
 
@@ -796,11 +799,8 @@ class TestAddressValidation(TestAddressBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
             params={
+                "limit": 10000,
                 "folder": "Shared",
-                "type": "type1,type2",
-                "value": "value1,value2",
-                "name": "name1,name2",
-                "tag": "tag1,tag2",
             },
         )
 
@@ -832,37 +832,174 @@ class TestAddressValidation(TestAddressBase):
         with pytest.raises(FolderNotFoundError):
             self.client.list(folder="NonexistentFolder")
 
-    def test_fetch_additional_scenarios(self):
+    def test_list_filters_type_validation(self):
         """
-        **Objective:** Test additional fetch scenarios including multiple results and empty results.
+        **Objective:** Test validation of filter types in list method.
         **Workflow:**
-            1. Tests various response scenarios
-            2. Verifies correct handling of each case
+            1. Tests various invalid filter type scenarios
+            2. Verifies ValidationError is raised with correct message
+            3. Tests valid filter types pass validation
         """
-        # Test multiple results
-        mock_response_multiple = {
-            "data": [{"id": "id1", "name": "test1"}, {"id": "id2", "name": "test2"}]
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address",
+                    "folder": "Shared",
+                    "ip_netmask": "10.0.0.0/24",
+                    "tag": ["tag1", "tag2"],
+                }
+            ]
         }
-        self.mock_scm.get.return_value = mock_response_multiple  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Multiple address groups found" in str(exc_info.value)
+        # Test invalid types filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", types="netmask")
+        assert str(exc_info.value) == "'types' filter must be a list"
 
-        # Test single result
-        mock_response_single = {"data": [{"id": "id1", "name": "test1"}]}
-        self.mock_scm.get.return_value = mock_response_single  # noqa
+        # Test invalid values filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", values="10.0.0.0/24")
+        assert str(exc_info.value) == "'values' filter must be a list"
 
-        result = self.client.fetch(name="test1", folder="Shared")
-        assert result["id"] == "id1"
+        # Test invalid tags filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", tags="tag1")
+        assert str(exc_info.value) == "'tags' filter must be a list"
 
-        # Test empty result
-        mock_response_empty = {"data": []}
-        self.mock_scm.get.return_value = mock_response_empty  # noqa
+        # Test invalid types filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", types={"type": "netmask"})
+        assert str(exc_info.value) == "'types' filter must be a list"
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
-            self.client.fetch(name="nonexistent", folder="Shared")
-        assert "not found" in str(exc_info.value)
+        # Test invalid values filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", values={"value": "10.0.0.0/24"})
+        assert str(exc_info.value) == "'values' filter must be a list"
+
+        # Test invalid tags filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", tags={"tag": "tag1"})
+        assert str(exc_info.value) == "'tags' filter must be a list"
+
+        # Test invalid types filter (integer instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", types=123)
+        assert str(exc_info.value) == "'types' filter must be a list"
+
+        # Test that valid list filters pass validation
+        try:
+            self.client.list(
+                folder="Shared",
+                types=["netmask"],
+                values=["10.0.0.0/24"],
+                tags=["tag1"],
+            )
+        except ValidationError:
+            pytest.fail("Unexpected ValidationError raised with valid list filters")
+
+    def test_list_filter_combinations(self):
+        """
+        **Objective:** Test different combinations of valid filters.
+        **Workflow:**
+            1. Tests various combinations of valid filters
+            2. Verifies filters are properly applied
+            3. Checks that filtered results match expected criteria
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address1",
+                    "folder": "Shared",
+                    "ip_netmask": "10.0.0.0/24",
+                    "tag": ["tag1", "tag2"],
+                },
+                {
+                    "id": "223e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address2",
+                    "folder": "Shared",
+                    "ip_range": "10.0.0.1-10.0.0.10",
+                    "tag": ["tag2", "tag3"],
+                },
+                {
+                    "id": "323e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address3",
+                    "folder": "Shared",
+                    "fqdn": "test.example.com",
+                    "tag": ["tag1", "tag3"],
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test combining types and tags filters
+        filtered_addresses = self.client.list(
+            folder="Shared",
+            types=["netmask"],
+            tags=["tag1"],
+        )
+        assert len(filtered_addresses) == 1
+        assert filtered_addresses[0].name == "test-address1"
+
+        # Test combining values and tags filters
+        filtered_addresses = self.client.list(
+            folder="Shared",
+            values=["10.0.0.0/24"],
+            tags=["tag2"],
+        )
+        assert len(filtered_addresses) == 1
+        assert filtered_addresses[0].name == "test-address1"
+
+        # Test all filters together
+        filtered_addresses = self.client.list(
+            folder="Shared",
+            types=["netmask"],
+            values=["10.0.0.0/24"],
+            tags=["tag1"],
+        )
+        assert len(filtered_addresses) == 1
+        assert filtered_addresses[0].name == "test-address1"
+
+    def test_list_empty_filter_lists(self):
+        """
+        **Objective:** Test behavior with empty filter lists.
+        **Workflow:**
+            1. Tests filters with empty lists
+            2. Verifies appropriate handling of empty filters
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address",
+                    "folder": "Shared",
+                    "ip_netmask": "10.0.0.0/24",
+                    "tag": ["tag1"],
+                }
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Empty lists should result in no matches
+        filtered_addresses = self.client.list(
+            folder="Shared",
+            types=[],
+        )
+        assert len(filtered_addresses) == 0
+
+        filtered_addresses = self.client.list(
+            folder="Shared",
+            values=[],
+        )
+        assert len(filtered_addresses) == 0
+
+        filtered_addresses = self.client.list(
+            folder="Shared",
+            tags=[],
+        )
+        assert len(filtered_addresses) == 0
 
     def test_fetch_validation_errors(self):
         """
@@ -1036,9 +1173,9 @@ class TestAddressValidation(TestAddressBase):
         # Test malformed response without expected fields
         self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(BadResponseError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert "Unexpected response format" in str(exc_info.value)
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
 
         # Test response with both id and data fields (invalid format)
         self.mock_scm.get.return_value = {  # noqa
@@ -1051,6 +1188,12 @@ class TestAddressValidation(TestAddressBase):
         assert "2 validation errors for AddressResponseModel" in str(exc_info.value)
         assert "name\n  Field required" in str(exc_info.value)
         assert "id\n  Value error, Invalid UUID format for 'id'" in str(exc_info.value)
+
+        # Test malformed response in list format
+        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
     def test_list_response_format_handling(self):
         """
