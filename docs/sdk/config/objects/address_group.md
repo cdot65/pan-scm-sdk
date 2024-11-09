@@ -41,13 +41,13 @@ dynamic filter, along with exactly one container type (folder, snippet, or devic
 static_group = {
     "name": "web_servers",
     "description": "Web server group",
-    "static": ["web1", "web2", "web3"],
-    "folder": "Shared",
-    "tag": ["production", "web"]
+    "static": ["example_website", "webserver_network"],
+    "folder": "Texas",
+    "tag": ["Python", "Automation"]
 }
 
-new_group = address_group.create(static_group)
-print(f"Created group: {new_group['name']}")
+new_group = address_groups.create(static_group)
+print(f"Created group: {new_group.name}")
 ```
 
 </div>
@@ -60,17 +60,17 @@ print(f"Created group: {new_group['name']}")
 
 ```python
 dynamic_group = {
-    "name": "prod_servers",
-    "description": "Production servers",
+    "name": "python servers",
+    "description": "Python-based automation servers",
     "dynamic": {
-        "filter": "'production' and 'server'"
+        "filter": "'Python'"
     },
-    "folder": "Shared",
-    "tag": ["production"]
+    "folder": "Texas",
+    "tag": ["Automation"]
 }
 
-new_group = address_group.create(dynamic_group)
-print(f"Created group: {new_group['name']}")
+new_group = address_groups.create(dynamic_group)
+print(f"Created group: {new_group.name}")
 ```
 
 </div>
@@ -84,9 +84,9 @@ Use the `get()` method to retrieve an address group by its ID.
 <!-- termynal -->
 
 ```python
-group_id = "123e4567-e89b-12d3-a456-426655440000"
-group = address_group.get(group_id)
-print(f"Group Name: {group['name']}")
+group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
+group = address_groups.get(group_id)
+print(f"Group Name: {group.name}")
 print(f"Type: {'Dynamic' if 'dynamic' in group else 'Static'}")
 ```
 
@@ -101,14 +101,16 @@ The `update()` method allows you to modify existing address groups.
 <!-- termynal -->
 
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "description": "Updated server group",
-    "tag": ["production", "updated"]
-}
+# return an existing group
+python_server_group = address_groups.fetch(folder='Texas', name='python servers')
 
-updated_group = address_group.update(update_data)
-print(f"Updated group: {updated_group['name']}")
+# perform the update
+python_server_group['description'] = 'updated description'
+
+# push changes to the SCM API
+updated_group = address_groups.update(python_server_group)
+
+print(f"Updated group: {updated_group.name}")
 ```
 
 </div>
@@ -122,8 +124,8 @@ Use the `delete()` method to remove an address group.
 <!-- termynal -->
 
 ```python
-group_id = "123e4567-e89b-12d3-a456-426655440000"
-address_group.delete(group_id)
+group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
+address_groups.delete(group_id)
 print("Group deleted successfully")
 ```
 
@@ -138,14 +140,11 @@ The `list()` method retrieves multiple address groups with optional filtering.
 <!-- termynal -->
 
 ```python
-# List all groups in a folder with specific tags
-groups = address_group.list(
-    folder="Shared",
-    tags=["production"]
-)
+# List all groups in a folder
+groups = address_groups.list(folder="Texas")
 
 for group in groups:
-    print(f"Name: {group['name']}")
+    print(f"Name: {group.name}")
     print(f"Type: {'Dynamic' if 'dynamic' in group else 'Static'}")
 ```
 
@@ -160,11 +159,11 @@ The `fetch()` method retrieves a single address group by name from a specific co
 <!-- termynal -->
 
 ```python
-group = address_group.fetch(
-    name="web_servers",
-    folder="Shared"
-)
-print(f"Found group: {group['name']}")
+# pass in the folder and name required parameters, will return a dictionary object
+dag_group = address_groups.fetch(folder='Texas', name='DAG_test')
+
+# print out the name of the group to the screen
+print(f"Found group: {dag_group['name']}")
 ```
 
 </div>
@@ -179,7 +178,7 @@ Here's a complete example demonstrating the full lifecycle of an address group:
 
 ```python
 from scm.client import Scm
-from scm.config.objects import AddressGroup
+from scm.config.objects import Address, AddressGroup
 
 # Initialize client
 client = Scm(
@@ -188,42 +187,62 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize address group object
-address_group = AddressGroup(client)
+# Initialize address and address group objects
+addresses = Address(client)
+address_groups = AddressGroup(client)
+
+# Create address object `test_network1`
+ao1 = {
+    "name": "test_network1",
+    "ip_netmask": "10.0.0.0/24",
+    "description": "Test network",
+    "folder": "Texas",
+    "tag": ["Automation"]
+}
+test_network1 = addresses.create(ao1)
+
+# Create address object `test_network2`
+ao2 = {
+    "name": "test_network2",
+    "ip_netmask": "10.0.1.0/24",
+    "description": "Test network",
+    "folder": "Texas",
+    "tag": ["Automation"]
+}
+test_network2 = addresses.create(ao2)
 
 # Create a new static group
-static_group = {
-    "name": "app_servers",
-    "description": "Application servers",
-    "static": ["app1", "app2"],
-    "folder": "Shared",
-    "tag": ["production"]
+test_network_group = {
+    "name": "test_network_group",
+    "description": "Test networks",
+    "static": [test_network1.name, test_network2.name],
+    "folder": "Texas",
+    "tag": ["Automation"]
 }
 
-new_group = address_group.create(static_group)
-print(f"Created group: {new_group['name']}")
+new_group = address_groups.create(test_network_group)
+print(f"Created group: {new_group.name}")
 
 # Fetch the group by name
-fetched_group = address_group.fetch(
-    name="app_servers",
-    folder="Shared"
+fetched_group = address_groups.fetch(
+    name="test_network_group",
+    folder="Texas"
 )
 
 # Modify the fetched group
-fetched_group["description"] = "Updated application servers"
-fetched_group["tag"] = ["production", "updated"]
+fetched_group["description"] = "Updated test networks"
+fetched_group["tag"] = ["Automation"]
 
 # Update the group
-updated_group = address_group.update(fetched_group)
-print(f"Updated group description: {updated_group['description']}")
+address_groups.update(fetched_group)
 
 # List all groups
-groups = address_group.list(folder="Shared")
+groups = address_groups.list(folder="Texas")
 for group in groups:
-    print(f"Listed group: {group['name']}")
+    print(f"Listed group: {group.name}")
 
 # Clean up
-address_group.delete(new_group['id'])
+address_groups.delete(new_group.id)
 print("Group deleted successfully")
 ```
 
