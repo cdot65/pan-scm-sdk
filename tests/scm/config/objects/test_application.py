@@ -45,7 +45,7 @@ class TestApplicationBase:
 class TestApplicationList(TestApplicationBase):
     """Tests for listing Application objects."""
 
-    def test_list_applications(self):
+    def test_list_objects(self):
         """
         **Objective:** Test listing all applications.
         **Workflow:**
@@ -103,7 +103,7 @@ class TestApplicationList(TestApplicationBase):
 class TestApplicationCreate(TestApplicationBase):
     """Tests for creating Application objects."""
 
-    def test_create_application(self):
+    def test_create_object(self):
         """
         **Objective:** Test creating a new application.
         **Workflow:**
@@ -111,22 +111,20 @@ class TestApplicationCreate(TestApplicationBase):
             2. Mocks the API response.
             3. Calls create method and validates the result.
         """
-        test_application = ApplicationFactory()
-        mock_response = test_application.model_dump()
+        test_object = ApplicationFactory()
+        mock_response = test_object.model_dump()
         mock_response["name"] = "ValidApplication"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_app = self.client.create(
-            test_application.model_dump(exclude_unset=True)
-        )
+        created_app = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/applications",
-            json=test_application.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
-        assert created_app.name == test_application.name
-        assert created_app.description == test_application.description
-        assert created_app.category == test_application.category
+        assert created_app.name == test_object.name
+        assert created_app.description == test_object.description
+        assert created_app.category == test_object.category
 
     def test_create_object_error_handling(self):
         """
@@ -195,7 +193,7 @@ class TestApplicationCreate(TestApplicationBase):
 class TestApplicationGet(TestApplicationBase):
     """Tests for retrieving a specific Application object."""
 
-    def test_get_application(self):
+    def test_get_object(self):
         """
         **Objective:** Test fetching a specific application.
         **Workflow:**
@@ -768,7 +766,7 @@ class TestApplicationFetch(TestApplicationBase):
 class TestApplicationValidation(TestApplicationBase):
     """Tests for Application validation."""
 
-    def test_object_list_validation_error(self):
+    def test_list_validation_error(self):
         """Test validation error when listing with multiple containers."""
         with pytest.raises(ValidationError) as exc_info:
             self.client.list(folder="Shared", snippet="TestSnippet")
@@ -778,7 +776,7 @@ class TestApplicationValidation(TestApplicationBase):
             in str(exc_info.value)
         )
 
-    def test_object_request_model_no_container_provided(self):
+    def test_request_model_no_container_provided(self):
         """Test validation when no container is provided."""
         data = {
             "name": "TestApp",
@@ -793,7 +791,7 @@ class TestApplicationValidation(TestApplicationBase):
             exc_info.value
         )
 
-    def test_object_request_model_multiple_containers_provided(self):
+    def test_request_model_multiple_containers_provided(self):
         """Test validation when multiple containers are provided."""
         data = {
             "name": "TestApp",
@@ -810,7 +808,7 @@ class TestApplicationValidation(TestApplicationBase):
             exc_info.value
         )
 
-    def test_object_model_required_fields(self):
+    def test_model_required_fields(self):
         """Test validation of required fields."""
         # Test missing required fields
         data = {
@@ -926,7 +924,7 @@ class TestApplicationListFilters(TestApplicationBase):
         except ValidationError:
             pytest.fail("Unexpected ValidationError raised with valid list filters")
 
-    def test_object_list_with_values_filter(self):
+    def test_list_with_values_filter(self):
         """Test listing applications with values filter."""
         mock_response = {
             "data": [
