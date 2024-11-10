@@ -273,7 +273,7 @@ class TestApplicationGet(TestApplicationBase):
 class TestApplicationUpdate(TestApplicationBase):
     """Tests for updating Application objects."""
 
-    def test_update_application(self):
+    def test_update_object(self):
         """
         **Objective:** Test updating a specific application.
         **Workflow:**
@@ -297,7 +297,7 @@ class TestApplicationUpdate(TestApplicationBase):
         mock_response = update_data.copy()
 
         self.mock_scm.put.return_value = mock_response  # noqa
-        updated_application = self.client.update(update_data)
+        updated_object = self.client.update(update_data)
 
         # Prepare the expected payload by exluding `id`
         expected_payload = update_data.copy()
@@ -307,11 +307,11 @@ class TestApplicationUpdate(TestApplicationBase):
             f"/config/objects/v1/applications/{application_id}",
             json=expected_payload,
         )
-        assert isinstance(updated_application, ApplicationResponseModel)
-        assert updated_application.name == "TestApp"
-        assert updated_application.category == "networking"
-        assert updated_application.subcategory == "networking"
-        assert updated_application.technology == "client-server"
+        assert isinstance(updated_object, ApplicationResponseModel)
+        assert updated_object.name == "TestApp"
+        assert updated_object.category == "networking"
+        assert updated_object.subcategory == "networking"
+        assert updated_object.technology == "client-server"
 
     def test_update_object_error_handling(self):
         """
@@ -768,7 +768,7 @@ class TestApplicationFetch(TestApplicationBase):
 class TestApplicationValidation(TestApplicationBase):
     """Tests for Application validation."""
 
-    def test_application_list_validation_error(self):
+    def test_object_list_validation_error(self):
         """Test validation error when listing with multiple containers."""
         with pytest.raises(ValidationError) as exc_info:
             self.client.list(folder="Shared", snippet="TestSnippet")
@@ -778,7 +778,7 @@ class TestApplicationValidation(TestApplicationBase):
             in str(exc_info.value)
         )
 
-    def test_application_request_model_no_container_provided(self):
+    def test_object_request_model_no_container_provided(self):
         """Test validation when no container is provided."""
         data = {
             "name": "TestApp",
@@ -793,7 +793,7 @@ class TestApplicationValidation(TestApplicationBase):
             exc_info.value
         )
 
-    def test_application_request_model_multiple_containers_provided(self):
+    def test_object_request_model_multiple_containers_provided(self):
         """Test validation when multiple containers are provided."""
         data = {
             "name": "TestApp",
@@ -810,7 +810,7 @@ class TestApplicationValidation(TestApplicationBase):
             exc_info.value
         )
 
-    def test_application_model_required_fields(self):
+    def test_object_model_required_fields(self):
         """Test validation of required fields."""
         # Test missing required fields
         data = {
@@ -926,7 +926,7 @@ class TestApplicationListFilters(TestApplicationBase):
         except ValidationError:
             pytest.fail("Unexpected ValidationError raised with valid list filters")
 
-    def test_application_list_with_values_filter(self):
+    def test_object_list_with_values_filter(self):
         """Test listing applications with values filter."""
         mock_response = {
             "data": [
