@@ -776,7 +776,7 @@ class TestApplicationValidation(TestApplicationBase):
             in str(exc_info.value)
         )
 
-    def test_request_model_no_container_provided(self):
+    def test_request_model_no_container(self):
         """Test validation when no container is provided."""
         data = {
             "name": "TestApp",
@@ -791,7 +791,7 @@ class TestApplicationValidation(TestApplicationBase):
             exc_info.value
         )
 
-    def test_request_model_multiple_containers_provided(self):
+    def test_request_model_multiple_containers(self):
         """Test validation when multiple containers are provided."""
         data = {
             "name": "TestApp",
@@ -808,17 +808,19 @@ class TestApplicationValidation(TestApplicationBase):
             exc_info.value
         )
 
-    def test_model_required_fields(self):
-        """Test validation of required fields."""
-        # Test missing required fields
-        data = {
-            "name": "TestApp",
+    def test_response_model_invalid_uuid(self):
+        """Test validation of UUID format in response model."""
+        invalid_data = {
+            "id": "invalid-uuid",
+            "name": "TestAppGroup",
+            "category": "test123",
+            "risk": 1,
             "folder": "Shared",
         }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            ApplicationCreateModel(**data)
-        assert "category" in str(exc_info.value)
-        assert "technology" in str(exc_info.value)
+        with pytest.raises(ValueError) as exc_info:
+            ApplicationResponseModel(**invalid_data)
+        assert "1 validation error for ApplicationResponseModel" in str(exc_info.value)
+        assert "Input should be a valid UUID, invalid character" in str(exc_info.value)
 
 
 class TestApplicationListFilters(TestApplicationBase):
@@ -966,6 +968,20 @@ class TestApplicationListFilters(TestApplicationBase):
         with pytest.raises(EmptyFieldError) as exc_info:
             self.client.list(folder="")
         assert str(exc_info.value) == "Field 'folder' cannot be empty"
+
+    def test_list_multiple_containers_error(self):
+        """
+        **Objective:** Test validation of container parameters.
+        **Workflow:**
+            1. Attempts to list with multiple containers
+            2. Verifies ValidationError is raised
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+        assert (
+            str(exc_info.value)
+            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+        )
 
     def test_list_response_format_handling(self):
         """
