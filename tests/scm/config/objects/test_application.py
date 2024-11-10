@@ -529,7 +529,7 @@ class TestApplicationDelete(TestApplicationBase):
 class TestApplicationFetch(TestApplicationBase):
     """Tests for fetching Application objects by name."""
 
-    def test_fetch_application(self):
+    def test_fetch_object(self):
         """
         **Objective:** Test retrieving an object by its name using the `fetch` method.
         **Workflow:**
@@ -574,7 +574,7 @@ class TestApplicationFetch(TestApplicationBase):
         assert address["description"] == mock_response["description"]
         assert address["category"] == mock_response["category"]
 
-    def test_fetch_application_not_found(self):
+    def test_fetch_object_not_found(self):
         """
         Test fetching an object by name that does not exist.
 
