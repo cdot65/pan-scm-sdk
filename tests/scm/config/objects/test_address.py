@@ -50,7 +50,7 @@ class TestAddressBase:
 class TestAddressModelValidation(TestAddressBase):
     """Tests for object model validation."""
 
-    def test_object_create_no_type_provided(self):
+    def test_object_model_no_type_provided(self):
         """Test validation when no type is provided."""
         data = {
             "name": "Test123",
@@ -64,7 +64,7 @@ class TestAddressModelValidation(TestAddressBase):
             in str(exc_info.value)
         )
 
-    def test_object_create_multiple_types(self):
+    def test_object_model_multiple_types(self):
         """Test validation when multiple types are provided."""
         data = {
             "name": "Test123",
@@ -79,7 +79,7 @@ class TestAddressModelValidation(TestAddressBase):
             in str(exc_info.value)
         )
 
-    def test_object_create_multiple_containers(self):
+    def test_object_model_multiple_containers(self):
         """Test validation when multiple containers are provided."""
         data = {
             "name": "internal_network",
@@ -96,7 +96,7 @@ class TestAddressModelValidation(TestAddressBase):
             in str(exc_info.value)
         )
 
-    def test_object_create_no_container(self):
+    def test_object_model_create_no_container(self):
         """Test validation when no container is provided."""
         data = {
             "name": "internal_network",
@@ -112,7 +112,7 @@ class TestAddressModelValidation(TestAddressBase):
             in str(exc_info.value)
         )
 
-    def test_object_create_model_valid(self):
+    def test_object_model_create_model_valid(self):
         """Test validation with valid data."""
         data = {
             "name": "Test123",
