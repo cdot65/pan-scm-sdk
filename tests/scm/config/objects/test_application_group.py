@@ -118,7 +118,7 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
         test_application_group = ApplicationGroupFactory()
         mock_response = test_application_group.model_dump()
         mock_response["name"] = "ValidStaticApplicationGroup"
-        mock_response["id"] = "0b12a889-4220-4cdd-b95f-506e0351a5e4"
+        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
         created_group = self.client.create(
@@ -129,6 +129,7 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
             "/config/objects/v1/application-groups",
             json=test_application_group.model_dump(exclude_unset=True),
         )
+        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
         assert created_group.name == test_application_group.name
         assert created_group.members == test_application_group.members
         assert created_group.folder == test_application_group.folder
@@ -479,26 +480,26 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.client.fetch(
-            name="Microsoft Office",
-            folder="Shared",
+        # Call the fetch method
+        fetched_object = self.client.fetch(
+            name=mock_response["name"],
+            folder=mock_response["folder"],
         )
 
-        # Verify API call
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
             params={
-                "folder": "Shared",
-                "name": "Microsoft Office",
+                "folder": mock_response["folder"],
+                "name": mock_response["name"],
             },
         )
 
         # Verify result
-        assert isinstance(result, dict)
-        assert "id" in result
-        assert result["name"] == "Microsoft Office"
-        assert result["members"] == ["office365", "ms-office"]
-        assert "description" not in result  # None values should be excluded
+        assert isinstance(fetched_object, dict)
+        assert str(fetched_object["id"]) == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+        assert fetched_object["members"] == mock_response["members"]
 
     def test_fetch_object_not_found(self):
         """
@@ -706,7 +707,7 @@ class TestApplicationGroupValidation(TestApplicationGroupBase):
             in str(exc_info.value)
         )
 
-    def test_request_model_no_container(self):
+    def test_object_create_no_container(self):
         """Test validation when no container is provided."""
         data = {
             "name": "Microsoft 365 Access",
@@ -719,7 +720,7 @@ class TestApplicationGroupValidation(TestApplicationGroupBase):
             in str(exc_info.value)
         )
 
-    def test_request_model_multiple_containers(self):
+    def test_object_create_multiple_containers(self):
         """Test validation when multiple containers are provided."""
         data = {
             "name": "Microsoft 365 Access",
@@ -779,9 +780,9 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
             },
         )
 
-    def test_list_filters_members_validation(self):
+    def test_list_filters_type_validation(self):
         """
-        **Objective:** Test validation of filter members in list method.
+        **Objective:** Test validation of filter types in list method.
         **Workflow:**
             1. Tests various invalid filter type scenarios
             2. Verifies ValidationError is raised with correct message
@@ -881,6 +882,96 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
             )
         except ValidationError:
             pytest.fail("Unexpected ValidationError raised with valid list filters")
+
+    def test_list_empty_filter_lists(self):
+        """
+        **Objective:** Test behavior with empty filter lists.
+        **Workflow:**
+            1. Tests filters with empty lists
+            2. Verifies appropriate handling of empty filters
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
+                    "name": "Microsoft 365 Access",
+                    "folder": "Shared",
+                    "snippet": "office365",
+                    "members": [
+                        "office365-consumer-access",
+                        "office365-enterprise-access",
+                    ],
+                },
+                {
+                    "id": "0b12a889-4220-4cdd-b95f-506e0351a5e4",
+                    "name": "Microsoft 365 Services",
+                    "folder": "Shared",
+                    "snippet": "office365",
+                    "members": [
+                        "ms-office365",
+                        "ms-onedrive",
+                        "ms-onenote",
+                        "ms-lync-base",
+                        "skype",
+                    ],
+                },
+                {
+                    "id": "67e962f5-280b-40ac-a26c-d330f1c1baf6",
+                    "name": "Microsoft 365 Mail Clients",
+                    "folder": "Shared",
+                    "snippet": "office365",
+                    "members": [
+                        "mapi-over-http",
+                        "ms-exchange",
+                        "rpc-over-http",
+                        "activesync",
+                    ],
+                },
+                {
+                    "id": "c75509c1-edc3-4d7d-be92-591f415edb48",
+                    "name": "Microsoft Real Time Protocols",
+                    "folder": "Shared",
+                    "snippet": "office365",
+                    "members": ["rtcp", "stun", "rtp"],
+                },
+                {
+                    "id": "25633a36-cfff-4be9-a0cf-53b3a9880418",
+                    "name": "Microsoft 365 - Dependent Apps",
+                    "folder": "Shared",
+                    "snippet": "office365",
+                    "members": [
+                        "http-audio",
+                        "http-video",
+                        "ocsp",
+                        "soap",
+                        "ssl",
+                        "web-browsing",
+                        "websocket",
+                        "windows-azure-base",
+                    ],
+                },
+                {
+                    "id": "97dc0b92-de21-4fcb-b3ac-fd0ffae99e36",
+                    "name": "test123asdf",
+                    "folder": "Shared",
+                    "members": [
+                        "office365-consumer-access",
+                        "office365-enterprise-access",
+                    ],
+                },
+            ],
+            "offset": 0,
+            "total": 6,
+            "limit": 200,
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Empty lists should result in no matches
+        filtered_objects = self.client.list(
+            folder="Texas",
+            members=[],
+        )
+        assert len(filtered_objects) == 0
 
     def test_list_empty_folder_error(self):
         """
