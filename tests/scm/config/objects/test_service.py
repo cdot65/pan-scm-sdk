@@ -557,6 +557,38 @@ class TestServiceFetch(TestServiceBase):
         assert "description" not in result  # None values should be excluded
         assert result["tag"] == ["web"]
 
+    def test_fetch_object_not_found(self):
+        """
+        Test fetching an object by name that does not exist.
+
+        **Objective:** Test that fetching a non-existent object raises NotFoundError.
+        **Workflow:**
+            1. Mocks the API response to return an empty 'data' list.
+            2. Calls the `fetch` method with a name that does not exist.
+            3. Asserts that NotFoundError is raised.
+        """
+        address_name = "NonExistent"
+        folder_name = "Shared"
+        mock_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Call the fetch method and expect a NotFoundError
+        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
+            self.client.fetch(
+                name=address_name,
+                folder=folder_name,
+            )
+
     def test_fetch_empty_name(self):
         """
         **Objective:** Test fetch with empty name parameter.
@@ -575,7 +607,12 @@ class TestServiceFetch(TestServiceBase):
             1. Tests various invalid container combinations
             2. Verifies proper error handling
         """
-        # Test no container provided
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+
+        # Test no container
         with pytest.raises(ValidationError) as exc_info:
             self.client.fetch(name="test-service")
         assert (
@@ -638,6 +675,84 @@ class TestServiceFetch(TestServiceBase):
         with pytest.raises(Exception) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert str(exc_info.value) == "Generic error"
+
+    def test_fetch_unexpected_response_format(self):
+        """
+        Test fetching an application when the API returns an unexpected response format.
+
+        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
+        **Workflow:**
+            1. Mocks the API response to return an unexpected format.
+            2. Calls the `fetch` method.
+            3. Asserts that BadResponseError is raised.
+        """
+        group_name = "TestGroup"
+        folder_name = "Shared"
+        # Mocking an unexpected response format
+        mock_response = {"unexpected_key": "unexpected_value"}
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name=group_name, folder=folder_name)
+        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
+
+    def test_fetch_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in fetch method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response without expected fields
+        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
+
+        # Test response with both id and data fields (invalid format)
+        self.mock_scm.get.return_value = {  # noqa
+            "id": "some-id",
+            "data": [{"some": "data"}],
+        }  # noqa
+
+        with pytest.raises(PydanticValidationError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "3 validation errors for ServiceResponseMode" in str(exc_info.value)
+
+        # Test malformed response in list format
+        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+    def test_fetch_error_handler_json_error(self):
+        """
+        **Objective:** Test fetch method error handling when json() raises an error.
+        **Workflow:**
+            1. Mocks an exception with a response that raises error on json()
+            2. Verifies the original exception is re-raised
+        """
+
+        class MockResponse:
+            @property
+            def response(self):
+                return self
+
+            def json(self):
+                raise ValueError("Original error")
+
+        # Create mock exception with our special response
+        mock_exception = Exception("Original error")
+        mock_exception.response = MockResponse()
+
+        # Configure mock to raise our custom exception
+        self.mock_scm.get.side_effect = mock_exception  # noqa
+
+        # The original exception should be raised since json() failed
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Original error" in str(exc_info.value)
 
 
 class TestServiceValidation(TestServiceBase):
@@ -748,8 +863,8 @@ class TestServiceListFilters(TestServiceBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         filters = {
-            "folder": "Shared",
-            "names": ["service-http", "service-https"],
+            "folder": "Shared",  # Added this
+            "protocols": ["tcp", "udp"],
             "tags": ["Tag1", "Tag2"],
         }
         services = self.client.list(**filters)
@@ -763,6 +878,148 @@ class TestServiceListFilters(TestServiceBase):
             params=expected_params,
         )
         assert len(services) == 2
+
+    def test_list_filters_protocol_validation(self):
+        """
+        **Objective:** Test validation of filter protocol in list method.
+        **Workflow:**
+            1. Tests various invalid filter type scenarios
+            2. Verifies ValidationError is raised with correct message
+            3. Tests valid filter types pass validation
+        """
+        mock_response = {
+            "data": [
+                {
+                    "name": "service-http",
+                    "folder": "All",
+                    "snippet": "predefined-snippet",
+                    "protocol": {"tcp": {"port": "80,8080"}},
+                },
+                {
+                    "name": "service-https",
+                    "folder": "All",
+                    "snippet": "predefined-snippet",
+                    "protocol": {"tcp": {"port": "443"}},
+                },
+                {
+                    "id": "7242be61-ba51-4862-95b1-b24b20acf9b4",
+                    "name": "web-service",
+                    "folder": "Texas",
+                    "protocol": {
+                        "tcp": {
+                            "port": "80,443",
+                            "override": {
+                                "timeout": 60,
+                                "halfclose_timeout": 30,
+                            },
+                        }
+                    },
+                    "description": "Web service for HTTP/HTTPS",
+                    "tag": ["Automation"],
+                },
+                {
+                    "id": "28832824-2775-4eb7-bd38-ca70ad6d9ba5",
+                    "name": "dns-service",
+                    "folder": "Texas",
+                    "protocol": {"udp": {"port": "53"}},
+                    "description": "DNS service",
+                },
+            ],
+            "offset": 0,
+            "total": 4,
+            "limit": 200,
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test invalid protocol filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", protocol="tcp")
+        assert str(exc_info.value) == "'protocol' filter must be a list"
+
+        # Test invalid protocol filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", protocol={"value": "tcp"})
+        assert str(exc_info.value) == "'protocol' filter must be a list"
+
+        # Test invalid tag filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", tag="database")
+        assert str(exc_info.value) == "'tag' filter must be a list"
+
+        # Test invalid tag filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", tag={"value": "database"})
+        assert str(exc_info.value) == "'tag' filter must be a list"
+
+        # Test that valid list filters pass validation
+        try:
+            self.client.list(
+                folder="Shared",
+                tag=["database"],
+            )
+        except ValidationError:
+            pytest.fail("Unexpected ValidationError raised with valid list filters")
+
+    def test_list_protocol_filtering(self):
+        """
+        **Objective:** Test filtering services by protocol type.
+        **Workflow:**
+            1. Sets up mock response with mixed protocol services
+            2. Tests filtering for TCP and UDP protocols
+            3. Verifies correct services are returned based on protocol
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "http-service",
+                    "folder": "Shared",
+                    "protocol": {"tcp": {"port": "80,8080"}},
+                },
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440001",
+                    "name": "dns-service",
+                    "folder": "Shared",
+                    "protocol": {"udp": {"port": "53"}},
+                },
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440002",
+                    "name": "https-service",
+                    "folder": "Shared",
+                    "protocol": {"tcp": {"port": "443"}},
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test TCP protocol filter
+        tcp_services = self.client.list(folder="Shared", protocol=["tcp"])
+        assert len(tcp_services) == 2
+        assert all(svc.protocol.tcp is not None for svc in tcp_services)
+        assert all(
+            svc.name in ["http-service", "https-service"] for svc in tcp_services
+        )
+
+        # Test UDP protocol filter
+        udp_services = self.client.list(folder="Shared", protocol=["udp"])
+        assert len(udp_services) == 1
+        assert all(svc.protocol.udp is not None for svc in udp_services)
+        assert udp_services[0].name == "dns-service"
+
+        # Test multiple protocol filter
+        all_services = self.client.list(folder="Shared", protocol=["tcp", "udp"])
+        assert len(all_services) == 3
+        assert any(svc.protocol.tcp is not None for svc in all_services)
+        assert any(svc.protocol.udp is not None for svc in all_services)
+
+        # Verify API was called correctly
+        self.mock_scm.get.assert_called_with(  # noqa
+            "/config/objects/v1/services",
+            params={
+                "limit": 10000,
+                "folder": "Shared",
+            },
+        )
 
     def test_list_empty_folder_error(self):
         """
@@ -788,6 +1045,96 @@ class TestServiceListFilters(TestServiceBase):
             str(exc_info.value)
             == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
         )
+
+    def test_list_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in list method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response
+        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+        # Test invalid data format
+        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+    def test_list_non_dict_response(self):
+        """
+        **Objective:** Test list method handling of non-dictionary response.
+        **Workflow:**
+            1. Mocks a non-dictionary response from the API
+            2. Verifies that BadResponseError is raised with correct message
+            3. Tests different non-dict response types
+        """
+        # Test with list response
+        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with string response
+        self.mock_scm.get.return_value = "string response"  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with None response
+        self.mock_scm.get.return_value = None  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+    def test_list_error_handling(self):
+        """
+        **Objective:** Test error handling in list operation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to list objects
+            3. Verifies proper error handling
+        """
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Listing failed",
+                    "details": {"errorType": "Operation Impossible"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(FolderNotFoundError):
+            self.client.list(folder="NonexistentFolder")
+
+    def test_list_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in list method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.list(folder="Shared")
+        assert str(exc_info.value) == "Generic error"
 
 
 # -------------------- End of Test Classes --------------------
