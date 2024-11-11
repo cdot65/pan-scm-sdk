@@ -1,7 +1,7 @@
 # scm/models/objects/address_group.py
 
-import uuid
 from typing import Optional, List
+from uuid import UUID
 
 from pydantic import (
     BaseModel,
@@ -163,20 +163,21 @@ class AddressGroupUpdateModel(AddressGroupBaseModel):
 
 class AddressGroupResponseModel(AddressGroupBaseModel):
     """
-    Model for Address Group responses.
-    Includes all base fields plus the id field.
+    Represents the creation of a new AddressGroup object for Palo Alto Networks' Strata Cloud Manager.
+
+    This class defines the structure and validation rules for an AddressGroupResponseModel object,
+    it inherits all fields from the AddressGroupBaseModel class, adds its own attribute for the
+    id field, and provides a custom validator to ensure that it is of the type UUID
+
+    Attributes:
+        id (UUID): The UUID of the address object.
+
+    Error:
+        ValueError: Raised when container type validation fails.
     """
 
-    id: str = Field(
+    id: UUID = Field(
         ...,
-        description="The UUID of the address group",
+        description="The UUID of the application group",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    @field_validator("id")
-    def validate_uuid(cls, v):  # noqa
-        try:
-            uuid.UUID(v)
-        except ValueError:
-            raise ValueError("Invalid UUID format for 'id'")
-        return v
