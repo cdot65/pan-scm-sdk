@@ -42,17 +42,88 @@ class TestApplicationBase:
 # -------------------- Test Classes Grouped by Functionality --------------------
 
 
+class TestApplicationModelValidation(TestApplicationBase):
+    """Tests for object model validation."""
+
+    def test_object_model_multiple_containers(self):
+        """Test validation when multiple containers are provided."""
+        data = {
+            "name": "internal-chat",
+            "category": "collaboration",
+            "subcategory": "instant-messaging",
+            "technology": "client-server",
+            "risk": 2,
+            "description": "Internal chat application",
+            "ports": ["tcp/8443"],
+            "folder": "Texas",
+            "snippet": "Test123",
+            "transfers_files": True,
+            "has_known_vulnerabilities": False,
+        }
+        with pytest.raises(ValueError) as exc_info:
+            ApplicationCreateModel(**data)
+        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
+            exc_info.value
+        )
+
+    def test_object_model_create_no_container(self):
+        """Test validation when no container is provided."""
+        data = {
+            "name": "internal-chat",
+            "category": "collaboration",
+            "subcategory": "instant-messaging",
+            "technology": "client-server",
+            "risk": 2,
+            "description": "Internal chat application",
+            "ports": ["tcp/8443"],
+            "transfers_files": True,
+            "has_known_vulnerabilities": False,
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            ApplicationCreateModel(**data)
+        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
+            exc_info.value
+        )
+
+    def test_object_model_create_model_valid(self):
+        """Test validation with valid data."""
+        data = {
+            "name": "internal-chat",
+            "folder": "MainFolder",
+            "category": "collaboration",
+            "subcategory": "instant-messaging",
+            "technology": "client-server",
+            "risk": 2,
+            "description": "Internal chat application",
+            "ports": ["tcp/8443"],
+            "transfers_files": True,
+            "has_known_vulnerabilities": False,
+        }
+        model = ApplicationCreateModel(**data)
+        assert model.name == data["name"]
+        assert model.folder == data["folder"]
+        assert model.category == data["category"]
+        assert model.subcategory == data["subcategory"]
+        assert model.technology == data["technology"]
+        assert model.risk == data["risk"]
+        assert model.description == data["description"]
+        assert model.ports == data["ports"]
+        assert model.transfers_files == data["transfers_files"]
+        assert model.has_known_vulnerabilities == data["has_known_vulnerabilities"]
+
+
 class TestApplicationList(TestApplicationBase):
     """Tests for listing Application objects."""
 
     def test_list_objects(self):
         """
-        **Objective:** Test listing all applications.
+        **Objective:** Test listing all objects.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing applications.
+            1. Sets up a mock response resembling the expected API response for listing objects.
             2. Calls the `list` method of `self.client` with a filter parameter.
             3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of applications, checking their types and attributes.
+            4. Validates the returned list of objects, checking their types and attributes.
         """
         mock_response = {
             "data": [
@@ -84,7 +155,7 @@ class TestApplicationList(TestApplicationBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        applications = self.client.list(folder="MainFolder")
+        existing_objects = self.client.list(folder="MainFolder")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/applications",
@@ -93,11 +164,21 @@ class TestApplicationList(TestApplicationBase):
                 "folder": "MainFolder",
             },
         )
-        assert isinstance(applications, list)
-        assert isinstance(applications[0], ApplicationResponseModel)
-        assert len(applications) == 2
-        assert applications[0].name == "100bao"
-        assert applications[0].ports == ["tcp/3468,6346,11300"]
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], ApplicationResponseModel)
+        assert len(existing_objects) == 2
+        assert existing_objects[0].name == "100bao"
+        assert existing_objects[0].ports == ["tcp/3468,6346,11300"]
+
+    def test_object_list_multiple_containers(self):
+        """Test validation error when listing with multiple containers."""
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
 
 
 class TestApplicationCreate(TestApplicationBase):
@@ -105,7 +186,7 @@ class TestApplicationCreate(TestApplicationBase):
 
     def test_create_object(self):
         """
-        **Objective:** Test creating a new application.
+        **Objective:** Test creating a new object.
         **Workflow:**
             1. Creates test data using ApplicationFactory.
             2. Mocks the API response.
@@ -195,9 +276,9 @@ class TestApplicationGet(TestApplicationBase):
 
     def test_get_object(self):
         """
-        **Objective:** Test fetching a specific application.
+        **Objective:** Test fetching a specific object.
         **Workflow:**
-            1. Mocks the API response for a specific application.
+            1. Mocks the API response for a specific object.
             2. Calls get method and validates the result.
         """
         mock_response = {
@@ -212,14 +293,14 @@ class TestApplicationGet(TestApplicationBase):
 
         self.mock_scm.get.return_value = mock_response  # noqa
         app_name = "TestApp"
-        application = self.client.get(app_name)
+        get_object = self.client.get(app_name)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/applications/{app_name}"
         )
-        assert isinstance(application, ApplicationResponseModel)
-        assert application.name == "TestApp"
-        assert application.category == "networking"
+        assert isinstance(get_object, ApplicationResponseModel)
+        assert get_object.name == "TestApp"
+        assert get_object.category == "networking"
 
     def test_get_object_error_handling(self):
         """
@@ -273,7 +354,7 @@ class TestApplicationUpdate(TestApplicationBase):
 
     def test_update_object(self):
         """
-        **Objective:** Test updating a specific application.
+        **Objective:** Test updating a specific object.
         **Workflow:**
         1. Sets up the update data for the object.
         2. Sets up a mock response that includes the updated data.
@@ -281,9 +362,9 @@ class TestApplicationUpdate(TestApplicationBase):
         4. Asserts that the mocked service was called with the correct URL and data.
         5. Validates the updated object's attributes.
         """
-        application_id = "123e4567-e89b-12d3-a456-426655440000"
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
         update_data = {
-            "id": application_id,
+            "id": object_id,
             "name": "TestApp",
             "description": "A test application",
             "category": "networking",
@@ -302,7 +383,7 @@ class TestApplicationUpdate(TestApplicationBase):
         expected_payload.pop("id")
 
         self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/applications/{application_id}",
+            f"/config/objects/v1/applications/{object_id}",
             json=expected_payload,
         )
         assert isinstance(updated_object, ApplicationResponseModel)
@@ -421,15 +502,15 @@ class TestApplicationDelete(TestApplicationBase):
 
     def test_delete_referenced_object(self):
         """
-        **Objective:** Test deleting an application that is referenced by another group.
+        **Objective:** Test deleting an object that is referenced by another group.
 
         **Workflow:**
         1. Sets up a mock error response for a referenced object deletion attempt
-        2. Attempts to delete an application that is reference by a group
+        2. Attempts to delete an object that is reference by a group
         3. Validates that ReferenceNotZeroError is raised with correct details
         4. Verifies the error contains proper reference information
         """
-        application_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
 
         # Mock the API error response
         mock_error_response = {
@@ -465,9 +546,9 @@ class TestApplicationDelete(TestApplicationBase):
             return_value=mock_error_response,
         )
 
-        # Attempt to delete the application and expect ReferenceNotZeroError
+        # Attempt to delete the object and expect ReferenceNotZeroError
         with pytest.raises(ReferenceNotZeroError) as exc_info:
-            self.client.delete(application_id)
+            self.client.delete(object_id)
 
         error = exc_info.value
 
@@ -643,49 +724,9 @@ class TestApplicationFetch(TestApplicationBase):
         with pytest.raises(ValidationError):
             self.client.fetch(name="test", folder="Shared", device="device1")
 
-    def test_fetch_response_handling(self):
+    def test_fetch_object_unexpected_response_format(self):
         """
-        **Objective:** Test fetch method's response handling.
-        **Workflow:**
-            1. Tests various response scenarios
-            2. Verifies proper response transformation
-        """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestApp",
-            "folder": "Shared",
-            "description": None,  # Should be excluded
-            "category": "networking",
-            "subcategory": "web",
-            "technology": "client-server",
-            "risk": 2,
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        result = self.client.fetch(name="TestApp", folder="Shared")
-
-        # Verify None values are excluded
-        assert "description" not in result
-        assert result["name"] == mock_response["name"]
-        assert result["folder"] == mock_response["folder"]
-
-    def test_fetch_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in fetch method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "Generic error"
-
-    def test_fetch_unexpected_response_format(self):
-        """
-        Test fetching an application when the API returns an unexpected response format.
+        Test fetching an object when the API returns an unexpected response format.
 
         **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
         **Workflow:**
@@ -702,6 +743,40 @@ class TestApplicationFetch(TestApplicationBase):
         with pytest.raises(BadResponseError) as exc_info:
             self.client.fetch(name=group_name, folder=folder_name)
         assert str(exc_info.value) == "Invalid response format: missing 'id' field"
+
+    def test_fetch_validation_errors(self):
+        """
+        **Objective:** Test fetch validation errors.
+        **Workflow:**
+            1. Tests various invalid input scenarios
+            2. Verifies appropriate error handling
+        """
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+
+        # Test multiple containers
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test", folder="folder1", snippet="snippet1")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
+            in str(exc_info.value)
+        )
+
+    def test_fetch_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in fetch method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert str(exc_info.value) == "Generic error"
 
     def test_fetch_response_format_handling(self):
         """
@@ -763,66 +838,6 @@ class TestApplicationFetch(TestApplicationBase):
         assert "Original error" in str(exc_info.value)
 
 
-class TestApplicationValidation(TestApplicationBase):
-    """Tests for Application validation."""
-
-    def test_list_validation_error(self):
-        """Test validation error when listing with multiple containers."""
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", snippet="TestSnippet")
-
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_request_model_no_container(self):
-        """Test validation when no container is provided."""
-        data = {
-            "name": "TestApp",
-            "category": "networking",
-            "subcategory": "web",
-            "technology": "client-server",
-            "risk": 3,
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ApplicationCreateModel(**data)
-        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
-            exc_info.value
-        )
-
-    def test_request_model_multiple_containers(self):
-        """Test validation when multiple containers are provided."""
-        data = {
-            "name": "TestApp",
-            "category": "networking",
-            "subcategory": "web",
-            "technology": "client-server",
-            "risk": 3,
-            "folder": "Shared",
-            "snippet": "Snippet1",
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ApplicationCreateModel(**data)
-        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
-            exc_info.value
-        )
-
-    def test_response_model_invalid_uuid(self):
-        """Test validation of UUID format in response model."""
-        invalid_data = {
-            "id": "invalid-uuid",
-            "name": "TestAppGroup",
-            "category": "test123",
-            "risk": 1,
-            "folder": "Shared",
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ApplicationResponseModel(**invalid_data)
-        assert "1 validation error for ApplicationResponseModel" in str(exc_info.value)
-        assert "Input should be a valid UUID, invalid character" in str(exc_info.value)
-
-
 class TestApplicationListFilters(TestApplicationBase):
     """Tests for filtering during listing Application objects."""
 
@@ -853,7 +868,7 @@ class TestApplicationListFilters(TestApplicationBase):
             },
         )
 
-    def test_list_filters_category_validation(self):
+    def test_list_filters_type_validation(self):
         """
         **Objective:** Test validation of filter category in list method.
         **Workflow:**
@@ -926,8 +941,8 @@ class TestApplicationListFilters(TestApplicationBase):
         except ValidationError:
             pytest.fail("Unexpected ValidationError raised with valid list filters")
 
-    def test_list_with_values_filter(self):
-        """Test listing applications with values filter."""
+    def test_list_filters_type_values(self):
+        """Test listing objects with values filter."""
         mock_response = {
             "data": [
                 {
@@ -947,7 +962,7 @@ class TestApplicationListFilters(TestApplicationBase):
             "folder": "Shared",
             "values": ["80"],
         }
-        applications = self.client.list(**filters)
+        filtered_objects = self.client.list(**filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/applications",
@@ -956,7 +971,135 @@ class TestApplicationListFilters(TestApplicationBase):
                 "folder": "Shared",
             },
         )
-        assert len(applications) == 1
+        assert len(filtered_objects) == 1
+
+    def test_list_empty_filter_lists(self):
+        """
+        **Objective:** Test behavior with empty filter lists.
+        **Workflow:**
+            1. Tests filters with empty lists
+            2. Verifies appropriate handling of empty filters
+        """
+        mock_response = {
+            "data": [
+                {
+                    "name": "100bao",
+                    "description": '100bao (literally translated as "100 treasures") is a free Chinese P2P file-sharing program that supports Windows 98, 2000, and XP operating systems.',
+                    "ports": ["tcp/3468,6346,11300"],
+                    "category": "general-internet",
+                    "subcategory": "file-sharing",
+                    "technology": "peer-to-peer",
+                    "risk": "5",
+                    "evasive": True,
+                    "pervasive": True,
+                    "folder": "All",
+                    "snippet": "predefined-snippet",
+                    "excessive_bandwidth_use": True,
+                    "used_by_malware": True,
+                    "transfers_files": True,
+                    "has_known_vulnerabilities": True,
+                    "tunnels_other_apps": False,
+                    "prone_to_misuse": True,
+                    "no_certifications": False,
+                },
+                {
+                    "name": "104apci-supervisory",
+                    "container": "iec-60870-5-104",
+                    "description": "IEC 60870-5-104 enables communication between control station and substation via a standard TCP/IP network. The functional app identifies application protocol control information (APCI) for supervisory function. This control format does not contain any application service data units (ASDUs).",
+                    "ports": ["tcp/2404"],
+                    "category": "business-systems",
+                    "subcategory": "ics-protocols",
+                    "technology": "client-server",
+                    "risk": "2",
+                    "evasive": False,
+                    "pervasive": True,
+                    "folder": "All",
+                    "snippet": "predefined-snippet",
+                    "depends_on": ["iec-60870-5-104-base"],
+                    "excessive_bandwidth_use": False,
+                    "used_by_malware": False,
+                    "transfers_files": False,
+                    "has_known_vulnerabilities": True,
+                    "tunnels_other_apps": True,
+                    "prone_to_misuse": False,
+                    "no_certifications": False,
+                },
+                {
+                    "name": "104apci-unnumbered",
+                    "container": "iec-60870-5-104",
+                    "description": "IEC 60870-5-104 enables communication between control station and substation via a standard TCP/IP network. The functional app identifies application protocol control information (APCI) for the unnumbered control format. This control format is used as a start-stop mechanism for information flow. There are no sequence numbers. This control field may also be used where more than one connection is available between stations, and a changeover between connections is to be made without loss of data. This control format does not contain any application service data units (ASDUs).",
+                    "ports": ["tcp/2404"],
+                    "category": "business-systems",
+                    "subcategory": "ics-protocols",
+                    "technology": "client-server",
+                    "risk": "2",
+                    "evasive": False,
+                    "pervasive": True,
+                    "folder": "All",
+                    "snippet": "predefined-snippet",
+                    "depends_on": ["iec-60870-5-104-base"],
+                    "excessive_bandwidth_use": False,
+                    "used_by_malware": False,
+                    "transfers_files": False,
+                    "has_known_vulnerabilities": True,
+                    "tunnels_other_apps": True,
+                    "prone_to_misuse": False,
+                    "no_certifications": False,
+                },
+                {
+                    "name": "104apci-unnumbered-startdt-act",
+                    "container": "iec-60870-5-104",
+                    "description": "IEC 60870-5-104 enables communication between control station and substation via a standard TCP/IP network. This functional app detects apci unnumbered frame - start data transfer activation.",
+                    "ports": ["tcp/2404"],
+                    "category": "business-systems",
+                    "subcategory": "ics-protocols",
+                    "technology": "client-server",
+                    "risk": "1",
+                    "evasive": False,
+                    "pervasive": False,
+                    "folder": "All",
+                    "snippet": "predefined-snippet",
+                    "depends_on": ["iec-60870-5-104-base"],
+                    "excessive_bandwidth_use": False,
+                    "used_by_malware": False,
+                    "transfers_files": False,
+                    "has_known_vulnerabilities": True,
+                    "tunnels_other_apps": False,
+                    "prone_to_misuse": False,
+                    "can_disable": True,
+                    "no_certifications": False,
+                },
+            ],
+            "offset": 0,
+            "total": 4867,
+            "limit": "4",
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Empty lists should result in no matches
+        filtered_objects = self.client.list(
+            folder="Shared",
+            category=[],
+        )
+        assert len(filtered_objects) == 0
+
+        filtered_objects = self.client.list(
+            folder="Shared",
+            subcategory=[],
+        )
+        assert len(filtered_objects) == 0
+
+        filtered_objects = self.client.list(
+            folder="Shared",
+            technology=[],
+        )
+        assert len(filtered_objects) == 0
+
+        filtered_objects = self.client.list(
+            folder="Shared",
+            risk=[],
+        )
+        assert len(filtered_objects) == 0
 
     def test_list_empty_folder_error(self):
         """
