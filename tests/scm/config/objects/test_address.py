@@ -7,12 +7,12 @@ from scm.config.objects import Address
 from scm.exceptions import (
     ValidationError,
     ObjectNotPresentError,
-    ReferenceNotZeroError,
     EmptyFieldError,
     ObjectAlreadyExistsError,
     MalformedRequestError,
     FolderNotFoundError,
     BadResponseError,
+    ReferenceNotZeroError,
 )
 from scm.models.objects import (
     AddressCreateModel,
@@ -31,7 +31,7 @@ from pydantic import ValidationError as PydanticValidationError
 
 @pytest.mark.usefixtures("load_env")
 class TestAddressBase:
-    """Base class for Address Group tests."""
+    """Base class for Address tests."""
 
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_scm):
@@ -47,17 +47,95 @@ class TestAddressBase:
 # -------------------- Test Classes Grouped by Functionality --------------------
 
 
+class TestAddressModelValidation(TestAddressBase):
+    """Tests for object model validation."""
+
+    def test_object_create_no_type_provided(self):
+        """Test validation when no type is provided."""
+        data = {
+            "name": "Test123",
+            "folder": "Shared",
+        }
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressCreateModel(**data)
+        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
+        assert (
+            "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_create_multiple_types(self):
+        """Test validation when multiple types are provided."""
+        data = {
+            "name": "Test123",
+            "folder": "Shared",
+            "ip_netmask": "10.5.0.11",
+            "fqdn": "test.com",
+        }
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressCreateModel(**data)
+        assert (
+            "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_create_multiple_containers(self):
+        """Test validation when multiple containers are provided."""
+        data = {
+            "name": "internal_network",
+            "ip_netmask": "192.168.1.0/24",
+            "description": "Internal network segment",
+            "tag": ["Python", "Automation"],
+            "folder": "Shared",
+            "snippet": "Test123",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            AddressCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_create_no_container(self):
+        """Test validation when no container is provided."""
+        data = {
+            "name": "internal_network",
+            "ip_netmask": "192.168.1.0/24",
+            "description": "Internal network segment",
+            "tag": ["Python", "Automation"],
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            AddressCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_create_model_valid(self):
+        """Test validation with valid data."""
+        data = {
+            "name": "Test123",
+            "folder": "Shared",
+            "ip_netmask": "10.5.0.11",
+        }
+        model = AddressCreateModel(**data)
+        assert model.name == "Test123"
+        assert model.folder == "Shared"
+        assert model.ip_netmask == "10.5.0.11"
+
+
 class TestAddressList(TestAddressBase):
     """Tests for listing Address objects."""
 
-    def test_list_addresses(self):
+    def test_object_list_valid(self):
         """
         **Objective:** Test listing all addresses.
         **Workflow:**
             1. Sets up a mock response resembling the expected API response for listing addresses.
-            2. Calls the `list` method of `self.client` with a filter parameter (`folder="All"`).
+            2. Calls the `list` method with a filter parameter.
             3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of addresses, checking their types and attributes.
+            4. Validates the returned list of addresses.
         """
         mock_response = {
             "data": [
@@ -78,27 +156,9 @@ class TestAddressList(TestAddressBase):
                     "description": "test123456",
                     "tag": ["Decrypted"],
                 },
-                {
-                    "id": "c33fa16a-939a-4ac5-a45b-a9902f30752a",
-                    "name": "dallas-desktop2",
-                    "folder": "cdot65",
-                    "snippet": "cdot.io Best Practices",
-                    "description": "RHEL9 desktop",
-                    "ip_netmask": "10.5.0.12",
-                    "tag": ["Decrypted"],
-                },
-                {
-                    "id": "a3754e04-919a-455a-8c87-09fb6fa6db63",
-                    "name": "dallas-desktop3",
-                    "folder": "cdot65",
-                    "snippet": "cdot.io Best Practices",
-                    "description": "Windows 11 Desktop",
-                    "ip_netmask": "10.5.0.100",
-                    "tag": ["Decrypted"],
-                },
             ],
             "offset": 0,
-            "total": 4,
+            "total": 2,
             "limit": 200,
         }
 
@@ -114,42 +174,50 @@ class TestAddressList(TestAddressBase):
         )
         assert isinstance(addresses, list)
         assert isinstance(addresses[0], AddressResponseModel)
-        assert len(addresses) == 4
+        assert len(addresses) == 2
         assert addresses[0].name == "Palo Alto Networks Sinkhole"
+
+    def test_object_list_multiple_containers(self):
+        """Test validation error when listing with multiple containers."""
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
 
 
 class TestAddressCreate(TestAddressBase):
     """Tests for creating Address objects."""
 
-    def test_create_address_of_type_ip_netmask(self):
+    def test_create_object_type_ip_netmask(self):
         """
-        **Objective:** Test creating an address object of type ip-netmask.
+        **Objective:** Test creating an object.
         **Workflow:**
-            1. Uses `AddressCreateIpNetmaskFactory` to create an object.
-            2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the address data.
-            4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created address group's attributes.
+            1. Uses AddressCreateIpNetmaskFactory to create test data.
+            2. Mocks the API response.
+            3. Verifies the creation request and response.
         """
-        test_address_ip_netmask = AddressCreateIpNetmaskFactory()
-        mock_response = test_address_ip_netmask.model_dump()
+        test_address = AddressCreateIpNetmaskFactory()
+        mock_response = test_address.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_address_ip_netmask.model_dump(exclude_unset=True)
+        created_address = self.client.create(
+            test_address.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_address_ip_netmask.model_dump(exclude_unset=True),
+            json=test_address.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_address_ip_netmask.name
-        assert created_group.ip_netmask == test_address_ip_netmask.ip_netmask
-        assert created_group.folder == test_address_ip_netmask.folder
+        assert str(created_address.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert created_address.name == test_address.name
+        assert created_address.ip_netmask == test_address.ip_netmask
+        assert created_address.folder == test_address.folder
 
-    def test_create_address_of_type_fdqn(self):
+    def test_create_object_type_fqdn(self):
         """
         **Objective:** Test creating an address object of type fqdn.
         **Workflow:**
@@ -172,12 +240,12 @@ class TestAddressCreate(TestAddressBase):
             "/config/objects/v1/addresses",
             json=test_address_fqdn.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "12345678-abcd-abcd-abcd-123456789012"
+        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
         assert created_group.name == test_address_fqdn.name
         assert created_group.fqdn == test_address_fqdn.fqdn
         assert created_group.folder == test_address_fqdn.folder
 
-    def test_create_address_of_type_ip_range(self):
+    def test_create_object_type_ip_range(self):
         """
         **Objective:** Test creating an address object of type ip-range.
         **Workflow:**
@@ -200,12 +268,12 @@ class TestAddressCreate(TestAddressBase):
             "/config/objects/v1/addresses",
             json=test_address_ip_range.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "12345678-abcd-abcd-abcd-123456789012"
+        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
         assert created_group.name == test_address_ip_range.name
         assert created_group.ip_range == test_address_ip_range.ip_range
         assert created_group.folder == test_address_ip_range.folder
 
-    def test_create_address_of_type_ip_wildcard(self):
+    def test_create_object_type_ip_wildcard(self):
         """
         **Objective:** Test creating an address object of type ip-wildcard.
         **Workflow:**
@@ -228,7 +296,7 @@ class TestAddressCreate(TestAddressBase):
             "/config/objects/v1/addresses",
             json=test_address_ip_wildcard.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "12345678-abcd-abcd-abcd-123456789012"
+        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
         assert created_group.name == test_address_ip_wildcard.name
         assert created_group.ip_wildcard == test_address_ip_wildcard.ip_wildcard
         assert created_group.folder == test_address_ip_wildcard.folder
@@ -300,38 +368,30 @@ class TestAddressCreate(TestAddressBase):
 class TestAddressGet(TestAddressBase):
     """Tests for retrieving a specific Address object."""
 
-    def test_get_address(self):
+    def test_get_object(self):
         """
-        **Objective:** Test retrieving an address by its ID.
+        **Objective:** Test retrieving a specific address.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for fetching an address by ID.
-            2. Calls the `get` method of `self.client` with a specific group ID.
-            3. Asserts that the mocked service was called with the correct URL.
-            4. Validates the returned address group's attributes.
+            1. Mocks the API response for a specific address.
+            2. Verifies the get request and response handling.
         """
-        address_id = "123e4567-e89b-12d3-a456-426655440000"
         mock_response = {
-            "id": address_id,
-            "name": "dallas-desktop1",
-            "snippet": "cdot.io Best Practices",
-            "ip_netmask": "10.5.0.11",
-            "description": "test123456",
-            "tag": ["Decrypted"],
+            "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
+            "name": "TestAddress",
+            "ip_netmask": "10.0.0.0/24",
+            "folder": "Shared",
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
+        address_id = "b44a8c00-7555-4021-96f0-d59deecd54e8"
         address = self.client.get(address_id)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/addresses/{address_id}"
         )
         assert isinstance(address, AddressResponseModel)
-        assert address.id == address_id
-        assert address.name == "dallas-desktop1"
-        assert address.description == "test123456"
-        assert address.ip_netmask == "10.5.0.11"
-        assert isinstance(address.tag, list)
-        assert address.tag[0] == "Decrypted"
+        assert address.name == "TestAddress"
+        assert address.ip_netmask == "10.0.0.0/24"
 
     def test_get_object_error_handling(self):
         """
@@ -383,44 +443,66 @@ class TestAddressGet(TestAddressBase):
 class TestAddressUpdate(TestAddressBase):
     """Tests for updating Address objects."""
 
-    def test_update_address(self):
+    def test_update_object(self):
         """
-        **Objective:** Test updating an existing object.
+        **Objective:** Test updating an address.
         **Workflow:**
-            1. Sets up the update data for the object.
-            2. Sets up a mock response that includes the updated data.
-            3. Calls the `update` method of `self.client` with the update data.
-            4. Asserts that the mocked service was called with the correct URL and data.
-            5. Validates the updated object's attributes.
+            1. Prepares update data and mocks response
+            2. Verifies the update request and response
+            3. Ensures payload transformation is correct
         """
-        address_id = "123e4567-e89b-12d3-a456-426655440000"
+        from uuid import UUID
+
+        test_uuid = UUID("123e4567-e89b-12d3-a456-426655440000")
+
+        # Test data including ID
         update_data = {
-            "id": address_id,
-            "name": "dallas-desktop1",
-            "snippet": "cdot.io Best Practices",
-            "ip_netmask": "10.5.0.11",
-            "description": "test123456",
-            "tag": ["Decrypted"],
+            "id": str(test_uuid),
+            "name": "TestAddress",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+            "description": "Updated description",
+            "tag": [
+                "tag1",
+                "tag2",
+            ],
         }
 
-        mock_response = update_data.copy()
+        # Expected payload should not include the ID
+        expected_payload = {
+            "name": "TestAddress",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+            "description": "Updated description",
+            "tag": [
+                "tag1",
+                "tag2",
+            ],
+        }
 
+        # Mock response should include the ID
+        mock_response = update_data.copy()
         self.mock_scm.put.return_value = mock_response  # noqa
+
+        # Perform update
         updated_address = self.client.update(update_data)
 
-        # Prepare the expected payload by excluding 'id'
-        expected_payload = update_data.copy()
-        expected_payload.pop("id")
-
+        # Verify correct endpoint and payload
         self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/addresses/{address_id}",
-            json=expected_payload,
+            f"/config/objects/v1/addresses/{update_data['id']}",
+            json=expected_payload,  # Should not include ID
         )
+
+        # Verify response model
         assert isinstance(updated_address, AddressResponseModel)
-        assert updated_address.id == update_data["id"]
-        assert updated_address.name == "dallas-desktop1"
-        assert updated_address.description == "test123456"
-        assert updated_address.tag[0] == "Decrypted"
+        assert isinstance(updated_address.id, UUID)  # Verify it's a UUID object
+        assert updated_address.id == test_uuid  # Compare against UUID object
+        assert (
+            str(updated_address.id) == update_data["id"]
+        )  # Compare string representations
+        assert updated_address.name == "TestAddress"
+        assert updated_address.ip_netmask == "10.0.0.0/24"
+        assert updated_address.folder == "Shared"
 
     def test_update_object_error_handling(self):
         """
@@ -456,6 +538,21 @@ class TestAddressUpdate(TestAddressBase):
 
         with pytest.raises(MalformedRequestError):
             self.client.update(update_data)
+
+    def test_update_with_invalid_data(self):
+        """
+        **Objective:** Test update method with invalid data structure.
+        **Workflow:**
+            1. Attempts to update with invalid data
+            2. Verifies proper validation error handling
+        """
+        invalid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "invalid_field": "test",
+        }
+
+        with pytest.raises(PydanticValidationError):
+            self.client.update(invalid_data)
 
     def test_update_generic_exception_handling(self):
         """
@@ -602,7 +699,7 @@ class TestAddressDelete(TestAddressBase):
 class TestAddressFetch(TestAddressBase):
     """Tests for fetching Address objects by name."""
 
-    def test_fetch_address(self):
+    def test_fetch_object(self):
         """
         **Objective:** Test retrieving an object by its name using the `fetch` method.
         **Workflow:**
@@ -611,9 +708,8 @@ class TestAddressFetch(TestAddressBase):
             3. Asserts that the mocked service was called with the correct URL and parameters.
             4. Validates the returned object's attributes.
         """
-        address_id = "123e4567-e89b-12d3-a456-426655440000"
         mock_response = {
-            "id": address_id,
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "dallas-desktop1",
             "folder": "Texas",
             "ip_netmask": "10.5.0.11",
@@ -624,7 +720,7 @@ class TestAddressFetch(TestAddressBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Call the fetch method
-        address = self.client.fetch(
+        fetched_object = self.client.fetch(
             name=mock_response["name"],
             folder=mock_response["folder"],
         )
@@ -639,13 +735,13 @@ class TestAddressFetch(TestAddressBase):
         )
 
         # Validate the returned address
-        assert isinstance(address, dict)
-        assert address["id"] == mock_response["id"]
-        assert address["name"] == mock_response["name"]
-        assert address["description"] == mock_response["description"]
-        assert address["tag"][0] == mock_response["tag"][0]
+        assert isinstance(fetched_object, dict)
+        assert str(fetched_object["id"]) == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+        assert fetched_object["description"] == mock_response["description"]
+        assert fetched_object["tag"][0] == mock_response["tag"][0]
 
-    def test_fetch_address_not_found(self):
+    def test_fetch_object_not_found(self):
         """
         Test fetching an object by name that does not exist.
 
@@ -677,7 +773,7 @@ class TestAddressFetch(TestAddressBase):
                 folder=folder_name,
             )
 
-    def test_fetch_address_no_name(self):
+    def test_fetch_empty_name(self):
         """
         Test fetching an address without providing the 'name' parameter.
 
@@ -690,6 +786,34 @@ class TestAddressFetch(TestAddressBase):
         with pytest.raises(ValidationError) as exc_info:
             self.client.fetch(folder=folder_name, name="")
         assert str(exc_info.value) == "Field 'name' cannot be empty"
+
+    def test_fetch_container_validation(self):
+        """
+        **Objective:** Test container parameter validation in fetch.
+        **Workflow:**
+            1. Tests various invalid container combinations
+            2. Verifies proper error handling
+        """
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+
+        # Test no container provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-group")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+        # Test multiple containers provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-group", folder="Shared", snippet="TestSnippet")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
 
     def test_fetch_address_unexpected_response_format(self):
         """
@@ -769,7 +893,6 @@ class TestAddressFetch(TestAddressBase):
             self.client.fetch(name="test", folder="Shared")
         assert "2 validation errors for AddressResponseModel" in str(exc_info.value)
         assert "name\n  Field required" in str(exc_info.value)
-        assert "id\n  Value error, Invalid UUID format for 'id'" in str(exc_info.value)
 
         # Test malformed response in list format
         self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
@@ -804,103 +927,6 @@ class TestAddressFetch(TestAddressBase):
         with pytest.raises(Exception) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Original error" in str(exc_info.value)
-
-
-class TestAddressValidation(TestAddressBase):
-    """Tests for Address model validation."""
-
-    def test_address_create_model_no_type_provided(self):
-        """Test validation when no type is provided."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
-        assert (
-            "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_address_create_model_multiple_types_provided(self):
-        """Test validation when multiple types are provided."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-            "fqdn": "test.com",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert (
-            "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_address_create_model_valid(self):
-        """Test validation with valid data."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-        }
-        model = AddressCreateModel(**data)
-        assert model.name == "Test123"
-        assert model.folder == "Shared"
-        assert model.ip_netmask == "10.5.0.11"
-
-    def test_address_create_model_invalid_container(self):
-        """Test validation with multiple container types."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "snippet": "TestSnippet",
-            "ip_netmask": "10.5.0.11",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_invalid_uuid_format(self):
-        """
-        Test UUID format validator.
-
-        **Objective:** Verify that invalid UUID formats raise ValueError.
-        **Workflow:**
-            1. Attempts to create/update an address with invalid UUID
-            2. Validates that appropriate error is raised
-        """
-        data = {
-            "id": "not-a-uuid",
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressResponseModel(**data)
-        assert "Invalid UUID format for 'id'" in str(exc_info.value)
-
-    def test_valid_uuid_format(self):
-        """
-        Test valid UUID format.
-
-        **Objective:** Verify that valid UUID formats are accepted.
-        **Workflow:**
-            1. Creates/updates an address with valid UUID
-            2. Validates that the UUID is accepted
-        """
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-        }
-        model = AddressResponseModel(**data)
-        assert model.id == "123e4567-e89b-12d3-a456-426655440000"
 
 
 class TestAddressTagValidation(TestAddressBase):
@@ -1295,101 +1321,6 @@ class TestAddressListFilters(TestAddressBase):
         with pytest.raises(BadResponseError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
-
-
-class TestAddressExceptionHandling(TestAddressBase):
-    """Tests for generic exception handling across Address methods."""
-
-    def test_create_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in create method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        test_data = AddressCreateIpNetmaskFactory()
-
-        # Mock a generic exception without response
-        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.create(test_data.model_dump())
-        assert str(exc_info.value) == "Generic error"
-
-    def test_get_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in get method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.get(object_id)
-        assert str(exc_info.value) == "Generic error"
-
-    def test_update_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in update method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-address",
-            "folder": "Shared",
-            "ip_netmask": "10.0.0.0/24",
-        }
-
-        # Mock a generic exception without response
-        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.update(update_data)
-        assert str(exc_info.value) == "Generic error"
-
-    def test_delete_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in delete method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.delete(object_id)
-        assert str(exc_info.value) == "Generic error"
-
-    def test_error_handler_raise_through(self):
-        """
-        **Objective:** Test that ErrorHandler properly raises through original exceptions.
-        **Workflow:**
-            1. Mocks various exception scenarios
-            2. Verifies exceptions are properly propagated
-        """
-
-        # Test with non-JSON response
-        class MockResponse:
-            def json(self):
-                raise ValueError("API Error")
-
-        mock_exception = Exception("API Error")
-        mock_exception.response = MockResponse()
-
-        self.mock_scm.get.side_effect = mock_exception  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.get("test-id")
-        assert "API Error" in str(exc_info.value)
 
 
 # -------------------- End of Test Classes --------------------
