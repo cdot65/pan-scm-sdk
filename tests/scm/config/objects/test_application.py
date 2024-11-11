@@ -397,7 +397,7 @@ class TestApplicationUpdate(TestApplicationBase):
         **Objective:** Test error handling during object update method.
         **Workflow:**
         1. Mocks an error response from the API
-        2. Attemps to update an object
+        2. Attempts to update an object
         3. Verifies proper error handling and exception raising
         """
         update_data = {

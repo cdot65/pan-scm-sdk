@@ -280,7 +280,7 @@ class TestServiceUpdate(TestServiceBase):
 
     def test_update_object(self):
         """
-        **Objective:** Test updating a object.
+        **Objective:** Test updating an object.
         **Workflow:**
             1. Prepares update data and mocks response
             2. Verifies the update request and response
@@ -519,7 +519,7 @@ class TestServiceFetch(TestServiceBase):
 
     def test_fetch_object(self):
         """
-        **Objective:** Test successful fetch of a object.
+        **Objective:** Test successful fetch of an object.
         **Workflow:**
             1. Mocks API response for a successful fetch
             2. Verifies correct parameter handling
