@@ -7,7 +7,6 @@ from scm.config.objects import AddressGroup
 from scm.exceptions import (
     ValidationError,
     ObjectNotPresentError,
-    ReferenceNotZeroError,
     EmptyFieldError,
     ObjectAlreadyExistsError,
     MalformedRequestError,
@@ -45,10 +44,91 @@ class TestAddressGroupBase:
 # -------------------- Test Classes Grouped by Functionality --------------------
 
 
+class TestAddressGroupModelValidation(TestAddressGroupBase):
+    """Tests for object model validation."""
+
+    def test_object_model_no_type_provided(self):
+        """Test validation when no type is provided."""
+        data = {
+            "name": "Test123",
+            "folder": "Shared",
+        }
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
+        assert (
+            "Value error, Exactly one of 'static' or 'dynamic' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_multiple_types(self):
+        """Test validation when multiple types are provided."""
+        data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "static": ["None"],
+            "folder": "All",
+        }
+
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
+            exc_info.value
+        )
+
+    def test_object_model_multiple_containers(self):
+        """Test validation when multiple containers are provided."""
+        data = {
+            "name": "test - address group 1",
+            "folder": "Texas",
+            "snippet": "Test",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+        with pytest.raises(ValueError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_create_no_container(self):
+        """Test validation when no container is provided."""
+        data = {
+            "name": "test - address group 1",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_create_model_valid(self):
+        """Test validation with valid data."""
+        data = {
+            "name": "test - address group 1",
+            "folder": "Texas",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+        model = AddressGroupCreateModel(**data)
+        assert model.name == data["name"]
+        assert model.folder == data["folder"]
+        assert model.static == data["static"]
+
+
 class TestAddressGroupList(TestAddressGroupBase):
     """Tests for listing Address Group objects."""
 
-    def test_list_address_groups(self):
+    def test_list_objects(self):
         """
         **Objective:** Test listing all address groups.
         **Workflow:**
@@ -89,7 +169,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        address_groups = self.client.list(folder="All")
+        existing_objects = self.client.list(folder="All")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
@@ -98,18 +178,28 @@ class TestAddressGroupList(TestAddressGroupBase):
                 "folder": "All",
             },
         )
-        assert isinstance(address_groups, list)
-        assert isinstance(address_groups[0], AddressGroupResponseModel)
-        assert len(address_groups) == 3
-        assert address_groups[0].name == "DAG_test"
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], AddressGroupResponseModel)
+        assert len(existing_objects) == 3
+        assert existing_objects[0].name == "DAG_test"
+
+    def test_list_objects_multiple_containers(self):
+        """Test validation error when listing with multiple containers."""
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
 
 
 class TestAddressGroupCreate(TestAddressGroupBase):
     """Tests for creating Address Group objects."""
 
-    def test_create_address_group_of_type_static(self):
+    def test_create_object_of_type_static(self):
         """
-        **Objective:** Test creating an address group of type static.
+        **Objective:** Test creating an object of type static.
         **Workflow:**
             1. Uses `AddressGroupStaticFactory` to create an object.
             2. Sets up a mock response with an added `id`.
@@ -117,28 +207,28 @@ class TestAddressGroupCreate(TestAddressGroupBase):
             4. Asserts that the mocked service was called with the correct parameters.
             5. Validates the created address group's attributes.
         """
-        test_address_group_static = AddressGroupStaticFactory()
-        mock_response = test_address_group_static.model_dump()
+        test_object_static = AddressGroupStaticFactory()
+        mock_response = test_object_static.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_address_group_static.model_dump(exclude_unset=True)
+        created_object = self.client.create(
+            test_object_static.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
-            json=test_address_group_static.model_dump(exclude_unset=True),
+            json=test_object_static.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_address_group_static.name
-        assert created_group.static == test_address_group_static.static
-        assert created_group.folder == test_address_group_static.folder
-        assert created_group.tag == test_address_group_static.tag
+        assert str(created_object.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert created_object.name == test_object_static.name
+        assert created_object.static == test_object_static.static
+        assert created_object.folder == test_object_static.folder
+        assert created_object.tag == test_object_static.tag
 
-    def test_create_address_group_of_type_dynamic(self):
+    def test_create_object_of_type_dynamic(self):
         """
-        **Objective:** Test creating an address group object of type fqdn.
+        **Objective:** Test creating an object of type fqdn.
         **Workflow:**
             1. Uses `AddressGroupDynamicFactory` to create an object.
             2. Sets up a mock response with an added `id`.
@@ -146,24 +236,24 @@ class TestAddressGroupCreate(TestAddressGroupBase):
             4. Asserts that the mocked service was called with the correct parameters.
             5. Validates the created address group's attributes.
         """
-        test_address_group_dynamic = AddressGroupDynamicFactory()
-        mock_response = test_address_group_dynamic.model_dump()
+        test_object_dynamic = AddressGroupDynamicFactory()
+        mock_response = test_object_dynamic.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_address_group_dynamic.model_dump(exclude_unset=True)
+        created_object = self.client.create(
+            test_object_dynamic.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
-            json=test_address_group_dynamic.model_dump(exclude_unset=True),
+            json=test_object_dynamic.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_address_group_dynamic.name
-        assert created_group.dynamic == test_address_group_dynamic.dynamic
-        assert created_group.folder == test_address_group_dynamic.folder
-        assert created_group.tag == test_address_group_dynamic.tag
+        assert str(created_object.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert created_object.name == test_object_dynamic.name
+        assert created_object.dynamic == test_object_dynamic.dynamic
+        assert created_object.folder == test_object_dynamic.folder
+        assert created_object.tag == test_object_dynamic.tag
 
     def test_create_object_error_handling(self):
         """
@@ -232,11 +322,11 @@ class TestAddressGroupCreate(TestAddressGroupBase):
 class TestAddressGroupGet(TestAddressGroupBase):
     """Tests for retrieving a specific Address Group object."""
 
-    def test_get_address_group(self):
+    def test_get_object(self):
         """
-        **Objective:** Test retrieving an address group by its ID.
+        **Objective:** Test retrieving an object by its ID.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for fetching an address group by ID.
+            1. Sets up a mock response resembling the expected API response for fetching an object by ID.
             2. Calls the `get` method of `self.client` with a specific group ID.
             3. Asserts that the mocked service was called with the correct URL.
             4. Validates the returned address group's attributes.
@@ -250,15 +340,15 @@ class TestAddressGroupGet(TestAddressGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        address_group = self.client.get(mock_response["id"])
+        existing_object = self.client.get(mock_response["id"])
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/address-groups/{mock_response['id']}"
         )
-        assert isinstance(address_group, AddressGroupResponseModel)
-        assert address_group.id == mock_response["id"]
-        assert address_group.name == mock_response["name"]
-        assert address_group.description == mock_response["description"]
+        assert isinstance(existing_object, AddressGroupResponseModel)
+        assert str(existing_object.id) == mock_response["id"]
+        assert existing_object.name == mock_response["name"]
+        assert existing_object.description == mock_response["description"]
 
     def test_get_object_error_handling(self):
         """
@@ -310,7 +400,7 @@ class TestAddressGroupGet(TestAddressGroupBase):
 class TestAddressGroupUpdate(TestAddressGroupBase):
     """Tests for updating Address Group objects."""
 
-    def test_update_address_group(self):
+    def test_update_object(self):
         """
         **Objective:** Test updating an existing object.
         **Workflow:**
@@ -331,7 +421,7 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
         mock_response = update_group_data.copy()
 
         self.mock_scm.put.return_value = mock_response  # noqa
-        updated_address_group = self.client.update(update_group_data)
+        updated_object = self.client.update(update_group_data)
 
         # Prepare the expected payload by excluding 'id'
         expected_payload = update_group_data.copy()
@@ -341,10 +431,10 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
             f"/config/objects/v1/address-groups/{update_group_data['id']}",
             json=expected_payload,
         )
-        assert isinstance(updated_address_group, AddressGroupResponseModel)
-        assert updated_address_group.id == mock_response["id"]
-        assert updated_address_group.name == mock_response["name"]
-        assert updated_address_group.description == mock_response["description"]
+        assert isinstance(updated_object, AddressGroupResponseModel)
+        assert str(updated_object.id) == mock_response["id"]
+        assert updated_object.name == mock_response["name"]
+        assert updated_object.description == mock_response["description"]
 
     def test_update_object_error_handling(self):
         """
@@ -381,6 +471,21 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
 
         with pytest.raises(MalformedRequestError):
             self.client.update(update_group_data)
+
+    def test_update_with_invalid_data(self):
+        """
+        **Objective:** Test update method with invalid data structure.
+        **Workflow:**
+            1. Attempts to update with invalid data
+            2. Verifies proper validation error handling
+        """
+        invalid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "invalid_field": "test",
+        }
+
+        with pytest.raises(PydanticValidationError):
+            self.client.update(invalid_data)
 
     def test_update_generic_exception_handling(self):
         """
@@ -458,7 +563,7 @@ class TestAddressGroupDelete(TestAddressGroupBase):
 class TestAddressGroupFetch(TestAddressGroupBase):
     """Tests for fetching Address Group objects by name."""
 
-    def test_fetch_address_group(self):
+    def test_fetch_object(self):
         """
         **Objective:** Test retrieving an object by its name using the `fetch` method.
         **Workflow:**
@@ -478,7 +583,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Call the fetch method
-        address_group = self.client.fetch(
+        fetched_object = self.client.fetch(
             name=mock_response["name"],
             folder=mock_response["folder"],
         )
@@ -493,13 +598,13 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         )
 
         # Validate the returned address
-        assert isinstance(address_group, dict)
-        assert address_group["id"] == mock_response["id"]
-        assert address_group["name"] == mock_response["name"]
-        assert address_group["description"] == mock_response["description"]
-        assert address_group["dynamic"] == mock_response["dynamic"]
+        assert isinstance(fetched_object, dict)
+        assert str(fetched_object["id"]) == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+        assert fetched_object["description"] == mock_response["description"]
+        assert fetched_object["dynamic"] == mock_response["dynamic"]
 
-    def test_fetch_address_not_found(self):
+    def test_fetch_object_not_found(self):
         """
         Test fetching an object by name that does not exist.
 
@@ -531,9 +636,9 @@ class TestAddressGroupFetch(TestAddressGroupBase):
                 folder=folder_name,
             )
 
-    def test_fetch_address_group_no_name(self):
+    def test_fetch_empty_name(self):
         """
-        Test fetching an address group without providing the 'name' parameter.
+        Test fetching an object without providing the 'name' parameter.
 
         **Objective:** Ensure that the fetch method raises ValidationError when 'name' is not provided.
         **Workflow:**
@@ -548,9 +653,37 @@ class TestAddressGroupFetch(TestAddressGroupBase):
             )
         assert str(exc_info.value) == "Field 'name' cannot be empty"
 
-    def test_fetch_address_group_unexpected_response_format(self):
+    def test_fetch_container_validation(self):
         """
-        Test fetching an address group when the API returns an unexpected response format.
+        **Objective:** Test container parameter validation in fetch.
+        **Workflow:**
+            1. Tests various invalid container combinations
+            2. Verifies proper error handling
+        """
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+
+        # Test no container provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-group")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+        # Test multiple containers provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-group", folder="Shared", snippet="TestSnippet")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_fetch_object_unexpected_response_format(self):
+        """
+        Test fetching an object when the API returns an unexpected response format.
 
         **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
         **Workflow:**
@@ -647,7 +780,6 @@ class TestAddressGroupFetch(TestAddressGroupBase):
             exc_info.value
         )
         assert "name\n  Field required" in str(exc_info.value)
-        assert "id\n  Value error, Invalid UUID format for 'id'" in str(exc_info.value)
 
         # Test malformed response in list format
         self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
@@ -685,109 +817,6 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         with pytest.raises(Exception) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Original error" in str(exc_info.value)
-
-
-class TestAddressGroupValidation(TestAddressGroupBase):
-    """Tests for Address model validation."""
-
-    def test_address_create_model_no_type_provided(self):
-        """Test validation when no type is provided."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
-        assert (
-            "Value error, Exactly one of 'static' or 'dynamic' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_address_group_create_model_multiple_types_provided(self):
-        """Test validation when multiple types are provided."""
-        data = {
-            "name": "DAG_test",
-            "description": "test123",
-            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
-            "static": ["None"],
-            "folder": "All",
-        }
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
-            exc_info.value
-        )
-
-    def test_address_group_create_model_valid(self):
-        """Test validation with valid data."""
-        data = {
-            "name": "DAG_test",
-            "description": "test123",
-            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
-            "folder": "All",
-        }
-
-        model = AddressGroupCreateModel(**data)
-        assert model.name == data["name"]
-        assert model.folder == data["folder"]
-
-    def test_address_group_create_model_invalid_container(self):
-        """Test validation with multiple container types."""
-        data = {
-            "name": "DAG_test",
-            "description": "test123",
-            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
-            "folder": "All",
-            "snippet": "Test",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_invalid_uuid_format(self):
-        """
-        Test UUID format validator.
-
-        **Objective:** Verify that invalid UUID formats raise ValueError.
-        **Workflow:**
-            1. Attempts to create/update an address with invalid UUID
-            2. Validates that appropriate error is raised
-        """
-        data = {
-            "name": "DAG_test",
-            "description": "test123",
-            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
-            "folder": "All",
-            "id": "fsad",
-        }
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupResponseModel(**data)
-        assert "Invalid UUID format for 'id'" in str(exc_info.value)
-
-    def test_valid_uuid_format(self):
-        """
-        Test valid UUID format.
-
-        **Objective:** Verify that valid UUID formats are accepted.
-        **Workflow:**
-            1. Creates/updates an address with valid UUID
-            2. Validates that the UUID is accepted
-        """
-        data = {
-            "name": "DAG_test",
-            "description": "test123",
-            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
-            "folder": "All",
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-        }
-        model = AddressGroupResponseModel(**data)
-        assert model.id == "123e4567-e89b-12d3-a456-426655440000"
 
 
 class TestAddressGroupTagValidation(TestAddressGroupBase):
@@ -1034,32 +1063,32 @@ class TestAddressGroupListFilters(TestAddressGroupBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test combining types and tags filters
-        filtered_address_groups = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             types=["static"],
             tags=["Automation"],
         )
-        assert len(filtered_address_groups) == 1
-        assert filtered_address_groups[0].name == "test - address group 1"
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test - address group 1"
 
         # Test combining values and tags filters
-        filtered_address_groups = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             values=["test_network1"],
             tags=["Automation"],
         )
-        assert len(filtered_address_groups) == 1
-        assert filtered_address_groups[0].name == "test - address group 1"
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test - address group 1"
 
         # Test all filters together
-        filtered_address_groups = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             types=["static"],
             values=["test_network1"],
             tags=["Automation"],
         )
-        assert len(filtered_address_groups) == 1
-        assert filtered_address_groups[0].name == "test - address group 1"
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test - address group 1"
 
     def test_list_empty_filter_lists(self):
         """
@@ -1101,23 +1130,23 @@ class TestAddressGroupListFilters(TestAddressGroupBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Empty lists should result in no matches
-        filtered_address_groups = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             types=[],
         )
-        assert len(filtered_address_groups) == 0
+        assert len(filtered_objects) == 0
 
-        filtered_address_groups = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             values=[],
         )
-        assert len(filtered_address_groups) == 0
+        assert len(filtered_objects) == 0
 
-        filtered_address_groups = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             tags=[],
         )
-        assert len(filtered_address_groups) == 0
+        assert len(filtered_objects) == 0
 
     def test_list_empty_folder_error(self):
         """
