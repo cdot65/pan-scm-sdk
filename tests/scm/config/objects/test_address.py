@@ -96,7 +96,7 @@ class TestAddressModelValidation(TestAddressBase):
             in str(exc_info.value)
         )
 
-    def test_object_model_create_no_container(self):
+    def test_object_model_no_container_provided(self):
         """Test validation when no container is provided."""
         data = {
             "name": "internal_network",
