@@ -47,12 +47,12 @@ class TestServiceList(TestServiceBase):
 
     def test_list_objects(self):
         """
-        **Objective:** Test listing all services.
+        **Objective:** Test listing all objects.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing services.
+            1. Sets up a mock response resembling the expected API response for listing objects.
             2. Calls the `list` method with a filter parameter.
-            3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of services.
+            3. Asserts that the mocked object was called correctly.
+            4. Validates the returned list of objects.
         """
         mock_response = {
             "data": [
@@ -88,7 +88,7 @@ class TestServiceList(TestServiceBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        services = self.client.list(folder="Prisma Access")
+        existing_objects = self.client.list(folder="Prisma Access")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/services",
@@ -97,10 +97,10 @@ class TestServiceList(TestServiceBase):
                 "folder": "Prisma Access",
             },
         )
-        assert isinstance(services, list)
-        assert isinstance(services[0], ServiceResponseModel)
-        assert len(services) == 3
-        assert services[0].name == "service-http"
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], ServiceResponseModel)
+        assert len(existing_objects) == 3
+        assert existing_objects[0].name == "service-http"
 
 
 class TestServiceCreate(TestServiceBase):
@@ -108,29 +108,27 @@ class TestServiceCreate(TestServiceBase):
 
     def test_create_object(self):
         """
-        **Objective:** Test creating a new service.
+        **Objective:** Test creating a new object.
         **Workflow:**
             1. Creates test data using ServiceFactory.
             2. Mocks the API response.
             3. Calls create method and validates the result.
         """
-        test_service = ServiceFactory()
-        mock_response = test_service.model_dump()
+        test_object = ServiceFactory()
+        mock_response = test_object.model_dump()
         mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_service = self.client.create(
-            test_service.model_dump(exclude_unset=True)
-        )
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/services",
-            json=test_service.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
-        assert created_service.name == test_service.name
-        assert created_service.description == test_service.description
-        assert created_service.protocol == test_service.protocol
-        assert created_service.folder == test_service.folder
+        assert created_object.name == test_object.name
+        assert created_object.description == test_object.description
+        assert created_object.protocol == test_object.protocol
+        assert created_object.folder == test_object.folder
 
     def test_create_object_error_handling(self):
         """
@@ -201,14 +199,14 @@ class TestServiceGet(TestServiceBase):
 
     def test_get_object(self):
         """
-        **Objective:** Test retrieving a specific service.
+        **Objective:** Test retrieving a specific object.
         **Workflow:**
-            1. Mocks the API response for a specific service.
+            1. Mocks the API response for a specific object.
             2. Calls get method and validates the result.
         """
-        service_id = "5e7600f1-8681-4048-973b-4117da7e446c"
+        object_id = "5e7600f1-8681-4048-973b-4117da7e446c"
         mock_response = {
-            "id": service_id,
+            "id": object_id,
             "name": "Test",
             "folder": "Shared",
             "description": "This is just a test",
@@ -221,14 +219,14 @@ class TestServiceGet(TestServiceBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        service = self.client.get(service_id)
+        get_object = self.client.get(object_id)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/objects/v1/services/{service_id}"
+            f"/config/objects/v1/services/{object_id}"
         )
-        assert isinstance(service, ServiceResponseModel)
-        assert service.name == "Test"
-        assert service.protocol.tcp.port == "4433,4333,4999,9443"
+        assert isinstance(get_object, ServiceResponseModel)
+        assert get_object.name == "Test"
+        assert get_object.protocol.tcp.port == "4433,4333,4999,9443"
 
     def test_get_object_error_handling(self):
         """
@@ -282,7 +280,7 @@ class TestServiceUpdate(TestServiceBase):
 
     def test_update_object(self):
         """
-        **Objective:** Test updating a service.
+        **Objective:** Test updating a object.
         **Workflow:**
             1. Prepares update data and mocks response
             2. Verifies the update request and response
@@ -320,7 +318,7 @@ class TestServiceUpdate(TestServiceBase):
         self.mock_scm.put.return_value = mock_response  # noqa
 
         # Perform update
-        updated_service = self.client.update(update_data)
+        updated_object = self.client.update(update_data)
 
         # Verify correct endpoint and payload
         self.mock_scm.put.assert_called_once_with(  # noqa
@@ -329,12 +327,12 @@ class TestServiceUpdate(TestServiceBase):
         )
 
         # Verify response model
-        assert isinstance(updated_service, ServiceResponseModel)
-        assert isinstance(updated_service.id, UUID)
-        assert str(updated_service.id) == update_data["id"]
-        assert updated_service.name == "UpdatedService"
-        assert updated_service.description == "An updated service"
-        assert updated_service.protocol.tcp.port == "4433,4333,4999,9443"
+        assert isinstance(updated_object, ServiceResponseModel)
+        assert isinstance(updated_object.id, UUID)
+        assert str(updated_object.id) == update_data["id"]
+        assert updated_object.name == "UpdatedService"
+        assert updated_object.description == "An updated service"
+        assert updated_object.protocol.tcp.port == "4433,4333,4999,9443"
 
     def test_update_object_error_handling(self):
         """
@@ -521,7 +519,7 @@ class TestServiceFetch(TestServiceBase):
 
     def test_fetch_object(self):
         """
-        **Objective:** Test successful fetch of a service.
+        **Objective:** Test successful fetch of a object.
         **Workflow:**
             1. Mocks API response for a successful fetch
             2. Verifies correct parameter handling
@@ -867,7 +865,7 @@ class TestServiceListFilters(TestServiceBase):
             "protocols": ["tcp", "udp"],
             "tags": ["Tag1", "Tag2"],
         }
-        services = self.client.list(**filters)
+        filtered_objects = self.client.list(**filters)
 
         expected_params = {
             "limit": 10000,
@@ -877,7 +875,7 @@ class TestServiceListFilters(TestServiceBase):
             "/config/objects/v1/services",
             params=expected_params,
         )
-        assert len(services) == 2
+        assert len(filtered_objects) == 2
 
     def test_list_filters_protocol_validation(self):
         """
@@ -962,11 +960,11 @@ class TestServiceListFilters(TestServiceBase):
 
     def test_list_protocol_filtering(self):
         """
-        **Objective:** Test filtering services by protocol type.
+        **Objective:** Test filtering objects by protocol type.
         **Workflow:**
-            1. Sets up mock response with mixed protocol services
+            1. Sets up mock response with mixed protocol objects
             2. Tests filtering for TCP and UDP protocols
-            3. Verifies correct services are returned based on protocol
+            3. Verifies correct objects are returned based on protocol
         """
         mock_response = {
             "data": [
@@ -993,24 +991,22 @@ class TestServiceListFilters(TestServiceBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test TCP protocol filter
-        tcp_services = self.client.list(folder="Shared", protocol=["tcp"])
-        assert len(tcp_services) == 2
-        assert all(svc.protocol.tcp is not None for svc in tcp_services)
-        assert all(
-            svc.name in ["http-service", "https-service"] for svc in tcp_services
-        )
+        tcp_objects = self.client.list(folder="Shared", protocol=["tcp"])
+        assert len(tcp_objects) == 2
+        assert all(svc.protocol.tcp is not None for svc in tcp_objects)
+        assert all(svc.name in ["http-service", "https-service"] for svc in tcp_objects)
 
         # Test UDP protocol filter
-        udp_services = self.client.list(folder="Shared", protocol=["udp"])
-        assert len(udp_services) == 1
-        assert all(svc.protocol.udp is not None for svc in udp_services)
-        assert udp_services[0].name == "dns-service"
+        udp_objects = self.client.list(folder="Shared", protocol=["udp"])
+        assert len(udp_objects) == 1
+        assert all(svc.protocol.udp is not None for svc in udp_objects)
+        assert udp_objects[0].name == "dns-service"
 
         # Test multiple protocol filter
-        all_services = self.client.list(folder="Shared", protocol=["tcp", "udp"])
-        assert len(all_services) == 3
-        assert any(svc.protocol.tcp is not None for svc in all_services)
-        assert any(svc.protocol.udp is not None for svc in all_services)
+        all_objects = self.client.list(folder="Shared", protocol=["tcp", "udp"])
+        assert len(all_objects) == 3
+        assert any(svc.protocol.tcp is not None for svc in all_objects)
+        assert any(svc.protocol.udp is not None for svc in all_objects)
 
         # Verify API was called correctly
         self.mock_scm.get.assert_called_with(  # noqa
