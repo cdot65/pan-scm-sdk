@@ -46,12 +46,12 @@ class TestApplicationGroupList(TestApplicationGroupBase):
 
     def test_list_objects(self):
         """
-        **Objective:** Test listing all application groups.
+        **Objective:** Test listing all objects.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing application groups.
+            1. Sets up a mock response resembling the expected API response for listing objects.
             2. Calls the `list` method with a filter parameter.
             3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of application groups.
+            4. Validates the returned list of objects.
         """
         mock_response = {
             "data": [
@@ -85,7 +85,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        application_groups = self.client.list(folder="Prisma Access")
+        existing_objects = self.client.list(folder="Prisma Access")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
@@ -94,11 +94,11 @@ class TestApplicationGroupList(TestApplicationGroupBase):
                 "folder": "Prisma Access",
             },
         )
-        assert isinstance(application_groups, list)
-        assert isinstance(application_groups[0], ApplicationGroupResponseModel)
-        assert len(application_groups) == 2
-        assert application_groups[0].name == "Microsoft 365 Access"
-        assert application_groups[0].members == [
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], ApplicationGroupResponseModel)
+        assert len(existing_objects) == 2
+        assert existing_objects[0].name == "Microsoft 365 Access"
+        assert existing_objects[0].members == [
             "office365-consumer-access",
             "office365-enterprise-access",
         ]
@@ -109,30 +109,28 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
 
     def test_create_object(self):
         """
-        **Objective:** Test creating an application group.
+        **Objective:** Test creating an object.
         **Workflow:**
             1. Uses ApplicationGroupFactory to create test data.
             2. Mocks the API response.
             3. Verifies the creation request and response.
         """
-        test_application_group = ApplicationGroupFactory()
-        mock_response = test_application_group.model_dump()
+        test_object = ApplicationGroupFactory()
+        mock_response = test_object.model_dump()
         mock_response["name"] = "ValidStaticApplicationGroup"
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_application_group.model_dump(exclude_unset=True)
-        )
+        created_group = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
-            json=test_application_group.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
         assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_application_group.name
-        assert created_group.members == test_application_group.members
-        assert created_group.folder == test_application_group.folder
+        assert created_group.name == test_object.name
+        assert created_group.members == test_object.members
+        assert created_group.folder == test_object.folder
 
     def test_create_object_error_handling(self):
         """
@@ -203,7 +201,7 @@ class TestApplicationGroupGet(TestApplicationGroupBase):
 
     def test_get_object(self):
         """
-        **Objective:** Test retrieving a specific application group.
+        **Objective:** Test retrieving a specific object.
         **Workflow:**
             1. Mocks the API response for a specific group.
             2. Verifies the get request and response handling.
@@ -216,14 +214,14 @@ class TestApplicationGroupGet(TestApplicationGroupBase):
 
         self.mock_scm.get.return_value = mock_response  # noqa
         app_group_name = "TestAppGroup"
-        application = self.client.get(app_group_name)
+        get_object = self.client.get(app_group_name)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/application-groups/{app_group_name}"
         )
-        assert isinstance(application, ApplicationGroupResponseModel)
-        assert application.name == "TestAppGroup"
-        assert application.members == [
+        assert isinstance(get_object, ApplicationGroupResponseModel)
+        assert get_object.name == "TestAppGroup"
+        assert get_object.members == [
             "office365-consumer-access",
             "office365-enterprise-access",
         ]
@@ -280,7 +278,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
 
     def test_update_object(self):
         """
-        **Objective:** Test updating an application group.
+        **Objective:** Test updating an object.
         **Workflow:**
             1. Prepares update data and mocks response
             2. Verifies the update request and response
@@ -611,7 +609,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
 
     def test_fetch_unexpected_response_format(self):
         """
-        Test fetching an application when the API returns an unexpected response format.
+        Test fetching an object when the API returns an unexpected response format.
 
         **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
         **Workflow:**
