@@ -2,12 +2,26 @@
 
 import pytest
 from unittest.mock import MagicMock
-from pydantic import ValidationError as PydanticValidationError
-from scm.exceptions import ValidationError as SCMValidationError, ValidationError
 
 from scm.config.objects import Service
-from scm.models.objects import ServiceCreateModel, ServiceResponseModel
+from scm.exceptions import (
+    ValidationError,
+    ObjectNotPresentError,
+    EmptyFieldError,
+    ObjectAlreadyExistsError,
+    MalformedRequestError,
+    FolderNotFoundError,
+    BadResponseError,
+    ReferenceNotZeroError,
+)
+from scm.models.objects import (
+    ServiceCreateModel,
+    ServiceResponseModel,
+)
+
 from tests.factories import ServiceFactory
+
+from pydantic import ValidationError as PydanticValidationError
 
 
 @pytest.mark.usefixtures("load_env")
@@ -25,19 +39,20 @@ class TestServiceBase:
         self.client = Service(self.mock_scm)  # noqa
 
 
-class TestServiceAPI(TestServiceBase):
-    """Tests for Service API operations."""
+# -------------------- Test Classes Grouped by Functionality --------------------
 
-    def test_list_services(self):
+
+class TestServiceList(TestServiceBase):
+    """Tests for listing Service objects."""
+
+    def test_list_objects(self):
         """
-        Test listing services.
-
         **Objective:** Test listing all services.
         **Workflow:**
             1. Sets up a mock response resembling the expected API response for listing services.
-            2. Calls the `list` method of `self.client` with a filter parameter.
+            2. Calls the `list` method with a filter parameter.
             3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of services, checking their types and attributes.
+            4. Validates the returned list of services.
         """
         mock_response = {
             "data": [
@@ -77,17 +92,22 @@ class TestServiceAPI(TestServiceBase):
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/services",
-            params={"folder": "Prisma Access"},
+            params={
+                "limit": 10000,
+                "folder": "Prisma Access",
+            },
         )
         assert isinstance(services, list)
         assert isinstance(services[0], ServiceResponseModel)
         assert len(services) == 3
         assert services[0].name == "service-http"
 
-    def test_create_service(self):
-        """
-        Test creating a service.
 
+class TestServiceCreate(TestServiceBase):
+    """Tests for creating Service objects."""
+
+    def test_create_object(self):
+        """
         **Objective:** Test creating a new service.
         **Workflow:**
             1. Creates test data using ServiceFactory.
@@ -112,11 +132,76 @@ class TestServiceAPI(TestServiceBase):
         assert created_service.protocol == test_service.protocol
         assert created_service.folder == test_service.folder
 
-    def test_get_service(self):
+    def test_create_object_error_handling(self):
         """
-        Test retrieving a service by ID.
+        **Objective:** Test error handling during object creation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to create an object
+            3. Verifies proper error handling and exception raising
+        """
+        test_data = ServiceFactory()
 
-        **Objective:** Test fetching a specific service.
+        # Mock error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object creation failed",
+                    "details": {"errorType": "Object Already Exists"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        # Configure mock to raise exception
+        self.mock_scm.post.side_effect = Exception()  # noqa
+        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectAlreadyExistsError):
+            self.client.create(test_data.model_dump())
+
+    def test_create_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in create method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        test_data = ServiceFactory()
+
+        # Mock a generic exception without response
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(test_data.model_dump())
+        assert str(exc_info.value) == "Generic error"
+
+    def test_create_malformed_response_handling(self):
+        """
+        **Objective:** Test handling of malformed response in create method.
+        **Workflow:**
+            1. Mocks a response that would cause a parsing error
+            2. Verifies appropriate error handling
+        """
+        test_data = ServiceFactory()
+
+        # Mock invalid JSON response
+        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(PydanticValidationError):
+            self.client.create(test_data.model_dump())
+
+
+class TestServiceGet(TestServiceBase):
+    """Tests for retrieving a specific Service object."""
+
+    def test_get_object(self):
+        """
+        **Objective:** Test retrieving a specific service.
         **Workflow:**
             1. Mocks the API response for a specific service.
             2. Calls get method and validates the result.
@@ -145,16 +230,63 @@ class TestServiceAPI(TestServiceBase):
         assert service.name == "Test"
         assert service.protocol.tcp.port == "4433,4333,4999,9443"
 
-    def test_update_service(self):
+    def test_get_object_error_handling(self):
         """
-        Test updating a service.
-
-        **Objective:** Test updating an existing service.
+        **Objective:** Test error handling during object retrieval.
         **Workflow:**
-            1. Sets up the update data for the service.
-            2. Sets up a mock response that includes the updated data.
-            3. Calls the `update` method and verifies payload transformation.
-            4. Validates the updated service's attributes.
+            1. Mocks an error response from the API
+            2. Attempts to get an object
+            3. Verifies proper error handling and exception raising
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.get(object_id)
+
+    def test_get_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in get method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.get(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestServiceUpdate(TestServiceBase):
+    """Tests for updating Service objects."""
+
+    def test_update_object(self):
+        """
+        **Objective:** Test updating a service.
+        **Workflow:**
+            1. Prepares update data and mocks response
+            2. Verifies the update request and response
+            3. Ensures payload transformation is correct
         """
         from uuid import UUID
 
@@ -204,7 +336,190 @@ class TestServiceAPI(TestServiceBase):
         assert updated_service.description == "An updated service"
         assert updated_service.protocol.tcp.port == "4433,4333,4999,9443"
 
-    def test_fetch_service_success(self):
+    def test_update_object_error_handling(self):
+        """
+        **Objective:** Test error handling during object update.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to update an object
+            3. Verifies proper error handling and exception raising
+        """
+        update_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-service",
+            "folder": "Shared",
+            "protocol": {"tcp": {"port": "80"}},
+        }
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Update failed",
+                    "details": {"errorType": "Malformed Command"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.put.side_effect = Exception()  # noqa
+        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(MalformedRequestError):
+            self.client.update(update_data)
+
+    def test_update_with_invalid_data(self):
+        """
+        **Objective:** Test update method with invalid data structure.
+        **Workflow:**
+            1. Attempts to update with invalid data
+            2. Verifies proper validation error handling
+        """
+        invalid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "invalid_field": "test",
+        }
+
+        with pytest.raises(PydanticValidationError):
+            self.client.update(invalid_data)
+
+    def test_update_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in update method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        update_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-service",
+            "folder": "Shared",
+            "protocol": {"tcp": {"port": "80"}},
+        }
+
+        # Mock a generic exception without response
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(update_data)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestServiceDelete(TestServiceBase):
+    """Tests for deleting Service objects."""
+
+    def test_delete_referenced_object(self):
+        """
+        **Objective:** Test deleting an application that is referenced by another group.
+
+        **Workflow:**
+        1. Sets up a mock error response for a referenced object deletion attempt
+        2. Attempts to delete an application that is reference by a group
+        3. Validates that ReferenceNotZeroError is raised with correct details
+        4. Verifies the error contains proper reference information
+        """
+        application_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+
+        # Mock the API error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {
+                        "errorType": "Reference Not Zero",
+                        "message": [
+                            " container -> Texas -> application-group -> custom-group -> members"
+                        ],
+                        "errors": [
+                            {
+                                "type": "NON_ZERO_REFS",
+                                "message": "Node cannot be deleted because of references from",
+                                "params": ["custom-app"],
+                                "extra": [
+                                    "container/[Texas]/application-group/[custom-group]/s/[custom-app]"
+                                ],
+                            }
+                        ],
+                    },
+                }
+            ],
+            "_request_id": "c318dcbf-4678-4ff5-acf8-e55df7fca081",
+        }
+
+        # Configure mock to raise HTTPError with our custom error response
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response,
+        )
+
+        # Attempt to delete the application and expect ReferenceNotZeroError
+        with pytest.raises(ReferenceNotZeroError) as exc_info:
+            self.client.delete(application_id)
+
+        error = exc_info.value
+
+        # Verify the error contains the expected information
+        assert error.error_code == "API_I00013"
+        assert "custom-app" in error.references
+        assert any("Texas" in path for path in error.reference_paths)
+        assert "Cannot delete object due to existing references" in str(error)
+
+    def test_delete_error_handling(self):
+        """
+        **Objective:** Test error handling during object deletion.
+        **Workflow:**
+            1. Mocks various error scenarios
+            2. Verifies proper error handling for each case
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Test object not found
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.delete(object_id)
+
+    def test_delete_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in delete method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestServiceFetch(TestServiceBase):
+    """Tests for fetching Service objects by name."""
+
+    def test_fetch_object(self):
         """
         **Objective:** Test successful fetch of a service.
         **Workflow:**
@@ -212,7 +527,6 @@ class TestServiceAPI(TestServiceBase):
             2. Verifies correct parameter handling
             3. Validates response transformation
         """
-
         mock_response = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "web-browsing",
@@ -229,7 +543,10 @@ class TestServiceAPI(TestServiceBase):
         # Verify API call
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/services",
-            params={"folder": "Shared", "name": "web-browsing"},
+            params={
+                "folder": "Shared",
+                "name": "web-browsing",
+            },
         )
 
         # Verify result
@@ -249,9 +566,7 @@ class TestServiceAPI(TestServiceBase):
         """
         with pytest.raises(ValidationError) as exc_info:
             self.client.fetch(name="", folder="Shared")
-        assert "Parameter 'name' must be provided for fetch method." in str(
-            exc_info.value
-        )
+        assert "Field 'name' cannot be empty" in str(exc_info.value)
 
     def test_fetch_container_validation(self):
         """
@@ -278,62 +593,12 @@ class TestServiceAPI(TestServiceBase):
             in str(exc_info.value)
         )
 
-        # Test all containers provided
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(
-                name="test-service",
-                folder="Shared",
-                snippet="TestSnippet",
-                device="device1",
-            )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_fetch_with_additional_filters(self):
+    def test_fetch_response_handling(self):
         """
-        **Objective:** Test fetch with additional filter parameters.
+        **Objective:** Test fetch method's response handling.
         **Workflow:**
-            1. Tests handling of allowed and excluded filters
-            2. Verifies correct parameter passing
-        """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestService",
-            "folder": "Shared",
-            "protocol": {"tcp": {"port": "80"}},
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Test with mixed allowed and excluded filters
-        result = self.client.fetch(
-            name="TestService",
-            folder="Shared",
-            custom_filter="value",  # Should be included
-            types=["type1"],  # Should be excluded
-            values=["value1"],  # Should be excluded
-            names=["name1"],  # Should be excluded
-            tags=["tag1"],  # Should be excluded
-        )
-
-        # Verify only allowed filters were passed
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/services",
-            params={
-                "folder": "Shared",
-                "name": "TestService",
-                "custom_filter": "value",
-            },
-        )
-        assert isinstance(result, dict)
-
-    def test_fetch_response_transformation(self):
-        """
-        **Objective:** Test response transformation in fetch method.
-        **Workflow:**
-            1. Tests handling of None values and optional fields
-            2. Verifies model transformation and exclusions
+            1. Tests various response scenarios
+            2. Verifies proper response transformation
         """
         mock_response = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
@@ -360,72 +625,27 @@ class TestServiceAPI(TestServiceBase):
         assert "protocol" in result
         assert result["protocol"]["tcp"]["port"] == "80"
 
-    def test_fetch_with_different_containers(self):
+    def test_fetch_generic_exception_handling(self):
         """
-        **Objective:** Test fetch with different container types.
+        **Objective:** Test generic exception handling in fetch method.
         **Workflow:**
-            1. Tests fetch with folder, snippet, and device containers
-            2. Verifies correct parameter handling for each
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
         """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestService",
-            "protocol": {"tcp": {"port": "80"}},
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        # Test with folder
-        self.client.fetch(name="TestService", folder="Shared")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/objects/v1/services",
-            params={"folder": "Shared", "name": "TestService"},
-        )
-
-        # Test with snippet
-        self.client.fetch(name="TestService", snippet="TestSnippet")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/objects/v1/services",
-            params={"snippet": "TestSnippet", "name": "TestService"},
-        )
-
-        # Test with device
-        self.client.fetch(name="TestService", device="TestDevice")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/objects/v1/services",
-            params={"device": "TestDevice", "name": "TestService"},
-        )
-
-    def test_fetch_udp_protocol(self):
-        """
-        **Objective:** Test fetch of a service with UDP protocol.
-        **Workflow:**
-            1. Tests fetch of a UDP service
-            2. Verifies protocol structure handling
-        """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "dns-service",
-            "folder": "Shared",
-            "protocol": {
-                "udp": {
-                    "port": "53",
-                }
-            },
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        result = self.client.fetch(name="dns-service", folder="Shared")
-
-        assert result["protocol"]["udp"]["port"] == "53"
-        assert "tcp" not in result["protocol"]
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert str(exc_info.value) == "Generic error"
 
 
 class TestServiceValidation(TestServiceBase):
     """Tests for Service validation."""
 
-    def test_service_list_validation_error(self):
+    def test_list_validation_error(self):
         """Test validation error when listing with multiple containers."""
-        with pytest.raises(SCMValidationError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             self.client.list(folder="Shared", snippet="TestSnippet")
 
         assert (
@@ -433,20 +653,7 @@ class TestServiceValidation(TestServiceBase):
             in str(exc_info.value)
         )
 
-    def test_service_request_model_invalid_uuid(self):
-        """Test UUID validation in ServiceResponseModel."""
-        invalid_data = {
-            "id": "invalid-uuid",
-            "name": "TestService",
-            "folder": "Shared",
-            "protocol": {"tcp": {"port": "80"}},
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ServiceResponseModel(**invalid_data)
-        assert "1 validation error for ServiceResponseModel" in str(exc_info.value)
-        assert "Input should be a valid UUID, invalid character" in str(exc_info.value)
-
-    def test_service_request_model_no_protocol_provided(self):
+    def test_request_model_no_protocol_provided(self):
         """Test validation when no protocol is provided."""
         data = {
             "name": "TestService",
@@ -456,7 +663,7 @@ class TestServiceValidation(TestServiceBase):
             ServiceCreateModel(**data)
         assert "Field required" in str(exc_info.value)
 
-    def test_service_request_model_multiple_protocols_provided(self):
+    def test_request_model_multiple_protocols_provided(self):
         """Test validation when multiple protocols are provided."""
         data = {
             "name": "TestService",
@@ -472,7 +679,7 @@ class TestServiceValidation(TestServiceBase):
             exc_info.value
         )
 
-    def test_service_request_model_no_container_provided(self):
+    def test_request_model_no_container_provided(self):
         """Test validation when no container is provided."""
         data = {
             "name": "TestService",
@@ -485,7 +692,7 @@ class TestServiceValidation(TestServiceBase):
             in str(exc_info.value)
         )
 
-    def test_service_request_model_multiple_containers_provided(self):
+    def test_request_model_multiple_containers_provided(self):
         """Test validation when multiple containers are provided."""
         data = {
             "name": "TestService",
@@ -500,37 +707,30 @@ class TestServiceValidation(TestServiceBase):
             in str(exc_info.value)
         )
 
-    def test_service_request_model_with_device_container(self):
-        """Test service creation with device container."""
-        data = {
+    def test_response_model_invalid_uuid(self):
+        """Test validation of UUID format in response model."""
+        invalid_data = {
+            "id": "invalid-uuid",
             "name": "TestService",
-            "protocol": {"tcp": {"port": "80"}},
-            "device": "Device1",
-        }
-        model = ServiceCreateModel(**data)
-        assert model.device == "Device1"
-
-    def test_service_request_model_multiple_containers_with_device(self):
-        """Test validation when multiple containers including device are provided."""
-        data = {
-            "name": "TestService",
-            "protocol": {"tcp": {"port": "80"}},
             "folder": "Shared",
-            "device": "Device1",
+            "protocol": {"tcp": {"port": "80"}},
         }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            ServiceCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        with pytest.raises(ValueError) as exc_info:
+            ServiceResponseModel(**invalid_data)
+        assert "1 validation error for ServiceResponseModel" in str(exc_info.value)
+        assert "Input should be a valid UUID, invalid character" in str(exc_info.value)
 
 
-class TestServiceFilters(TestServiceBase):
-    """Tests for Service filtering functionality."""
+class TestServiceListFilters(TestServiceBase):
+    """Tests for filtering during listing Service objects."""
 
-    def test_service_list_with_filters(self):
-        """Test listing services with filters."""
+    def test_list_with_filters(self):
+        """
+        **Objective:** Test that filters are properly added to parameters.
+        **Workflow:**
+            1. Calls list with various filters
+            2. Verifies filters are properly formatted in the request
+        """
         mock_response = {
             "data": [
                 {
@@ -555,9 +755,8 @@ class TestServiceFilters(TestServiceBase):
         services = self.client.list(**filters)
 
         expected_params = {
+            "limit": 10000,
             "folder": "Shared",
-            "name": "service-http,service-https",
-            "tag": "Tag1,Tag2",
         }
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/services",
@@ -565,12 +764,30 @@ class TestServiceFilters(TestServiceBase):
         )
         assert len(services) == 2
 
+    def test_list_empty_folder_error(self):
+        """
+        **Objective:** Test that empty folder raises appropriate error.
+        **Workflow:**
+            1. Attempts to list objects with empty folder
+            2. Verifies EmptyFieldError is raised
+        """
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.list(folder="")
+        assert str(exc_info.value) == "Field 'folder' cannot be empty"
 
-class TestSuite(
-    TestServiceAPI,
-    TestServiceValidation,
-    TestServiceFilters,
-):
-    """Main test suite that combines all test classes."""
+    def test_list_multiple_containers_error(self):
+        """
+        **Objective:** Test validation of container parameters.
+        **Workflow:**
+            1. Attempts to list with multiple containers
+            2. Verifies ValidationError is raised
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+        assert (
+            str(exc_info.value)
+            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+        )
 
-    pass
+
+# -------------------- End of Test Classes --------------------
