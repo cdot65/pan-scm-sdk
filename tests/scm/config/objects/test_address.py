@@ -130,12 +130,12 @@ class TestAddressList(TestAddressBase):
 
     def test_object_list_valid(self):
         """
-        **Objective:** Test listing all addresses.
+        **Objective:** Test listing all objects.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing addresses.
+            1. Sets up a mock response resembling the expected API response for listing objects.
             2. Calls the `list` method with a filter parameter.
             3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of addresses.
+            4. Validates the returned list of objects.
         """
         mock_response = {
             "data": [
@@ -163,7 +163,7 @@ class TestAddressList(TestAddressBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        addresses = self.client.list(folder="All")
+        existing_objects = self.client.list(folder="All")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
@@ -172,10 +172,10 @@ class TestAddressList(TestAddressBase):
                 "folder": "All",
             },
         )
-        assert isinstance(addresses, list)
-        assert isinstance(addresses[0], AddressResponseModel)
-        assert len(addresses) == 2
-        assert addresses[0].name == "Palo Alto Networks Sinkhole"
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], AddressResponseModel)
+        assert len(existing_objects) == 2
+        assert existing_objects[0].name == "Palo Alto Networks Sinkhole"
 
     def test_object_list_multiple_containers(self):
         """Test validation error when listing with multiple containers."""
@@ -199,107 +199,107 @@ class TestAddressCreate(TestAddressBase):
             2. Mocks the API response.
             3. Verifies the creation request and response.
         """
-        test_address = AddressCreateIpNetmaskFactory()
-        mock_response = test_address.model_dump()
+        test_objects = AddressCreateIpNetmaskFactory()
+        mock_response = test_objects.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_address = self.client.create(
-            test_address.model_dump(exclude_unset=True)
+        created_objects = self.client.create(
+            test_objects.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_address.model_dump(exclude_unset=True),
+            json=test_objects.model_dump(exclude_unset=True),
         )
-        assert str(created_address.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_address.name == test_address.name
-        assert created_address.ip_netmask == test_address.ip_netmask
-        assert created_address.folder == test_address.folder
+        assert str(created_objects.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert created_objects.name == test_objects.name
+        assert created_objects.ip_netmask == test_objects.ip_netmask
+        assert created_objects.folder == test_objects.folder
 
     def test_create_object_type_fqdn(self):
         """
-        **Objective:** Test creating an address object of type fqdn.
+        **Objective:** Test creating an object of type fqdn.
         **Workflow:**
             1. Uses `AddressCreateFqdnFactory` to create an object.
             2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the address data.
+            3. Calls the `create` method of `self.client` with the object data.
             4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created address group's attributes.
+            5. Validates the created object's attributes.
         """
-        test_address_fqdn = AddressCreateFqdnFactory()
-        mock_response = test_address_fqdn.model_dump()
+        test_objects_fqdn = AddressCreateFqdnFactory()
+        mock_response = test_objects_fqdn.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
         created_group = self.client.create(
-            test_address_fqdn.model_dump(exclude_unset=True)
+            test_objects_fqdn.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_address_fqdn.model_dump(exclude_unset=True),
+            json=test_objects_fqdn.model_dump(exclude_unset=True),
         )
         assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_address_fqdn.name
-        assert created_group.fqdn == test_address_fqdn.fqdn
-        assert created_group.folder == test_address_fqdn.folder
+        assert created_group.name == test_objects_fqdn.name
+        assert created_group.fqdn == test_objects_fqdn.fqdn
+        assert created_group.folder == test_objects_fqdn.folder
 
     def test_create_object_type_ip_range(self):
         """
-        **Objective:** Test creating an address object of type ip-range.
+        **Objective:** Test creating an object of type ip-range.
         **Workflow:**
             1. Uses `AddressCreateIpRangeFactory` to create an object.
             2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the address data.
+            3. Calls the `create` method of `self.client` with the object data.
             4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created address group's attributes.
+            5. Validates the created object's attributes.
         """
-        test_address_ip_range = AddressCreateIpRangeFactory()
-        mock_response = test_address_ip_range.model_dump()
+        test_objects_ip_range = AddressCreateIpRangeFactory()
+        mock_response = test_objects_ip_range.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
         created_group = self.client.create(
-            test_address_ip_range.model_dump(exclude_unset=True)
+            test_objects_ip_range.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_address_ip_range.model_dump(exclude_unset=True),
+            json=test_objects_ip_range.model_dump(exclude_unset=True),
         )
         assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_address_ip_range.name
-        assert created_group.ip_range == test_address_ip_range.ip_range
-        assert created_group.folder == test_address_ip_range.folder
+        assert created_group.name == test_objects_ip_range.name
+        assert created_group.ip_range == test_objects_ip_range.ip_range
+        assert created_group.folder == test_objects_ip_range.folder
 
     def test_create_object_type_ip_wildcard(self):
         """
-        **Objective:** Test creating an address object of type ip-wildcard.
+        **Objective:** Test creating an object of type ip-wildcard.
         **Workflow:**
             1. Uses `AddressCreateIpWildcardFactory` to create an object.
             2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the address data.
+            3. Calls the `create` method of `self.client` with the object data.
             4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created address group's attributes.
+            5. Validates the created object's attributes.
         """
-        test_address_ip_wildcard = AddressCreateIpWildcardFactory()
-        mock_response = test_address_ip_wildcard.model_dump()
+        test_objects_ip_wildcard = AddressCreateIpWildcardFactory()
+        mock_response = test_objects_ip_wildcard.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
         created_group = self.client.create(
-            test_address_ip_wildcard.model_dump(exclude_unset=True)
+            test_objects_ip_wildcard.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_address_ip_wildcard.model_dump(exclude_unset=True),
+            json=test_objects_ip_wildcard.model_dump(exclude_unset=True),
         )
         assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_address_ip_wildcard.name
-        assert created_group.ip_wildcard == test_address_ip_wildcard.ip_wildcard
-        assert created_group.folder == test_address_ip_wildcard.folder
+        assert created_group.name == test_objects_ip_wildcard.name
+        assert created_group.ip_wildcard == test_objects_ip_wildcard.ip_wildcard
+        assert created_group.folder == test_objects_ip_wildcard.folder
 
     def test_create_object_error_handling(self):
         """
@@ -370,9 +370,9 @@ class TestAddressGet(TestAddressBase):
 
     def test_get_object(self):
         """
-        **Objective:** Test retrieving a specific address.
+        **Objective:** Test retrieving a specific object.
         **Workflow:**
-            1. Mocks the API response for a specific address.
+            1. Mocks the API response for a specific object.
             2. Verifies the get request and response handling.
         """
         mock_response = {
@@ -383,15 +383,15 @@ class TestAddressGet(TestAddressBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        address_id = "b44a8c00-7555-4021-96f0-d59deecd54e8"
-        address = self.client.get(address_id)
+        object_id = "b44a8c00-7555-4021-96f0-d59deecd54e8"
+        get_object = self.client.get(object_id)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/objects/v1/addresses/{address_id}"
+            f"/config/objects/v1/addresses/{object_id}"
         )
-        assert isinstance(address, AddressResponseModel)
-        assert address.name == "TestAddress"
-        assert address.ip_netmask == "10.0.0.0/24"
+        assert isinstance(get_object, AddressResponseModel)
+        assert get_object.name == "TestAddress"
+        assert get_object.ip_netmask == "10.0.0.0/24"
 
     def test_get_object_error_handling(self):
         """
@@ -445,7 +445,7 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_object(self):
         """
-        **Objective:** Test updating an address.
+        **Objective:** Test updating an object.
         **Workflow:**
             1. Prepares update data and mocks response
             2. Verifies the update request and response
@@ -485,7 +485,7 @@ class TestAddressUpdate(TestAddressBase):
         self.mock_scm.put.return_value = mock_response  # noqa
 
         # Perform update
-        updated_address = self.client.update(update_data)
+        updated_object = self.client.update(update_data)
 
         # Verify correct endpoint and payload
         self.mock_scm.put.assert_called_once_with(  # noqa
@@ -494,15 +494,15 @@ class TestAddressUpdate(TestAddressBase):
         )
 
         # Verify response model
-        assert isinstance(updated_address, AddressResponseModel)
-        assert isinstance(updated_address.id, UUID)  # Verify it's a UUID object
-        assert updated_address.id == test_uuid  # Compare against UUID object
+        assert isinstance(updated_object, AddressResponseModel)
+        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
+        assert updated_object.id == test_uuid  # Compare against UUID object
         assert (
-            str(updated_address.id) == update_data["id"]
+            str(updated_object.id) == update_data["id"]
         )  # Compare string representations
-        assert updated_address.name == "TestAddress"
-        assert updated_address.ip_netmask == "10.0.0.0/24"
-        assert updated_address.folder == "Shared"
+        assert updated_object.name == "TestAddress"
+        assert updated_object.ip_netmask == "10.0.0.0/24"
+        assert updated_object.folder == "Shared"
 
     def test_update_object_error_handling(self):
         """
@@ -581,18 +581,18 @@ class TestAddressDelete(TestAddressBase):
 
     def test_delete_referenced_object(self):
         """
-        Test deleting an address that is referenced by other objects.
+        Test deleting an object that is referenced by other objects.
 
-        **Objective:** Verify that attempting to delete an address that is referenced
+        **Objective:** Verify that attempting to delete an object that is referenced
         by other objects raises a ReferenceNotZeroError with proper reference details.
 
         **Workflow:**
             1. Sets up a mock error response for a referenced object deletion attempt
-            2. Attempts to delete an address that is referenced by other objects
+            2. Attempts to delete an object that is referenced by other objects
             3. Validates that ReferenceNotZeroError is raised with correct details
             4. Verifies the error contains proper reference information
         """
-        address_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
 
         # Mock the API error response
         mock_error_response = {
@@ -628,9 +628,9 @@ class TestAddressDelete(TestAddressBase):
             return_value=mock_error_response
         )
 
-        # Attempt to delete the address and expect ReferenceNotZeroError
+        # Attempt to delete the object and expect ReferenceNotZeroError
         with pytest.raises(ReferenceNotZeroError) as exc_info:
-            self.client.delete(address_id)
+            self.client.delete(object_id)
 
         error = exc_info.value
 
@@ -642,7 +642,7 @@ class TestAddressDelete(TestAddressBase):
 
         # Verify the delete method was called with correct endpoint
         self.mock_scm.delete.assert_called_once_with(  # noqa
-            f"/config/objects/v1/addresses/{address_id}"
+            f"/config/objects/v1/addresses/{object_id}"
         )
 
         # Verify detailed error message includes reference path
@@ -734,7 +734,7 @@ class TestAddressFetch(TestAddressBase):
             },
         )
 
-        # Validate the returned address
+        # Validate the returned object
         assert isinstance(fetched_object, dict)
         assert str(fetched_object["id"]) == mock_response["id"]
         assert fetched_object["name"] == mock_response["name"]
@@ -751,7 +751,7 @@ class TestAddressFetch(TestAddressBase):
             2. Calls the `fetch` method with a name that does not exist.
             3. Asserts that NotFoundError is raised.
         """
-        address_name = "NonExistent"
+        object_name = "NonExistent"
         folder_name = "Shared"
         mock_response = {
             "_errors": [
@@ -769,13 +769,13 @@ class TestAddressFetch(TestAddressBase):
         # Call the fetch method and expect a NotFoundError
         with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
             self.client.fetch(
-                name=address_name,
+                name=object_name,
                 folder=folder_name,
             )
 
     def test_fetch_empty_name(self):
         """
-        Test fetching an address without providing the 'name' parameter.
+        Test fetching an object without providing the 'name' parameter.
 
         **Objective:** Ensure that the fetch method raises ValidationError when 'name' is not provided.
         **Workflow:**
@@ -815,9 +815,9 @@ class TestAddressFetch(TestAddressBase):
             in str(exc_info.value)
         )
 
-    def test_fetch_address_unexpected_response_format(self):
+    def test_fetch_object_unexpected_response_format(self):
         """
-        Test fetching an address group when the API returns an unexpected response format.
+        Test fetching an object when the API returns an unexpected response format.
 
         **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
         **Workflow:**
@@ -938,7 +938,7 @@ class TestAddressTagValidation(TestAddressBase):
 
         **Objective:** Verify that a single string tag is properly converted to a list.
         **Workflow:**
-            1. Creates an address with a single string tag
+            1. Creates an object with a single string tag
             2. Validates the tag is converted to a single-item list
         """
         data = {
@@ -957,7 +957,7 @@ class TestAddressTagValidation(TestAddressBase):
 
         **Objective:** Verify that a list of tags is properly handled.
         **Workflow:**
-            1. Creates an address with multiple tags as a list
+            1. Creates an object with multiple tags as a list
             2. Validates the tags remain as a list
         """
         data = {
@@ -976,7 +976,7 @@ class TestAddressTagValidation(TestAddressBase):
 
         **Objective:** Verify that non-string/non-list tag values raise ValueError.
         **Workflow:**
-            1. Attempts to create an address with an invalid tag type (dict)
+            1. Attempts to create an object with an invalid tag type (dict)
             2. Validates that appropriate error is raised
         """
         data = {
@@ -995,7 +995,7 @@ class TestAddressTagValidation(TestAddressBase):
 
         **Objective:** Verify that duplicate tags raise ValueError.
         **Workflow:**
-            1. Attempts to create an address with duplicate tags
+            1. Attempts to create an object with duplicate tags
             2. Validates that appropriate error is raised
         """
         data = {
@@ -1141,32 +1141,32 @@ class TestAddressListFilters(TestAddressBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test combining types and tags filters
-        filtered_addresses = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             types=["netmask"],
             tags=["tag1"],
         )
-        assert len(filtered_addresses) == 1
-        assert filtered_addresses[0].name == "test-address1"
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test-address1"
 
         # Test combining values and tags filters
-        filtered_addresses = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             values=["10.0.0.0/24"],
             tags=["tag2"],
         )
-        assert len(filtered_addresses) == 1
-        assert filtered_addresses[0].name == "test-address1"
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test-address1"
 
         # Test all filters together
-        filtered_addresses = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             types=["netmask"],
             values=["10.0.0.0/24"],
             tags=["tag1"],
         )
-        assert len(filtered_addresses) == 1
-        assert filtered_addresses[0].name == "test-address1"
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test-address1"
 
     def test_list_empty_filter_lists(self):
         """
@@ -1189,23 +1189,23 @@ class TestAddressListFilters(TestAddressBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Empty lists should result in no matches
-        filtered_addresses = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             types=[],
         )
-        assert len(filtered_addresses) == 0
+        assert len(filtered_objects) == 0
 
-        filtered_addresses = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             values=[],
         )
-        assert len(filtered_addresses) == 0
+        assert len(filtered_objects) == 0
 
-        filtered_addresses = self.client.list(
+        filtered_objects = self.client.list(
             folder="Shared",
             tags=[],
         )
-        assert len(filtered_addresses) == 0
+        assert len(filtered_objects) == 0
 
     def test_list_empty_folder_error(self):
         """
