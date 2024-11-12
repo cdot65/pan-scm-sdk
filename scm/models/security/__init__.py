@@ -24,8 +24,8 @@ from .security_rules import (
 )
 from .vulnerability_protection_profiles import (
     VulnerabilityProtectionProfileCreateModel,
-    VulnerabilityProtectionProfileResponseModelModel,
-    VulnerabilityProtectionProfileUpdateModelModel,
+    VulnerabilityProtectionProfileResponseModel,
+    VulnerabilityProtectionProfileUpdateModel,
 )
 from .wildfire_antivirus_profiles import (
     WildfireAntivirusProfileCreateModel,
