@@ -16,9 +16,10 @@ from .dns_security_profiles import (
     DNSSecurityProfileUpdateModel,
 )
 from .security_rules import (
-    SecurityRuleRequestModel,
+    SecurityRuleCreateModel,
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
+    SecurityRuleUpdateModel,
     Rulebase,
 )
 from .vulnerability_protection_profiles import (
