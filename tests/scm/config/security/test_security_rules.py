@@ -1085,7 +1085,7 @@ class TestRulebaseValidation(TestSecurityRuleBase):
         Tests various invalid rulebase values and ensures proper error handling.
         """
         # Mock a valid response
-        self.mock_scm.get.return_value = {
+        self.mock_scm.get.return_value = {  # noqa
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-rule",
             "folder": "Shared",
@@ -1117,7 +1117,7 @@ class TestRulebaseValidation(TestSecurityRuleBase):
         Verifies that the case conversion works correctly.
         """
         # Mock a valid response
-        self.mock_scm.get.return_value = {
+        self.mock_scm.get.return_value = {  # noqa
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-rule",
             "folder": "Shared",
