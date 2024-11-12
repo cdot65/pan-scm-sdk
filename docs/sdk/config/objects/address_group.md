@@ -133,7 +133,12 @@ print("Group deleted successfully")
 
 ## Listing Address Groups
 
-The `list()` method retrieves multiple address groups with optional filtering.
+The `list()` method retrieves multiple address groups with optional filtering. You can filter the results using the
+following kwargs:
+
+- `types`: List[str] - Filter by group types (e.g., ['static', 'dynamic'])
+- `values`: List[str] - Filter by group values (static members or dynamic filter values)
+- `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
 
 <div class="termy">
 
@@ -143,9 +148,35 @@ The `list()` method retrieves multiple address groups with optional filtering.
 # List all groups in a folder
 groups = address_groups.list(folder="Texas")
 
+# List only static groups
+static_groups = address_groups.list(
+    folder="Texas",
+    types=['static']
+)
+
+# List groups with specific values
+specific_groups = address_groups.list(
+    folder="Texas",
+    values=['web_server1', 'web_server2']
+)
+
+# List groups with specific tags
+tagged_groups = address_groups.list(
+    folder="Texas",
+    tags=['Automation', 'Production']
+)
+
+# Combine multiple filters
+filtered_groups = address_groups.list(
+    folder="Texas",
+    types=['static'],
+    tags=['Production']
+)
+
+# Print the results
 for group in groups:
     print(f"Name: {group.name}")
-    print(f"Type: {'Dynamic' if 'dynamic' in group else 'Static'}")
+    print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
 ```
 
 </div>

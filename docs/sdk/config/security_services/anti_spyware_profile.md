@@ -157,7 +157,11 @@ print("Profile deleted successfully")
 
 ## Listing Anti-Spyware Profiles
 
-The `list()` method retrieves multiple anti-spyware profiles with optional filtering.
+The `list()` method retrieves multiple anti-spyware profiles with optional filtering. You can filter the results using
+the
+following kwargs:
+
+- `rules`: List[str] - Filter by rule names (e.g., ['block-critical', 'medium-threats'])
 
 <div class="termy">
 
@@ -167,11 +171,25 @@ The `list()` method retrieves multiple anti-spyware profiles with optional filte
 # List all profiles in a folder
 existing_profiles = profiles.list(folder="Texas")
 
+# List profiles containing specific rules
+critical_profiles = profiles.list(
+    folder="Texas",
+    rules=['block-critical']
+)
+
+# List profiles with multiple rule matches
+filtered_profiles = profiles.list(
+    folder="Texas",
+    rules=['block-critical', 'medium-threats']
+)
+
+# Print the results
 for profile in existing_profiles:
     print(f"Name: {profile.name}")
     print(f"Rules: {len(profile.rules)}")
+    for rule in profile.rules:
+        print(f"  - {rule.name}")
     print("---")
-
 ```
 
 </div>

@@ -279,7 +279,12 @@ print("Profile deleted successfully")
 
 ## Listing DNS Security Profiles
 
-The `list()` method retrieves multiple DNS Security profiles with optional filtering.
+The `list()` method retrieves multiple DNS Security profiles with optional filtering. You can filter the results using
+the
+following kwargs:
+
+- `dns_security_categories`: List[str] - Filter by DNS security category names (
+  e.g., ['pan-dns-sec-malware', 'pan-dns-sec-phishing'])
 
 <div class="termy">
 
@@ -289,9 +294,23 @@ The `list()` method retrieves multiple DNS Security profiles with optional filte
 # List all profiles in a folder
 profiles = dns_security_profiles.list(folder="Texas")
 
+# List profiles with specific DNS security categories
+malware_profiles = dns_security_profiles.list(
+    folder="Texas",
+    dns_security_categories=['pan-dns-sec-malware']
+)
+
+# List profiles with multiple category matches
+filtered_profiles = dns_security_profiles.list(
+    folder="Texas",
+    dns_security_categories=['pan-dns-sec-malware', 'pan-dns-sec-phishing']
+)
+
+# Print the results
 for profile in profiles:
     print(f"Name: {profile.name}")
-
+    if profile.botnet_domains and profile.botnet_domains.dns_security_categories:
+        print("Categories:", [cat.name for cat in profile.botnet_domains.dns_security_categories])
 ```
 
 </div>
