@@ -303,6 +303,15 @@ class SecurityRule(BaseObject):
                 and any(group in rule.profile_setting.group for group in groups)
             ]
 
+        # Filter by log_setting
+        if "log_setting" in filters:
+            if not isinstance(filters["log_setting"], list):
+                raise ValidationError("'log_setting' filter must be a list")
+            log_settings = filters["log_setting"]
+            filter_criteria = [
+                rule for rule in filter_criteria if rule.log_setting in log_settings
+            ]
+
         return filter_criteria
 
     @staticmethod
