@@ -13,6 +13,7 @@ from .decryption_profiles import (
 from .dns_security_profiles import (
     DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
+    DNSSecurityProfileUpdateModel,
 )
 from .security_rules import (
     SecurityRuleRequestModel,
