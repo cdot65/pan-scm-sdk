@@ -46,7 +46,7 @@ from scm.models.security.dns_security_profiles import (
     DNSSecurityCategoryEntryModel,
 )
 from scm.models.security.security_rules import (
-    SecurityRuleRequestModel,
+    SecurityRuleCreateModel,
     ProfileSetting,
     Rulebase,
     SecurityRuleMoveModel,
@@ -248,27 +248,27 @@ class BaseSecurityRuleFactory(factory.Factory):
 
 
 class SecurityRuleRequestFactory(BaseSecurityRuleFactory):
-    """Factory for creating SecurityRuleRequestModel instances."""
+    """Factory for creating SecurityRuleCreateModel instances."""
 
     class Meta:
-        model = SecurityRuleRequestModel
+        model = SecurityRuleCreateModel
 
     folder = "Shared"  # Default container type
 
     @classmethod
-    def with_snippet(cls, **kwargs) -> SecurityRuleRequestModel:
+    def with_snippet(cls, **kwargs) -> SecurityRuleCreateModel:
         """Create a security rule with snippet container."""
         return cls(folder=None, snippet="TestSnippet", **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs) -> SecurityRuleRequestModel:
+    def with_device(cls, **kwargs) -> SecurityRuleCreateModel:
         """Create a security rule with device container."""
         return cls(folder=None, device="TestDevice", **kwargs)
 
     @classmethod
     def create_batch_with_names(
         cls, names: list[str], **kwargs
-    ) -> list[SecurityRuleRequestModel]:
+    ) -> list[SecurityRuleCreateModel]:
         """Create multiple security rules with specified names."""
         return [cls(name=name, **kwargs) for name in names]
 
@@ -285,7 +285,7 @@ class SecurityRuleResponseFactory(BaseSecurityRuleFactory):
     @classmethod
     def from_request(
         cls,
-        request_model: SecurityRuleRequestModel,
+        request_model: SecurityRuleCreateModel,
         **kwargs,
     ) -> SecurityRuleResponseModel:
         """Create a response model based on a request model."""
