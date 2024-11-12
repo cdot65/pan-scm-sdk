@@ -8,6 +8,7 @@ from .anti_spyware_profiles import (
 from .decryption_profiles import (
     DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
+    DecryptionProfileUpdateModel,
 )
 from .dns_security_profiles import (
     DNSSecurityProfileCreateModel,
