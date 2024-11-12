@@ -5,7 +5,309 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.2.1
+
+**Release Date:** November 12th
+
 ## Version 0.2.0
+
+### Updates:
+
+* Add client-side filtering to address list method
+
+Introduced a new method `_apply_filters` to perform client-side filtering based on types, values, and tags. Updated the
+`list` method to use this filtering and added a high limit for comprehensive results by default.
+
+* Refactor address object management and add error handling
+
+Refactor the address object methods to improve readability and maintainability. Simplify error handling by consolidating
+custom error responses, and ensure proper validation for filters. Additionally, enhance comments to provide clearer
+guidance on the methods' implementations.
+
+* Add BadResponseError to exceptions module
+
+Introduced BadResponseError class to handle cases where API responses are invalid. This addition enhances error handling
+by providing a specific exception for bad API responses.
+
+* Refactor address tests to improve validation and error handling.
+
+Added validation for filter types in the list method to ensure they are lists. Changed error handling to raise
+BadResponseError for invalid responses and updated corresponding assertions. Simplified filter parameters by removing
+unused names filter.
+
+* Refactor error handling to use BadResponseError
+
+Replaced instances of APIError with BadResponseError in address module and tests. This improves clarity by
+distinguishing response format errors from other API-related issues. Updated relevant test cases to reflect this change.
+
+* Refactor tests and enhance error handling in Address module
+
+Reorganized test classes by functionality and added comprehensive error handling tests for create, retrieve, update,
+delete, and fetch operations. Improved test coverage by including various exception scenarios and validation checks for
+better robustness.
+
+* Refactor address group management for better error handling
+
+Enhanced error handling for address group methods by integrating a custom ErrorHandler. Added detailed docstrings and
+implemented client-side filtering. Improved parameter validation and included a delete method.
+
+* Add custom validators for the 'tag' field
+
+Ensure 'tag' is a string or list of strings, and enforce uniqueness within the list. This enhances data integrity and
+prevents duplicate entries in the 'tag' field.
+
+* Refactor tests and improve error handling for AddressGroup
+
+Grouped test classes by functionality for better organization. Added more detailed tests for object creation, retrieval,
+update, deletion, and fetch, including error handling and validation scenarios. These changes enhance test coverage and
+readability.
+
+* Add error handling and client-side filtering for Application
+
+Enhanced the Application class with detailed error handling for API calls, utilizing a custom ErrorHandler. Introduced
+client-side filtering for listings and revamped docstrings for better clarity and consistency.
+
+* Refactor test cases for better modularity and error handling
+
+Seperate test classes based on functionality like creation, retrieval, updating, and deletion of `Application` objects.
+This also includes enhanced exception handling and validation in the tests for multiple scenarios to improve robustness
+and maintainability.
+
+* Refactor ApplicationGroup class for improved error handling
+
+Included custom error handling using the ErrorHandler class across all methods. Enhanced docstrings for better clarity
+and added validation checks, especially for empty fields.
+
+* Rename fetch tests for consistency
+
+Renamed `test_fetch_application` and `test_fetch_application_not_found` methods to `test_fetch_object` and
+`test_fetch_object_not_found` respectively. This change ensures that the test method names accurately reflect their
+purpose of fetching general objects rather than specifically applications.
+
+* Rename application test methods to generic object naming
+
+Refactor test method names in test_application.py to use 'object' instead of 'application' for consistency and clarity.
+This change ensures a more generalized approach, making the tests reusable for various object types and easier to
+maintain.
+
+* Refactor test method names for simplicity
+
+Renamed several test methods to improve clarity and consistency across the test suite. This change simplifies the method
+names by removing redundancy and shortening them, which helps in maintaining and understanding the tests more easily.
+
+* Rename tests and add UUID validation test
+
+Renamed several test method names to improve readability and consistency. Added a new test to check for invalid UUID
+format in the response model. Enhanced error handling in list method for multiple container parameters.
+
+* Refactor tests to improve structure and error handling
+
+Restructure the test classes to group them by functionality such as listing, creation, retrieval, updating, and deletion
+of Application Group objects. Additionally, enhance error and validation handling in methods dealing with API
+interactions to improve code readability and maintainability.
+
+* Add error handling and filtering improvements to Service class
+
+Enhanced the Service class to include comprehensive error handling in the create, get, update, list, fetch, and delete
+methods. Added client-side filtering capabilities and detailed validation for incoming parameters.
+
+* Refactor service tests for better modularity and error handling
+
+Grouped service tests by functionality like list, create, get, update, delete, and fetch. Enhanced error handling and
+exception raising for various scenarios, ensuring clear and accurate validation of input data and responses.
+
+* Add comprehensive error handling tests for fetch and list methods
+
+Enhanced the test suite for the fetch and list methods by adding various cases for error handling and response
+validation. This includes new tests for non-existent objects, unexpected response formats, and invalid filters, ensuring
+robust API interactions.
+
+* Update junit.xml schema version
+
+Changed the XML schema version in junit.xml to ensure compatibility with the latest testing framework updates. This
+modification addresses potential issues with outdated schema references.
+
+* Update junit.xml formatting
+
+Adjusted the formatting in junit.xml for better readability. No functional changes were made to the file content.
+
+* Refactor UUID handling in Address model.
+
+Updated the 'id' field in the Address model to use UUID type instead of str and removed the custom UUID validator. This
+change ensures consistency and leverages Pydantic's built-in UUID validation.
+
+* Add model validation tests for Address objects
+
+Introduced various tests to validate the Address model, including scenarios with missing or multiple type fields,
+invalid container formats, and proper UUID verification. Updated existing tests to improve clarity and consistency in
+naming conventions.
+
+* Add model validation tests for Address objects
+
+Introduced various tests to validate the Address model, including scenarios with missing or multiple type fields,
+invalid container formats, and proper UUID verification. Updated existing tests to improve clarity and consistency in
+naming conventions.
+
+* Update tests to use 'objects' terminology globally
+
+Replaces references of 'address' with 'object' in test cases, ensuring consistency in terminology. This includes
+updating mock responses, function calls, and assertions to reflect the new terminology.
+
+* Refactor AddressGroupResponseModel id field to UUID
+
+Updated the AddressGroupResponseModel class to use the UUID type for the id field instead of str. This change ensures
+stricter type validation and removes the need for a custom UUID validator. Additionally, improved code readability by
+importing UUID directly from the uuid module.
+
+* Rename test case methods for clarity in address tests
+
+Refactored method names in TestAddressModelValidation to better reflect their purpose and improve readability. Changed '
+test_object_create' prefix to 'test_object_model' in all relevant test functions. This ensures consistency and clarity
+when reading and maintaining test code.
+
+* Add comprehensive validation tests and refactor object naming
+
+Introduce detailed validation tests for object models, ensuring accurate error handling and successful creation of valid
+models. Refactor method and variable names for consistency and clarity, changing "address_group" to "object" where
+applicable.
+
+* Add validation and update tests for application models
+
+Introduced new tests for validating application models, including scenarios for multiple and no containers provided.
+Additionally, enhanced existing tests to generalize terminology from 'application' to 'object,' improving code clarity
+and consistency.
+
+* Refactor terminology from 'application group' to 'object'
+
+Updated test cases to use a more generic term 'object' instead of 'application group' for better code clarity and
+flexibility. Adjusted all relevant variable names, comments, and assertions to match the new terminology.
+
+* Rename variables and comments for consistency
+
+Renamed variables and comments to use "object" instead of "service" for consistency and clarity. This change helps in
+maintaining uniform terminology across the test suite, reducing confusion and improving code readability.
+
+* Correct typos in test docstrings
+
+Fixed incorrect usage of 'a' before 'object' in multiple test docstrings, changing it to 'an.' Also corrected the
+spelling of 'attempts' in the test for error handling during object updates. These changes improve the readability and
+accuracy of the test documentation.
+
+* Add enhanced error handling and filtering to AntiSpywareProfile
+
+Implemented custom error handling across create, get, update, list, and delete methods in the AntiSpywareProfile class.
+Introduced client-side filtering for profiles and improved validation for container parameters.
+
+* Rename AntiSpywareProfileRequestModel to AntiSpywareProfileCreateModel
+
+Updated the import in scm/models/security/__init__.py to reflect the new model name. This enhances code clarity and
+ensures the correct model is referenced throughout the module.
+
+* Refactor Anti-Spyware Profile models and enums
+
+Reorganize and simplify Anti-Spyware Profile models, including renaming base classes and moving enums to a more
+appropriate location. Also added missing field pattern validation and proper docstrings to ensure readability and
+maintainability.
+
+* Rename test method for clarity
+
+Renamed `test_object_model_create_no_container` to `test_object_model_no_container_provided` for better readability.
+This change clarifies the intent of the test, making it easier to understand what is being validated.
+
+* Update and organize anti-spyware profile tests
+
+Refactor tests in `test_anti_spyware_profile.py` by grouping them according to their functionalities: model validation,
+listing, creating, retrieving, updating, deleting, and fetching. Enhance error handling for various scenarios, including
+invalid data, missing objects, and malformed requests. Update imports and improve test methods to ensure accurate
+validation and error handling.
+
+* Rename anti-spyware factory models to align with new schema
+
+Refactored the `AntiSpywareProfileRequestFactory` and related factory classes to use the updated `CreateModel` schema.
+This includes renaming model imports and instances to maintain consistency with the new naming conventions. These
+changes help ensure better alignment with the underlying data models.
+
+* Update junit.xml formatting
+
+This commit makes minor formatting changes to the junit.xml file. There are no alterations to the file's content or
+functionality. These changes help improve the readability and maintainability of the file's structure.
+
+* Update junit.xml formatting
+
+This commit makes minor formatting changes to the junit.xml file. There are no alterations to the file's content or
+functionality. These changes help improve the readability and maintainability of the file's structure.
+
+* Update id field to use UUID type in decryption profiles
+
+Replaced `id` field type from `str` to `UUID` in `DecryptionProfileResponseModel` to ensure proper validation and type
+safety. Removed the unnecessary custom validator for `id` field, leveraging Pydantic’s built-in UUID validation.
+
+* Add DecryptionProfileUpdateModel to imports
+
+This commit adds the DecryptionProfileUpdateModel to the imports in the security module initialization. This change
+ensures that the update functionalities for decryption profiles are properly included and available for use.
+
+* Update and expand test cases for DecryptionProfile
+
+Refactor test cases in `test_decryption_profile.py` to enhance coverage and clarity. Includes grouped test classes by
+functionality, improved error handling tests, detailed docstrings, validation assertions, and expanded mock scenarios
+for various API responses and exception handling.
+
+* Update DNS Security Profile functionality with error handling
+
+Enhanced methods to create, update, get, list, and delete DNS Security Profiles with detailed error handling using
+custom error classes. Added utility methods for client-side filtering of profiles and constructing parameter
+dictionaries. Improved code clarity and consistency in docstrings and exception handling.
+
+* Change id field to UUID in DNSSecurityProfileResponseModel
+
+Converted the `id` field from a string to a UUID in the DNSSecurityProfileResponseModel for better type safety and
+accuracy. This also removes the now-unnecessary UUID format validation method.
+
+* Add DNSSecurityProfileUpdateModel import to security module
+
+This change includes the DNSSecurityProfileUpdateModel in the security module's init file. Importing this model is
+necessary for handling DNS security profile updates within the module. This ensures that updates to DNS security
+profiles are correctly managed and processed.
+
+* Refactor and expand DNS Security Profile tests
+
+Reorganized the test classes for improved readability and maintainability, grouping them by functionality. Expanded the
+test coverage to include additional error handling and validation scenarios for create, update, get, delete, and fetch
+methods, ensuring robust exception handling and correct API interactions.
+
+* Update security_rule.py for improved functionality and error handling
+
+Refactored the security_rule.py module to enhance clarity and robustness. Introduced custom error handling, expanded
+filtering options, and updated models to differentiate between create and update operations. Added built-in constants
+and methods for client-side filtering, container parameter construction, and detailed error responses.
+
+* Refactor and optimize security rules models
+
+Consolidate Enums and adjust class structures to enhance clarity and maintainability. Updated validation methods and
+field types to ensure robust input handling, and standardized UUID usage across security rules models for better
+consistency.
+
+* Add log_setting filter to security_rule
+
+This commit introduces a new filter for `log_setting` in the `security_rule` module. It checks if the `log_setting`
+filter is provided and ensures it is a list before filtering. Invalid filter types will raise a `ValidationError`.
+
+* Replace SecurityRuleRequestModel with SecurityRuleCreateModel
+
+Updated the factory and related methods to use SecurityRuleCreateModel instead of SecurityRuleRequestModel. This
+includes renaming the factory class methods and updating type hints to match the new model.
+
+* Refactor security rules tests for cleaner structure
+
+Simplified and reorganized the security rules test suite. Grouped and removed redundant tests, streamlined setup
+methods, improved fixture utilization, and consolidated duplicate test cases into more efficient structures.
+
+* Add noqa comments to mock responses in security tests
+
+This change adds noqa comments to the dictionary mock responses in the `test_security_rules.py` file. This ensures that
+code linters do not flag these lines, allowing tests to run without interruptions or false positives. The integrity of
+the mocked data for test validation remains unchanged.
 
 **Release Date:** November 4th
 
