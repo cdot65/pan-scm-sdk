@@ -104,7 +104,10 @@ print("Group deleted successfully")
 
 ## Listing Application Groups
 
-The `list()` method retrieves multiple application groups with optional filtering.
+The `list()` method retrieves multiple application groups with optional filtering. You can filter the results using the
+following kwargs:
+
+- `members`: List[str] - Filter by member applications (e.g., ['ssl', 'web-browsing'])
 
 <div class="termy">
 
@@ -113,9 +116,22 @@ The `list()` method retrieves multiple application groups with optional filterin
 ```python
 # List all groups in a folder
 groups = application_groups.list(folder="Texas")
+
+# List groups containing specific members
+ssl_groups = application_groups.list(
+    folder="Texas",
+    members=['ssl']
+)
+
+# List groups with multiple member matches
+web_groups = application_groups.list(
+    folder="Texas",
+    members=['ssl', 'web-browsing']
+)
+
+# Print the results
 for group in groups:
     print(f"Name: {group.name}, Members: {group.members}")
-
 ```
 
 </div>

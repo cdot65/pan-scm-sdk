@@ -135,7 +135,11 @@ print("Service deleted successfully")
 
 ## Listing Services
 
-The `list()` method retrieves multiple services with optional filtering.
+The `list()` method retrieves multiple services with optional filtering. You can filter the results using the
+following kwargs:
+
+- `protocol`: List[str] - Filter by protocol type (e.g., ['tcp', 'udp'])
+- `tag`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
 
 <div class="termy">
 
@@ -144,8 +148,33 @@ The `list()` method retrieves multiple services with optional filtering.
 ```python
 # List all services in a folder
 services = services.list(folder="Texas")
+
+# List only TCP services
+tcp_services = services.list(
+    folder="Texas",
+    protocol=['tcp']
+)
+
+# List services with specific tags
+tagged_services = services.list(
+    folder="Texas",
+    tag=['Automation']
+)
+
+# Combine multiple filters
+filtered_services = services.list(
+    folder="Texas",
+    protocol=['tcp'],
+    tag=['Production']
+)
+
+# Print the results
 for svc in services:
     print(f"Name: {svc.name}")
+    if svc.protocol.tcp:
+        print(f"TCP Ports: {svc.protocol.tcp.port}")
+    elif svc.protocol.udp:
+        print(f"UDP Ports: {svc.protocol.udp.port}")
 ```
 
 </div>

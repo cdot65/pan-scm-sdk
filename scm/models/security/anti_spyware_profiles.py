@@ -1,6 +1,8 @@
 # scm/models/security/anti_spyware_profile.py
 
 from typing import List, Optional
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     Field,
@@ -10,9 +12,9 @@ from pydantic import (
     RootModel,
 )
 from enum import Enum
-import uuid
 
 
+# Enums
 class InlinePolicyAction(str, Enum):
     """Enumeration of allowed inline policy actions."""
 
@@ -24,120 +26,18 @@ class InlinePolicyAction(str, Enum):
     reset_server = "reset-server"
 
 
-class MicaEngineSpywareEnabledEntry(BaseModel):
+class ExemptIpEntry(BaseModel):
     """
-    Represents an entry in the 'mica_engine_spyware_enabled' list.
+    Represents an entry in the 'exempt_ip' list within a threat exception.
 
     Attributes:
-        name (str): Name of the MICA engine spyware detector.
-        inline_policy_action (InlinePolicyAction): Action to be taken by the inline policy.
+        name (str): Name of the IP address or range to exempt.
     """
 
     name: str = Field(
         ...,
-        description="Name of the MICA engine spyware detector",
+        description="Exempt IP name",
     )
-    inline_policy_action: InlinePolicyAction = Field(
-        InlinePolicyAction.alert,
-        description="Inline policy action, defaults to 'alert'",
-    )
-
-
-class BlockIpAction(BaseModel):
-    """
-    Represents the 'block_ip' action with additional properties.
-
-    Attributes:
-        track_by (str): Method of tracking ('source-and-destination' or 'source').
-        duration (int): Duration in seconds (1 to 3600).
-    """
-
-    track_by: str = Field(
-        ...,
-        description="Tracking method",
-        pattern="^(source-and-destination|source)$",
-    )
-    duration: int = Field(
-        ...,
-        description="Duration in seconds",
-        ge=1,
-        le=3600,
-    )
-
-
-class ActionRequest(RootModel[dict]):
-    """
-    Represents the 'action' field in rules and threat exceptions for requests.
-
-    Enforces that exactly one action is provided.
-    """
-
-    @model_validator(mode="before")
-    @classmethod
-    def check_and_transform_action(cls, values):
-        if isinstance(values, str):
-            # Convert string to dict
-            values = {values: {}}
-        elif not isinstance(values, dict):
-            raise ValueError("Invalid action format; must be a string or dict.")
-
-        action_fields = [
-            "allow",
-            "alert",
-            "drop",
-            "reset_client",
-            "reset_server",
-            "reset_both",
-            "block_ip",
-            "default",
-        ]
-        provided_actions = [field for field in action_fields if field in values]
-
-        if len(provided_actions) != 1:
-            raise ValueError("Exactly one action must be provided in 'action' field.")
-
-        return values
-
-    def get_action_name(self) -> str:
-        return next(iter(self.root.keys()), "unknown")
-
-
-class ActionResponse(RootModel[dict]):
-    """
-    Represents the 'action' field in rules and threat exceptions for responses.
-
-    Accepts empty dictionaries.
-    """
-
-    @model_validator(mode="before")
-    @classmethod
-    def check_action(cls, values):
-        if isinstance(values, str):
-            # Convert string to dict
-            values = {values: {}}
-        elif not isinstance(values, dict):
-            raise ValueError("Invalid action format; must be a string or dict.")
-
-        action_fields = [
-            "allow",
-            "alert",
-            "drop",
-            "reset_client",
-            "reset_server",
-            "reset_both",
-            "block_ip",
-            "default",
-        ]
-        provided_actions = [field for field in action_fields if field in values]
-
-        if len(provided_actions) > 1:
-            raise ValueError("At most one action must be provided in 'action' field.")
-
-        # Accept empty dicts (no action specified)
-        return values
-
-    def get_action_name(self) -> str:
-        return next(iter(self.root.keys()), "unknown")
 
 
 class PacketCapture(str, Enum):
@@ -198,24 +98,112 @@ class Category(str, Enum):
     any = "any"
 
 
-class ExemptIpEntry(BaseModel):
-    """
-    Represents an entry in the 'exempt_ip' list within a threat exception.
-
-    Attributes:
-        name (str): Name of the IP address or range to exempt.
-    """
+# Component Models
+class MicaEngineSpywareEnabledEntry(BaseModel):
+    """Represents an entry in the 'mica_engine_spyware_enabled' list."""
 
     name: str = Field(
         ...,
-        description="Exempt IP name",
+        description="Name of the MICA engine spyware detector",
+    )
+    inline_policy_action: InlinePolicyAction = Field(
+        InlinePolicyAction.alert,
+        description="Inline policy action, defaults to 'alert'",
     )
 
 
-class RuleBase(BaseModel):
+class BlockIpAction(BaseModel):
+    """Represents the 'block_ip' action configuration."""
+
+    track_by: str = Field(
+        ...,
+        description="Tracking method",
+        pattern="^(source-and-destination|source)$",
+    )
+    duration: int = Field(
+        ...,
+        description="Duration in seconds",
+        ge=1,
+        le=3600,
+    )
+
+
+class ActionRequest(RootModel[dict]):
     """
-    Base class for Rule.
+    Represents the 'action' field in rules and threat exceptions for requests.
+
+    Enforces that exactly one action is provided.
     """
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_and_transform_action(cls, values):
+        if isinstance(values, str):
+            # Convert string to dict
+            values = {values: {}}
+        elif not isinstance(values, dict):
+            raise ValueError("Invalid action format; must be a string or dict.")
+
+        action_fields = [
+            "allow",
+            "alert",
+            "drop",
+            "reset_client",
+            "reset_server",
+            "reset_both",
+            "block_ip",
+            "default",
+        ]
+        provided_actions = [field for field in action_fields if field in values]
+
+        if len(provided_actions) != 1:
+            raise ValueError("Exactly one action must be provided in 'action' field.")
+
+        return values
+
+    def get_action_name(self) -> str:
+        return next(iter(self.root.keys()), "unknown")
+
+
+class ActionResponse(RootModel[dict]):
+    """
+    Represents the 'action' field in rules and threat exceptions for responses.
+
+    Accepts empty dictionaries.
+    """
+
+    @model_validator(mode="before")
+    def check_action(cls, values):
+        if isinstance(values, str):
+            # Convert string to dict
+            values = {values: {}}
+        elif not isinstance(values, dict):
+            raise ValueError("Invalid action format; must be a string or dict.")
+
+        action_fields = [
+            "allow",
+            "alert",
+            "drop",
+            "reset_client",
+            "reset_server",
+            "reset_both",
+            "block_ip",
+            "default",
+        ]
+        provided_actions = [field for field in action_fields if field in values]
+
+        if len(provided_actions) > 1:
+            raise ValueError("At most one action must be provided in 'action' field.")
+
+        # Accept empty dicts (no action specified)
+        return values
+
+    def get_action_name(self) -> str:
+        return next(iter(self.root.keys()), "unknown")
+
+
+class RuleBaseModel(BaseModel):
+    """Base model for rules."""
 
     name: str = Field(
         ...,
@@ -239,30 +227,16 @@ class RuleBase(BaseModel):
         description="Packet capture setting",
     )
 
-    @field_validator("threat_name", mode="before")
-    @classmethod
+    @field_validator(
+        "threat_name",
+        mode="before",
+    )
     def default_threat_name(cls, v):
         return v or "any"
 
 
-class RuleRequest(RuleBase):
-    action: Optional[ActionRequest] = Field(
-        None,
-        description="Action",
-    )
-
-
-class RuleResponse(RuleBase):
-    action: Optional[ActionResponse] = Field(
-        None,
-        description="Action",
-    )
-
-
 class ThreatExceptionBase(BaseModel):
-    """
-    Base class for ThreatException.
-    """
+    """Base model for threat exceptions."""
 
     name: str = Field(
         ...,
@@ -282,28 +256,21 @@ class ThreatExceptionBase(BaseModel):
     )
 
 
-class ThreatExceptionRequest(ThreatExceptionBase):
-    action: ActionRequest = Field(
-        ...,
-        description="Action",
-    )
-
-
-class ThreatExceptionResponse(ThreatExceptionBase):
-    action: ActionResponse = Field(
-        ...,
-        description="Action",
-    )
-
-
-class AntiSpywareProfileBaseModel(BaseModel):
+class AntiSpywareProfileBase(BaseModel):
     """
-    Base model for AntiSpywareProfile, containing common fields.
+    Base model for Anti-Spyware Profile containing common fields across all operations.
     """
+
+    model_config = ConfigDict(
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
 
     name: str = Field(
         ...,
         description="Profile name",
+        pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_\-. ]*$",
     )
     description: Optional[str] = Field(
         None,
@@ -325,161 +292,72 @@ class AntiSpywareProfileBaseModel(BaseModel):
         None,
         description="List of MICA engine spyware enabled entries",
     )
-
-
-class AntiSpywareProfileRequestModel(AntiSpywareProfileBaseModel):
-    """
-    Represents an anti-spyware profile for API requests.
-    """
+    rules: List[RuleBaseModel] = Field(
+        ...,
+        description="List of rules",
+    )
+    threat_exception: Optional[List[ThreatExceptionBase]] = Field(
+        None,
+        description="List of threat exceptions",
+    )
 
     folder: Optional[str] = Field(
         None,
-        description="Folder",
+        description="Folder in which the resource is defined",
         max_length=64,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
     snippet: Optional[str] = Field(
         None,
-        description="Snippet",
+        description="Snippet in which the resource is defined",
         max_length=64,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
     device: Optional[str] = Field(
         None,
-        description="Device",
+        description="Device in which the resource is defined",
         max_length=64,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
-    rules: List[RuleRequest] = Field(
-        ...,
-        description="List of rules",
-    )
-    threat_exception: Optional[List[ThreatExceptionRequest]] = Field(
-        None,
-        description="List of threat exceptions",
-    )
 
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
+
+class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
+    """
+    Model for creating a new Anti-Spyware Profile.
+    Inherits from base model and adds create-specific validation.
+    """
 
     @model_validator(mode="after")
-    def validate_container(self) -> "AntiSpywareProfileRequestModel":
+    def validate_container(self) -> "AntiSpywareProfileCreateModel":
         container_fields = [
             "folder",
             "snippet",
             "device",
         ]
-        provided_containers = [
+        provided = [
             field for field in container_fields if getattr(self, field) is not None
         ]
-
-        if len(provided_containers) != 1:
+        if len(provided) != 1:
             raise ValueError(
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
-
         return self
 
 
-class AntiSpywareProfileUpdateModel(AntiSpywareProfileBaseModel):
+class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
     """
-    Represents an anti-spyware profile for API requests.
+    Model for updating an existing Anti-Spyware Profile.
+    All fields are optional to allow partial updates.
     """
 
-    id: str = Field(
+
+class AntiSpywareProfileResponseModel(AntiSpywareProfileBase):
+    """
+    Model for Anti-Spyware Profile API responses.
+    Includes all base fields plus the id field.
+    """
+
+    id: UUID = Field(
         ...,
         description="Profile ID",
     )
-    folder: Optional[str] = Field(
-        None,
-        description="Folder",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        description="Snippet",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-    )
-    device: Optional[str] = Field(
-        None,
-        description="Device",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-    )
-    rules: List[RuleRequest] = Field(
-        ...,
-        description="List of rules",
-    )
-    threat_exception: Optional[List[ThreatExceptionRequest]] = Field(
-        None,
-        description="List of threat exceptions",
-    )
-
-    model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
-
-    @field_validator("id")
-    @classmethod
-    def validate_id(cls, v):
-        try:
-            uuid.UUID(v)
-        except ValueError:
-            raise ValueError("Invalid UUID format for 'id'")
-        return v
-
-
-class AntiSpywareProfileResponseModel(AntiSpywareProfileBaseModel):
-    """
-    Represents an anti-spyware profile for API responses.
-    """
-
-    id: str = Field(
-        ...,
-        description="Profile ID",
-    )
-    folder: Optional[str] = Field(
-        None,
-        description="Folder",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        description="Snippet",
-    )
-    device: Optional[str] = Field(
-        None,
-        description="Device",
-    )
-    rules: List[RuleResponse] = Field(
-        ...,
-        description="List of rules",
-    )
-    threat_exception: Optional[List[ThreatExceptionResponse]] = Field(
-        None,
-        description="List of threat exceptions",
-    )
-
-    @field_validator("id")
-    @classmethod
-    def validate_id(cls, v):
-        try:
-            uuid.UUID(v)
-        except ValueError:
-            raise ValueError("Invalid UUID format for 'id'")
-        return v
-
-
-class AntiSpywareProfilesResponse(BaseModel):
-    """
-    Represents the API response containing a list of anti-spyware profiles.
-
-    Attributes:
-        data (List[AntiSpywareProfileResponseModel]): List of anti-spyware profiles.
-        offset (int): Offset used in pagination.
-        total (int): Total number of profiles available.
-        limit (int): Maximum number of profiles returned.
-    """
-
-    data: List[AntiSpywareProfileResponseModel]
-    offset: int
-    total: int
-    limit: int

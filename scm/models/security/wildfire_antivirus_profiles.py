@@ -1,15 +1,15 @@
 # scm/models/security/wildfire_antivirus_profiles.py
 
 from typing import List, Optional
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     Field,
     model_validator,
-    field_validator,
     ConfigDict,
 )
 from enum import Enum
-import uuid
 
 
 # Enums
@@ -145,15 +145,7 @@ class WildfireAntivirusProfileResponseModel(WildfireAntivirusProfileBase):
     Includes all base fields plus the id field.
     """
 
-    id: str = Field(
+    id: UUID = Field(
         ...,
         description="Profile ID",
     )
-
-    @field_validator("id")
-    def validate_id(cls, v):
-        try:
-            uuid.UUID(v)
-        except ValueError:
-            raise ValueError("Invalid UUID format for 'id'")
-        return v

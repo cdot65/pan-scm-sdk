@@ -1,24 +1,34 @@
-# tests/test_dns_security_profile.py
+# tests/scm/config/security/test_dns_security_profile.py
 
 import pytest
 from unittest.mock import MagicMock
 
 from scm.config.security.dns_security_profile import DNSSecurityProfile
-from scm.exceptions import ValidationError
+from scm.exceptions import (
+    ValidationError,
+    ObjectNotPresentError,
+    EmptyFieldError,
+    ObjectAlreadyExistsError,
+    MalformedRequestError,
+    FolderNotFoundError,
+    BadResponseError,
+    ReferenceNotZeroError,
+)
 from scm.models.security.dns_security_profiles import (
     DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
     ActionEnum,
     ListActionRequestModel,
     DNSSecurityProfileUpdateModel,
+    ListActionBaseModel,
 )
-from pydantic import ValidationError as PydanticValidationError
-
 
 from tests.factories import (
     DNSSecurityProfileRequestFactory,
     DNSSecurityProfileResponseFactory,
 )
+
+from pydantic import ValidationError as PydanticValidationError
 
 
 @pytest.mark.usefixtures("load_env")
@@ -29,7 +39,6 @@ class TestDNSSecurityProfileBase:
     def setup_method(self, mock_scm):
         """Setup method that runs before each test."""
         self.mock_scm = mock_scm  # noqa
-        # Create new MagicMock instances for each HTTP method
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
@@ -37,11 +46,91 @@ class TestDNSSecurityProfileBase:
         self.client = DNSSecurityProfile(self.mock_scm)  # noqa
 
 
-class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
-    """Tests for DNS Security Profile API operations."""
+# -------------------- Test Classes Grouped by Functionality --------------------
 
-    def test_list_dns_security_profiles(self):
-        """Test listing DNS security profiles."""
+
+class TestDNSSecurityProfileModelValidation(TestDNSSecurityProfileBase):
+    """Tests for object model validation."""
+
+    def test_object_model_no_container_provided(self):
+        """Test validation when no container is provided."""
+        data = {
+            "name": "InvalidDNSProfile",
+            "botnet_domains": {},
+        }
+        with pytest.raises(ValueError) as exc_info:
+            DNSSecurityProfileCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_multiple_containers(self):
+        """Test validation when multiple containers are provided."""
+        data = {
+            "name": "InvalidDNSProfile",
+            "folder": "Shared",
+            "device": "Device1",
+            "botnet_domains": {},
+        }
+        with pytest.raises(ValueError) as exc_info:
+            DNSSecurityProfileCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_invalid_action_dns_security_categories(self):
+        """Test validation when invalid action provided in dns_security_categories."""
+        with pytest.raises(ValueError) as exc_info:
+            DNSSecurityProfileCreateModel(
+                name="InvalidDNSProfile",
+                folder="Shared",
+                botnet_domains={
+                    "dns_security_categories": [
+                        {
+                            "name": "pan-dns-sec-malware",
+                            "action": "invalid_action",
+                        }
+                    ]
+                },
+            )
+        assert "1 validation error for DNSSecurityProfileCreateModel" in str(
+            exc_info.value
+        )
+
+    def test_invalid_action_lists(self):
+        """Test validation when invalid action provided in lists."""
+        with pytest.raises(ValueError) as exc_info:
+            DNSSecurityProfileCreateModel(
+                name="InvalidDNSProfile",
+                folder="Shared",
+                botnet_domains={
+                    "lists": [
+                        {
+                            "name": "CustomDNSList",
+                            "action": {"invalid_action": {}},
+                        }
+                    ]
+                },
+            )
+        assert "Exactly one action must be provided in 'action' field." in str(
+            exc_info.value
+        )
+
+
+class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
+    """Tests for listing DNS Security Profile objects."""
+
+    def test_list_objects(self):
+        """
+        **Objective:** Test listing all objects.
+        **Workflow:**
+            1. Sets up a mock response resembling the expected API response for listing objects.
+            2. Calls the `list` method with a filter parameter.
+            3. Asserts that the mocked service was called correctly.
+            4. Validates the returned list of objects.
+        """
         mock_response = {
             "data": [
                 {
@@ -85,48 +174,6 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
                                 "action": "sinkhole",
                                 "packet_capture": "disable",
                             },
-                            {
-                                "name": "pan-dns-sec-recent",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "disable",
-                            },
-                            {
-                                "name": "pan-dns-sec-parked",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "disable",
-                            },
-                            {
-                                "name": "pan-dns-sec-proxy",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "disable",
-                            },
-                            {
-                                "name": "pan-dns-sec-cc",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "extended-capture",
-                            },
-                            {
-                                "name": "pan-dns-sec-ddns",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "disable",
-                            },
-                            {
-                                "name": "pan-dns-sec-phishing",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "disable",
-                            },
-                            {
-                                "name": "pan-dns-sec-malware",
-                                "log_level": "default",
-                                "action": "sinkhole",
-                                "packet_capture": "disable",
-                            },
                         ],
                         "lists": [
                             {
@@ -149,60 +196,145 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        profiles = self.client.list(folder="All")
+        existing_objects = self.client.list(folder="All")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
-            params={"folder": "All"},
+            params={
+                "limit": 10000,
+                "folder": "All",
+            },
         )
-        assert isinstance(profiles, list)
-        assert len(profiles) == 2
-        assert isinstance(profiles[0], DNSSecurityProfileResponseModel)
-        assert profiles[0].name == "web-security-default"
-        assert profiles[0].folder == "All"
-        assert profiles[0].snippet == "Web-Security-Default"
-        assert profiles[0].botnet_domains is not None
-        assert len(profiles[0].botnet_domains.dns_security_categories) == 8
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], DNSSecurityProfileResponseModel)
+        assert len(existing_objects) == 2
+        assert existing_objects[0].name == "web-security-default"
         assert (
-            profiles[0].botnet_domains.dns_security_categories[0].name
+            existing_objects[0].botnet_domains.dns_security_categories[0].name
             == "pan-dns-sec-grayware"
         )
         assert (
-            profiles[0].botnet_domains.dns_security_categories[0].action
+            existing_objects[0].botnet_domains.dns_security_categories[0].action
             == ActionEnum.default
         )
 
-        assert profiles[1].description == "Best practice dns security profile"
-        assert profiles[1].botnet_domains.lists[0].name == "default-paloalto-dns"
+    def test_object_list_multiple_containers(self):
+        """Test validation error when listing with multiple containers."""
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+
         assert (
-            profiles[1].botnet_domains.lists[0].action.get_action_name() == "sinkhole"
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
 
-    def test_create_dns_security_profile(self):
-        """Test creating a DNS security profile."""
-        profile_request = DNSSecurityProfileRequestFactory()
+
+class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
+    """Tests for creating DNS Security Profile objects."""
+
+    def test_create_object(self):
+        """
+        **Objective:** Test creating a new object.
+        **Workflow:**
+            1. Creates test data using DNSSecurityProfileRequestFactory.
+            2. Mocks the API response.
+            3. Verifies the creation request and response.
+        """
+        test_object = DNSSecurityProfileRequestFactory()
         mock_response = DNSSecurityProfileResponseFactory.from_request(
-            profile_request, id="333e4567-e89b-12d3-a456-426655440002"
+            test_object, id="333e4567-e89b-12d3-a456-426655440002"
         )
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
 
         # Create a clean request payload without None values
-        request_payload = profile_request.model_dump(exclude_none=True)
-        created_profile = self.client.create(request_payload)
+        request_payload = test_object.model_dump(exclude_none=True)
+        created_object = self.client.create(request_payload)
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             json=request_payload,
         )
 
-        assert isinstance(created_profile, DNSSecurityProfileResponseModel)
-        assert created_profile.id == "333e4567-e89b-12d3-a456-426655440002"
-        assert created_profile.name == profile_request.name
-        assert created_profile.description == profile_request.description
+        assert isinstance(created_object, DNSSecurityProfileResponseModel)
+        assert str(created_object.id) == "333e4567-e89b-12d3-a456-426655440002"
+        assert created_object.name == test_object.name
+        assert created_object.description == test_object.description
 
-    def test_get_dns_security_profile(self):
-        """Test retrieving a DNS security profile by ID."""
+    def test_create_object_error_handling(self):
+        """
+        **Objective:** Test error handling during object creation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to create an object
+            3. Verifies proper error handling and exception raising
+        """
+        test_data = DNSSecurityProfileRequestFactory()
+
+        # Mock error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object creation failed",
+                    "details": {"errorType": "Object Already Exists"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        # Configure mock to raise exception
+        self.mock_scm.post.side_effect = Exception()  # noqa
+        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectAlreadyExistsError):
+            self.client.create(test_data.model_dump())
+
+    def test_create_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in create method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        test_data = DNSSecurityProfileRequestFactory()
+
+        # Mock a generic exception without response
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(test_data.model_dump())
+        assert str(exc_info.value) == "Generic error"
+
+    def test_create_malformed_response_handling(self):
+        """
+        **Objective:** Test handling of malformed response in create method.
+        **Workflow:**
+            1. Mocks a response that would cause a parsing error
+            2. Verifies appropriate error handling
+        """
+        test_data = DNSSecurityProfileRequestFactory()
+
+        # Mock invalid JSON response
+        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(PydanticValidationError):
+            self.client.create(test_data.model_dump())
+
+
+class TestDNSSecurityProfileGet(TestDNSSecurityProfileBase):
+    """Tests for retrieving a specific DNS Security Profile object."""
+
+    def test_get_object(self):
+        """
+        **Objective:** Test retrieving a specific object.
+        **Workflow:**
+            1. Mocks the API response for a specific object.
+            2. Verifies the get request and response handling.
+        """
         profile_id = "e4af4e61-29aa-4454-86f7-269a6e6c5868"
         mock_response = {
             "id": profile_id,
@@ -226,28 +358,89 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        profile = self.client.get(profile_id)
+        get_object = self.client.get(profile_id)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/security/v1/dns-security-profiles/{profile_id}"
         )
-        assert isinstance(profile, DNSSecurityProfileResponseModel)
-        assert profile.id == profile_id
-        assert profile.name == "TestDNSProfile"
-        assert profile.description == "A test DNS security profile"
+        assert isinstance(get_object, DNSSecurityProfileResponseModel)
+        assert str(get_object.id) == profile_id
+        assert get_object.name == "TestDNSProfile"
+        assert get_object.description == "A test DNS security profile"
         assert (
-            profile.botnet_domains.dns_security_categories[0].name
+            get_object.botnet_domains.dns_security_categories[0].name
             == "pan-dns-sec-malware"
         )
         assert (
-            profile.botnet_domains.dns_security_categories[0].action == ActionEnum.block
+            get_object.botnet_domains.dns_security_categories[0].action
+            == ActionEnum.block
         )
 
-    def test_update_dns_security_profile(self):
-        """Test updating a DNS security profile."""
-        profile_id = "e4af4e61-29aa-4454-86f7-269a6e6c5868"
+    def test_get_object_error_handling(self):
+        """
+        **Objective:** Test error handling during object retrieval.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to get an object
+            3. Verifies proper error handling and exception raising
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.get(object_id)
+
+    def test_get_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in get method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.get(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
+    """Tests for updating DNS Security Profile objects."""
+
+    def test_update_object(self):
+        """
+        **Objective:** Test updating an object.
+        **Workflow:**
+            1. Prepares update data and mocks response
+            2. Verifies the update request and response
+            3. Ensures payload transformation is correct
+        """
+        from uuid import UUID
+
+        test_uuid = UUID("e4af4e61-29aa-4454-86f7-269a6e6c5868")
+
+        # Test data including ID
         update_data = {
-            "id": profile_id,  # Include ID in the update data
+            "id": str(test_uuid),
             "name": "UpdatedDNSProfile",
             "folder": "All",
             "description": "An updated DNS security profile",
@@ -269,88 +462,254 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             },
         }
 
-        # Create mock response
-        mock_response = {
-            "id": profile_id,
-            "name": "UpdatedDNSProfile",
-            "folder": "All",
-            "description": "An updated DNS security profile",
-            "botnet_domains": {
-                "dns_security_categories": [
-                    {
-                        "name": "pan-dns-sec-phishing",
-                        "action": "sinkhole",
-                        "log_level": "medium",
-                        "packet_capture": "extended-capture",
-                    }
-                ],
-                "whitelist": [
-                    {
-                        "name": "safe.com",
-                        "description": "Safe domain",
-                    }
-                ],
-            },
-        }
+        # Expected payload should not include the ID
+        expected_payload = update_data.copy()
+        expected_payload.pop("id")
+
+        # Mock response should include the ID
+        mock_response = update_data.copy()
         self.mock_scm.put.return_value = mock_response  # noqa
 
-        updated_profile = self.client.update(update_data)
+        # Perform update
+        updated_object = self.client.update(update_data)
 
-        # Verify the API call
-        expected_payload = update_data.copy()
-        expected_payload.pop("id")  # ID should not be in the payload
-
+        # Verify correct endpoint and payload
         self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/security/v1/dns-security-profiles/{profile_id}",
-            json=expected_payload,
+            f"/config/security/v1/dns-security-profiles/{update_data['id']}",
+            json=expected_payload,  # Should not include ID
         )
-        assert isinstance(updated_profile, DNSSecurityProfileResponseModel)
-        assert updated_profile.id == profile_id
 
-    def test_dns_security_profile_update_model_validation(self):
-        """Test validation in DNSSecurityProfileUpdateModel."""
-        # Test valid update
-        valid_data = {
-            "name": "UpdatedProfile",
-            "folder": "Shared",
-            "description": "Updated description",
-        }
-        profile = DNSSecurityProfileUpdateModel(**valid_data)
-        assert profile.name == "UpdatedProfile"
-
-        # Test invalid name pattern
-        invalid_name_data = {"name": "Invalid!Name@", "folder": "Shared"}
-        with pytest.raises(PydanticValidationError) as exc_info:
-            DNSSecurityProfileUpdateModel(**invalid_name_data)
-        assert "String should match pattern" in str(exc_info.value)
-
-        # Test container validation (if required for updates)
-        multiple_containers = {
-            "name": "TestProfile",
-            "folder": "Shared",
-            "device": "Device1",
-        }
-        profile = DNSSecurityProfileUpdateModel(**multiple_containers)
+        # Verify response model
+        assert isinstance(updated_object, DNSSecurityProfileResponseModel)
+        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
+        assert updated_object.id == test_uuid  # Compare against UUID object
         assert (
-            profile.folder == "Shared"
-        )  # Should allow multiple containers in update model
-
-    def test_delete_dns_security_profile(self):
-        """Test deleting a DNS security profile."""
-        profile_id = "e4af4e61-29aa-4454-86f7-269a6e6c5868"
-
-        self.mock_scm.delete.return_value = None  # noqa
-        self.client.delete(profile_id)
-
-        self.mock_scm.delete.assert_called_once_with(  # noqa
-            f"/config/security/v1/dns-security-profiles/{profile_id}"
+            str(updated_object.id) == update_data["id"]
+        )  # Compare string representations
+        assert updated_object.name == "UpdatedDNSProfile"
+        assert updated_object.description == "An updated DNS security profile"
+        assert (
+            updated_object.botnet_domains.dns_security_categories[0].name
+            == "pan-dns-sec-phishing"
+        )
+        assert (
+            updated_object.botnet_domains.dns_security_categories[0].action
+            == ActionEnum.sinkhole
         )
 
-    def test_fetch_dns_security_profile_success(self):
+    def test_update_object_error_handling(self):
         """
-        Test successful fetch of a DNS security profile.
+        **Objective:** Test error handling during object update.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to update an object
+            3. Verifies proper error handling and exception raising
+        """
+        update_data = {
+            "id": "e4af4e61-29aa-4454-86f7-269a6e6c5868",
+            "name": "test-profile",
+            "folder": "Shared",
+            "botnet_domains": {
+                "dns_security_categories": [
+                    {
+                        "name": "pan-dns-sec-malware",
+                        "action": "block",
+                    }
+                ]
+            },
+        }
 
-        **Objective:** Test fetching a profile with all fields populated.
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Update failed",
+                    "details": {"errorType": "Malformed Command"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.put.side_effect = Exception()  # noqa
+        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(MalformedRequestError):
+            self.client.update(update_data)
+
+    def test_update_with_invalid_data(self):
+        """
+        **Objective:** Test update method with invalid data structure.
+        **Workflow:**
+            1. Attempts to update with invalid data
+            2. Verifies proper validation error handling
+        """
+        invalid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "invalid_field": "test",
+        }
+
+        with pytest.raises(PydanticValidationError):
+            self.client.update(invalid_data)
+
+    def test_update_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in update method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        update_data = {
+            "id": "e4af4e61-29aa-4454-86f7-269a6e6c5868",
+            "name": "test-profile",
+            "folder": "Shared",
+            "botnet_domains": {
+                "dns_security_categories": [
+                    {
+                        "name": "pan-dns-sec-malware",
+                        "action": "block",
+                    }
+                ]
+            },
+        }
+
+        # Mock a generic exception without response
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(update_data)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestDNSSecurityProfileDelete(TestDNSSecurityProfileBase):
+    """Tests for deleting DNS Security Profile objects."""
+
+    def test_delete_referenced_object(self):
+        """
+        **Objective:** Test deleting an object that is referenced by other objects.
+        **Workflow:**
+            1. Sets up a mock error response for a referenced object deletion attempt
+            2. Attempts to delete an object that is referenced by other objects
+            3. Validates that ReferenceNotZeroError is raised with correct details
+            4. Verifies the error contains proper reference information
+        """
+        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+
+        # Mock the API error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {
+                        "errorType": "Reference Not Zero",
+                        "message": [
+                            " container -> Texas -> security-profile-group -> custom-group -> dns-security"
+                        ],
+                        "errors": [
+                            {
+                                "type": "NON_ZERO_REFS",
+                                "message": "Node cannot be deleted because of references from",
+                                "params": ["custom-profile"],
+                                "extra": [
+                                    "container/[Texas]/security-profile-group/[custom-group]/dns-security/[custom-profile]"
+                                ],
+                            }
+                        ],
+                    },
+                }
+            ],
+            "_request_id": "8fe3b025-feb7-41d9-bf88-3938c0b33116",
+        }
+
+        # Configure mock to raise HTTPError with our custom error response
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        # Attempt to delete the object and expect ReferenceNotZeroError
+        with pytest.raises(ReferenceNotZeroError) as exc_info:
+            self.client.delete(object_id)
+
+        error = exc_info.value
+
+        # Verify the error contains the expected information
+        assert error.error_code == "API_I00013"
+        assert "custom-profile" in error.references
+        assert any("Texas" in path for path in error.reference_paths)
+        assert "Cannot delete object due to existing references" in str(error)
+
+        # Verify the delete method was called with correct endpoint
+        self.mock_scm.delete.assert_called_once_with(  # noqa
+            f"/config/security/v1/dns-security-profiles/{object_id}"
+        )
+
+        # Verify detailed error message includes reference path
+        assert "custom-group" in error.detailed_message
+        assert "container/[Texas]" in error.detailed_message
+
+    def test_delete_error_handling(self):
+        """
+        **Objective:** Test error handling during object deletion.
+        **Workflow:**
+            1. Mocks various error scenarios
+            2. Verifies proper error handling for each case
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Test object not found
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.delete(object_id)
+
+    def test_delete_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in delete method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
+    """Tests for fetching DNS Security Profile objects by name."""
+
+    def test_fetch_object(self):
+        """
+        **Objective:** Test retrieving an object by its name using the `fetch` method.
+        **Workflow:**
+            1. Sets up a mock response resembling the expected API response for fetching an object by name.
+            2. Calls the `fetch` method of `self.client` with a specific name and container.
+            3. Asserts that the mocked service was called with the correct URL and parameters.
+            4. Validates the returned object's attributes.
         """
         mock_response = {
             "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
@@ -372,32 +731,88 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
                 },
             },
         }
+
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.client.fetch(name="test-profile", folder="All")
+        # Call the fetch method
+        fetched_object = self.client.fetch(
+            name=mock_response["name"],
+            folder=mock_response["folder"],
+        )
 
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
-            params={"folder": "All", "name": "test-profile"},
+            params={
+                "folder": mock_response["folder"],
+                "name": mock_response["name"],
+            },
         )
-        assert isinstance(result, dict)
-        assert result["name"] == "test-profile"
+
+        # Validate the returned object
+        assert isinstance(fetched_object, dict)
+        assert str(fetched_object["id"]) == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+        assert fetched_object["description"] == mock_response["description"]
         assert (
-            result["botnet_domains"]["dns_security_categories"][0]["action"] == "block"
+            fetched_object["botnet_domains"]["dns_security_categories"][0]["action"]
+            == "block"
         )
 
-    def test_fetch_dns_security_profile_validations(self):
+    def test_fetch_object_not_found(self):
         """
-        Test fetch method parameter validations.
+        Test fetching an object by name that does not exist.
 
-        **Objective:** Test all validation scenarios for fetch parameters.
+        **Objective:** Test that fetching a non-existent object raises NotFoundError.
+        **Workflow:**
+            1. Mocks the API response to return an empty 'data' list.
+            2. Calls the `fetch` method with a name that does not exist.
+            3. Asserts that NotFoundError is raised.
         """
-        # Test empty name
+        object_name = "NonExistent"
+        folder_name = "Shared"
+        mock_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Call the fetch method and expect a NotFoundError
+        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
+            self.client.fetch(
+                name=object_name,
+                folder=folder_name,
+            )
+
+    def test_fetch_empty_name(self):
+        """
+        **Objective:** Test fetch with empty name parameter.
+        **Workflow:**
+            1. Attempts to fetch with empty name
+            2. Verifies ValidationError is raised
+        """
         with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="", folder="All")
-        assert "Parameter 'name' must be provided for fetch method." in str(
-            exc_info.value
-        )
+            self.client.fetch(name="", folder="Shared")
+        assert "Field 'name' cannot be empty" in str(exc_info.value)
+
+    def test_fetch_container_validation(self):
+        """
+        **Objective:** Test container parameter validation in fetch.
+        **Workflow:**
+            1. Tests various invalid container combinations
+            2. Verifies proper error handling
+        """
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
         # Test no container provided
         with pytest.raises(ValidationError) as exc_info:
@@ -407,365 +822,403 @@ class TestDNSSecurityProfileAPI(TestDNSSecurityProfileBase):
             in str(exc_info.value)
         )
 
-        # Test multiple containers
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="test-profile", folder="All", snippet="test-snippet")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-        # Test all containers
+        # Test multiple containers provided
         with pytest.raises(ValidationError) as exc_info:
             self.client.fetch(
-                name="test-profile",
-                folder="All",
-                snippet="test-snippet",
-                device="test-device",
+                name="test-profile", folder="Shared", snippet="TestSnippet"
             )
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
 
-    def test_fetch_dns_security_profile_with_different_containers(self):
+    def test_fetch_object_unexpected_response_format(self):
         """
-        Test fetch with different container types.
+        Test fetching an object when the API returns an unexpected response format.
 
-        **Objective:** Test fetch using different container parameters.
+        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
+        **Workflow:**
+            1. Mocks the API response to return an unexpected format.
+            2. Calls the `fetch` method.
+            3. Asserts that BadResponseError is raised.
         """
-        mock_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "test-profile",
-            "botnet_domains": {},
-        }
+        group_name = "TestGroup"
+        folder_name = "Shared"
+        # Mocking an unexpected response format
+        mock_response = {"unexpected_key": "unexpected_value"}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Test with folder
-        self.client.fetch(name="test-profile", folder="All")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/dns-security-profiles",
-            params={"folder": "All", "name": "test-profile"},
-        )
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name=group_name, folder=folder_name)
+        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
 
-        # Test with snippet
-        self.client.fetch(name="test-profile", snippet="test-snippet")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/dns-security-profiles",
-            params={"snippet": "test-snippet", "name": "test-profile"},
-        )
-
-        # Test with device
-        self.client.fetch(name="test-profile", device="test-device")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/dns-security-profiles",
-            params={"device": "test-device", "name": "test-profile"},
-        )
-
-    def test_fetch_dns_security_profile_with_filters(self):
+    def test_fetch_validation_errors(self):
         """
-        Test fetch with additional filters.
-
-        **Objective:** Test handling of additional filter parameters.
+        **Objective:** Test fetch validation errors.
+        **Workflow:**
+            1. Tests various invalid input scenarios
+            2. Verifies appropriate error handling
         """
-        mock_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "test-profile",
-            "folder": "All",
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
-        # Test with allowed and excluded filters
-        result = self.client.fetch(
-            name="test-profile",
-            folder="All",
-            custom_filter="value",
-            types=["excluded"],
-            values=["excluded"],
-            names=["excluded"],
-            tags=["excluded"],
-        )
-
-        # Verify only allowed filters are included
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/dns-security-profiles",
-            params={"folder": "All", "name": "test-profile", "custom_filter": "value"},
-        )
-        assert isinstance(result, dict)
-        assert result["name"] == "test-profile"
-
-    def test_fetch_dns_security_profile_response_handling(self):
-        """
-        Test fetch response handling.
-
-        **Objective:** Test handling of different response scenarios.
-        """
-        # Test with all fields present
-        complete_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "test-profile",
-            "folder": "All",
-            "description": "Test description",
-            "botnet_domains": {
-                "dns_security_categories": [
-                    {"name": "pan-dns-sec-malware", "action": "block"}
-                ]
-            },
-        }
-        self.mock_scm.get.return_value = complete_response  # noqa
-        result = self.client.fetch(name="test-profile", folder="All")
-        assert result["description"] == "Test description"
-        assert "botnet_domains" in result
-
-        # Test with minimal fields
-        minimal_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "test-profile",
-            "folder": "All",
-        }
-        self.mock_scm.get.return_value = minimal_response  # noqa
-        result = self.client.fetch(name="test-profile", folder="All")
-        assert "description" not in result
-        assert "botnet_domains" not in result
-
-
-class TestDNSSecurityProfileValidation(TestDNSSecurityProfileBase):
-    """Tests for DNS Security Profile validation."""
-
-    def test_dns_security_profile_request_model_validation_errors(self):
-        """Test validation errors in DNSSecurityProfileCreateModel."""
-        # No container provided
-        with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileCreateModel(
-                name="InvalidDNSProfile",
-                botnet_domains={},
-            )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-        # Multiple containers provided
-        with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileCreateModel(
-                name="InvalidDNSProfile",
-                folder="Shared",
-                device="Device1",
-                botnet_domains={},
-            )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-        # Invalid action in dns_security_categories
-        with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileCreateModel(
-                name="InvalidDNSProfile",
-                folder="Shared",
-                botnet_domains={
-                    "dns_security_categories": [
-                        {
-                            "name": "pan-dns-sec-malware",
-                            "action": "invalid_action",
-                        }
-                    ]
-                },
-            )
-        assert "1 validation error for DNSSecurityProfileCreateModel" in str(
-            exc_info.value
-        )
-
-        # Invalid action in lists
-        with pytest.raises(ValueError) as exc_info:
-            DNSSecurityProfileCreateModel(
-                name="InvalidDNSProfile",
-                folder="Shared",
-                botnet_domains={
-                    "lists": [
-                        {
-                            "name": "CustomDNSList",
-                            "action": {"invalid_action": {}},
-                        }
-                    ]
-                },
-            )
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
-
-    def test_dns_security_profile_list_validation_error(self):
-        """Test validation error when listing with multiple containers."""
+        # Test multiple containers
         with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", snippet="TestSnippet")
-
+            self.client.fetch(name="test", folder="folder1", snippet="snippet1")
         assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
             in str(exc_info.value)
         )
 
-    def test_dns_security_profile_list_with_invalid_pagination(self):
-        """Test validation error when invalid pagination parameters are provided."""
-        with pytest.raises(ValueError) as exc_info:
-            self.client.list(
-                folder="All",
-                offset=-1,
-                limit=0,
-            )
+    def test_fetch_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in fetch method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        assert "Offset must be a non-negative integer" in str(exc_info.value)
-        assert "Limit must be a positive integer" in str(exc_info.value)
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert str(exc_info.value) == "Generic error"
 
+    def test_fetch_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in fetch method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response without expected fields
+        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
 
-class TestListActionValidation:
-    """Tests for List Action validation."""
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
 
-    def test_list_action_request_validation(self):
-        """Test validation in ListActionRequestModel."""
-        # Valid action
-        valid_action = ListActionRequestModel("sinkhole")  # noqa
-        assert valid_action.root == {"sinkhole": {}}
+        # Test response with both id and data fields (invalid format)
+        self.mock_scm.get.return_value = {  # noqa
+            "id": "some-id",
+            "data": [{"some": "data"}],
+        }  # noqa
 
-        # Invalid action format
-        with pytest.raises(
-            ValueError, match="Invalid action format; must be a string or dict."
-        ):
-            ListActionRequestModel(123)  # noqa
-
-        # Multiple actions
-        with pytest.raises(
-            ValueError, match="Exactly one action must be provided in 'action' field."
-        ):
-            ListActionRequestModel({"sinkhole": {}, "block": {}})
-
-        # Invalid action name
-        with pytest.raises(
-            ValueError, match="Exactly one action must be provided in 'action' field."
-        ):
-            ListActionRequestModel({"invalid_action": {}})
-
-        # Non-empty parameters
-        with pytest.raises(
-            ValueError, match="Action 'sinkhole' does not take any parameters."
-        ):
-            ListActionRequestModel({"sinkhole": {"param": "value"}})
-
-
-class TestModelValidation:
-    """Tests for model-specific validations."""
-
-    def test_dns_security_profile_response_id_validation(self):
-        """Test UUID validation in DNSSecurityProfileResponseModel."""
-        # Test valid UUID
-        valid_uuid = "550e8400-e29b-41d4-a716-446655440000"
-        valid_data = {
-            "id": valid_uuid,
-            "name": "TestProfile",
-            "folder": "All",
-            "botnet_domains": {},
-        }
-        profile = DNSSecurityProfileResponseModel(**valid_data)
-        assert profile.id == valid_uuid
-
-        # Test invalid UUID format
-        invalid_uuids = [
-            "not-a-uuid",
-            "123",
-            "550e8400-e29b-41d4-a716",  # Incomplete UUID
-            "550e8400-e29b-41d4-a716-44665544000Z",  # Invalid character
-            "",  # Empty string
-        ]
-
-        for invalid_uuid in invalid_uuids:
-            invalid_data = valid_data.copy()
-            invalid_data["id"] = invalid_uuid
-            with pytest.raises(ValueError, match="Invalid UUID format for 'id'"):
-                DNSSecurityProfileResponseModel(**invalid_data)
-
-        # Test that the validator handles None (though it shouldn't occur due to field requirements)
-        invalid_data = valid_data.copy()
-        invalid_data["id"] = None  # noqa
-        with pytest.raises(ValueError):
-            DNSSecurityProfileResponseModel(**invalid_data)
-
-
-class TestDNSSecurityProfilePagination(TestDNSSecurityProfileBase):
-    """Tests for DNS Security Profile pagination."""
-
-    def test_list_dns_security_profiles_with_pagination(self):
-        """Test listing DNS security profiles with pagination parameters."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "d3d1d8bf-d7e3-44ae-a3be-37396c365572",
-                    "name": "best-practice",
-                    "folder": "All",
-                    "snippet": "predefined-snippet",
-                    "botnet_domains": {},
-                    "description": "Best practice dns security profile",
-                }
-            ],
-            "offset": 1,
-            "total": 2,
-            "limit": 1,
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-        profiles = self.client.list(
-            folder="All",
-            offset=1,
-            limit=1,
+        with pytest.raises(PydanticValidationError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert (
+            "2 validation errors for DNSSecurityProfileResponseModel\nname\n  Field required [type=missing, input_value={'id': 'some-id', 'data': [{'some': 'data'}]}, input_type=dict]"
+            in str(exc_info.value)
         )
+
+        # Test malformed response in list format
+        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+    def test_fetch_error_handler_json_error(self):
+        """
+        **Objective:** Test fetch method error handling when json() raises an error.
+        **Workflow:**
+            1. Mocks an exception with a response that raises error on json()
+            2. Verifies the original exception is re-raised
+        """
+
+        class MockResponse:
+            @property
+            def response(self):
+                return self
+
+            def json(self):
+                raise ValueError("Original error")
+
+        # Create mock exception with our special response
+        mock_exception = Exception("Original error")
+        mock_exception.response = MockResponse()
+
+        # Configure mock to raise our custom exception
+        self.mock_scm.get.side_effect = mock_exception  # noqa
+
+        # The original exception should be raised since json() failed
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Original error" in str(exc_info.value)
+
+
+class TestDNSSecurityProfileListFilters(TestDNSSecurityProfileBase):
+    """Tests for filtering during listing DNS Security Profile objects."""
+
+    def test_list_with_filters(self):
+        """
+        **Objective:** Test that filters are properly added to parameters.
+        **Workflow:**
+            1. Calls list with various filters
+            2. Verifies filters are properly formatted in the request
+        """
+        filters = {
+            "dns_security_categories": ["category1", "category2"],
+        }
+
+        mock_response = {"data": []}
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        self.client.list(folder="Shared", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
-                "folder": "All",
-                "offset": 1,
-                "limit": 1,
+                "limit": 10000,
+                "folder": "Shared",
             },
         )
-        assert isinstance(profiles, list)
-        assert len(profiles) == 1
-        assert profiles[0].name == "best-practice"
-        assert profiles[0].id == "d3d1d8bf-d7e3-44ae-a3be-37396c365572"
 
-    def test_list_dns_security_profiles_with_name_filter(self):
-        """Test listing DNS security profiles with name filter."""
+    def test_list_filters_type_validation(self):
+        """
+        **Objective:** Test validation of filter types in list method.
+        **Workflow:**
+            1. Tests various invalid filter type scenarios
+            2. Verifies ValidationError is raised with correct message
+            3. Tests valid filter types pass validation
+        """
         mock_response = {
             "data": [
                 {
-                    "id": "e4af4e61-29aa-4454-86f7-269a6e6c5868",
-                    "name": "SpecificProfile",
-                    "folder": "All",
-                    "botnet_domains": {},
-                },
+                    "id": "1cbeeef0-59dd-49a3-9753-3b7c4d174cef",
+                    "name": "Morrowind",
+                    "folder": "Shared",
+                    "ssl_forward_proxy": {
+                        "auto_include_altname": True,
+                        "block_client_cert": False,
+                        "block_expired_certificate": True,
+                        "block_timeout_cert": False,
+                        "block_tls13_downgrade_no_resource": False,
+                        "block_unknown_cert": False,
+                        "block_unsupported_cipher": False,
+                        "block_unsupported_version": False,
+                        "block_untrusted_issuer": False,
+                        "restrict_cert_exts": False,
+                        "strip_alpn": False,
+                    },
+                    "ssl_protocol_settings": {
+                        "auth_algo_md5": True,
+                        "auth_algo_sha1": True,
+                        "auth_algo_sha256": True,
+                        "auth_algo_sha384": True,
+                        "enc_algo_3des": True,
+                        "enc_algo_aes_128_cbc": True,
+                        "enc_algo_aes_128_gcm": True,
+                        "enc_algo_aes_256_cbc": True,
+                        "enc_algo_aes_256_gcm": True,
+                        "enc_algo_chacha20_poly1305": True,
+                        "enc_algo_rc4": True,
+                        "keyxchg_algo_dhe": True,
+                        "keyxchg_algo_ecdhe": True,
+                        "keyxchg_algo_rsa": True,
+                        "max_version": "tls1-2",
+                        "min_version": "tls1-0",
+                    },
+                }
             ],
             "offset": 0,
             "total": 1,
             "limit": 200,
         }
-
         self.mock_scm.get.return_value = mock_response  # noqa
-        profiles = self.client.list(folder="All", name="SpecificProfile")
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/security/v1/dns-security-profiles",
-            params={"folder": "All", "name": "SpecificProfile"},
+        # Test invalid types filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", dns_security_categories="category1")
+        assert str(exc_info.value) == "'dns_security_categories' filter must be a list"
+
+        # Test invalid types filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(
+                folder="Shared", dns_security_categories={"type": "category1"}
+            )
+        assert str(exc_info.value) == "'dns_security_categories' filter must be a list"
+
+        # Test that valid list filters pass validation
+        try:
+            self.client.list(
+                folder="Shared",
+                dns_security_categories=["category1"],
+            )
+        except ValidationError:
+            pytest.fail("Unexpected ValidationError raised with valid list filters")
+
+    def test_list_empty_folder_error(self):
+        """
+        **Objective:** Test that empty folder raises appropriate error.
+        **Workflow:**
+            1. Attempts to list objects with empty folder
+            2. Verifies EmptyFieldError is raised
+        """
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.list(folder="")
+        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+
+    def test_list_multiple_containers_error(self):
+        """
+        **Objective:** Test validation of container parameters.
+        **Workflow:**
+            1. Attempts to list with multiple containers
+            2. Verifies ValidationError is raised
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+        assert (
+            str(exc_info.value)
+            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
         )
-        assert isinstance(profiles, list)
-        assert len(profiles) == 1
-        assert profiles[0].name == "SpecificProfile"
-        assert profiles[0].id == "e4af4e61-29aa-4454-86f7-269a6e6c5868"
+
+    def test_list_error_handling(self):
+        """
+        **Objective:** Test error handling in list operation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to list objects
+            3. Verifies proper error handling
+        """
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Listing failed",
+                    "details": {"errorType": "Operation Impossible"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(FolderNotFoundError):
+            self.client.list(folder="NonexistentFolder")
+
+    def test_list_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in list method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.list(folder="Shared")
+        assert str(exc_info.value) == "Generic error"
+
+    def test_list_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in list method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response
+        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+        # Test invalid data format
+        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+    def test_list_non_dict_response(self):
+        """
+        **Objective:** Test list method handling of non-dictionary response.
+        **Workflow:**
+            1. Mocks a non-dictionary response from the API
+            2. Verifies that BadResponseError is raised with correct message
+            3. Tests different non-dict response types
+        """
+        # Test with list response
+        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with string response
+        self.mock_scm.get.return_value = "string response"  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with None response
+        self.mock_scm.get.return_value = None  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
 
-class TestSuite(
-    TestDNSSecurityProfileAPI,
-    TestDNSSecurityProfileValidation,
-    TestListActionValidation,
-    TestDNSSecurityProfilePagination,
-    TestModelValidation,
-):
-    """Main test suite that combines all test classes."""
+class TestListActionBaseModel(TestDNSSecurityProfileBase):
+    """Tests for ListActionBaseModel functionality."""
 
-    pass
+    def test_get_action_name_returns_first_key(self):
+        """
+        **Objective:** Test that get_action_name returns the first key from root.
+        **Workflow:**
+            1. Creates a ListActionBaseModel with a single action
+            2. Verifies get_action_name returns the correct action
+        """
+        action_model = ListActionBaseModel.model_validate({"block": {}})
+        assert action_model.get_action_name() == "block"
+
+    def test_get_action_name_returns_unknown_for_empty_dict(self):
+        """
+        **Objective:** Test that get_action_name returns 'unknown' for empty dict.
+        **Workflow:**
+            1. Creates a ListActionBaseModel with an empty dict
+            2. Verifies get_action_name returns 'unknown'
+        """
+        action_model = ListActionBaseModel.model_validate({})
+        assert action_model.get_action_name() == "unknown"
+
+
+class TestListActionRequestModelValidation(TestDNSSecurityProfileBase):
+    """Tests for ListActionRequestModel validation."""
+
+    def test_invalid_action_format_raises_error(self):
+        """
+        **Objective:** Test that invalid action format raises ValueError.
+        **Workflow:**
+            1. Attempts to create ListActionRequestModel with invalid format
+            2. Verifies ValueError is raised with correct message
+        """
+        with pytest.raises(ValueError) as exc_info:
+            ListActionRequestModel.model_validate(
+                []
+            )  # Invalid format - list instead of dict
+        assert "Invalid action format; must be a string or dict." in str(exc_info.value)
+
+
+class TestListActionRequestModelParameters(TestDNSSecurityProfileBase):
+    """Tests for ListActionRequestModel parameter validation."""
+
+    def test_action_with_parameters_raises_error(self):
+        """
+        **Objective:** Test that action with parameters raises ValueError.
+        **Workflow:**
+            1. Attempts to create ListActionRequestModel with parameters in action
+            2. Verifies ValueError is raised with correct message
+        """
+        with pytest.raises(ValueError) as exc_info:
+            ListActionRequestModel.model_validate({"block": {"param": "value"}})
+        assert "Action 'block' does not take any parameters." in str(exc_info.value)
+
+
+# -------------------- End of Test Classes --------------------

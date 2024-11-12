@@ -1,22 +1,25 @@
 # scm/models/security/__init__.py
 
 from .anti_spyware_profiles import (
-    AntiSpywareProfileRequestModel,
+    AntiSpywareProfileCreateModel,
     AntiSpywareProfileResponseModel,
     AntiSpywareProfileUpdateModel,
 )
 from .decryption_profiles import (
     DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
+    DecryptionProfileUpdateModel,
 )
 from .dns_security_profiles import (
     DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
+    DNSSecurityProfileUpdateModel,
 )
 from .security_rules import (
-    SecurityRuleRequestModel,
+    SecurityRuleCreateModel,
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
+    SecurityRuleUpdateModel,
     Rulebase,
 )
 from .vulnerability_protection_profiles import (

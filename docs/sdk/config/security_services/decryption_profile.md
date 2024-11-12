@@ -143,7 +143,10 @@ print("Profile deleted successfully")
 
 ## Listing Decryption Profiles
 
-The `list()` method retrieves multiple decryption profiles with optional filtering.
+The `list()` method retrieves multiple decryption profiles with optional filtering. You can filter the results using the
+following kwargs:
+
+- `types`: List[str] - Filter by proxy types (e.g., ['forward', 'inbound', 'no'])
 
 <div class="termy">
 
@@ -153,9 +156,27 @@ The `list()` method retrieves multiple decryption profiles with optional filteri
 # List all profiles in a folder
 profiles = decryption_profiles.list(folder="Texas")
 
+# List only forward proxy profiles
+forward_profiles = decryption_profiles.list(
+    folder="Texas",
+    types=['forward']
+)
+
+# List both forward and inbound proxy profiles
+mixed_profiles = decryption_profiles.list(
+    folder="Texas",
+    types=['forward', 'inbound']
+)
+
+# Print the results
 for profile in profiles:
     print(f"Name: {profile.name}")
-
+    if profile.ssl_forward_proxy:
+        print("Type: Forward Proxy")
+    elif profile.ssl_inbound_proxy:
+        print("Type: Inbound Proxy")
+    else:
+        print("Type: No Proxy")
 ```
 
 </div>

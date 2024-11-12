@@ -10,7 +10,7 @@ from pydantic import (
     RootModel,
 )
 from enum import Enum
-import uuid
+from uuid import UUID
 
 
 # Enums
@@ -241,16 +241,8 @@ class DNSSecurityProfileUpdateModel(DNSSecurityProfileBaseModel):
 class DNSSecurityProfileResponseModel(DNSSecurityProfileBaseModel):
     """Model for DNS Security Profile API responses."""
 
-    id: str = Field(
+    id: UUID = Field(
         ...,
         description="UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    @field_validator("id")
-    def validate_id(cls, v):
-        try:
-            uuid.UUID(v)
-        except ValueError:
-            raise ValueError("Invalid UUID format for 'id'")
-        return v

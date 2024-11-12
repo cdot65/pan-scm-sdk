@@ -176,7 +176,11 @@ print("Profile deleted successfully")
 
 ## Listing WildFire Antivirus Profiles
 
-The `list()` method retrieves multiple WildFire antivirus profiles with optional filtering.
+The `list()` method retrieves multiple WildFire antivirus profiles with optional filtering. You can filter the results
+using the
+following kwargs:
+
+- `rules`: List[str] - Filter by rule names (e.g., ['basic-rule', 'upload-rule'])
 
 <div class="termy">
 
@@ -185,24 +189,23 @@ The `list()` method retrieves multiple WildFire antivirus profiles with optional
 ```python
 # List all profiles in a folder
 profiles = wildfire_antivirus_profile.list(
-    folder="Shared",
-    limit=10,
-    offset=0
+    folder="Shared"
 )
 
+# List profiles with specific rules
+rule_profiles = wildfire_antivirus_profile.list(
+    folder="Shared",
+    rules=['basic-rule', 'upload-rule']
+)
+
+# Print the results
 for profile in profiles:
-    print(f"Name: {profile['name']}")
-    print(f"Rules: {len(profile['rules'])}")
+    print(f"Name: {profile.name}")
+    for rule in profile.rules:
+        print(f"  Rule: {rule.name}")
+        print(f"  Direction: {rule.direction}")
+        print(f"  Analysis: {rule.analysis}")
     print("---")
-
-# List profiles with name filter
-filtered_profiles = wildfire_antivirus_profile.list(
-    folder="Shared",
-    name="basic"
-)
-
-for profile in filtered_profiles:
-    print(f"Filtered profile: {profile['name']}")
 ```
 
 </div>

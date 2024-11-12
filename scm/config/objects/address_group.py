@@ -7,53 +7,199 @@ from scm.models.objects import (
     AddressGroupResponseModel,
     AddressGroupUpdateModel,
 )
-from scm.exceptions import ValidationError, NotFoundError, APIError
+from scm.exceptions import (
+    ValidationError,
+    EmptyFieldError,
+    ErrorHandler,
+    BadResponseError,
+)
 
 
 class AddressGroup(BaseObject):
     """
-    Manages AddressRequestModel Groups in Palo Alto Networks' Strata Cloud Manager.
-
-    This class provides methods to create, retrieve, update, and list AddressRequestModel Groups
-    using the Strata Cloud Manager API. It supports operations within folders, snippets,
-    or devices, and allows filtering of AddressRequestModel Groups based on various criteria.
-
-    Attributes:
-        ENDPOINT (str): The API endpoint for AddressRequestModel Group operations.
-
-    Error:
-        ValueError: Raised when invalid container parameters are provided.
-
-    Return:
-        AddressGroupResponseModel: For create, get, and update methods.
-        List[AddressGroupResponseModel]: For the list method.
+    Manages Address Group objects in Palo Alto Networks' Strata Cloud Manager.
     """
 
     ENDPOINT = "/config/objects/v1/address-groups"
+    DEFAULT_LIMIT = 10000
 
-    def __init__(self, api_client):
+    def __init__(
+        self,
+        api_client,
+    ):
         super().__init__(api_client)
 
-    def create(self, data: Dict[str, Any]) -> AddressGroupResponseModel:
-        address_group = AddressGroupCreateModel(**data)
-        payload = address_group.model_dump(exclude_unset=True)
-        response = self.api_client.post(self.ENDPOINT, json=payload)
-        return AddressGroupResponseModel(**response)
+    def create(
+        self,
+        data: Dict[str, Any],
+    ) -> AddressGroupResponseModel:
+        """
+        Creates a new address group object.
 
-    def get(self, object_id: str) -> AddressGroupResponseModel:
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        response = self.api_client.get(endpoint)
-        return AddressGroupResponseModel(**response)
+        Returns:
+            AddressResponseModel
+
+        Raises:
+            Custom Error Handling class response
+        """
+        try:
+
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
+            address_group = AddressGroupCreateModel(**data)
+
+            # Convert back to a Python dictionary, but removing any excluded object
+            payload = address_group.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
+            response = self.api_client.post(self.ENDPOINT, json=payload)
+
+            # Return the SCM API response as a new Pydantic object
+            return AddressGroupResponseModel(**response)
+
+        # Forward exceptions to our custom ErrorHandler object
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
+
+    def get(
+        self,
+        object_id: str,
+    ) -> AddressGroupResponseModel:
+        """
+        Gets an address group object by ID.
+
+        Returns:
+            AddressGroupResponseModel
+
+        Raises:
+            Custom Error Handling class response
+        """
+        try:
+
+            # Send the request to the remote API
+            endpoint = f"{self.ENDPOINT}/{object_id}"
+            response = self.api_client.get(endpoint)
+
+            # Return the SCM API response as a new Pydantic object
+            return AddressGroupResponseModel(**response)
+
+        # Forward exceptions to our custom ErrorHandler object
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
     def update(
         self,
         data: Dict[str, Any],
     ) -> AddressGroupResponseModel:
-        address = AddressGroupUpdateModel(**data)
-        payload = address.model_dump(exclude_unset=True)
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
-        response = self.api_client.put(endpoint, json=payload)
-        return AddressGroupResponseModel(**response)
+        """
+        Updates an existing address group object.
+
+        Returns:
+            AddressGroupResponseModel
+
+        Raises:
+            Custom Error Handling class response
+        """
+        try:
+
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
+            address = AddressGroupUpdateModel(**data)
+
+            # Convert back to a Python dictionary, but removing any excluded object
+            payload = address.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
+            endpoint = f"{self.ENDPOINT}/{data['id']}"
+            response = self.api_client.put(endpoint, json=payload)
+
+            # Return the SCM API response as a new Pydantic object
+            return AddressGroupResponseModel(**response)
+
+        # Forward exceptions to our custom ErrorHandler object
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
+
+    @staticmethod
+    def _apply_filters(
+        address_groups: List[AddressGroupResponseModel],
+        filters: Dict[str, Any],
+    ) -> List[AddressGroupResponseModel]:
+        """
+        Apply client-side filtering to the list of address groups.
+
+        Args:
+            address_groups: List of AddressGroupResponseModel objects
+            filters: Dictionary of filter criteria
+
+        Returns:
+            List[AddressGroupResponseModel]: Filtered list of address groups
+        """
+
+        # Build a list of what criteria we are looking to filter our response from
+        filtered_groups = address_groups
+
+        # Perform filtering if the presence of "types" is found within the filters
+        if "types" in filters:
+            if not isinstance(filters["types"], list):
+                raise ValidationError("'types' filter must be a list")
+
+            types = filters["types"]
+            filtered_groups = [
+                group
+                for group in filtered_groups
+                if any(
+                    getattr(group, field) is not None
+                    for field in ["static", "dynamic"]
+                    if field in types
+                )
+            ]
+
+        # Perform filtering if the presence of "values" is found within the filters
+        if "values" in filters:
+            if not isinstance(filters["values"], list):
+                raise ValidationError("'values' filter must be a list")
+
+            values = filters["values"]
+            filtered_groups = [
+                group
+                for group in filtered_groups
+                if (group.static and any(value in group.static for value in values))
+                or (group.dynamic and group.dynamic.filter in values)
+            ]
+
+        # Perform filtering if the presence of "tags" is found within the filters
+        if "tags" in filters:
+            if not isinstance(filters["tags"], list):
+                raise ValidationError("'tags' filter must be a list")
+
+            tags = filters["tags"]
+            filtered_groups = [
+                group
+                for group in filtered_groups
+                if group.tag and any(tag in group.tag for tag in tags)
+            ]
+
+        return filtered_groups
+
+    @staticmethod
+    def _build_container_params(
+        folder: Optional[str],
+        snippet: Optional[str],
+        device: Optional[str],
+    ) -> dict:
+        """Builds container parameters dictionary."""
+
+        # Only return a key of "folder", "snippet", or "device" if their value is not None
+        return {
+            k: v
+            for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
+            if v is not None
+        }
 
     def list(
         self,
@@ -62,54 +208,83 @@ class AddressGroup(BaseObject):
         device: Optional[str] = None,
         **filters,
     ) -> List[AddressGroupResponseModel]:
-        params = {}
+        """
+        Lists address group objects with optional filtering.
 
-        # Include container type parameter
-        container_params = {"folder": folder, "snippet": snippet, "device": device}
-        provided_containers = {
-            k: v for k, v in container_params.items() if v is not None
-        }
+        Args:
+            folder: Optional folder name
+            snippet: Optional snippet name
+            device: Optional device name
+            **filters: Additional filters including:
+                - types: List[str] - Filter by group types (e.g., ['static', 'dynamic'])
+                - values: List[str] - Filter by group values
+                - tags: List[str] - Filter by tags
+        Raises:
+            EmptyFieldError: If provided container fields are empty
+            FolderNotFoundError: If the specified folder doesn't exist
+            ValidationError: If the container parameters are invalid
+            BadResponseError: If response format is invalid
+        """
 
-        if len(provided_containers) != 1:
+        # If the folder object is empty, raise exception
+        if folder == "":
+            raise EmptyFieldError(
+                message="Field 'folder' cannot be empty",
+                error_code="API_I00035",
+                details=['"folder" is not allowed to be empty'],  # noqa
+            )
+
+        # Set the parameters, starting with a high limit for more than the default 200
+        params = {"limit": self.DEFAULT_LIMIT}
+
+        # Build the configuration container object (folder, snippet, or device)
+        container_parameters = self._build_container_params(
+            folder,
+            snippet,
+            device,
+        )
+
+        # Ensure that we have only a single instance of "folder", "device", or "snippet"
+        if len(container_parameters) != 1:
             raise ValidationError(
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
 
-        params.update(provided_containers)
+        # Add the resulting container object to our parameters
+        params.update(container_parameters)
 
-        # Handle specific filters for addresses
-        if "types" in filters:
-            params["type"] = ",".join(filters["types"])
-        if "values" in filters:
-            params["value"] = ",".join(filters["values"])
-        if "names" in filters:
-            params["name"] = ",".join(filters["names"])
-        if "tags" in filters:
-            params["tag"] = ",".join(filters["tags"])
+        # Perform our request
+        try:
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
+            )
 
-        # Include any additional filters provided
-        params.update(
-            {
-                k: v
-                for k, v in filters.items()
-                if k
-                not in [
-                    "types",
-                    "values",
-                    "names",
-                    "tags",
-                    "folder",
-                    "snippet",
-                    "device",
-                ]
-            }
-        )
+            # return errors if invalid structure
+            if not isinstance(response, dict):
+                raise BadResponseError("Invalid response format: expected dictionary")
 
-        response = self.api_client.get(self.ENDPOINT, params=params)
-        addresses = [
-            AddressGroupResponseModel(**item) for item in response.get("data", [])
-        ]
-        return addresses
+            if "data" not in response:
+                raise BadResponseError("Invalid response format: missing 'data' field")
+
+            if not isinstance(response["data"], list):
+                raise BadResponseError(
+                    "Invalid response format: 'data' field must be a list"
+                )
+
+            # Return a list object of the entries as Pydantic modeled objects
+            address_groups = [
+                AddressGroupResponseModel(**item) for item in response["data"]
+            ]
+
+            # Apply client-side filtering
+            return self._apply_filters(address_groups, filters)
+
+        # Forward exceptions to our custom ErrorHandler object
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
 
     def fetch(
         self,
@@ -117,7 +292,6 @@ class AddressGroup(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-        **filters,
     ) -> Dict[str, Any]:
         """
         Fetches a single address group by name.
@@ -127,74 +301,111 @@ class AddressGroup(BaseObject):
             folder (str, optional): The folder in which the resource is defined.
             snippet (str, optional): The snippet in which the resource is defined.
             device (str, optional): The device in which the resource is defined.
-            **filters: Additional filters to apply to the request.
 
         Returns:
-            AddressGroupResponseModel: The fetched security rule object.
+            Dict: The fetched object.
 
         Raises:
-            ValidationError: If invalid parameters are provided.
-            NotFoundError: If the security rule object is not found.
+            EmptyFieldError: If name or container fields are empty
+            FolderNotFoundError: If the specified folder doesn't exist
+            ObjectNotPresentError: If the object is not found
+            ValidationError: If the parameters are invalid
+            BadResponseError: For other API-related errors
         """
         if not name:
-            raise ValidationError("Parameter 'name' must be provided for fetch method.")
+            raise EmptyFieldError(
+                message="Field 'name' cannot be empty",
+                error_code="API_I00035",
+                details=['"name" is not allowed to be empty'],  # noqa
+            )
 
-        params = {}
+        if folder == "":
+            raise EmptyFieldError(
+                message="Field 'folder' cannot be empty",
+                error_code="API_I00035",
+                details=['"folder" is not allowed to be empty'],  # noqa
+            )
 
-        # Include container type parameter
-        container_params = {
-            "folder": folder,
-            "snippet": snippet,
-            "device": device,
-        }
-        provided_containers = {
-            k: v for k, v in container_params.items() if v is not None
-        }
+        # Build the configuration container object (folder, snippet, or device)
+        container_parameters = self._build_container_params(
+            folder,
+            snippet,
+            device,
+        )
 
-        if len(provided_containers) != 1:
+        # Ensure that we have only a single instance of "folder", "device", or "snippet"
+        if len(container_parameters) != 1:
             raise ValidationError(
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
 
-        params.update(provided_containers)
-        params["name"] = name  # Set the 'name' parameter
+        # Start with container parameters
+        params = container_parameters
 
-        # Include any additional filters provided
-        params.update(
-            {
-                k: v
-                for k, v in filters.items()
-                if k
-                not in [
-                    "types",
-                    "values",
-                    "names",
-                    "tags",
-                    "folder",
-                    "snippet",
-                    "device",
-                    "name",
-                ]
-            }
-        )
+        # Add name parameter
+        params["name"] = name
 
-        response = self.api_client.get(
-            self.ENDPOINT,
-            params=params,
-        )
+        # Perform our request
+        try:
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
+            )
 
-        # Handle different response formats
-        if isinstance(response, dict) and "id" in response:
-            # Single object returned directly
-            return response
-        elif "data" in response:
-            # List of objects returned under 'data'
-            data = response["data"]
-            if len(data) == 1:
-                return data[0]
-            elif len(data) == 0:
-                raise NotFoundError(f"Address group '{name}' not found.")
+            # return errors if invalid structure
+            if not isinstance(response, dict):
+                raise BadResponseError("Invalid response format: expected dictionary")
+
+            # If the response has a key of "_errors", pass to our custom error handler
+            if "_errors" in response:
+                ErrorHandler.raise_for_error(response)
+
+            # If the response has a key of "id"
+            elif "id" in response:
+
+                # Create a new object by passing the response through our Pydantic model
+                address = AddressGroupResponseModel(**response)
+
+                # Return an instance of the object as a Python dictionary
+                # TODO:
+                # move this model_dump logic into the update method.
+                return address.model_dump(
+                    exclude_unset=True,
+                    exclude_none=True,
+                )
+
             else:
-                raise APIError(f"Multiple address groups found with the name '{name}'.")
-        else:
-            raise APIError("Unexpected response format.")
+                raise BadResponseError("Invalid response format: missing 'id' field")
+
+        # Forward exceptions to our custom ErrorHandler object
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise
+
+    def delete(
+        self,
+        object_id: str,
+    ) -> None:
+        """
+        Deletes an address object.
+
+        Args:
+            object_id (str): The ID of the object to delete.
+
+        Raises:
+            ObjectNotPresentError: If the object doesn't exist
+            ReferenceNotZeroError: If the object is still referenced by other objects
+            MalformedRequestError: If the request is malformed
+        """
+
+        # Perform our request
+        try:
+            endpoint = f"{self.ENDPOINT}/{object_id}"
+            self.api_client.delete(endpoint)
+
+        # Forward exceptions to our custom ErrorHandler object
+        except Exception as e:
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(e.response.json())
+            raise

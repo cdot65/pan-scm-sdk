@@ -4,13 +4,23 @@ import pytest
 from unittest.mock import MagicMock
 
 from scm.config.objects import AddressGroup
-from scm.exceptions import ValidationError, NotFoundError, APIError
-from scm.models.objects import AddressGroupResponseModel, AddressGroupCreateModel
-from scm.models.objects.address_group import DynamicFilter
+from scm.exceptions import (
+    ValidationError,
+    ObjectNotPresentError,
+    EmptyFieldError,
+    ObjectAlreadyExistsError,
+    MalformedRequestError,
+    FolderNotFoundError,
+    BadResponseError,
+)
+from scm.models.objects import (
+    AddressGroupCreateModel,
+    AddressGroupResponseModel,
+)
 
 from tests.factories import (
-    AddressGroupStaticFactory,
     AddressGroupDynamicFactory,
+    AddressGroupStaticFactory,
 )
 
 from pydantic import ValidationError as PydanticValidationError
@@ -31,13 +41,95 @@ class TestAddressGroupBase:
         self.client = AddressGroup(self.mock_scm)  # noqa
 
 
-class TestAddressGroupAPI(TestAddressGroupBase):
-    """Tests for Address Group API operations."""
+# -------------------- Test Classes Grouped by Functionality --------------------
 
-    def test_list_address_groups(self):
+
+class TestAddressGroupModelValidation(TestAddressGroupBase):
+    """Tests for object model validation."""
+
+    def test_object_model_no_type_provided(self):
+        """Test validation when no type is provided."""
+        data = {
+            "name": "Test123",
+            "folder": "Shared",
+        }
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
+        assert (
+            "Value error, Exactly one of 'static' or 'dynamic' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_multiple_types(self):
+        """Test validation when multiple types are provided."""
+        data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "static": ["None"],
+            "folder": "All",
+        }
+
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
+            exc_info.value
+        )
+
+    def test_object_model_multiple_containers(self):
+        """Test validation when multiple containers are provided."""
+        data = {
+            "name": "test - address group 1",
+            "folder": "Texas",
+            "snippet": "Test",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+        with pytest.raises(ValueError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_create_no_container(self):
+        """Test validation when no container is provided."""
+        data = {
+            "name": "test - address group 1",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
+
+    def test_object_model_create_model_valid(self):
+        """Test validation with valid data."""
+        data = {
+            "name": "test - address group 1",
+            "folder": "Texas",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+        model = AddressGroupCreateModel(**data)
+        assert model.name == data["name"]
+        assert model.folder == data["folder"]
+        assert model.static == data["static"]
+
+
+class TestAddressGroupList(TestAddressGroupBase):
+    """Tests for listing Address Group objects."""
+
+    def test_list_objects(self):
         """
-        Test listing address groups.
-
         **Objective:** Test listing all address groups.
         **Workflow:**
             1. Sets up a mock response resembling the expected API response for listing address groups.
@@ -48,28 +140,27 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         mock_response = {
             "data": [
                 {
-                    "id": "a952ca48-9127-4012-be3b-71741ddd5767",
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "DAG_test",
                     "folder": "All",
+                    "description": "test123",
                     "dynamic": {
                         "filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
                     },
                 },
                 {
-                    "id": "54b2087b-b733-46d9-a0ff-fe9ee4bdcbac",
-                    "name": "Moishy_Test",
-                    "folder": "Shared",
-                    "description": "test",
-                    "dynamic": {
-                        "filter": "'Api test' or 'Hamuzim' and 'best-practice'"
-                    },
+                    "id": "4ee5b3cd-0308-43ce-b5db-3722bdc2706c",
+                    "name": "djs_DB",
+                    "folder": "cdot65",
+                    "dynamic": {"filter": "'aws.ec2.tag.Environment.DB'"},
                 },
                 {
-                    "id": "b2a7a7a1-cb15-463d-88be-80729bb1be37",
-                    "name": "Moishy Api",
-                    "folder": "Shared",
-                    "description": "test",
-                    "static": ["shachar_test2"],
+                    "id": "630bfb3d-93a4-4cde-95ca-feed6d8dacad",
+                    "name": "test - address group 1",
+                    "folder": "Texas",
+                    "description": "Test address group 1",
+                    "static": ["test_network1"],
+                    "tag": ["Automation"],
                 },
             ],
             "offset": 0,
@@ -78,275 +169,476 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        address_groups = self.client.list(folder="All")
+        existing_objects = self.client.list(folder="All")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
-            params={"folder": "All"},
+            params={
+                "limit": 10000,
+                "folder": "All",
+            },
         )
-        assert isinstance(address_groups, list)
-        assert isinstance(address_groups[0], AddressGroupResponseModel)
-        assert len(address_groups) == 3
-        assert address_groups[0].name == "DAG_test"
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], AddressGroupResponseModel)
+        assert len(existing_objects) == 3
+        assert existing_objects[0].name == "DAG_test"
+
+    def test_list_objects_multiple_containers(self):
+        """Test validation error when listing with multiple containers."""
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+
         assert (
-            address_groups[0].dynamic.filter
-            == "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
 
-    def test_create_address_group_with_dynamic_filter(self):
-        """
-        Test creating an address group with a dynamic filter.
 
-        **Objective:** Test creating an address group with a dynamic filter.
+class TestAddressGroupCreate(TestAddressGroupBase):
+    """Tests for creating Address Group objects."""
+
+    def test_create_object_of_type_static(self):
+        """
+        **Objective:** Test creating an object of type static.
         **Workflow:**
-            1. Uses `AddressGroupDynamicFactory` to create a test address group with dynamic filters.
+            1. Uses `AddressGroupStaticFactory` to create an object.
             2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the address group data.
+            3. Calls the `create` method of `self.client` with the address data.
             4. Asserts that the mocked service was called with the correct parameters.
             5. Validates the created address group's attributes.
         """
-        test_address_group = AddressGroupDynamicFactory()
-        mock_response = test_address_group.model_dump()
-        mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        test_object_static = AddressGroupStaticFactory()
+        mock_response = test_object_static.model_dump()
+        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_address_group.model_dump(exclude_unset=True)
+        created_object = self.client.create(
+            test_object_static.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
-            json=test_address_group.model_dump(exclude_unset=True),
+            json=test_object_static.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "123e4567-e89b-12d3-a456-426655440000"
-        assert created_group.name == test_address_group.name
-        assert created_group.dynamic.filter == test_address_group.dynamic.filter
-        assert created_group.folder == test_address_group.folder
+        assert str(created_object.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert created_object.name == test_object_static.name
+        assert created_object.static == test_object_static.static
+        assert created_object.folder == test_object_static.folder
+        assert created_object.tag == test_object_static.tag
 
-    def test_create_address_group_with_static_entries(self):
+    def test_create_object_of_type_dynamic(self):
         """
-        Test creating an address group with static entries.
-
-        **Objective:** Test creating an address group with static entries.
+        **Objective:** Test creating an object of type fqdn.
         **Workflow:**
-            1. Uses `AddressGroupStaticFactory` to create a test address group with dynamic filters.
+            1. Uses `AddressGroupDynamicFactory` to create an object.
             2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the address group data.
+            3. Calls the `create` method of `self.client` with the address data.
             4. Asserts that the mocked service was called with the correct parameters.
             5. Validates the created address group's attributes.
         """
-        test_address_group = AddressGroupStaticFactory()
-        mock_response = test_address_group.model_dump()
-        mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        test_object_dynamic = AddressGroupDynamicFactory()
+        mock_response = test_object_dynamic.model_dump()
+        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
         self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_address_group.model_dump(exclude_unset=True)
+        created_object = self.client.create(
+            test_object_dynamic.model_dump(exclude_unset=True)
         )
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
-            json=test_address_group.model_dump(exclude_unset=True),
+            json=test_object_dynamic.model_dump(exclude_unset=True),
         )
-        assert created_group.id == "123e4567-e89b-12d3-a456-426655440000"
-        assert created_group.name == test_address_group.name
-        assert created_group.folder == test_address_group.folder
+        assert str(created_object.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert created_object.name == test_object_dynamic.name
+        assert created_object.dynamic == test_object_dynamic.dynamic
+        assert created_object.folder == test_object_dynamic.folder
+        assert created_object.tag == test_object_dynamic.tag
 
-    def test_get_address_group(self):
+    def test_create_object_error_handling(self):
         """
-        Test retrieving an address group by ID.
-
-        **Objective:** Test retrieving an address group by its ID.
+        **Objective:** Test error handling during object creation.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for fetching an address group by ID.
+            1. Mocks an error response from the API
+            2. Attempts to create an object
+            3. Verifies proper error handling and exception raising
+        """
+        test_data = AddressGroupStaticFactory()
+
+        # Mock error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object creation failed",
+                    "details": {"errorType": "Object Already Exists"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        # Configure mock to raise exception
+        self.mock_scm.post.side_effect = Exception()  # noqa
+        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectAlreadyExistsError):
+            self.client.create(test_data.model_dump())
+
+    def test_create_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in create method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        test_data = AddressGroupStaticFactory()
+
+        # Mock a generic exception without response
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(test_data.model_dump())
+        assert str(exc_info.value) == "Generic error"
+
+    def test_create_malformed_response_handling(self):
+        """
+        **Objective:** Test handling of malformed response in create method.
+        **Workflow:**
+            1. Mocks a response that would cause a parsing error
+            2. Verifies appropriate error handling
+        """
+        test_data = AddressGroupStaticFactory()
+
+        # Mock invalid JSON response
+        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(PydanticValidationError):
+            self.client.create(test_data.model_dump())
+
+
+class TestAddressGroupGet(TestAddressGroupBase):
+    """Tests for retrieving a specific Address Group object."""
+
+    def test_get_object(self):
+        """
+        **Objective:** Test retrieving an object by its ID.
+        **Workflow:**
+            1. Sets up a mock response resembling the expected API response for fetching an object by ID.
             2. Calls the `get` method of `self.client` with a specific group ID.
             3. Asserts that the mocked service was called with the correct URL.
             4. Validates the returned address group's attributes.
         """
-        group_id = "123e4567-e89b-12d3-a456-426655440000"
         mock_response = {
-            "id": group_id,
-            "name": "TestGroup",
-            "folder": "Shared",
-            "description": "A test address group",
-            "static": ["Address1", "Address2"],
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "DAG_test",
+            "folder": "All",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        address_group = self.client.get(group_id)
+        existing_object = self.client.get(mock_response["id"])
 
         self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/objects/v1/address-groups/{group_id}"
+            f"/config/objects/v1/address-groups/{mock_response['id']}"
         )
-        assert isinstance(address_group, AddressGroupResponseModel)
-        assert address_group.id == group_id
-        assert address_group.name == "TestGroup"
-        assert address_group.description == "A test address group"
-        assert address_group.static == ["Address1", "Address2"]
+        assert isinstance(existing_object, AddressGroupResponseModel)
+        assert str(existing_object.id) == mock_response["id"]
+        assert existing_object.name == mock_response["name"]
+        assert existing_object.description == mock_response["description"]
 
-    def test_update_address_group(self):
+    def test_get_object_error_handling(self):
         """
-        Test updating an address group.
-
-        **Objective:** Test updating an existing address group.
+        **Objective:** Test error handling during object retrieval.
         **Workflow:**
-            1. Sets up the update data for the address group.
+            1. Mocks an error response from the API
+            2. Attempts to get an object
+            3. Verifies proper error handling and exception raising
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.get(object_id)
+
+    def test_get_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in get method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.get(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestAddressGroupUpdate(TestAddressGroupBase):
+    """Tests for updating Address Group objects."""
+
+    def test_update_object(self):
+        """
+        **Objective:** Test updating an existing object.
+        **Workflow:**
+            1. Sets up the update data for the object.
             2. Sets up a mock response that includes the updated data.
             3. Calls the `update` method of `self.client` with the update data.
             4. Asserts that the mocked service was called with the correct URL and data.
-            5. Validates the updated address group's attributes.
+            5. Validates the updated object's attributes.
         """
-        update_data = {
+        update_group_data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
             "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "UpdatedGroup",
-            "folder": "Shared",
-            "description": "An updated address group",
-            "static": ["Address3", "Address4"],
         }
 
-        mock_response = update_data.copy()
+        mock_response = update_group_data.copy()
 
         self.mock_scm.put.return_value = mock_response  # noqa
-        updated_group = self.client.update(update_data)
+        updated_object = self.client.update(update_group_data)
 
         # Prepare the expected payload by excluding 'id'
-        expected_payload = update_data.copy()
+        expected_payload = update_group_data.copy()
         expected_payload.pop("id")
 
         self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/address-groups/{update_data['id']}",
+            f"/config/objects/v1/address-groups/{update_group_data['id']}",
             json=expected_payload,
         )
-        assert isinstance(updated_group, AddressGroupResponseModel)
-        assert updated_group.id == update_data["id"]
-        assert updated_group.name == "UpdatedGroup"
-        assert updated_group.description == "An updated address group"
-        assert updated_group.static == ["Address3", "Address4"]
+        assert isinstance(updated_object, AddressGroupResponseModel)
+        assert str(updated_object.id) == mock_response["id"]
+        assert updated_object.name == mock_response["name"]
+        assert updated_object.description == mock_response["description"]
 
-    def test_fetch_address_group(self):
+    def test_update_object_error_handling(self):
         """
-        Test fetching an address group by name.
-
-        **Objective:** Test retrieving an address group by its name using the `fetch` method.
+        **Objective:** Test error handling during object update.
         **Workflow:**
-            1. Sets up a mock response resembling the expected API response for fetching an address group by name.
+            1. Mocks an error response from the API
+            2. Attempts to update an object
+            3. Verifies proper error handling and exception raising
+        """
+        update_group_data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+        }
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Update failed",
+                    "details": {"errorType": "Malformed Command"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.put.side_effect = Exception()  # noqa
+        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(MalformedRequestError):
+            self.client.update(update_group_data)
+
+    def test_update_with_invalid_data(self):
+        """
+        **Objective:** Test update method with invalid data structure.
+        **Workflow:**
+            1. Attempts to update with invalid data
+            2. Verifies proper validation error handling
+        """
+        invalid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "invalid_field": "test",
+        }
+
+        with pytest.raises(PydanticValidationError):
+            self.client.update(invalid_data)
+
+    def test_update_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in update method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        update_data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+        }
+
+        # Mock a generic exception without response
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(update_data)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestAddressGroupDelete(TestAddressGroupBase):
+    """Tests for deleting Address Groups."""
+
+    def test_delete_error_handling(self):
+        """
+        **Objective:** Test error handling during object deletion.
+        **Workflow:**
+            1. Mocks various error scenarios
+            2. Verifies proper error handling for each case
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Test object not found
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.delete(object_id)
+
+    def test_delete_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in delete method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestAddressGroupFetch(TestAddressGroupBase):
+    """Tests for fetching Address Group objects by name."""
+
+    def test_fetch_object(self):
+        """
+        **Objective:** Test retrieving an object by its name using the `fetch` method.
+        **Workflow:**
+            1. Sets up a mock response resembling the expected API response for fetching an object by name.
             2. Calls the `fetch` method of `self.client` with a specific name and container.
             3. Asserts that the mocked service was called with the correct URL and parameters.
-            4. Validates the returned address group's attributes.
+            4. Validates the returned object's attributes.
         """
-        group_name = "TestGroup"
-        folder_name = "Shared"
         mock_response = {
+            "name": "DAG_test",
+            "description": "test123",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
             "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": group_name,
-            "folder": folder_name,
-            "description": "A test address group",
-            "static": ["Address1", "Address2"],
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Call the fetch method
-        address_group = self.client.fetch(
-            name=group_name,
-            folder=folder_name,
+        fetched_object = self.client.fetch(
+            name=mock_response["name"],
+            folder=mock_response["folder"],
         )
 
         # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
-                "folder": folder_name,
-                "name": group_name,
+                "folder": mock_response["folder"],
+                "name": mock_response["name"],
             },
         )
 
-        # Validate the returned address group
-        assert isinstance(address_group, dict)
-        assert address_group["id"] == mock_response["id"]
-        assert address_group["name"] == group_name
-        assert address_group["description"] == "A test address group"
-        assert address_group["static"] == ["Address1", "Address2"]
+        # Validate the returned address
+        assert isinstance(fetched_object, dict)
+        assert str(fetched_object["id"]) == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+        assert fetched_object["description"] == mock_response["description"]
+        assert fetched_object["dynamic"] == mock_response["dynamic"]
 
-    def test_fetch_address_group_not_found(self):
+    def test_fetch_object_not_found(self):
         """
-        Test fetching an address group by name that does not exist.
+        Test fetching an object by name that does not exist.
 
-        **Objective:** Test that fetching a non-existent address group raises NotFoundError.
+        **Objective:** Test that fetching a non-existent object raises NotFoundError.
         **Workflow:**
             1. Mocks the API response to return an empty 'data' list.
             2. Calls the `fetch` method with a name that does not exist.
             3. Asserts that NotFoundError is raised.
         """
-        group_name = "NonExistentGroup"
-        folder_name = "Shared"
-        mock_response = {"data": []}
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method and expect a NotFoundError
-        with pytest.raises(NotFoundError) as exc_info:
-            self.client.fetch(
-                name=group_name,
-                folder=folder_name,
-            )
-
-        # Optionally, assert the exception message
-        assert str(exc_info.value) == f"Address group '{group_name}' not found."
-
-        # Assert that the GET request was made with the correct parameters
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/address-groups",
-            params={
-                "folder": folder_name,
-                "name": group_name,
-            },
-        )
-
-    def test_fetch_address_group_multiple_found(self):
-        """
-        Test fetching an address group by name when multiple are found.
-
-        **Objective:** Test that fetching an address group by name raises APIError when multiple groups are found.
-        **Workflow:**
-            1. Mocks the API response to return multiple address groups.
-            2. Calls the `fetch` method with a name that matches multiple groups.
-            3. Asserts that APIError is raised.
-        """
-        group_name = "DuplicateGroup"
+        address_name = "NonExistent"
         folder_name = "Shared"
         mock_response = {
-            "data": [
+            "_errors": [
                 {
-                    "id": "id1",
-                    "name": group_name,
-                    "folder": folder_name,
-                    "static": ["Address1"],
-                },
-                {
-                    "id": "id2",
-                    "name": group_name,
-                    "folder": folder_name,
-                    "static": ["Address2"],
-                },
-            ]
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Call the fetch method and expect an APIError
-        with pytest.raises(APIError):
-            self.client.fetch(name=group_name, folder=folder_name)
+        # Call the fetch method and expect a NotFoundError
+        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
+            self.client.fetch(
+                name=address_name,
+                folder=folder_name,
+            )
 
-        # Assert that the GET request was made with the correct parameters
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/address-groups",
-            params={"folder": folder_name, "name": group_name},
-        )
-
-    def test_fetch_address_group_no_name(self):
+    def test_fetch_empty_name(self):
         """
-        Test fetching an address group without providing the 'name' parameter.
+        Test fetching an object without providing the 'name' parameter.
 
         **Objective:** Ensure that the fetch method raises ValidationError when 'name' is not provided.
         **Workflow:**
@@ -355,39 +647,49 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         """
         folder_name = "Shared"
         with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(folder=folder_name, name="")
-        assert (
-            str(exc_info.value) == "Parameter 'name' must be provided for fetch method."
-        )
+            self.client.fetch(
+                folder=folder_name,
+                name="",
+            )
+        assert str(exc_info.value) == "Field 'name' cannot be empty"
 
-    def test_fetch_address_group_multiple_containers(self):
+    def test_fetch_container_validation(self):
         """
-        Test fetching an address group with multiple containers provided.
-
-        **Objective:** Ensure that the fetch method raises ValidationError when more than one of 'folder', 'snippet', or 'device' is provided.
+        **Objective:** Test container parameter validation in fetch.
         **Workflow:**
-            1. Calls the `fetch` method with multiple container parameters.
-            2. Asserts that ValidationError is raised.
+            1. Tests various invalid container combinations
+            2. Verifies proper error handling
         """
-        group_name = "TestGroup"
-        folder_name = "Shared"
-        snippet_name = "TestSnippet"
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+
+        # Test no container provided
         with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name, snippet=snippet_name)
+            self.client.fetch(name="test-group")
         assert (
-            str(exc_info.value)
-            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
 
-    def test_fetch_address_group_unexpected_response_format(self):
-        """
-        Test fetching an address group when the API returns an unexpected response format.
+        # Test multiple containers provided
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test-group", folder="Shared", snippet="TestSnippet")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
+        )
 
-        **Objective:** Ensure that the fetch method raises APIError when the response format is not as expected.
+    def test_fetch_object_unexpected_response_format(self):
+        """
+        Test fetching an object when the API returns an unexpected response format.
+
+        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
         **Workflow:**
             1. Mocks the API response to return an unexpected format.
             2. Calls the `fetch` method.
-            3. Asserts that APIError is raised.
+            3. Asserts that BadResponseError is raised.
         """
         group_name = "TestGroup"
         folder_name = "Shared"
@@ -395,465 +697,668 @@ class TestAddressGroupAPI(TestAddressGroupBase):
         mock_response = {"unexpected_key": "unexpected_value"}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Unexpected response format."
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(
+                name=group_name,
+                folder=folder_name,
+            )
+        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
 
-    def test_fetch_address_group_single_in_data(self):
+    def test_fetch_validation_errors(self):
         """
-        Test fetching an address group when the API returns a 'data' key with exactly one item.
-
-        **Objective:** Ensure that the fetch method correctly returns the single item when 'data' contains exactly one address group.
+        **Objective:** Test fetch validation errors.
         **Workflow:**
-            1. Mocks the API response to return 'data' with one address group.
-            2. Calls the `fetch` method.
-            3. Asserts that the returned address group matches the expected data.
+            1. Tests various invalid input scenarios
+            2. Verifies appropriate error handling
         """
-        group_name = "TestGroup"
-        folder_name = "Shared"
-        mock_response = {
-            "data": [
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": group_name,
-                    "folder": folder_name,
-                    "description": "A test address group",
-                    "static": ["Address1", "Address2"],
-                }
-            ]
-        }
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(
+                name="test",
+                folder="",
+            )
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method
-        address_group = self.client.fetch(
-            name=group_name,
-            folder=folder_name,
+        # Test multiple containers
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(
+                name="test",
+                folder="folder1",
+                snippet="snippet1",
+            )
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
+            in str(exc_info.value)
         )
 
-        # Assert that the GET request was made with the correct parameters
+    def test_fetch_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in fetch method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(
+                name="test",
+                folder="Shared",
+            )
+        assert str(exc_info.value) == "Generic error"
+
+    def test_fetch_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in fetch method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response without expected fields
+        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(
+                name="test",
+                folder="Shared",
+            )
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
+
+        # Test response with both id and data fields (invalid format)
+        self.mock_scm.get.return_value = {  # noqa
+            "id": "some-id",
+            "data": [{"some": "data"}],
+        }  # noqa
+
+        with pytest.raises(PydanticValidationError) as exc_info:
+            self.client.fetch(
+                name="test",
+                folder="Shared",
+            )
+        assert "2 validation errors for AddressGroupResponseModel" in str(
+            exc_info.value
+        )
+        assert "name\n  Field required" in str(exc_info.value)
+
+        # Test malformed response in list format
+        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(
+                name="test",
+                folder="Shared",
+            )
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+    def test_fetch_error_handler_json_error(self):
+        """
+        **Objective:** Test fetch method error handling when json() raises an error.
+        **Workflow:**
+            1. Mocks an exception with a response that raises error on json()
+            2. Verifies the original exception is re-raised
+        """
+
+        class MockResponse:
+            @property
+            def response(self):
+                return self
+
+            def json(self):
+                raise ValueError("Original error")
+
+        # Create mock exception with our special response
+        mock_exception = Exception("Original error")
+        mock_exception.response = MockResponse()
+
+        # Configure mock to raise our custom exception
+        self.mock_scm.get.side_effect = mock_exception  # noqa
+
+        # The original exception should be raised since json() failed
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Original error" in str(exc_info.value)
+
+
+class TestAddressGroupTagValidation(TestAddressGroupBase):
+    """Tests for Address tag field validation."""
+
+    def test_tag_string_to_list_conversion(self):
+        """
+        Test tag field validator converting a string to a list.
+
+        **Objective:** Verify that a single string tag is properly converted to a list.
+        **Workflow:**
+            1. Creates an address with a single string tag
+            2. Validates the tag is converted to a single-item list
+        """
+        data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "tag": "TestTag",
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+        }
+        model = AddressGroupCreateModel(**data)
+        assert isinstance(model.tag, list)
+        assert model.tag == ["TestTag"]
+
+    def test_tag_list_passed_through(self):
+        """
+        Test tag field validator passing through a list.
+
+        **Objective:** Verify that a list of tags is properly handled.
+        **Workflow:**
+            1. Creates an address with multiple tags as a list
+            2. Validates the tags remain as a list
+        """
+        data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "tag": ["Tag1", "Tag2"],
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+        }
+        model = AddressGroupCreateModel(**data)
+        assert isinstance(model.tag, list)
+        assert model.tag == ["Tag1", "Tag2"]
+
+    def test_tag_invalid_type(self):
+        """
+        Test tag field validator with invalid type.
+
+        **Objective:** Verify that non-string/non-list tag values raise ValueError.
+        **Workflow:**
+            1. Attempts to create an address with an invalid tag type (dict)
+            2. Validates that appropriate error is raised
+        """
+        data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "tag": {"invalid": "type"},
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+        }
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
+
+    def test_tag_duplicate_items(self):
+        """
+        Test tag uniqueness validator.
+
+        **Objective:** Verify that duplicate tags raise ValueError.
+        **Workflow:**
+            1. Attempts to create an address with duplicate tags
+            2. Validates that appropriate error is raised
+        """
+        data = {
+            "name": "DAG_test",
+            "description": "test123",
+            "tag": ["Tag1", "Tag1"],
+            "dynamic": {"filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"},
+            "folder": "All",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+        }
+        with pytest.raises(PydanticValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "List items must be unique" in str(exc_info.value)
+
+
+class TestAddressGroupListFilters(TestAddressGroupBase):
+    """Tests for filtering during listing Address Group objects."""
+
+    def test_list_with_filters(self):
+        """
+        **Objective:** Test that filters are properly added to parameters.
+        **Workflow:**
+            1. Calls list with various filters
+            2. Verifies filters are properly formatted in the request
+        """
+        filters = {
+            "types": ["type1", "type2"],
+            "values": ["value1", "value2"],
+            "tags": ["tag1", "tag2"],
+        }
+
+        mock_response = {"data": []}
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        self.client.list(folder="Shared", **filters)
+
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
-                "folder": folder_name,
-                "name": group_name,
+                "limit": 10000,
+                "folder": "Shared",
             },
         )
 
-        # Validate the returned address group
-        assert isinstance(address_group, dict)
-        expected_group = mock_response["data"][0]
-        assert address_group == expected_group
+    def test_list_filters_type_validation(self):
+        """
+        **Objective:** Test validation of filter types in list method.
+        **Workflow:**
+            1. Tests various invalid filter type scenarios
+            2. Verifies ValidationError is raised with correct message
+            3. Tests valid filter types pass validation
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "DAG_test",
+                    "folder": "All",
+                    "description": "test123",
+                    "dynamic": {
+                        "filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
+                    },
+                },
+                {
+                    "id": "4ee5b3cd-0308-43ce-b5db-3722bdc2706c",
+                    "name": "djs_DB",
+                    "folder": "cdot65",
+                    "dynamic": {"filter": "'aws.ec2.tag.Environment.DB'"},
+                },
+                {
+                    "id": "630bfb3d-93a4-4cde-95ca-feed6d8dacad",
+                    "name": "test - address group 1",
+                    "folder": "Texas",
+                    "description": "Test address group 1",
+                    "static": ["test_network1"],
+                    "tag": ["Automation"],
+                },
+            ],
+            "offset": 0,
+            "total": 3,
+            "limit": 200,
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
 
-
-class TestAddressGroupValidation(TestAddressGroupBase):
-    """Tests for Address Group validation."""
-
-    def test_address_group_list_validation_error(self):
-        """Test validation error when listing with multiple containers."""
+        # Test invalid types filter (string instead of list)
         with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", snippet="TestSnippet")
+            self.client.list(folder="Shared", types="static")
+        assert str(exc_info.value) == "'types' filter must be a list"
 
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        # Test invalid values filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", values="test_network1")
+        assert str(exc_info.value) == "'values' filter must be a list"
 
-    def test_address_group_request_model_no_type_provided(self):
-        """Test validation when no type is provided."""
-        data = {
-            "name": "TestGroup",
-            "folder": "Shared",
-            # Neither 'static' nor 'dynamic' provided
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
-            exc_info.value
-        )
+        # Test invalid tags filter (string instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", tags="tag1")
+        assert str(exc_info.value) == "'tags' filter must be a list"
 
-    def test_address_group_request_model_both_types_provided(self):
-        """Test validation when both types are provided."""
-        data = {
-            "name": "TestGroup",
-            "folder": "Shared",
-            "static": ["Address1"],
-            "dynamic": DynamicFilter(
-                filter="'Tag1'"
-            ),  # Provide as an instance, not dict
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
-            exc_info.value
-        )
+        # Test invalid types filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", types={"type": "static"})
+        assert str(exc_info.value) == "'types' filter must be a list"
 
-    def test_address_group_request_model_no_container_provided(self):
-        """Test validation when no container is provided."""
-        data = {
-            "name": "TestGroup",
-            "static": ["Address1"],
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        # Test invalid values filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", values={"value": "test_network1"})
+        assert str(exc_info.value) == "'values' filter must be a list"
 
-    def test_address_group_request_model_multiple_containers_provided(self):
-        """Test validation when multiple containers are provided."""
-        data = {
-            "name": "TestGroup",
-            "static": ["Address1"],
-            "folder": "Shared",
-            "snippet": "TestSnippet",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        # Test invalid tags filter (dict instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", tags={"tag": "tag1"})
+        assert str(exc_info.value) == "'tags' filter must be a list"
 
-    def test_address_group_type_validation(self):
-        """Test validation of address group type (static/dynamic)."""
-        test_cases = [
-            # Case 1: Neither static nor dynamic provided
-            {
-                "data": {
-                    "name": "TestGroup",
-                    "folder": "Shared",
-                },
-                "expected_error": "Exactly one of 'static' or 'dynamic' must be provided",
-            },
-            # Case 2: Both static and dynamic provided
-            {
-                "data": {
-                    "name": "TestGroup",
-                    "folder": "Shared",
-                    "static": ["Address1"],
-                    "dynamic": {"filter": "test-filter"},
-                },
-                "expected_error": "Exactly one of 'static' or 'dynamic' must be provided",
-            },
-        ]
+        # Test invalid types filter (integer instead of list)
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="Shared", types=123)
+        assert str(exc_info.value) == "'types' filter must be a list"
 
-        for test_case in test_cases:
-            with pytest.raises(ValueError) as exc_info:
-                AddressGroupCreateModel(**test_case["data"])
-            assert test_case["expected_error"] in str(exc_info.value)
-
-        # Positive test cases - should not raise errors
-        valid_cases = [
-            # Valid static group
-            {
-                "name": "StaticGroup",
-                "folder": "Shared",
-                "static": ["Address1"],
-            },
-            # Valid dynamic group
-            {
-                "name": "DynamicGroup",
-                "folder": "Shared",
-                "dynamic": {"filter": "test-filter"},
-            },
-        ]
-
-        for valid_case in valid_cases:
-            model = AddressGroupCreateModel(**valid_case)
-            assert model is not None
-
-    def test_address_group_container_validation_comprehensive(self):
-        """Comprehensive test for container validation."""
-        test_cases = [
-            # No container
-            {
-                "data": {
-                    "name": "TestGroup",
-                    "static": ["Address1"],
-                },
-                "expected_errors": [
-                    "Exactly one of 'folder', 'snippet', or 'device' must be provided",
-                    "Value error",
-                ],
-            },
-            # Multiple containers
-            {
-                "data": {
-                    "name": "TestGroup",
-                    "static": ["Address1"],
-                    "folder": "Shared",
-                    "snippet": "TestSnippet",
-                },
-                "expected_errors": [
-                    "Exactly one of 'folder', 'snippet', or 'device' must be provided",
-                    "Value error",
-                ],
-            },
-        ]
-
-        for test_case in test_cases:
-            try:
-                AddressGroupCreateModel(**test_case["data"])
-                pytest.fail("Should have raised a validation error")
-            except (PydanticValidationError, ValueError) as exc:
-                assert any(error in str(exc) for error in test_case["expected_errors"])
-
-    def test_address_group_response_model_invalid_uuid(self):
-        """Test UUID validation in AddressGroupResponseModel."""
-        invalid_data = {
-            "id": "invalid-uuid",
-            "name": "TestGroup",
-            "static": ["Address1"],
-            "folder": "Shared",
-        }
+        # Test that valid list filters pass validation
         try:
-            AddressGroupResponseModel(**invalid_data)
-            pytest.fail("Should have raised a validation error")
-        except (PydanticValidationError, ValueError) as exc:
-            assert any(
-                "Invalid UUID" in str(err) or "valid UUID" in str(err) for err in [exc]
+            self.client.list(
+                folder="Shared",
+                types=["static"],
+                values=["test_network1"],
+                tags=["Automation"],
             )
+        except ValidationError:
+            pytest.fail("Unexpected ValidationError raised with valid list filters")
 
-    def test_address_group_request_model_with_device_container(self):
-        """Test address group creation with device container."""
-        data = {
-            "name": "TestGroup",
-            "static": ["Address1"],
-            "device": "Device1",
-        }
-        model = AddressGroupCreateModel(**data)
-        assert model.device == "Device1"
-        assert model.folder is None
-        assert model.snippet is None
-
-    def test_address_group_request_model_with_snippet_container(self):
-        """Test address group creation with snippet container."""
-        data = {
-            "name": "TestGroup",
-            "static": ["Address1"],
-            "snippet": "Snippet1",
-        }
-        model = AddressGroupCreateModel(**data)
-        assert model.snippet == "Snippet1"
-        assert model.folder is None
-        assert model.device is None
-
-    def test_address_group_type_validation_all_cases(self):
-        """Test all cases for address group type validation."""
-        test_cases = [
-            # Case 1: Neither static nor dynamic provided
-            {
-                "data": {
-                    "name": "TestGroup",
-                    "folder": "Shared",
-                },
-                "expected_error": "Exactly one of 'static' or 'dynamic' must be provided",
-            },
-            # Case 2: Both static and dynamic provided
-            {
-                "data": {
-                    "name": "TestGroup",
-                    "folder": "Shared",
-                    "static": ["Address1"],
-                    "dynamic": {"filter": "'Tag1'"},
-                },
-                "expected_error": "Exactly one of 'static' or 'dynamic' must be provided",
-            },
-        ]
-
-        for test_case in test_cases:
-            with pytest.raises(ValueError) as exc_info:
-                AddressGroupCreateModel(**test_case["data"])
-            assert test_case["expected_error"] in str(exc_info.value)
-
-        # Test valid cases
-        valid_static = {
-            "name": "StaticGroup",
-            "folder": "Shared",
-            "static": ["Address1"],
-        }
-        static_model = AddressGroupCreateModel(**valid_static)
-        assert static_model.static == ["Address1"]
-        assert static_model.dynamic is None
-
-        valid_dynamic = {
-            "name": "DynamicGroup",
-            "folder": "Shared",
-            "dynamic": {"filter": "'Tag1'"},
-        }
-        dynamic_model = AddressGroupCreateModel(**valid_dynamic)
-        assert dynamic_model.dynamic.filter == "'Tag1'"
-        assert dynamic_model.static is None
-
-    def test_address_group_response_model_validation(self):
-        """Test validation in AddressGroupResponseModel for address group type."""
-        test_cases = [
-            # Case 1: Neither static nor dynamic provided
-            {
-                "data": {
+    def test_list_filter_combinations(self):
+        """
+        **Objective:** Test different combinations of valid filters.
+        **Workflow:**
+            1. Tests various combinations of valid filters
+            2. Verifies filters are properly applied
+            3. Checks that filtered results match expected criteria
+        """
+        mock_response = {
+            "data": [
+                {
                     "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "TestGroup",
-                    "folder": "Shared",
+                    "name": "DAG_test",
+                    "folder": "All",
+                    "description": "test123",
+                    "dynamic": {
+                        "filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
+                    },
                 },
-                "expected_error": "Exactly one of 'static' or 'dynamic' must be provided",
-            },
-            # Case 2: Both static and dynamic provided
-            {
-                "data": {
+                {
+                    "id": "4ee5b3cd-0308-43ce-b5db-3722bdc2706c",
+                    "name": "djs_DB",
+                    "folder": "cdot65",
+                    "dynamic": {"filter": "'aws.ec2.tag.Environment.DB'"},
+                },
+                {
+                    "id": "630bfb3d-93a4-4cde-95ca-feed6d8dacad",
+                    "name": "test - address group 1",
+                    "folder": "Texas",
+                    "description": "Test address group 1",
+                    "static": ["test_network1"],
+                    "tag": ["Automation"],
+                },
+            ],
+            "offset": 0,
+            "total": 3,
+            "limit": 200,
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test combining types and tags filters
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=["static"],
+            tags=["Automation"],
+        )
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test - address group 1"
+
+        # Test combining values and tags filters
+        filtered_objects = self.client.list(
+            folder="Shared",
+            values=["test_network1"],
+            tags=["Automation"],
+        )
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test - address group 1"
+
+        # Test all filters together
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=["static"],
+            values=["test_network1"],
+            tags=["Automation"],
+        )
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test - address group 1"
+
+    def test_list_empty_filter_lists(self):
+        """
+        **Objective:** Test behavior with empty filter lists.
+        **Workflow:**
+            1. Tests filters with empty lists
+            2. Verifies appropriate handling of empty filters
+        """
+        mock_response = {
+            "data": [
+                {
                     "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "TestGroup",
-                    "folder": "Shared",
-                    "static": ["Address1"],
-                    "dynamic": {"filter": "test-filter"},
-                },
-                "expected_error": "Exactly one of 'static' or 'dynamic' must be provided",
-            },
-        ]
-
-        for test_case in test_cases:
-            with pytest.raises(ValueError) as exc_info:
-                AddressGroupResponseModel(**test_case["data"])
-            assert test_case["expected_error"] in str(exc_info.value)
-
-        # Positive test cases to ensure valid data still works
-        valid_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestGroup",
-            "folder": "Shared",
-            "static": ["Address1"],  # Only static provided
-        }
-        model = AddressGroupResponseModel(**valid_data)
-        assert model.static == ["Address1"]
-        assert model.dynamic is None
-
-        valid_dynamic_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestGroup",
-            "folder": "Shared",
-            "dynamic": {"filter": "test-filter"},  # Only dynamic provided
-        }
-        model = AddressGroupResponseModel(**valid_dynamic_data)
-        assert model.dynamic.filter == "test-filter"  # noqa
-        assert model.static is None
-
-
-class TestAddressGroupFilters(TestAddressGroupBase):
-    """Tests for Address Group filtering functionality."""
-
-    def test_address_group_list_with_filters(self):
-        """Test listing address groups with filters."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "12345678-1234-5678-1234-567812345678",
-                    "name": "Group1",
-                    "folder": "Shared",
-                    "static": ["Address1"],
+                    "name": "DAG_test",
+                    "folder": "All",
+                    "description": "test123",
+                    "dynamic": {
+                        "filter": "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
+                    },
                 },
                 {
-                    "id": "12345678-1234-5678-1234-567812345679",
-                    "name": "Group2",
-                    "folder": "Shared",
-                    "static": ["Address2"],
+                    "id": "4ee5b3cd-0308-43ce-b5db-3722bdc2706c",
+                    "name": "djs_DB",
+                    "folder": "cdot65",
+                    "dynamic": {"filter": "'aws.ec2.tag.Environment.DB'"},
                 },
-            ]
+                {
+                    "id": "630bfb3d-93a4-4cde-95ca-feed6d8dacad",
+                    "name": "test - address group 1",
+                    "folder": "Texas",
+                    "description": "Test address group 1",
+                    "static": ["test_network1"],
+                    "tag": ["Automation"],
+                },
+            ],
+            "offset": 0,
+            "total": 3,
+            "limit": 200,
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        filters = {
-            "folder": "Shared",
-            "names": ["Group1", "Group2"],
-            "tags": ["Tag1", "Tag2"],
-        }
-        address_groups = self.client.list(**filters)
-
-        expected_params = {
-            "folder": "Shared",
-            "name": "Group1,Group2",
-            "tag": "Tag1,Tag2",
-        }
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/address-groups",
-            params=expected_params,
+        # Empty lists should result in no matches
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=[],
         )
-        assert len(address_groups) == 2
+        assert len(filtered_objects) == 0
 
-    def test_address_group_list_with_types_filter(self):
-        """Test listing address groups with types filter."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "12345678-1234-5678-1234-567812345678",
-                    "name": "DynamicGroup",
-                    "folder": "Shared",
-                    "type": "dynamic",
-                    "dynamic": {"filter": "'Tag1'"},
-                },
-                {
-                    "id": "12345678-1234-5678-1234-567812345679",
-                    "name": "StaticGroup",
-                    "folder": "Shared",
-                    "type": "static",
-                    "static": ["Address1"],
-                },
-            ]
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        filters = {
-            "folder": "Shared",
-            "types": ["dynamic", "static"],
-        }
-        address_groups = self.client.list(**filters)
-
-        expected_params = {
-            "folder": "Shared",
-            "type": "dynamic,static",
-        }
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/address-groups",
-            params=expected_params,
+        filtered_objects = self.client.list(
+            folder="Shared",
+            values=[],
         )
-        assert len(address_groups) == 2
+        assert len(filtered_objects) == 0
 
-    def test_address_group_list_with_values_filter(self):
-        """Test listing address groups with values filter."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "12345678-1234-5678-1234-567812345678",
-                    "name": "Group1",
-                    "folder": "Shared",
-                    "static": ["Address1", "Address2"],
-                },
-            ]
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        filters = {
-            "folder": "Shared",
-            "values": ["Address1", "Address2"],
-        }
-        address_groups = self.client.list(**filters)
-
-        expected_params = {
-            "folder": "Shared",
-            "value": "Address1,Address2",
-        }
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/address-groups",
-            params=expected_params,
+        filtered_objects = self.client.list(
+            folder="Shared",
+            tags=[],
         )
-        assert len(address_groups) == 1
+        assert len(filtered_objects) == 0
+
+    def test_list_empty_folder_error(self):
+        """
+        **Objective:** Test that empty folder raises appropriate error.
+        **Workflow:**
+            1. Attempts to list objects with empty folder
+            2. Verifies EmptyFieldError is raised
+        """
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.list(folder="")
+        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+
+    def test_list_multiple_containers_error(self):
+        """
+        **Objective:** Test validation of container parameters.
+        **Workflow:**
+            1. Attempts to list with multiple containers
+            2. Verifies ValidationError is raised
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+        assert (
+            str(exc_info.value)
+            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+        )
+
+    def test_list_error_handling(self):
+        """
+        **Objective:** Test error handling in list operation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to list objects
+            3. Verifies proper error handling
+        """
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Listing failed",
+                    "details": {"errorType": "Operation Impossible"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(FolderNotFoundError):
+            self.client.list(folder="NonexistentFolder")
+
+    def test_list_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in list method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.list(folder="Shared")
+        assert str(exc_info.value) == "Generic error"
+
+    def test_list_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in list method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response
+        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+        # Test invalid data format
+        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+    def test_list_non_dict_response(self):
+        """
+        **Objective:** Test list method handling of non-dictionary response.
+        **Workflow:**
+            1. Mocks a non-dictionary response from the API
+            2. Verifies that BadResponseError is raised with correct message
+            3. Tests different non-dict response types
+        """
+        # Test with list response
+        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with string response
+        self.mock_scm.get.return_value = "string response"  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with None response
+        self.mock_scm.get.return_value = None  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
 
-class TestSuite(
-    TestAddressGroupAPI,
-    TestAddressGroupValidation,
-    TestAddressGroupFilters,
-):
-    """Main test suite that combines all test classes."""
+class TestAddressGroupExceptionHandling(TestAddressGroupBase):
+    """Tests for generic exception handling across Address methods."""
 
-    pass
+    def test_create_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in create method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        test_data = AddressGroupStaticFactory()
+
+        # Mock a generic exception without response
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(test_data.model_dump())
+        assert str(exc_info.value) == "Generic error"
+
+    def test_get_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in get method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.get(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in update method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        update_data = {
+            "id": "630bfb3d-93a4-4cde-95ca-feed6d8dacad",
+            "name": "test - address group 1",
+            "folder": "Texas",
+            "description": "Test address group 1",
+            "static": ["test_network1"],
+            "tag": ["Automation"],
+        }
+
+        # Mock a generic exception without response
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(update_data)
+        assert str(exc_info.value) == "Generic error"
+
+    def test_delete_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in delete method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock a generic exception without response
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+    def test_error_handler_raise_through(self):
+        """
+        **Objective:** Test that ErrorHandler properly raises through original exceptions.
+        **Workflow:**
+            1. Mocks various exception scenarios
+            2. Verifies exceptions are properly propagated
+        """
+
+        # Test with non-JSON response
+        class MockResponse:
+            def json(self):
+                raise ValueError("API Error")
+
+        mock_exception = Exception("API Error")
+        mock_exception.response = MockResponse()
+
+        self.mock_scm.get.side_effect = mock_exception  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.get("test-id")
+        assert "API Error" in str(exc_info.value)
+
+
+# -------------------- End of Test Classes --------------------

@@ -124,7 +124,12 @@ print("Address object deleted successfully")
 
 ## Listing Address Objects
 
-The `list()` method retrieves multiple address objects with optional filtering.
+The `list()` method retrieves multiple address objects with optional filtering. You can filter the results using the
+following kwargs:
+
+- `types`: List[str] - Filter by address types (e.g., ['netmask', 'range', 'wildcard', 'fqdn'])
+- `values`: List[str] - Filter by address values (e.g., ['10.0.0.0/24', '192.168.1.0/24'])
+- `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
 
 <div class="termy">
 
@@ -136,6 +141,32 @@ texas_addresses = addresses.list(
     folder="Texas",
 )
 
+# List only netmask addresses
+netmask_addresses = addresses.list(
+    folder="Texas",
+    types=['netmask']
+)
+
+# List addresses with specific values
+specific_networks = addresses.list(
+    folder="Texas",
+    values=['10.0.0.0/24', '192.168.1.0/24']
+)
+
+# List addresses with specific tags
+tagged_addresses = addresses.list(
+    folder="Texas",
+    tags=['Automation', 'Production']
+)
+
+# Combine multiple filters
+filtered_addresses = addresses.list(
+    folder="Texas",
+    types=['netmask', 'range'],
+    tags=['Production']
+)
+
+# Print the results
 for addr in texas_addresses:
     if addr.ip_netmask:
         print(f"Name: {addr.name}, Value: {addr.ip_netmask}")

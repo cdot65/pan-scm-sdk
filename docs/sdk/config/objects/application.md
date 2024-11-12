@@ -112,7 +112,13 @@ print("Application deleted successfully")
 
 ## Listing Applications
 
-The `list()` method retrieves multiple applications with optional filtering.
+The `list()` method retrieves multiple applications with optional filtering. You can filter the results using the
+following kwargs:
+
+- `category`: List[str] - Filter by category (e.g., ['collaboration', 'business-systems'])
+- `subcategory`: List[str] - Filter by subcategory (e.g., ['instant-messaging', 'database'])
+- `technology`: List[str] - Filter by technology (e.g., ['client-server', 'peer-to-peer'])
+- `risk`: List[int] - Filter by risk level (e.g., [1, 2, 3])
 
 <div class="termy">
 
@@ -122,18 +128,35 @@ The `list()` method retrieves multiple applications with optional filtering.
 # List all applications in a folder
 apps = applications.list(folder="Texas")
 
-# Default behavior of API is to return first 200 objects
-if len(apps) == 200:
-    print(True)
+# List applications by category
+collab_apps = applications.list(
+    folder="Texas",
+    category=['collaboration']
+)
 
-# Passing the filter of `limit` with an integer will increase amount of retrieved objects
-apps = applications.list(folder="Texas", limit=5000)
-len(apps)
-4868
+# List applications by risk level
+high_risk_apps = applications.list(
+    folder="Texas",
+    risk=[4, 5]
+)
 
+# List applications by technology
+client_server_apps = applications.list(
+    folder="Texas",
+    technology=['client-server']
+)
+
+# Combine multiple filters
+filtered_apps = applications.list(
+    folder="Texas",
+    category=['business-systems'],
+    subcategory=['database'],
+    risk=[3, 4, 5]
+)
+
+# Print the results
 for app in apps:
-    print(f"Name: {app.name}, Risk: {app.risk}")
-
+    print(f"Name: {app.name}, Category: {app.category}, Risk: {app.risk}")
 ```
 
 </div>

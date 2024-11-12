@@ -21,16 +21,18 @@ from scm.models.objects.address_group import (
 from scm.models.security import (
     DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
-    AntiSpywareProfileRequestModel,
     AntiSpywareProfileResponseModel,
+    AntiSpywareProfileCreateModel,
+    VulnerabilityProtectionProfileCreateModel,
+    VulnerabilityProtectionProfileResponseModel,
 )
 from scm.models.security.anti_spyware_profiles import (
     PacketCapture,
     ActionRequest,
-    ThreatExceptionRequest,
+    ThreatExceptionBase,
     Category,
     Severity,
-    RuleRequest,
+    RuleBaseModel,
 )
 from scm.models.security.dns_security_profiles import (
     BotnetDomainsModel,
@@ -46,12 +48,16 @@ from scm.models.security.dns_security_profiles import (
     DNSSecurityCategoryEntryModel,
 )
 from scm.models.security.security_rules import (
-    SecurityRuleRequestModel,
+    SecurityRuleCreateModel,
     ProfileSetting,
     Rulebase,
     SecurityRuleMoveModel,
     RuleMoveDestination,
     SecurityRuleResponseModel,
+)
+from scm.models.security.vulnerability_protection_profiles import (
+    ThreatExceptionModel,
+    VulnerabilityRuleModel,
 )
 
 
@@ -248,27 +254,27 @@ class BaseSecurityRuleFactory(factory.Factory):
 
 
 class SecurityRuleRequestFactory(BaseSecurityRuleFactory):
-    """Factory for creating SecurityRuleRequestModel instances."""
+    """Factory for creating SecurityRuleCreateModel instances."""
 
     class Meta:
-        model = SecurityRuleRequestModel
+        model = SecurityRuleCreateModel
 
     folder = "Shared"  # Default container type
 
     @classmethod
-    def with_snippet(cls, **kwargs) -> SecurityRuleRequestModel:
+    def with_snippet(cls, **kwargs) -> SecurityRuleCreateModel:
         """Create a security rule with snippet container."""
         return cls(folder=None, snippet="TestSnippet", **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs) -> SecurityRuleRequestModel:
+    def with_device(cls, **kwargs) -> SecurityRuleCreateModel:
         """Create a security rule with device container."""
         return cls(folder=None, device="TestDevice", **kwargs)
 
     @classmethod
     def create_batch_with_names(
         cls, names: list[str], **kwargs
-    ) -> list[SecurityRuleRequestModel]:
+    ) -> list[SecurityRuleCreateModel]:
         """Create multiple security rules with specified names."""
         return [cls(name=name, **kwargs) for name in names]
 
@@ -285,7 +291,7 @@ class SecurityRuleResponseFactory(BaseSecurityRuleFactory):
     @classmethod
     def from_request(
         cls,
-        request_model: SecurityRuleRequestModel,
+        request_model: SecurityRuleCreateModel,
         **kwargs,
     ) -> SecurityRuleResponseModel:
         """Create a response model based on a request model."""
@@ -460,11 +466,11 @@ class AddressGroupResponseFactory(AddressGroupRequestFactory):
         return cls(**data)
 
 
-class RuleRequestFactory(factory.Factory):
+class AntiSpywareRuleCreateFactory(factory.Factory):
     """Factory for creating RuleRequest instances."""
 
     class Meta:
-        model = RuleRequest
+        model = RuleBaseModel
 
     name = factory.Sequence(lambda n: f"rule_{n}")
     severity = [Severity.critical, Severity.high]
@@ -481,11 +487,11 @@ class RuleRequestFactory(factory.Factory):
         )
 
 
-class ThreatExceptionRequestFactory(factory.Factory):
+class ThreatExceptionCreateFactory(factory.Factory):
     """Factory for creating ThreatExceptionRequest instances."""
 
     class Meta:
-        model = ThreatExceptionRequest
+        model = ThreatExceptionBase
 
     name = factory.Sequence(lambda n: f"exception_{n}")
     action = factory.LazyAttribute(lambda _: ActionRequest("allow"))
@@ -495,16 +501,16 @@ class ThreatExceptionRequestFactory(factory.Factory):
 
 
 class AntiSpywareProfileRequestFactory(factory.Factory):
-    """Factory for creating AntiSpywareProfileRequestModel instances."""
+    """Factory for creating AntiSpywareProfileCreateModel instances."""
 
     class Meta:
-        model = AntiSpywareProfileRequestModel
+        model = AntiSpywareProfileCreateModel
 
     name = factory.Sequence(lambda n: f"profile_{n}")
     folder = "Prisma Access"
     description = "Test anti-spyware profile"
-    rules = factory.List([factory.SubFactory(RuleRequestFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionRequestFactory)])
+    rules = factory.List([factory.SubFactory(AntiSpywareRuleCreateFactory)])
+    threat_exception = factory.List([factory.SubFactory(ThreatExceptionCreateFactory)])
 
     @classmethod
     def with_snippet(cls, **kwargs):
@@ -526,7 +532,87 @@ class AntiSpywareProfileResponseFactory(AntiSpywareProfileRequestFactory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
     @classmethod
-    def from_request(cls, request_model: AntiSpywareProfileRequestModel, **kwargs):
+    def from_request(cls, request_model: AntiSpywareProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data.update(kwargs)
+        return cls(**data)
+
+
+class VulnerabilityRuleRequestFactory(factory.Factory):
+    """Factory for creating VulnerabilityRuleModel instances."""
+
+    class Meta:
+        model = VulnerabilityRuleModel
+
+    name = factory.Sequence(lambda n: f"rule_{n}")
+    severity = ["critical"]
+    category = "dos"
+    host = "client"
+    threat_name = "any"
+    packet_capture = "single-packet"
+    action = factory.LazyAttribute(lambda _: {"alert": {}})
+    cve = ["any"]
+    vendor_id = ["any"]
+
+    @classmethod
+    def with_block_ip_action(cls, **kwargs):
+        """Create a rule with block_ip action."""
+        return cls(
+            action={"block_ip": {"track_by": "source", "duration": 3600}}, **kwargs
+        )
+
+
+class ThreatExceptionRequestFactory(factory.Factory):
+    """Factory for creating ThreatExceptionModel instances."""
+
+    class Meta:
+        model = ThreatExceptionModel
+
+    name = factory.Sequence(lambda n: f"exception_{n}")
+    action = factory.LazyAttribute(lambda _: ActionRequest("allow"))
+    packet_capture = "single-packet"
+    exempt_ip = [{"name": "192.168.1.1"}]
+    notes = "Test exception"
+
+
+class VulnerabilityProtectionProfileRequestFactory(factory.Factory):
+    """Factory for creating VulnerabilityProtectionProfileCreateModel instances."""
+
+    class Meta:
+        model = VulnerabilityProtectionProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    folder = "Prisma Access"
+    description = "Test vulnerability protection profile"
+    rules = factory.List([factory.SubFactory(VulnerabilityRuleRequestFactory)])
+    threat_exception = factory.List([factory.SubFactory(ThreatExceptionRequestFactory)])
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        """Create a profile with snippet container."""
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        """Create a profile with device container."""
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class VulnerabilityProtectionProfileResponseFactory(
+    VulnerabilityProtectionProfileRequestFactory
+):
+    """Factory for creating VulnerabilityProtectionProfileResponseModel instances."""
+
+    class Meta:
+        model = VulnerabilityProtectionProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+    @classmethod
+    def from_request(
+        cls, request_model: VulnerabilityProtectionProfileCreateModel, **kwargs
+    ):
         """Create a response model based on a request model."""
         data = request_model.model_dump()
         data.update(kwargs)

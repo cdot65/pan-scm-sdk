@@ -1,104 +1,151 @@
-# tests/test_security_rules.py
-import uuid
-from unittest.mock import MagicMock, patch
+# tests/scm/config/security/test_security_rules.py
 
 import pytest
-from pydantic import ValidationError as PydanticValidationError
-from scm.exceptions import ValidationError
+from unittest.mock import MagicMock
+
+from scm.config.security import SecurityRule
+from scm.exceptions import (
+    ValidationError,
+    ObjectNotPresentError,
+    EmptyFieldError,
+    ObjectAlreadyExistsError,
+    MalformedRequestError,
+    FolderNotFoundError,
+    BadResponseError,
+    ReferenceNotZeroError,
+)
 from scm.models.security.security_rules import (
-    SecurityRuleRequestModel,
     SecurityRuleResponseModel,
+    SecurityRuleCreateModel,
+    SecurityRuleUpdateModel,
     ProfileSetting,
-    string_validator,
-    RuleMoveDestination,
+    Action,
     Rulebase,
+    RuleMoveDestination,
     SecurityRuleMoveModel,
 )
-from scm.config.security import SecurityRule
-from tests.factories import SecurityRuleRequestFactory, SecurityRuleResponseFactory
+
+from tests.factories import (
+    SecurityRuleRequestFactory,
+    SecurityRuleResponseFactory,
+)
+
+from pydantic import ValidationError as PydanticValidationError
 
 
-class TestSecurityRuleBasicOperations:
-    """Test basic CRUD operations for security rules."""
+@pytest.mark.usefixtures("load_env")
+class TestSecurityRuleBase:
+    """Base class for Security Rule tests."""
 
-    @pytest.fixture
-    def security_rule_client(self, mock_scm):
-        return SecurityRule(mock_scm)
+    @pytest.fixture(autouse=True)
+    def setup_method(self, mock_scm):
+        """Setup method that runs before each test."""
+        self.mock_scm = mock_scm  # noqa
+        self.mock_scm.get = MagicMock()
+        self.mock_scm.post = MagicMock()
+        self.mock_scm.put = MagicMock()
+        self.mock_scm.delete = MagicMock()
+        self.client = SecurityRule(self.mock_scm)  # noqa
 
-    def test_create_security_rule(
-        self,
-        security_rule_client,
-        mock_scm,
-    ):
-        """Test creating a security rule with default rulebase."""
-        test_rule = SecurityRuleRequestFactory()
-        mock_response = SecurityRuleResponseFactory(**test_rule.model_dump())
 
-        # Ensure mock_scm.post is a MagicMock object
-        mock_scm.post = MagicMock()
-        mock_scm.post.return_value = mock_response.model_dump(by_alias=True)
+# -------------------- Test Classes Grouped by Functionality --------------------
 
-        created_rule = security_rule_client.create(
-            test_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            )
+
+class TestSecurityRuleModelValidation(TestSecurityRuleBase):
+    """Tests for object model validation."""
+
+    def test_object_model_no_container_provided(self):
+        """Test validation when no container is provided."""
+        data = {
+            "name": "TestRule",
+            "action": "allow",
+            # No 'folder', 'snippet', or 'device' provided
+        }
+        with pytest.raises(ValueError) as exc_info:
+            SecurityRuleCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
 
-        mock_scm.post.assert_called_once_with(
-            "/config/security/v1/security-rules",
-            params={"position": "pre"},
-            json=test_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            ),
-        )
-        assert isinstance(created_rule, SecurityRuleResponseModel)
-
-    def test_create_with_explicit_rulebase(
-        self,
-        security_rule_client,
-        mock_scm,
-    ):
-        """Test creating a security rule with explicit rulebase."""
-        test_rule = SecurityRuleRequestFactory()
-        mock_response = SecurityRuleResponseFactory(**test_rule.model_dump())
-
-        # Ensure mock_scm.post is a MagicMock object
-        mock_scm.post = MagicMock()
-        mock_scm.post.return_value = mock_response.model_dump(by_alias=True)
-
-        security_rule_client.create(
-            test_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            ),
-            rulebase="post",
+    def test_object_model_multiple_containers(self):
+        """Test validation when multiple containers are provided."""
+        data = {
+            "name": "TestRule",
+            "action": "allow",
+            "folder": "Shared",
+            "snippet": "TestSnippet",
+            # Multiple containers provided
+        }
+        with pytest.raises(ValueError) as exc_info:
+            SecurityRuleCreateModel(**data)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
 
-        mock_scm.post.assert_called_once_with(
-            "/config/security/v1/security-rules",
-            params={"position": "post"},
-            json=test_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            ),
-        )
+    def test_ensure_list_of_strings_single_string(self):
+        """Test that a single string is converted to a list containing that string."""
+        data = {
+            "name": "TestRule",
+            "action": "allow",
+            "folder": "Shared",
+            "from": "zone1",  # single string
+            "to": "zone2",  # single string
+        }
+        model = SecurityRuleCreateModel(**data)
+        assert model.from_ == ["zone1"]
+        assert model.to_ == ["zone2"]
+
+    def test_ensure_list_of_strings_invalid_type(self):
+        """Test that a non-string, non-list input raises ValueError."""
+        data = {
+            "name": "TestRule",
+            "action": "allow",
+            "folder": "Shared",
+            "from": 123,  # invalid type
+        }
+        with pytest.raises(ValueError) as exc_info:
+            SecurityRuleCreateModel(**data)
+        assert "Value must be a list of strings" in str(exc_info.value)
+
+    def test_ensure_list_of_strings_non_string_items(self):
+        """Test that a list containing non-string items raises ValueError."""
+        data = {
+            "name": "TestRule",
+            "action": "allow",
+            "folder": "Shared",
+            "from": ["zone1", 123],  # list with non-string item
+        }
+        with pytest.raises(ValueError) as exc_info:
+            SecurityRuleCreateModel(**data)
+        assert "All items must be strings" in str(exc_info.value)
+
+    def test_ensure_unique_items(self):
+        """Test that duplicate items in lists raise ValueError."""
+        data = {
+            "name": "TestRule",
+            "action": "allow",
+            "folder": "Shared",
+            "from": ["zone1", "zone1"],  # duplicate item
+        }
+        with pytest.raises(ValueError) as exc_info:
+            SecurityRuleCreateModel(**data)
+        assert "List items must be unique" in str(exc_info.value)
 
 
-class TestSecurityRuleAPI:
-    """Test suite for SecurityRule SDK API methods."""
+class TestSecurityRuleList(TestSecurityRuleBase):
+    """Tests for listing Security Rule objects."""
 
-    @pytest.fixture
-    def security_rules_client(self, mock_scm):
-        return SecurityRule(mock_scm)
-
-    def test_list_security_rules(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        # Mock the API client's get method if you don't want to make real API calls
+    def test_list_objects(self):
+        """
+        **Objective:** Test listing all objects.
+        **Workflow:**
+            1. Sets up a mock response resembling the expected API response for listing objects.
+            2. Calls the `list` method with a filter parameter.
+            3. Asserts that the mocked service was called correctly.
+            4. Validates the returned list of objects.
+        """
         mock_response = {
             "data": [
                 {
@@ -115,883 +162,143 @@ class TestSecurityRuleAPI:
                     "log_setting": "Cortex Data Lake",
                     "log_end": True,
                 },
-                {
-                    "id": "2cfc7c35-ac36-4cd2-9ce9-33dd1b99ea87",
-                    "name": "hip-default",
-                    "folder": "All",
-                },
-                {
-                    "id": "404cc766-539b-4245-a2ae-822f2770846f",
-                    "name": "optional-default",
-                    "folder": "Shared",
-                    "log_setting": "Cortex Data Lake",
-                    "log_end": True,
-                },
-                {
-                    "id": "b80505fa-217f-4626-8dde-35545e3df611",
-                    "name": "office365",
-                    "folder": "Shared",
-                    "log_setting": "Cortex Data Lake",
-                    "log_end": True,
-                },
-                {
-                    "id": "70b9f4f2-b3e5-422f-8726-8cc41ef39078",
-                    "name": "deny FTP",
-                    "folder": "Shared",
-                    "disabled": False,
-                    "from": ["trust"],
-                    "source": ["any"],
-                    "source_user": ["any"],
-                    "source_hip": ["any"],
-                    "to": ["untrust"],
-                    "destination": ["any"],
-                    "destination_hip": ["any"],
-                    "application": ["ftp"],
-                    "service": ["any"],
-                    "category": ["any"],
-                    "action": "deny",
-                    "log_start": False,
-                    "log_end": True,
-                    "log_setting": "Cortex Data Lake",
-                },
-                {
-                    "id": "dc5cffdb-fc21-4882-b5c5-ccbcc134e004",
-                    "name": "rbi",
-                    "folder": "Shared",
-                    "log_setting": "Cortex Data Lake",
-                    "log_end": True,
-                },
-                {
-                    "id": "b9a5af08-151f-4761-aced-98d6e5e2dc7a",
-                    "name": "saas-tenant-restrictions",
-                    "folder": "Shared",
-                    "log_setting": "Cortex Data Lake",
-                    "log_end": True,
-                },
-                {
-                    "id": "504fb7f5-b63d-45e4-a599-7dcc80974f42",
-                    "name": "VPN clients to Corporate",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["any"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Permit any clients to access corporate network",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "8a5cb583-85bd-45d9-be7e-2a6f79888f4c",
-                    "name": "Monitor WAN to GlobalProtect",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["panos-global-protect", "ssl", "web-browsing"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Monitor GlobalProtect requests",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "91cc19e4-c154-4a8b-959d-13be61303c11",
-                    "name": "Auto-Rule-1",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["dns"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 1",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "385d9ff9-3370-40b9-b4f7-5a822da39d5c",
-                    "name": "Auto-Rule-3",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["smtp"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 3",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "0e23d466-cc28-4037-ba5a-28d4ec907f3b",
-                    "name": "Auto-Rule-6",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["ssh"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 6",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "37d82545-4084-43d4-8b55-0089290b85d4",
-                    "name": "Auto-Rule-9",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["web-browsing"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 9",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "4efb42ba-dd4a-4a47-a5c0-4b4ec8b8c41e",
-                    "name": "Auto-Rule-12",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["ssh"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 12",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "1ca04f5f-f03b-44de-a872-183d0818fe21",
-                    "name": "Auto-Rule-15",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["smtp"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 15",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "9a5fd2c9-efb0-46f6-802b-40d6ef8f6dad",
-                    "name": "Auto-Rule-18",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["dns"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 18",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "1c59570f-1632-4a93-9f7c-a8d0146683b5",
-                    "name": "Auto-Rule-19",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["dns"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 19",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "0d2637d9-33fa-4e5b-b3f1-94f21e3bc6e2",
-                    "name": "Auto-Rule-20",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["smtp"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 20",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "864b7614-8377-4e2c-a0b2-c2ef12179c9f",
-                    "name": "Auto-Rule-32",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["smtp"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 32",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "58c93101-2fb5-438b-a397-7e927f77be25",
-                    "name": "Auto-Rule-33",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["smtp"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 33",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "6aae06a8-9044-4db3-a3c9-516c1c74e36c",
-                    "name": "Auto-Rule-34",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["smtp"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 34",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "5f26df62-228a-4671-827e-4b03fea06c96",
-                    "name": "Auto-Rule-35",
-                    "folder": "Shared",
-                    "action": "deny",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["dns"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 35",
-                    "log_end": True,
-                    "disabled": True,
-                },
-                {
-                    "id": "6ed52d68-bb27-4abc-9346-4eac2652a4b9",
-                    "name": "Auto-Rule-37",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "from": ["any"],
-                    "to": ["any"],
-                    "source": ["any"],
-                    "destination": ["any"],
-                    "source_user": ["any"],
-                    "category": ["any"],
-                    "application": ["dns"],
-                    "service": ["any"],
-                    "log_setting": "Cortex Data Lake",
-                    "description": "Randomly generated security rule 37",
-                    "log_end": True,
-                    "disabled": True,
-                },
             ],
             "offset": 0,
-            "total": 24,
+            "total": 2,
             "limit": 200,
         }
 
-        mock_scm.get = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-        security_rules = security_rules_client.list(folder="All")
+        self.mock_scm.get.return_value = mock_response  # noqa
+        existing_objects = self.client.list(folder="All")
 
-        # Updated assertion to include position parameter
-        mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
-            params={"folder": "All", "position": "pre"},  # pre is default
+            params={
+                "position": "pre",
+                "limit": 10000,
+                "folder": "All",
+            },
         )
-        assert isinstance(security_rules, list)
-        assert isinstance(security_rules[0], SecurityRuleResponseModel)
-        assert len(security_rules) == 24
+        assert isinstance(existing_objects, list)
+        assert isinstance(existing_objects[0], SecurityRuleResponseModel)
+        assert len(existing_objects) == 2
+        assert existing_objects[0].name == "default"
 
-    def test_create_security_rule(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test creating a security rule with default rulebase."""
-        test_security_rule = SecurityRuleRequestFactory()
-        mock_response = test_security_rule.model_dump(
-            exclude_none=True,
-            by_alias=True,
-        )
-        mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_scm.post = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        created_rule = security_rules_client.create(
-            test_security_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            )
-        )
-
-        # Updated assertion to include position parameter
-        mock_scm.post.assert_called_once_with(
-            "/config/security/v1/security-rules",
-            params={"position": "pre"},  # pre is default
-            json=test_security_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            ),
-        )
-        assert created_rule.id == "123e4567-e89b-12d3-a456-426655440000"
-
-    def test_create_security_rule_with_explicit_rulebase(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test creating a security rule with explicit rulebase."""
-        test_security_rule = SecurityRuleRequestFactory()
-        mock_response = test_security_rule.model_dump(
-            exclude_none=True,
-            by_alias=True,
-        )
-        mock_response["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_scm.post = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        security_rules_client.create(
-            test_security_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            ),
-            rulebase="post",
-        )
-
-        mock_scm.post.assert_called_once_with(
-            "/config/security/v1/security-rules",
-            params={"position": "post"},
-            json=test_security_rule.model_dump(
-                exclude_none=True,
-                by_alias=True,
-            ),
-        )
-
-    def test_update_security_rule(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test updating a security rule with default rulebase."""
-        test_security_rule = SecurityRuleRequestFactory(name="UpdatedSecurityRule")
-        mock_response = test_security_rule.model_dump(
-            exclude_unset=True,
-            by_alias=True,
-        )
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-        mock_response["id"] = rule_id
-
-        mock_scm.put = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        update_data = test_security_rule.model_dump(
-            exclude_unset=True,
-            by_alias=True,
-        )
-        update_data["id"] = (
-            rule_id  # Include the 'id' in update_data for endpoint construction
-        )
-
-        updated_rule = security_rules_client.update(update_data)
-
-        # Create a copy of update_data without 'id' for the expected JSON payload
-        expected_json = update_data.copy()
-        expected_json.pop("id")
-
-        mock_scm.put.assert_called_once_with(
-            f"/config/security/v1/security-rules/{rule_id}",
-            params={"position": "pre"},  # pre is default
-            json=expected_json,
-        )
-        assert updated_rule.id == rule_id
-
-    def test_get_security_rule(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        # Mock the API client's get method
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRule",
-            "folder": "Shared",
-            "description": "A test security rule",
-            "action": "allow",
-            "from": ["any"],
-            "to": ["any"],
-            "source": ["any"],
-            "destination": ["any"],
-            "application": ["any"],
-            "service": ["any"],
-        }
-        mock_scm.get = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-        security_rule = security_rules_client.get(rule_id)
-
-        # Updated assertion to include position parameter
-        mock_scm.get.assert_called_once_with(
-            f"/config/security/v1/security-rules/{rule_id}",
-            params={"position": "pre"},  # pre is default
-        )
-
-        assert isinstance(security_rule, SecurityRuleResponseModel)
-        assert security_rule.id == rule_id
-
-    def test_delete_security_rule(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test deleting a security rule with default rulebase."""
-        mock_scm.delete = MagicMock(return_value=None)
-        security_rules_client = SecurityRule(mock_scm)
-
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-        security_rules_client.delete(rule_id)
-
-        # Updated assertion to include position parameter
-        mock_scm.delete.assert_called_once_with(
-            f"/config/security/v1/security-rules/{rule_id}",
-            params={"position": "pre"},  # pre is default
-        )
-
-    def test_security_rule_list_with_invalid_offset_limit(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """
-        Test that invalid offset and limit values raise ValueError.
-        """
-        # Create an instance of SecurityRule with the mocked Scm
-        security_rules_client = SecurityRule(mock_scm)
-
-        # Invalid offset
-        with pytest.raises(ValueError) as exc_info:
-            security_rules_client.list(
-                folder="Shared",
-                offset=-1,
-            )
-        assert "Offset must be a non-negative integer" in str(exc_info.value)
-
-        # Invalid limit
-        with pytest.raises(ValueError) as exc_info:
-            security_rules_client.list(
-                folder="Shared",
-                limit=0,
-            )
-        assert "Limit must be a positive integer" in str(exc_info.value)
-
-        # Both invalid
-        with pytest.raises(ValueError) as exc_info:
-            security_rules_client.list(
-                folder="Shared",
-                offset=-1,
-                limit=-10,
-            )
-        assert (
-            "Offset must be a non-negative integer. Limit must be a positive integer"
-            in str(exc_info.value)
-        )
-
-    def test_security_rule_list_no_container_provided(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """
-        Test that providing no container raises ValidationError.
-        """
-        # Create an instance of SecurityRule with the mocked Scm
-        security_rules_client = SecurityRule(mock_scm)
-
-        # Call the list method without any container
+    def test_object_list_multiple_containers(self):
+        """Test validation error when listing with multiple containers."""
         with pytest.raises(ValidationError) as exc_info:
-            security_rules_client.list()
+            self.client.list(folder="Prisma Access", snippet="TestSnippet")
 
-        # Assertions
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
 
-    def test_security_rule_list_multiple_containers_provided(
-        self,
-        load_env,
-        mock_scm,
-    ):
+
+class TestSecurityRuleCreate(TestSecurityRuleBase):
+    """Tests for creating Security Rule objects."""
+
+    def test_create_object(self):
         """
-        Test that providing multiple containers raises ValidationError.
+        **Objective:** Test creating a new object.
+        **Workflow:**
+            1. Creates test data using SecurityRuleRequestFactory.
+            2. Mocks the API response.
+            3. Verifies the creation request and response.
         """
-        # Create an instance of SecurityRule with the mocked Scm
-        security_rules_client = SecurityRule(mock_scm)
+        test_rule = SecurityRuleRequestFactory()
+        mock_response = test_rule.model_dump()
+        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
-        # Call the list method with multiple containers
-        with pytest.raises(ValidationError) as exc_info:
-            security_rules_client.list(
-                folder="Shared",
-                snippet="TestSnippet",
-            )
-
-        # Assertions
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        self.mock_scm.post.return_value = mock_response  # noqa
+        created_rule = self.client.create(
+            test_rule.model_dump(exclude_none=True, by_alias=True)
         )
 
-    def test_security_rule_list_with_name_filter(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test listing security rules with name filter and default rulebase."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "12345678-1234-5678-1234-567812345678",
-                    "name": "Allow_HTTP",
-                    "folder": "Shared",
-                    "action": "allow",
-                }
-            ],
-            "offset": 0,
-            "total": 1,
-            "limit": 100,
-        }
-        mock_scm.get = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        security_rules_client.list(folder="Shared", name="Allow_HTTP")
-
-        # Updated assertion to include position parameter
-        expected_params = {
-            "folder": "Shared",
-            "name": "Allow_HTTP",
-            "position": "pre",  # pre is default
-        }
-        mock_scm.get.assert_called_once_with(
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
-            params=expected_params,
-        )
-
-    def test_security_rule_list_with_additional_filters(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test listing security rules with additional filters and default rulebase."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "12345678-1234-5678-1234-567812345678",
-                    "name": "Allow_HTTP",
-                    "folder": "Shared",
-                    "action": "allow",
-                    "source": ["10.0.0.0/24"],
-                }
-            ],
-            "offset": 0,
-            "total": 1,
-            "limit": 100,
-        }
-        mock_scm.get = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        filters = {
-            "folder": "Shared",
-            "action": "allow",
-            "source": "10.0.0.0/24",
-        }
-        security_rules = security_rules_client.list(**filters)
-
-        # Updated assertion to include position parameter
-        expected_params = {
-            "folder": "Shared",
-            "action": "allow",
-            "source": "10.0.0.0/24",
-            "position": "pre",  # pre is default
-        }
-        mock_scm.get.assert_called_once_with(
-            "/config/security/v1/security-rules",
-            params=expected_params,
-        )
-
-        assert len(security_rules) == 1
-        assert security_rules[0].source == ["10.0.0.0/24"]
-
-    def test_security_rule_list_with_offset_limit(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test listing security rules with offset, limit, and default rulebase."""
-        mock_response = {
-            "data": [],
-            "offset": 10,
-            "total": 100,
-            "limit": 20,
-        }
-        mock_scm.get = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-
-        security_rules = security_rules_client.list(
-            folder="Shared",
-            offset=10,
-            limit=20,
-        )
-
-        # Updated assertion to include position parameter
-        expected_params = {
-            "folder": "Shared",
-            "offset": 10,
-            "limit": 20,
-            "position": "pre",  # pre is default
-        }
-        mock_scm.get.assert_called_once_with(
-            "/config/security/v1/security-rules",
-            params=expected_params,
-        )
-
-        # Since the data is empty, security_rules should be an empty list
-        assert len(security_rules) == 0
-
-    def test_invalid_rulebase_value(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test that invalid rulebase values raise ValueError."""
-        security_rules_client = SecurityRule(mock_scm)
-
-        with pytest.raises(
-            ValueError,
-            match="rulebase must be either 'pre' or 'post'",
-        ):
-            security_rules_client.create(
-                {
-                    "name": "test",
-                    "folder": "Shared",
-                },
-                rulebase="invalid",
-            )
-
-        with pytest.raises(
-            ValueError,
-            match="rulebase must be either 'pre' or 'post'",
-        ):
-            security_rules_client.list(
-                folder="Shared",
-                rulebase="invalid",
-            )
-
-    def test_update_security_rule_with_invalid_rulebase(
-        self,
-        load_env,
-        mock_scm,
-        security_rules_client,
-    ):
-        """Test that update() raises ValueError with invalid rulebase."""
-        test_security_rule = SecurityRuleRequestFactory(name="UpdatedSecurityRule")
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-        update_data = test_security_rule.model_dump(
-            exclude_unset=True,
-            by_alias=True,
-        )
-        update_data["id"] = rule_id  # Include 'id' in update_data
-
-        # Ensure mock_scm.put is a MagicMock object
-        mock_scm.put = MagicMock()
-
-        with pytest.raises(ValueError, match="rulebase must be either 'pre' or 'post'"):
-            security_rules_client.update(
-                update_data,
-                rulebase="invalid_value",
-            )
-
-        # Verify no API call was made
-        mock_scm.put.assert_not_called()
-
-    def test_update_security_rule_with_alternate_case(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test that update() handles case-insensitive rulebase values."""
-        test_security_rule = SecurityRuleRequestFactory(name="UpdatedSecurityRule")
-        mock_response = test_security_rule.model_dump(
-            exclude_unset=True,
-            by_alias=True,
-        )
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-        mock_response["id"] = rule_id
-
-        mock_scm.put = MagicMock(return_value=mock_response)
-        security_rules_client = SecurityRule(mock_scm)
-        update_data = test_security_rule.model_dump(
-            exclude_unset=True,
-            by_alias=True,
-        )
-        update_data["id"] = rule_id  # Include 'id' in update_data
-
-        # Test with uppercase value
-        updated_rule = security_rules_client.update(
-            update_data,
-            rulebase="PRE",
-        )
-
-        # Create a copy of update_data without 'id' for the expected JSON payload
-        expected_json = update_data.copy()
-        expected_json.pop("id")
-
-        mock_scm.put.assert_called_once_with(
-            f"/config/security/v1/security-rules/{rule_id}",
             params={"position": "pre"},
-            json=expected_json,
+            json=test_rule.model_dump(exclude_none=True, by_alias=True),
         )
-        assert updated_rule.id == rule_id
+        assert isinstance(created_rule, SecurityRuleResponseModel)
+        assert str(created_rule.id) == "12345678-abcd-abcd-abcd-123456789012"
 
-    def test_delete_security_rule_with_invalid_rulebase(
-        self,
-        load_env,
-        mock_scm,
-        security_rules_client,
-    ):
-        """Test that delete() raises ValueError with invalid rulebase."""
+    def test_create_object_error_handling(self):
+        """
+        **Objective:** Test error handling during object creation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to create an object
+            3. Verifies proper error handling and exception raising
+        """
+        test_data = SecurityRuleRequestFactory()
 
-        # Ensure mock_scm.delete is a MagicMock object
-        mock_scm.delete = MagicMock()
+        # Mock error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object creation failed",
+                    "details": {"errorType": "Object Already Exists"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
 
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        with pytest.raises(ValueError, match="rulebase must be either 'pre' or 'post'"):
-            security_rules_client.delete(rule_id, rulebase="invalid_value")
-
-        # Verify no API call was made
-        mock_scm.delete.assert_not_called()
-
-    def test_delete_security_rule_with_alternate_case(
-        self,
-        load_env,
-        mock_scm,
-    ):
-        """Test that delete() handles case-insensitive rulebase values."""
-        mock_scm.delete = MagicMock(return_value=None)
-        security_rules_client = SecurityRule(mock_scm)
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Test with uppercase value
-        security_rules_client.delete(rule_id, rulebase="POST")
-
-        mock_scm.delete.assert_called_once_with(
-            f"/config/security/v1/security-rules/{rule_id}",
-            params={"position": "post"},
+        # Configure mock to raise exception
+        self.mock_scm.post.side_effect = Exception()  # noqa
+        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
         )
 
-    def test_get_security_rule_with_invalid_rulebase(
-        self,
-        load_env,
-        mock_scm,
-        security_rules_client,
-    ):
-        """Test that get() raises ValueError with invalid rulebase."""
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        with pytest.raises(ObjectAlreadyExistsError):
+            self.client.create(test_data.model_dump())
 
-        # Ensure mock_scm.get is a MagicMock object
-        mock_scm.get = MagicMock()
+    def test_create_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in create method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        test_data = SecurityRuleRequestFactory()
 
-        with pytest.raises(ValueError, match="rulebase must be either 'pre' or 'post'"):
-            security_rules_client.get(rule_id, rulebase="invalid_value")
+        # Mock a generic exception without response
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
-        # Verify no API call was made
-        mock_scm.get.assert_not_called()
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(test_data.model_dump())
+        assert str(exc_info.value) == "Generic error"
 
-    def test_get_security_rule_with_alternate_case(
-        self,
-        load_env,
-        mock_scm,
-        security_rules_client,
-    ):
-        """Test that get() handles case-insensitive rulebase values."""
-        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+    def test_create_malformed_response_handling(self):
+        """
+        **Objective:** Test handling of malformed response in create method.
+        **Workflow:**
+            1. Mocks a response that would cause a parsing error
+            2. Verifies appropriate error handling
+        """
+        test_data = SecurityRuleRequestFactory()
+
+        # Mock invalid JSON response
+        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(PydanticValidationError):
+            self.client.create(test_data.model_dump())
+
+
+class TestSecurityRuleGet(TestSecurityRuleBase):
+    """Tests for retrieving a specific Security Rule object."""
+
+    def test_get_object(self):
+        """
+        **Objective:** Test retrieving a specific object.
+        **Workflow:**
+            1. Mocks the API response for a specific object.
+            2. Verifies the get request and response handling.
+        """
         mock_response = {
-            "id": rule_id,
+            "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
             "name": "TestRule",
             "folder": "Shared",
             "action": "allow",
@@ -1003,467 +310,325 @@ class TestSecurityRuleAPI:
             "service": ["any"],
         }
 
-        # Ensure mock_scm.get is a MagicMock object
-        mock_scm.get = MagicMock(return_value=mock_response)
+        self.mock_scm.get.return_value = mock_response  # noqa
+        object_id = "b44a8c00-7555-4021-96f0-d59deecd54e8"
+        get_object = self.client.get(object_id)
 
-        # Test with uppercase value
-        security_rule = security_rules_client.get(rule_id, rulebase="POST")
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            f"/config/security/v1/security-rules/{object_id}",
+            params={"position": "pre"},
+        )
+        assert isinstance(get_object, SecurityRuleResponseModel)
+        assert get_object.name == "TestRule"
+        assert get_object.action == "allow"
 
-        mock_scm.get.assert_called_once_with(
-            f"/config/security/v1/security-rules/{rule_id}",
-            params={"position": "post"},
+    def test_get_object_error_handling(self):
+        """
+        **Objective:** Test error handling during object retrieval.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to get an object
+            3. Verifies proper error handling and exception raising
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
         )
 
-        assert isinstance(security_rule, SecurityRuleResponseModel)
-        assert security_rule.id == rule_id
+        with pytest.raises(ObjectNotPresentError):
+            self.client.get(object_id)
 
-
-class TestSecurityRuleModels:
-    """Test suite for SecurityRule model validations."""
-
-    def test_create_security_rule_with_invalid_names(self):
+    def test_get_generic_exception_handling(self):
         """
-        Test creating security rules with invalid names that do not match the regex pattern.
+        **Objective:** Test generic exception handling in get method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
         """
-        # List of invalid names that include characters not allowed by the regex
-        invalid_names = [
-            "Invalid@Name",
-            "Name!",
-            "Name#",
-            "Name$",
-            "Name%",
-            "Name^",
-            "Name&",
-            "Name*",
-            "Name(",
-            "Name)",
-            "Name+",
-            "Name=",
-            "Name{",
-            "Name}",
-            "Name[",
-            "Name]",
-            "Name|",
-            "Name\\",
-            "Name/",
-            "Name<",
-            "Name>",
-            "Name?",
-            "Name~",
-            "Name`",
-            'Name"',
-            "Name'",
-            "Name:",
-            "Name;",
-        ]
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        for name in invalid_names:
-            # We also need to provide at least one container field to pass the model validation
-            with pytest.raises(PydanticValidationError) as exc_info:
-                SecurityRuleRequestModel(
-                    name=name,
-                    folder="test-folder",  # Added this to satisfy the container validation
-                )
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-            errors = exc_info.value.errors()
-            assert len(errors) >= 1, f"No validation errors found for name: {name}"
+        with pytest.raises(Exception) as exc_info:
+            self.client.get(object_id)
+        assert str(exc_info.value) == "Generic error"
 
-            name_errors = [error for error in errors if error["loc"] == ("name",)]
-            assert (
-                name_errors
-            ), f"No validation error for 'name' field with value: {name}"
 
-            error = name_errors[0]
-            assert (
-                error["type"] == "string_pattern_mismatch"
-            ), f"Unexpected error type: {error['type']}"
-            assert (
-                "should match pattern" in error["msg"]
-            ), f"Unexpected error message: {error['msg']}"
+class TestSecurityRuleUpdate(TestSecurityRuleBase):
+    """Tests for updating Security Rule objects."""
 
-    def test_security_rule_response_model_invalid_uuid(self):
+    def test_update_object(self):
         """
-        Test that providing an invalid UUID raises a validation error.
+        **Objective:** Test updating an object.
+        **Workflow:**
+            1. Prepares update data and mocks response
+            2. Verifies the update request and response
+            3. Ensures payload transformation is correct
+        """
+        from uuid import UUID
+
+        test_uuid = UUID("123e4567-e89b-12d3-a456-426655440000")
+
+        # Test data including ID
+        update_data = {
+            "id": str(test_uuid),
+            "name": "UpdatedRule",
+            "folder": "Shared",
+            "action": "allow",
+            "from": ["any"],
+            "to": ["any"],
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["any"],
+            "service": ["any"],
+        }
+
+        # Expected payload should not include the ID
+        expected_payload = update_data.copy()
+        expected_payload.pop("id")
+
+        # Mock response should include the ID
+        mock_response = update_data.copy()
+        self.mock_scm.put.return_value = mock_response  # noqa
+
+        # Perform update
+        updated_object = self.client.update(update_data)
+
+        # Verify correct endpoint and payload
+        self.mock_scm.put.assert_called_once_with(  # noqa
+            f"/config/security/v1/security-rules/{update_data['id']}",
+            params={"position": "pre"},
+            json=expected_payload,  # Should not include ID
+        )
+
+        # Verify response model
+        assert isinstance(updated_object, SecurityRuleResponseModel)
+        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
+        assert updated_object.id == test_uuid  # Compare against UUID object
+        assert (
+            str(updated_object.id) == update_data["id"]
+        )  # Compare string representations
+        assert updated_object.name == "UpdatedRule"
+        assert updated_object.action == "allow"
+
+    def test_update_object_error_handling(self):
+        """
+        **Objective:** Test error handling during object update.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to update an object
+            3. Verifies proper error handling and exception raising
+        """
+        update_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-rule",
+            "folder": "Shared",
+            "action": "allow",
+        }
+
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Update failed",
+                    "details": {"errorType": "Malformed Command"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.put.side_effect = Exception()  # noqa
+        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(MalformedRequestError):
+            self.client.update(update_data)
+
+    def test_update_with_invalid_data(self):
+        """
+        **Objective:** Test update method with invalid data structure.
+        **Workflow:**
+            1. Attempts to update with invalid data
+            2. Verifies proper validation error handling
         """
         invalid_data = {
-            "id": "invalid-uuid",
-            "name": "TestRule",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "invalid_field": "test",
+        }
+
+        with pytest.raises(PydanticValidationError):
+            self.client.update(invalid_data)
+
+    def test_update_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in update method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        update_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-rule",
             "folder": "Shared",
             "action": "allow",
-            "from": ["zone1"],
-            "to": ["zone2"],
         }
-        with pytest.raises(ValueError) as exc_info:
-            SecurityRuleResponseModel(**invalid_data)
-        assert "Invalid UUID format for 'id'" in str(exc_info.value)
 
-    def test_security_rule_request_model_no_container_provided(self):
+        # Mock a generic exception without response
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(update_data)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestSecurityRuleDelete(TestSecurityRuleBase):
+    """Tests for deleting Security Rule objects."""
+
+    def test_delete_referenced_object(self):
         """
-        Test that providing no container raises validation error.
+        **Objective:** Test deleting an object that is referenced by other objects.
+        **Workflow:**
+            1. Sets up a mock error response for a referenced object deletion attempt
+            2. Attempts to delete an object that is referenced by other objects
+            3. Validates that ReferenceNotZeroError is raised with correct details
+            4. Verifies the error contains proper reference information
         """
-        data = {
-            "name": "TestRule",
-            "action": "allow",
-            # No 'folder', 'snippet', or 'device' provided
+        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+
+        # Mock the API error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {
+                        "errorType": "Reference Not Zero",
+                        "message": [
+                            " container -> Texas -> security-rule-group -> custom-group -> rules"
+                        ],
+                        "errors": [
+                            {
+                                "type": "NON_ZERO_REFS",
+                                "message": "Node cannot be deleted because of references from",
+                                "params": ["custom-rule"],
+                                "extra": [
+                                    "container/[Texas]/security-rule-group/[custom-group]/rules/[custom-rule]"
+                                ],
+                            }
+                        ],
+                    },
+                }
+            ],
+            "_request_id": "8fe3b025-feb7-41d9-bf88-3938c0b33116",
         }
-        with pytest.raises(ValueError) as exc_info:
-            SecurityRuleRequestModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+
+        # Configure mock to raise HTTPError with our custom error response
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
         )
 
-    def test_security_rule_request_model_multiple_containers_provided(self):
-        """
-        Test that providing multiple containers raises validation error.
-        """
-        data = {
-            "name": "TestRule",
-            "action": "allow",
-            "folder": "Shared",
-            "snippet": "TestSnippet",
-            # Multiple containers provided
-        }
-        with pytest.raises(ValueError) as exc_info:
-            SecurityRuleRequestModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        # Attempt to delete the object and expect ReferenceNotZeroError
+        with pytest.raises(ReferenceNotZeroError) as exc_info:
+            self.client.delete(object_id)
+
+        error = exc_info.value
+
+        # Verify the error contains the expected information
+        assert error.error_code == "API_I00013"
+        assert "custom-rule" in error.references
+        assert any("Texas" in path for path in error.reference_paths)
+        assert "Cannot delete object due to existing references" in str(error)
+
+        # Verify the delete method was called with correct endpoint
+        self.mock_scm.delete.assert_called_once_with(  # noqa
+            f"/config/security/v1/security-rules/{object_id}",
+            params={"position": "pre"},
         )
 
-    def test_ensure_list_of_strings_single_string(self):
+        # Verify detailed error message includes reference path
+        assert "custom-group" in error.detailed_message
+        assert "container/[Texas]" in error.detailed_message
+
+    def test_delete_error_handling(self):
         """
-        Test that a single string is converted to a list containing that string.
+        **Objective:** Test error handling during object deletion.
+        **Workflow:**
+            1. Mocks various error scenarios
+            2. Verifies proper error handling for each case
         """
-        data = {
-            "name": "TestRule",
-            "action": "allow",
-            "folder": "Shared",
-            "from": "zone1",  # single string
-            "to": "zone2",  # single string
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Test object not found
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Object not found",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
         }
-        model = SecurityRuleRequestModel(**data)
-        assert model.from_ == ["zone1"]
-        assert model.to_ == ["zone2"]
 
-    def test_ensure_list_of_strings_invalid_type(self):
-        """
-        Test that a non-string, non-list input raises ValueError.
-        """
-        data = {
-            "name": "TestRule",
-            "action": "allow",
-            "folder": "Shared",
-            "from": 123,  # invalid type
-        }
-        with pytest.raises(ValueError) as exc_info:
-            SecurityRuleRequestModel(**data)
-        assert "Value must be a list of strings" in str(exc_info.value)
-
-    def test_ensure_list_of_strings_non_string_items(self):
-        """
-        Test that a list containing non-string items raises ValueError.
-        """
-        data = {
-            "name": "TestRule",
-            "action": "allow",
-            "folder": "Shared",
-            "from": ["zone1", 123],  # list with non-string item
-        }
-        with pytest.raises(ValueError) as exc_info:
-            SecurityRuleRequestModel(**data)
-        assert "All items must be strings" in str(exc_info.value)
-
-    def test_ensure_unique_items(self):
-        """
-        Test that duplicate items in lists raise ValueError.
-        """
-        data = {
-            "name": "TestRule",
-            "action": "allow",
-            "folder": "Shared",
-            "from": ["zone1", "zone1"],  # duplicate item
-        }
-        with pytest.raises(ValueError) as exc_info:
-            SecurityRuleRequestModel(**data)
-        assert "List items must be unique" in str(exc_info.value)
-
-
-class TestStringValidator:
-    """Test suite for string_validator function."""
-
-    def test_string_validator(self):
-        """
-        Test that string_validator raises ValueError for non-string inputs.
-        """
-        # Valid input
-        assert string_validator("test") == "test"
-
-        # Invalid input: integer
-        with pytest.raises(ValueError) as exc_info:
-            string_validator(123)
-        assert "Must be a string" in str(exc_info.value)
-
-        # Invalid input: None
-        with pytest.raises(ValueError) as exc_info:
-            string_validator(None)
-        assert "Must be a string" in str(exc_info.value)
-
-
-class TestProfileSetting:
-    """Test suite for ProfileSetting validations."""
-
-    def test_profile_setting_validate_unique_items(self):
-        """
-        Test that ProfileSetting raises ValueError when 'group' has duplicate items.
-        """
-        # Valid input
-        ps = ProfileSetting(group=["group1", "group2"])
-        assert ps.group == ["group1", "group2"]
-
-        # Duplicate items in 'group'
-        with pytest.raises(ValueError) as exc_info:
-            ProfileSetting(group=["group1", "group1"])
-        assert "List items in 'group' must be unique" in str(exc_info.value)
-
-
-class TestSecurityRuleMoveModel:
-    """Test suite for SecurityRuleMoveModel validation."""
-
-    def test_validate_uuid_fields_none_value(self):
-        """Test that None values are allowed and returned as-is."""
-        model = SecurityRuleMoveModel(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
-            destination=RuleMoveDestination.TOP,
-            rulebase=Rulebase.PRE,
-            destination_rule=None,
+        self.mock_scm.delete.side_effect = Exception()  # noqa
+        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
         )
-        assert model.destination_rule is None
 
-    def test_validate_uuid_fields_valid_uuid(self):
-        """Test that valid UUIDs are accepted."""
-        valid_uuid = str(uuid.uuid4())
-        model = SecurityRuleMoveModel(
-            source_rule=valid_uuid,
-            destination=RuleMoveDestination.TOP,
-            rulebase=Rulebase.PRE,
-        )
-        assert model.source_rule == valid_uuid
+        with pytest.raises(ObjectNotPresentError):
+            self.client.delete(object_id)
 
-    def test_validate_uuid_fields_invalid_uuid(self):
-        """Test that invalid UUIDs raise ValueError."""
-        with pytest.raises(ValueError, match="Field must be a valid UUID"):
-            SecurityRuleMoveModel(
-                source_rule="not-a-uuid",
-                destination=RuleMoveDestination.TOP,
-                rulebase=Rulebase.PRE,
-            )
-
-    def test_validate_uuid_fields_both_fields(self):
-        """Test UUID validation on both source_rule and destination_rule fields."""
-        valid_uuid1 = str(uuid.uuid4())
-        valid_uuid2 = str(uuid.uuid4())
-        model = SecurityRuleMoveModel(
-            source_rule=valid_uuid1,
-            destination=RuleMoveDestination.BEFORE,
-            rulebase=Rulebase.PRE,
-            destination_rule=valid_uuid2,
-        )
-        assert model.source_rule == valid_uuid1
-        assert model.destination_rule == valid_uuid2
-
-    def test_validate_move_configuration_before_with_destination_rule(self):
-        """Test valid move configuration with BEFORE and destination_rule."""
-        model = SecurityRuleMoveModel(
-            source_rule=str(uuid.uuid4()),
-            destination=RuleMoveDestination.BEFORE,
-            rulebase=Rulebase.PRE,
-            destination_rule=str(uuid.uuid4()),
-        )
-        assert model is not None  # Validates successful return of self
-
-    def test_validate_move_configuration_after_with_destination_rule(self):
-        """Test valid move configuration with AFTER and destination_rule."""
-        model = SecurityRuleMoveModel(
-            source_rule=str(uuid.uuid4()),
-            destination=RuleMoveDestination.AFTER,
-            rulebase=Rulebase.PRE,
-            destination_rule=str(uuid.uuid4()),
-        )
-        assert model is not None  # Validates successful return of self
-
-    def test_validate_move_configuration_before_without_destination_rule(self):
-        """Test that BEFORE without destination_rule raises ValueError."""
-        with pytest.raises(
-            ValueError,
-            match="destination_rule is required when destination is 'before'",
-        ):
-            SecurityRuleMoveModel(
-                source_rule=str(uuid.uuid4()),
-                destination=RuleMoveDestination.BEFORE,
-                rulebase=Rulebase.PRE,
-            )
-
-    def test_validate_move_configuration_after_without_destination_rule(self):
-        """Test that AFTER without destination_rule raises ValueError."""
-        with pytest.raises(
-            ValueError, match="destination_rule is required when destination is 'after'"
-        ):
-            SecurityRuleMoveModel(
-                source_rule=str(uuid.uuid4()),
-                destination=RuleMoveDestination.AFTER,
-                rulebase=Rulebase.PRE,
-            )
-
-    def test_validate_move_configuration_top_with_destination_rule(self):
-        """Test that TOP with destination_rule raises ValueError."""
-        with pytest.raises(
-            ValueError,
-            match="destination_rule should not be provided when destination is 'top'",
-        ):
-            SecurityRuleMoveModel(
-                source_rule=str(uuid.uuid4()),
-                destination=RuleMoveDestination.TOP,
-                rulebase=Rulebase.PRE,
-                destination_rule=str(uuid.uuid4()),
-            )
-
-    def test_validate_move_configuration_bottom_with_destination_rule(self):
-        """Test that BOTTOM with destination_rule raises ValueError."""
-        with pytest.raises(
-            ValueError,
-            match="destination_rule should not be provided when destination is 'bottom'",
-        ):
-            SecurityRuleMoveModel(
-                source_rule=str(uuid.uuid4()),
-                destination=RuleMoveDestination.BOTTOM,
-                rulebase=Rulebase.PRE,
-                destination_rule=str(uuid.uuid4()),
-            )
-
-    def test_validate_move_configuration_successful_return(self):
-        """Test that validation returns self for valid configurations."""
-        model_data = {
-            "source_rule": str(uuid.uuid4()),
-            "destination": RuleMoveDestination.TOP,
-            "rulebase": Rulebase.PRE,
-        }
-        model = SecurityRuleMoveModel(**model_data)
-        validated_model = model.validate_move_configuration()  # noqa
-        assert validated_model == model
-
-
-class TestSecurityRule:
-    """Test suite for SecurityRule SDK."""
-
-    @pytest.fixture
-    def security_rule(self, mock_scm):
-        """Create a SecurityRule instance with mock API client."""
-        return SecurityRule(mock_scm)
-
-    def test_move_model_instantiation(self, security_rule):
-        """Test that move() correctly instantiates SecurityRuleMoveModel."""
-        rule_id = str(uuid.uuid4())
-        move_data = {
-            "destination": "before",
-            "rulebase": "pre",
-            "destination_rule": str(uuid.uuid4()),
-        }
-
-        security_rule.move(rule_id, move_data)
-
-        # Verify the model was created with correct data
-        expected_model_data = {
-            "source_rule": rule_id,
-            **move_data,
-        }
-        actual_model = SecurityRuleMoveModel(**expected_model_data)
-        assert actual_model.source_rule == rule_id
-        assert actual_model.destination == RuleMoveDestination.BEFORE
-        assert actual_model.rulebase == Rulebase.PRE
-        assert actual_model.destination_rule == move_data["destination_rule"]
-
-    def test_move_payload_generation(self, security_rule):
-        """Test that move() generates correct payload from model."""
-        rule_id = str(uuid.uuid4())
-        dest_rule_id = str(uuid.uuid4())
-        move_data = {
-            "destination": "before",
-            "rulebase": "pre",
-            "destination_rule": dest_rule_id,
-        }
-
-        # Patch post method to capture payload
-        with patch.object(security_rule.api_client, "post") as mock_post:
-            security_rule.move(rule_id, move_data)
-
-            # Verify payload structure
-            expected_payload = {
-                "source_rule": rule_id,
-                "destination": "before",
-                "rulebase": "pre",
-                "destination_rule": dest_rule_id,
-            }
-            mock_post.assert_called_once()
-            actual_payload = mock_post.call_args[1]["json"]
-            assert actual_payload == expected_payload
-
-    def test_move_endpoint_construction(self, security_rule):
-        """Test that move() constructs correct endpoint URL."""
-        rule_id = str(uuid.uuid4())
-        move_data = {
-            "destination": "top",
-            "rulebase": "pre",
-        }
-
-        # Patch post method to capture endpoint
-        with patch.object(security_rule.api_client, "post") as mock_post:
-            security_rule.move(rule_id, move_data)
-
-            # Verify endpoint construction
-            expected_endpoint = f"{security_rule.ENDPOINT}/{rule_id}:move"
-            mock_post.assert_called_once()
-            actual_endpoint = mock_post.call_args[0][0]
-            assert actual_endpoint == expected_endpoint
-
-    def test_move_api_call(self, security_rule):
-        """Test that move() makes correct API call."""
-        rule_id = str(uuid.uuid4())
-        move_data = {
-            "destination": "top",
-            "rulebase": "pre",
-        }
-
-        # Test API call
-        with patch.object(security_rule.api_client, "post") as mock_post:
-            security_rule.move(rule_id, move_data)
-
-            # Verify API call was made with correct arguments
-            mock_post.assert_called_once()
-            assert mock_post.call_args[1]["json"]["source_rule"] == rule_id
-            assert mock_post.call_args[1]["json"]["destination"] == "top"
-            assert mock_post.call_args[1]["json"]["rulebase"] == "pre"
-
-
-class TestSecurityRuleFetch:
-    """Tests for the fetch method of SecurityRule."""
-
-    @pytest.fixture(autouse=True)
-    def setup_method(self, load_env, mock_scm):
-        """Setup method that runs before each test."""
-        self.mock_scm = mock_scm
-        # Create new MagicMock instances for each HTTP method
-        self.mock_scm.get = MagicMock()
-        self.security_rules_client = SecurityRule(self.mock_scm)
-
-    def test_fetch_security_rule_success(self):
+    def test_delete_generic_exception_handling(self):
         """
-        Test successful fetch of a security rule.
+        **Objective:** Test generic exception handling in delete method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        **Objective:** Test fetching a security rule with all fields populated.
+        # Mock a generic exception without response
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete(object_id)
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestSecurityRuleFetch(TestSecurityRuleBase):
+    """Tests for fetching Security Rule objects by name."""
+
+    def test_fetch_object(self):
+        """
+        **Objective:** Test retrieving an object by its name using the `fetch` method.
+        **Workflow:**
+            1. Sets up a mock response resembling the expected API response for fetching an object by name.
+            2. Calls the `fetch` method of `self.client` with a specific name and container.
+            3. Asserts that the mocked service was called with the correct URL and parameters.
+            4. Validates the returned object's attributes.
         """
         mock_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Allow_HTTP",
             "folder": "Shared",
             "action": "allow",
@@ -1476,36 +641,91 @@ class TestSecurityRuleFetch:
             "log_setting": "Cortex Data Lake",
             "description": "Allow HTTP traffic",
         }
+
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+        # Call the fetch method
+        fetched_object = self.client.fetch(
+            name=mock_response["name"],
+            folder=mock_response["folder"],
+        )
 
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
-            params={"folder": "Shared", "name": "Allow_HTTP"},
+            params={
+                "folder": mock_response["folder"],
+                "name": mock_response["name"],
+                "position": "pre",
+            },
         )
-        assert isinstance(result, dict)
-        assert result["name"] == "Allow_HTTP"
-        assert result["action"] == "allow"
-        assert result["from_"] == ["zone1"]
-        assert result["to_"] == ["zone2"]
 
-    def test_fetch_security_rule_validations(self):
-        """
-        Test fetch method parameter validations.
+        # Validate the returned object
+        assert isinstance(fetched_object, dict)
+        assert str(fetched_object["id"]) == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+        assert fetched_object["action"] == mock_response["action"]
+        assert fetched_object["from_"] == mock_response["from"]
+        assert fetched_object["to_"] == mock_response["to"]
 
-        **Objective:** Test all validation scenarios for fetch parameters.
+    def test_fetch_object_not_found(self):
         """
-        # Test empty name
+        Test fetching an object by name that does not exist.
+
+        **Objective:** Test that fetching a non-existent object raises NotFoundError.
+        **Workflow:**
+            1. Mocks the API response to return an empty 'data' list.
+            2. Calls the `fetch` method with a name that does not exist.
+            3. Asserts that NotFoundError is raised.
+        """
+        object_name = "NonExistent"
+        folder_name = "Shared"
+        mock_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Call the fetch method and expect a NotFoundError
+        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
+            self.client.fetch(
+                name=object_name,
+                folder=folder_name,
+            )
+
+    def test_fetch_empty_name(self):
+        """
+        **Objective:** Test fetch with empty name parameter.
+        **Workflow:**
+            1. Attempts to fetch with empty name
+            2. Verifies ValidationError is raised
+        """
         with pytest.raises(ValidationError) as exc_info:
-            self.security_rules_client.fetch(name="", folder="Shared")
-        assert "Parameter 'name' must be provided for fetch method." in str(
-            exc_info.value
-        )
+            self.client.fetch(name="", folder="Shared")
+        assert "Field 'name' cannot be empty" in str(exc_info.value)
+
+    def test_fetch_container_validation(self):
+        """
+        **Objective:** Test container parameter validation in fetch.
+        **Workflow:**
+            1. Tests various invalid container combinations
+            2. Verifies proper error handling
+        """
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
         # Test no container provided
         with pytest.raises(ValidationError) as exc_info:
-            self.security_rules_client.fetch(name="Allow_HTTP")
+            self.client.fetch(name="test-rule")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
@@ -1513,144 +733,786 @@ class TestSecurityRuleFetch:
 
         # Test multiple containers provided
         with pytest.raises(ValidationError) as exc_info:
-            self.security_rules_client.fetch(
-                name="Allow_HTTP", folder="Shared", snippet="TestSnippet"
-            )
+            self.client.fetch(name="test-rule", folder="Shared", snippet="TestSnippet")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
 
-    def test_fetch_security_rule_with_different_containers(self):
+    def test_fetch_object_unexpected_response_format(self):
         """
-        Test fetch with different container types.
+        Test fetching an object when the API returns an unexpected response format.
 
-        **Objective:** Test fetch using different container parameters.
+        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
+        **Workflow:**
+            1. Mocks the API response to return an unexpected format.
+            2. Calls the `fetch` method.
+            3. Asserts that BadResponseError is raised.
         """
-        mock_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "Allow_HTTP",
-            "action": "allow",
-        }
+        group_name = "TestGroup"
+        folder_name = "Shared"
+        # Mocking an unexpected response format
+        mock_response = {"unexpected_key": "unexpected_value"}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Test with folder
-        self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/security-rules",
-            params={"folder": "Shared", "name": "Allow_HTTP"},
-        )
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name=group_name, folder=folder_name)
+        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
 
-        # Test with snippet
-        self.security_rules_client.fetch(name="Allow_HTTP", snippet="TestSnippet")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/security-rules",
-            params={"snippet": "TestSnippet", "name": "Allow_HTTP"},
-        )
-
-        # Test with device
-        self.security_rules_client.fetch(name="Allow_HTTP", device="TestDevice")
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/security-rules",
-            params={"device": "TestDevice", "name": "Allow_HTTP"},
-        )
-
-    def test_fetch_security_rule_with_filters(self):
+    def test_fetch_validation_errors(self):
         """
-        Test fetch with additional filters.
-
-        **Objective:** Test handling of additional filter parameters.
+        **Objective:** Test fetch validation errors.
+        **Workflow:**
+            1. Tests various invalid input scenarios
+            2. Verifies appropriate error handling
         """
-        mock_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "Allow_HTTP",
-            "action": "allow",
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        # Test empty folder
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.fetch(name="test", folder="")
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
-        # Test with allowed and excluded filters
-        result = self.security_rules_client.fetch(
-            name="Allow_HTTP",
-            folder="Shared",
-            custom_filter="value",
-            types=["excluded"],
-            values=["excluded"],
-            names=["excluded"],
-            tags=["excluded"],
+        # Test multiple containers
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.fetch(name="test", folder="folder1", snippet="snippet1")
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
+            in str(exc_info.value)
         )
 
-        # Verify only allowed filters are included
-        self.mock_scm.get.assert_called_with(  # noqa
-            "/config/security/v1/security-rules",
-            params={"folder": "Shared", "name": "Allow_HTTP", "custom_filter": "value"},
+    def test_fetch_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in fetch method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert str(exc_info.value) == "Generic error"
+
+    def test_fetch_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in fetch method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response without expected fields
+        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
+
+        # Test response with both id and data fields (invalid format)
+        self.mock_scm.get.return_value = {  # noqa
+            "id": "some-id",
+            "data": [{"some": "data"}],
+        }  # noqa
+
+        with pytest.raises(PydanticValidationError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "2 validation errors for SecurityRuleResponseModel" in str(
+            exc_info.value
         )
-        assert isinstance(result, dict)
-        assert result["name"] == "Allow_HTTP"
+        assert "name\n  Field required" in str(exc_info.value)
 
-    def test_fetch_security_rule_response_handling(self):
-        """
-        Test fetch response handling.
+        # Test malformed response in list format
+        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
-        **Objective:** Test handling of different response scenarios.
+    def test_fetch_error_handler_json_error(self):
         """
-        # Test with all fields present
-        complete_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "Allow_HTTP",
-            "folder": "Shared",
-            "description": "Allow HTTP traffic",
-            "action": "allow",
-            "from": ["zone1"],
-            "to": ["zone2"],
-            "source": ["any"],
+        **Objective:** Test fetch method error handling when json() raises an error.
+        **Workflow:**
+            1. Mocks an exception with a response that raises error on json()
+            2. Verifies the original exception is re-raised
+        """
+
+        class MockResponse:
+            @property
+            def response(self):
+                return self
+
+            def json(self):
+                raise ValueError("Original error")
+
+        # Create mock exception with our special response
+        mock_exception = Exception("Original error")
+        mock_exception.response = MockResponse()
+
+        # Configure mock to raise our custom exception
+        self.mock_scm.get.side_effect = mock_exception  # noqa
+
+        # The original exception should be raised since json() failed
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Original error" in str(exc_info.value)
+
+
+class TestSecurityRuleListFilters(TestSecurityRuleBase):
+    """Tests for filtering during listing Security Rule objects."""
+
+    def test_list_with_filters(self):
+        """
+        **Objective:** Test that filters are properly added to parameters.
+        **Workflow:**
+            1. Calls list with various filters
+            2. Verifies filters are properly formatted in the request
+        """
+        filters = {
+            "action": ["allow"],
+            "source": ["10.0.0.0/24"],
             "destination": ["any"],
-            "application": ["web-browsing"],
-            "service": ["application-default"],
         }
-        self.mock_scm.get.return_value = complete_response  # noqa
-        result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
-        assert result["description"] == "Allow HTTP traffic"
-        assert result["application"] == ["web-browsing"]
 
-        # Test with minimal fields
-        minimal_response = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "Allow_HTTP",
+        mock_response = {"data": []}
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        self.client.list(folder="Shared", **filters)
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/security-rules",
+            params={
+                "position": "pre",
+                "limit": 10000,
+                "folder": "Shared",
+            },
+        )
+
+    def test_list_empty_folder_error(self):
+        """
+        **Objective:** Test that empty folder raises appropriate error.
+        **Workflow:**
+            1. Attempts to list objects with empty folder
+            2. Verifies EmptyFieldError is raised
+        """
+        with pytest.raises(EmptyFieldError) as exc_info:
+            self.client.list(folder="")
+        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+
+    def test_list_multiple_containers_error(self):
+        """
+        **Objective:** Test validation of container parameters.
+        **Workflow:**
+            1. Attempts to list with multiple containers
+            2. Verifies ValidationError is raised
+        """
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+        assert (
+            str(exc_info.value)
+            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+        )
+
+    def test_list_error_handling(self):
+        """
+        **Objective:** Test error handling in list operation.
+        **Workflow:**
+            1. Mocks an error response from the API
+            2. Attempts to list objects
+            3. Verifies proper error handling
+        """
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Listing failed",
+                    "details": {"errorType": "Operation Impossible"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(FolderNotFoundError):
+            self.client.list(folder="NonexistentFolder")
+
+    def test_list_generic_exception_handling(self):
+        """
+        **Objective:** Test generic exception handling in list method.
+        **Workflow:**
+            1. Mocks a generic exception without response attribute
+            2. Verifies the original exception is re-raised
+        """
+        # Mock a generic exception without response
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.list(folder="Shared")
+        assert str(exc_info.value) == "Generic error"
+
+    def test_list_response_format_handling(self):
+        """
+        **Objective:** Test handling of various response formats in list method.
+        **Workflow:**
+            1. Tests different malformed response scenarios
+            2. Verifies appropriate error handling for each case
+        """
+        # Test malformed response
+        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+        # Test invalid data format
+        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
+
+        with pytest.raises(BadResponseError):
+            self.client.list(folder="Shared")
+
+    def test_list_non_dict_response(self):
+        """
+        **Objective:** Test list method handling of non-dictionary response.
+        **Workflow:**
+            1. Mocks a non-dictionary response from the API
+            2. Verifies that BadResponseError is raised with correct message
+            3. Tests different non-dict response types
+        """
+        # Test with list response
+        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with string response
+        self.mock_scm.get.return_value = "string response"  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+        # Test with None response
+        self.mock_scm.get.return_value = None  # noqa
+
+        with pytest.raises(BadResponseError) as exc_info:
+            self.client.list(folder="Shared")
+        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+
+class TestRulebaseValidation(TestSecurityRuleBase):
+    """Tests for rulebase validation across different methods."""
+
+    def test_create_invalid_rulebase(self):
+        """Test create method with invalid rulebase value."""
+        test_data = {
+            "name": "TestRule",
             "folder": "Shared",
-            "action": "allow",
+            "action": Action.allow,
         }
-        self.mock_scm.get.return_value = minimal_response  # noqa
-        result = self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
-        assert "description" not in result
-        assert "application" not in result
 
-    def test_fetch_security_rule_not_found(self):
+        with pytest.raises(ValueError) as exc_info:
+            self.client.create(test_data, rulebase="invalid")
+        assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
+
+    def test_get_invalid_rulebase(self):
+        """Test get method with invalid rulebase value."""
+        test_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        with pytest.raises(ValueError) as exc_info:
+            self.client.get(test_id, rulebase="invalid")
+        assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
+
+    def test_update_invalid_rulebase(self):
+        """Test update method with invalid rulebase value."""
+        test_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRule",
+            "folder": "Shared",
+            "action": Action.allow,
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            self.client.update(test_data, rulebase="invalid")
+        assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
+
+    def test_list_invalid_rulebase(self):
+        """Test list method with invalid rulebase value."""
+        with pytest.raises(ValueError) as exc_info:
+            self.client.list(folder="Shared", rulebase="invalid")
+        assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
+
+    def test_delete_invalid_rulebase(self):
+        """Test delete method with invalid rulebase value."""
+        test_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        with pytest.raises(ValueError) as exc_info:
+            self.client.delete(test_id, rulebase="invalid")
+        assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
+
+    def test_valid_rulebase_values(self):
+        """Test that valid rulebase values are accepted."""
+        test_data = {
+            "name": "TestRule",
+            "folder": "Shared",
+            "action": Action.allow,
+        }
+
+        # Mock successful responses with a valid UUID
+        mock_response = {"id": "123e4567-e89b-12d3-a456-426655440000", **test_data}
+        self.mock_scm.post.return_value = mock_response  # noqa
+
+        # Test both 'pre' and 'post' values
+        for value in ["pre", "post", Rulebase.PRE, Rulebase.POST]:
+            try:
+                self.client.create(test_data, rulebase=value)
+            except ValueError:
+                pytest.fail(f"Valid rulebase value '{value}' raised ValueError")
+
+    def test_fetch_invalid_rulebase(self):
         """
-        Test fetch when the security rule is not found.
-
-        **Objective:** Test handling when the API returns an error or empty response.
+        Test fetch method with invalid rulebase value.
+        Verifies that the correct ValueError is raised when an invalid rulebase is provided.
         """
-        # Simulate a NotFoundError from the API client
-        from scm.exceptions import NotFoundError
+        with pytest.raises(ValueError) as exc_info:
+            self.client.fetch(name="test-rule", folder="Shared", rulebase="invalid")
+        assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
 
-        self.mock_scm.get.side_effect = NotFoundError("Security rule not found")  # noqa
-
-        with pytest.raises(NotFoundError) as exc_info:
-            self.security_rules_client.fetch(name="NonExistentRule", folder="Shared")
-
-        assert "Security rule not found" in str(exc_info.value)
-
-    def test_fetch_security_rule_api_error(self):
+    def test_fetch_rulebase_validation(self):
         """
-        Test fetch when the API client raises an unexpected error.
-
-        **Objective:** Ensure that unexpected API errors are propagated.
+        Test comprehensive rulebase validation in fetch method.
+        Tests various invalid rulebase values and ensures proper error handling.
         """
-        from scm.exceptions import APIError
+        # Mock a valid response
+        self.mock_scm.get.return_value = {  # noqa
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-rule",
+            "folder": "Shared",
+            "action": Action.allow,
+        }
 
-        self.mock_scm.get.side_effect = APIError("API is unavailable")  # noqa
+        test_cases = [
+            "invalid",
+            "both",
+            "123",
+            "prepost",
+            "postpre",
+            "preview",
+            "postview",
+            "prepre",
+            "postpost",
+        ]
 
-        with pytest.raises(APIError) as exc_info:
-            self.security_rules_client.fetch(name="Allow_HTTP", folder="Shared")
+        for invalid_rulebase in test_cases:
+            with pytest.raises(ValueError) as exc_info:
+                self.client.fetch(
+                    name="test-rule", folder="Shared", rulebase=invalid_rulebase
+                )
+            assert "rulebase must be either 'pre' or 'post'" in str(exc_info.value)
 
-        assert "API is unavailable" in str(exc_info.value)
+    def test_fetch_rulebase_case_handling(self):
+        """
+        Test that valid rulebase values in different cases are accepted.
+        Verifies that the case conversion works correctly.
+        """
+        # Mock a valid response
+        self.mock_scm.get.return_value = {  # noqa
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-rule",
+            "folder": "Shared",
+            "action": Action.allow,
+        }
+
+        valid_cases = [
+            "pre",
+            "PRE",
+            "Pre",
+            "pRe",
+            "post",
+            "POST",
+            "Post",
+            "pOsT",
+        ]
+
+        for valid_rulebase in valid_cases:
+            try:
+                self.client.fetch(
+                    name="test-rule", folder="Shared", rulebase=valid_rulebase
+                )
+            except ValueError:
+                pytest.fail(
+                    f"Valid rulebase value '{valid_rulebase}' raised ValueError"
+                )
+
+
+class TestProfileSettingValidation(TestSecurityRuleBase):
+    """Tests for ProfileSetting model validation."""
+
+    def test_group_unique_items(self):
+        """
+        Test that duplicate items in group list raise ValueError.
+        Verifies that the unique items validation works correctly.
+        """
+        # Test with duplicate items
+        with pytest.raises(ValueError) as exc_info:
+            ProfileSetting(group=["best-practice", "best-practice"])
+        assert "List items in 'group' must be unique" in str(exc_info.value)
+
+        with pytest.raises(ValueError) as exc_info:
+            ProfileSetting(group=["strict", "moderate", "strict"])
+        assert "List items in 'group' must be unique" in str(exc_info.value)
+
+    def test_group_valid_items(self):
+        """Test that unique items in group list are accepted."""
+        # Test with unique items
+        valid_cases = [
+            ["best-practice"],
+            ["strict"],
+            ["best-practice", "strict"],
+            ["moderate", "strict", "best-practice"],
+            [],  # Empty list should be valid
+            None,  # None should be valid and default to ["best-practice"]
+        ]
+
+        for case in valid_cases:
+            try:
+                profile = ProfileSetting(group=case)
+                if case is None:
+                    assert profile.group == ProfileSetting(group=None).group
+                else:
+                    assert profile.group == case
+            except ValueError:
+                pytest.fail(f"Valid group value {case} raised ValueError")
+
+    def test_group_default_value(self):
+        """Test that default value is set correctly when no group is specified."""
+        profile = ProfileSetting()
+        assert profile.group == ["best-practice"]
+
+
+class TestSecurityRuleFilters(TestSecurityRuleBase):
+    """Tests for security rule filtering functionality."""
+
+    @pytest.fixture(autouse=True)
+    def init_sample_rules(self):
+        """Initialize sample rules for testing filters."""
+        self.sample_rules = [
+            SecurityRuleResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="rule1",
+                folder="Shared",
+                action=Action.allow,
+                source=["10.0.0.0/24"],
+                destination=["any"],
+                application=["web-browsing"],
+                service=["application-default"],
+                from_=["trust"],
+                to_=["untrust"],
+                tag=["tag1"],
+                disabled=False,
+                profile_setting=ProfileSetting(group=["best-practice"]),
+                log_setting="default",
+            ),
+            SecurityRuleResponseModel(
+                id="987ffedc-ba98-7654-3210-abcdef123456",
+                name="rule2",
+                folder="Shared",
+                action=Action.deny,
+                source=["any"],
+                destination=["192.168.1.0/24"],
+                application=["any"],
+                service=["service1"],
+                from_=["untrust"],
+                to_=["trust"],
+                tag=["tag2"],
+                disabled=True,
+                profile_setting=ProfileSetting(group=["strict"]),
+                log_setting="custom",
+            ),
+        ]
+
+    def test_filter_non_list_values(self):
+        """Test that non-list values raise ValidationError for list fields."""
+        filter_fields = [
+            "action",
+            "category",
+            "service",
+            "application",
+            "destination",
+            "to_",
+            "source",
+            "from_",
+            "tag",
+            "profile_setting",
+            "log_setting",
+        ]
+
+        for field in filter_fields:
+            with pytest.raises(ValidationError) as exc_info:
+                self.client._apply_filters(self.sample_rules, {field: "not-a-list"})
+            assert f"'{field}' filter must be a list" in str(exc_info.value)
+
+    def test_filter_non_boolean_disabled(self):
+        """Test that non-boolean values raise ValidationError for disabled field."""
+        with pytest.raises(ValidationError) as exc_info:
+            self.client._apply_filters(self.sample_rules, {"disabled": "not-a-boolean"})
+        assert "'disabled' filter must be a boolean" in str(exc_info.value)
+
+    def test_filter_criteria(self):
+        """Test filter criteria application."""
+        test_cases = [
+            ({"action": [Action.allow]}, 1),
+            ({"source": ["10.0.0.0/24"]}, 1),
+            ({"destination": ["any"]}, 1),
+            ({"application": ["web-browsing"]}, 1),
+            ({"service": ["application-default"]}, 1),
+            ({"from_": ["trust"]}, 1),
+            ({"to_": ["untrust"]}, 1),
+            ({"tag": ["tag1"]}, 1),
+            ({"disabled": True}, 1),
+            ({"profile_setting": ["best-practice"]}, 1),
+            ({"log_setting": ["default"]}, 1),
+        ]
+
+        for filters, expected_count in test_cases:
+            filtered_rules = self.client._apply_filters(self.sample_rules, filters)
+            assert len(filtered_rules) == expected_count, f"Filter {filters} failed"
+
+    def test_multiple_filters(self):
+        """Test applying multiple filters simultaneously."""
+        filters = {
+            "action": [Action.allow],
+            "application": ["web-browsing"],
+            "source": ["10.0.0.0/24"],
+        }
+
+        filtered_rules = self.client._apply_filters(self.sample_rules, filters)
+        assert len(filtered_rules) == 1
+        assert filtered_rules[0].name == "rule1"
+
+    def test_filter_no_matches(self):
+        """Test filtering with criteria that match no rules."""
+        filters = {
+            "action": [Action.reset_both],
+        }
+
+        filtered_rules = self.client._apply_filters(self.sample_rules, filters)
+        assert len(filtered_rules) == 0
+
+    def test_category_filter(self):
+        """
+        Test category filtering functionality.
+        Tests that category filtering works correctly with different category values.
+        """
+        # Create test rules with specific categories
+        test_rules = [
+            SecurityRuleResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="rule1",
+                folder="Shared",
+                action=Action.allow,
+                category=["social-networking", "gaming"],
+            ),
+            SecurityRuleResponseModel(
+                id="987ffedc-ba98-7654-3210-abcdef123456",
+                name="rule2",
+                folder="Shared",
+                action=Action.allow,
+                category=["any"],
+            ),
+            SecurityRuleResponseModel(
+                id="456e7890-cdef-4abc-9012-34567890abcd",
+                name="rule3",
+                folder="Shared",
+                action=Action.allow,
+                category=["streaming", "social-networking"],
+            ),
+        ]
+
+        # Test single category filter
+        filters = {"category": ["social-networking"]}
+        filtered_rules = self.client._apply_filters(test_rules, filters)
+        assert len(filtered_rules) == 2
+        assert all("social-networking" in rule.category for rule in filtered_rules)
+
+        # Test multiple categories
+        filters = {"category": ["gaming", "streaming"]}
+        filtered_rules = self.client._apply_filters(test_rules, filters)
+        assert len(filtered_rules) == 2
+        assert any("gaming" in rule.category for rule in filtered_rules)
+        assert any("streaming" in rule.category for rule in filtered_rules)
+
+        # Test category not present
+        filters = {"category": ["non-existent-category"]}
+        filtered_rules = self.client._apply_filters(test_rules, filters)
+        assert len(filtered_rules) == 0
+
+        # Test with empty category list
+        filters = {"category": []}
+        filtered_rules = self.client._apply_filters(test_rules, filters)
+        assert len(filtered_rules) == 0
+
+        # Test with 'any' category
+        filters = {"category": ["any"]}
+        filtered_rules = self.client._apply_filters(test_rules, filters)
+        assert len(filtered_rules) == 1
+        assert "any" in filtered_rules[0].category
+
+    def test_category_filter_invalid_input(self):
+        """
+        Test category filtering with invalid input.
+        Verifies that appropriate errors are raised for invalid category filters.
+        """
+        # Test with non-list category
+        with pytest.raises(ValidationError) as exc_info:
+            self.client._apply_filters(
+                self.sample_rules, {"category": "social-networking"}
+            )
+        assert "'category' filter must be a list" in str(exc_info.value)
+
+        # Test with None value
+        with pytest.raises(ValidationError) as exc_info:
+            self.client._apply_filters(self.sample_rules, {"category": None})
+        assert "'category' filter must be a list" in str(exc_info.value)
+
+
+class TestSecurityRuleMove(TestSecurityRuleBase):
+    """Tests for security rule move operations."""
+
+    def test_move_rule_to_top(self):
+        """Test moving a rule to the top of the rulebase."""
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        move_data = {
+            "destination": RuleMoveDestination.TOP,
+            "rulebase": Rulebase.PRE,
+        }
+
+        self.client.move(rule_id, move_data)
+
+        expected_payload = {
+            "source_rule": rule_id,
+            "destination": "top",
+            "rulebase": "pre",
+        }
+
+        self.mock_scm.post.assert_called_once_with(  # noqa
+            f"/config/security/v1/security-rules/{rule_id}:move",
+            json=expected_payload,
+        )
+
+    def test_move_rule_before(self):
+        """Test moving a rule before another rule."""
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        target_rule = "987ffedc-ba98-7654-3210-abcdef123456"
+        move_data = {
+            "destination": RuleMoveDestination.BEFORE,
+            "rulebase": Rulebase.PRE,
+            "destination_rule": target_rule,
+        }
+
+        self.client.move(rule_id, move_data)
+
+        expected_payload = {
+            "source_rule": rule_id,
+            "destination": "before",
+            "rulebase": "pre",
+            "destination_rule": target_rule,
+        }
+
+        self.mock_scm.post.assert_called_once_with(  # noqa
+            f"/config/security/v1/security-rules/{rule_id}:move",
+            json=expected_payload,
+        )
+
+    def test_move_rule_validation_error(self):
+        """Test validation error when moving a rule with invalid parameters."""
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        # Missing destination_rule for BEFORE operation
+        move_data = {
+            "destination": RuleMoveDestination.BEFORE,
+            "rulebase": Rulebase.PRE,
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            self.client.move(rule_id, move_data)
+        assert "destination_rule is required" in str(exc_info.value)
+
+    def test_move_rule_error_handling(self):
+        """Test error handling during rule move operation."""
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        move_data = {
+            "destination": RuleMoveDestination.TOP,
+            "rulebase": Rulebase.PRE,
+        }
+
+        # Mock error response
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Move failed",
+                    "details": {"errorType": "Object Not Present"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.post.side_effect = Exception()  # noqa
+        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
+
+        with pytest.raises(ObjectNotPresentError):
+            self.client.move(rule_id, move_data)
+
+    def test_move_invalid_destination(self):
+        """Test moving a rule with invalid destination type."""
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        move_data = {
+            "destination": "invalid",
+            "rulebase": Rulebase.PRE,
+        }
+
+        with pytest.raises(ValueError):
+            self.client.move(rule_id, move_data)
+
+    def test_move_rule_invalid_destination_rule(self):
+        """
+        Test validation when destination_rule is provided for TOP/BOTTOM moves.
+        Verifies that providing destination_rule for destinations that don't require it raises ValueError.
+        """
+        rule_id = "123e4567-e89b-12d3-a456-426655440000"
+        target_rule = "987ffedc-ba98-7654-3210-abcdef123456"
+
+        # Test with TOP destination
+        move_data = {
+            "destination": RuleMoveDestination.TOP,
+            "rulebase": Rulebase.PRE,
+            "destination_rule": target_rule,  # This should raise error for TOP
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            self.client.move(rule_id, move_data)
+        assert (
+            "destination_rule should not be provided when destination is 'top'"
+            in str(exc_info.value)
+        )
+
+        # Test with BOTTOM destination
+        move_data = {
+            "destination": RuleMoveDestination.BOTTOM,
+            "rulebase": Rulebase.PRE,
+            "destination_rule": target_rule,  # This should raise error for BOTTOM
+        }
+
+        with pytest.raises(ValueError) as exc_info:
+            self.client.move(rule_id, move_data)
+        assert (
+            "destination_rule should not be provided when destination is 'bottom'"
+            in str(exc_info.value)
+        )
+
+
+# -------------------- End of Test Classes --------------------

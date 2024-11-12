@@ -1,6 +1,8 @@
 # scm/models/security/decryption_profiles.py
 
 from typing import Optional
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     Field,
@@ -9,7 +11,6 @@ from pydantic import (
     model_validator,
 )
 from enum import Enum
-import uuid
 
 
 # Enums
@@ -268,16 +269,8 @@ class DecryptionProfileUpdateModel(DecryptionProfileBaseModel):
 class DecryptionProfileResponseModel(DecryptionProfileBaseModel):
     """Model for Decryption Profile API responses."""
 
-    id: str = Field(
+    id: UUID = Field(
         ...,
         description="UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    @field_validator("id")
-    def validate_id(cls, v):
-        try:
-            uuid.UUID(v)
-        except ValueError:
-            raise ValueError("Invalid UUID format for 'id'")
-        return v

@@ -172,35 +172,77 @@ security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
 
 ## Listing Security Rules
 
-The `list()` method retrieves multiple security rules with optional filtering.
+The `list()` method retrieves multiple security rules with optional filtering. You can filter the results using the
+following kwargs:
+
+- `action`: List[str] - Filter by actions (e.g., ['allow', 'deny'])
+- `category`: List[str] - Filter by categories (e.g., ['trust', 'untrust'])
+- `service`: List[str] - Filter by services (e.g., ['application-default', 'service-http'])
+- `application`: List[str] - Filter by applications (e.g., ['web-browsing', 'ssl'])
+- `destination`: List[str] - Filter by destinations (e.g., ['any', '10.0.0.0/24'])
+- `to_`: List[str] - Filter by to zones (e.g., ['untrust', 'dmz'])
+- `source`: List[str] - Filter by sources (e.g., ['any', 'internal-subnet'])
+- `from_`: List[str] - Filter by from zones (e.g., ['trust', 'vpn'])
+- `tag`: List[str] - Filter by tags (e.g., ['Production', 'Development'])
+- `disabled`: bool - Filter by disabled status (True/False)
+- `profile_setting`: List[str] - Filter by profile setting groups (e.g., ['strict-security'])
+- `log_setting`: List[str] - Filter by log settings (e.g., ['default-logging'])
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# List all rules in a folder
+# List all rules in a folder's pre-rulebase
 rules = security_rule.list(
     folder="Shared",
-    limit=10,
-    offset=0,
     rulebase="pre"
 )
 
-for rule in rules:
-    print(f"Name: {rule['name']}")
-    print(f"Action: {rule['action']}")
-    print("---")
+# List only allow rules
+allow_rules = security_rule.list(
+    folder="Shared",
+    rulebase="pre",
+    action=['allow']
+)
 
-# List rules with name filter
+# List rules with specific applications
+web_rules = security_rule.list(
+    folder="Shared",
+    rulebase="pre",
+    application=['web-browsing', 'ssl']
+)
+
+# List rules with specific zones
+zone_rules = security_rule.list(
+    folder="Shared",
+    rulebase="pre",
+    from_=['trust'],
+    to_=['untrust']
+)
+
+# List rules with security profiles
+secure_rules = security_rule.list(
+    folder="Shared",
+    rulebase="pre",
+    profile_setting=['strict-security']
+)
+
+# Combine multiple filters
 filtered_rules = security_rule.list(
     folder="Shared",
-    name="web",
-    rulebase="pre"
+    rulebase="pre",
+    action=['allow'],
+    application=['web-browsing'],
+    tag=['Production']
 )
 
-for rule in filtered_rules:
-    print(f"Filtered rule: {rule['name']}")
+# Print the results
+for rule in rules:
+    print(f"Name: {rule.name}")
+    print(f"Action: {rule.action}")
+    print(f"Applications: {rule.application}")
+    print("---")
 ```
 
 </div>
