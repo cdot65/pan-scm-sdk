@@ -9,8 +9,6 @@ enhancements, and fixes in each version of the tool.
 
 **Release Date:** November 12th
 
-## Version 0.2.0
-
 ### Updates:
 
 * Add client-side filtering to address list method
@@ -308,6 +306,8 @@ methods, improved fixture utilization, and consolidated duplicate test cases int
 This change adds noqa comments to the dictionary mock responses in the `test_security_rules.py` file. This ensures that
 code linters do not flag these lines, allowing tests to run without interruptions or false positives. The integrity of
 the mocked data for test validation remains unchanged.
+
+## Version 0.2.0
 
 **Release Date:** November 4th
 
