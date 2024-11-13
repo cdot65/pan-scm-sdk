@@ -2,6 +2,8 @@
 
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
+
+from scm.exceptions import APIError
 from scm.utils.logging import setup_logger
 from scm.models.auth import AuthRequestModel
 import jwt
@@ -89,13 +91,17 @@ class OAuth2Client:
 
     def refresh_token(self):
         logger.debug("Refreshing token...")
-        token = self.session.fetch_token(
-            token_url=self.auth_request.token_url,
-            client_id=self.auth_request.client_id,
-            client_secret=self.auth_request.client_secret,
-            scope=self.auth_request.scope,
-            include_client_id=True,
-            client_kwargs={"tsg_id": self.auth_request.tsg_id},
-        )
-        logger.debug(f"Token refreshed successfully. {token}")
-        self.signing_key = self._get_signing_key()
+        try:
+            token = self.session.fetch_token(
+                token_url=self.auth_request.token_url,
+                client_id=self.auth_request.client_id,
+                client_secret=self.auth_request.client_secret,
+                scope=self.auth_request.scope,
+                include_client_id=True,
+                client_kwargs={"tsg_id": self.auth_request.tsg_id},
+            )
+            logger.debug(f"Token refreshed successfully. {token}")
+            self.signing_key = self._get_signing_key()
+        except Exception as e:
+            logger.error(f"Failed to refresh token: {str(e)}")
+            raise APIError(f"Failed to refresh token: {str(e)}")
