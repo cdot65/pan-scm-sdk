@@ -13,7 +13,7 @@ from scm.exceptions import (
     MethodNotAllowedError,
     ConflictError,
     ReferenceNotZeroError,
-    VersionNotSupportedError,
+    VersionAPINotSupportedError,
     SessionTimeoutError,
     BadRequestError,
     ObjectNotPresentError,
@@ -184,7 +184,7 @@ def test_handle_api_error():
                 "_errors": [{"message": "Version not supported"}],
                 "_request_id": "req-206",
             },
-            "expected_exception": VersionNotSupportedError,
+            "expected_exception": VersionAPINotSupportedError,
             "expected_message": "Version not supported",
         },
         {
