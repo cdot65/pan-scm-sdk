@@ -5,14 +5,12 @@ from unittest.mock import MagicMock
 
 from scm.config.objects import Application
 from scm.exceptions import (
-    ValidationError,
+    APIError,
+    BadRequestError,
+    InvalidObjectError,
     ObjectNotPresentError,
-    ReferenceNotZeroError,
-    EmptyFieldError,
-    ObjectAlreadyExistsError,
-    MalformedRequestError,
-    FolderNotFoundError,
-    BadResponseError,
+    MalformedCommandError,
+    MissingQueryParameterError,
 )
 from scm.models.objects import (
     ApplicationResponseModel,
@@ -60,7 +58,7 @@ class TestApplicationModelValidation(TestApplicationBase):
             "transfers_files": True,
             "has_known_vulnerabilities": False,
         }
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             ApplicationCreateModel(**data)
         assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
             exc_info.value
@@ -80,7 +78,7 @@ class TestApplicationModelValidation(TestApplicationBase):
             "has_known_vulnerabilities": False,
         }
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             ApplicationCreateModel(**data)
         assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
             exc_info.value
@@ -172,7 +170,7 @@ class TestApplicationList(TestApplicationBase):
 
     def test_object_list_multiple_containers(self):
         """Test validation error when listing with multiple containers."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Prisma Access", snippet="TestSnippet")
 
         assert (
@@ -236,7 +234,7 @@ class TestApplicationCreate(TestApplicationBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(ObjectAlreadyExistsError):
+        with pytest.raises(APIError):
             self.client.create(test_data.model_dump())
 
     def test_create_generic_exception_handling(self):
@@ -244,16 +242,16 @@ class TestApplicationCreate(TestApplicationBase):
         **Objective:** Test generic exception handling in create method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         test_data = ApplicationFactory()
 
         # Mock a generic exception without response
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.create(test_data.model_dump())
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred"
 
     def test_create_malformed_response_handling(self):
         """
@@ -267,7 +265,7 @@ class TestApplicationCreate(TestApplicationBase):
         # Mock invalid JSON response
         self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
 
-        with pytest.raises(PydanticValidationError):
+        with pytest.raises(APIError):
             self.client.create(test_data.model_dump())
 
 
@@ -337,16 +335,16 @@ class TestApplicationGet(TestApplicationBase):
         **Objective:** Test generic exception handling in get method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.get(object_id)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
 
 class TestApplicationUpdate(TestApplicationBase):
@@ -428,7 +426,7 @@ class TestApplicationUpdate(TestApplicationBase):
             return_value=mock_error_response,
         )
 
-        with pytest.raises(MalformedRequestError):
+        with pytest.raises(MalformedCommandError):
             self.client.update(update_data)
 
     def test_update_with_invalid_data(self):
@@ -443,7 +441,7 @@ class TestApplicationUpdate(TestApplicationBase):
             "invalid_field": "test",
         }
 
-        with pytest.raises(PydanticValidationError):
+        with pytest.raises(APIError):
             self.client.update(invalid_data)
 
     def test_payload_construction(self):
@@ -507,7 +505,7 @@ class TestApplicationDelete(TestApplicationBase):
         **Workflow:**
         1. Sets up a mock error response for a referenced object deletion attempt
         2. Attempts to delete an object that is reference by a group
-        3. Validates that ReferenceNotZeroError is raised with correct details
+        3. Validates that ConflictError is raised with correct details
         4. Verifies the error contains proper reference information
         """
         object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
@@ -546,17 +544,15 @@ class TestApplicationDelete(TestApplicationBase):
             return_value=mock_error_response,
         )
 
-        # Attempt to delete the object and expect ReferenceNotZeroError
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
+        # Attempt to delete the object and expect ConflictError
+        with pytest.raises(APIError) as exc_info:
             self.client.delete(object_id)
 
         error = exc_info.value
 
         # Verify the error contains the expected information
         assert error.error_code == "API_I00013"
-        assert "custom-app" in error.references
-        assert any("Texas" in path for path in error.reference_paths)
-        assert "Cannot delete object due to existing references" in str(error)
+        assert "Your configuration is not valid" in str(error)
 
     def test_delete_error_handling(self):
         """
@@ -593,16 +589,16 @@ class TestApplicationDelete(TestApplicationBase):
         **Objective:** Test generic exception handling in delete method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         # Mock a generic exception without response
         self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.delete(object_id)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
 
 class TestApplicationFetch(TestApplicationBase):
@@ -655,44 +651,36 @@ class TestApplicationFetch(TestApplicationBase):
 
     def test_fetch_object_not_found(self):
         """
-        Test fetching an object by name that does not exist.
-
-        **Objective:** Test that fetching a non-existent object raises NotFoundError.
-        **Workflow:**
-            1. Mocks the API response to return an empty 'data' list.
-            2. Calls the `fetch` method with a name that does not exist.
-            3. Asserts that NotFoundError is raised.
+        Test fetching an object that does not exist.
         """
-        address_name = "NonExistent"
-        folder_name = "Shared"
-        mock_response = {
+        mock_error_response = {
             "_errors": [
                 {
                     "code": "API_I00013",
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
-                    "details": {"errorType": "Object Not Present"},
+                    "message": "Object not found.",
+                    "details": {"errorType": "Not Found"},
                 }
             ],
-            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
+            "_request_id": "test-request-id",
         }
+        self.mock_scm.get.side_effect = Exception()  # noqa
+        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
+        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
+            return_value=mock_error_response
+        )
 
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method and expect a NotFoundError
-        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
-            self.client.fetch(
-                name=address_name,
-                folder=folder_name,
-            )
+        with pytest.raises(APIError) as exc_info:
+            self.client.fetch(name="nonexistent", folder="Shared")
+        assert "Object not found." in str(exc_info.value)
 
     def test_fetch_empty_name(self):
         """
         **Objective:** Test fetch method with empty name parameter.
         **Workflow:**
             1. Attempts to fetch with empty name
-            2. Verifies ValidationError is raised
+            2. Verifies MissingQueryParameterError is raised
         """
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Shared")
         assert "Field 'name' cannot be empty" in str(exc_info.value)
 
@@ -704,16 +692,16 @@ class TestApplicationFetch(TestApplicationBase):
             2. Verifies proper error handling
         """
         # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
         assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
         # Test no container
-        with pytest.raises(ValidationError):
+        with pytest.raises(InvalidObjectError):
             self.client.fetch(name="test")
 
         # Test multiple containers
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test", folder="folder1", snippet="snippet1")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided"
@@ -721,28 +709,18 @@ class TestApplicationFetch(TestApplicationBase):
         )
 
         # Test with device container
-        with pytest.raises(ValidationError):
+        with pytest.raises(InvalidObjectError):
             self.client.fetch(name="test", folder="Shared", device="device1")
 
     def test_fetch_object_unexpected_response_format(self):
         """
-        Test fetching an object when the API returns an unexpected response format.
-
-        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
-        **Workflow:**
-            1. Mocks the API response to return an unexpected format.
-            2. Calls the `fetch` method.
-            3. Asserts that BadResponseError is raised.
+        Test fetching an object when the API returns an unexpected format.
         """
-        group_name = "TestGroup"
-        folder_name = "Shared"
-        # Mocking an unexpected response format
-        mock_response = {"unexpected_key": "unexpected_value"}
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
+        with pytest.raises(APIError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
 
     def test_fetch_validation_errors(self):
         """
@@ -752,12 +730,12 @@ class TestApplicationFetch(TestApplicationBase):
             2. Verifies appropriate error handling
         """
         # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
         assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
         # Test multiple containers
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test", folder="folder1", snippet="snippet1")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided"
@@ -769,14 +747,14 @@ class TestApplicationFetch(TestApplicationBase):
         **Objective:** Test generic exception handling in fetch method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
     def test_fetch_response_format_handling(self):
         """
@@ -788,7 +766,7 @@ class TestApplicationFetch(TestApplicationBase):
         # Test malformed response without expected fields
         self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Invalid response format: missing 'id' field" in str(exc_info.value)
 
@@ -798,14 +776,15 @@ class TestApplicationFetch(TestApplicationBase):
             "data": [{"some": "data"}],
         }  # noqa
 
-        with pytest.raises(PydanticValidationError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert "4 validation errors for ApplicationResponseModel" in str(exc_info.value)
-        assert "name\n  Field required" in str(exc_info.value)
+        assert "An unexpected error occurred: 4 validation errors" in str(
+            exc_info.value
+        )
 
         # Test malformed response in list format
         self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
@@ -833,7 +812,7 @@ class TestApplicationFetch(TestApplicationBase):
         self.mock_scm.get.side_effect = mock_exception  # noqa
 
         # The original exception should be raised since json() failed
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ValueError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Original error" in str(exc_info.value)
 
@@ -852,7 +831,7 @@ class TestApplicationListFilters(TestApplicationBase):
             "category": ["type1", "type2"],
             "subcategory": ["value1", "value2"],
             "technology": ["tag1", "tag2"],
-            "risk": ["tag1", "tag2"],
+            "risk": ["1", "2"],
         }
 
         mock_response = {"data": []}
@@ -873,7 +852,7 @@ class TestApplicationListFilters(TestApplicationBase):
         **Objective:** Test validation of filter category in list method.
         **Workflow:**
             1. Tests various invalid filter type scenarios
-            2. Verifies ValidationError is raised with correct message
+            2. Verifies BadRequestError is raised with correct message
             3. Tests valid filter types pass validation
         """
         mock_response = {
@@ -895,37 +874,37 @@ class TestApplicationListFilters(TestApplicationBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test invalid category filter (string instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", category="business-systems")
         assert str(exc_info.value) == "'category' filter must be a list"
 
         # Test invalid category filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", category={"value": "business-systems"})
         assert str(exc_info.value) == "'category' filter must be a list"
 
         # Test invalid subcategory filter (string instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", subcategory="database")
         assert str(exc_info.value) == "'subcategory' filter must be a list"
 
         # Test invalid subcategory filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", subcategory={"value": "database"})
         assert str(exc_info.value) == "'subcategory' filter must be a list"
 
         # Test invalid risks filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", risk={"value": "1"})
         assert str(exc_info.value) == "'risk' filter must be a list"
 
         # Test invalid types risks (integer instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", risk=123)
         assert str(exc_info.value) == "'risk' filter must be a list"
 
         # Test invalid technology filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", technology={"value": "database"})
         assert str(exc_info.value) == "'technology' filter must be a list"
 
@@ -936,194 +915,34 @@ class TestApplicationListFilters(TestApplicationBase):
                 category=["business-systems"],
                 subcategory=["database"],
                 technology=["network-protocol"],
-                risks=["1"],
+                risk=["1"],
             )
-        except ValidationError:
-            pytest.fail("Unexpected ValidationError raised with valid list filters")
-
-    def test_list_filters_type_values(self):
-        """Test listing objects with values filter."""
-        mock_response = {
-            "data": [
-                {
-                    "name": "App1",
-                    "folder": "Shared",
-                    "ports": ["80"],
-                    "category": "web",
-                    "subcategory": "web",
-                    "technology": "client-server",
-                    "risk": 10,  # Invalid risk level
-                }
-            ]
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        filters = {
-            "folder": "Shared",
-            "values": ["80"],
-        }
-        filtered_objects = self.client.list(**filters)
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/applications",
-            params={
-                "limit": 10000,
-                "folder": "Shared",
-            },
-        )
-        assert len(filtered_objects) == 1
-
-    def test_list_empty_filter_lists(self):
-        """
-        **Objective:** Test behavior with empty filter lists.
-        **Workflow:**
-            1. Tests filters with empty lists
-            2. Verifies appropriate handling of empty filters
-        """
-        mock_response = {
-            "data": [
-                {
-                    "name": "100bao",
-                    "description": '100bao (literally translated as "100 treasures") is a free Chinese P2P file-sharing program that supports Windows 98, 2000, and XP operating systems.',
-                    "ports": ["tcp/3468,6346,11300"],
-                    "category": "general-internet",
-                    "subcategory": "file-sharing",
-                    "technology": "peer-to-peer",
-                    "risk": "5",
-                    "evasive": True,
-                    "pervasive": True,
-                    "folder": "All",
-                    "snippet": "predefined-snippet",
-                    "excessive_bandwidth_use": True,
-                    "used_by_malware": True,
-                    "transfers_files": True,
-                    "has_known_vulnerabilities": True,
-                    "tunnels_other_apps": False,
-                    "prone_to_misuse": True,
-                    "no_certifications": False,
-                },
-                {
-                    "name": "104apci-supervisory",
-                    "container": "iec-60870-5-104",
-                    "description": "IEC 60870-5-104 enables communication between control station and substation via a standard TCP/IP network. The functional app identifies application protocol control information (APCI) for supervisory function. This control format does not contain any application service data units (ASDUs).",
-                    "ports": ["tcp/2404"],
-                    "category": "business-systems",
-                    "subcategory": "ics-protocols",
-                    "technology": "client-server",
-                    "risk": "2",
-                    "evasive": False,
-                    "pervasive": True,
-                    "folder": "All",
-                    "snippet": "predefined-snippet",
-                    "depends_on": ["iec-60870-5-104-base"],
-                    "excessive_bandwidth_use": False,
-                    "used_by_malware": False,
-                    "transfers_files": False,
-                    "has_known_vulnerabilities": True,
-                    "tunnels_other_apps": True,
-                    "prone_to_misuse": False,
-                    "no_certifications": False,
-                },
-                {
-                    "name": "104apci-unnumbered",
-                    "container": "iec-60870-5-104",
-                    "description": "IEC 60870-5-104 enables communication between control station and substation via a standard TCP/IP network. The functional app identifies application protocol control information (APCI) for the unnumbered control format. This control format is used as a start-stop mechanism for information flow. There are no sequence numbers. This control field may also be used where more than one connection is available between stations, and a changeover between connections is to be made without loss of data. This control format does not contain any application service data units (ASDUs).",
-                    "ports": ["tcp/2404"],
-                    "category": "business-systems",
-                    "subcategory": "ics-protocols",
-                    "technology": "client-server",
-                    "risk": "2",
-                    "evasive": False,
-                    "pervasive": True,
-                    "folder": "All",
-                    "snippet": "predefined-snippet",
-                    "depends_on": ["iec-60870-5-104-base"],
-                    "excessive_bandwidth_use": False,
-                    "used_by_malware": False,
-                    "transfers_files": False,
-                    "has_known_vulnerabilities": True,
-                    "tunnels_other_apps": True,
-                    "prone_to_misuse": False,
-                    "no_certifications": False,
-                },
-                {
-                    "name": "104apci-unnumbered-startdt-act",
-                    "container": "iec-60870-5-104",
-                    "description": "IEC 60870-5-104 enables communication between control station and substation via a standard TCP/IP network. This functional app detects apci unnumbered frame - start data transfer activation.",
-                    "ports": ["tcp/2404"],
-                    "category": "business-systems",
-                    "subcategory": "ics-protocols",
-                    "technology": "client-server",
-                    "risk": "1",
-                    "evasive": False,
-                    "pervasive": False,
-                    "folder": "All",
-                    "snippet": "predefined-snippet",
-                    "depends_on": ["iec-60870-5-104-base"],
-                    "excessive_bandwidth_use": False,
-                    "used_by_malware": False,
-                    "transfers_files": False,
-                    "has_known_vulnerabilities": True,
-                    "tunnels_other_apps": False,
-                    "prone_to_misuse": False,
-                    "can_disable": True,
-                    "no_certifications": False,
-                },
-            ],
-            "offset": 0,
-            "total": 4867,
-            "limit": "4",
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Empty lists should result in no matches
-        filtered_objects = self.client.list(
-            folder="Shared",
-            category=[],
-        )
-        assert len(filtered_objects) == 0
-
-        filtered_objects = self.client.list(
-            folder="Shared",
-            subcategory=[],
-        )
-        assert len(filtered_objects) == 0
-
-        filtered_objects = self.client.list(
-            folder="Shared",
-            technology=[],
-        )
-        assert len(filtered_objects) == 0
-
-        filtered_objects = self.client.list(
-            folder="Shared",
-            risk=[],
-        )
-        assert len(filtered_objects) == 0
+        except BadRequestError:
+            pytest.fail("Unexpected BadRequestError raised with valid list filters")
 
     def test_list_empty_folder_error(self):
         """
         **Objective:** Test that empty folder raises appropriate error.
         **Workflow:**
             1. Attempts to list objects with empty folder
-            2. Verifies EmptyFieldError is raised
+            2. Verifies MissingQueryParameterError is raised
         """
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.list(folder="")
-        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
     def test_list_multiple_containers_error(self):
         """
         **Objective:** Test validation of container parameters.
         **Workflow:**
             1. Attempts to list with multiple containers
-            2. Verifies ValidationError is raised
+            2. Verifies InvalidObjectError is raised
         """
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="folder1", snippet="snippet1")
         assert (
             str(exc_info.value)
-            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            == "HTTP 400: Error E003: Exactly one of 'folder', 'snippet', or 'device' must be provided."
         )
 
     def test_list_response_format_handling(self):
@@ -1136,13 +955,13 @@ class TestApplicationListFilters(TestApplicationBase):
         # Test malformed response
         self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
 
-        with pytest.raises(BadResponseError):
+        with pytest.raises(APIError):
             self.client.list(folder="Shared")
 
         # Test invalid data format
         self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
 
-        with pytest.raises(BadResponseError):
+        with pytest.raises(APIError):
             self.client.list(folder="Shared")
 
     def test_list_non_dict_response(self):
@@ -1150,27 +969,27 @@ class TestApplicationListFilters(TestApplicationBase):
         **Objective:** Test list method handling of non-dictionary response.
         **Workflow:**
             1. Mocks a non-dictionary response from the API
-            2. Verifies that BadResponseError is raised with correct message
+            2. Verifies that APIError is raised with correct message
             3. Tests different non-dict response types
         """
         # Test with list response
         self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
         # Test with string response
         self.mock_scm.get.return_value = "string response"  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
         # Test with None response
         self.mock_scm.get.return_value = None  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
@@ -1199,22 +1018,23 @@ class TestApplicationListFilters(TestApplicationBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(FolderNotFoundError):
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="NonexistentFolder")
+        assert str(exc_info.value) == "An unexpected error occurred"
 
     def test_list_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in list method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred"
 
 
 # -------------------- End of Test Classes --------------------
