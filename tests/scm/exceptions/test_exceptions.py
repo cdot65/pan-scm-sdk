@@ -1,98 +1,174 @@
+# tests/scm/exceptions/test_exceptions.py
+
 import pytest
+from unittest.mock import MagicMock
+
 from scm.exceptions import (
-    ErrorResponse,
     APIError,
-    ErrorHandler,
-    ValidationError,
+    ClientError,
+    ServerError,
+    AuthenticationError,
+    NotAuthenticatedError,
+    InvalidCredentialError,
+    KeyTooLongError,
+    KeyExpiredError,
+    PasswordChangeRequiredError,
+    AuthorizationError,
+    UnauthorizedError,
+    BadRequestError,
+    InputFormatMismatchError,
+    OutputFormatMismatchError,
+    MissingQueryParameterError,
+    InvalidQueryParameterError,
+    MissingBodyError,
+    InvalidObjectError,
+    InvalidCommandError,
+    MalformedCommandError,
+    BadXPathError,
+    NotFoundError,
+    ObjectNotPresentError,
+    ConflictError,
+    ObjectNotUniqueError,
+    NameNotUniqueError,
     ReferenceNotZeroError,
+    MethodNotAllowedError,
+    ActionNotSupportedError,
+    APINotImplementedError,
+    VersionAPINotSupportedError,
+    MethodAPINotSupportedError,
+    GatewayTimeoutError,
+    SessionTimeoutError,
+    ErrorHandler,
+    ErrorResponse,
 )
 
 
-class TestErrorResponse:
-    def test_from_response_raises_value_error(self):
-        """Test that from_response raises ValueError for invalid response data."""
-        # Test with missing _errors key
-        with pytest.raises(ValueError, match="Invalid error response format"):
-            ErrorResponse.from_response({})
+@pytest.mark.usefixtures("load_env")
+class TestExceptionsBase:
+    """Base class for Exception tests."""
 
-        # Test with empty _errors list
-        with pytest.raises(ValueError, match="Invalid error response format"):
-            ErrorResponse.from_response({"_errors": []})
+    @pytest.fixture(autouse=True)
+    def setup_method(self, mock_scm):
+        """Setup method that runs before each test."""
+        self.mock_scm = mock_scm  # noqa
+        self.mock_scm.get = MagicMock()
+        self.mock_scm.post = MagicMock()
+        self.mock_scm.put = MagicMock()
+        self.mock_scm.delete = MagicMock()
 
-        # Test with None _errors
-        with pytest.raises(ValueError, match="Invalid error response format"):
-            ErrorResponse.from_response({"_errors": None})
 
-    def test_from_response_success(self):
-        """Test successful creation of ErrorResponse from response data."""
+# -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestErrorResponseValidation(TestExceptionsBase):
+    """Tests for ErrorResponse validation."""
+
+    def test_error_response_from_response(self):
+        """Test creating ErrorResponse from API response."""
+        response_data = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Test error message",
+                    "details": {"errorType": "Test Error"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        error_response = ErrorResponse.from_response(response_data)
+        assert error_response.code == "API_I00013"
+        assert error_response.message == "Test error message"
+        assert error_response.details == {"errorType": "Test Error"}
+        assert error_response.request_id == "test-request-id"
+
+    def test_error_response_invalid_format(self):
+        """Test validation when response format is invalid."""
+        invalid_data = {"not_errors": []}
+        with pytest.raises(ValueError) as exc_info:
+            ErrorResponse.from_response(invalid_data)
+        assert str(exc_info.value) == "Invalid error response format"
+
+    def test_error_response_empty_errors(self):
+        """Test validation when errors list is empty."""
+        invalid_data = {"_errors": []}
+        with pytest.raises(ValueError) as exc_info:
+            ErrorResponse.from_response(invalid_data)
+        assert str(exc_info.value) == "Invalid error response format"
+
+
+class TestAPIErrorBase(TestExceptionsBase):
+    """Tests for base APIError class."""
+
+    def test_api_error_str_representation(self):
+        """Test string representation of APIError."""
+        error = APIError(
+            message="Test error",
+            error_code="TEST001",
+            http_status_code=400,
+            details={"type": "test"},
+            request_id="test-id",
+        )
+        error_str = str(error)
+        assert "HTTP 400" in error_str
+        assert "Error TEST001" in error_str
+        assert "Test error" in error_str
+        assert "Details: {'type': 'test'}" in error_str
+        assert "Request ID: test-id" in error_str
+
+    def test_api_error_minimal_str(self):
+        """Test string representation with minimal fields."""
+        error = APIError(message="Test error")
+        assert str(error) == "Test error"
+
+
+class TestErrorHandlerValidation(TestExceptionsBase):
+    """Tests for ErrorHandler validation."""
+
+    def test_error_handler_status_code_mapping(self):
+        """Test HTTP status code to exception class mapping."""
         response_data = {
             "_errors": [
                 {
                     "code": "TEST001",
-                    "message": "Test error message",
-                    "details": {"key": "value"},
+                    "message": "Test error",
                 }
-            ],
-            "_request_id": "req123",
+            ]
         }
 
-        error_response = ErrorResponse.from_response(response_data)
+        # Test 400 maps to BadRequestError
+        with pytest.raises(BadRequestError):
+            ErrorHandler.raise_for_error(response_data, 400)
 
-        assert error_response.code == "TEST001"
-        assert error_response.message == "Test error message"
-        assert error_response.details == {"key": "value"}
-        assert error_response.request_id == "req123"
+        # Test 401 maps to AuthenticationError
+        with pytest.raises(AuthenticationError):
+            ErrorHandler.raise_for_error(response_data, 401)
 
+        # Test 403 maps to AuthorizationError
+        with pytest.raises(AuthorizationError):
+            ErrorHandler.raise_for_error(response_data, 403)
 
-class TestAPIError:
-    def test_from_error_response(self):
-        """Test creation of APIError from ErrorResponse."""
-        error_response = ErrorResponse(
-            code="TEST001",
-            message="Test message",
-            details={"test": "details"},
-            request_id="req123",
-        )
+    def test_error_handler_code_mapping(self):
+        """Test error code to specific exception mapping."""
+        # Test E016 Not Authenticated
+        response_data = {
+            "_errors": [
+                {
+                    "code": "E016",
+                    "message": "Not Authenticated",
+                }
+            ]
+        }
+        with pytest.raises(NotAuthenticatedError):
+            ErrorHandler.raise_for_error(response_data, 401)
 
-        api_error = APIError.from_error_response(error_response)
+        # Test E007 Unauthorized
+        response_data["_errors"][0].update({"code": "E007", "message": "Unauthorized"})
+        with pytest.raises(UnauthorizedError):
+            ErrorHandler.raise_for_error(response_data, 403)
 
-        assert api_error.message == "Test message"
-        assert api_error.error_code == "TEST001"
-        assert api_error.details == {"test": "details"}
-        assert api_error.request_id == "req123"
-        assert api_error.references == []
-
-    def test_api_error_initialization(self):
-        """Test APIError initialization with different parameters."""
-        # Test with minimal parameters
-        error1 = APIError("Test message")
-        assert str(error1) == "Test message"
-        assert error1.details == {}
-        assert error1.references == []
-
-        # Test with all parameters
-        error2 = APIError(
-            message="Full test",
-            error_code="TEST001",
-            details={"key": "value"},
-            request_id="req123",
-            references=["ref1"],
-        )
-        assert error2.message == "Full test"
-        assert error2.error_code == "TEST001"
-        assert error2.details == {"key": "value"}
-        assert error2.request_id == "req123"
-        assert error2.references == ["ref1"]
-
-
-class TestErrorHandler:
-    def test_raise_for_error_invalid_format(self):
-        """Test ErrorHandler raises APIError for invalid format."""
-        with pytest.raises(APIError, match="Invalid error response format"):
-            ErrorHandler.raise_for_error({})
-
-    def test_raise_for_error_no_exception_class(self):
-        """Test fallback to generic APIError when no specific exception class matches."""
+    def test_error_handler_fallback(self):
+        """Test fallback to base exception class."""
         response_data = {
             "_errors": [
                 {
@@ -101,66 +177,250 @@ class TestErrorHandler:
                 }
             ]
         }
+        with pytest.raises(APIError):
+            ErrorHandler.raise_for_error(response_data, 418)
 
-        with pytest.raises(APIError) as exc_info:
-            ErrorHandler.raise_for_error(response_data)
 
-        assert exc_info.value.message == "Unknown error"
-        assert isinstance(exc_info.value, APIError)
-        assert not isinstance(
-            exc_info.value, ValidationError
-        )  # Ensure it's the base class
+class TestSpecificExceptions(TestExceptionsBase):
+    """Tests for specific exception classes."""
 
-    def test_raise_for_error_with_details_message(self):
-        """Test error handler uses details message when available."""
-        response_data = {
-            "_errors": [
-                {
-                    "code": "TEST001",
-                    "message": "General message",
-                    "details": {"message": "Detailed error message"},
-                }
-            ]
-        }
+    def test_client_error_inheritance(self):
+        """Test ClientError class inheritance."""
+        error = ClientError("Test client error")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
 
-        with pytest.raises(APIError) as exc_info:
-            ErrorHandler.raise_for_error(response_data)
+    def test_server_error_inheritance(self):
+        """Test ServerError class inheritance."""
+        error = ServerError("Test server error")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
 
-        assert exc_info.value.message == "Detailed error message"
+    def test_authentication_error_inheritance(self):
+        """Test authentication error inheritance chain."""
+        error = NotAuthenticatedError("Not authenticated")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, AuthenticationError)
+        assert isinstance(error, NotAuthenticatedError)
 
-    def test_raise_for_error_fallback_message(self):
-        """Test error handler falls back to error message when details message is not available."""
-        response_data = {
-            "_errors": [
-                {"code": "TEST001", "message": "Fallback message", "details": {}}
-            ]
-        }
+    def test_invalid_credential_error_inheritance(self):
+        """Test InvalidCredentialError class inheritance."""
+        error = InvalidCredentialError("Invalid credentials")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, AuthenticationError)
+        assert isinstance(error, InvalidCredentialError)
 
-        with pytest.raises(APIError) as exc_info:
-            ErrorHandler.raise_for_error(response_data)
+    def test_key_too_long_error_inheritance(self):
+        """Test KeyTooLongError class inheritance."""
+        error = KeyTooLongError("Key too long")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, AuthenticationError)
+        assert isinstance(error, KeyTooLongError)
 
-        assert exc_info.value.message == "Fallback message"
+    def test_key_expired_error_inheritance(self):
+        """Test KeyExpiredError class inheritance."""
+        error = KeyExpiredError("Key expired")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, AuthenticationError)
+        assert isinstance(error, KeyExpiredError)
 
-    def test_reference_not_zero_error_handling(self):
-        """Test handling of Reference Not Zero errors."""
-        response_data = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Cannot delete",
-                    "details": {
-                        "errorType": "Reference Not Zero",
-                        "errors": [{"params": ["ref1"], "extra": ["path1"]}],
-                        "message": ["Additional path info"],
-                    },
-                }
-            ],
-            "_request_id": "req123",
-        }
+    def test_password_change_required_error_inheritance(self):
+        """Test PasswordChangeRequiredError class inheritance."""
+        error = PasswordChangeRequiredError("Password change required")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, AuthenticationError)
+        assert isinstance(error, PasswordChangeRequiredError)
 
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
-            ErrorHandler.raise_for_error(response_data)
+    def test_authorization_error_inheritance(self):
+        """Test authorization error inheritance chain."""
+        error = UnauthorizedError("Unauthorized")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, AuthorizationError)
+        assert isinstance(error, UnauthorizedError)
 
-        assert exc_info.value.references == ["ref1"]
-        assert "path1" in exc_info.value.reference_paths
-        assert "Additional path info" in exc_info.value.reference_paths
+    def test_bad_request_error_inheritance(self):
+        """Test BadRequestError class inheritance."""
+        error = BadRequestError("Bad request")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+
+    def test_input_format_mismatch_error_inheritance(self):
+        """Test InputFormatMismatchError class inheritance."""
+        error = InputFormatMismatchError("Input format mismatch")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, InputFormatMismatchError)
+
+    def test_output_format_mismatch_error_inheritance(self):
+        """Test OutputFormatMismatchError class inheritance."""
+        error = OutputFormatMismatchError("Output format mismatch")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, OutputFormatMismatchError)
+
+    def test_missing_query_parameter_error_inheritance(self):
+        """Test MissingQueryParameterError class inheritance."""
+        error = MissingQueryParameterError("Missing query parameter")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, MissingQueryParameterError)
+
+    def test_invalid_query_parameter_error_inheritance(self):
+        """Test InvalidQueryParameterError class inheritance."""
+        error = InvalidQueryParameterError("Invalid query parameter")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, InvalidQueryParameterError)
+
+    def test_missing_body_error_inheritance(self):
+        """Test MissingBodyError class inheritance."""
+        error = MissingBodyError("Missing body")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, MissingBodyError)
+
+    def test_invalid_object_error_inheritance(self):
+        """Test InvalidObjectError class inheritance."""
+        error = InvalidObjectError("Invalid object")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, InvalidObjectError)
+
+    def test_invalid_command_error_inheritance(self):
+        """Test InvalidCommandError class inheritance."""
+        error = InvalidCommandError("Invalid command")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, InvalidCommandError)
+
+    def test_malformed_command_error_inheritance(self):
+        """Test MalformedCommandError class inheritance."""
+        error = MalformedCommandError("Malformed command")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, MalformedCommandError)
+
+    def test_bad_xpath_error_inheritance(self):
+        """Test BadXPathError class inheritance."""
+        error = BadXPathError("Bad XPath")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, BadRequestError)
+        assert isinstance(error, BadXPathError)
+
+    def test_not_found_error_inheritance(self):
+        """Test NotFoundError class inheritance."""
+        error = NotFoundError("Not found")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, NotFoundError)
+
+    def test_object_not_present_error_inheritance(self):
+        """Test ObjectNotPresentError class inheritance."""
+        error = ObjectNotPresentError("Object not present")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, NotFoundError)
+        assert isinstance(error, ObjectNotPresentError)
+
+    def test_conflict_error_inheritance(self):
+        """Test ConflictError class inheritance."""
+        error = ConflictError("Conflict")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, ConflictError)
+
+    def test_object_not_unique_error_inheritance(self):
+        """Test ObjectNotUniqueError class inheritance."""
+        error = ObjectNotUniqueError("Object not unique")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, ConflictError)
+        assert isinstance(error, ObjectNotUniqueError)
+
+    def test_name_not_unique_error_inheritance(self):
+        """Test NameNotUniqueError class inheritance."""
+        error = NameNotUniqueError("Name not unique")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, ConflictError)
+        assert isinstance(error, NameNotUniqueError)
+
+    def test_reference_not_zero_error_inheritance(self):
+        """Test ReferenceNotZeroError class inheritance."""
+        error = ReferenceNotZeroError("Reference not zero")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, ConflictError)
+        assert isinstance(error, ReferenceNotZeroError)
+
+    def test_method_not_allowed_error_inheritance(self):
+        """Test MethodNotAllowedError class inheritance."""
+        error = MethodNotAllowedError("Method not allowed")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, MethodNotAllowedError)
+
+    def test_action_not_supported_error_inheritance(self):
+        """Test ActionNotSupportedError class inheritance."""
+        error = ActionNotSupportedError("Action not supported")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ClientError)
+        assert isinstance(error, MethodNotAllowedError)
+        assert isinstance(error, ActionNotSupportedError)
+
+    def test_api_not_implemented_error_inheritance(self):
+        """Test APINotImplementedError class inheritance."""
+        error = APINotImplementedError("Not implemented")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, APINotImplementedError)
+
+    def test_version_not_supported_error_inheritance(self):
+        """Test VersionAPINotSupportedError class inheritance."""
+        error = VersionAPINotSupportedError("Version not supported")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, APINotImplementedError)
+        assert isinstance(error, VersionAPINotSupportedError)
+
+    def test_method_not_supported_error_inheritance(self):
+        """Test MethodAPINotSupportedError class inheritance."""
+        error = MethodAPINotSupportedError("Method not supported")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, APINotImplementedError)
+        assert isinstance(error, MethodAPINotSupportedError)
+
+    def test_gateway_timeout_error_inheritance(self):
+        """Test GatewayTimeoutError class inheritance."""
+        error = GatewayTimeoutError("Gateway timeout")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, GatewayTimeoutError)
+
+    def test_session_timeout_error_inheritance(self):
+        """Test SessionTimeoutError class inheritance."""
+        error = SessionTimeoutError("Session timeout")
+        assert isinstance(error, APIError)
+        assert isinstance(error, ServerError)
+        assert isinstance(error, GatewayTimeoutError)
+        assert isinstance(error, SessionTimeoutError)
+
+
+# -------------------- End of Test Classes --------------------
