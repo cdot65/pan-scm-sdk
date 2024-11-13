@@ -1,6 +1,7 @@
 # scm/config/security/security_rule.py
 
 from typing import List, Dict, Any, Optional
+import logging
 from scm.config import BaseObject
 from scm.models.security import (
     SecurityRuleCreateModel,
@@ -10,11 +11,12 @@ from scm.models.security import (
     Rulebase,
 )
 from scm.exceptions import (
-    ValidationError,
-    EmptyFieldError,
+    InvalidObjectError,
+    MissingQueryParameterError,
     ErrorHandler,
-    BadResponseError,
+    APIError,
 )
+from scm.utils.logging import setup_logger
 
 
 class SecurityRule(BaseObject):
@@ -28,8 +30,13 @@ class SecurityRule(BaseObject):
     def __init__(
         self,
         api_client,
+        log_level: int = logging.ERROR,
     ):
         super().__init__(api_client)
+        self.logger = setup_logger(
+            __name__,
+            log_level=log_level,
+        )
 
     def create(
         self,
@@ -43,7 +50,7 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel
 
         Raises:
-            Custom Error Handling class response
+            APIError: For any API-related errors
         """
         try:
             # Validate rulebase using the enum
@@ -51,33 +58,29 @@ class SecurityRule(BaseObject):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
-                    raise ValueError("rulebase must be either 'pre' or 'post'")
+                    raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
-            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             profile = SecurityRuleCreateModel(**data)
-
-            # Convert back to a Python dictionary, but removing any excluded object
-            # Note: by_alias=True is crucial for correct handling of from_/to_ fields
             payload = profile.model_dump(
                 exclude_unset=True,
                 by_alias=True,
             )
-
-            # Send the updated object to the remote API as JSON
             response = self.api_client.post(
                 self.ENDPOINT,
                 params={"position": rulebase.value},
                 json=payload,
             )
-
-            # Return the SCM API response as a new Pydantic object
             return SecurityRuleResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+            if isinstance(e, APIError):
+                self.logger.error(f"API error while creating security rule: {e}")
+                raise
+            else:
+                self.logger.error(
+                    f"An unexpected error occurred while creating security rule: {e}"
+                )
+                raise APIError("An unexpected error occurred") from e
 
     def get(
         self,
@@ -91,31 +94,34 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel
 
         Raises:
-            Custom Error Handling class response
+            APIError: For any API-related errors
         """
         try:
-            # Validate rulebase using the enum
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
-                    raise ValueError("rulebase must be either 'pre' or 'post'")
+                    raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
-            # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(
                 endpoint,
                 params={"position": rulebase.value},
             )
-
-            # Return the SCM API response as a new Pydantic object
             return SecurityRuleResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error getting security rule: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     def update(
         self,
@@ -129,42 +135,40 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel
 
         Raises:
-            Custom Error Handling class response
+            APIError: For any API-related errors
         """
         try:
-            # Validate rulebase using the enum
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
-                    raise ValueError("rulebase must be either 'pre' or 'post'")
+                    raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
-            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             profile = SecurityRuleUpdateModel(**data)
-
-            # Convert back to a Python dictionary, but removing any excluded object
-            # Note: by_alias=True is crucial for correct handling of from_/to_ fields
             payload = profile.model_dump(
                 exclude_unset=True,
                 by_alias=True,
             )
-
-            # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
             response = self.api_client.put(
                 endpoint,
                 params={"position": rulebase.value},
                 json=payload,
             )
-
-            # Return the SCM API response as a new Pydantic object
             return SecurityRuleResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error updating security rule: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     @staticmethod
     def _apply_filters(
@@ -180,14 +184,16 @@ class SecurityRule(BaseObject):
 
         Returns:
             List[SecurityRuleResponseModel]: Filtered list of security rules
+
+        Raises:
+            InvalidObjectError: If filter criteria are invalid
         """
-        # Build a list of what criteria we are looking to filter our response from
         filter_criteria = rules
 
         # Filter by action
         if "action" in filters:
             if not isinstance(filters["action"], list):
-                raise ValidationError("'action' filter must be a list")
+                raise InvalidObjectError("'action' filter must be a list")
             actions = filters["action"]
             filter_criteria = [
                 rule for rule in filter_criteria if rule.action in actions
@@ -196,7 +202,7 @@ class SecurityRule(BaseObject):
         # Filter by category
         if "category" in filters:
             if not isinstance(filters["category"], list):
-                raise ValidationError("'category' filter must be a list")
+                raise InvalidObjectError("'category' filter must be a list")
             categories = filters["category"]
             filter_criteria = [
                 rule
@@ -207,7 +213,7 @@ class SecurityRule(BaseObject):
         # Filter by service
         if "service" in filters:
             if not isinstance(filters["service"], list):
-                raise ValidationError("'service' filter must be a list")
+                raise InvalidObjectError("'service' filter must be a list")
             services = filters["service"]
             filter_criteria = [
                 rule
@@ -218,7 +224,7 @@ class SecurityRule(BaseObject):
         # Filter by application
         if "application" in filters:
             if not isinstance(filters["application"], list):
-                raise ValidationError("'application' filter must be a list")
+                raise InvalidObjectError("'application' filter must be a list")
             applications = filters["application"]
             filter_criteria = [
                 rule
@@ -229,7 +235,7 @@ class SecurityRule(BaseObject):
         # Filter by destination
         if "destination" in filters:
             if not isinstance(filters["destination"], list):
-                raise ValidationError("'destination' filter must be a list")
+                raise InvalidObjectError("'destination' filter must be a list")
             destinations = filters["destination"]
             filter_criteria = [
                 rule
@@ -240,7 +246,7 @@ class SecurityRule(BaseObject):
         # Filter by to_
         if "to_" in filters:
             if not isinstance(filters["to_"], list):
-                raise ValidationError("'to_' filter must be a list")
+                raise InvalidObjectError("'to_' filter must be a list")
             to_zones = filters["to_"]
             filter_criteria = [
                 rule
@@ -251,7 +257,7 @@ class SecurityRule(BaseObject):
         # Filter by source
         if "source" in filters:
             if not isinstance(filters["source"], list):
-                raise ValidationError("'source' filter must be a list")
+                raise InvalidObjectError("'source' filter must be a list")
             sources = filters["source"]
             filter_criteria = [
                 rule
@@ -262,7 +268,7 @@ class SecurityRule(BaseObject):
         # Filter by from_
         if "from_" in filters:
             if not isinstance(filters["from_"], list):
-                raise ValidationError("'from_' filter must be a list")
+                raise InvalidObjectError("'from_' filter must be a list")
             from_zones = filters["from_"]
             filter_criteria = [
                 rule
@@ -273,7 +279,7 @@ class SecurityRule(BaseObject):
         # Filter by tag
         if "tag" in filters:
             if not isinstance(filters["tag"], list):
-                raise ValidationError("'tag' filter must be a list")
+                raise InvalidObjectError("'tag' filter must be a list")
             tags = filters["tag"]
             filter_criteria = [
                 rule
@@ -284,7 +290,7 @@ class SecurityRule(BaseObject):
         # Filter by disabled status
         if "disabled" in filters:
             if not isinstance(filters["disabled"], bool):
-                raise ValidationError("'disabled' filter must be a boolean")
+                raise InvalidObjectError("'disabled' filter must be a boolean")
             disabled = filters["disabled"]
             filter_criteria = [
                 rule for rule in filter_criteria if rule.disabled == disabled
@@ -293,7 +299,7 @@ class SecurityRule(BaseObject):
         # Filter by profile_setting group
         if "profile_setting" in filters:
             if not isinstance(filters["profile_setting"], list):
-                raise ValidationError("'profile_setting' filter must be a list")
+                raise InvalidObjectError("'profile_setting' filter must be a list")
             groups = filters["profile_setting"]
             filter_criteria = [
                 rule
@@ -306,7 +312,7 @@ class SecurityRule(BaseObject):
         # Filter by log_setting
         if "log_setting" in filters:
             if not isinstance(filters["log_setting"], list):
-                raise ValidationError("'log_setting' filter must be a list")
+                raise InvalidObjectError("'log_setting' filter must be a list")
             log_settings = filters["log_setting"]
             filter_criteria = [
                 rule for rule in filter_criteria if rule.log_setting in log_settings
@@ -321,7 +327,6 @@ class SecurityRule(BaseObject):
         device: Optional[str],
     ) -> dict:
         """Builds container parameters dictionary."""
-        # Only return a key of "folder", "snippet", or "device" if their value is not None
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -356,79 +361,82 @@ class SecurityRule(BaseObject):
                 - tag: List[str] - Filter by tags
                 - disabled: bool - Filter by disabled status
                 - profile_setting: List[str] - Filter by profile setting groups
+
         Raises:
-            EmptyFieldError: If provided container fields are empty
-            FolderNotFoundError: If the specified folder doesn't exist
-            ValidationError: If the container parameters are invalid
-            BadResponseError: If response format is invalid
+            MissingQueryParameterError: If provided container fields are empty
+            InvalidObjectError: If the container parameters are invalid
+            APIError: If response format is invalid
         """
-        # If the folder object is empty, raise exception
         if folder == "":
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
-        # Validate rulebase using the enum
         if not isinstance(rulebase, Rulebase):
             try:
                 rulebase = Rulebase(rulebase.lower())
             except ValueError:
-                raise ValueError("rulebase must be either 'pre' or 'post'")
+                raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
-        # Set the parameters, starting with a high limit for more than the default 200
         params = {
             "limit": self.DEFAULT_LIMIT,
             "position": rulebase.value,
         }
 
-        # Build the configuration container object (folder, snippet, or device)
         container_parameters = self._build_container_params(
             folder,
             snippet,
             device,
         )
 
-        # Ensure that we have only a single instance of "folder", "device", or "snippet"
         if len(container_parameters) != 1:
-            raise ValidationError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            raise InvalidObjectError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                error_code="E003",
+                http_status_code=400,
             )
 
-        # Add the resulting container object to our parameters
         params.update(container_parameters)
 
-        # Perform our request
         try:
             response = self.api_client.get(
                 self.ENDPOINT,
                 params=params,
             )
 
-            # return errors if invalid structure
             if not isinstance(response, dict):
-                raise BadResponseError("Invalid response format: expected dictionary")
-
-            if "data" not in response:
-                raise BadResponseError("Invalid response format: missing 'data' field")
-
-            if not isinstance(response["data"], list):
-                raise BadResponseError(
-                    "Invalid response format: 'data' field must be a list"
+                raise APIError(
+                    "Invalid response format: expected dictionary",
+                    http_status_code=500,
                 )
 
-            # Return a list object of the entries as Pydantic modeled objects
-            rules = [SecurityRuleResponseModel(**item) for item in response["data"]]
+            if "data" not in response:
+                raise APIError(
+                    "Invalid response format: missing 'data' field",
+                    http_status_code=500,
+                )
 
-            # Apply client-side filtering
+            if not isinstance(response["data"], list):
+                raise APIError(
+                    "Invalid response format: 'data' field must be a list",
+                    http_status_code=500,
+                )
+
+            rules = [SecurityRuleResponseModel(**item) for item in response["data"]]
             return self._apply_filters(rules, filters)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+            if isinstance(e, APIError):
+                self.logger.error(f"API error while listing security rules: {e}")
+                raise
+            else:
+                self.logger.error(
+                    f"An unexpected error occurred while listing security rules: {e}"
+                )
+                raise APIError("An unexpected error occurred") from e
 
     def fetch(
         self,
@@ -452,54 +460,50 @@ class SecurityRule(BaseObject):
             Dict: The fetched object.
 
         Raises:
-            EmptyFieldError: If name or container fields are empty
-            FolderNotFoundError: If the specified folder doesn't exist
-            ObjectNotPresentError: If the object is not found
-            ValidationError: If the parameters are invalid
-            BadResponseError: For other API-related errors
+            MissingQueryParameterError: If name or container fields are empty
+            InvalidObjectError: If the parameters are invalid
+            APIError: For other API-related errors
         """
         if not name:
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'name' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"name" is not allowed to be empty'],  # noqa
             )
 
         if folder == "":
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
-        # Validate rulebase using the enum
         if not isinstance(rulebase, Rulebase):
             try:
                 rulebase = Rulebase(rulebase.lower())
             except ValueError:
-                raise ValueError("rulebase must be either 'pre' or 'post'")
+                raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
-        # Build the configuration container object (folder, snippet, or device)
         container_parameters = self._build_container_params(
             folder,
             snippet,
             device,
         )
 
-        # Ensure that we have only a single instance of "folder", "device", or "snippet"
         if len(container_parameters) != 1:
-            raise ValidationError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            raise InvalidObjectError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                error_code="E003",
+                http_status_code=400,
             )
 
-        # Start with container parameters and add position
         params = {
             **container_parameters,
             "position": rulebase.value,
             "name": name,
         }
-
-        # Add name parameter
 
         try:
             response = self.api_client.get(
@@ -507,33 +511,39 @@ class SecurityRule(BaseObject):
                 params=params,
             )
 
-            # return errors if invalid structure
             if not isinstance(response, dict):
-                raise BadResponseError("Invalid response format: expected dictionary")
+                raise APIError(
+                    "Invalid response format: expected dictionary",
+                    http_status_code=500,
+                )
 
-            # If the response has a key of "_errors", pass to our custom error handler
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response)
+                ErrorHandler.raise_for_error(response, http_status_code=400)
 
-            # If the response has a key of "id"
-            elif "id" in response:
-                # Create a new object by passing the response through our Pydantic model
+            if "id" in response:
                 rule = SecurityRuleResponseModel(**response)
-
-                # Return an instance of the object as a Python dictionary
                 return rule.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
                 )
-
             else:
-                raise BadResponseError("Invalid response format: missing 'id' field")
+                raise APIError(
+                    "Invalid response format: missing 'id' field",
+                    http_status_code=500,
+                )
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error fetching security rule: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     def delete(
         self,
@@ -550,15 +560,14 @@ class SecurityRule(BaseObject):
         Raises:
             ObjectNotPresentError: If the object doesn't exist
             ReferenceNotZeroError: If the object is still referenced by other objects
-            MalformedRequestError: If the request is malformed
+            MalformedCommandError: If the request is malformed
         """
         try:
-            # Validate rulebase using the enum
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
-                    raise ValueError("rulebase must be either 'pre' or 'post'")
+                    raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(
@@ -566,11 +575,18 @@ class SecurityRule(BaseObject):
                 params={"position": rulebase.value},
             )
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error deleting security rule: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     def move(
         self,
@@ -588,31 +604,34 @@ class SecurityRule(BaseObject):
                 - destination_rule: UUID of reference rule (required for 'before'/'after')
 
         Raises:
-            ValidationError: If the move parameters are invalid
+            InvalidObjectError: If the move parameters are invalid
             ObjectNotPresentError: If the referenced rules don't exist
-            MalformedRequestError: If the request is malformed
+            MalformedCommandError: If the request is malformed
         """
         try:
             rule_id_str = str(rule_id)
-            # Create move configuration with the provided rule_id and data
             move_config = SecurityRuleMoveModel(
                 source_rule=rule_id,
                 **data,
             )
-
-            # Convert to dict for API request, excluding None values
             payload = move_config.model_dump(exclude_none=True)
             payload["source_rule"] = rule_id_str
 
-            # Make the API call
             endpoint = f"{self.ENDPOINT}/{rule_id_str}:move"
             self.api_client.post(
                 endpoint,
                 json=payload,
             )
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error moving security rule: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
