@@ -1,6 +1,7 @@
 # scm/config/objects/service.py
 
 from typing import List, Dict, Any, Optional
+import logging
 from scm.config import BaseObject
 from scm.models.objects import (
     ServiceCreateModel,
@@ -8,11 +9,12 @@ from scm.models.objects import (
     ServiceUpdateModel,
 )
 from scm.exceptions import (
-    ValidationError,
-    EmptyFieldError,
+    InvalidObjectError,
+    MissingQueryParameterError,
     ErrorHandler,
-    BadResponseError,
+    APIError,
 )
+from scm.utils.logging import setup_logger
 
 
 class Service(BaseObject):
@@ -26,8 +28,13 @@ class Service(BaseObject):
     def __init__(
         self,
         api_client,
+        log_level: int = logging.ERROR,
     ):
         super().__init__(api_client)
+        self.logger = setup_logger(
+            __name__,
+            log_level=log_level,
+        )
 
     def create(
         self,
@@ -40,26 +47,26 @@ class Service(BaseObject):
             ServiceResponseModel
 
         Raises:
-            Custom Error Handling class response
+            APIError: For any API-related errors
         """
         try:
-            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             service = ServiceCreateModel(**data)
-
-            # Convert back to a Python dictionary, but removing any excluded object
             payload = service.model_dump(exclude_unset=True)
-
-            # Send the updated object to the remote API as JSON
-            response = self.api_client.post(self.ENDPOINT, json=payload)
-
-            # Return the SCM API response as a new Pydantic object
+            response = self.api_client.post(
+                self.ENDPOINT,
+                json=payload,
+            )
             return ServiceResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+            if isinstance(e, APIError):
+                self.logger.error(f"API error while creating service: {e}")
+                raise
+            else:
+                self.logger.error(
+                    f"An unexpected error occurred while creating service: {e}"
+                )
+                raise APIError("An unexpected error occurred") from e
 
     def get(
         self,
@@ -72,21 +79,25 @@ class Service(BaseObject):
             ServiceResponseModel
 
         Raises:
-            Custom Error Handling class response
+            APIError: For any API-related errors
         """
         try:
-            # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(endpoint)
-
-            # Return the SCM API response as a new Pydantic object
             return ServiceResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error getting service: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     def update(
         self,
@@ -99,27 +110,30 @@ class Service(BaseObject):
             ServiceResponseModel
 
         Raises:
-            Custom Error Handling class response
+            APIError: For any API-related errors
         """
         try:
-            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             service = ServiceUpdateModel(**data)
-
-            # Convert back to a Python dictionary, but removing any excluded object
             payload = service.model_dump(exclude_unset=True)
-
-            # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(endpoint, json=payload)
-
-            # Return the SCM API response as a new Pydantic object
+            response = self.api_client.put(
+                endpoint,
+                json=payload,
+            )
             return ServiceResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error updating service: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     @staticmethod
     def _apply_filters(
@@ -135,15 +149,15 @@ class Service(BaseObject):
 
         Returns:
             List[ServiceResponseModel]: Filtered list of services
+
+        Raises:
+            InvalidObjectError: If filter criteria are invalid
         """
-        # Build a list of what criteria we are looking to filter our response from
         filter_criteria = services
 
-        # Perform filtering if the presence of "protocol" is found within the filters
         if "protocol" in filters:
             if not isinstance(filters["protocol"], list):
-                raise ValidationError("'protocol' filter must be a list")
-
+                raise InvalidObjectError("'protocol' filter must be a list")
             protocols = filters["protocol"]
             filter_criteria = [
                 svc
@@ -151,11 +165,9 @@ class Service(BaseObject):
                 if any(getattr(svc.protocol, proto) is not None for proto in protocols)
             ]
 
-        # Perform filtering if the presence of "tag" is found within the filters
         if "tag" in filters:
             if not isinstance(filters["tag"], list):
-                raise ValidationError("'tag' filter must be a list")
-
+                raise InvalidObjectError("'tag' filter must be a list")
             tags = filters["tag"]
             filter_criteria = [
                 svc
@@ -172,7 +184,6 @@ class Service(BaseObject):
         device: Optional[str],
     ) -> dict:
         """Builds container parameters dictionary."""
-        # Only return a key of "folder", "snippet", or "device" if their value is not None
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -196,69 +207,72 @@ class Service(BaseObject):
             **filters: Additional filters including:
                 - protocol: List[str] - Filter by protocol type (e.g., ['tcp', 'udp'])
                 - tag: List[str] - Filter by tags
+
         Raises:
-            EmptyFieldError: If provided container fields are empty
-            FolderNotFoundError: If the specified folder doesn't exist
-            ValidationError: If the container parameters are invalid
-            BadResponseError: If response format is invalid
+            MissingQueryParameterError: If provided container fields are empty
+            InvalidObjectError: If the container parameters are invalid
+            APIError: If response format is invalid
         """
-        # If the folder object is empty, raise exception
         if folder == "":
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
-        # Set the parameters, starting with a high limit for more than the default 200
         params = {"limit": self.DEFAULT_LIMIT}
-
-        # Build the configuration container object (folder, snippet, or device)
         container_parameters = self._build_container_params(
             folder,
             snippet,
             device,
         )
 
-        # Ensure that we have only a single instance of "folder", "device", or "snippet"
         if len(container_parameters) != 1:
-            raise ValidationError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            raise InvalidObjectError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                error_code="E003",
+                http_status_code=400,
             )
 
-        # Add the resulting container object to our parameters
         params.update(container_parameters)
 
-        # Perform our request
         try:
             response = self.api_client.get(
                 self.ENDPOINT,
                 params=params,
             )
 
-            # return errors if invalid structure
             if not isinstance(response, dict):
-                raise BadResponseError("Invalid response format: expected dictionary")
-
-            if "data" not in response:
-                raise BadResponseError("Invalid response format: missing 'data' field")
-
-            if not isinstance(response["data"], list):
-                raise BadResponseError(
-                    "Invalid response format: 'data' field must be a list"
+                raise APIError(
+                    "Invalid response format: expected dictionary",
+                    http_status_code=500,
                 )
 
-            # Return a list object of the entries as Pydantic modeled objects
-            services = [ServiceResponseModel(**item) for item in response["data"]]
+            if "data" not in response:
+                raise APIError(
+                    "Invalid response format: missing 'data' field",
+                    http_status_code=500,
+                )
 
-            # Apply client-side filtering
+            if not isinstance(response["data"], list):
+                raise APIError(
+                    "Invalid response format: 'data' field must be a list",
+                    http_status_code=500,
+                )
+
+            services = [ServiceResponseModel(**item) for item in response["data"]]
             return self._apply_filters(services, filters)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+            if isinstance(e, APIError):
+                self.logger.error(f"API error while listing services: {e}")
+                raise
+            else:
+                self.logger.error(
+                    f"An unexpected error occurred while listing services: {e}"
+                )
+                raise APIError("An unexpected error occurred") from e
 
     def fetch(
         self,
@@ -280,43 +294,41 @@ class Service(BaseObject):
             Dict: The fetched object.
 
         Raises:
-            EmptyFieldError: If name or container fields are empty
-            FolderNotFoundError: If the specified folder doesn't exist
-            ObjectNotPresentError: If the object is not found
-            ValidationError: If the parameters are invalid
-            BadResponseError: For other API-related errors
+            MissingQueryParameterError: If name or container fields are empty
+            InvalidObjectError: If the parameters are invalid
+            APIError: For other API-related errors
         """
         if not name:
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'name' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"name" is not allowed to be empty'],  # noqa
             )
 
         if folder == "":
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
-        # Build the configuration container object (folder, snippet, or device)
+        params = {}
         container_parameters = self._build_container_params(
             folder,
             snippet,
             device,
         )
 
-        # Ensure that we have only a single instance of "folder", "device", or "snippet"
         if len(container_parameters) != 1:
-            raise ValidationError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            raise InvalidObjectError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                error_code="E003",
+                http_status_code=400,
             )
 
-        # Start with container parameters
-        params = container_parameters
-
-        # Add name parameter
+        params.update(container_parameters)
         params["name"] = name
 
         try:
@@ -325,33 +337,39 @@ class Service(BaseObject):
                 params=params,
             )
 
-            # return errors if invalid structure
             if not isinstance(response, dict):
-                raise BadResponseError("Invalid response format: expected dictionary")
+                raise APIError(
+                    "Invalid response format: expected dictionary",
+                    http_status_code=500,
+                )
 
-            # If the response has a key of "_errors", pass to our custom error handler
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response)
+                ErrorHandler.raise_for_error(response, http_status_code=400)
 
-            # If the response has a key of "id"
-            elif "id" in response:
-                # Create a new object by passing the response through our Pydantic model
+            if "id" in response:
                 service = ServiceResponseModel(**response)
-
-                # Return an instance of the object as a Python dictionary
                 return service.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
                 )
-
             else:
-                raise BadResponseError("Invalid response format: missing 'id' field")
+                raise APIError(
+                    "Invalid response format: missing 'id' field",
+                    http_status_code=500,
+                )
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error fetching service: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
 
     def delete(
         self,
@@ -366,14 +384,21 @@ class Service(BaseObject):
         Raises:
             ObjectNotPresentError: If the object doesn't exist
             ReferenceNotZeroError: If the object is still referenced by other objects
-            MalformedRequestError: If the request is malformed
+            MalformedCommandError: If the request is malformed
         """
         try:
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(endpoint)
 
-        # Forward exceptions to our custom ErrorHandler object
         except Exception as e:
+            self.logger.error(
+                f"Error deleting service: {e}",
+                exc_info=True,
+            )
             if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
+            else:
+                raise APIError(f"An unexpected error occurred: {e}") from e
