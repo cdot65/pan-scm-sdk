@@ -65,12 +65,22 @@ class Scm:
                 return None  # Return None or an empty dict
         except requests.exceptions.HTTPError as http_err:
             http_status_code = response.status_code
-            error_content = response.json() if response.content else {}
+            error_content = {}
+            try:
+                error_content = response.json() if response.content else {}
+            except ValueError:
+                self.logger.error(f"Failed to parse error response: {response.content}")
             self.logger.error(f"HTTP error occurred: {http_err} - {error_content}")
-            ErrorHandler.raise_for_error(
-                error_content,
-                http_status_code,
-            )
+
+            try:
+                ErrorHandler.raise_for_error(
+                    error_content,
+                    http_status_code,
+                )
+            except ValueError as ve:
+                self.logger.error(f"Invalid error response format: {ve}")
+                raise APIError("An error occurred.") from ve
+            # Remove the generic exception handler to let specific exceptions propagate
         except Exception as e:
             self.logger.error(f"API request failed: {str(e)}")
             raise APIError(f"API request failed: {str(e)}") from e
