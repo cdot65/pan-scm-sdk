@@ -1,6 +1,6 @@
 # scm/exceptions/__init__.py
 
-from typing import Optional, Dict, Any, Type
+from typing import Optional, Dict, Any, Type, Union, List
 from dataclasses import dataclass
 
 
@@ -10,7 +10,7 @@ class ErrorResponse:
 
     code: str
     message: str
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[Union[Dict[str, Any], List[Any]]] = None
     request_id: Optional[str] = None
 
     @classmethod
@@ -22,7 +22,7 @@ class ErrorResponse:
         return cls(
             code=error.get("code", ""),
             message=error.get("message", ""),
-            details=error.get("details", {}),
+            details=error.get("details"),
             request_id=response_data.get("_request_id"),
         )
 
@@ -247,11 +247,20 @@ class ErrorHandler:
             "Action Not Supported": ActionNotSupportedError,
         },
         "4": SessionTimeoutError,
+        "API_I00013": {
+            "Object Not Present": ObjectNotPresentError,
+            "Operation Impossible": ObjectNotPresentError,
+            "Object Already Exists": ConflictError,
+            "Malformed Command": MalformedCommandError,
+        },
+        "API_I00035": InvalidObjectError,
     }
 
     @classmethod
     def raise_for_error(
-        cls, response_data: Dict[str, Any], http_status_code: int
+        cls,
+        response_data: Dict[str, Any],
+        http_status_code: int,
     ) -> None:
         error_response = ErrorResponse.from_response(response_data)
         # Get base exception class from HTTP status code
@@ -260,12 +269,23 @@ class ErrorHandler:
         # Refine exception class based on error code and message
         error_code = error_response.code
         message = error_response.message
+        error_details = error_response.details
+        error_type = None
+        if isinstance(error_details, dict):
+            error_type = error_details.get("errorType")
 
         if error_code in cls.ERROR_CODE_MAP:
             code_mapping = cls.ERROR_CODE_MAP[error_code]
             if isinstance(code_mapping, dict):
-                # Match based on message
-                exception_cls = code_mapping.get(message, exception_cls)
+                # First, try to match errorType
+                if error_type and error_type in code_mapping:
+                    exception_cls = code_mapping[error_type]
+                # Then, try to match message
+                elif message in code_mapping:
+                    exception_cls = code_mapping[message]
+                else:
+                    # Fallback to base exception class from status code
+                    exception_cls = exception_cls
             else:
                 exception_cls = code_mapping
 
@@ -273,6 +293,6 @@ class ErrorHandler:
             message=message,
             error_code=error_code,
             http_status_code=http_status_code,
-            details=error_response.details,
+            details=error_details,
             request_id=error_response.request_id,
         )
