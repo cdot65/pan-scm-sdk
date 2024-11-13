@@ -4,35 +4,37 @@ import logging
 import sys
 
 
-def setup_logger(name: str) -> logging.Logger:
+def setup_logger(name: str, log_level: int = logging.ERROR) -> logging.Logger:
     """
     Set up and return a configured logger with the given name.
 
-    This function creates a logger with DEBUG level, adds a console handler,
+    This function creates a logger with the specified level, adds a console handler,
     and sets a formatter for consistent log message formatting.
 
-    Attributes:
+    Args:
         name (str): The name to be assigned to the logger.
+        log_level (int): Logging level (e.g., logging.DEBUG, logging.INFO).
 
-    Return:
+    Returns:
         logger (logging.Logger): A configured logger instance.
     """
 
-    """Set up and return a logger with the given name."""
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(log_level)
 
-    # Console handler
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.INFO)
+    # Avoid adding multiple handlers if they already exist
+    if not logger.handlers:
+        # Console handler
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(log_level)
 
-    # Formatter
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-    ch.setFormatter(formatter)
+        # Formatter
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        ch.setFormatter(formatter)
 
-    # Add handler to logger
-    logger.addHandler(ch)
+        # Add handler to logger
+        logger.addHandler(ch)
 
     return logger
