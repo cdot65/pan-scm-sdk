@@ -1,17 +1,7 @@
 # scm/exceptions/__init__.py
 
-from typing import Dict, Any, Optional, Type, List, Union
+from typing import Optional, Dict, Any, Type
 from dataclasses import dataclass
-
-
-@dataclass
-class ReferenceDetail:
-    """Represents details about an object reference."""
-
-    type: str
-    message: str
-    params: List[str]
-    extra: List[str]
 
 
 @dataclass
@@ -20,7 +10,7 @@ class ErrorResponse:
 
     code: str
     message: str
-    details: Optional[Union[Dict[str, Any], List[str]]] = None
+    details: Optional[Dict[str, Any]] = None
     request_id: Optional[str] = None
 
     @classmethod
@@ -38,249 +28,251 @@ class ErrorResponse:
 
 
 class APIError(Exception):
-    """Base class for API exceptions."""
+    """Base class for all API exceptions."""
 
     def __init__(
         self,
         message: str,
         error_code: Optional[str] = None,
+        http_status_code: Optional[int] = None,
         details: Optional[Dict[str, Any]] = None,
         request_id: Optional[str] = None,
-        references: Optional[List[str]] = None,
     ):
         super().__init__(message)
         self.message = message
         self.error_code = error_code
+        self.http_status_code = http_status_code
         self.details = details or {}
         self.request_id = request_id
-        self.references = references or []
 
-    @classmethod
-    def from_error_response(cls, error_response: ErrorResponse) -> "APIError":
-        """Creates an APIError instance from an ErrorResponse."""
-        return cls(
-            message=error_response.message,
-            error_code=error_response.code,
-            details=error_response.details,
-            request_id=error_response.request_id,
-        )
-
-
-class AuthenticationError(APIError):
-    """Raised when authentication fails."""
-
-
-class AuthorizationError(APIError):
-    """Raised when authorization fails (Forbidden access)."""
+    def __str__(self):
+        parts = []
+        if self.http_status_code is not None:
+            parts.append(f"HTTP {self.http_status_code}")
+        if self.error_code:
+            parts.append(f"Error {self.error_code}")
+        if self.message:
+            parts.append(f"{self.message}")
+        if self.details:
+            parts.append(f"Details: {self.details}")
+        if self.request_id:
+            parts.append(f"Request ID: {self.request_id}")
+        return ": ".join(parts)
 
 
-class BadRequestError(APIError):
-    """Raised when the API request is invalid."""
-
-
-class BadResponseError(APIError):
-    """Raised when the API request is invalid."""
-
-
-class NotFoundError(APIError):
-    """Raised when a requested resource is not found."""
-
-
-class ObjectNotPresentError(NotFoundError):
-    """Raised when a specific object is not found."""
-
-
-class FolderNotFoundError(NotFoundError):
-    """Raised when a specified folder does not exist."""
-
-
-class ConflictError(APIError):
-    """Raised when there is a conflict in the request."""
+# Base classes for HTTP status codes
+class ClientError(APIError):
+    """Base class for 4xx client errors."""
 
 
 class ServerError(APIError):
-    """Raised when the server encounters an error."""
+    """Base class for 5xx server errors."""
 
 
-class ValidationError(APIError):
-    """Raised when data validation fails."""
+# Authentication Errors (HTTP 401)
+class AuthenticationError(ClientError):
+    """Raised when authentication fails (HTTP 401 Unauthorized)."""
 
 
-class EmptyFieldError(ValidationError):
-    """Raised when a required field is empty."""
+class NotAuthenticatedError(AuthenticationError):
+    """Raised when not authenticated (E016: Not Authenticated)."""
 
 
-class MalformedRequestError(APIError):
-    """Raised when the request is malformed."""
+class InvalidCredentialError(AuthenticationError):
+    """Raised when credentials are invalid (E016: Invalid Credential)."""
 
 
-class ObjectAlreadyExistsError(APIError):
-    """Raised when attempting to create an object that already exists."""
+class KeyTooLongError(AuthenticationError):
+    """Raised when the key is too long (E016: Key Too Long)."""
 
 
-class SessionTimeoutError(APIError):
-    """Raised when the session has timed out."""
+class KeyExpiredError(AuthenticationError):
+    """Raised when the key has expired (E016: Key Expired)."""
 
 
-class MethodNotAllowedError(APIError):
-    """Raised when the HTTP method is not allowed."""
+class PasswordChangeRequiredError(AuthenticationError):
+    """Raised when a password change is required (E016: The password needs to be changed)."""
+
+
+# Access Errors (HTTP 403)
+class AuthorizationError(ClientError):
+    """Raised when authorization fails (HTTP 403 Forbidden)."""
+
+
+class UnauthorizedError(AuthorizationError):
+    """Raised when unauthorized access is attempted (E007: Unauthorized)."""
+
+
+# Bad Request Errors (HTTP 400)
+class BadRequestError(ClientError):
+    """Raised for bad requests (HTTP 400 Bad Request)."""
+
+
+class InputFormatMismatchError(BadRequestError):
+    """Raised when input format mismatches (E003: Input Format Mismatch)."""
+
+
+class OutputFormatMismatchError(BadRequestError):
+    """Raised when output format mismatches (E003: Output Format Mismatch)."""
+
+
+class MissingQueryParameterError(BadRequestError):
+    """Raised when a query parameter is missing (E003: Missing Query Parameter)."""
+
+
+class InvalidQueryParameterError(BadRequestError):
+    """Raised when a query parameter is invalid (E003: Invalid Query Parameter)."""
+
+
+class MissingBodyError(BadRequestError):
+    """Raised when the request body is missing (E003: Missing Body)."""
+
+
+class InvalidObjectError(BadRequestError):
+    """Raised when an invalid object is provided (E003: Invalid Object)."""
 
 
 class InvalidCommandError(BadRequestError):
-    """Raised when an invalid command is sent to the API."""
+    """Raised when an invalid command is issued (E003: Invalid Command)."""
 
 
-class InvalidParameterError(BadRequestError):
-    """Raised when a query parameter is invalid."""
+class MalformedCommandError(BadRequestError):
+    """Raised when a command is malformed (E003: Malformed Command)."""
 
 
-class MissingParameterError(BadRequestError):
-    """Raised when a required parameter is missing."""
+class BadXPathError(BadRequestError):
+    """Raised when an invalid XPath is used (E013: Bad XPath)."""
 
 
-class InputFormatError(BadRequestError):
-    """Raised when the input format is incorrect."""
+# Not Found Errors (HTTP 404)
+class NotFoundError(ClientError):
+    """Raised when a resource is not found (HTTP 404 Not Found)."""
 
 
-class OutputFormatError(BadRequestError):
-    """Raised when the output format is incorrect."""
+class ObjectNotPresentError(NotFoundError):
+    """Raised when the object is not present (E005: Object Not Present)."""
 
 
-class VersionNotSupportedError(APIError):
-    """Raised when the API version is not supported."""
+# Conflict Errors (HTTP 409)
+class ConflictError(ClientError):
+    """Raised when there is a conflict (HTTP 409 Conflict)."""
+
+
+class ObjectNotUniqueError(ConflictError):
+    """Raised when the object is not unique (E016: Object Not Unique)."""
+
+
+class NameNotUniqueError(ConflictError):
+    """Raised when the name is not unique (E006: Name Not Unique)."""
+
+
+class ReferenceNotZeroError(ConflictError):
+    """Raised when the reference count is not zero (E009: Reference Not Zero)."""
+
+
+# Method Not Allowed (HTTP 405)
+class MethodNotAllowedError(ClientError):
+    """Raised when the method is not allowed (HTTP 405 Method Not Allowed)."""
 
 
 class ActionNotSupportedError(MethodNotAllowedError):
-    """Raised when the requested action is not supported."""
+    """Raised when the action is not supported (E012: Action Not Supported)."""
 
 
-class ReferenceNotZeroError(APIError):
-    """
-    Raised when attempting to delete an object that is still being referenced by other objects.
-
-    Attributes:
-        references (List[str]): List of references to the object preventing deletion
-        reference_paths (List[str]): Full paths to the referring objects
-    """
-
-    def __init__(
-        self,
-        message: str,
-        error_code: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
-        request_id: Optional[str] = None,
-        references: Optional[List[str]] = None,
-        reference_paths: Optional[List[str]] = None,
-    ):
-        super().__init__(message, error_code, details, request_id, references)
-        self.reference_paths = reference_paths or []
-
-        # Format a more detailed error message
-        ref_details = "\n".join([f"- {path}" for path in (self.reference_paths or [])])
-        self.detailed_message = (
-            f"{message}\n"
-            f"This object cannot be deleted because it is referenced by:\n{ref_details}"
-        )
-
-    def __str__(self):
-        return self.detailed_message
+# Not Implemented (HTTP 501)
+class NotImplementedError(ServerError):
+    """Raised when a method is not implemented (HTTP 501 Not Implemented)."""
 
 
-class SessionExpiredError(AuthenticationError):
-    """Raised when the session has expired."""
+class VersionNotSupportedError(NotImplementedError):
+    """Raised when the API version is not supported (E012: Version Not Supported)."""
+
+
+class MethodNotSupportedError(NotImplementedError):
+    """Raised when the method is not supported (E012: Method Not Supported)."""
+
+
+# Gateway Timeout (HTTP 504)
+class GatewayTimeoutError(ServerError):
+    """Raised when a gateway timeout occurs (HTTP 504 Gateway Timeout)."""
+
+
+class SessionTimeoutError(GatewayTimeoutError):
+    """Raised when the session times out (Code '4': Session Timeout)."""
 
 
 class ErrorHandler:
     """Handles mapping of API error responses to appropriate exceptions."""
 
-    # Map API error codes to exception classes
-    ERROR_CODE_MAP: Dict[str, Type[APIError]] = {
-        "API_I00013": NotFoundError,  # Generic not found error - will be refined by error type
-        "API_I00035": ValidationError,  # Invalid request payload - will be refined by details
+    # Map HTTP status codes to base exception classes
+    ERROR_STATUS_CODE_MAP: Dict[int, Type[APIError]] = {
+        400: BadRequestError,
+        401: AuthenticationError,
+        403: AuthorizationError,
+        404: NotFoundError,
+        405: MethodNotAllowedError,
+        409: ConflictError,
+        501: NotImplementedError,
+        504: GatewayTimeoutError,
     }
 
-    # Map error types from details to exception classes
-    ERROR_TYPE_MAP: Dict[str, Type[APIError]] = {
-        "Object Not Present": ObjectNotPresentError,
-        "Operation Impossible": FolderNotFoundError,
-        "Object Already Exists": ObjectAlreadyExistsError,
-        "Malformed Command": MalformedRequestError,
+    # Map error codes to specific exception classes
+    ERROR_CODE_MAP: Dict[str, Type[APIError]] = {
+        "E016": {
+            "Not Authenticated": NotAuthenticatedError,
+            "Invalid Credential": InvalidCredentialError,
+            "Key Too Long": KeyTooLongError,
+            "Key Expired": KeyExpiredError,
+            "The password needs to be changed.": PasswordChangeRequiredError,
+            "Object Not Unique": ObjectNotUniqueError,
+        },
+        "E007": UnauthorizedError,
+        "E003": {
+            "Input Format Mismatch": InputFormatMismatchError,
+            "Output Format Mismatch": OutputFormatMismatchError,
+            "Missing Query Parameter": MissingQueryParameterError,
+            "Invalid Query Parameter": InvalidQueryParameterError,
+            "Missing Body": MissingBodyError,
+            "Invalid Object": InvalidObjectError,
+            "Invalid Command": InvalidCommandError,
+            "Malformed Command": MalformedCommandError,
+        },
+        "E013": BadXPathError,
+        "E005": ObjectNotPresentError,
+        "E006": NameNotUniqueError,
+        "E009": ReferenceNotZeroError,
+        "E012": {
+            "Version Not Supported": VersionNotSupportedError,
+            "Method Not Supported": MethodNotSupportedError,
+            "Action Not Supported": ActionNotSupportedError,
+        },
+        "4": SessionTimeoutError,
     }
 
     @classmethod
-    def raise_for_error(cls, response_data: Dict[str, Any]) -> None:
-        """
-        Raises the appropriate exception based on the API error response.
+    def raise_for_error(
+        cls, response_data: Dict[str, Any], http_status_code: int
+    ) -> None:
+        error_response = ErrorResponse.from_response(response_data)
+        # Get base exception class from HTTP status code
+        exception_cls = cls.ERROR_STATUS_CODE_MAP.get(http_status_code, APIError)
 
-        Args:
-            response_data: The error response from the API
+        # Refine exception class based on error code and message
+        error_code = error_response.code
+        message = error_response.message
 
-        Raises:
-            APIError: An appropriate subclass of APIError based on the error response
-        """
-        try:
-            error_response = ErrorResponse.from_response(response_data)
-        except ValueError:
-            raise APIError("Invalid error response format")
-
-        # Handle validation errors with empty fields
-        if error_response.code == "API_I00013":
-            if isinstance(error_response.details, dict):
-                error_type = error_response.details.get("errorType")
-
-                if error_type == "Reference Not Zero":
-                    # Extract reference details
-                    errors = error_response.details.get("errors", [])
-                    references = []
-                    reference_paths = []
-
-                    for error in errors:
-                        if isinstance(error, dict):
-                            if "params" in error:
-                                references.extend(error["params"])
-                            if "extra" in error:
-                                reference_paths.extend(error["extra"])
-
-                    # Get the reference paths from the message if available
-                    if "message" in error_response.details and isinstance(
-                        error_response.details["message"], list
-                    ):
-                        reference_paths.extend(error_response.details["message"])
-
-                    raise ReferenceNotZeroError(
-                        message="Cannot delete object due to existing references",
-                        error_code=error_response.code,
-                        details=error_response.details,
-                        request_id=response_data.get("_request_id"),
-                        references=references,
-                        reference_paths=reference_paths,
-                    )
-
-        # Get base exception class from error code
-        exception_cls = cls.ERROR_CODE_MAP.get(error_response.code)
-
-        # Refine exception class based on error type if available
-        if isinstance(error_response.details, dict):
-            error_type = error_response.details.get("errorType")
-            if error_type and error_type in cls.ERROR_TYPE_MAP:
-                exception_cls = cls.ERROR_TYPE_MAP[error_type]
-
-        # Fall back to generic APIError if no specific match
-        if not exception_cls:
-            exception_cls = APIError
-
-        # Include the detailed message if available
-        if (
-            isinstance(error_response.details, dict)
-            and "message" in error_response.details
-        ):
-            message = error_response.details["message"]
-        else:
-            message = error_response.message
+        if error_code in cls.ERROR_CODE_MAP:
+            code_mapping = cls.ERROR_CODE_MAP[error_code]
+            if isinstance(code_mapping, dict):
+                # Match based on message
+                exception_cls = code_mapping.get(message, exception_cls)
+            else:
+                exception_cls = code_mapping
 
         raise exception_cls(
             message=message,
-            error_code=error_response.code,
+            error_code=error_code,
+            http_status_code=http_status_code,
             details=error_response.details,
             request_id=error_response.request_id,
         )
