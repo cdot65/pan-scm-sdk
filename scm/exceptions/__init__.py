@@ -180,15 +180,15 @@ class ActionNotSupportedError(MethodNotAllowedError):
 
 
 # Not Implemented (HTTP 501)
-class NotImplementedError(ServerError):
+class APINotImplementedError(ServerError):
     """Raised when a method is not implemented (HTTP 501 Not Implemented)."""
 
 
-class VersionNotSupportedError(NotImplementedError):
+class VersionAPINotSupportedError(APINotImplementedError):
     """Raised when the API version is not supported (E012: Version Not Supported)."""
 
 
-class MethodNotSupportedError(NotImplementedError):
+class MethodAPINotSupportedError(APINotImplementedError):
     """Raised when the method is not supported (E012: Method Not Supported)."""
 
 
@@ -212,7 +212,7 @@ class ErrorHandler:
         404: NotFoundError,
         405: MethodNotAllowedError,
         409: ConflictError,
-        501: NotImplementedError,
+        501: APINotImplementedError,
         504: GatewayTimeoutError,
     }
 
@@ -242,8 +242,8 @@ class ErrorHandler:
         "E006": NameNotUniqueError,
         "E009": ReferenceNotZeroError,
         "E012": {
-            "Version Not Supported": VersionNotSupportedError,
-            "Method Not Supported": MethodNotSupportedError,
+            "Version Not Supported": VersionAPINotSupportedError,
+            "Method Not Supported": MethodAPINotSupportedError,
             "Action Not Supported": ActionNotSupportedError,
         },
         "4": SessionTimeoutError,
