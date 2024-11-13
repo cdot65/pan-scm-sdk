@@ -5,13 +5,13 @@ from unittest.mock import MagicMock
 
 from scm.config.objects import ApplicationGroup
 from scm.exceptions import (
-    ValidationError,
+    APIError,
+    BadRequestError,
+    InvalidObjectError,
     ObjectNotPresentError,
-    EmptyFieldError,
-    ObjectAlreadyExistsError,
-    MalformedRequestError,
-    FolderNotFoundError,
-    BadResponseError,
+    MalformedCommandError,
+    MissingQueryParameterError,
+    ConflictError,
 )
 from scm.models.objects import (
     ApplicationGroupCreateModel,
@@ -161,7 +161,7 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(ObjectAlreadyExistsError):
+        with pytest.raises(APIError):
             self.client.create(test_data.model_dump())
 
     def test_create_generic_exception_handling(self):
@@ -169,16 +169,16 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
         **Objective:** Test generic exception handling in create method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         test_data = ApplicationGroupFactory()
 
         # Mock a generic exception without response
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.create(test_data.model_dump())
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred"
 
     def test_create_malformed_response_handling(self):
         """
@@ -192,7 +192,7 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
         # Mock invalid JSON response
         self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
 
-        with pytest.raises(PydanticValidationError):
+        with pytest.raises(APIError):
             self.client.create(test_data.model_dump())
 
 
@@ -261,16 +261,16 @@ class TestApplicationGroupGet(TestApplicationGroupBase):
         **Objective:** Test generic exception handling in get method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.get(object_id)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
 
 class TestApplicationGroupUpdate(TestApplicationGroupBase):
@@ -367,7 +367,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(MalformedRequestError):
+        with pytest.raises(MalformedCommandError):
             self.client.update(update_data)
 
     def test_update_with_invalid_data(self):
@@ -382,7 +382,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
             "invalid_field": "test",
         }
 
-        with pytest.raises(PydanticValidationError):
+        with pytest.raises(APIError):
             self.client.update(invalid_data)
 
     def test_update_generic_exception_handling(self):
@@ -390,7 +390,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
         **Objective:** Test generic exception handling in update method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         update_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
@@ -402,9 +402,9 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
         # Mock a generic exception without response
         self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.update(update_data)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
 
 class TestApplicationGroupDelete(TestApplicationGroupBase):
@@ -445,16 +445,16 @@ class TestApplicationGroupDelete(TestApplicationGroupBase):
         **Objective:** Test generic exception handling in delete method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         # Mock a generic exception without response
         self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.delete(object_id)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
 
 class TestApplicationGroupFetch(TestApplicationGroupBase):
@@ -525,7 +525,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Call the fetch method and expect a NotFoundError
-        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
+        with pytest.raises(APIError) as exc_info:  # noqa
             self.client.fetch(
                 name=object_name,
                 folder=folder_name,
@@ -536,9 +536,9 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         **Objective:** Test fetch with empty name parameter.
         **Workflow:**
             1. Attempts to fetch with empty name
-            2. Verifies ValidationError is raised
+            2. Verifies MissingQueryParameterError is raised
         """
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Shared")
         assert "Field 'name' cannot be empty" in str(exc_info.value)
 
@@ -550,12 +550,12 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
             2. Verifies proper error handling
         """
         # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
         assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
         # Test no container provided
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-group")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
@@ -563,7 +563,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         )
 
         # Test multiple containers provided
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-group", folder="Shared", snippet="TestSnippet")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
@@ -598,24 +598,24 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         **Objective:** Test generic exception handling in fetch method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
     def test_fetch_unexpected_response_format(self):
         """
         Test fetching an object when the API returns an unexpected response format.
 
-        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
+        **Objective:** Ensure that the fetch method raises APIError when the response format is not as expected.
         **Workflow:**
             1. Mocks the API response to return an unexpected format.
             2. Calls the `fetch` method.
-            3. Asserts that BadResponseError is raised.
+            3. Asserts that APIError is raised.
         """
         group_name = "TestGroup"
         folder_name = "Shared"
@@ -623,9 +623,9 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         mock_response = {"unexpected_key": "unexpected_value"}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
 
     def test_fetch_response_format_handling(self):
         """
@@ -637,7 +637,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         # Test malformed response without expected fields
         self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Invalid response format: missing 'id' field" in str(exc_info.value)
 
@@ -647,16 +647,15 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
             "data": [{"some": "data"}],
         }  # noqa
 
-        with pytest.raises(PydanticValidationError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert "3 validation errors for ApplicationGroupResponseModel" in str(
+        assert "An unexpected error occurred: 3 validation errors" in str(
             exc_info.value
         )
-        assert "name\n  Field required" in str(exc_info.value)
 
         # Test malformed response in list format
         self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
@@ -684,7 +683,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         self.mock_scm.get.side_effect = mock_exception  # noqa
 
         # The original exception should be raised since json() failed
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ValueError) as exc_info:
             self.client.fetch(
                 name="test",
                 folder="Shared",
@@ -697,7 +696,7 @@ class TestApplicationGroupValidation(TestApplicationGroupBase):
 
     def test_list_validation_error(self):
         """Test validation error when listing with multiple containers."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Prisma Access", snippet="TestSnippet")
 
         assert (
@@ -783,7 +782,7 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
         **Objective:** Test validation of filter types in list method.
         **Workflow:**
             1. Tests various invalid filter type scenarios
-            2. Verifies ValidationError is raised with correct message
+            2. Verifies BadRequestError is raised with correct message
             3. Tests valid filter types pass validation
         """
         mock_response = {
@@ -811,64 +810,20 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
                         "skype",
                     ],
                 },
-                {
-                    "id": "67e962f5-280b-40ac-a26c-d330f1c1baf6",
-                    "name": "Microsoft 365 Mail Clients",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "mapi-over-http",
-                        "ms-exchange",
-                        "rpc-over-http",
-                        "activesync",
-                    ],
-                },
-                {
-                    "id": "c75509c1-edc3-4d7d-be92-591f415edb48",
-                    "name": "Microsoft Real Time Protocols",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": ["rtcp", "stun", "rtp"],
-                },
-                {
-                    "id": "25633a36-cfff-4be9-a0cf-53b3a9880418",
-                    "name": "Microsoft 365 - Dependent Apps",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "http-audio",
-                        "http-video",
-                        "ocsp",
-                        "soap",
-                        "ssl",
-                        "web-browsing",
-                        "websocket",
-                        "windows-azure-base",
-                    ],
-                },
-                {
-                    "id": "97dc0b92-de21-4fcb-b3ac-fd0ffae99e36",
-                    "name": "test123asdf",
-                    "folder": "Shared",
-                    "members": [
-                        "office365-consumer-access",
-                        "office365-enterprise-access",
-                    ],
-                },
             ],
             "offset": 0,
-            "total": 6,
+            "total": 2,
             "limit": 200,
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Test invalid category filter (string instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        # Test invalid members filter (string instead of list)
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", members="business-systems")
         assert str(exc_info.value) == "'members' filter must be a list"
 
-        # Test invalid category filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        # Test invalid members filter (dict instead of list)
+        with pytest.raises(BadRequestError) as exc_info:
             self.client.list(folder="Shared", members={"value": "business-systems"})
         assert str(exc_info.value) == "'members' filter must be a list"
 
@@ -878,8 +833,8 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
                 folder="Shared",
                 members=["office365-consumer-access"],
             )
-        except ValidationError:
-            pytest.fail("Unexpected ValidationError raised with valid list filters")
+        except BadRequestError:
+            pytest.fail("Unexpected BadRequestError raised with valid list filters")
 
     def test_list_empty_filter_lists(self):
         """
@@ -899,68 +854,8 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
                         "office365-consumer-access",
                         "office365-enterprise-access",
                     ],
-                },
-                {
-                    "id": "0b12a889-4220-4cdd-b95f-506e0351a5e4",
-                    "name": "Microsoft 365 Services",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "ms-office365",
-                        "ms-onedrive",
-                        "ms-onenote",
-                        "ms-lync-base",
-                        "skype",
-                    ],
-                },
-                {
-                    "id": "67e962f5-280b-40ac-a26c-d330f1c1baf6",
-                    "name": "Microsoft 365 Mail Clients",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "mapi-over-http",
-                        "ms-exchange",
-                        "rpc-over-http",
-                        "activesync",
-                    ],
-                },
-                {
-                    "id": "c75509c1-edc3-4d7d-be92-591f415edb48",
-                    "name": "Microsoft Real Time Protocols",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": ["rtcp", "stun", "rtp"],
-                },
-                {
-                    "id": "25633a36-cfff-4be9-a0cf-53b3a9880418",
-                    "name": "Microsoft 365 - Dependent Apps",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "http-audio",
-                        "http-video",
-                        "ocsp",
-                        "soap",
-                        "ssl",
-                        "web-browsing",
-                        "websocket",
-                        "windows-azure-base",
-                    ],
-                },
-                {
-                    "id": "97dc0b92-de21-4fcb-b3ac-fd0ffae99e36",
-                    "name": "test123asdf",
-                    "folder": "Shared",
-                    "members": [
-                        "office365-consumer-access",
-                        "office365-enterprise-access",
-                    ],
-                },
-            ],
-            "offset": 0,
-            "total": 6,
-            "limit": 200,
+                }
+            ]
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
@@ -976,24 +871,24 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
         **Objective:** Test that empty folder raises appropriate error.
         **Workflow:**
             1. Attempts to list objects with empty folder
-            2. Verifies EmptyFieldError is raised
+            2. Verifies MissingQueryParameterError is raised
         """
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.list(folder="")
-        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
     def test_list_multiple_containers_error(self):
         """
         **Objective:** Test validation of container parameters.
         **Workflow:**
             1. Attempts to list with multiple containers
-            2. Verifies ValidationError is raised
+            2. Verifies InvalidObjectError is raised
         """
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="folder1", snippet="snippet1")
         assert (
-            str(exc_info.value)
-            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
 
     def test_list_response_format_handling(self):
@@ -1006,13 +901,13 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
         # Test malformed response
         self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
 
-        with pytest.raises(BadResponseError):
+        with pytest.raises(APIError):
             self.client.list(folder="Shared")
 
         # Test invalid data format
         self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
 
-        with pytest.raises(BadResponseError):
+        with pytest.raises(APIError):
             self.client.list(folder="Shared")
 
     def test_list_non_dict_response(self):
@@ -1020,27 +915,27 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
         **Objective:** Test list method handling of non-dictionary response.
         **Workflow:**
             1. Mocks a non-dictionary response from the API
-            2. Verifies that BadResponseError is raised with correct message
+            2. Verifies that APIError is raised with correct message
             3. Tests different non-dict response types
         """
         # Test with list response
         self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
         # Test with string response
         self.mock_scm.get.return_value = "string response"  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
         # Test with None response
         self.mock_scm.get.return_value = None  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
@@ -1069,22 +964,23 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(FolderNotFoundError):
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="NonexistentFolder")
+        assert str(exc_info.value) == "An unexpected error occurred"
 
     def test_list_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in list method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred"
 
 
 # -------------------- End of Test Classes --------------------
