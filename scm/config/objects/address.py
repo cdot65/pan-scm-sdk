@@ -31,7 +31,10 @@ class Address(BaseObject):
         log_level: int = logging.ERROR,
     ):
         super().__init__(api_client)
-        self.logger = setup_logger(__name__, log_level=log_level)
+        self.logger = setup_logger(
+            __name__,
+            log_level=log_level,
+        )
 
     def create(
         self,
@@ -54,7 +57,10 @@ class Address(BaseObject):
             payload = address.model_dump(exclude_unset=True)
 
             # Send the updated object to the remote API as JSON
-            response = self.api_client.post(self.ENDPOINT, json=payload)
+            response = self.api_client.post(
+                self.ENDPOINT,
+                json=payload,
+            )
 
             # Return the SCM API response as a new Pydantic object
             return AddressResponseModel(**response)
@@ -91,9 +97,15 @@ class Address(BaseObject):
             return AddressResponseModel(**response)
 
         except Exception as e:
-            self.logger.error(f"Error getting address: {e}", exc_info=True)
-            if hasattr(e, "response") and e.response is not None:
-                ErrorHandler.raise_for_error(e.response.json(), e.response.status_code)
+            self.logger.error(
+                f"Error getting address: {e}",
+                exc_info=True,
+            )
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
             else:
                 raise APIError(f"An unexpected error occurred: {e}") from e
 
@@ -119,15 +131,24 @@ class Address(BaseObject):
 
             # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(endpoint, json=payload)
+            response = self.api_client.put(
+                endpoint,
+                json=payload,
+            )
 
             # Return the SCM API response as a new Pydantic object
             return AddressResponseModel(**response)
 
         except Exception as e:
-            self.logger.error(f"Error updating address: {e}", exc_info=True)
-            if hasattr(e, "response") and e.response is not None:
-                ErrorHandler.raise_for_error(e.response.json(), e.response.status_code)
+            self.logger.error(
+                f"Error updating address: {e}",
+                exc_info=True,
+            )
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
             else:
                 raise APIError(f"An unexpected error occurred: {e}") from e
 
@@ -234,7 +255,7 @@ class Address(BaseObject):
                 message="Field 'folder' cannot be empty",
                 error_code="E003",
                 http_status_code=400,
-                details=['"folder" is not allowed to be empty'],
+                details=['"folder" is not allowed to be empty'],  # noqa
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
@@ -323,7 +344,7 @@ class Address(BaseObject):
                 message="Field 'name' cannot be empty",
                 error_code="E003",
                 http_status_code=400,
-                details=['"name" is not allowed to be empty'],
+                details=['"name" is not allowed to be empty'],  # noqa
             )
 
         if folder == "":
@@ -331,7 +352,7 @@ class Address(BaseObject):
                 message="Field 'folder' cannot be empty",
                 error_code="E003",
                 http_status_code=400,
-                details=['"folder" is not allowed to be empty'],
+                details=['"folder" is not allowed to be empty'],  # noqa
             )
 
         params = {}
@@ -380,9 +401,15 @@ class Address(BaseObject):
                 )
 
         except Exception as e:
-            self.logger.error(f"Error fetching address: {e}", exc_info=True)
-            if hasattr(e, "response") and e.response is not None:
-                ErrorHandler.raise_for_error(e.response.json(), e.response.status_code)
+            self.logger.error(
+                f"Error fetching address: {e}",
+                exc_info=True,
+            )
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
             else:
                 raise APIError(f"An unexpected error occurred: {e}") from e
 
@@ -406,8 +433,14 @@ class Address(BaseObject):
             self.api_client.delete(endpoint)
 
         except Exception as e:
-            self.logger.error(f"Error deleting address: {e}", exc_info=True)
-            if hasattr(e, "response") and e.response is not None:
-                ErrorHandler.raise_for_error(e.response.json(), e.response.status_code)
+            self.logger.error(
+                f"Error deleting address: {e}",
+                exc_info=True,
+            )
+            if hasattr(e, "response") and e.response is not None:  # noqa
+                ErrorHandler.raise_for_error(
+                    e.response.json(),
+                    e.response.status_code,
+                )
             else:
                 raise APIError(f"An unexpected error occurred: {e}") from e
