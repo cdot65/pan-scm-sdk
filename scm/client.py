@@ -1,11 +1,11 @@
 # scm/client.py
+import sys
 from typing import Optional, Dict, Any
 import logging
 import requests
 
 from scm.auth import OAuth2Client
 from scm.models.auth import AuthRequestModel
-from scm.utils.logging import setup_logger
 from scm.exceptions import (
     APIError,
     ErrorHandler,
@@ -23,12 +23,28 @@ class Scm:
         client_secret: str,
         tsg_id: str,
         api_base_url: str = "https://api.strata.paloaltonetworks.com",
-        log_level: int = logging.ERROR,
+        log_level: str = "ERROR",
     ):
         self.api_base_url = api_base_url
 
-        # Set up logger with user-specified log level
-        self.logger = setup_logger(__name__, log_level=log_level)
+        # Map string log level to numeric level
+        numeric_level = getattr(logging, log_level.upper(), None)
+        if not isinstance(numeric_level, int):
+            raise ValueError(f"Invalid log level: {log_level}")
+
+        # Configure the 'scm' logger
+        self.logger = logging.getLogger("scm")
+        self.logger.setLevel(numeric_level)
+
+        # Add a handler if the logger doesn't have one
+        if not self.logger.handlers:
+            handler = logging.StreamHandler(sys.stdout)
+            handler.setLevel(numeric_level)
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            )
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
 
         # Create the AuthRequestModel object
         try:
@@ -41,8 +57,10 @@ class Scm:
             self.logger.error(f"Authentication initialization failed: {e}")
             raise APIError(f"Authentication initialization failed: {e}")
 
+        self.logger.debug(f"Auth request: {auth_request.model_dump()}")
         self.oauth_client = OAuth2Client(auth_request)
         self.session = self.oauth_client.session
+        self.logger.debug(f"Session created: {self.session.headers}")
 
     def request(
         self,
@@ -64,7 +82,7 @@ class Scm:
             else:
                 return None  # Return None or an empty dict
         except requests.exceptions.HTTPError as http_err:
-            http_status_code = response.status_code
+            http_status_code = response.status_code  # noqa
             error_content = {}
             try:
                 error_content = response.json() if response.content else {}
