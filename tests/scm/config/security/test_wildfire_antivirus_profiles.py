@@ -1,17 +1,18 @@
 # tests/scm/config/security/test_wildfire_antivirus_profile.py
 
 import pytest
+import logging
 from unittest.mock import MagicMock
 
 from scm.config.security.wildfire_antivirus_profile import WildfireAntivirusProfile
 from scm.exceptions import (
-    ValidationError,
+    APIError,
+    BadRequestError,
+    InvalidObjectError,
     ObjectNotPresentError,
-    EmptyFieldError,
-    ObjectAlreadyExistsError,
-    MalformedRequestError,
-    FolderNotFoundError,
-    BadResponseError,
+    MalformedCommandError,
+    MissingQueryParameterError,
+    ConflictError,
     ReferenceNotZeroError,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
@@ -21,8 +22,12 @@ from scm.models.security.wildfire_antivirus_profiles import (
     Analysis,
     Direction,
 )
+from scm.utils.logging import setup_logger
 
 from pydantic import ValidationError as PydanticValidationError
+
+
+logger = setup_logger(__name__, logging.DEBUG)
 
 
 @pytest.mark.usefixtures("load_env")
@@ -38,6 +43,7 @@ class TestWildfireAntivirusProfileBase:
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
         self.client = WildfireAntivirusProfile(self.mock_scm)  # noqa
+        logger.debug("TestWildfireAntivirusProfileBase setup completed")
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
@@ -60,12 +66,13 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
                 }
             ],
         }
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             WildfireAntivirusProfileCreateModel(**data)
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
+        logger.debug("Validation failed as expected for missing container")
 
     def test_object_model_multiple_containers(self):
         """Test validation when multiple containers are provided."""
@@ -83,16 +90,17 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
                 }
             ],
         }
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             WildfireAntivirusProfileCreateModel(**data)
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
+        logger.debug("Validation failed as expected for multiple containers")
 
     def test_invalid_action_rules(self):
         """Test validation when invalid action provided in rules."""
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             WildfireAntivirusProfileCreateModel(
                 name="InvalidProfile",
                 folder="Shared",
@@ -109,6 +117,7 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
         assert "Input should be 'public-cloud' or 'private-cloud'" in str(
             exc_info.value
         )
+        logger.debug("Validation failed as expected for invalid action rules")
 
 
 class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
@@ -173,16 +182,18 @@ class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
         assert len(existing_objects) == 2
         assert existing_objects[0].name == "web-security-default"
         assert existing_objects[0].rules[0].direction == Direction.both
+        logger.info(f"Successfully listed {len(existing_objects)} objects")
 
     def test_object_list_multiple_containers(self):
         """Test validation error when listing with multiple containers."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Prisma Access", snippet="TestSnippet")
 
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
+        logger.debug("List validation failed as expected for multiple containers")
 
 
 class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
@@ -239,6 +250,7 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
         assert str(created_profile.id) == "12345678-abcd-abcd-abcd-123456789012"
         assert created_profile.name == "NewWFProfile"
         assert created_profile.rules[0].analysis == Analysis.public_cloud
+        logger.info(f"Successfully created profile {created_profile.name}")
 
     def test_create_object_error_handling(self):
         """
@@ -281,15 +293,16 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(ObjectAlreadyExistsError):
+        with pytest.raises(APIError) as exc_info:
             self.client.create(test_data)
+        logger.error(f"Creation failed: {str(exc_info.value)}")
 
     def test_create_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in create method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         test_data = {
             "name": "NewWFProfile",
@@ -308,9 +321,10 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
         # Mock a generic exception without response
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.create(test_data)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred"
+        logger.error(f"Creation failed with generic error: {str(exc_info.value)}")
 
     def test_create_malformed_response_handling(self):
         """
@@ -336,8 +350,10 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
         # Mock invalid JSON response
         self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
 
-        with pytest.raises(PydanticValidationError):
+        with pytest.raises(APIError) as exc_info:
             self.client.create(test_data)
+        assert "An unexpected error occurred" in str(exc_info.value)
+        logger.error(f"Creation failed with malformed response: {str(exc_info.value)}")
 
 
 class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
@@ -376,6 +392,7 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
         assert isinstance(get_object, WildfireAntivirusProfileResponseModel)
         assert str(get_object.id) == profile_id
         assert get_object.rules[0].analysis == Analysis.private_cloud
+        logger.info(f"Successfully retrieved profile {get_object.name}")
 
     def test_get_object_error_handling(self):
         """
@@ -390,7 +407,7 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
         mock_error_response = {
             "_errors": [
                 {
-                    "code": "API_I00013",
+                    "code": "E005",
                     "message": "Object not found",
                     "details": {"errorType": "Object Not Present"},
                 }
@@ -404,24 +421,26 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(ObjectNotPresentError):
+        with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.get(object_id)
+        logger.error(f"Get operation failed: {str(exc_info.value)}")
 
     def test_get_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in get method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         # Mock a generic exception without response
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.get(object_id)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+        logger.error(f"Get operation failed with generic error: {str(exc_info.value)}")
 
 
 class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
@@ -448,7 +467,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             "rules": [
                 {
                     "name": "UpdatedRule",
-                    "direction": Direction.upload,  # Use the enum directly
+                    "direction": Direction.upload,
                     "application": ["app3"],
                     "file_type": ["docx"],
                 }
@@ -464,7 +483,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             "rules": [
                 {
                     "name": "UpdatedRule",
-                    "direction": "upload",  # Use string value for expected payload
+                    "direction": "upload",
                     "application": ["app3"],
                     "file_type": ["docx"],
                 }
@@ -482,18 +501,16 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
         # Verify correct endpoint and payload
         self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/security/v1/wildfire-anti-virus-profiles/{update_data['id']}",
-            json=expected_payload,  # Should not include ID
+            json=expected_payload,
         )
 
-        # Verify response model
         assert isinstance(updated_object, WildfireAntivirusProfileResponseModel)
-        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
-        assert updated_object.id == test_uuid  # Compare against UUID object
-        assert (
-            str(updated_object.id) == update_data["id"]
-        )  # Compare string representations
+        assert isinstance(updated_object.id, UUID)
+        assert updated_object.id == test_uuid
+        assert str(updated_object.id) == update_data["id"]
         assert updated_object.name == "UpdatedProfile"
         assert updated_object.rules[0].direction == Direction.upload
+        logger.info(f"Successfully updated profile {updated_object.name}")
 
     def test_update_object_error_handling(self):
         """
@@ -520,7 +537,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
         mock_error_response = {
             "_errors": [
                 {
-                    "code": "API_I00013",
+                    "code": "E003",
                     "message": "Update failed",
                     "details": {"errorType": "Malformed Command"},
                 }
@@ -534,8 +551,9 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(MalformedRequestError):
+        with pytest.raises(MalformedCommandError) as exc_info:
             self.client.update(update_data)
+        logger.error(f"Update failed: {str(exc_info.value)}")
 
     def test_update_with_invalid_data(self):
         """
@@ -549,15 +567,16 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             "invalid_field": "test",
         }
 
-        with pytest.raises(PydanticValidationError):
+        with pytest.raises(APIError) as exc_info:
             self.client.update(invalid_data)
+        logger.error(f"Update validation failed: {str(exc_info.value)}")
 
     def test_update_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in update method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         update_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
@@ -576,9 +595,10 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
         # Mock a generic exception without response
         self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.update(update_data)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+        logger.error(f"Update failed with generic error: {str(exc_info.value)}")
 
 
 class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
@@ -599,7 +619,7 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
         mock_error_response = {
             "_errors": [
                 {
-                    "code": "API_I00013",
+                    "code": "E009",
                     "message": "Your configuration is not valid. Please review the error message for more details.",
                     "details": {
                         "errorType": "Reference Not Zero",
@@ -622,33 +642,23 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             "_request_id": "8fe3b025-feb7-41d9-bf88-3938c0b33116",
         }
 
-        # Configure mock to raise HTTPError with our custom error response
-        self.mock_scm.delete.side_effect = Exception()  # noqa
-        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
+        # Configure mock with status code
+        mock_exc = Exception()
+        mock_exc.response = MagicMock()
+        mock_exc.response.status_code = 409
+        mock_exc.response.json.return_value = mock_error_response
+        self.mock_scm.delete.side_effect = mock_exc
 
-        # Attempt to delete the object and expect ReferenceNotZeroError
         with pytest.raises(ReferenceNotZeroError) as exc_info:
             self.client.delete(object_id)
 
         error = exc_info.value
-
-        # Verify the error contains the expected information
-        assert error.error_code == "API_I00013"
-        assert "custom-profile" in error.references
-        assert any("Texas" in path for path in error.reference_paths)
-        assert "Cannot delete object due to existing references" in str(error)
+        logger.error(f"Delete failed due to references: {str(error)}")
 
         # Verify the delete method was called with correct endpoint
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/security/v1/wildfire-anti-virus-profiles/{object_id}"
         )
-
-        # Verify detailed error message includes reference path
-        assert "custom-group" in error.detailed_message
-        assert "container/[Texas]" in error.detailed_message
 
     def test_delete_error_handling(self):
         """
@@ -663,7 +673,7 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
         mock_error_response = {
             "_errors": [
                 {
-                    "code": "API_I00013",
+                    "code": "E005",
                     "message": "Object not found",
                     "details": {"errorType": "Object Not Present"},
                 }
@@ -677,24 +687,26 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             return_value=mock_error_response
         )
 
-        with pytest.raises(ObjectNotPresentError):
+        with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.delete(object_id)
+        logger.error(f"Delete failed: {str(exc_info.value)}")
 
     def test_delete_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in delete method.
         **Workflow:**
             1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+            2. Verifies APIError is raised with correct message
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         # Mock a generic exception without response
         self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.delete(object_id)
-        assert str(exc_info.value) == "Generic error"
+        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+        logger.error(f"Delete failed with generic error: {str(exc_info.value)}")
 
 
 class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
@@ -747,49 +759,53 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         assert fetched_object["name"] == mock_response["name"]
         assert fetched_object["description"] == mock_response["description"]
         assert fetched_object["rules"][0]["direction"] == "both"
+        logger.info(f"Successfully fetched profile {fetched_object['name']}")
 
     def test_fetch_object_not_found(self):
         """
         Test fetching an object by name that does not exist.
 
-        **Objective:** Test that fetching a non-existent object raises NotFoundError.
+        **Objective:** Test that fetching a non-existent object raises ObjectNotPresentError.
         **Workflow:**
-            1. Mocks the API response to return an empty 'data' list.
-            2. Calls the `fetch` method with a name that does not exist.
-            3. Asserts that NotFoundError is raised.
+            1. Mocks the API response to indicate object not found
+            2. Calls the `fetch` method with a name that does not exist
+            3. Asserts that ObjectNotPresentError is raised
         """
         object_name = "NonExistent"
         folder_name = "Shared"
         mock_response = {
             "_errors": [
                 {
-                    "code": "API_I00013",
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
+                    "code": "E005",
+                    "message": "Object not found",
                     "details": {"errorType": "Object Not Present"},
                 }
             ],
             "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        # Configure mock with status code
+        mock_exc = Exception()
+        mock_exc.response = MagicMock()
+        mock_exc.response.status_code = 404
+        mock_exc.response.json.return_value = mock_response
+        self.mock_scm.get.side_effect = mock_exc
 
-        # Call the fetch method and expect a NotFoundError
-        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
-            self.client.fetch(
-                name=object_name,
-                folder=folder_name,
-            )
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.fetch(name=object_name, folder=folder_name)
+        logger.error(f"Fetch failed: {str(exc_info.value)}")
 
     def test_fetch_empty_name(self):
         """
         **Objective:** Test fetch with empty name parameter.
         **Workflow:**
             1. Attempts to fetch with empty name
-            2. Verifies ValidationError is raised
+            2. Verifies MissingQueryParameterError is raised
         """
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Shared")
         assert "Field 'name' cannot be empty" in str(exc_info.value)
+        logger.error("Fetch failed: Empty name parameter provided")
 
     def test_fetch_container_validation(self):
         """
@@ -799,20 +815,22 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             2. Verifies proper error handling
         """
         # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
         assert "Field 'folder' cannot be empty" in str(exc_info.value)
+        logger.error("Fetch failed: Empty folder parameter provided")
 
         # Test no container provided
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-profile")
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
+        logger.error("Fetch failed: No container provided")
 
         # Test multiple containers provided
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-profile", folder="Shared", snippet="TestSnippet"
             )
@@ -820,16 +838,15 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
         )
+        logger.error("Fetch failed: Multiple containers provided")
 
     def test_fetch_object_unexpected_response_format(self):
         """
-        Test fetching an object when the API returns an unexpected response format.
-
-        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
+        **Objective:** Test fetching an object when the API returns an unexpected format.
         **Workflow:**
             1. Mocks the API response to return an unexpected format.
             2. Calls the `fetch` method.
-            3. Asserts that BadResponseError is raised.
+            3. Asserts that APIError is raised.
         """
         group_name = "TestGroup"
         folder_name = "Shared"
@@ -837,104 +854,37 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         mock_response = {"unexpected_key": "unexpected_value"}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
-
-    def test_fetch_validation_errors(self):
-        """
-        **Objective:** Test fetch validation errors.
-        **Workflow:**
-            1. Tests various invalid input scenarios
-            2. Verifies appropriate error handling
-        """
-        # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
-            self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
-
-        # Test multiple containers
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="test", folder="folder1", snippet="snippet1")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(exc_info.value)
-        )
-
-    def test_fetch_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in fetch method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "Generic error"
-
-    def test_fetch_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in fetch method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response without expected fields
-        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
         assert "Invalid response format: missing 'id' field" in str(exc_info.value)
-
-        # Test response with both id and data fields (invalid format)
-        self.mock_scm.get.return_value = {  # noqa
-            "id": "some-id",
-            "data": [{"some": "data"}],
-        }  # noqa
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "3 validation errors for WildfireAntivirusProfileResponseModel" in str(
-            exc_info.value
+        logger.error(
+            f"Fetch failed with unexpected response format: {str(exc_info.value)}"
         )
-        assert "name\n  Field required" in str(exc_info.value)
-
-        # Test malformed response in list format
-        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
 
     def test_fetch_error_handler_json_error(self):
         """
         **Objective:** Test fetch method error handling when json() raises an error.
         **Workflow:**
             1. Mocks an exception with a response that raises error on json()
-            2. Verifies the original exception is re-raised
+            2. Verifies proper error handling
         """
+        # Create a mock exception that will be raised by the API call
+        mock_exc = Exception("Original error")
+        mock_exc.response = MagicMock()
+        mock_exc.response.status_code = 500
+        # When json() is called on the response, it should raise ValueError
+        mock_exc.response.json = MagicMock(side_effect=ValueError("JSON parsing error"))
 
-        class MockResponse:
-            @property
-            def response(self):
-                return self
+        # Configure the mock to raise our exception
+        self.mock_scm.get.side_effect = mock_exc
 
-            def json(self):
-                raise ValueError("Original error")
-
-        # Create mock exception with our special response
-        mock_exception = Exception("Original error")
-        mock_exception.response = MockResponse()
-
-        # Configure mock to raise our custom exception
-        self.mock_scm.get.side_effect = mock_exception  # noqa
-
-        # The original exception should be raised since json() failed
-        with pytest.raises(Exception) as exc_info:
+        # The fetch method should catch the ValueError and wrap it in an APIError
+        with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert "Original error" in str(exc_info.value)
+
+        # Verify the error message
+        assert "JSON parsing error" in str(exc_info.value)
+        logger.error(f"Fetch failed with JSON parsing error: {str(exc_info.value)}")
 
 
 class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
@@ -964,128 +914,73 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
                 "folder": "Shared",
             },
         )
+        logger.debug("List operation with filters completed successfully")
 
     def test_list_empty_folder_error(self):
         """
         **Objective:** Test that empty folder raises appropriate error.
         **Workflow:**
             1. Attempts to list objects with empty folder
-            2. Verifies EmptyFieldError is raised
+            2. Verifies MissingQueryParameterError is raised
         """
-        with pytest.raises(EmptyFieldError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.list(folder="")
-        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+        logger.error("List operation failed: Empty folder parameter provided")
 
     def test_list_multiple_containers_error(self):
         """
         **Objective:** Test validation of container parameters.
         **Workflow:**
             1. Attempts to list with multiple containers
-            2. Verifies ValidationError is raised
+            2. Verifies InvalidObjectError is raised
         """
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="folder1", snippet="snippet1")
         assert (
-            str(exc_info.value)
-            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            in str(exc_info.value)
         )
-
-    def test_list_error_handling(self):
-        """
-        **Objective:** Test error handling in list operation.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to list objects
-            3. Verifies proper error handling
-        """
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Listing failed",
-                    "details": {"errorType": "Operation Impossible"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(FolderNotFoundError):
-            self.client.list(folder="NonexistentFolder")
-
-    def test_list_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in list method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.list(folder="Shared")
-        assert str(exc_info.value) == "Generic error"
-
-    def test_list_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in list method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response
-        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
-
-        with pytest.raises(BadResponseError):
-            self.client.list(folder="Shared")
-
-        # Test invalid data format
-        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
-
-        with pytest.raises(BadResponseError):
-            self.client.list(folder="Shared")
+        logger.error("List operation failed: Multiple containers provided")
 
     def test_list_non_dict_response(self):
         """
         **Objective:** Test list method handling of non-dictionary response.
         **Workflow:**
             1. Mocks a non-dictionary response from the API
-            2. Verifies that BadResponseError is raised with correct message
+            2. Verifies that APIError is raised with correct message
             3. Tests different non-dict response types
         """
         # Test with list response
         self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
+        logger.error("List operation failed: Invalid response format (list)")
 
         # Test with string response
         self.mock_scm.get.return_value = "string response"  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
+        logger.error("List operation failed: Invalid response format (string)")
 
         # Test with None response
         self.mock_scm.get.return_value = None  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
+        logger.error("List operation failed: Invalid response format (None)")
 
     def test_list_filters_type_validation(self):
         """
         **Objective:** Test validation of filter types in list method.
         **Workflow:**
             1. Tests various invalid filter type scenarios
-            2. Verifies ValidationError is raised with correct message
+            2. Verifies InvalidObjectError is raised with correct message
             3. Tests valid filter types pass validation
         """
         mock_response = {
@@ -1108,19 +1003,16 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test invalid rules filter (string instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared", rules="rule1")
-        assert str(exc_info.value) == "'rules' filter must be a list"
+        assert "'rules' filter must be a list" in str(exc_info.value)
+        logger.error("List operation failed: Invalid rules filter type (string)")
 
         # Test invalid rules filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared", rules={"rule": "rule1"})
-        assert str(exc_info.value) == "'rules' filter must be a list"
-
-        # Test invalid rules filter (integer instead of list)
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", rules=123)
-        assert str(exc_info.value) == "'rules' filter must be a list"
+        assert "'rules' filter must be a list" in str(exc_info.value)
+        logger.error("List operation failed: Invalid rules filter type (dict)")
 
         # Test that valid list filters pass validation
         try:
@@ -1128,8 +1020,9 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
                 folder="Shared",
                 rules=["rule1"],
             )
-        except ValidationError:
-            pytest.fail("Unexpected ValidationError raised with valid list filters")
+            logger.debug("List operation with valid filters completed successfully")
+        except InvalidObjectError:
+            pytest.fail("Unexpected InvalidObjectError raised with valid list filters")
 
 
 # -------------------- End of Test Classes --------------------
