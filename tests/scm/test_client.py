@@ -148,6 +148,37 @@ class TestClientRequest(TestClientBase):
 
         assert "API request failed: Invalid JSON" in str(exc_info.value)
 
+    @patch("scm.client.setup_logger")
+    def test_request_http_error_invalid_json(self, mock_setup_logger):
+        """Test handling of HTTP errors with invalid JSON response."""
+        # Create a mock logger
+        mock_logger = MagicMock()
+        mock_setup_logger.return_value = mock_logger
+
+        # Set the mock logger on the client instance
+        self.client.logger = mock_logger
+
+        mock_session = self.session
+
+        # Mock the response to raise HTTPError with invalid JSON content
+        mock_response = MagicMock()
+        mock_response.status_code = 400
+        mock_response.raise_for_status.side_effect = HTTPError("Mocked HTTPError")
+        mock_response.content = (
+            b"Invalid JSON Content"  # This will cause ValueError when parsing
+        )
+        mock_response.json.side_effect = ValueError("Invalid JSON")
+        mock_session.request.return_value = mock_response
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.request("GET", "/test-endpoint")
+
+        # Verify that the error was logged
+        mock_logger.error.assert_any_call(
+            "Failed to parse error response: b'Invalid JSON Content'"
+        )
+        assert "An error occurred." in str(exc_info.value)
+
     def test_request_empty_response(self):
         """Test handling of empty responses."""
         mock_session = self.session
