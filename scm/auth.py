@@ -38,20 +38,25 @@ class OAuth2Client:
         self.signing_key = self._get_signing_key()
 
     def _create_session(self):
-        client = BackendApplicationClient(client_id=self.auth_request.client_id)
-        oauth = OAuth2Session(client=client)
-        logger.debug("Fetching token...")
+        """Create an OAuth2 session."""
+        try:
+            client = BackendApplicationClient(client_id=self.auth_request.client_id)
+            oauth = OAuth2Session(client=client)
+            logger.debug("Fetching token...")
 
-        token = oauth.fetch_token(
-            token_url=self.auth_request.token_url,
-            client_id=self.auth_request.client_id,
-            client_secret=self.auth_request.client_secret,
-            scope=self.auth_request.scope,
-            include_client_id=True,
-            client_kwargs={"tsg_id": self.auth_request.tsg_id},
-        )
-        logger.debug(f"Token fetched successfully. {token}")
-        return oauth
+            token = oauth.fetch_token(
+                token_url=self.auth_request.token_url,
+                client_id=self.auth_request.client_id,
+                client_secret=self.auth_request.client_secret,
+                scope=self.auth_request.scope,
+                include_client_id=True,
+                client_kwargs={"tsg_id": self.auth_request.tsg_id},
+            )
+            logger.debug(f"Token fetched successfully. {token}")
+            return oauth
+        except Exception as e:
+            logger.error(f"Failed to create session: {str(e)}")
+            raise APIError(f"Failed to create session: {str(e)}")
 
     def _get_signing_key(self):
         jwks_uri = (
