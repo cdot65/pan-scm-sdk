@@ -355,11 +355,18 @@ class WildfireAntivirusProfile(BaseObject):
                 f"Error fetching profile: {e}",
                 exc_info=True,
             )
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
-                )
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    error_data = e.response.json()
+                    ErrorHandler.raise_for_error(
+                        error_data,
+                        e.response.status_code,
+                    )
+                except ValueError as json_error:
+                    raise APIError(
+                        f"Invalid JSON response: {str(json_error)}",
+                        http_status_code=e.response.status_code,
+                    )
             else:
                 raise APIError(f"An unexpected error occurred: {e}") from e
 
