@@ -256,7 +256,10 @@ class ErrorHandler:
         response_data: Dict[str, Any],
         http_status_code: int,
     ) -> None:
+
+        # Perform the mapping of the error response from the provided response data
         error_response = ErrorResponse.from_response(response_data)
+
         # Get base exception class from HTTP status code
         exception_cls = cls.ERROR_STATUS_CODE_MAP.get(http_status_code, APIError)
 
@@ -265,21 +268,31 @@ class ErrorHandler:
         message = error_response.message
         error_details = error_response.details
         error_type = None
+
+        # if the error_details is of type dictionary, get `errorType`
         if isinstance(error_details, dict):
             error_type = error_details.get("errorType")
 
+        # if the error code if found in the ERROR_CODE_MAP, set the mapping to the code
         if error_code in cls.ERROR_CODE_MAP:
             code_mapping = cls.ERROR_CODE_MAP[error_code]
+
+            # if code_mapping is of type dictionary
             if isinstance(code_mapping, dict):
+
                 # First, try to match errorType
                 if error_type and error_type in code_mapping:
                     exception_cls = code_mapping[error_type]
+
                 # Then, try to match message
                 elif message in code_mapping:
                     exception_cls = code_mapping[message]
+
+                # Fallback to base exception class from status code
                 else:
-                    # Fallback to base exception class from status code
                     exception_cls = exception_cls
+
+            # if code_mapping is not of type dictionary, set exception_cls to code_mapping
             else:
                 exception_cls = code_mapping
 
