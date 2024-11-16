@@ -173,6 +173,9 @@ class Address(BaseObject):
 
         Returns:
             List[AddressResponseModel]: Filtered list of addresses
+
+        Raises:
+            InvalidObjectError: If filter criteria are invalid
         """
 
         filter_criteria = addresses
@@ -311,7 +314,10 @@ class Address(BaseObject):
 
             addresses = [AddressResponseModel(**item) for item in response["data"]]
 
-            return self._apply_filters(addresses, filters)
+            return self._apply_filters(
+                addresses,
+                filters,
+            )
 
         except HTTPError as e:
             response: Optional[Response] = e.response
