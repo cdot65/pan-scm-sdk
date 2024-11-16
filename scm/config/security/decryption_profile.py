@@ -14,7 +14,6 @@ from scm.exceptions import (
     ErrorHandler,
     APIError,
 )
-from scm.utils.logging import setup_logger
 
 
 class DecryptionProfile(BaseObject):
@@ -28,13 +27,9 @@ class DecryptionProfile(BaseObject):
     def __init__(
         self,
         api_client,
-        log_level: int = logging.ERROR,
     ):
         super().__init__(api_client)
-        self.logger = setup_logger(
-            __name__,
-            log_level=log_level,
-        )
+        self.logger = logging.getLogger(__name__)
 
     def create(
         self,
