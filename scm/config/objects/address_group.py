@@ -1,18 +1,24 @@
 # scm/config/objects/address_group.py
 
-from typing import List, Dict, Any, Optional
+# Standard library imports
 import logging
+from typing import List, Dict, Any, Optional
+
+# External libraries
+from requests import Response
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config import BaseObject
-from scm.models.objects import (
-    AddressGroupCreateModel,
-    AddressGroupResponseModel,
-    AddressGroupUpdateModel,
-)
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     ErrorHandler,
-    APIError,
+)
+from scm.models.objects import (
+    AddressGroupCreateModel,
+    AddressGroupResponseModel,
+    AddressGroupUpdateModel,
 )
 
 
@@ -42,26 +48,37 @@ class AddressGroup(BaseObject):
             AddressGroupResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             address_group = AddressGroupCreateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields
             payload = address_group.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
             response = self.api_client.post(
                 self.ENDPOINT,
                 json=payload,
             )
-            return AddressGroupResponseModel(**response)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while creating address group: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while creating address group: {e}"
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return AddressGroupResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def get(
         self,
@@ -74,22 +91,29 @@ class AddressGroup(BaseObject):
             AddressGroupResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(endpoint)
-            return AddressGroupResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(f"Error getting address group: {e}", exc_info=True)
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return AddressGroupResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def update(
         self,
@@ -102,24 +126,38 @@ class AddressGroup(BaseObject):
             AddressGroupResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             address = AddressGroupUpdateModel(**data)
-            payload = address.model_dump(exclude_unset=True)
-            endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(endpoint, json=payload)
-            return AddressGroupResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(f"Error updating address group: {e}", exc_info=True)
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Convert back to a Python dictionary, removing any unset fields
+            payload = address.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
+            endpoint = f"{self.ENDPOINT}/{data['id']}"
+            response = self.api_client.put(
+                endpoint,
+                json=payload,
+            )
+
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return AddressGroupResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     @staticmethod
     def _apply_filters(
@@ -139,15 +177,17 @@ class AddressGroup(BaseObject):
         Raises:
             InvalidObjectError: If filter criteria are invalid
         """
-        filtered_groups = address_groups
 
+        filter_criteria = address_groups
+
+        # Filter by types
         if "types" in filters:
             if not isinstance(filters["types"], list):
                 raise InvalidObjectError("'types' filter must be a list")
             types = filters["types"]
-            filtered_groups = [
+            filter_criteria = [
                 group
-                for group in filtered_groups
+                for group in filter_criteria
                 if any(
                     getattr(group, field) is not None
                     for field in ["static", "dynamic"]
@@ -155,28 +195,30 @@ class AddressGroup(BaseObject):
                 )
             ]
 
+        # Filter by values
         if "values" in filters:
             if not isinstance(filters["values"], list):
                 raise InvalidObjectError("'values' filter must be a list")
             values = filters["values"]
-            filtered_groups = [
+            filter_criteria = [
                 group
-                for group in filtered_groups
+                for group in filter_criteria
                 if (group.static and any(value in group.static for value in values))
                 or (group.dynamic and group.dynamic.filter in values)
             ]
 
+        # Filter by tags
         if "tags" in filters:
             if not isinstance(filters["tags"], list):
                 raise InvalidObjectError("'tags' filter must be a list")
             tags = filters["tags"]
-            filtered_groups = [
+            filter_criteria = [
                 group
-                for group in filtered_groups
+                for group in filter_criteria
                 if group.tag and any(tag in group.tag for tag in tags)
             ]
 
-        return filtered_groups
+        return filter_criteria
 
     @staticmethod
     def _build_container_params(
@@ -208,7 +250,7 @@ class AddressGroup(BaseObject):
             **filters: Additional filters including:
                 - types: List[str] - Filter by group types (e.g., ['static', 'dynamic'])
                 - values: List[str] - Filter by group values
-                - tags: List[str] - Filter by tags
+                - tags: List[str] - Filter by tags (e.g., ['Automation'])
 
         Raises:
             MissingQueryParameterError: If provided container fields are empty
@@ -224,6 +266,7 @@ class AddressGroup(BaseObject):
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -240,23 +283,29 @@ class AddressGroup(BaseObject):
         params.update(container_parameters)
 
         try:
-            response = self.api_client.get(self.ENDPOINT, params=params)
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
+            )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "data" not in response:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'data' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if not isinstance(response["data"], list):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: 'data' field must be a list",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
@@ -268,15 +317,16 @@ class AddressGroup(BaseObject):
                 filters,
             )
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while listing address groups: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while listing address groups: {e}"
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def fetch(
         self,
@@ -319,6 +369,7 @@ class AddressGroup(BaseObject):
             )
 
         params = {}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -342,13 +393,17 @@ class AddressGroup(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response, http_status_code=400)
+                ErrorHandler.raise_for_error(
+                    response,
+                    http_status_code=400,
+                )
 
             if "id" in response:
                 address = AddressGroupResponseModel(**response)
@@ -357,23 +412,22 @@ class AddressGroup(BaseObject):
                     exclude_none=True,
                 )
             else:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'id' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error fetching address group: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def delete(
         self,
@@ -394,15 +448,13 @@ class AddressGroup(BaseObject):
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(endpoint)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error deleting address group: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
