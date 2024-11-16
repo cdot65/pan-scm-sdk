@@ -1,10 +1,14 @@
 # scm/client.py
+
+# Standard library imports
 import logging
 import sys
 from typing import Optional, Dict, Any
 
-import requests
+# External libraries
+from requests.exceptions import HTTPError
 
+# Local SDK imports
 from scm.auth import OAuth2Client
 from scm.exceptions import (
     APIError,
@@ -55,8 +59,8 @@ class Scm:
                 tsg_id=tsg_id,
             )
         except ValueError as e:
-            self.logger.error(f"Authentication initialization failed: {e}")
-            raise APIError(f"Authentication initialization failed: {e}")
+            # Let exception propagate
+            raise APIError(f"Authentication initialization failed: {e}") from e
 
         self.logger.debug(f"Auth request: {auth_request.model_dump()}")
         self.oauth_client = OAuth2Client(auth_request)
@@ -80,9 +84,6 @@ class Scm:
         url = f"{self.api_base_url}{endpoint}"
         self.logger.debug(f"Making {method} request to {url} with params {kwargs}")
 
-        # make linter happy by defining an empty response dictionary for exceptions
-        response = {}
-
         try:
             response = self.session.request(
                 method,
@@ -96,26 +97,20 @@ class Scm:
             else:
                 return None  # Return None or an empty dict
 
-        except requests.exceptions.HTTPError:
-            http_status_code = response.status_code
-            error_content = {}
-
-            try:
-                error_content = response.json() if response.content else {}
-            except ValueError:
-                pass
-
-            try:
+        except HTTPError as e:
+            # Handle HTTP errors
+            response = e.response
+            if response is not None and response.content:
+                try:
+                    error_content = response.json()
+                except ValueError:
+                    error_content = {}
                 ErrorHandler.raise_for_error(
                     error_content,
-                    http_status_code,
+                    response.status_code,
                 )
-            except ValueError as ve:
-                raise APIError("An error occurred.") from ve
-
-        except Exception as e:
-            self.logger.error(f"API request failed: {str(e)}")
-            raise APIError(f"API request failed: {str(e)}") from e
+            else:
+                raise APIError(f"HTTP error occurred: {e}") from e
 
     def get(
         self,
