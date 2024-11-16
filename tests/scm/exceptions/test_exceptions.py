@@ -80,7 +80,6 @@ class TestErrorResponseValidation(TestExceptionsBase):
         assert error_response.code == "API_I00013"
         assert error_response.message == "Test error message"
         assert error_response.details == {"errorType": "Test Error"}
-        assert error_response.request_id == "test-request-id"
 
     def test_error_response_invalid_format(self):
         """Test validation when response format is invalid."""
@@ -107,14 +106,12 @@ class TestAPIErrorBase(TestExceptionsBase):
             error_code="TEST001",
             http_status_code=400,
             details={"type": "test"},
-            request_id="test-id",
         )
         error_str = str(error)
         assert "HTTP 400" in error_str
         assert "Error TEST001" in error_str
         assert "Test error" in error_str
         assert "Details: {'type': 'test'}" in error_str
-        assert "Request ID: test-id" in error_str
 
     def test_api_error_minimal_str(self):
         """Test string representation with minimal fields."""

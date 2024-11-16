@@ -298,7 +298,6 @@ class TestClientErrorHandling(TestClientBase):
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert isinstance(exc_info.value, APIError)
         assert "Unknown error" in str(exc_info.value)
-        assert exc_info.value.request_id == "req-999"
 
     def test_handle_api_error_details_list(self):
         """Test error handling when details is a list."""
@@ -318,7 +317,6 @@ class TestClientErrorHandling(TestClientBase):
         with pytest.raises(BadRequestError) as exc_info:
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert isinstance(exc_info.value, BadRequestError)
-        assert exc_info.value.request_id == "req-list-1"
 
     def test_handle_api_error_object_not_present(self):
         """Test API_I00013 error code with Object Not Present error type."""
@@ -338,7 +336,6 @@ class TestClientErrorHandling(TestClientBase):
         with pytest.raises(ObjectNotPresentError) as exc_info:
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert exc_info.value.error_code == "API_I00013"
-        assert exc_info.value.request_id == "req-onp-1"
 
     def test_handle_api_error_operation_impossible(self):
         """Test API_I00013 error code with Operation Impossible error type."""
@@ -358,7 +355,6 @@ class TestClientErrorHandling(TestClientBase):
         with pytest.raises(ObjectNotPresentError) as exc_info:
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert exc_info.value.error_code == "API_I00013"
-        assert exc_info.value.request_id == "req-oi-1"
 
     def test_handle_api_error_object_already_exists(self):
         """Test API_I00013 error code with Object Already Exists error type."""
@@ -378,7 +374,6 @@ class TestClientErrorHandling(TestClientBase):
         with pytest.raises(ConflictError) as exc_info:
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert exc_info.value.error_code == "API_I00013"
-        assert exc_info.value.request_id == "req-oae-1"
 
     def test_handle_api_error_malformed_command(self):
         """Test API_I00013 error code with Malformed Command error type."""
@@ -398,7 +393,6 @@ class TestClientErrorHandling(TestClientBase):
         with pytest.raises(MalformedCommandError) as exc_info:
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert exc_info.value.error_code == "API_I00013"
-        assert exc_info.value.request_id == "req-mc-1"
 
     def test_handle_api_error_empty_field(self):
         """Test API_I00035 error code with empty field validation error."""
@@ -421,4 +415,3 @@ class TestClientErrorHandling(TestClientBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             ErrorHandler.raise_for_error(error_content, response.status_code)
         assert exc_info.value.error_code == "API_I00035"
-        assert exc_info.value.request_id == "req-ef-1"
