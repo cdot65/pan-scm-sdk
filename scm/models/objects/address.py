@@ -1,8 +1,10 @@
 # scm/models/objects/address.py
 
+# Standard library imports
 from typing import Optional, List
 from uuid import UUID
 
+# External libraries
 from pydantic import (
     BaseModel,
     Field,
@@ -11,7 +13,6 @@ from pydantic import (
     ConfigDict,
     constr,
 )
-
 
 TagString = constr(max_length=64)
 

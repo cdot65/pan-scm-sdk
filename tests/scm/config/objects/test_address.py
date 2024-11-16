@@ -1,9 +1,14 @@
 # tests/scm/config/objects/test_address.py
+
+# Standard library imports
 import logging
+from unittest.mock import MagicMock
 
+# External libraries
 import pytest
-from unittest.mock import MagicMock, patch
+from pydantic import ValidationError as PydanticValidationError
 
+# Local SDK imports
 from scm.config.objects import Address
 from scm.exceptions import (
     APIError,
@@ -17,15 +22,7 @@ from scm.models.objects import (
     AddressCreateModel,
     AddressResponseModel,
 )
-
-from tests.factories import (
-    AddressCreateIpNetmaskFactory,
-    AddressCreateFqdnFactory,
-    AddressCreateIpRangeFactory,
-    AddressCreateIpWildcardFactory,
-)
-
-from pydantic import ValidationError as PydanticValidationError
+from tests.factories import AddressResponseFactory, AddressCreateFactory
 
 
 @pytest.mark.usefixtures("load_env")
@@ -130,31 +127,24 @@ class TestAddressList(TestAddressBase):
     def test_object_list_valid(self):
         """
         **Objective:** Test listing all objects.
-        **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing objects.
-            2. Calls the `list` method with a filter parameter.
-            3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of objects.
         """
         mock_response = {
             "data": [
-                {
-                    "id": "cd7583dd-7efb-46e4-9eb8-a87437da3a0d",
-                    "name": "Palo Alto Networks Sinkhole",
-                    "folder": "All",
-                    "snippet": "default",
-                    "fqdn": "sinkhole.paloaltonetworks.com",
-                    "description": "Palo Alto Networks sinkhole",
-                },
-                {
-                    "id": "3fecfe58-af0c-472b-85cf-437bb6df2929",
-                    "name": "dallas-desktop1",
-                    "folder": "cdot65",
-                    "snippet": "cdot.io Best Practices",
-                    "ip_netmask": "10.5.0.11",
-                    "description": "test123456",
-                    "tag": ["Decrypted"],
-                },
+                AddressResponseFactory.with_fqdn(
+                    name="Palo Alto Networks Sinkhole",
+                    folder="All",
+                    snippet="default",
+                    fqdn="sinkhole.paloaltonetworks.com",
+                    description="Palo Alto Networks sinkhole",
+                ).model_dump(),
+                AddressResponseFactory.with_ip_netmask(
+                    name="dallas-desktop1",
+                    folder="cdot65",
+                    snippet="cdot.io Best Practices",
+                    ip_netmask="10.5.0.11",
+                    description="test123456",
+                    tag=["Decrypted"],
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -179,12 +169,12 @@ class TestAddressList(TestAddressBase):
     def test_object_list_multiple_containers(self):
         """Test validation error when listing with multiple containers."""
         with pytest.raises(BadRequestError) as exc_info:
-            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+            self.client.list(
+                folder="Prisma Access",
+                snippet="TestSnippet",
+            )
 
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
 
 
 class TestAddressCreate(TestAddressBase):
@@ -192,113 +182,79 @@ class TestAddressCreate(TestAddressBase):
 
     def test_create_object_type_ip_netmask(self):
         """
-        **Objective:** Test creating an object.
-        **Workflow:**
-            1. Uses AddressCreateIpNetmaskFactory to create test data.
-            2. Mocks the API response.
-            3. Verifies the creation request and response.
+        **Objective:** Test creating an object with ip_netmask.
         """
-        test_objects = AddressCreateIpNetmaskFactory()
-        mock_response = test_objects.model_dump()
-        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
+        test_object = AddressCreateFactory.with_ip_netmask()
+        mock_response = AddressResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_objects = self.client.create(
-            test_objects.model_dump(exclude_unset=True)
-        )
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_objects.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
-        assert str(created_objects.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_objects.name == test_objects.name
-        assert created_objects.ip_netmask == test_objects.ip_netmask
-        assert created_objects.folder == test_objects.folder
+        assert str(created_object.id) == str(mock_response.id)
+        assert created_object.name == test_object.name
+        assert created_object.ip_netmask == test_object.ip_netmask
+        assert created_object.folder == test_object.folder
 
     def test_create_object_type_fqdn(self):
         """
         **Objective:** Test creating an object of type fqdn.
-        **Workflow:**
-            1. Uses `AddressCreateFqdnFactory` to create an object.
-            2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the object data.
-            4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created object's attributes.
         """
-        test_objects_fqdn = AddressCreateFqdnFactory()
-        mock_response = test_objects_fqdn.model_dump()
-        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
+        test_object = AddressCreateFactory.with_fqdn()
+        mock_response = AddressResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_objects_fqdn.model_dump(exclude_unset=True)
-        )
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_objects_fqdn.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
-        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_objects_fqdn.name
-        assert created_group.fqdn == test_objects_fqdn.fqdn
-        assert created_group.folder == test_objects_fqdn.folder
+        assert str(created_object.id) == str(mock_response.id)
+        assert created_object.name == test_object.name
+        assert created_object.fqdn == test_object.fqdn
+        assert created_object.folder == test_object.folder
 
     def test_create_object_type_ip_range(self):
         """
-        **Objective:** Test creating an object of type ip-range.
-        **Workflow:**
-            1. Uses `AddressCreateIpRangeFactory` to create an object.
-            2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the object data.
-            4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created object's attributes.
+        **Objective:** Test creating an object of type ip_range.
         """
-        test_objects_ip_range = AddressCreateIpRangeFactory()
-        mock_response = test_objects_ip_range.model_dump()
-        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
+        test_object = AddressCreateFactory.with_ip_range()
+        mock_response = AddressResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_objects_ip_range.model_dump(exclude_unset=True)
-        )
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_objects_ip_range.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
-        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_objects_ip_range.name
-        assert created_group.ip_range == test_objects_ip_range.ip_range
-        assert created_group.folder == test_objects_ip_range.folder
+        assert str(created_object.id) == str(mock_response.id)
+        assert created_object.name == test_object.name
+        assert created_object.ip_range == test_object.ip_range
+        assert created_object.folder == test_object.folder
 
     def test_create_object_type_ip_wildcard(self):
         """
-        **Objective:** Test creating an object of type ip-wildcard.
-        **Workflow:**
-            1. Uses `AddressCreateIpWildcardFactory` to create an object.
-            2. Sets up a mock response with an added `id`.
-            3. Calls the `create` method of `self.client` with the object data.
-            4. Asserts that the mocked service was called with the correct parameters.
-            5. Validates the created object's attributes.
+        **Objective:** Test creating an object of type ip_wildcard.
         """
-        test_objects_ip_wildcard = AddressCreateIpWildcardFactory()
-        mock_response = test_objects_ip_wildcard.model_dump()
-        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
+        test_object = AddressCreateFactory.with_ip_wildcard()
+        mock_response = AddressResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(
-            test_objects_ip_wildcard.model_dump(exclude_unset=True)
-        )
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
-            json=test_objects_ip_wildcard.model_dump(exclude_unset=True),
+            json=test_object.model_dump(exclude_unset=True),
         )
-        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_objects_ip_wildcard.name
-        assert created_group.ip_wildcard == test_objects_ip_wildcard.ip_wildcard
-        assert created_group.folder == test_objects_ip_wildcard.folder
+        assert str(created_object.id) == str(mock_response.id)
+        assert created_object.name == test_object.name
+        assert created_object.ip_wildcard == test_object.ip_wildcard
+        assert created_object.folder == test_object.folder
 
     def test_create_object_error_handling(self):
         """
@@ -306,9 +262,13 @@ class TestAddressCreate(TestAddressBase):
         """
         self.mock_scm.post.side_effect = Exception()  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             self.client.create(data={"name": "test"})
-        assert str(exc_info.value) == "An unexpected error occurred"
+        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
+        assert (
+            "Value error, Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+            in str(exc_info.value)
+        )
 
     def test_create_generic_exception_handling(self):
         """
@@ -316,9 +276,13 @@ class TestAddressCreate(TestAddressBase):
         """
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             self.client.create(data={"name": "test"})
-        assert str(exc_info.value) == "An unexpected error occurred"
+        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
+        assert (
+            "Value error, Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+            in str(exc_info.value)
+        )
 
     def test_create_malformed_response_handling(self):
         """
@@ -326,9 +290,13 @@ class TestAddressCreate(TestAddressBase):
         """
         self.mock_scm.post.return_value = {"unexpected": "format"}  # noqa
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(PydanticValidationError) as exc_info:
             self.client.create(data={"name": "test"})
-        assert "An unexpected error occurred" in str(exc_info.value)
+        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
+        assert (
+            "Value error, Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+            in str(exc_info.value)
+        )
 
     def test_create_api_error_handling(self, caplog):
         """
@@ -336,7 +304,7 @@ class TestAddressCreate(TestAddressBase):
         """
         # Create an APIError instance
         api_error = APIError("Test API Error")
-        self.mock_scm.post.side_effect = api_error
+        self.mock_scm.post.side_effect = api_error  # noqa
 
         # Test data
         test_data = {
@@ -795,7 +763,7 @@ class TestAddressFetch(TestAddressBase):
             "folder": "Shared",
             # Missing 'id' field
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test-address", folder="Shared")

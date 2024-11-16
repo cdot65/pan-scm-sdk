@@ -1,22 +1,24 @@
 # tests/factories.py
+
+# Standard library imports
 import uuid
 
+# External libraries
 import factory
 
+# Local SDK imports
 from scm.models.objects import (
+    AddressCreateModel,
+    AddressUpdateModel,
+    AddressResponseModel,
+    AddressGroupCreateModel,
+    AddressGroupResponseModel,
     ApplicationCreateModel,
     ServiceCreateModel,
     ApplicationGroupCreateModel,
 )
-from scm.models.objects import (
-    AddressResponseModel,
-    AddressCreateModel,
-    AddressUpdateModel,
-)
 from scm.models.objects.address_group import (
-    AddressGroupCreateModel,
     DynamicFilter,
-    AddressGroupResponseModel,
 )
 from scm.models.security import (
     DNSSecurityProfileCreateModel,
@@ -25,6 +27,8 @@ from scm.models.security import (
     AntiSpywareProfileCreateModel,
     VulnerabilityProtectionProfileCreateModel,
     VulnerabilityProtectionProfileResponseModel,
+    SecurityRuleCreateModel,
+    SecurityRuleMoveModel,
 )
 from scm.models.security.anti_spyware_profiles import (
     PacketCapture,
@@ -48,10 +52,8 @@ from scm.models.security.dns_security_profiles import (
     DNSSecurityCategoryEntryModel,
 )
 from scm.models.security.security_rules import (
-    SecurityRuleCreateModel,
     ProfileSetting,
     Rulebase,
-    SecurityRuleMoveModel,
     RuleMoveDestination,
     SecurityRuleResponseModel,
 )
@@ -61,17 +63,44 @@ from scm.models.security.vulnerability_protection_profiles import (
 )
 
 
-class AddressCreateIpNetmaskFactory(factory.Factory):
-    """Factory for creating AddressCreateModel instances."""
+# ----------------------------------------------------------------------------
+# Address object factories.
+# ----------------------------------------------------------------------------
+class AddressCreateFactory(factory.Factory):
+    """Factory for creating AddressCreateModel instances with different address types."""
 
     class Meta:
         model = AddressCreateModel
 
     name = factory.Sequence(lambda n: f"address_{n}")
-    description = "Test Address"
-    ip_netmask = "192.168.1.1/32"
+    description = factory.Faker("sentence")
     folder = "Shared"
-    tag = ["test-tag", "environment-prod"]
+    tag = [
+        "test-tag",
+        "environment-prod",
+    ]
+
+    # Address types default to None
+    ip_netmask = None
+    ip_range = None
+    ip_wildcard = None
+    fqdn = None
+
+    @classmethod
+    def with_ip_netmask(cls, ip_netmask="192.168.1.1/32", **kwargs):
+        return cls(ip_netmask=ip_netmask, **kwargs)
+
+    @classmethod
+    def with_fqdn(cls, fqdn="example.com", **kwargs):
+        return cls(fqdn=fqdn, **kwargs)
+
+    @classmethod
+    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
+        return cls(ip_range=ip_range, **kwargs)
+
+    @classmethod
+    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
+        return cls(ip_wildcard=ip_wildcard, **kwargs)
 
     @classmethod
     def with_snippet(cls, **kwargs):
@@ -82,17 +111,38 @@ class AddressCreateIpNetmaskFactory(factory.Factory):
         return cls(folder=None, device="TestDevice", **kwargs)
 
 
-class AddressCreateFqdnFactory(factory.Factory):
-    """Factory for creating AddressCreateModel instances."""
+class AddressUpdateFactory(factory.Factory):
+    """Factory for creating AddressUpdateModel instances."""
 
     class Meta:
-        model = AddressCreateModel
+        model = AddressUpdateModel
 
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"address_{n}")
-    description = "Test Address"
-    fqdn = "pytest.example.com"
-    folder = "Shared"
-    tag = ["test-tag", "environment-prod"]
+    description = factory.Faker("sentence")
+    tag = ["updated-tag"]
+
+    # Address types default to None
+    ip_netmask = None
+    ip_range = None
+    ip_wildcard = None
+    fqdn = None
+
+    @classmethod
+    def with_ip_netmask(cls, ip_netmask="192.168.1.100/32", **kwargs):
+        return cls(ip_netmask=ip_netmask, **kwargs)
+
+    @classmethod
+    def with_fqdn(cls, fqdn="example.com", **kwargs):
+        return cls(fqdn=fqdn, **kwargs)
+
+    @classmethod
+    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
+        return cls(ip_range=ip_range, **kwargs)
+
+    @classmethod
+    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
+        return cls(ip_wildcard=ip_wildcard, **kwargs)
 
     @classmethod
     def with_snippet(cls, **kwargs):
@@ -103,17 +153,39 @@ class AddressCreateFqdnFactory(factory.Factory):
         return cls(folder=None, device="TestDevice", **kwargs)
 
 
-class AddressCreateIpRangeFactory(factory.Factory):
-    """Factory for creating AddressCreateModel instances."""
+class AddressResponseFactory(factory.Factory):
+    """Factory for creating AddressResponseModel instances."""
 
     class Meta:
-        model = AddressCreateModel
+        model = AddressResponseModel
 
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"address_{n}")
-    description = "Test Address"
-    ip_range = "192.168.255.100-192.168.255.105"
+    description = factory.Faker("sentence")
+    tag = ["response-tag"]
     folder = "Shared"
-    tag = ["test-tag", "environment-prod"]
+
+    # Address types default to None
+    ip_netmask = None
+    ip_range = None
+    ip_wildcard = None
+    fqdn = None
+
+    @classmethod
+    def with_ip_netmask(cls, ip_netmask="192.168.1.1/32", **kwargs):
+        return cls(ip_netmask=ip_netmask, **kwargs)
+
+    @classmethod
+    def with_fqdn(cls, fqdn="example.com", **kwargs):
+        return cls(fqdn=fqdn, **kwargs)
+
+    @classmethod
+    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
+        return cls(ip_range=ip_range, **kwargs)
+
+    @classmethod
+    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
+        return cls(ip_wildcard=ip_wildcard, **kwargs)
 
     @classmethod
     def with_snippet(cls, **kwargs):
@@ -123,28 +195,18 @@ class AddressCreateIpRangeFactory(factory.Factory):
     def with_device(cls, **kwargs):
         return cls(folder=None, device="TestDevice", **kwargs)
 
-
-class AddressCreateIpWildcardFactory(factory.Factory):
-    """Factory for creating AddressCreateModel instances."""
-
-    class Meta:
-        model = AddressCreateModel
-
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = "Test Address"
-    ip_wildcard = "10.20.1.0/0.0.248.255"
-    folder = "Shared"
-    tag = ["test-tag", "environment-prod"]
-
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def from_request(cls, request_model: AddressCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
 
-    @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
 
-
+# ----------------------------------------------------------------------------
+# Address Group object factories.
+# ----------------------------------------------------------------------------
 class DynamicFilterFactory(factory.Factory):
     class Meta:
         model = DynamicFilter

@@ -67,7 +67,7 @@ class Address(BaseObject):
             response_data = response.json()
 
             # Return the SCM API response as a new Pydantic object
-            return AddressResponseModel(**response_data)
+            return AddressResponseModel(**response)
 
         except HTTPError as e:
             response: Optional[Response] = e.response
