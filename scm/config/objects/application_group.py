@@ -1,18 +1,24 @@
 # scm/config/objects/application_group.py
 
-from typing import List, Dict, Any, Optional
+# Standard library imports
 import logging
+from typing import List, Dict, Any, Optional
+
+# External libraries
+from requests import Response
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config import BaseObject
-from scm.models.objects import (
-    ApplicationGroupCreateModel,
-    ApplicationGroupResponseModel,
-    ApplicationGroupUpdateModel,
-)
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     ErrorHandler,
-    APIError,
+)
+from scm.models.objects import (
+    ApplicationGroupCreateModel,
+    ApplicationGroupResponseModel,
+    ApplicationGroupUpdateModel,
 )
 
 
@@ -42,26 +48,37 @@ class ApplicationGroup(BaseObject):
             ApplicationGroupResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             app_group = ApplicationGroupCreateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields
             payload = app_group.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
             response = self.api_client.post(
                 self.ENDPOINT,
                 json=payload,
             )
-            return ApplicationGroupResponseModel(**response)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while creating application group: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while creating application group: {e}"
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return ApplicationGroupResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def get(
         self,
@@ -74,25 +91,29 @@ class ApplicationGroup(BaseObject):
             ApplicationGroupResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(endpoint)
-            return ApplicationGroupResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error getting application group: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return ApplicationGroupResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def update(
         self,
@@ -105,30 +126,38 @@ class ApplicationGroup(BaseObject):
             ApplicationGroupResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             app_group = ApplicationGroupUpdateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields
             payload = app_group.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
             response = self.api_client.put(
                 endpoint,
                 json=payload,
             )
-            return ApplicationGroupResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error updating application group: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return ApplicationGroupResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     @staticmethod
     def _apply_filters(
@@ -148,8 +177,10 @@ class ApplicationGroup(BaseObject):
         Raises:
             InvalidObjectError: If filter criteria are invalid
         """
+
         filter_criteria = app_groups
 
+        # Filter by members
         if "members" in filters:
             if not isinstance(filters["members"], list):
                 raise InvalidObjectError("'members' filter must be a list")
@@ -206,6 +237,7 @@ class ApplicationGroup(BaseObject):
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -228,37 +260,45 @@ class ApplicationGroup(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "data" not in response:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'data' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if not isinstance(response["data"], list):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: 'data' field must be a list",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
-            app_groups = [
+            addresses = [
                 ApplicationGroupResponseModel(**item) for item in response["data"]
             ]
-            return self._apply_filters(app_groups, filters)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while listing application groups: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while listing application groups: {e}"
+            return self._apply_filters(
+                addresses,
+                filters,
+            )
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def fetch(
         self,
@@ -301,6 +341,7 @@ class ApplicationGroup(BaseObject):
             )
 
         params = {}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -324,38 +365,41 @@ class ApplicationGroup(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response, http_status_code=400)
+                ErrorHandler.raise_for_error(
+                    response,
+                    http_status_code=400,
+                )
 
             if "id" in response:
-                app_group = ApplicationGroupResponseModel(**response)
-                return app_group.model_dump(
+                address = ApplicationGroupResponseModel(**response)
+                return address.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
                 )
             else:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'id' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error fetching application group: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def delete(
         self,
@@ -376,15 +420,13 @@ class ApplicationGroup(BaseObject):
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(endpoint)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error deleting application group: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
