@@ -1,18 +1,24 @@
 # scm/config/objects/address.py
 
-from typing import List, Dict, Any, Optional
+# Standard library imports
 import logging
+from typing import List, Dict, Any, Optional
+
+# External libraries
+from requests import Response
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config import BaseObject
-from scm.models.objects import (
-    AddressCreateModel,
-    AddressResponseModel,
-    AddressUpdateModel,
-)
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     ErrorHandler,
-    APIError,
+)
+from scm.models.objects import (
+    AddressCreateModel,
+    AddressResponseModel,
+    AddressUpdateModel,
 )
 
 
@@ -57,18 +63,22 @@ class Address(BaseObject):
                 json=payload,
             )
 
-            # Return the SCM API response as a new Pydantic object
-            return AddressResponseModel(**response)
+            # Extract JSON data from the response
+            response_data = response.json()
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while creating address: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while creating address: {e}"
+            # Return the SCM API response as a new Pydantic object
+            return AddressResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def get(
         self,
@@ -88,21 +98,22 @@ class Address(BaseObject):
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(endpoint)
 
-            # Return the SCM API response as a new Pydantic object
-            return AddressResponseModel(**response)
+            # Extract JSON data from the response
+            response_data = response.json()
 
-        except Exception as e:
-            self.logger.error(
-                f"Error getting address: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Return the SCM API response as a new Pydantic object
+            return AddressResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def update(
         self,
@@ -131,21 +142,22 @@ class Address(BaseObject):
                 json=payload,
             )
 
-            # Return the SCM API response as a new Pydantic object
-            return AddressResponseModel(**response)
+            # Extract JSON data from the response
+            response_data = response.json()
 
-        except Exception as e:
-            self.logger.error(
-                f"Error updating address: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Return the SCM API response as a new Pydantic object
+            return AddressResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     @staticmethod
     def _apply_filters(
@@ -277,20 +289,23 @@ class Address(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "data" not in response:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'data' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if not isinstance(response["data"], list):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: 'data' field must be a list",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
@@ -298,17 +313,16 @@ class Address(BaseObject):
 
             return self._apply_filters(addresses, filters)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                # Already an APIError, re-raise it without logging traceback again
-                self.logger.error(f"API error while listing addresses: {e}")
-                raise
-            else:
-                # Log the unexpected exception and raise a new APIError
-                self.logger.error(
-                    f"An unexpected error occurred while listing addresses: {e}"
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def fetch(
         self,
@@ -375,13 +389,17 @@ class Address(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response, http_status_code=400)
+                ErrorHandler.raise_for_error(
+                    response,
+                    http_status_code=400,
+                )
 
             if "id" in response:
                 address = AddressResponseModel(**response)
@@ -390,23 +408,22 @@ class Address(BaseObject):
                     exclude_none=True,
                 )
             else:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'id' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error fetching address: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def delete(
         self,
@@ -427,15 +444,13 @@ class Address(BaseObject):
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(endpoint)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error deleting address: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
