@@ -11,7 +11,6 @@ class ErrorResponse:
     code: str
     message: str
     details: Optional[Union[Dict[str, Any], List[Any]]] = None
-    request_id: Optional[str] = None
 
     @classmethod
     def from_response(cls, response_data: Dict[str, Any]) -> "ErrorResponse":
@@ -23,7 +22,6 @@ class ErrorResponse:
             code=error.get("code", ""),
             message=error.get("message", ""),
             details=error.get("details"),
-            request_id=response_data.get("_request_id"),
         )
 
 
@@ -36,14 +34,12 @@ class APIError(Exception):
         error_code: Optional[str] = None,
         http_status_code: Optional[int] = None,
         details: Optional[Dict[str, Any]] = None,
-        request_id: Optional[str] = None,
     ):
         super().__init__(message)
         self.message = message
         self.error_code = error_code
         self.http_status_code = http_status_code
         self.details = details or {}
-        self.request_id = request_id
 
     def __str__(self):
         parts = []
@@ -55,8 +51,6 @@ class APIError(Exception):
             parts.append(f"{self.message}")
         if self.details:
             parts.append(f"Details: {self.details}")
-        if self.request_id:
-            parts.append(f"Request ID: {self.request_id}")
         return ": ".join(parts)
 
 
@@ -218,15 +212,13 @@ class ErrorHandler:
 
     # Map error codes to specific exception classes
     ERROR_CODE_MAP: Dict[str, Type[APIError]] = {
-        "E016": {
-            "Not Authenticated": NotAuthenticatedError,
-            "Invalid Credential": InvalidCredentialError,
-            "Key Too Long": KeyTooLongError,
-            "Key Expired": KeyExpiredError,
-            "The password needs to be changed.": PasswordChangeRequiredError,
-            "Object Not Unique": ObjectNotUniqueError,
+        "API_I00013": {
+            "Object Not Present": ObjectNotPresentError,
+            "Operation Impossible": ObjectNotPresentError,
+            "Object Already Exists": ConflictError,
+            "Malformed Command": MalformedCommandError,
         },
-        "E007": UnauthorizedError,
+        "API_I00035": InvalidObjectError,
         "E003": {
             "Input Format Mismatch": InputFormatMismatchError,
             "Output Format Mismatch": OutputFormatMismatchError,
@@ -237,23 +229,25 @@ class ErrorHandler:
             "Invalid Command": InvalidCommandError,
             "Malformed Command": MalformedCommandError,
         },
-        "E013": BadXPathError,
         "E005": ObjectNotPresentError,
         "E006": NameNotUniqueError,
+        "E007": UnauthorizedError,
         "E009": ReferenceNotZeroError,
         "E012": {
             "Version Not Supported": VersionAPINotSupportedError,
             "Method Not Supported": MethodAPINotSupportedError,
             "Action Not Supported": ActionNotSupportedError,
         },
-        "4": SessionTimeoutError,
-        "API_I00013": {
-            "Object Not Present": ObjectNotPresentError,
-            "Operation Impossible": ObjectNotPresentError,
-            "Object Already Exists": ConflictError,
-            "Malformed Command": MalformedCommandError,
+        "E013": BadXPathError,
+        "E016": {
+            "Not Authenticated": NotAuthenticatedError,
+            "Invalid Credential": InvalidCredentialError,
+            "Key Too Long": KeyTooLongError,
+            "Key Expired": KeyExpiredError,
+            "The password needs to be changed.": PasswordChangeRequiredError,
+            "Object Not Unique": ObjectNotUniqueError,
         },
-        "API_I00035": InvalidObjectError,
+        "4": SessionTimeoutError,
     }
 
     @classmethod
@@ -294,5 +288,4 @@ class ErrorHandler:
             error_code=error_code,
             http_status_code=http_status_code,
             details=error_details,
-            request_id=error_response.request_id,
         )
