@@ -1,7 +1,8 @@
 # tests/scm/config/objects/test_address.py
+import logging
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from scm.config.objects import Address
 from scm.exceptions import (
@@ -328,6 +329,30 @@ class TestAddressCreate(TestAddressBase):
         with pytest.raises(APIError) as exc_info:
             self.client.create(data={"name": "test"})
         assert "An unexpected error occurred" in str(exc_info.value)
+
+    def test_create_api_error_handling(self, caplog):
+        """
+        Test handling of APIError during address creation.
+        """
+        # Create an APIError instance
+        api_error = APIError("Test API Error")
+        self.mock_scm.post.side_effect = api_error
+
+        # Test data
+        test_data = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
+
+        with caplog.at_level(logging.ERROR, logger="scm"):
+            with pytest.raises(APIError) as exc_info:
+                self.client.create(test_data)
+
+        # Verify the error was logged
+        assert "API error while creating address: Test API Error" in caplog.text
+        # Verify the same error was re-raised
+        assert exc_info.value is api_error
 
 
 class TestAddressGet(TestAddressBase):
@@ -760,6 +785,48 @@ class TestAddressFetch(TestAddressBase):
             self.client.fetch(name="test", folder="Shared")
         assert "Original error" in str(exc_info.value)
 
+    def test_fetch_invalid_format_raises_api_error(self):
+        """
+        Test fetching when response format is invalid (line 383).
+        """
+        # Mock response with invalid format (missing 'id' field)
+        mock_response = {
+            "name": "test-address",
+            "folder": "Shared",
+            # Missing 'id' field
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.fetch(name="test-address", folder="Shared")
+        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
+
+    #
+    # def test_fetch_error_response_handling(self, caplog):
+    #     """
+    #     Test handling of error response in fetch method.
+    #     """
+    #     # Mock an error response
+    #     mock_error_response = {
+    #         "_errors": [
+    #             {
+    #                 "message": "Test error",
+    #                 "code": "API_I00013",
+    #                 "details": {"errorType": "Invalid Object"},
+    #             }
+    #         ]
+    #     }
+    #     self.mock_scm.get.return_value = mock_error_response
+    #
+    #     with caplog.at_level(logging.ERROR, logger="scm"):
+    #         with pytest.raises(InvalidObjectError) as exc_info:
+    #             self.client.fetch(name="test-address", folder="Shared")
+    #
+    #     # Verify the error was logged
+    #     assert "Error fetching address" in caplog.text
+    #     # Optionally, check that the exception message is correct
+    #     assert "Invalid Object" in str(exc_info.value)
+
 
 class TestAddressTagValidation(TestAddressBase):
     """Tests for Address tag field validation."""
@@ -1144,6 +1211,17 @@ class TestAddressListFilters(TestAddressBase):
         with pytest.raises(APIError) as exc_info:
             self.client.list(folder="Shared")
         assert "Invalid response format: expected dictionary" in str(exc_info.value)
+
+    def test_apply_filters_invalid_types_filter(self):
+        """
+        Test _apply_filters with invalid types filter (line 367).
+        """
+        mock_addresses = []  # Empty list as we'll raise before using it
+        invalid_filters = {"types": "not-a-list"}  # String instead of list
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+        assert "'types' filter must be a list" in str(exc_info.value)
 
 
 # -------------------- End of Test Classes --------------------
