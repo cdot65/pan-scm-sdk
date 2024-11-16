@@ -1,18 +1,24 @@
 # scm/config/security/decryption_profile.py
 
-from typing import List, Dict, Any, Optional
+# Standard library imports
 import logging
+from typing import List, Dict, Any, Optional
+
+# External libraries
+from requests import Response
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config import BaseObject
-from scm.models.security import (
-    DecryptionProfileCreateModel,
-    DecryptionProfileResponseModel,
-    DecryptionProfileUpdateModel,
-)
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     ErrorHandler,
-    APIError,
+)
+from scm.models.security import (
+    DecryptionProfileCreateModel,
+    DecryptionProfileResponseModel,
+    DecryptionProfileUpdateModel,
 )
 
 
@@ -42,26 +48,37 @@ class DecryptionProfile(BaseObject):
             DecryptionProfileResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             profile = DecryptionProfileCreateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields
             payload = profile.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
             response = self.api_client.post(
                 self.ENDPOINT,
                 json=payload,
             )
-            return DecryptionProfileResponseModel(**response)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while creating decryption profile: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while creating decryption profile: {e}"
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return DecryptionProfileResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def get(
         self,
@@ -74,25 +91,29 @@ class DecryptionProfile(BaseObject):
             DecryptionProfileResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(endpoint)
-            return DecryptionProfileResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error getting decryption profile: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return DecryptionProfileResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def update(
         self,
@@ -105,30 +126,38 @@ class DecryptionProfile(BaseObject):
             DecryptionProfileResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             profile = DecryptionProfileUpdateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields
             payload = profile.model_dump(exclude_unset=True)
+
+            # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
             response = self.api_client.put(
                 endpoint,
                 json=payload,
             )
-            return DecryptionProfileResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error updating decryption profile: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return DecryptionProfileResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     @staticmethod
     def _apply_filters(
@@ -148,8 +177,10 @@ class DecryptionProfile(BaseObject):
         Raises:
             InvalidObjectError: If filter criteria are invalid
         """
+
         filter_criteria = profiles
 
+        # Filter by types
         if "types" in filters:
             if not isinstance(filters["types"], list):
                 raise InvalidObjectError("'types' filter must be a list")
@@ -214,6 +245,7 @@ class DecryptionProfile(BaseObject):
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -236,37 +268,45 @@ class DecryptionProfile(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "data" not in response:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'data' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if not isinstance(response["data"], list):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: 'data' field must be a list",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             profiles = [
                 DecryptionProfileResponseModel(**item) for item in response["data"]
             ]
-            return self._apply_filters(profiles, filters)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while listing decryption profiles: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while listing decryption profiles: {e}"
+            return self._apply_filters(
+                profiles,
+                filters,
+            )
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def fetch(
         self,
@@ -309,6 +349,7 @@ class DecryptionProfile(BaseObject):
             )
 
         params = {}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -332,38 +373,41 @@ class DecryptionProfile(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response, http_status_code=400)
+                ErrorHandler.raise_for_error(
+                    response,
+                    http_status_code=400,
+                )
 
             if "id" in response:
-                profile = DecryptionProfileResponseModel(**response)
-                return profile.model_dump(
+                address = DecryptionProfileResponseModel(**response)
+                return address.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
                 )
             else:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'id' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error fetching decryption profile: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def delete(
         self,
@@ -384,15 +428,13 @@ class DecryptionProfile(BaseObject):
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(endpoint)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error deleting decryption profile: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise

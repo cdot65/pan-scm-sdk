@@ -1,20 +1,26 @@
 # scm/config/security/security_rule.py
 
-from typing import List, Dict, Any, Optional
+# Standard library imports
 import logging
+from typing import List, Dict, Any, Optional
+
+# External libraries
+from requests import Response
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config import BaseObject
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    ErrorHandler,
+)
 from scm.models.security import (
     SecurityRuleCreateModel,
     SecurityRuleUpdateModel,
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
     Rulebase,
-)
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-    ErrorHandler,
-    APIError,
 )
 
 
@@ -45,37 +51,48 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
-            # Validate rulebase using the enum
+            # Validate that the rulebase is of type `pre` or `post`
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             profile = SecurityRuleCreateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields and using aliases
             payload = profile.model_dump(
                 exclude_unset=True,
                 by_alias=True,
             )
+
+            # Send the updated object to the remote API as JSON
             response = self.api_client.post(
                 self.ENDPOINT,
                 params={"position": rulebase.value},
                 json=payload,
             )
-            return SecurityRuleResponseModel(**response)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while creating security rule: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while creating security rule: {e}"
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return SecurityRuleResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def get(
         self,
@@ -89,34 +106,39 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Validate that the rulebase is of type `pre` or `post`
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
+            # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
             response = self.api_client.get(
                 endpoint,
                 params={"position": rulebase.value},
             )
-            return SecurityRuleResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error getting security rule: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return SecurityRuleResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def update(
         self,
@@ -130,40 +152,49 @@ class SecurityRule(BaseObject):
             SecurityRuleResponseModel
 
         Raises:
-            APIError: For any API-related errors
+            Custom Error Handling class response
         """
         try:
+            # Validate that the rulebase is of type `pre` or `post`
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
+            # Use the dictionary "data" to pass into Pydantic and return a modeled object
             profile = SecurityRuleUpdateModel(**data)
+
+            # Convert back to a Python dictionary, removing any unset fields and using aliases
             payload = profile.model_dump(
                 exclude_unset=True,
                 by_alias=True,
             )
+
+            # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
             response = self.api_client.put(
                 endpoint,
                 params={"position": rulebase.value},
                 json=payload,
             )
-            return SecurityRuleResponseModel(**response)
 
-        except Exception as e:
-            self.logger.error(
-                f"Error updating security rule: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+            # Extract JSON data from the response
+            response_data = response.json()
+
+            # Return the SCM API response as a new Pydantic object
+            return SecurityRuleResponseModel(**response_data)
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     @staticmethod
     def _apply_filters(
@@ -183,6 +214,7 @@ class SecurityRule(BaseObject):
         Raises:
             InvalidObjectError: If filter criteria are invalid
         """
+
         filter_criteria = rules
 
         # Filter by action
@@ -370,6 +402,7 @@ class SecurityRule(BaseObject):
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
+        # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, Rulebase):
             try:
                 rulebase = Rulebase(rulebase.lower())
@@ -403,35 +436,43 @@ class SecurityRule(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "data" not in response:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'data' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if not isinstance(response["data"], list):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: 'data' field must be a list",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             rules = [SecurityRuleResponseModel(**item) for item in response["data"]]
-            return self._apply_filters(rules, filters)
 
-        except Exception as e:
-            if isinstance(e, APIError):
-                self.logger.error(f"API error while listing security rules: {e}")
-                raise
-            else:
-                self.logger.error(
-                    f"An unexpected error occurred while listing security rules: {e}"
+            return self._apply_filters(
+                rules,
+                filters,
+            )
+
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
                 )
-                raise APIError("An unexpected error occurred") from e
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def fetch(
         self,
@@ -475,11 +516,14 @@ class SecurityRule(BaseObject):
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
+        # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, Rulebase):
             try:
                 rulebase = Rulebase(rulebase.lower())
             except ValueError:
                 raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
+
+        params = {}
 
         container_parameters = self._build_container_params(
             folder,
@@ -494,11 +538,9 @@ class SecurityRule(BaseObject):
                 http_status_code=400,
             )
 
-        params = {
-            **container_parameters,
-            "position": rulebase.value,
-            "name": name,
-        }
+        params.update(container_parameters)
+        params["position"] = rulebase.value
+        params["name"] = name
 
         try:
             response = self.api_client.get(
@@ -507,38 +549,41 @@ class SecurityRule(BaseObject):
             )
 
             if not isinstance(response, dict):
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: expected dictionary",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
             if "_errors" in response:
-                ErrorHandler.raise_for_error(response, http_status_code=400)
+                ErrorHandler.raise_for_error(
+                    response,
+                    http_status_code=400,
+                )
 
             if "id" in response:
-                rule = SecurityRuleResponseModel(**response)
-                return rule.model_dump(
+                address = SecurityRuleResponseModel(**response)
+                return address.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
                 )
             else:
-                raise APIError(
+                raise InvalidObjectError(
                     "Invalid response format: missing 'id' field",
+                    error_code="E003",
                     http_status_code=500,
                 )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error fetching security rule: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def delete(
         self,
@@ -558,6 +603,7 @@ class SecurityRule(BaseObject):
             MalformedCommandError: If the request is malformed
         """
         try:
+            # Validate that the rulebase is of type `pre` or `post`
             if not isinstance(rulebase, Rulebase):
                 try:
                     rulebase = Rulebase(rulebase.lower())
@@ -570,18 +616,16 @@ class SecurityRule(BaseObject):
                 params={"position": rulebase.value},
             )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error deleting security rule: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def move(
         self,
@@ -618,15 +662,13 @@ class SecurityRule(BaseObject):
                 json=payload,
             )
 
-        except Exception as e:
-            self.logger.error(
-                f"Error moving security rule: {e}",
-                exc_info=True,
-            )
-            if hasattr(e, "response") and e.response is not None:  # noqa
+        except HTTPError as e:
+            response: Optional[Response] = e.response
+            if response is not None and response.content:
                 ErrorHandler.raise_for_error(
-                    e.response.json(),
-                    e.response.status_code,
+                    response.json(),
+                    response.status_code,
                 )
             else:
-                raise APIError(f"An unexpected error occurred: {e}") from e
+                self.logger.error("No response content available for error parsing.")
+                raise
