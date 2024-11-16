@@ -1,15 +1,16 @@
 # scm/client.py
+import logging
 import sys
 from typing import Optional, Dict, Any
-import logging
+
 import requests
 
 from scm.auth import OAuth2Client
-from scm.models.auth import AuthRequestModel
 from scm.exceptions import (
     APIError,
     ErrorHandler,
 )
+from scm.models.auth import AuthRequestModel
 
 
 class Scm:
@@ -68,8 +69,20 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
+        """
+        Handles the API request and returns the response JSON or None if no content is present.
+
+        Args:
+            method: HTTP method to be used for the request (e.g., 'GET', 'POST').
+            endpoint: The API endpoint to which the request is made.
+            **kwargs: Additional arguments to be passed to the request (e.g., headers, params, data).
+        """
         url = f"{self.api_base_url}{endpoint}"
         self.logger.debug(f"Making {method} request to {url} with params {kwargs}")
+
+        # make linter happy by defining an empty response dictionary for exceptions
+        response = {}
+
         try:
             response = self.session.request(
                 method,
@@ -77,18 +90,20 @@ class Scm:
                 **kwargs,
             )
             response.raise_for_status()
+
             if response.content and response.content.strip():
                 return response.json()
             else:
                 return None  # Return None or an empty dict
-        except requests.exceptions.HTTPError as http_err:
-            http_status_code = response.status_code  # noqa
+
+        except requests.exceptions.HTTPError:
+            http_status_code = response.status_code
             error_content = {}
+
             try:
                 error_content = response.json() if response.content else {}
             except ValueError:
-                self.logger.error(f"Failed to parse error response: {response.content}")
-            self.logger.error(f"HTTP error occurred: {http_err} - {error_content}")
+                pass
 
             try:
                 ErrorHandler.raise_for_error(
@@ -96,29 +111,74 @@ class Scm:
                     http_status_code,
                 )
             except ValueError as ve:
-                self.logger.error(f"Invalid error response format: {ve}")
                 raise APIError("An error occurred.") from ve
-            # Remove the generic exception handler to let specific exceptions propagate
+
         except Exception as e:
             self.logger.error(f"API request failed: {str(e)}")
             raise APIError(f"API request failed: {str(e)}") from e
 
-    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs):
+    def get(
+        self,
+        endpoint: str,
+        params: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ):
+        """
+        Sends a GET request to the SCM API.
+        """
         if self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
-        return self.request("GET", endpoint, params=params, **kwargs)
+        return self.request(
+            "GET",
+            endpoint,
+            params=params,
+            **kwargs,
+        )
 
-    def post(self, endpoint: str, **kwargs):
+    def post(
+        self,
+        endpoint: str,
+        **kwargs,
+    ):
+        """
+        Sends a POST request to the SCM API.
+        """
         if self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
-        return self.request("POST", endpoint, **kwargs)
+        return self.request(
+            "POST",
+            endpoint,
+            **kwargs,
+        )
 
-    def put(self, endpoint: str, **kwargs):
+    def put(
+        self,
+        endpoint: str,
+        **kwargs,
+    ):
+        """
+        Sends a PUT request to the SCM API.
+        """
         if self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
-        return self.request("PUT", endpoint, **kwargs)
+        return self.request(
+            "PUT",
+            endpoint,
+            **kwargs,
+        )
 
-    def delete(self, endpoint: str, **kwargs):
+    def delete(
+        self,
+        endpoint: str,
+        **kwargs,
+    ):
+        """
+        Sends a DELETE request to the SCM API.
+        """
         if self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
-        return self.request("DELETE", endpoint, **kwargs)
+        return self.request(
+            "DELETE",
+            endpoint,
+            **kwargs,
+        )
