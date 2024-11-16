@@ -1,7 +1,7 @@
 # scm/exceptions/__init__.py
 
-from typing import Optional, Dict, Any, Type, Union, List
 from dataclasses import dataclass
+from typing import Optional, Dict, Any, Type, Union, List
 
 
 @dataclass
@@ -43,15 +43,15 @@ class APIError(Exception):
 
     def __str__(self):
         parts = []
-        if self.http_status_code is not None:
-            parts.append(f"HTTP {self.http_status_code}")
-        if self.error_code:
-            parts.append(f"Error {self.error_code}")
-        if self.message:
-            parts.append(f"{self.message}")
+        # if self.message:
+        #     parts.append(f"{self.message}")
         if self.details:
-            parts.append(f"Details: {self.details}")
-        return ": ".join(parts)
+            parts.append(f"{self.details}")
+        if self.http_status_code is not None:
+            parts.append(f"HTTP error: {self.http_status_code}")
+        if self.error_code:
+            parts.append(f"API error: {self.error_code}")
+        return " - ".join(parts)
 
 
 # Base classes for HTTP status codes
