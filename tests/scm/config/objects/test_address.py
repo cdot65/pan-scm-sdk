@@ -23,7 +23,11 @@ from scm.models.objects import (
     AddressCreateModel,
     AddressResponseModel,
 )
-from tests.factories import AddressResponseFactory, AddressCreateFactory
+from tests.factories import (
+    AddressResponseFactory,
+    AddressCreateFactory,
+    AddressUpdateFactory,
+)
 
 
 @pytest.mark.usefixtures("load_env")
@@ -412,63 +416,40 @@ class TestAddressUpdate(TestAddressBase):
     def test_update_object(self):
         """
         **Objective:** Test updating an object.
-        **Workflow:**
-            1. Prepares update data and mocks response
-            2. Verifies the update request and response
-            3. Ensures payload transformation is correct
         """
-        from uuid import UUID
-
-        test_uuid = UUID("123e4567-e89b-12d3-a456-426655440000")
-
-        # Test data including ID
-        update_data = {
-            "id": str(test_uuid),
-            "name": "TestAddress",
-            "folder": "Shared",
-            "ip_netmask": "10.0.0.0/24",
-            "description": "Updated description",
-            "tag": [
-                "tag1",
-                "tag2",
-            ],
-        }
+        # Use AddressUpdateFactory to create the update data
+        update_data = AddressUpdateFactory.with_ip_netmask(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="TestAddress",
+            ip_netmask="10.0.0.0/24",
+            description="Updated description",
+            tag=["tag1", "tag2"],
+            folder="Shared",
+        )
 
         # Expected payload should not include the ID
-        expected_payload = {
-            "name": "TestAddress",
-            "folder": "Shared",
-            "ip_netmask": "10.0.0.0/24",
-            "description": "Updated description",
-            "tag": [
-                "tag1",
-                "tag2",
-            ],
-        }
+        expected_payload = update_data.model_dump(exclude_unset=True, exclude={"id"})
 
         # Mock response should include the ID
-        mock_response = update_data.copy()
-        self.mock_scm.put.return_value = mock_response  # noqa
+        mock_response = AddressResponseFactory.from_request(update_data)
+
+        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
         # Perform update
-        updated_object = self.client.update(update_data)
+        updated_object = self.client.update(update_data.model_dump())
 
         # Verify correct endpoint and payload
         self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/addresses/{update_data['id']}",
-            json=expected_payload,  # Should not include ID
+            f"/config/objects/v1/addresses/{update_data.id}",
+            json=expected_payload,
         )
 
         # Verify response model
         assert isinstance(updated_object, AddressResponseModel)
-        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
-        assert updated_object.id == test_uuid  # Compare against UUID object
-        assert (
-            str(updated_object.id) == update_data["id"]
-        )  # Compare string representations
-        assert updated_object.name == "TestAddress"
-        assert updated_object.ip_netmask == "10.0.0.0/24"
-        assert updated_object.folder == "Shared"
+        assert updated_object.id == update_data.id
+        assert updated_object.name == update_data.name
+        assert updated_object.ip_netmask == update_data.ip_netmask
+        assert updated_object.folder == update_data.folder
 
     def test_update_object_error_handling(self):
         """
