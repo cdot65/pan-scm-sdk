@@ -187,12 +187,14 @@ class AddressUpdateModel(AddressBaseModel):
     """
     Represents the update of an existing Address object for Palo Alto Networks' Strata Cloud Manager.
 
-    This class defines the structure and validation rules for an AddressUpdateModel object, similar to the
-    AddressCreateModel class, but does not have the same custom validator as the AddressBaseModel class.
-
-    Creating this dedicated Update model in the event that additional validators or fields are required in the
-    near future.
+    This class defines the structure and validation rules for an AddressUpdateModel object.
     """
+
+    id: str = Field(
+        ...,  # This makes it required
+        description="The UUID of the address object",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
 
 
 class AddressResponseModel(AddressBaseModel):
