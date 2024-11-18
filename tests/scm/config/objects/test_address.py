@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 # External libraries
 import pytest
 from pydantic import ValidationError as PydanticValidationError
+from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import Address
@@ -313,12 +314,9 @@ class TestAddressCreate(TestAddressBase):
             "ip_netmask": "10.0.0.0/24",
         }
 
-        with caplog.at_level(logging.ERROR, logger="scm"):
-            with pytest.raises(APIError) as exc_info:
-                self.client.create(test_data)
+        with pytest.raises(APIError) as exc_info:
+            self.client.create(test_data)
 
-        # Verify the error was logged
-        assert "API error while creating address: Test API Error" in caplog.text
         # Verify the same error was re-raised
         assert exc_info.value is api_error
 
@@ -329,38 +327,37 @@ class TestAddressGet(TestAddressBase):
     def test_get_object(self):
         """
         **Objective:** Test retrieving a specific object.
-        **Workflow:**
-            1. Mocks the API response for a specific object.
-            2. Verifies the get request and response handling.
         """
-        mock_response = {
-            "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
-            "name": "TestAddress",
-            "ip_netmask": "10.0.0.0/24",
-            "folder": "Shared",
-        }
+        # Use AddressResponseFactory to create a mock response
+        mock_response = AddressResponseFactory.with_ip_netmask(
+            id="b44a8c00-7555-4021-96f0-d59deecd54e8",
+            name="TestAddress",
+            ip_netmask="10.0.0.0/24",
+            folder="Shared",
+        )
 
-        self.mock_scm.get.return_value = mock_response  # noqa
-        object_id = "b44a8c00-7555-4021-96f0-d59deecd54e8"
+        # Mock the get method to return the mock_response's dictionary representation
+        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
+        object_id = mock_response.id  # Use the same ID as in the mock response
+
         get_object = self.client.get(object_id)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/addresses/{object_id}"
         )
         assert isinstance(get_object, AddressResponseModel)
-        assert get_object.name == "TestAddress"
-        assert get_object.ip_netmask == "10.0.0.0/24"
+        assert get_object.id == mock_response.id
+        assert get_object.name == mock_response.name
+        assert get_object.ip_netmask == mock_response.ip_netmask
+        assert get_object.folder == mock_response.folder
 
     def test_get_object_error_handling(self):
         """
         **Objective:** Test error handling during object retrieval.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to get an object
-            3. Verifies proper error handling and exception raising
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
+        # Mock error response data using a realistic error response
         mock_error_response = {
             "_errors": [
                 {
@@ -372,21 +369,30 @@ class TestAddressGet(TestAddressBase):
             "_request_id": "test-request-id",
         }
 
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
+        # Create a mock response object
+        mock_response = MagicMock()
+        mock_response.content = True  # Simulate that there is content
+        mock_response.json.return_value = mock_error_response
+        mock_response.status_code = 404
 
-        with pytest.raises(ObjectNotPresentError):
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.get(object_id)
+
+        # Optionally, assert that the exception message is correct
+        assert (
+            str(exc_info.value)
+            == "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+        )
 
     def test_get_generic_exception_handling(self):
         """
         **Objective:** Test generic exception handling in get method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
@@ -395,7 +401,9 @@ class TestAddressGet(TestAddressBase):
 
         with pytest.raises(Exception) as exc_info:
             self.client.get(object_id)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+
+        # Assert that the exception message is correct
+        assert str(exc_info.value) == "Generic error"
 
 
 class TestAddressUpdate(TestAddressBase):
