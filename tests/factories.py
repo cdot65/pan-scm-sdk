@@ -66,6 +66,9 @@ from scm.models.security.vulnerability_protection_profiles import (
 # ----------------------------------------------------------------------------
 # Address object factories.
 # ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
 class AddressCreateFactory(factory.Factory):
     """Factory for creating AddressCreateModel instances with different address types."""
 
@@ -109,6 +112,69 @@ class AddressCreateFactory(factory.Factory):
     @classmethod
     def with_device(cls, **kwargs):
         return cls(folder=None, device="TestDevice", **kwargs)
+
+
+# Pydantic modeling tests
+class AddressCreateDataFactory(factory.DictFactory):
+    """Factory for creating data dicts for AddressCreateModel."""
+
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = [
+        "test-tag",
+        "environment-prod",
+    ]
+
+    # We intentionally omit the address type fields to simulate missing them
+
+    @classmethod
+    def build_without_type(cls):
+        """Return a data dict without the required address type fields."""
+        return cls(
+            name="Test123",
+            folder="Shared",
+            # No address type fields provided
+        )
+
+    @classmethod
+    def build_with_multiple_types(cls):
+        """Return a data dict multiple type fields."""
+        return cls(
+            name="Test123",
+            folder="Shared",
+            ip_netmask="1.1.1.1/32",
+            fqdn="example.com",
+        )
+
+    @classmethod
+    def build_with_no_containers(cls):
+        """Return a data dict without any containers."""
+        return cls(
+            name="Test123",
+            fqdn="example.com",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict multiple containers."""
+        return cls(
+            name="Test123",
+            folder="Shared",
+            snippet="this will fail",
+            fqdn="example.com",
+        )
+
+    @classmethod
+    def build_valid(cls):
+        """Return a data dict with all the expected attributes."""
+        return cls(
+            name="Test123",
+            ip_netmask="10.5.0.11",
+            folder="Texas",
+            tag=["Python", "Automation"],
+            description="This is a test",
+        )
 
 
 class AddressUpdateFactory(factory.Factory):
