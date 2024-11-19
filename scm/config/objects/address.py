@@ -189,7 +189,12 @@ class Address(BaseObject):
         # Filter by types
         if "types" in filters:
             if not isinstance(filters["types"], list):
-                raise InvalidObjectError("'types' filter must be a list")
+                raise InvalidObjectError(
+                    message="'types' filter must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"errorType": "Invalid Object"},
+                )
             types = filters["types"]
             filter_criteria = [
                 addr
@@ -204,7 +209,12 @@ class Address(BaseObject):
         # Filter by values
         if "values" in filters:
             if not isinstance(filters["values"], list):
-                raise InvalidObjectError("'values' filter must be a list")
+                raise InvalidObjectError(
+                    message="'values' filter must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"errorType": "Invalid Object"},
+                )
             values = filters["values"]
             filter_criteria = [
                 addr
@@ -219,7 +229,12 @@ class Address(BaseObject):
         # Filter by tags
         if "tags" in filters:
             if not isinstance(filters["tags"], list):
-                raise InvalidObjectError("'tags' filter must be a list")
+                raise InvalidObjectError(
+                    message="'tags' filter must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"errorType": "Invalid Object"},
+                )
             tags = filters["tags"]
             filter_criteria = [
                 addr
