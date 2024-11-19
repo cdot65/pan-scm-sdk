@@ -1,5 +1,5 @@
 # tests/scm/config/objects/test_address.py
-
+import logging
 # Standard library imports
 from unittest.mock import MagicMock
 
@@ -181,6 +181,170 @@ class TestAddressList(TestAddressBase):
 
         assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
 
+    def test_list_invalid_response_format(self):
+        """
+        Test that InvalidObjectError is raised when the response is not a dictionary.
+        """
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_list_no_container_provided(self):
+        """
+        Test that InvalidObjectError is raised when no container parameter is provided.
+        """
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list()
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_list_multiple_containers_provided(self):
+        """
+        Test that InvalidObjectError is raised when multiple container parameters are provided.
+        """
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared", snippet="TestSnippet")
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_list_http_error_no_response_content(self, caplog):
+        """
+        Test that an HTTPError without response content in list() logs an error and re-raises the exception.
+        """
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None  # Simulate no content
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
+            with pytest.raises(HTTPError):
+                self.client.list(folder="Shared")
+
+        # Check that the log message was emitted
+        assert "No response content available for error parsing." in caplog.text
+
+    def test_list_invalid_types_filter(self):
+        """
+        Test that InvalidObjectError is raised when 'types' filter is not a list.
+        """
+        # Mock the API client to return a valid response
+        mock_response = {"data": []}
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Call list with invalid 'types' filter
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared", types="not-a-list")
+
+        # Assert that the exception message contains the expected error
+        assert (
+            "{'errorType': 'Invalid Object'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_list_no_container_params(self):
+        """
+        Test that InvalidObjectError is raised when no container parameter is provided.
+
+        This tests the case where neither folder, snippet, nor device is provided,
+        expecting an InvalidObjectError with specific error details.
+        """
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list()
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 400
+        assert "HTTP error: 400 - API error: E003" in str(error)
+
+    def test_list_no_container_parameters(self):
+        """
+        Test that InvalidObjectError is raised when no container parameters are provided.
+        """
+        # Ensure that the API client's get method doesn't interfere
+        self.mock_scm.get.return_value = {"data": []}  # noqa
+
+        # Call the list method without any container parameters
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list()
+
+        # Verify that the exception is raised with the correct message and error code
+        assert str(exc_info.value) == "HTTP error: 400 - API error: E003"
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_list_invalid_api_response_type(self):
+        """
+        Test that InvalidObjectError is raised when API returns non-dictionary response.
+
+        This tests the case where the API response is not a dictionary,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a non-dictionary response (e.g., a list)
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(error)
+
+    def test_list_invalid_api_response_format(self):
+        """
+        Test that InvalidObjectError is raised when API returns response with missing data field.
+
+        This tests the case where the API response is a dictionary but missing the required 'data' field,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a dictionary without 'data' field
+        self.mock_scm.get.return_value = {"wrong_field": "value"}
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(error)
+
+    def test_list_invalid_data_field_type(self):
+        """
+        Test that InvalidObjectError is raised when API returns non-list data field.
+
+        This tests the case where the API response's 'data' field is not a list,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a response where 'data' is not a list
+        self.mock_scm.get.return_value = {"data": "not a list"}
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+
 
 class TestAddressCreate(TestAddressBase):
     """Tests for creating Address objects."""
@@ -324,6 +488,61 @@ class TestAddressCreate(TestAddressBase):
         # Verify the same error was re-raised
         assert exc_info.value is api_error
 
+    def test_create_no_response_content(self):
+        """Test create method when HTTP error has no response content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_error = HTTPError(response=mock_response)
+        self.mock_scm.post.side_effect = mock_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.create(
+                {"name": "test", "ip_netmask": "10.0.0.0/24", "folder": "test"}
+            )
+
+    def test_create_http_error_with_response(self):
+        """
+        Test that an HTTPError with response content in create() triggers ErrorHandler.raise_for_error().
+        """
+        test_data = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
+
+        # Mock error response data
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "API_I00013",
+                    "message": "Create failed",
+                    "details": {"errorType": "Malformed Command"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        # Create a mock response object with content
+        mock_response = MagicMock()
+        mock_response.content = True  # Simulate that there is content
+        mock_response.json.return_value = mock_error_response
+        mock_response.status_code = 400
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the post method to raise the HTTPError
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.create(test_data)
+
+        # Verify that the exception message contains the expected error
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
 
 class TestAddressGet(TestAddressBase):
     """Tests for retrieving a specific Address object."""
@@ -408,6 +627,30 @@ class TestAddressGet(TestAddressBase):
 
         # Assert that the exception message is correct
         assert str(exc_info.value) == "Generic error"
+
+    def test_get_http_error_no_response_content(self, caplog):
+        """
+        Test that an HTTPError without response content in get() logs an error and re-raises the exception.
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None  # Simulate no content
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
+            with pytest.raises(HTTPError):
+                self.client.get(object_id)
+
+        # Check that the log message was emitted
+        assert "No response content available for error parsing." in caplog.text
 
 
 class TestAddressUpdate(TestAddressBase):
@@ -557,6 +800,18 @@ class TestAddressUpdate(TestAddressBase):
             in error_msg
         )
 
+    def test_update_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(
+                {"id": "test-id", "name": "test", "ip_netmask": "10.0.0.0/24"}
+            )
+
 
 class TestAddressDelete(TestAddressBase):
     """Tests for deleting Address objects."""
@@ -636,6 +891,30 @@ class TestAddressDelete(TestAddressBase):
         assert "HTTP error: 404" in error_message
         assert "API error: API_I00013" in error_message
 
+    def test_delete_http_error_no_response_content(self, caplog):
+        """
+        Test that an HTTPError without response content in delete() logs an error and re-raises the exception.
+        """
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the delete method to raise the HTTPError
+        self.mock_scm.delete.side_effect = mock_http_error
+
+        with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
+            with pytest.raises(HTTPError):
+                self.client.delete(object_id)
+
+        # Check that the log message was emitted
+        assert "No response content available for error parsing." in caplog.text
+
     def test_delete_generic_exception_handling(self):
         """
         Test generic exception handling during delete.
@@ -671,6 +950,16 @@ class TestAddressDelete(TestAddressBase):
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/objects/v1/addresses/{object_id}"
         )
+
+    def test_delete_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.delete("test-id")
 
 
 class TestAddressFetch(TestAddressBase):
@@ -977,6 +1266,112 @@ class TestAddressFetch(TestAddressBase):
         assert "HTTP error: 500" in str(exc_info.value)
         assert "API error: E003" in str(exc_info.value)
 
+    def test_fetch_missing_id_field(self):
+        """
+        Test that InvalidObjectError is raised when the response is missing 'id' field.
+        """
+        # Mock response without 'id' field
+        mock_response = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
+
+        self.mock_scm.get.return_value = mock_response
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address", folder="Shared")
+
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_fetch_http_error_no_response_content(self, caplog):
+        """
+        Test that an HTTPError without response content in fetch() logs an error and re-raises the exception.
+        """
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error
+
+        with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
+            with pytest.raises(HTTPError):
+                self.client.fetch(name="test-address", folder="Shared")
+
+        # Check that the log message was emitted
+        assert "No response content available for error parsing." in caplog.text
+
+    def test_fetch_response_contains_errors(self):
+        """
+        Test that ErrorHandler.raise_for_error is called when response contains '_errors' field.
+        """
+        # Mock response with '_errors' field
+        mock_response = {
+            "_errors": [
+                {
+                    "code": "E003",
+                    "message": "Invalid request",
+                    "details": {"errorType": "Invalid Object"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address", folder="Shared")
+
+        assert (
+            "{'errorType': 'Invalid Object'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_fetch_no_container_provided(self):
+        """
+        Test that InvalidObjectError is raised when no container parameter is provided.
+        """
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address")
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_fetch_multiple_containers_provided(self):
+        """
+        Test that InvalidObjectError is raised when multiple container parameters are provided.
+        """
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(
+                folder="Shared", snippet="TestSnippet", name="test-address"
+            )
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_list_invalid_response_format(self):
+        """
+        Test that InvalidObjectError is raised when the response is not a dictionary.
+        """
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(folder="Shared", name="test123")
+
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
 
 class TestAddressTagValidation(TestAddressBase):
     """Tests for Address tag field validation."""
@@ -1155,6 +1550,105 @@ class TestAddressListFilters(TestAddressBase):
             )
         except BadRequestError:
             pytest.fail("Unexpected BadRequestError raised with valid list filters")
+
+    def test_values_filter_validation(self):
+        """Test validation of values filter specifically."""
+        mock_addresses = []
+
+        # Test with string instead of list
+        invalid_filters = {"values": "10.0.0.0/24"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+        assert "HTTP error: 500" in str(error)
+        assert "API error: E003" in str(error)
+
+        # Test with dict instead of list
+        invalid_filters = {"values": {"value": "10.0.0.0/24"}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+        assert "HTTP error: 500" in str(error)
+        assert "API error: E003" in str(error)
+
+    def test_tags_filter_validation(self):
+        """Test validation of tags filter specifically."""
+        mock_addresses = []
+
+        # Test with string instead of list
+        invalid_filters = {"tags": "tag1"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+        assert "HTTP error: 500" in str(error)
+        assert "API error: E003" in str(error)
+
+        # Test with dict instead of list
+        invalid_filters = {"tags": {"tag": "tag1"}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+        assert "HTTP error: 500" in str(error)
+        assert "API error: E003" in str(error)
+
+    def test_list_data_field_validation(self):
+        """Test validation of response data field."""
+        mock_error_response = {
+            "_errors": [
+                {
+                    "code": "E003",
+                    "message": "Invalid response format",
+                    "details": {"errorType": "Invalid Object"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+
+        # Create mock response
+        mock_response = MagicMock()
+        mock_response.status_code = 500
+        mock_response.content = True
+        mock_response.json.return_value = mock_error_response
+
+        # Test missing data field
+        self.mock_scm.get.return_value = {"not_data": []}  # noqa
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+
+        # Test invalid data type
+        self.mock_scm.get.return_value = {"data": "not_a_list"}  # noqa
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
 
     def test_list_filter_combinations(self):
         """
