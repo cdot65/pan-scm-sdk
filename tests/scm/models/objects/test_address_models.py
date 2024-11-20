@@ -1,4 +1,4 @@
-# tests/scm/config/objects/test_address.py
+# tests/scm/models/objects/test_address.py
 
 # External libraries
 import pytest
