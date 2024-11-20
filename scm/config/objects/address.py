@@ -422,12 +422,6 @@ class Address(BaseObject):
                     http_status_code=500,
                 )
 
-            if "_errors" in response:
-                ErrorHandler.raise_for_error(
-                    response,
-                    http_status_code=400,
-                )
-
             if "id" in response:
                 address = AddressResponseModel(**response)
                 return address.model_dump(
