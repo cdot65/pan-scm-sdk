@@ -341,8 +341,13 @@ class Address(BaseObject):
             )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -436,8 +441,13 @@ class Address(BaseObject):
                 )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -466,8 +476,13 @@ class Address(BaseObject):
             self.api_client.delete(endpoint)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
