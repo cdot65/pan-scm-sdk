@@ -69,7 +69,7 @@ from scm.models.security.vulnerability_protection_profiles import (
 
 
 # SDK tests against SCM API
-class AddressCreateFactory(factory.Factory):
+class AddressCreateApiFactory(factory.Factory):
     """Factory for creating AddressCreateModel instances with different address types."""
 
     class Meta:
@@ -114,13 +114,54 @@ class AddressCreateFactory(factory.Factory):
         return cls(folder=None, device="TestDevice", **kwargs)
 
 
+class AddressUpdateApiFactory(factory.Factory):
+    """Factory for creating AddressUpdateModel instances."""
+
+    class Meta:
+        model = AddressUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = factory.Faker("sentence")
+    tag = ["updated-tag"]
+
+    # Address types default to None
+    ip_netmask = None
+    ip_range = None
+    ip_wildcard = None
+    fqdn = None
+
+    @classmethod
+    def with_ip_netmask(cls, ip_netmask="192.168.1.100/32", **kwargs):
+        return cls(ip_netmask=ip_netmask, **kwargs)
+
+    @classmethod
+    def with_fqdn(cls, fqdn="example.com", **kwargs):
+        return cls(fqdn=fqdn, **kwargs)
+
+    @classmethod
+    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
+        return cls(ip_range=ip_range, **kwargs)
+
+    @classmethod
+    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
+        return cls(ip_wildcard=ip_wildcard, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
 # Pydantic modeling tests
-class AddressCreateDataFactory(factory.DictFactory):
+class AddressCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for AddressCreateModel."""
 
     name = factory.Sequence(lambda n: f"address_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
     tag = [
         "test-tag",
         "environment-prod",
@@ -177,46 +218,67 @@ class AddressCreateDataFactory(factory.DictFactory):
         )
 
 
-class AddressUpdateFactory(factory.Factory):
-    """Factory for creating AddressUpdateModel instances."""
+class AddressUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for AddressCreateModel."""
 
-    class Meta:
-        model = AddressUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"address_{n}")
     description = factory.Faker("sentence")
-    tag = ["updated-tag"]
+    folder = "Shared"
+    tag = [
+        "test-tag",
+        "environment-prod",
+    ]
 
-    # Address types default to None
-    ip_netmask = None
-    ip_range = None
-    ip_wildcard = None
-    fqdn = None
-
-    @classmethod
-    def with_ip_netmask(cls, ip_netmask="192.168.1.100/32", **kwargs):
-        return cls(ip_netmask=ip_netmask, **kwargs)
+    # We intentionally omit the address type fields to simulate missing them
 
     @classmethod
-    def with_fqdn(cls, fqdn="example.com", **kwargs):
-        return cls(fqdn=fqdn, **kwargs)
+    def build_without_type(cls):
+        """Return a data dict without the required address type fields."""
+        return cls(
+            name="Test123",
+            folder="Shared",
+            # No address type fields provided
+        )
 
     @classmethod
-    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
-        return cls(ip_range=ip_range, **kwargs)
+    def build_with_multiple_types(cls):
+        """Return a data dict multiple type fields."""
+        return cls(
+            name="Test123",
+            folder="Shared",
+            ip_netmask="1.1.1.1/32",
+            fqdn="example.com",
+        )
 
     @classmethod
-    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
-        return cls(ip_wildcard=ip_wildcard, **kwargs)
+    def build_with_no_containers(cls):
+        """Return a data dict without any containers."""
+        return cls(
+            name="Test123",
+            fqdn="example.com",
+        )
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def build_with_multiple_containers(cls):
+        """Return a data dict multiple containers."""
+        return cls(
+            name="Test123",
+            folder="Shared",
+            snippet="this will fail",
+            fqdn="example.com",
+        )
 
     @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
+    def build_valid(cls):
+        """Return a data dict with all the expected attributes."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="Test123",
+            ip_netmask="10.5.0.11",
+            folder="Texas",
+            tag=["Python", "Automation"],
+            description="This is a test",
+        )
 
 
 class AddressResponseFactory(factory.Factory):
