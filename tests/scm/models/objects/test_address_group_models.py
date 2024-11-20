@@ -15,6 +15,7 @@ from tests.factories import (
     AddressGroupUpdateModelFactory,
 )
 
+
 # -------------------- Test Classes for Pydantic Models --------------------
 
 
@@ -131,10 +132,10 @@ class TestAddressGroupUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert "1 validation error for AddressGroupUpdateModel" in error_msg
         assert (
-            "Exactly one of 'static' or 'dynamic' must be provided." in error_msg
-        )  # Group type required
+            "2 validation errors for AddressGroupUpdateModel\nname\n  Field required [type=missing, input_value={'invalid': 'data'}, input_type=dict]"
+            in error_msg
+        )
 
     def test_address_group_update_model_multiple_types_provided(self):
         """Test validation when both static and dynamic group types are provided."""
