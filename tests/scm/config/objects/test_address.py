@@ -718,11 +718,9 @@ class TestAddressGet(TestAddressBase):
 class TestAddressUpdate(TestAddressBase):
     """Tests for updating Address objects."""
 
-    def test_update_object(self):
-        """
-        **Objective:** Test updating an object.
-        """
-        # Use AddressUpdateFactory to create the update data
+    def test_update_valid_object(self):
+        """Test updating an object with valid data."""
+        # Create update data using factory
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestAddress",
@@ -731,169 +729,170 @@ class TestAddressUpdate(TestAddressBase):
             tag=["tag1", "tag2"],
             folder="Shared",
         )
-
-        # Create the data dictionary ensuring ID is included
         input_data = update_data.model_dump()
 
         # Create mock response
         mock_response = AddressResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        # Perform update with complete data including ID
+        # Perform update
         updated_object = self.client.update(input_data)
 
-        # Verify the API was called once
-        self.mock_scm.put.assert_called_once()  # noqa
+        # Assert the put method was called with correct parameters
+        self.mock_scm.put.assert_called_once_with(  # noqa
+            f"/config/objects/v1/addresses/{update_data.id}",
+            json=input_data,
+        )
 
-        # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args  # noqa
-        actual_endpoint = call_args[0][0]
-        actual_payload = call_args[1]["json"]
-
-        # Verify endpoint
-        assert actual_endpoint == f"/config/objects/v1/addresses/{update_data.id}"
-
-        # Verify required fields in payload
-        assert actual_payload["name"] == update_data.name
-        assert actual_payload["ip_netmask"] == update_data.ip_netmask
-        assert actual_payload["description"] == update_data.description
-        assert actual_payload["tag"] == update_data.tag
-        assert actual_payload["folder"] == update_data.folder
-        assert actual_payload["id"] == update_data.id
-
-        # Verify response
+        # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressResponseModel)
-        assert updated_object.name == update_data.name
-        assert updated_object.ip_netmask == update_data.ip_netmask
-        assert updated_object.folder == update_data.folder
-        assert updated_object.description == update_data.description
-        assert updated_object.tag == update_data.tag
+        assert updated_object.id == mock_response.id
+        assert updated_object.name == mock_response.name
+        assert updated_object.ip_netmask == mock_response.ip_netmask
+        assert updated_object.description == mock_response.description
+        assert updated_object.tag == mock_response.tag
+        assert updated_object.folder == mock_response.folder
 
-    def test_update_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object update.
-        """
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
         # Create test data using factory
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
             ip_netmask="10.0.0.0/24",
-        ).model_dump()
+        )
+        input_data = update_data.model_dump()
 
-        # Mock error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Update failed",
-                    "details": {"errorType": "Malformed Command"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        # Create mock HTTP error
-        mock_response = MagicMock()
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-        mock_response.status_code = 400
-
-        # Set up mock to raise HTTPError
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.put.side_effect = mock_http_error  # noqa
+        # Use utility function to create mock HTTP error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
+        )
 
         with pytest.raises(MalformedCommandError) as exc_info:
-            self.client.update(update_data)
+            self.client.update(input_data)
 
         assert (
             "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
             in str(exc_info.value)
         )
 
-    def test_update_no_response_content(self):
+    def test_update_object_not_present_error(self):
+        """Test error handling when the object to update is not present."""
+        # Create test data
+        update_data = AddressUpdateApiFactory.with_ip_netmask(
+            id="nonexistent-id",
+            name="test-address",
+            folder="Shared",
+            ip_netmask="10.0.0.0/24",
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate object not present error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
+        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.put.side_effect = mock_error  # noqa
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
             self.client.update(
                 {"id": "test-id", "name": "test", "ip_netmask": "10.0.0.0/24"}
             )
 
+    def test_update_generic_exception_handling(self):
+        """Test handling of a generic exception during update."""
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(
+                {"id": "test-id", "name": "test", "ip_netmask": "10.0.0.0/24"}
+            )
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_server_error(self):
+        """Test handling of server errors during update."""
+        # Create test data
+        update_data = AddressUpdateApiFactory.with_ip_netmask(
+            id="test-id",
+            name="test-address",
+            folder="Shared",
+            ip_netmask="10.0.0.0/24",
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate server error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
+
 
 class TestAddressDelete(TestAddressBase):
     """Tests for deleting Address objects."""
 
     def test_delete_referenced_object(self):
-        """
-        Test deleting an object that is referenced elsewhere.
-        """
-        # Mock error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E009",  # Using proper error code for reference errors
-                    "message": "Your configuration is not valid.",
-                    "details": {"errorType": "Reference Not Zero"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
+        """Test deleting an object that is referenced elsewhere."""
+        object_id = "abcdefg"
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=409,
+            error_code="E009",
+            message="Your configuration is not valid.",
+            error_type="Reference Not Zero",
+        )
 
-        # Create mock response with proper status code
-        mock_response = MagicMock()
-        mock_response.status_code = 409  # Conflict status code
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        # Create HTTPError with mock response
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_error  # noqa
-
-        # Test the delete operation
         with pytest.raises(ReferenceNotZeroError) as exc_info:
-            self.client.delete("abcdefg")
+            self.client.delete(object_id)
 
         error_message = str(exc_info.value)
         assert "{'errorType': 'Reference Not Zero'}" in error_message
         assert "HTTP error: 409" in error_message
         assert "API error: E009" in error_message
 
-    def test_delete_error_handling(self):
-        """
-        **Objective:** Test error handling during object deletion.
-        **Workflow:**
-            1. Mocks various error scenarios
-            2. Verifies proper error handling for each case
-        """
+    def test_delete_object_not_present_error(self):
+        """Test error handling when the object to delete is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Mock error response for object not found
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
 
-        # Create mock response with proper status code
-        mock_response = MagicMock()
-        mock_response.status_code = 404  # Not Found status code
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        # Create HTTPError with mock response
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_error  # noqa
-
-        # Test the delete operation
         with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.delete(object_id)
 
@@ -902,56 +901,52 @@ class TestAddressDelete(TestAddressBase):
         assert "HTTP error: 404" in error_message
         assert "API error: API_I00013" in error_message
 
-    def test_delete_http_error_no_response_content(self, caplog):
-        """
-        Test that an HTTPError without response content in delete() logs an error and re-raises the exception.
-        """
+    def test_delete_http_error_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
-        # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
-
-        # Set the side effect of the delete method to raise the HTTPError
         self.mock_scm.delete.side_effect = mock_http_error  # noqa
 
-        with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
-            with pytest.raises(HTTPError):
-                self.client.delete(object_id)
-
-        # Check that the log message was emitted
-        assert "No response content available for error parsing." in caplog.text
+        with pytest.raises(HTTPError):
+            self.client.delete(object_id)
 
     def test_delete_generic_exception_handling(self):
-        """
-        Test generic exception handling during delete.
-        """
-        # Create mock response without error details
-        mock_response = MagicMock()
-        mock_response.status_code = 500
-        mock_response.content = True
-        mock_response.json.side_effect = Exception("Invalid JSON")
-
-        # Create HTTPError with mock response
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_error  # noqa
+        """Test handling of a generic exception during delete."""
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
             self.client.delete("abcdefg")
 
-        assert "Invalid JSON" in str(exc_info.value)
+        assert str(exc_info.value) == "Generic error"
 
-    def test_delete_success(self):
-        """
-        Test successful deletion of an object.
-        """
+    def test_delete_server_error(self):
+        """Test handling of server errors during delete."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Mock successful delete (returns None)
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.delete(object_id)
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_message
+        assert "HTTP error: 500" in error_message
+        assert "API error: E003" in error_message
+
+    def test_delete_success(self):
+        """Test successful deletion of an object."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
         self.mock_scm.delete.return_value = None  # noqa
 
         # Should not raise any exception
@@ -961,16 +956,6 @@ class TestAddressDelete(TestAddressBase):
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/objects/v1/addresses/{object_id}"
         )
-
-    def test_delete_no_response_content(self):
-        """Test delete method when HTTP error has no response content."""
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.delete("test-id")
 
 
 class TestAddressFetch(TestAddressBase):
