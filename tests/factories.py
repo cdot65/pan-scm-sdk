@@ -40,7 +40,13 @@ from scm.models.security.anti_spyware_profiles import (
     ThreatExceptionBase,
     Category,
     Severity,
-    RuleBaseModel,
+    AntiSpywareProfileUpdateModel,
+    InlinePolicyAction,
+    MicaEngineSpywareEnabledEntry,
+    ExemptIpEntry,
+)
+from scm.models.security.anti_spyware_profiles import (
+    RuleBaseModel as AntiSpywareRuleBaseModel,
 )
 from scm.models.security.dns_security_profiles import (
     BotnetDomainsModel,
@@ -905,6 +911,233 @@ class ServiceResponseFactory(factory.Factory):
 
 
 # ----------------------------------------------------------------------------
+# Anti-Spyware Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class ExemptIpEntryFactory(factory.Factory):
+    """Factory for creating ExemptIpEntry instances."""
+
+    class Meta:
+        model = ExemptIpEntry
+
+    name = "192.168.1.1"
+
+
+class MicaEngineSpywareEnabledEntryFactory(factory.Factory):
+    """Factory for creating MicaEngineSpywareEnabledEntry instances."""
+
+    class Meta:
+        model = MicaEngineSpywareEnabledEntry
+
+    name = factory.Sequence(lambda n: f"mica_engine_{n}")
+    inline_policy_action = InlinePolicyAction.alert
+
+
+class RuleBaseFactory(factory.Factory):
+    """Factory for creating AntiSpywareRuleBaseModel instances."""
+
+    class Meta:
+        model = AntiSpywareRuleBaseModel
+
+    name = factory.Sequence(lambda n: f"rule_{n}")
+    severity = [Severity.critical, Severity.high]
+    category = Category.spyware
+    threat_name = "any"
+    packet_capture = PacketCapture.disable
+
+
+class ThreatExceptionBaseFactory(factory.Factory):
+    """Factory for creating ThreatExceptionBase instances."""
+
+    class Meta:
+        model = ThreatExceptionBase
+
+    name = factory.Sequence(lambda n: f"exception_{n}")
+    packet_capture = PacketCapture.single_packet
+    exempt_ip = [factory.SubFactory(ExemptIpEntryFactory)]
+    notes = "Test exception"
+
+
+# SDK tests against SCM API
+class AntiSpywareProfileCreateApiFactory(factory.Factory):
+    """Factory for creating AntiSpywareProfileCreateModel instances."""
+
+    class Meta:
+        model = AntiSpywareProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    cloud_inline_analysis = False
+    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        """Create a profile with snippet container."""
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        """Create a profile with device container."""
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def with_mica_engine(cls, **kwargs):
+        """Create a profile with MICA engine entries."""
+        return cls(
+            mica_engine_spyware_enabled=[
+                factory.SubFactory(MicaEngineSpywareEnabledEntryFactory)
+            ],
+            **kwargs,
+        )
+
+
+class AntiSpywareProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating AntiSpywareProfileUpdateModel instances."""
+
+    class Meta:
+        model = AntiSpywareProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    description = factory.Faker("sentence")
+    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+
+
+# Pydantic modeling tests
+class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for AntiSpywareProfileCreateModel."""
+
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    cloud_inline_analysis = False
+    rules = []
+
+    @classmethod
+    def build_without_container(cls):
+        """Return a data dict without any containers."""
+        return cls(
+            name="TestProfile",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [Severity.critical],
+                    "category": Category.spyware,
+                }
+            ],
+            # No folder, snippet, or device
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            snippet="this will fail",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [Severity.critical],
+                    "category": Category.spyware,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for creating a profile."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            description="Test anti-spyware profile",
+            cloud_inline_analysis=True,
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [Severity.critical, Severity.high],
+                    "category": Category.spyware,
+                    "threat_name": "test_threat",
+                    "packet_capture": PacketCapture.disable,
+                }
+            ],
+            threat_exception=[
+                {
+                    "name": "TestException",
+                    "packet_capture": PacketCapture.single_packet,
+                    "exempt_ip": [{"name": "192.168.1.1"}],
+                    "notes": "Test exception",
+                }
+            ],
+        )
+
+
+class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for AntiSpywareProfileUpdateModel."""
+
+    id = "12345678-1234-5678-1234-567812345678"
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    description = factory.Faker("sentence")
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a profile."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="UpdatedProfile",
+            description="Updated anti-spyware profile",
+            rules=[
+                {
+                    "name": "UpdatedRule",
+                    "severity": [Severity.high],
+                    "category": Category.botnet,
+                    "packet_capture": PacketCapture.extended_capture,
+                }
+            ],
+            threat_exception=[],
+        )
+
+
+class AntiSpywareProfileResponseFactory(factory.Factory):
+    """Factory for creating AntiSpywareProfileResponseModel instances."""
+
+    class Meta:
+        model = AntiSpywareProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    cloud_inline_analysis = False
+    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        """Create a profile with snippet container."""
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        """Create a profile with device container."""
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: AntiSpywareProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# ----------------------------------------------------------------------------
 # Other object factories.
 # ----------------------------------------------------------------------------
 
@@ -1141,7 +1374,7 @@ class AntiSpywareRuleCreateFactory(factory.Factory):
     """Factory for creating RuleRequest instances."""
 
     class Meta:
-        model = RuleBaseModel
+        model = AntiSpywareRuleBaseModel
 
     name = factory.Sequence(lambda n: f"rule_{n}")
     severity = [Severity.critical, Severity.high]

@@ -1,7 +1,8 @@
-# tests/scm/config/objects/test_application_group.py
+# tests/scm/config/objects/test_application_group_models.py
+
+from unittest.mock import MagicMock
 
 import pytest
-from unittest.mock import MagicMock
 
 from scm.config.objects import ApplicationGroup
 from scm.exceptions import (
@@ -11,16 +12,12 @@ from scm.exceptions import (
     ObjectNotPresentError,
     MalformedCommandError,
     MissingQueryParameterError,
-    ConflictError,
 )
 from scm.models.objects import (
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
 )
-
 from tests.factories import ApplicationGroupFactory
-
-from pydantic import ValidationError as PydanticValidationError
 
 
 @pytest.mark.usefixtures("load_env")
