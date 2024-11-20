@@ -22,7 +22,7 @@ class TagBaseModel(BaseModel):
 
     Attributes:
         name (str): The name of the tag object.
-        description (Optional[str]): The description of the tag object.
+        comments (Optional[str]): The comments of the tag object.
         tag (Optional[List[TagString]]): Tags associated with the tag object.
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
@@ -37,10 +37,10 @@ class TagBaseModel(BaseModel):
         pattern=r"^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$",
     )
     # Optional fields
-    description: Optional[str] = Field(
+    comments: Optional[str] = Field(
         None,
         max_length=1023,
-        description="The description of the tag object",
+        comments="The comments of the tag object",
     )
 
     color: Optional[str] = Field(
