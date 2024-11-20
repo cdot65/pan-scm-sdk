@@ -19,6 +19,7 @@ from scm.models.objects import (
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
+    AddressGroupUpdateModel,
 )
 from scm.models.security import (
     DNSSecurityProfileCreateModel,
@@ -335,38 +336,286 @@ class AddressResponseFactory(factory.Factory):
 # ----------------------------------------------------------------------------
 # Address Group object factories.
 # ----------------------------------------------------------------------------
+
+
+# Sub factories
 class DynamicFilterFactory(factory.Factory):
     class Meta:
         model = DynamicFilter
 
-    filter = "'test', 'abc123', 'prod', 'web'"
+    filter = "'aws.ec2.key.Name.value.scm-test-scm-test-vpc'"
 
 
-class AddressGroupDynamicFactory(factory.Factory):
+# SDK tests against SCM API
+class AddressGroupCreateApiFactory(factory.Factory):
+    """Factory for creating AddressGroupCreateModel instances with different group types."""
+
     class Meta:
         model = AddressGroupCreateModel
 
-    name = "ValidDynamicAddressGroup"
-    description = "This is just a pytest that will fail"
-    dynamic = factory.SubFactory(DynamicFilterFactory)
-    folder = "MainFolder"
-    tag = ["tag1", "tag2"]
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    # Address group types default to None
+    dynamic = None
+    static = None
+
+    @classmethod
+    def with_static(cls, static=None, **kwargs):
+        """Create an AddressGroupCreateModel instance with a static address group."""
+        if static is None:
+            static = [
+                "address-object1",
+                "address-object2",
+                "address-object3",
+                "address-object4",
+            ]
+        return cls(static=static, **kwargs)
+
+    @classmethod
+    def with_dynamic(cls, filter_str=None, **kwargs):
+        """Create an AddressGroupCreateModel instance with a dynamic address group."""
+        if filter_str is None:
+            dynamic_filter = DynamicFilterFactory()
+        else:
+            dynamic_filter = DynamicFilter(filter=filter_str)
+        return cls(dynamic=dynamic_filter, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
 
 
-class AddressGroupStaticFactory(factory.Factory):
+class AddressGroupUpdateApiFactory(factory.Factory):
+    """Factory for creating AddressGroupUpdateModel instances."""
+
     class Meta:
-        model = AddressGroupCreateModel
+        model = AddressGroupUpdateModel
 
-    name = "ValidStaticAddressGroup"
-    description = "Static AddressCreateModel Group Test"
-    static = [
-        "address-object1",
-        "address-object2",
-        "address-object3",
-        "address-object4",
-    ]
-    folder = "MainFolder"
-    tag = ["tag1", "tag2"]
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = factory.Faker("sentence")
+    tag = ["updated-tag"]
+
+    # Address group types default to None
+    dynamic = None
+    static = None
+
+    @classmethod
+    def with_static(cls, static=None, **kwargs):
+        """Create an AddressGroupUpdateModel instance with a static address group."""
+        if static is None:
+            static = ["address-object1", "address-object2"]
+        return cls(static=static, **kwargs)
+
+    @classmethod
+    def with_dynamic(cls, filter_str=None, **kwargs):
+        """Create an AddressGroupUpdateModel instance with a dynamic address group."""
+        if filter_str is None:
+            dynamic_filter = DynamicFilterFactory()
+        else:
+            dynamic_filter = DynamicFilter(filter=filter_str)
+        return cls(dynamic=dynamic_filter, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+# Pydantic modeling tests
+class AddressGroupCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for AddressGroupCreateModel."""
+
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    # Group type fields default to None
+    dynamic = None
+    static = None
+
+    @classmethod
+    def build_without_type(cls):
+        """Return a data dict without the required group type fields."""
+        return cls(
+            name="TestAddressGroup",
+            folder="Shared",
+            # No group type fields provided
+        )
+
+    @classmethod
+    def build_with_multiple_types(cls):
+        """Return a data dict with multiple type fields."""
+        return cls(
+            name="TestAddressGroup",
+            folder="Shared",
+            static=["address1", "address2"],
+            dynamic={"filter": "'tag1 and tag2'"},
+        )
+
+    @classmethod
+    def build_with_no_containers(cls):
+        """Return a data dict without any containers."""
+        return cls(
+            name="TestAddressGroup",
+            static=["address1", "address2"],
+            # No folder, snippet, or device
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestAddressGroup",
+            folder="Shared",
+            snippet="this will fail",
+            static=["address1", "address2"],
+        )
+
+    @classmethod
+    def build_valid_static(cls):
+        """Return a valid data dict for a static address group."""
+        return cls(
+            name="TestAddressGroup",
+            static=["address1", "address2"],
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is a test static address group",
+        )
+
+    @classmethod
+    def build_valid_dynamic(cls):
+        """Return a valid data dict for a dynamic address group."""
+        return cls(
+            name="TestAddressGroup",
+            dynamic={"filter": "'tag1 and tag2'"},
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is a test dynamic address group",
+        )
+
+
+class AddressGroupUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for AddressGroupUpdateModel."""
+
+    id = "12345678-1234-5678-1234-567812345678"
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = factory.Faker("sentence")
+    tag = ["test-tag", "environment-prod"]
+
+    # Group type fields default to None
+    dynamic = None
+    static = None
+
+    @classmethod
+    def build_without_type(cls):
+        """Return a data dict without the required group type fields."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestAddressGroup",
+            folder="Shared",
+            # No group type fields provided
+        )
+
+    @classmethod
+    def build_with_multiple_types(cls):
+        """Return a data dict with multiple type fields."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestAddressGroup",
+            folder="Shared",
+            static=["address1", "address2"],
+            dynamic={"filter": "'tag1 and tag2'"},
+        )
+
+    @classmethod
+    def build_valid_static(cls):
+        """Return a valid data dict for a static address group."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestAddressGroup",
+            static=["address1", "address2"],
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is a test static address group",
+        )
+
+    @classmethod
+    def build_valid_dynamic(cls):
+        """Return a valid data dict for a dynamic address group."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestAddressGroup",
+            dynamic={"filter": "'tag1 and tag2'"},
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is a test dynamic address group",
+        )
+
+
+class AddressGroupResponseFactory(factory.Factory):
+    """Factory for creating AddressGroupResponseModel instances."""
+
+    class Meta:
+        model = AddressGroupResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["response-tag"]
+
+    # Address group types default to None
+    dynamic = None
+    static = None
+
+    @classmethod
+    def with_static(cls, static=None, **kwargs):
+        """Create an AddressGroupResponseModel instance with a static address group."""
+        if static is None:
+            static = ["address-object1", "address-object2", "address-object3"]
+        return cls(static=static, **kwargs)
+
+    @classmethod
+    def with_dynamic(cls, filter_str=None, **kwargs):
+        """Create an AddressGroupResponseModel instance with a dynamic address group."""
+        if filter_str is None:
+            dynamic_filter = DynamicFilterFactory()
+        else:
+            dynamic_filter = DynamicFilter(filter=filter_str)
+        return cls(dynamic=dynamic_filter, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: AddressGroupCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# ----------------------------------------------------------------------------
+# Application object factories.
+# ----------------------------------------------------------------------------
 
 
 class ApplicationFactory(factory.Factory):
@@ -641,19 +890,6 @@ class AddressGroupRequestFactory(factory.Factory):
     @classmethod
     def with_device(cls, **kwargs):
         return cls(folder=None, device="TestDevice", **kwargs)
-
-
-class AddressGroupResponseFactory(AddressGroupRequestFactory):
-    class Meta:
-        model = AddressGroupResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-
-    @classmethod
-    def from_request(cls, request_model: AddressGroupCreateModel, **kwargs):
-        data = request_model.model_dump()
-        data.update(kwargs)
-        return cls(**data)
 
 
 class AntiSpywareRuleCreateFactory(factory.Factory):
