@@ -958,7 +958,7 @@ class TestAddressDelete(TestAddressBase):
         mock_http_error = HTTPError(response=mock_response)
 
         # Set the side effect of the delete method to raise the HTTPError
-        self.mock_scm.delete.side_effect = mock_http_error
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
 
         with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
             with pytest.raises(HTTPError):
@@ -1329,7 +1329,7 @@ class TestAddressFetch(TestAddressBase):
             "ip_netmask": "10.0.0.0/24",
         }
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-address", folder="Shared")
@@ -1351,7 +1351,7 @@ class TestAddressFetch(TestAddressBase):
         mock_http_error = HTTPError(response=mock_response)
 
         # Set the side effect of the get method to raise the HTTPError
-        self.mock_scm.get.side_effect = mock_http_error
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
             with pytest.raises(HTTPError):
@@ -1415,7 +1415,7 @@ class TestAddressFetch(TestAddressBase):
         Test that InvalidObjectError is raised when the response is not a dictionary.
         """
         # Mock the API client to return a non-dictionary response
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(folder="Shared", name="test123")
