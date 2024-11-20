@@ -863,6 +863,20 @@ class TestAddressUpdate(TestAddressBase):
 class TestAddressDelete(TestAddressBase):
     """Tests for deleting Address objects."""
 
+    def test_delete_success(self):
+        """Test successful deletion of an object."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.return_value = None  # noqa
+
+        # Should not raise any exception
+        self.client.delete(object_id)
+
+        # Verify the delete call
+        self.mock_scm.delete.assert_called_once_with(  # noqa
+            f"/config/objects/v1/addresses/{object_id}"
+        )
+
     def test_delete_referenced_object(self):
         """Test deleting an object that is referenced elsewhere."""
         object_id = "abcdefg"
@@ -941,20 +955,6 @@ class TestAddressDelete(TestAddressBase):
         assert "{'errorType': 'Internal Error'}" in error_message
         assert "HTTP error: 500" in error_message
         assert "API error: E003" in error_message
-
-    def test_delete_success(self):
-        """Test successful deletion of an object."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        self.mock_scm.delete.return_value = None  # noqa
-
-        # Should not raise any exception
-        self.client.delete(object_id)
-
-        # Verify the delete call
-        self.mock_scm.delete.assert_called_once_with(  # noqa
-            f"/config/objects/v1/addresses/{object_id}"
-        )
 
 
 class TestAddressFetch(TestAddressBase):
