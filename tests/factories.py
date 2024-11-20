@@ -16,11 +16,14 @@ from scm.models.objects import (
     ApplicationCreateModel,
     ServiceCreateModel,
     ApplicationGroupCreateModel,
+    ServiceResponseModel,
+    ServiceUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
     AddressGroupUpdateModel,
 )
+from scm.models.objects.service import UDPProtocol, TCPProtocol, Override
 from scm.models.security import (
     DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
@@ -653,15 +656,257 @@ class ApplicationGroupFactory(factory.Factory):
     folder = "Prisma Access"
 
 
-class ServiceFactory(factory.Factory):
+# ----------------------------------------------------------------------------
+# Service object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class OverrideFactory(factory.Factory):
+    """Factory for creating Override instances."""
+
+    class Meta:
+        model = Override
+
+    timeout = 10
+    halfclose_timeout = 10
+    timewait_timeout = 10
+
+
+class TCPProtocolFactory(factory.Factory):
+    """Factory for creating TCPProtocol instances."""
+
+    class Meta:
+        model = TCPProtocol
+
+    port = "80,443"
+    override = factory.SubFactory(OverrideFactory)
+
+
+class UDPProtocolFactory(factory.Factory):
+    """Factory for creating UDPProtocol instances."""
+
+    class Meta:
+        model = UDPProtocol
+
+    port = "53"
+    override = factory.SubFactory(OverrideFactory)
+
+
+# SDK tests against SCM API
+class ServiceCreateApiFactory(factory.Factory):
+    """Factory for creating ServiceCreateModel instances with different protocols."""
+
     class Meta:
         model = ServiceCreateModel
 
-    name = factory.Faker("word")
-    description = "PyTest ServiceCreateModel test"
-    tag = ["Automation"]
-    folder = "Prisma Access"
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
     protocol = {"tcp": {"port": "80,443"}}
+
+    @classmethod
+    def with_tcp(cls, port="80,443", **kwargs):
+        """Create a ServiceCreateModel instance with TCP protocol."""
+        return cls(protocol={"tcp": {"port": port}}, **kwargs)
+
+    @classmethod
+    def with_udp(cls, port="53", **kwargs):
+        """Create a ServiceCreateModel instance with UDP protocol."""
+        return cls(protocol={"udp": {"port": port}}, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class ServiceUpdateApiFactory(factory.Factory):
+    """Factory for creating ServiceUpdateModel instances."""
+
+    class Meta:
+        model = ServiceUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    tag = ["updated-tag"]
+    protocol = {"tcp": {"port": "80,443"}}
+
+    @classmethod
+    def with_tcp(cls, port="80,443", **kwargs):
+        """Create a ServiceUpdateModel instance with TCP protocol."""
+        return cls(protocol={"tcp": {"port": port}}, **kwargs)
+
+    @classmethod
+    def with_udp(cls, port="53", **kwargs):
+        """Create a ServiceUpdateModel instance with UDP protocol."""
+        return cls(protocol={"udp": {"port": port}}, **kwargs)
+
+
+# Pydantic modeling tests
+class ServiceCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ServiceCreateModel."""
+
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["test-tag", "environment-prod"]
+
+    @classmethod
+    def build_without_protocol(cls):
+        """Return a data dict without the required protocol field."""
+        return cls(
+            name="TestService",
+            folder="Shared",
+            # No protocol provided
+        )
+
+    @classmethod
+    def build_with_multiple_protocols(cls):
+        """Return a data dict with both TCP and UDP protocols."""
+        return cls(
+            name="TestService",
+            folder="Shared",
+            protocol={
+                "tcp": {"port": "80"},
+                "udp": {"port": "53"},
+            },
+        )
+
+    @classmethod
+    def build_with_no_containers(cls):
+        """Return a data dict without any containers."""
+        return cls(
+            name="TestService",
+            protocol={"tcp": {"port": "80"}},
+            # No folder, snippet, or device
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestService",
+            folder="Shared",
+            snippet="this will fail",
+            protocol={"tcp": {"port": "80"}},
+        )
+
+    @classmethod
+    def build_valid_tcp(cls):
+        """Return a valid data dict for a TCP service."""
+        return cls(
+            name="TestService",
+            protocol={"tcp": {"port": "80,443"}},
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is a test TCP service",
+        )
+
+    @classmethod
+    def build_valid_udp(cls):
+        """Return a valid data dict for a UDP service."""
+        return cls(
+            name="TestService",
+            protocol={"udp": {"port": "53"}},
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is a test UDP service",
+        )
+
+
+class ServiceUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ServiceUpdateModel."""
+
+    id = "12345678-1234-5678-1234-567812345678"
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    tag = ["test-tag", "environment-prod"]
+
+    @classmethod
+    def build_without_protocol(cls):
+        """Return a data dict without the required protocol field."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestService",
+            folder="Shared",
+            # No protocol provided
+        )
+
+    @classmethod
+    def build_with_multiple_protocols(cls):
+        """Return a data dict with both TCP and UDP protocols."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestService",
+            folder="Shared",
+            protocol={
+                "tcp": {"port": "80"},
+                "udp": {"port": "53"},
+            },
+        )
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a service."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            name="TestService",
+            protocol={"tcp": {"port": "80,443"}},
+            folder="Shared",
+            tag=["Python", "Automation"],
+            description="This is an updated service",
+        )
+
+
+class ServiceResponseFactory(factory.Factory):
+    """Factory for creating ServiceResponseModel instances."""
+
+    class Meta:
+        model = ServiceResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["response-tag"]
+    protocol = {"tcp": {"port": "80,443"}}
+
+    @classmethod
+    def with_tcp(cls, port="80,443", **kwargs):
+        """Create a ServiceResponseModel instance with TCP protocol."""
+        return cls(protocol={"tcp": {"port": port}}, **kwargs)
+
+    @classmethod
+    def with_udp(cls, port="53", **kwargs):
+        """Create a ServiceResponseModel instance with UDP protocol."""
+        return cls(protocol={"udp": {"port": port}}, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: ServiceCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# ----------------------------------------------------------------------------
+# Other object factories.
+# ----------------------------------------------------------------------------
 
 
 class BaseSecurityRuleFactory(factory.Factory):
