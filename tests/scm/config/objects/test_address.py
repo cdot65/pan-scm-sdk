@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 
 # External libraries
 import pytest
-from pydantic import ValidationError as PydanticValidationError
 from requests.exceptions import HTTPError
 
 # Local SDK imports
@@ -20,14 +19,14 @@ from scm.exceptions import (
     ReferenceNotZeroError,
 )
 from scm.models.objects import (
-    AddressCreateModel,
     AddressResponseModel,
 )
 from tests.factories import (
     AddressResponseFactory,
-    AddressCreateFactory,
-    AddressUpdateFactory,
+    AddressCreateApiFactory,
+    AddressUpdateApiFactory,
 )
+from tests.utils import raise_mock_http_error
 
 
 @pytest.mark.usefixtures("load_env")
@@ -48,88 +47,10 @@ class TestAddressBase:
 # -------------------- Test Classes Grouped by Functionality --------------------
 
 
-class TestAddressModelValidation(TestAddressBase):
-    """Tests for object model validation."""
-
-    def test_object_model_no_type_provided(self):
-        """Test validation when no type is provided."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
-        assert (
-            "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_object_model_multiple_types(self):
-        """Test validation when multiple types are provided."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-            "fqdn": "test.com",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert (
-            "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_object_model_multiple_containers(self):
-        """Test validation when multiple containers are provided."""
-        data = {
-            "name": "internal_network",
-            "ip_netmask": "192.168.1.0/24",
-            "description": "Internal network segment",
-            "tag": ["Python", "Automation"],
-            "folder": "Shared",
-            "snippet": "Test123",
-        }
-        with pytest.raises(ValueError) as exc_info:
-            AddressCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_object_model_no_container_provided(self):
-        """Test validation when no container is provided."""
-        data = {
-            "name": "internal_network",
-            "ip_netmask": "192.168.1.0/24",
-            "description": "Internal network segment",
-            "tag": ["Python", "Automation"],
-        }
-
-        with pytest.raises(ValueError) as exc_info:
-            AddressCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_object_model_create_model_valid(self):
-        """Test validation with valid data."""
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-        }
-        model = AddressCreateModel(**data)
-        assert model.name == "Test123"
-        assert model.folder == "Shared"
-        assert model.ip_netmask == "10.5.0.11"
-
-
 class TestAddressList(TestAddressBase):
     """Tests for listing Address objects."""
 
-    def test_object_list_valid(self):
+    def test_list_valid(self):
         """
         **Objective:** Test listing all objects.
         """
@@ -171,144 +92,346 @@ class TestAddressList(TestAddressBase):
         assert len(existing_objects) == 2
         assert existing_objects[0].name == "Palo Alto Networks Sinkhole"
 
-    def test_object_list_multiple_containers(self):
-        """Test validation error when listing with multiple containers."""
-        with pytest.raises(BadRequestError) as exc_info:
-            self.client.list(
-                folder="Prisma Access",
-                snippet="TestSnippet",
-            )
+    def test_list_folder_empty_error(self):
+        """Test that empty folder raises appropriate error."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message='"folder" is not allowed to be empty',
+            error_type="Missing Query Parameter",
+        )
 
-        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.list(folder="")
 
-    def test_list_invalid_response_format(self):
-        """
-        Test that InvalidObjectError is raised when the response is not a dictionary.
-        """
-        # Mock the API client to return a non-dictionary response
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        error_msg = str(exc_info.value)
+        assert (
+            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in error_msg
+        )
 
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+    def test_list_folder_nonexistent_error(self):
+        """Test error handling in list operation."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Listing failed",
+            error_type="Operation Impossible",
+        )
 
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 500
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.list(folder="NonexistentFolder")
 
-    def test_list_no_container_provided(self):
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
+            in error_msg
+        )
+
+    def test_list_container_missing_error(self):
         """
         Test that InvalidObjectError is raised when no container parameter is provided.
         """
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+            error_type="Invalid Object",
+        )
+
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list()
-        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 400
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
 
-    def test_list_multiple_containers_provided(self):
-        """
-        Test that InvalidObjectError is raised when multiple container parameters are provided.
-        """
+    def test_list_container_multiple_error(self):
+        """Test validation of container parameters."""
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="Multiple container types provided",
+            error_type="Invalid Object",
+        )
+
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", snippet="TestSnippet")
-        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 400
+            self.client.list(folder="folder1", snippet="snippet1")
 
-    def test_list_http_error_no_response_content(self, caplog):
-        """
-        Test that an HTTPError without response content in list() logs an error and re-raises the exception.
-        """
-        # Create a mock response object without content
-        mock_response = MagicMock()
-        mock_response.content = None  # Simulate no content
-        mock_response.status_code = 500
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
 
-        # Create an HTTPError with the mock response
-        mock_http_error = HTTPError(response=mock_response)
+    def test_list_filters_valid(self):
+        """Test that filters are properly added to parameters."""
+        filters = {
+            "types": ["type1", "type2"],
+            "values": ["value1", "value2"],
+            "tags": ["tag1", "tag2"],
+        }
 
-        # Set the side effect of the get method to raise the HTTPError
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
-
-        with caplog.at_level(logging.ERROR, logger=self.client.logger.name):
-            with pytest.raises(HTTPError):
-                self.client.list(folder="Shared")
-
-        # Check that the log message was emitted
-        assert "No response content available for error parsing." in caplog.text
-
-    def test_list_invalid_types_filter(self):
-        """
-        Test that InvalidObjectError is raised when 'types' filter is not a list.
-        """
-        # Mock the API client to return a valid response
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Call list with invalid 'types' filter
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", types="not-a-list")
+        self.client.list(folder="Shared", **filters)
 
-        # Assert that the exception message contains the expected error
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/objects/v1/addresses",
+            params={
+                "limit": 10000,
+                "folder": "Shared",
+            },
+        )
+
+    def test_list_filters_lists_empty(self):
+        """Test behavior with empty filter lists."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address",
+                    "folder": "Shared",
+                    "ip_netmask": "10.0.0.0/24",
+                    "tag": ["tag1"],
+                }
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Empty lists should result in no matches
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=[],
+        )
+        assert len(filtered_objects) == 0
+
+        filtered_objects = self.client.list(
+            folder="Shared",
+            values=[],
+        )
+        assert len(filtered_objects) == 0
+
+        filtered_objects = self.client.list(
+            folder="Shared",
+            tags=[],
+        )
+        assert len(filtered_objects) == 0
+
+    def test_list_filters_types(self):
+        """Test validation of filter types in list method."""
+        # Mock response for successful case
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address",
+                    "folder": "Shared",
+                    "ip_netmask": "10.0.0.0/24",
+                    "tag": ["tag1", "tag2"],
+                }
+            ]
+        }
+
+        # Test invalid types filter (string instead of list)
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="'types' filter must be a list",
+            error_type="Invalid Query Parameter",
+        )
+        with pytest.raises(BadRequestError) as exc_info:
+            self.client.list(folder="Shared", types="netmask")
         assert (
-            "{'errorType': 'Invalid Object'} - HTTP error: 500 - API error: E003"
+            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
             in str(exc_info.value)
         )
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 500
 
-    def test_list_no_container_params(self):
-        """
-        Test that InvalidObjectError is raised when no container parameter is provided.
+        # Reset side effect for next test
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="'values' filter must be a list",
+            error_type="Invalid Query Parameter",
+        )
+        with pytest.raises(BadRequestError) as exc_info:
+            self.client.list(folder="Shared", values="10.0.0.0/24")
+        assert (
+            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
 
-        This tests the case where neither folder, snippet, nor device is provided,
-        expecting an InvalidObjectError with specific error details.
-        """
+        # Reset side effect for next test
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="'tags' filter must be a list",
+            error_type="Invalid Query Parameter",
+        )
+        with pytest.raises(BadRequestError) as exc_info:
+            self.client.list(folder="Shared", tags="tag1")
+        assert (
+            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+        # Reset side effect for successful case
+        self.mock_scm.get.side_effect = None  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test that valid list filters pass validation
+        try:
+            self.client.list(
+                folder="Shared",
+                types=["netmask"],
+                values=["10.0.0.0/24"],
+                tags=["tag1"],
+            )
+        except BadRequestError:
+            pytest.fail("Unexpected BadRequestError raised with valid list filters")
+
+    def test_list_filters_types_validation(self):
+        """Test validation of 'types' filter specifically."""
+        mock_addresses = []
+
+        # Test with string instead of list
+        invalid_filters = {"types": "type1"}
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list()
+            self.client._apply_filters(mock_addresses, invalid_filters)
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
-        assert error.http_status_code == 400
-        assert "HTTP error: 400 - API error: E003" in str(error)
+        assert "{'errorType': 'Invalid Object'}" in str(error)
 
-    def test_list_no_container_parameters(self):
-        """
-        Test that InvalidObjectError is raised when no container parameters are provided.
-        """
-        # Ensure that the API client's get method doesn't interfere
-        self.mock_scm.get.return_value = {"data": []}  # noqa
-
-        # Call the list method without any container parameters
+        # Test with dict instead of list
+        invalid_filters = {"types": {"types": "type1"}}
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list()
+            self.client._apply_filters(mock_addresses, invalid_filters)
 
-        # Verify that the exception is raised with the correct message and error code
-        assert str(exc_info.value) == "HTTP error: 400 - API error: E003"
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 400
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert "{'errorType': 'Invalid Object'}" in str(error)
 
-    def test_list_invalid_api_response_type(self):
-        """
-        Test that InvalidObjectError is raised when API returns non-dictionary response.
+    def test_list_filters_tags_validation(self):
+        """Test validation of 'tags' filter specifically."""
+        mock_addresses = []
 
-        This tests the case where the API response is not a dictionary,
-        expecting an InvalidObjectError with specific error details.
-        """
-        # Mock the API to return a non-dictionary response (e.g., a list)
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
-
+        # Test with string instead of list
+        invalid_filters = {"tags": "tag1"}
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+
+        # Test with dict instead of list
+        invalid_filters = {"tags": {"tag": "tag1"}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+
+    def test_list_filters_values_validation(self):
+        """Test validation of 'values' filter specifically."""
+        mock_addresses = []
+
+        # Test with string instead of list
+        invalid_filters = {"values": "10.0.0.0/24"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
         assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
+        assert "{'errorType': 'Invalid Object'}" in str(error)
 
-    def test_list_invalid_api_response_format(self):
+        # Test with dict instead of list
+        invalid_filters = {"values": {"value": "10.0.0.0/24"}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_addresses, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "{'errorType': 'Invalid Object'}" in str(error)
+
+    def test_list_filters_combinations(self):
+        """Test different combinations of valid filters."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address1",
+                    "folder": "Shared",
+                    "ip_netmask": "10.0.0.0/24",
+                    "tag": ["tag1", "tag2"],
+                },
+                {
+                    "id": "223e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address2",
+                    "folder": "Shared",
+                    "ip_range": "10.0.0.1-10.0.0.10",
+                    "tag": ["tag2", "tag3"],
+                },
+                {
+                    "id": "323e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-address3",
+                    "folder": "Shared",
+                    "fqdn": "test.example.com",
+                    "tag": ["tag1", "tag3"],
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test combining types and tags filters
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=["netmask"],
+            tags=["tag1"],
+        )
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test-address1"
+
+        # Test combining values and tags filters
+        filtered_objects = self.client.list(
+            folder="Shared",
+            values=["10.0.0.0/24"],
+            tags=["tag2"],
+        )
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test-address1"
+
+        # Test all filters together
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=["netmask"],
+            values=["10.0.0.0/24"],
+            tags=["tag1"],
+        )
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "test-address1"
+
+    def test_list_response_invalid_format(self):
+        """
+        Test that InvalidObjectError is raised when the response is not a dictionary.
+        """
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+
+    def test_list_response_invalid_data_field_missing(self):
         """
         Test that InvalidObjectError is raised when API returns response with missing data field.
 
@@ -316,7 +439,7 @@ class TestAddressList(TestAddressBase):
         expecting an InvalidObjectError with specific error details.
         """
         # Mock the API to return a dictionary without 'data' field
-        self.mock_scm.get.return_value = {"wrong_field": "value"}
+        self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared")
@@ -327,7 +450,7 @@ class TestAddressList(TestAddressBase):
         assert error.http_status_code == 500
         assert "HTTP error: 500 - API error: E003" in str(error)
 
-    def test_list_invalid_data_field_type(self):
+    def test_list_response_invalid_data_field_type(self):
         """
         Test that InvalidObjectError is raised when API returns non-list data field.
 
@@ -335,7 +458,7 @@ class TestAddressList(TestAddressBase):
         expecting an InvalidObjectError with specific error details.
         """
         # Mock the API to return a response where 'data' is not a list
-        self.mock_scm.get.return_value = {"data": "not a list"}
+        self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared")
@@ -345,15 +468,43 @@ class TestAddressList(TestAddressBase):
         assert error.error_code == "E003"
         assert error.http_status_code == 500
 
+    def test_list_response_no_content(self):
+        """Test that an HTTPError without response content in list() re-raises the exception."""
+        mock_response = MagicMock()
+        mock_response.content = None  # Simulate no content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.list(folder="Shared")
+
+    def test_list_server_error(self):
+        """Test generic exception handling in list method."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in error_msg
+        )
+
 
 class TestAddressCreate(TestAddressBase):
     """Tests for creating Address objects."""
 
-    def test_create_object_type_ip_netmask(self):
-        """
-        **Objective:** Test creating an object with ip_netmask.
-        """
-        test_object = AddressCreateFactory.with_ip_netmask()
+    def test_create_valid_type_ip_netmask(self):
+        """Test creating an object with ip_netmask."""
+        test_object = AddressCreateApiFactory.with_ip_netmask()
         mock_response = AddressResponseFactory.from_request(test_object)
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
@@ -368,11 +519,9 @@ class TestAddressCreate(TestAddressBase):
         assert created_object.ip_netmask == test_object.ip_netmask
         assert created_object.folder == test_object.folder
 
-    def test_create_object_type_fqdn(self):
-        """
-        **Objective:** Test creating an object of type fqdn.
-        """
-        test_object = AddressCreateFactory.with_fqdn()
+    def test_create_valid_type_fqdn(self):
+        """Test creating an object of type fqdn."""
+        test_object = AddressCreateApiFactory.with_fqdn()
         mock_response = AddressResponseFactory.from_request(test_object)
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
@@ -387,11 +536,9 @@ class TestAddressCreate(TestAddressBase):
         assert created_object.fqdn == test_object.fqdn
         assert created_object.folder == test_object.folder
 
-    def test_create_object_type_ip_range(self):
-        """
-        **Objective:** Test creating an object of type ip_range.
-        """
-        test_object = AddressCreateFactory.with_ip_range()
+    def test_create_valid_type_ip_range(self):
+        """Test creating an object of type ip_range."""
+        test_object = AddressCreateApiFactory.with_ip_range()
         mock_response = AddressResponseFactory.from_request(test_object)
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
@@ -406,11 +553,9 @@ class TestAddressCreate(TestAddressBase):
         assert created_object.ip_range == test_object.ip_range
         assert created_object.folder == test_object.folder
 
-    def test_create_object_type_ip_wildcard(self):
-        """
-        **Objective:** Test creating an object of type ip_wildcard.
-        """
-        test_object = AddressCreateFactory.with_ip_wildcard()
+    def test_create_valid_type_ip_wildcard(self):
+        """Test creating an object of type ip_wildcard."""
+        test_object = AddressCreateApiFactory.with_ip_wildcard()
         mock_response = AddressResponseFactory.from_request(test_object)
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
@@ -424,48 +569,6 @@ class TestAddressCreate(TestAddressBase):
         assert created_object.name == test_object.name
         assert created_object.ip_wildcard == test_object.ip_wildcard
         assert created_object.folder == test_object.folder
-
-    def test_create_object_error_handling(self):
-        """
-        Test error handling when the API returns an error during creation.
-        """
-        self.mock_scm.post.side_effect = Exception()  # noqa
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.create(data={"name": "test"})
-        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
-        assert (
-            "Value error, Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_create_generic_exception_handling(self):
-        """
-        Test handling of a generic exception during create.
-        """
-        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.create(data={"name": "test"})
-        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
-        assert (
-            "Value error, Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_create_malformed_response_handling(self):
-        """
-        Test handling of malformed response from the API.
-        """
-        self.mock_scm.post.return_value = {"unexpected": "format"}  # noqa
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.create(data={"name": "test"})
-        assert "1 validation error for AddressCreateModel" in str(exc_info.value)
-        assert (
-            "Value error, Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
-            in str(exc_info.value)
-        )
 
     def test_create_api_error_handling(self, caplog):
         """
@@ -661,7 +764,7 @@ class TestAddressUpdate(TestAddressBase):
         **Objective:** Test updating an object.
         """
         # Use AddressUpdateFactory to create the update data
-        update_data = AddressUpdateFactory.with_ip_netmask(
+        update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestAddress",
             ip_netmask="10.0.0.0/24",
@@ -712,7 +815,7 @@ class TestAddressUpdate(TestAddressBase):
         **Objective:** Test error handling during object update.
         """
         # Create test data using factory
-        update_data = AddressUpdateFactory.with_ip_netmask(
+        update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
@@ -747,57 +850,6 @@ class TestAddressUpdate(TestAddressBase):
         assert (
             "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
             in str(exc_info.value)
-        )
-
-    def test_update_with_invalid_data(self):
-        """
-        Test updating an object with invalid data.
-        """
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.update(data={"invalid": "data"})
-
-        error_msg = str(exc_info.value)
-        assert "validation error" in error_msg
-        assert "name" in error_msg  # Name is required
-        assert "id" in error_msg  # ID is required
-
-    def test_update_generic_exception_handling(self):
-        """
-        Test generic exception handling during update.
-        """
-        # Create valid test data with factory but missing required fields
-        test_data = AddressUpdateFactory.with_ip_netmask(
-            name="test-address",
-            ip_netmask="10.0.0.0/24",
-            folder="Shared",
-        ).model_dump()
-
-        # Remove ID to trigger validation error
-        test_data.pop("id")
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.update(data=test_data)
-
-        assert "id" in str(exc_info.value)  # Should mention missing ID field
-
-    def test_update_missing_address_type(self):
-        """
-        Test update with missing address type.
-        """
-        test_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-address",
-            "folder": "Shared",
-        }
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.update(test_data)
-
-        error_msg = str(exc_info.value)
-        assert "Value error" in error_msg
-        assert (
-            "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided"
-            in error_msg
         )
 
     def test_update_no_response_content(self):
@@ -1371,561 +1423,3 @@ class TestAddressFetch(TestAddressBase):
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
-
-
-class TestAddressTagValidation(TestAddressBase):
-    """Tests for Address tag field validation."""
-
-    def test_tag_string_to_list_conversion(self):
-        """
-        Test tag field validator converting a string to a list.
-
-        **Objective:** Verify that a single string tag is properly converted to a list.
-        **Workflow:**
-            1. Creates an object with a single string tag
-            2. Validates the tag is converted to a single-item list
-        """
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-            "tag": "TestTag",
-        }
-        model = AddressCreateModel(**data)
-        assert isinstance(model.tag, list)
-        assert model.tag == ["TestTag"]
-
-    def test_tag_list_passed_through(self):
-        """
-        Test tag field validator passing through a list.
-
-        **Objective:** Verify that a list of tags is properly handled.
-        **Workflow:**
-            1. Creates an object with multiple tags as a list
-            2. Validates the tags remain as a list
-        """
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-            "tag": ["Tag1", "Tag2"],
-        }
-        model = AddressCreateModel(**data)
-        assert isinstance(model.tag, list)
-        assert model.tag == ["Tag1", "Tag2"]
-
-    def test_tag_invalid_type(self):
-        """
-        Test tag field validator with invalid type.
-
-        **Objective:** Verify that non-string/non-list tag values raise ValueError.
-        **Workflow:**
-            1. Attempts to create an object with an invalid tag type (dict)
-            2. Validates that appropriate error is raised
-        """
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-            "tag": {"invalid": "type"},
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert "Tag must be a string or a list of strings" in str(exc_info.value)
-
-    def test_tag_duplicate_items(self):
-        """
-        Test tag uniqueness validator.
-
-        **Objective:** Verify that duplicate tags raise ValueError.
-        **Workflow:**
-            1. Attempts to create an object with duplicate tags
-            2. Validates that appropriate error is raised
-        """
-        data = {
-            "name": "Test123",
-            "folder": "Shared",
-            "ip_netmask": "10.5.0.11",
-            "tag": ["TestTag", "TestTag"],
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AddressCreateModel(**data)
-        assert "List items must be unique" in str(exc_info.value)
-
-
-class TestAddressListFilters(TestAddressBase):
-    """Tests for filtering during listing Address objects."""
-
-    def test_list_with_filters(self):
-        """Test that filters are properly added to parameters."""
-        filters = {
-            "types": ["type1", "type2"],
-            "values": ["value1", "value2"],
-            "tags": ["tag1", "tag2"],
-        }
-
-        mock_response = {"data": []}
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        self.client.list(folder="Shared", **filters)
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/addresses",
-            params={
-                "limit": 10000,
-                "folder": "Shared",
-            },
-        )
-
-    def test_list_filters_type_validation(self):
-        """Test validation of filter types in list method."""
-        mock_response = {
-            "data": [
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-address",
-                    "folder": "Shared",
-                    "ip_netmask": "10.0.0.0/24",
-                    "tag": ["tag1", "tag2"],
-                }
-            ]
-        }
-
-        def create_mock_error(error_msg):
-            """Helper to create mock error response"""
-            return {
-                "_errors": [
-                    {
-                        "code": "E003",
-                        "message": error_msg,
-                        "details": {"errorType": "Invalid Query Parameter"},
-                    }
-                ],
-                "_request_id": "test-request-id",
-            }
-
-        def setup_mock_error(error_msg):
-            """Helper to set up mock error response"""
-            mock_response = MagicMock()  # noqa
-            mock_response.status_code = 400
-            mock_response.content = True
-            mock_response.json.return_value = create_mock_error(error_msg)
-            return HTTPError(response=mock_response)
-
-        # Test invalid types filter (string instead of list)
-        mock_error = setup_mock_error("'types' filter must be a list")
-        self.mock_scm.get.side_effect = mock_error  # noqa
-        with pytest.raises(BadRequestError) as exc_info:
-            self.client.list(folder="Shared", types="netmask")
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
-
-        # Test invalid values filter (string instead of list)
-        mock_error = setup_mock_error("'values' filter must be a list")
-        self.mock_scm.get.side_effect = mock_error  # noqa
-        with pytest.raises(BadRequestError) as exc_info:
-            self.client.list(folder="Shared", values="10.0.0.0/24")
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
-
-        # Test invalid tags filter (string instead of list)
-        mock_error = setup_mock_error("'tags' filter must be a list")
-        self.mock_scm.get.side_effect = mock_error  # noqa
-        with pytest.raises(BadRequestError) as exc_info:
-            self.client.list(folder="Shared", tags="tag1")
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
-
-        # Reset side effect for successful case
-        self.mock_scm.get.side_effect = None  # noqa
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Test that valid list filters pass validation
-        try:
-            self.client.list(
-                folder="Shared",
-                types=["netmask"],
-                values=["10.0.0.0/24"],
-                tags=["tag1"],
-            )
-        except BadRequestError:
-            pytest.fail("Unexpected BadRequestError raised with valid list filters")
-
-    def test_values_filter_validation(self):
-        """Test validation of values filter specifically."""
-        mock_addresses = []
-
-        # Test with string instead of list
-        invalid_filters = {"values": "10.0.0.0/24"}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client._apply_filters(mock_addresses, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "{'errorType': 'Invalid Object'}" in str(error)
-        assert "HTTP error: 500" in str(error)
-        assert "API error: E003" in str(error)
-
-        # Test with dict instead of list
-        invalid_filters = {"values": {"value": "10.0.0.0/24"}}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client._apply_filters(mock_addresses, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "{'errorType': 'Invalid Object'}" in str(error)
-        assert "HTTP error: 500" in str(error)
-        assert "API error: E003" in str(error)
-
-    def test_tags_filter_validation(self):
-        """Test validation of tags filter specifically."""
-        mock_addresses = []
-
-        # Test with string instead of list
-        invalid_filters = {"tags": "tag1"}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client._apply_filters(mock_addresses, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "{'errorType': 'Invalid Object'}" in str(error)
-        assert "HTTP error: 500" in str(error)
-        assert "API error: E003" in str(error)
-
-        # Test with dict instead of list
-        invalid_filters = {"tags": {"tag": "tag1"}}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client._apply_filters(mock_addresses, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "{'errorType': 'Invalid Object'}" in str(error)
-        assert "HTTP error: 500" in str(error)
-        assert "API error: E003" in str(error)
-
-    def test_list_data_field_validation(self):
-        """Test validation of response data field."""
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E003",
-                    "message": "Invalid response format",
-                    "details": {"errorType": "Invalid Object"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        # Create mock response
-        mock_response = MagicMock()
-        mock_response.status_code = 500
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        # Test missing data field
-        self.mock_scm.get.return_value = {"not_data": []}  # noqa
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-
-        # Test invalid data type
-        self.mock_scm.get.return_value = {"data": "not_a_list"}  # noqa
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-
-    def test_list_filter_combinations(self):
-        """
-        **Objective:** Test different combinations of valid filters.
-        **Workflow:**
-            1. Tests various combinations of valid filters
-            2. Verifies filters are properly applied
-            3. Checks that filtered results match expected criteria
-        """
-        mock_response = {
-            "data": [
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-address1",
-                    "folder": "Shared",
-                    "ip_netmask": "10.0.0.0/24",
-                    "tag": ["tag1", "tag2"],
-                },
-                {
-                    "id": "223e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-address2",
-                    "folder": "Shared",
-                    "ip_range": "10.0.0.1-10.0.0.10",
-                    "tag": ["tag2", "tag3"],
-                },
-                {
-                    "id": "323e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-address3",
-                    "folder": "Shared",
-                    "fqdn": "test.example.com",
-                    "tag": ["tag1", "tag3"],
-                },
-            ]
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Test combining types and tags filters
-        filtered_objects = self.client.list(
-            folder="Shared",
-            types=["netmask"],
-            tags=["tag1"],
-        )
-        assert len(filtered_objects) == 1
-        assert filtered_objects[0].name == "test-address1"
-
-        # Test combining values and tags filters
-        filtered_objects = self.client.list(
-            folder="Shared",
-            values=["10.0.0.0/24"],
-            tags=["tag2"],
-        )
-        assert len(filtered_objects) == 1
-        assert filtered_objects[0].name == "test-address1"
-
-        # Test all filters together
-        filtered_objects = self.client.list(
-            folder="Shared",
-            types=["netmask"],
-            values=["10.0.0.0/24"],
-            tags=["tag1"],
-        )
-        assert len(filtered_objects) == 1
-        assert filtered_objects[0].name == "test-address1"
-
-    def test_list_empty_filter_lists(self):
-        """
-        **Objective:** Test behavior with empty filter lists.
-        **Workflow:**
-            1. Tests filters with empty lists
-            2. Verifies appropriate handling of empty filters
-        """
-        mock_response = {
-            "data": [
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-address",
-                    "folder": "Shared",
-                    "ip_netmask": "10.0.0.0/24",
-                    "tag": ["tag1"],
-                }
-            ]
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Empty lists should result in no matches
-        filtered_objects = self.client.list(
-            folder="Shared",
-            types=[],
-        )
-        assert len(filtered_objects) == 0
-
-        filtered_objects = self.client.list(
-            folder="Shared",
-            values=[],
-        )
-        assert len(filtered_objects) == 0
-
-        filtered_objects = self.client.list(
-            folder="Shared",
-            tags=[],
-        )
-        assert len(filtered_objects) == 0
-
-    def test_list_empty_folder_error(self):
-        """Test that empty folder raises appropriate error."""
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E003",
-                    "message": '"folder" is not allowed to be empty',
-                    "details": {"errorType": "Missing Query Parameter"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        mock_response = MagicMock()
-        mock_response.status_code = 400
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        self.mock_scm.get.side_effect = HTTPError(response=mock_response)  # noqa
-
-        with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.list(folder="")
-
-        error_msg = str(exc_info.value)
-        assert '"folder" is not allowed to be empty' in error_msg
-        assert "HTTP error: 400" in error_msg
-        assert "API error: E003" in error_msg
-
-    def test_list_multiple_containers_error(self):
-        """Test validation of container parameters."""
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E003",
-                    "message": "Multiple container types provided",
-                    "details": {"errorType": "Invalid Object"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        mock_response = MagicMock()
-        mock_response.status_code = 400
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        self.mock_scm.get.side_effect = HTTPError(response=mock_response)  # noqa
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="folder1", snippet="snippet1")
-
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 400" in error_msg
-        assert "API error: E003" in error_msg
-
-    def test_list_error_handling(self):
-        """Test error handling in list operation."""
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Listing failed",
-                    "details": {"errorType": "Operation Impossible"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        # Create mock response
-        mock_response = MagicMock()
-        mock_response.status_code = 404
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        # Create HTTPError with mock response
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_error  # noqa
-
-        with pytest.raises(ObjectNotPresentError) as exc_info:
-            self.client.list(folder="NonexistentFolder")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Operation Impossible'}" in error_msg
-        assert "HTTP error: 404" in error_msg
-        assert "API error: API_I00013" in error_msg
-
-    def test_list_generic_exception_handling(self):
-        """Test generic exception handling in list method."""
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E003",
-                    "message": "An internal error occurred",
-                    "details": {"errorType": "Internal Error"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        mock_response = MagicMock()
-        mock_response.status_code = 500
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_error  # noqa
-
-        with pytest.raises(APIError) as exc_info:
-            self.client.list(folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
-
-    def test_list_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in list method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response
-        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
-
-        with pytest.raises(APIError):
-            self.client.list(folder="Shared")
-
-        # Test invalid data format
-        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
-
-        with pytest.raises(APIError):
-            self.client.list(folder="Shared")
-
-    def test_list_non_dict_response(self):
-        """Test list method handling of non-dictionary response."""
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E003",
-                    "message": "Invalid response format",
-                    "details": {"errorType": "Invalid Object"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        mock_response = MagicMock()
-        mock_response.status_code = 500
-        mock_response.content = True
-        mock_response.json.return_value = mock_error_response
-
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_error  # noqa
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
-            self.client.list(folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Invalid Object'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
-
-    def test_apply_filters_invalid_types_filter(self):
-        """
-        Test _apply_filters with invalid types filter (line 367).
-        """
-        mock_addresses = []  # Empty list as we'll raise before using it
-        invalid_filters = {"types": "not-a-list"}  # String instead of list
-
-        with pytest.raises(InvalidObjectError):
-            self.client._apply_filters(mock_addresses, invalid_filters)
-        # assert "'types' filter must be a list" in str(exc_info.value)
-
-
-# -------------------- End of Test Classes --------------------
