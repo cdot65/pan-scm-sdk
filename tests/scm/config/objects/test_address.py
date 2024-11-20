@@ -1,5 +1,6 @@
 # tests/scm/config/objects/test_address.py
 import logging
+
 # Standard library imports
 from unittest.mock import MagicMock
 
