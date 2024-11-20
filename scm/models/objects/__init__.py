@@ -25,3 +25,9 @@ from .service import (
     ServiceResponseModel,
     ServiceUpdateModel,
 )
+from .tag import (
+    ColorModel,
+    TagCreateModel,
+    TagResponseModel,
+    TagUpdateModel
+)
