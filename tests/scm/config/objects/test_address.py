@@ -1,6 +1,5 @@
 # tests/scm/config/objects/test_address.py
 import logging
-
 # Standard library imports
 from unittest.mock import MagicMock
 
@@ -571,66 +570,12 @@ class TestAddressCreate(TestAddressBase):
         assert created_object.ip_wildcard == test_object.ip_wildcard
         assert created_object.folder == test_object.folder
 
-    def test_create_api_error_handling(self, caplog):
-        """
-        Test handling of APIError during address creation.
-        """
-        # Create an APIError instance
-        api_error = APIError("Test API Error")
-        self.mock_scm.post.side_effect = api_error  # noqa
-
-        # Test data
-        test_data = {
-            "name": "test-address",
-            "folder": "Shared",
-            "ip_netmask": "10.0.0.0/24",
-        }
-
-        with pytest.raises(APIError) as exc_info:
-            self.client.create(test_data)
-
-        # Verify the same error was re-raised
-        assert exc_info.value is api_error
-
-    def test_create_no_response_content(self):
+    def test_create_http_error_no_response_content(self):
         """Test create method when HTTP error has no response content."""
+        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
-        mock_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.create(
-                {"name": "test", "ip_netmask": "10.0.0.0/24", "folder": "test"}
-            )
-
-    def test_create_http_error_with_response(self):
-        """
-        Test that an HTTPError with response content in create() triggers ErrorHandler.raise_for_error().
-        """
-        test_data = {
-            "name": "test-address",
-            "folder": "Shared",
-            "ip_netmask": "10.0.0.0/24",
-        }
-
-        # Mock error response data
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Create failed",
-                    "details": {"errorType": "Malformed Command"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        # Create a mock response object with content
-        mock_response = MagicMock()
-        mock_response.content = True  # Simulate that there is content
-        mock_response.json.return_value = mock_error_response
-        mock_response.status_code = 400
+        mock_response.status_code = 500
 
         # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
@@ -638,14 +583,44 @@ class TestAddressCreate(TestAddressBase):
         # Set the side effect of the post method to raise the HTTPError
         self.mock_scm.post.side_effect = mock_http_error  # noqa
 
+        with pytest.raises(HTTPError):
+            self.client.create(
+                {"name": "test", "ip_netmask": "10.0.0.0/24", "folder": "test"}
+            )
+
+    def test_create_http_error_with_response(self):
+        """Test that HTTPError with response content triggers proper error handling."""
+        test_data = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
+
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Create failed",
+            error_type="Malformed Command",
+        )
+
         with pytest.raises(MalformedCommandError) as exc_info:
             self.client.create(test_data)
 
-        # Verify that the exception message contains the expected error
         assert (
             "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
             in str(exc_info.value)
         )
+
+    def test_create_generic_exception_handling(self):
+        """Test handling of a generic exception during create."""
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(
+                {"name": "test", "ip_netmask": "10.0.0.0/24", "folder": "test"}
+            )
+        assert str(exc_info.value) == "Generic error"
 
 
 class TestAddressGet(TestAddressBase):
