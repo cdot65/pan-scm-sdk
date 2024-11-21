@@ -10,6 +10,7 @@ from scm.models.objects import (
     TagUpdateModel,
     TagResponseModel,
 )
+from tests.factories import TagCreateModelFactory, TagUpdateModelFactory
 
 
 # -------------------- Test Classes for Pydantic Models --------------------
@@ -34,11 +35,7 @@ class TestTagCreateModel:
 
     def test_tag_create_model_invalid_color(self):
         """Test validation with invalid color."""
-        data = {
-            "name": "test-tag",
-            "folder": "Shared",
-            "color": "InvalidColor",
-        }
+        data = TagCreateModelFactory.build_with_invalid_color()
         with pytest.raises(ValidationError) as exc_info:
             TagCreateModel(**data)
         assert "Color must be one of" in str(exc_info.value)
@@ -65,11 +62,7 @@ class TestTagCreateModel:
 
     def test_tag_create_model_multiple_containers(self):
         """Test validation when multiple containers are provided."""
-        data = {
-            "name": "test-tag",
-            "folder": "Shared",
-            "snippet": "TestSnippet",
-        }
+        data = TagCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             TagCreateModel(**data)
         assert (
@@ -142,13 +135,19 @@ class TestTagUpdateModel:
 
     def test_tag_update_model_invalid_color(self):
         """Test validation with invalid color."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "color": "InvalidColor",
-        }
+        data = TagUpdateModelFactory.build_with_invalid_color()
         with pytest.raises(ValidationError) as exc_info:
             TagUpdateModel(**data)
         assert "Color must be one of" in str(exc_info.value)
+
+    def test_tag_update_model_http_error_no_response_content(self):
+        """Test validation with missing required fields."""
+        data = {}
+        with pytest.raises(ValidationError) as exc_info:
+            TagUpdateModel(**data)
+        assert "1 validation error for TagUpdateModel\nname\n  Field required" in str(
+            exc_info.value
+        )
 
 
 class TestTagResponseModel:
