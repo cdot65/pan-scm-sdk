@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pan-scm-sdk"
-version = "0.2.1"
+version = "0.2.2"
 description = "Python SDK for Palo Alto Networks Strata Cloud Manager."
 authors = ["Calvin Remsburg <calvin@cdot.io>"]
 license = "Apache 2.0"
@@ -20,7 +20,7 @@ requests-oauthlib = "^2.0.0"
 setuptools = "^75.1.0"
 pydantic = "^2.9.2"
 pyjwt = "^2.9.0"
-cryptography = "^43.0.1"
+cryptography = "^37.0.4"
 
 
 [tool.poetry.group.dev.dependencies]
