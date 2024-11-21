@@ -10,7 +10,6 @@ from scm.models.objects import (
     TagUpdateModel,
     TagResponseModel,
 )
-from scm.models.objects.tag import Colors, ColorModel
 
 
 # -------------------- Test Classes for Pydantic Models --------------------
@@ -32,6 +31,17 @@ class TestTagCreateModel:
         assert model.folder == data["folder"]
         assert model.comments == data["comments"]
         assert model.color == data["color"]
+
+    def test_tag_create_model_invalid_color(self):
+        """Test validation with invalid color."""
+        data = {
+            "name": "test-tag",
+            "folder": "Shared",
+            "color": "InvalidColor",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            TagCreateModel(**data)
+        assert "Color must be one of" in str(exc_info.value)
 
     def test_tag_create_model_invalid_name(self):
         """Test validation with invalid name pattern."""
@@ -91,6 +101,16 @@ class TestTagCreateModel:
             TagCreateModel(**data)
         assert "String should have at most 1023 characters" in str(exc_info.value)
 
+    def test_tag_create_model_none_color(self):
+        """Test validation when color is None."""
+        data = {
+            "name": "test-tag",
+            "folder": "Shared",
+            "color": None,
+        }
+        model = TagCreateModel(**data)
+        assert model.color is None
+
 
 class TestTagUpdateModel:
     """Tests for TagUpdateModel validation."""
@@ -98,11 +118,13 @@ class TestTagUpdateModel:
     def test_tag_update_model_valid(self):
         """Test validation with valid update data."""
         data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "updated-tag",
             "comments": "Updated test tag",
             "color": "Blue",
         }
         model = TagUpdateModel(**data)
+        assert str(model.id) == data["id"]
         assert model.name == data["name"]
         assert model.comments == data["comments"]
         assert model.color == data["color"]
@@ -118,14 +140,15 @@ class TestTagUpdateModel:
         assert model.comments == data["comments"]
         assert model.color is None
 
-    def test_tag_update_model_invalid_name(self):
-        """Test validation with invalid name pattern."""
+    def test_tag_update_model_invalid_color(self):
+        """Test validation with invalid color."""
         data = {
-            "name": "@invalid_name$",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "color": "InvalidColor",
         }
         with pytest.raises(ValidationError) as exc_info:
             TagUpdateModel(**data)
-        assert "String should match pattern" in str(exc_info.value)
+        assert "Color must be one of" in str(exc_info.value)
 
 
 class TestTagResponseModel:
@@ -169,36 +192,3 @@ class TestTagResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             TagResponseModel(**data)
         assert "Input should be a valid UUID" in str(exc_info.value)
-
-
-class TestColorModel:
-    """Tests for ColorModel validation."""
-
-    def test_color_model_valid(self):
-        """Test validation with valid color."""
-        data = {"color": "Red"}
-        model = ColorModel(**data)
-        assert model.color == "red"
-
-    def test_color_model_case_insensitive(self):
-        """Test that color validation is case-insensitive."""
-        data = {"color": "BLUE"}
-        model = ColorModel(**data)
-        assert model.color == "blue"
-
-    def test_color_model_invalid_color(self):
-        """Test validation with invalid color."""
-        data = {"color": "InvalidColor"}
-        with pytest.raises(ValidationError) as exc_info:
-            ColorModel(**data)
-        assert "Color must be one of:" in str(exc_info.value)
-
-    def test_color_model_all_valid_colors(self):
-        """Test all valid colors from Colors enum."""
-        for color in Colors:
-            data = {"color": color.value}
-            model = ColorModel(**data)
-            assert model.color == color.value.lower()
-
-
-# -------------------- End of Test Classes --------------------
