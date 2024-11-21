@@ -15,12 +15,13 @@ from scm.models.objects import (
     AddressGroupResponseModel,
     ApplicationCreateModel,
     ServiceCreateModel,
-    ApplicationGroupCreateModel,
     ServiceResponseModel,
     ServiceUpdateModel,
     TagResponseModel,
     TagCreateModel,
     TagUpdateModel,
+    ApplicationResponseModel,
+    ApplicationUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -169,6 +170,57 @@ class AddressUpdateApiFactory(factory.Factory):
         return cls(folder=None, device="TestDevice", **kwargs)
 
 
+class AddressResponseFactory(factory.Factory):
+    """Factory for creating AddressResponseModel instances."""
+
+    class Meta:
+        model = AddressResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"address_{n}")
+    description = factory.Faker("sentence")
+    tag = ["response-tag"]
+    folder = "Shared"
+
+    # Address types default to None
+    ip_netmask = None
+    ip_range = None
+    ip_wildcard = None
+    fqdn = None
+
+    @classmethod
+    def with_ip_netmask(cls, ip_netmask="192.168.1.1/32", **kwargs):
+        return cls(ip_netmask=ip_netmask, **kwargs)
+
+    @classmethod
+    def with_fqdn(cls, fqdn="example.com", **kwargs):
+        return cls(fqdn=fqdn, **kwargs)
+
+    @classmethod
+    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
+        return cls(ip_range=ip_range, **kwargs)
+
+    @classmethod
+    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
+        return cls(ip_wildcard=ip_wildcard, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: AddressCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
 # Pydantic modeling tests
 class AddressCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for AddressCreateModel."""
@@ -294,57 +346,6 @@ class AddressUpdateModelFactory(factory.DictFactory):
         )
 
 
-class AddressResponseFactory(factory.Factory):
-    """Factory for creating AddressResponseModel instances."""
-
-    class Meta:
-        model = AddressResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = factory.Faker("sentence")
-    tag = ["response-tag"]
-    folder = "Shared"
-
-    # Address types default to None
-    ip_netmask = None
-    ip_range = None
-    ip_wildcard = None
-    fqdn = None
-
-    @classmethod
-    def with_ip_netmask(cls, ip_netmask="192.168.1.1/32", **kwargs):
-        return cls(ip_netmask=ip_netmask, **kwargs)
-
-    @classmethod
-    def with_fqdn(cls, fqdn="example.com", **kwargs):
-        return cls(fqdn=fqdn, **kwargs)
-
-    @classmethod
-    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
-        return cls(ip_range=ip_range, **kwargs)
-
-    @classmethod
-    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
-        return cls(ip_wildcard=ip_wildcard, **kwargs)
-
-    @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: AddressCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
 # ----------------------------------------------------------------------------
 # Address Group object factories.
 # ----------------------------------------------------------------------------
@@ -442,6 +443,55 @@ class AddressGroupUpdateApiFactory(factory.Factory):
     @classmethod
     def with_device(cls, **kwargs):
         return cls(folder=None, device="TestDevice", **kwargs)
+
+
+class AddressGroupResponseFactory(factory.Factory):
+    """Factory for creating AddressGroupResponseModel instances."""
+
+    class Meta:
+        model = AddressGroupResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"address_group_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["response-tag"]
+
+    # Address group types default to None
+    dynamic = None
+    static = None
+
+    @classmethod
+    def with_static(cls, static=None, **kwargs):
+        """Create an AddressGroupResponseModel instance with a static address group."""
+        if static is None:
+            static = ["address-object1", "address-object2", "address-object3"]
+        return cls(static=static, **kwargs)
+
+    @classmethod
+    def with_dynamic(cls, filter_str=None, **kwargs):
+        """Create an AddressGroupResponseModel instance with a dynamic address group."""
+        if filter_str is None:
+            dynamic_filter = DynamicFilterFactory()
+        else:
+            dynamic_filter = DynamicFilter(filter=filter_str)
+        return cls(dynamic=dynamic_filter, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: AddressGroupCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
 
 
 # Pydantic modeling tests
@@ -576,48 +626,180 @@ class AddressGroupUpdateModelFactory(factory.DictFactory):
         )
 
 
-class AddressGroupResponseFactory(factory.Factory):
-    """Factory for creating AddressGroupResponseModel instances."""
+# ----------------------------------------------------------------------------
+# Application object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class ApplicationCreateApiFactory(factory.Factory):
+    """Factory for creating ApplicationCreateModel instances."""
 
     class Meta:
-        model = AddressGroupResponseModel
+        model = ApplicationCreateModel
+
+    name = factory.Sequence(lambda n: f"application_{n}")
+    description = factory.Faker("sentence")
+    category = "general-internet"
+    subcategory = "file-sharing"
+    technology = "client-server"
+    risk = 1
+    ports = ["tcp/80,443", "udp/3478"]
+    folder = "Prisma Access"
+    snippet = None  # Default to None; can be set using with_snippet()
+
+    # Boolean attributes
+    evasive = False
+    pervasive = False
+    excessive_bandwidth_use = False
+    used_by_malware = False
+    transfers_files = False
+    has_known_vulnerabilities = False
+    tunnels_other_apps = False
+    prone_to_misuse = False
+    no_certifications = False
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def build_without_required_fields(cls, **kwargs):
+        """Return an instance without required fields (should fail validation)."""
+        return cls(
+            name=None,
+            category=None,
+            subcategory=None,
+            technology=None,
+            risk=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers (should fail validation)."""
+        return cls(folder="Shared", snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def build_with_no_container(cls, **kwargs):
+        """Return an instance without any container (should fail validation)."""
+        return cls(folder=None, snippet=None, **kwargs)
+
+    @classmethod
+    def build_with_long_description(cls, **kwargs):
+        """Return an instance with description exceeding max_length."""
+        long_description = "A" * 2000  # Exceeds 1023 characters
+        return cls(description=long_description, **kwargs)
+
+    @classmethod
+    def build_valid(cls, **kwargs):
+        """Return a valid instance."""
+        return cls(**kwargs)
+
+
+class ApplicationUpdateApiFactory(factory.Factory):
+    """Factory for creating ApplicationUpdateModel instances."""
+
+    class Meta:
+        model = ApplicationUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"address_group_{n}")
-    description = factory.Faker("sentence")
-    folder = "Shared"
-    tag = ["response-tag"]
+    # All fields are optional for partial updates
+    name = None
+    description = None
+    category = None
+    subcategory = None
+    technology = None
+    risk = None
+    ports = None
 
-    # Address group types default to None
-    dynamic = None
-    static = None
-
-    @classmethod
-    def with_static(cls, static=None, **kwargs):
-        """Create an AddressGroupResponseModel instance with a static address group."""
-        if static is None:
-            static = ["address-object1", "address-object2", "address-object3"]
-        return cls(static=static, **kwargs)
-
-    @classmethod
-    def with_dynamic(cls, filter_str=None, **kwargs):
-        """Create an AddressGroupResponseModel instance with a dynamic address group."""
-        if filter_str is None:
-            dynamic_filter = DynamicFilterFactory()
-        else:
-            dynamic_filter = DynamicFilter(filter=filter_str)
-        return cls(dynamic=dynamic_filter, **kwargs)
+    # Boolean attributes
+    evasive = None
+    pervasive = None
+    excessive_bandwidth_use = None
+    used_by_malware = None
+    transfers_files = None
+    has_known_vulnerabilities = None
+    tunnels_other_apps = None
+    prone_to_misuse = None
+    no_certifications = None
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def build_partial_update(cls, **kwargs):
+        """Return an instance with partial update data."""
+        return cls(
+            id=str(uuid.uuid4()),
+            name="updated-application",
+            description="Updated description",
+            **kwargs,
+        )
 
     @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
+    def build_full_update(cls, **kwargs):
+        """Return an instance with all fields for a full update."""
+        return cls(
+            id=str(uuid.uuid4()),
+            name=factory.Sequence(lambda n: f"application_{n}"),
+            description=factory.Faker("sentence"),
+            category="general-internet",
+            subcategory="file-sharing",
+            technology="client-server",
+            risk=1,
+            ports=["tcp/80,443", "udp/3478"],
+            evasive=False,
+            pervasive=False,
+            excessive_bandwidth_use=False,
+            used_by_malware=False,
+            transfers_files=False,
+            has_known_vulnerabilities=False,
+            tunnels_other_apps=False,
+            prone_to_misuse=False,
+            no_certifications=False,
+            **kwargs,
+        )
+
+
+class ApplicationResponseFactory(factory.Factory):
+    """Factory for creating ApplicationResponseModel instances."""
+
+    class Meta:
+        model = ApplicationResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_{n}")
+    description = factory.Faker("paragraph", nb_sentences=5)
+    category = "general-internet"
+    subcategory = "file-sharing"
+    technology = "client-server"
+    risk = 1
+    ports = ["tcp/80,443", "udp/3478"]
+    folder = "Prisma Access"
+    snippet = None  # Default to None; can be set using with_snippet()
+
+    # Boolean attributes
+    evasive = False
+    pervasive = False
+    excessive_bandwidth_use = False
+    used_by_malware = False
+    transfers_files = False
+    has_known_vulnerabilities = False
+    tunnels_other_apps = False
+    prone_to_misuse = False
+    no_certifications = False
 
     @classmethod
-    def from_request(cls, request_model: AddressGroupCreateModel, **kwargs):
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def without_subcategory_and_technology(cls, **kwargs):
+        """Create an instance without subcategory and technology."""
+        return cls(subcategory=None, technology=None, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: ApplicationCreateModel, **kwargs):
         """Create a response model based on a request model."""
         data = request_model.model_dump()
         data["id"] = str(uuid.uuid4())
@@ -625,44 +807,127 @@ class AddressGroupResponseFactory(factory.Factory):
         return cls(**data)
 
 
-# ----------------------------------------------------------------------------
-# Application object factories.
-# ----------------------------------------------------------------------------
+# Pydantic modeling tests
+class ApplicationCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationCreateModel."""
 
-
-class ApplicationFactory(factory.Factory):
-    class Meta:
-        model = ApplicationCreateModel
-
-    name = "ValidApplication"
-    description = "Application from pan-scm-sdk Test"
-    category = "collaboration"
+    name = factory.Sequence(lambda n: f"application_{n}")
+    description = factory.Faker("sentence")
+    category = "general-internet"
     subcategory = "file-sharing"
     technology = "client-server"
     risk = 1
     ports = ["tcp/80,443", "udp/3478"]
     folder = "Prisma Access"
+    snippet = None  # Default to None; can be set using snippet field
+
+    # Boolean attributes
     evasive = False
     pervasive = False
     excessive_bandwidth_use = False
     used_by_malware = False
     transfers_files = False
-    has_known_vulnerabilities = True
+    has_known_vulnerabilities = False
     tunnels_other_apps = False
     prone_to_misuse = False
     no_certifications = False
 
+    @classmethod
+    def build_valid(cls, **kwargs):
+        """Return a valid data dict for creating an application."""
+        return cls(**kwargs)
 
-class ApplicationGroupFactory(factory.Factory):
-    class Meta:
-        model = ApplicationGroupCreateModel
+    @classmethod
+    def build_with_missing_required_fields(cls, **kwargs):
+        """Return a data dict missing required fields (should fail validation)."""
+        return cls(
+            name=None,
+            category=None,
+            subcategory=None,
+            technology=None,
+            risk=None,
+            **kwargs,
+        )
 
-    name = "ValidStaticApplicationGroup"
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Prisma Access"
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return a data dict with multiple containers (should fail validation)."""
+        return cls(folder="Shared", snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def build_with_no_container(cls, **kwargs):
+        """Return a data dict without any container (should fail validation)."""
+        return cls(folder=None, snippet=None, **kwargs)
+
+    @classmethod
+    def build_with_long_description(cls, **kwargs):
+        """Return a data dict with description exceeding max_length."""
+        long_description = "A" * 2000  # Exceeds 1023 characters
+        return cls(description=long_description, **kwargs)
+
+
+class ApplicationUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationUpdateModel."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    # All fields are optional for updates
+    name = None
+    description = None
+    category = None
+    subcategory = None
+    technology = None
+    risk = None
+    ports = None
+
+    # Boolean attributes
+    evasive = None
+    pervasive = None
+    excessive_bandwidth_use = None
+    used_by_malware = None
+    transfers_files = None
+    has_known_vulnerabilities = None
+    tunnels_other_apps = None
+    prone_to_misuse = None
+    no_certifications = None
+
+    @classmethod
+    def build_valid(cls, **kwargs):
+        """Return a valid data dict for updating an application."""
+        return cls(**kwargs)
+
+    @classmethod
+    def build_partial_update(cls, **kwargs):
+        """Return a data dict for partial update."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="updated-application",
+            description="Updated description",
+            **kwargs,
+        )
+
+    @classmethod
+    def build_full_update(cls, **kwargs):
+        """Return a data dict with all fields for a full update."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name=factory.Sequence(lambda n: f"application_{n}"),
+            description=factory.Faker("sentence"),
+            category="general-internet",
+            subcategory="file-sharing",
+            technology="client-server",
+            risk=1,
+            ports=["tcp/80,443", "udp/3478"],
+            evasive=False,
+            pervasive=False,
+            excessive_bandwidth_use=False,
+            used_by_malware=False,
+            transfers_files=False,
+            has_known_vulnerabilities=False,
+            tunnels_other_apps=False,
+            prone_to_misuse=False,
+            no_certifications=False,
+            **kwargs,
+        )
 
 
 # ----------------------------------------------------------------------------
@@ -712,8 +977,10 @@ class ServiceCreateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"service_{n}")
     description = factory.Faker("sentence")
     folder = "Shared"
+    snippet = None
+    device = None
     tag = ["test-tag", "environment-prod"]
-    protocol = {"tcp": {"port": "80,443"}}
+    protocol = None  # Will be set in specific methods
 
     @classmethod
     def with_tcp(cls, port="80,443", **kwargs):
@@ -726,12 +993,40 @@ class ServiceCreateApiFactory(factory.Factory):
         return cls(protocol={"udp": {"port": port}}, **kwargs)
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def build_without_protocol(cls, **kwargs):
+        """Return an instance without the required protocol field."""
+        return cls(protocol=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_protocols(cls, **kwargs):
+        """Return an instance with both TCP and UDP protocols."""
+        return cls(
+            protocol={
+                "tcp": {"port": "80"},
+                "udp": {"port": "53"},
+            },
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return an instance without any containers."""
+        return cls(folder=None, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers (should fail validation)."""
+        return cls(folder="Shared", snippet="TestSnippet", device=None, **kwargs)
 
 
 class ServiceUpdateApiFactory(factory.Factory):
@@ -744,7 +1039,7 @@ class ServiceUpdateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"service_{n}")
     description = factory.Faker("sentence")
     tag = ["updated-tag"]
-    protocol = {"tcp": {"port": "80,443"}}
+    protocol = None  # Will be set in specific methods
 
     @classmethod
     def with_tcp(cls, port="80,443", **kwargs):
@@ -756,121 +1051,31 @@ class ServiceUpdateApiFactory(factory.Factory):
         """Create a ServiceUpdateModel instance with UDP protocol."""
         return cls(protocol={"udp": {"port": port}}, **kwargs)
 
-
-# Pydantic modeling tests
-class ServiceCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ServiceCreateModel."""
-
-    name = factory.Sequence(lambda n: f"service_{n}")
-    description = factory.Faker("sentence")
-    folder = "Shared"
-    tag = ["test-tag", "environment-prod"]
+    @classmethod
+    def build_without_protocol(cls, **kwargs):
+        """Return an instance without the required protocol field."""
+        return cls(protocol=None, **kwargs)
 
     @classmethod
-    def build_without_protocol(cls):
-        """Return a data dict without the required protocol field."""
+    def build_with_multiple_protocols(cls, **kwargs):
+        """Return an instance with both TCP and UDP protocols."""
         return cls(
-            name="TestService",
-            folder="Shared",
-            # No protocol provided
-        )
-
-    @classmethod
-    def build_with_multiple_protocols(cls):
-        """Return a data dict with both TCP and UDP protocols."""
-        return cls(
-            name="TestService",
-            folder="Shared",
             protocol={
                 "tcp": {"port": "80"},
                 "udp": {"port": "53"},
             },
+            **kwargs,
         )
 
     @classmethod
-    def build_with_no_containers(cls):
-        """Return a data dict without any containers."""
-        return cls(
-            name="TestService",
-            protocol={"tcp": {"port": "80"}},
-            # No folder, snippet, or device
-        )
+    def build_with_no_containers(cls, **kwargs):
+        """Return an instance without any containers."""
+        return cls(folder=None, snippet=None, device=None, **kwargs)
 
     @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="TestService",
-            folder="Shared",
-            snippet="this will fail",
-            protocol={"tcp": {"port": "80"}},
-        )
-
-    @classmethod
-    def build_valid_tcp(cls):
-        """Return a valid data dict for a TCP service."""
-        return cls(
-            name="TestService",
-            protocol={"tcp": {"port": "80,443"}},
-            folder="Shared",
-            tag=["Python", "Automation"],
-            description="This is a test TCP service",
-        )
-
-    @classmethod
-    def build_valid_udp(cls):
-        """Return a valid data dict for a UDP service."""
-        return cls(
-            name="TestService",
-            protocol={"udp": {"port": "53"}},
-            folder="Shared",
-            tag=["Python", "Automation"],
-            description="This is a test UDP service",
-        )
-
-
-class ServiceUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ServiceUpdateModel."""
-
-    id = "12345678-1234-5678-1234-567812345678"
-    name = factory.Sequence(lambda n: f"service_{n}")
-    description = factory.Faker("sentence")
-    tag = ["test-tag", "environment-prod"]
-
-    @classmethod
-    def build_without_protocol(cls):
-        """Return a data dict without the required protocol field."""
-        return cls(
-            id="12345678-1234-5678-1234-567812345678",
-            name="TestService",
-            folder="Shared",
-            # No protocol provided
-        )
-
-    @classmethod
-    def build_with_multiple_protocols(cls):
-        """Return a data dict with both TCP and UDP protocols."""
-        return cls(
-            id="12345678-1234-5678-1234-567812345678",
-            name="TestService",
-            folder="Shared",
-            protocol={
-                "tcp": {"port": "80"},
-                "udp": {"port": "53"},
-            },
-        )
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating a service."""
-        return cls(
-            id="12345678-1234-5678-1234-567812345678",
-            name="TestService",
-            protocol={"tcp": {"port": "80,443"}},
-            folder="Shared",
-            tag=["Python", "Automation"],
-            description="This is an updated service",
-        )
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers."""
+        return cls(folder="Shared", snippet="TestSnippet", device=None, **kwargs)
 
 
 class ServiceResponseFactory(factory.Factory):
@@ -883,8 +1088,10 @@ class ServiceResponseFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"service_{n}")
     description = factory.Faker("sentence")
     folder = "Shared"
+    snippet = None
+    device = None
     tag = ["response-tag"]
-    protocol = {"tcp": {"port": "80,443"}}
+    protocol = None  # Will be set in specific methods
 
     @classmethod
     def with_tcp(cls, port="80,443", **kwargs):
@@ -897,12 +1104,12 @@ class ServiceResponseFactory(factory.Factory):
         return cls(protocol={"udp": {"port": port}}, **kwargs)
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
+    def with_device(cls, device="TestDevice", **kwargs):
+        return cls(folder=None, snippet=None, device=device, **kwargs)
 
     @classmethod
     def from_request(cls, request_model: ServiceCreateModel, **kwargs):
@@ -911,6 +1118,102 @@ class ServiceResponseFactory(factory.Factory):
         data["id"] = str(uuid.uuid4())
         data.update(kwargs)
         return cls(**data)
+
+
+# Pydantic modeling tests
+class ServiceCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ServiceCreateModel."""
+
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    snippet = None
+    device = None
+    tag = ["test-tag", "environment-prod"]
+    protocol = None  # Will be set in specific methods
+
+    @classmethod
+    def build_without_protocol(cls, **kwargs):
+        """Return a data dict without the required protocol field."""
+        return cls(protocol=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_protocols(cls, **kwargs):
+        """Return a data dict with both TCP and UDP protocols."""
+        return cls(
+            protocol={
+                "tcp": {"port": "80"},
+                "udp": {"port": "53"},
+            },
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return a data dict without any containers."""
+        return cls(folder=None, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return a data dict with multiple containers."""
+        return cls(
+            folder="Shared",
+            snippet="TestSnippet",
+            protocol={"tcp": {"port": "80,443"}},
+            device=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_valid_tcp(cls, **kwargs):
+        """Return a valid data dict for a TCP service."""
+        return cls(protocol={"tcp": {"port": "80,443"}}, **kwargs)
+
+    @classmethod
+    def build_valid_udp(cls, **kwargs):
+        """Return a valid data dict for a UDP service."""
+        return cls(protocol={"udp": {"port": "53"}}, **kwargs)
+
+
+class ServiceUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ServiceUpdateModel."""
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_{n}")
+    description = factory.Faker("sentence")
+    tag = ["updated-tag"]
+    protocol = None  # Will be set in specific methods
+
+    @classmethod
+    def build_without_protocol(cls, **kwargs):
+        """Return a data dict without the required protocol field."""
+        return cls(protocol=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_protocols(cls, **kwargs):
+        """Return a data dict with both TCP and UDP protocols."""
+        return cls(
+            protocol={
+                "tcp": {"port": "80"},
+                "udp": {"port": "53"},
+            },
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return a data dict without any containers."""
+        return cls(folder=None, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return a data dict with multiple containers."""
+        return cls(folder="Shared", snippet="TestSnippet", device=None, **kwargs)
+
+    @classmethod
+    def build_valid(cls, **kwargs):
+        """Return a valid data dict for updating a service."""
+        return cls(protocol={"tcp": {"port": "80,443"}}, **kwargs)
 
 
 # ----------------------------------------------------------------------------
@@ -1190,6 +1493,39 @@ class AntiSpywareProfileUpdateApiFactory(factory.Factory):
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
 
 
+class AntiSpywareProfileResponseFactory(factory.Factory):
+    """Factory for creating AntiSpywareProfileResponseModel instances."""
+
+    class Meta:
+        model = AntiSpywareProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    cloud_inline_analysis = False
+    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+
+    @classmethod
+    def with_snippet(cls, **kwargs):
+        """Create a profile with snippet container."""
+        return cls(folder=None, snippet="TestSnippet", **kwargs)
+
+    @classmethod
+    def with_device(cls, **kwargs):
+        """Create a profile with device container."""
+        return cls(folder=None, device="TestDevice", **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: AntiSpywareProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
 # Pydantic modeling tests
 class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for AntiSpywareProfileCreateModel."""
@@ -1284,39 +1620,6 @@ class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
             ],
             threat_exception=[],
         )
-
-
-class AntiSpywareProfileResponseFactory(factory.Factory):
-    """Factory for creating AntiSpywareProfileResponseModel instances."""
-
-    class Meta:
-        model = AntiSpywareProfileResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"profile_{n}")
-    description = factory.Faker("sentence")
-    folder = "Shared"
-    cloud_inline_analysis = False
-    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
-
-    @classmethod
-    def with_snippet(cls, **kwargs):
-        """Create a profile with snippet container."""
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        """Create a profile with device container."""
-        return cls(folder=None, device="TestDevice", **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: AntiSpywareProfileCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
 
 
 # ----------------------------------------------------------------------------
