@@ -20,6 +20,8 @@ from scm.models.objects import (
     TagResponseModel,
     TagUpdateModel,
 )
+from scm.models.objects.tag import Colors
+from scm.utils.tag_colors import normalize_color_name
 
 
 class Tag(BaseObject):
@@ -58,7 +60,7 @@ class Tag(BaseObject):
             payload = tag.model_dump(exclude_unset=True)
 
             # Send the updated object to the remote API as JSON
-            response = self.api_client.post(
+            response: Dict[str, Any] = self.api_client.post(
                 self.ENDPOINT,
                 json=payload,
             )
@@ -87,7 +89,7 @@ class Tag(BaseObject):
         object_id: str,
     ) -> TagResponseModel:
         """
-        Gets an tag object by ID.
+        Gets a tag object by ID.
 
         Returns:
             TagResponseModel
@@ -196,14 +198,26 @@ class Tag(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             colors = filters["colors"]
+
+            # Normalize and validate the filter colors
+            normalized_filter_colors = set()
+            for color_name in colors:
+                normalized_name = normalize_color_name(color_name)
+                standard_color_name = Colors.from_normalized_name(normalized_name)
+                if standard_color_name is None:
+                    valid_colors = [color for color in Colors]
+                    raise InvalidObjectError(
+                        message=f"Invalid color '{color_name}'. Valid colors are: {', '.join(valid_colors)}",
+                        error_code="E003",
+                        http_status_code=400,
+                        details={"errorType": "Invalid Color"},
+                    )
+                # Add the standard color name to the set
+                normalized_filter_colors.add(standard_color_name)
+
+            # Now filter the tags
             filter_criteria = [
-                color
-                for color in filter_criteria
-                if any(
-                    getattr(color, field) in colors
-                    for field in ["color"]
-                    if getattr(color, field) is not None
-                )
+                tag for tag in filter_criteria if tag.color in normalized_filter_colors
             ]
 
         return filter_criteria
@@ -318,7 +332,6 @@ class Tag(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-        **filters,
     ) -> Dict[str, Any]:
         """
         Fetches a single object by name.
@@ -411,7 +424,7 @@ class Tag(BaseObject):
         object_id: str,
     ) -> None:
         """
-        Deletes an tag object.
+        Deletes a tag object.
 
         Args:
             object_id (str): The ID of the object to delete.

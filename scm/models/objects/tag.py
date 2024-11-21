@@ -1,8 +1,9 @@
 # scm/models/objects/tag.py
 
-from uuid import UUID
-from typing import Optional, List
 from enum import Enum
+from typing import Optional, List
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     Field,
@@ -12,71 +13,9 @@ from pydantic import (
     constr,
 )
 
+from scm.utils.tag_colors import normalize_color_name
 
 TagString = constr(max_length=64)
-
-
-class TagBaseModel(BaseModel):
-    """
-    Base model for Tag objects containing fields common to all CRUD operations.
-
-    Attributes:
-        name (str): The name of the tag object.
-        comments (Optional[str]): The comments of the tag object.
-        tag (Optional[List[TagString]]): Tags associated with the tag object.
-        folder (Optional[str]): The folder in which the resource is defined.
-        snippet (Optional[str]): The snippet in which the resource is defined.
-        device (Optional[str]): The device in which the resource is defined.
-    """
-
-    # Required fields
-    name: str = Field(
-        ...,
-        max_length=63,
-        description="The name of the Tag object",
-        pattern=r"^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$",
-    )
-    # Optional fields
-    comments: Optional[str] = Field(
-        None,
-        max_length=1023,
-        comments="The comments of the tag object",
-    )
-
-    color: Optional[str] = Field(
-        None,
-        description="Color Associated with Tag",
-        examples=["Magenta"],
-    )
-    # Container Types
-    folder: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The folder in which the resource is defined",
-        examples=["Prisma Access"],
-    )
-    snippet: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The snippet in which the resource is defined",
-        examples=["My Snippet"],
-    )
-    device: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The device in which the resource is defined",
-        examples=["My Device"],
-    )
-
-    # Pydantic model configuration
-    model_config = ConfigDict(
-        populate_by_name=True,
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
 
 
 class Colors(str, Enum):
@@ -122,26 +61,102 @@ class Colors(str, Enum):
     YELLOW = "Yellow"
     YELLOW_ORANGE = "Yellow-Orange"
 
+    @classmethod
+    def from_normalized_name(
+        cls,
+        normalized_name: str,
+    ) -> Optional[str]:
+        """
+        Retrieve the standard color name based on the normalized color name.
 
-class ColorModel(BaseModel):
-    color: str
+        Args:
+            normalized_name (str): The normalized color name.
+
+        Returns:
+            Optional[str]: The standard color name if found, else None.
+        """
+        for color in cls:
+            if normalize_color_name(color) == normalized_name:
+                return color
+        return None
+
+
+class TagBaseModel(BaseModel):
+    """
+    Base model for Tag objects containing fields common to all CRUD operations.
+
+    Attributes:
+        name (str): The name of the tag object.
+        comments (Optional[str]): The comments of the tag object.
+        tag (Optional[List[TagString]]): Tags associated with the tag object.
+        folder (Optional[str]): The folder in which the resource is defined.
+        snippet (Optional[str]): The snippet in which the resource is defined.
+        device (Optional[str]): The device in which the resource is defined.
+    """
+
+    # Required fields
+    name: str = Field(
+        ...,
+        max_length=63,
+        description="The name of the Tag object",
+        pattern=r"^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$",
+    )
+    # Optional fields
+    color: Optional[str] = Field(
+        None,
+        description="Color Associated with Tag",
+        examples=["Magenta"],
+    )
+
+    comments: Optional[str] = Field(
+        None,
+        description="The comments of the tag object",
+        max_length=1023,
+    )
+
+    # Container Types
+    folder: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The folder in which the resource is defined",
+        examples=["Prisma Access"],
+    )
+    snippet: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The snippet in which the resource is defined",
+        examples=["My Snippet"],
+    )
+    device: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The device in which the resource is defined",
+        examples=["My Device"],
+    )
+
+    # Pydantic model configuration
+    model_config = ConfigDict(
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
 
     @field_validator("color")
-    def validate_color(cls, value: str) -> str:
-        try:
-            Colors(value.lower())  # Try to create an enum instance
-            return value.lower()
-        except ValueError:
-            valid_colors = [c.value for c in Colors]
+    def validate_color(
+        cls,
+        value: Optional[str],
+    ) -> Optional[str]:
+        if value is None:
+            return value
+        normalized_name = normalize_color_name(value)
+        standard_color_name = Colors.from_normalized_name(normalized_name)
+        if standard_color_name is None:
+            valid_colors = [color for color in Colors]
             raise ValueError(f"Color must be one of: {', '.join(valid_colors)}")
-
-
-# Usage examples:
-# valid_color = ColorModel(color="red")
-# print(valid_color.color)  # prints: red
-
-# This will raise a ValidationError
-# invalid_color = ColorModel(color="purple")
+        return standard_color_name
 
 
 class TagCreateModel(TagBaseModel):
@@ -188,6 +203,14 @@ class TagUpdateModel(TagBaseModel):
     Creating this dedicated Update model in the event that additional validators or fields are required in the
     near future.
     """
+
+    # Optional fields
+
+    id: Optional[UUID] = Field(
+        None,
+        description="The UUID of the application group",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
 
 
 class TagResponseModel(TagBaseModel):
