@@ -18,6 +18,9 @@ from scm.models.objects import (
     ApplicationGroupCreateModel,
     ServiceResponseModel,
     ServiceUpdateModel,
+    TagResponseModel,
+    TagCreateModel,
+    TagUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -908,6 +911,185 @@ class ServiceResponseFactory(factory.Factory):
         data["id"] = str(uuid.uuid4())
         data.update(kwargs)
         return cls(**data)
+
+
+# ----------------------------------------------------------------------------
+# Tag object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class TagCreateApiFactory(factory.Factory):
+    """Factory for creating TagCreateModel instances."""
+
+    class Meta:
+        model = TagCreateModel
+
+    name = factory.Sequence(lambda n: f"tag_{n}")
+    comments = factory.Faker("sentence")
+    color = None  # Default to None; can be set using with_color()
+    folder = "Shared"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_folder(cls, folder="Shared", **kwargs):
+        """Create a tag with a specific folder."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create a tag with a snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create a tag with a device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_color(cls, color="Red", **kwargs):
+        """Create a tag with a specific color."""
+        return cls(color=color, **kwargs)
+
+
+class TagUpdateApiFactory(factory.Factory):
+    """Factory for creating TagUpdateModel instances."""
+
+    class Meta:
+        model = TagUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"tag_{n}")
+    comments = factory.Faker("sentence")
+    color = None  # Default to None; can be set using with_color()
+
+    @classmethod
+    def with_color(cls, color="Blue", **kwargs):
+        """Update a tag with a specific color."""
+        return cls(color=color, **kwargs)
+
+
+class TagResponseFactory(factory.Factory):
+    """Factory for creating TagResponseModel instances."""
+
+    class Meta:
+        model = TagResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"tag_{n}")
+    comments = factory.Faker("sentence")
+    color = None
+    folder = "Shared"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_folder(cls, folder="Shared", **kwargs):
+        """Create a response model with a specific folder."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create a response model with a snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create a response model with a device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_color(cls, color="Red", **kwargs):
+        """Create a response model with a specific color."""
+        return cls(color=color, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: TagCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class TagCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for TagCreateModel."""
+
+    name = factory.Sequence(lambda n: f"tag_{n}")
+    comments = factory.Faker("sentence")
+    color = "Red"  # Default color; can be overridden
+    folder = "Shared"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestTag",
+            comments="This is a test tag",
+            color="Blue",
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_invalid_color(cls):
+        """Return a data dict with an invalid color."""
+        return cls(
+            name="InvalidColorTag",
+            comments="This tag has an invalid color",
+            color="InvalidColor",
+            folder="Shared",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers (should fail validation)."""
+        return cls(
+            name="TestTag",
+            folder="Shared",
+            snippet="MySnippet",
+            color="Blue",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any containers (should fail validation)."""
+        return cls(
+            name="TestTag",
+            color="Blue",
+            # No folder, snippet, or device provided
+        )
+
+
+class TagUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for TagUpdateModel."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"tag_{n}")
+    comments = factory.Faker("sentence")
+    color = "Green"
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a tag."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedTag",
+            comments="This is an updated test tag",
+            color="Yellow",
+        )
+
+    @classmethod
+    def build_with_invalid_color(cls):
+        """Return a data dict with an invalid color."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="InvalidColorTag",
+            color="InvalidColor",
+        )
 
 
 # ----------------------------------------------------------------------------
