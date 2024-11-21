@@ -5,6 +5,16 @@ enhancements, and fixes in each version of the tool.
 
 ---
 
+## Version 0.2.2
+
+**Release Date:** November 21st
+
+### Updates:
+
+* Drop dependency version on crypto package
+
+---
+
 ## Version 0.2.1
 
 **Release Date:** November 12th
