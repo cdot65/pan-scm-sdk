@@ -235,5 +235,101 @@ class TestActionModels:
             BlockIpAction(**data)
         assert "Input should be less than or equal to 3600" in str(exc_info.value)
 
+    def test_action_request_string_conversion(self):
+        """Test string to dict conversion in ActionRequest."""
+        data = "alert"
+        model = ActionRequest.model_validate(data)
+        assert model.root == {"alert": {}}
+        assert model.get_action_name() == "alert"
+
+    def test_action_request_invalid_type(self):
+        """Test invalid type handling in ActionRequest."""
+        with pytest.raises(ValidationError) as exc_info:
+            ActionRequest.model_validate(123)  # Neither string nor dict
+        assert "Invalid action format; must be a string or dict." in str(exc_info.value)
+
+    def test_action_request_no_action(self):
+        """Test validation when no action is provided."""
+        with pytest.raises(ValidationError) as exc_info:
+            ActionRequest.model_validate({})
+        assert "Exactly one action must be provided in 'action' field." in str(
+            exc_info.value
+        )
+
+    def test_action_request_multiple_actions(self):
+        """Test validation when multiple actions are provided."""
+        with pytest.raises(ValidationError) as exc_info:
+            ActionRequest.model_validate({"alert": {}, "drop": {}})
+        assert "Exactly one action must be provided in 'action' field." in str(
+            exc_info.value
+        )
+
+    def test_action_response_string_conversion(self):
+        """Test string to dict conversion in ActionResponse."""
+        data = "alert"
+        model = ActionResponse.model_validate(data)
+        assert model.root == {"alert": {}}
+        assert model.get_action_name() == "alert"
+
+    def test_action_response_invalid_type(self):
+        """Test invalid type handling in ActionResponse."""
+        with pytest.raises(ValidationError) as exc_info:
+            ActionResponse.model_validate(123)  # Neither string nor dict
+        assert "Invalid action format; must be a string or dict." in str(exc_info.value)
+
+    def test_action_response_empty_dict(self):
+        """Test that ActionResponse accepts empty dict."""
+        data = {}
+        model = ActionResponse.model_validate(data)
+        assert model.root == {}
+        assert model.get_action_name() == "unknown"
+
+    def test_action_response_single_action(self):
+        """Test ActionResponse with single valid action."""
+        data = {"alert": {}}
+        model = ActionResponse.model_validate(data)
+        assert model.root == {"alert": {}}
+        assert model.get_action_name() == "alert"
+
+    def test_action_response_multiple_actions(self):
+        """Test validation when multiple actions are provided."""
+        with pytest.raises(ValidationError) as exc_info:
+            ActionResponse.model_validate({"alert": {}, "drop": {}})
+        assert "At most one action must be provided in 'action' field." in str(
+            exc_info.value
+        )
+
+    def test_action_request_valid_actions(self):
+        """Test all valid action types in ActionRequest."""
+        valid_actions = [
+            "allow",
+            "alert",
+            "drop",
+            "reset_client",
+            "reset_server",
+            "reset_both",
+            "block_ip",
+            "default",
+        ]
+        for action_type in valid_actions:
+            model = ActionRequest.model_validate({action_type: {}})
+            assert model.get_action_name() == action_type
+
+    def test_action_response_valid_actions(self):
+        """Test all valid action types in ActionResponse."""
+        valid_actions = [
+            "allow",
+            "alert",
+            "drop",
+            "reset_client",
+            "reset_server",
+            "reset_both",
+            "block_ip",
+            "default",
+        ]
+        for action_type in valid_actions:
+            model = ActionResponse.model_validate({action_type: {}})
+            assert model.get_action_name() == action_type
+
 
 # -------------------- End of Test Classes --------------------
