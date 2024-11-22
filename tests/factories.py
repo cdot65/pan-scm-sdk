@@ -22,6 +22,7 @@ from scm.models.objects import (
     TagUpdateModel,
     ApplicationResponseModel,
     ApplicationUpdateModel,
+    ApplicationGroupCreateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -1420,7 +1421,7 @@ class MicaEngineSpywareEnabledEntryFactory(factory.Factory):
     inline_policy_action = InlinePolicyAction.alert
 
 
-class RuleBaseFactory(factory.Factory):
+class AntiSpywareRuleBaseFactory(factory.Factory):
     """Factory for creating AntiSpywareRuleBaseModel instances."""
 
     class Meta:
@@ -1456,7 +1457,7 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
     description = factory.Faker("sentence")
     folder = "Shared"
     cloud_inline_analysis = False
-    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
 
     @classmethod
@@ -1489,7 +1490,7 @@ class AntiSpywareProfileUpdateApiFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
-    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
 
 
@@ -1504,7 +1505,7 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
     description = factory.Faker("sentence")
     folder = "Shared"
     cloud_inline_analysis = False
-    rules = factory.List([factory.SubFactory(RuleBaseFactory)])
+    rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
 
     @classmethod
@@ -1627,7 +1628,7 @@ class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
 # ----------------------------------------------------------------------------
 
 
-class BaseSecurityRuleFactory(factory.Factory):
+class SecurityRuleBaseFactory(factory.Factory):
     """Base factory for common security rule fields."""
 
     name = factory.Sequence(lambda n: f"security_rule_{n}")
@@ -1655,7 +1656,7 @@ class BaseSecurityRuleFactory(factory.Factory):
     profile_setting = factory.SubFactory("tests.factories.ProfileSettingFactory")
 
 
-class SecurityRuleRequestFactory(BaseSecurityRuleFactory):
+class SecurityRuleRequestBaseFactory(SecurityRuleBaseFactory):
     """Factory for creating SecurityRuleCreateModel instances."""
 
     class Meta:
@@ -1681,7 +1682,7 @@ class SecurityRuleRequestFactory(BaseSecurityRuleFactory):
         return [cls(name=name, **kwargs) for name in names]
 
 
-class SecurityRuleResponseFactory(BaseSecurityRuleFactory):
+class SecurityRuleResponseBaseFactory(SecurityRuleBaseFactory):
     """Factory for creating SecurityRuleResponseModel instances."""
 
     class Meta:
@@ -2006,3 +2007,15 @@ class VulnerabilityProtectionProfileResponseFactory(
         data = request_model.model_dump()
         data.update(kwargs)
         return cls(**data)
+
+
+class ApplicationGroupFactory(factory.Factory):
+    class Meta:
+        model = ApplicationGroupCreateModel
+
+    name = "ValidStaticApplicationGroup"
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Prisma Access"

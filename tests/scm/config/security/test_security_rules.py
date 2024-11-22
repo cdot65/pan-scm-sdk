@@ -26,8 +26,8 @@ from scm.models.security.security_rules import (
 )
 
 from tests.factories import (
-    SecurityRuleRequestFactory,
-    SecurityRuleResponseFactory,
+    SecurityRuleRequestBaseFactory,
+    SecurityRuleResponseBaseFactory,
 )
 
 from pydantic import ValidationError as PydanticValidationError
@@ -202,11 +202,11 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         """
         **Objective:** Test creating a new object.
         **Workflow:**
-            1. Creates test data using SecurityRuleRequestFactory.
+            1. Creates test data using SecurityRuleRequestBaseFactory.
             2. Mocks the API response.
             3. Verifies the creation request and response.
         """
-        test_rule = SecurityRuleRequestFactory()
+        test_rule = SecurityRuleRequestBaseFactory()
         mock_response = test_rule.model_dump()
         mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
 
@@ -231,7 +231,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             2. Attempts to create an object
             3. Verifies proper error handling and exception raising
         """
-        test_data = SecurityRuleRequestFactory()
+        test_data = SecurityRuleRequestBaseFactory()
 
         # Mock error response
         mock_error_response = {
@@ -262,7 +262,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             1. Mocks a generic exception without response attribute
             2. Verifies APIError is raised with correct message
         """
-        test_data = SecurityRuleRequestFactory()
+        test_data = SecurityRuleRequestBaseFactory()
 
         # Mock a generic exception without response
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
@@ -278,7 +278,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             1. Mocks a response that would cause a parsing error
             2. Verifies appropriate error handling
         """
-        test_data = SecurityRuleRequestFactory()
+        test_data = SecurityRuleRequestBaseFactory()
 
         # Mock invalid JSON response
         self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
