@@ -1,5 +1,6 @@
 # scm/models/security/security_rules.py
 
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
@@ -11,11 +12,10 @@ from pydantic import (
     ConfigDict,
     constr,
 )
-from enum import Enum
 
 
 # Enums
-class RuleMoveDestination(str, Enum):
+class SecurityRuleMoveDestination(str, Enum):
     """Enum representing valid destination values for rule movement."""
 
     TOP = "top"
@@ -24,14 +24,14 @@ class RuleMoveDestination(str, Enum):
     AFTER = "after"
 
 
-class Rulebase(str, Enum):
+class SecurityRuleRulebase(str, Enum):
     """Enum representing valid rulebase values."""
 
     PRE = "pre"
     POST = "post"
 
 
-class Action(str, Enum):
+class SecurityRuleAction(str, Enum):
     """Enum representing various network actions."""
 
     allow = "allow"
@@ -43,7 +43,7 @@ class Action(str, Enum):
 
 
 # Component Models
-class ProfileSetting(BaseModel):
+class SecurityRuleProfileSetting(BaseModel):
     """Model for security profile settings."""
 
     group: Optional[List[str]] = Field(
@@ -124,11 +124,11 @@ class SecurityRuleBaseModel(BaseModel):
         default_factory=lambda: ["any"],
         description="The URL categories being accessed",
     )
-    action: Action = Field(
-        default=Action.allow,
+    action: SecurityRuleAction = Field(
+        default=SecurityRuleAction.allow,
         description="The action to be taken when the rule is matched",
     )
-    profile_setting: Optional[ProfileSetting] = None
+    profile_setting: Optional[SecurityRuleProfileSetting] = None
     log_setting: Optional[str] = None
     schedule: Optional[str] = None
     log_start: Optional[bool] = None
@@ -199,7 +199,7 @@ class SecurityRuleBaseModel(BaseModel):
 class SecurityRuleCreateModel(SecurityRuleBaseModel):
     """Model for creating new Security Rules."""
 
-    rulebase: Optional[Rulebase] = Field(
+    rulebase: Optional[SecurityRuleRulebase] = Field(
         None,
         description="Which rulebase to use (pre or post)",
     )
@@ -220,7 +220,7 @@ class SecurityRuleCreateModel(SecurityRuleBaseModel):
 class SecurityRuleUpdateModel(SecurityRuleBaseModel):
     """Model for updating existing Security Rules with all fields optional."""
 
-    rulebase: Optional[Rulebase] = None
+    rulebase: Optional[SecurityRuleRulebase] = None
 
 
 class SecurityRuleResponseModel(SecurityRuleBaseModel):
@@ -240,11 +240,11 @@ class SecurityRuleMoveModel(BaseModel):
         ...,
         description="UUID of the security rule to be moved",
     )
-    destination: RuleMoveDestination = Field(
+    destination: SecurityRuleMoveDestination = Field(
         ...,
         description="Where to move the rule (top, bottom, before, after)",
     )
-    rulebase: Rulebase = Field(
+    rulebase: SecurityRuleRulebase = Field(
         ...,
         description="Which rulebase to use (pre or post)",
     )
@@ -261,8 +261,8 @@ class SecurityRuleMoveModel(BaseModel):
     @model_validator(mode="after")
     def validate_move_configuration(self) -> "SecurityRuleMoveModel":
         if self.destination in (
-            RuleMoveDestination.BEFORE,
-            RuleMoveDestination.AFTER,
+            SecurityRuleMoveDestination.BEFORE,
+            SecurityRuleMoveDestination.AFTER,
         ):
             if not self.destination_rule:
                 raise ValueError(
