@@ -2,6 +2,7 @@
 
 # Standard library imports
 import uuid
+from typing import List
 
 # External libraries
 import factory
@@ -23,6 +24,8 @@ from scm.models.objects import (
     ApplicationResponseModel,
     ApplicationUpdateModel,
     ApplicationGroupCreateModel,
+    ApplicationGroupResponseModel,
+    ApplicationGroupUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -34,17 +37,18 @@ from scm.models.security import (
     DNSSecurityProfileResponseModel,
     AntiSpywareProfileResponseModel,
     AntiSpywareProfileCreateModel,
-    VulnerabilityProtectionProfileCreateModel,
-    VulnerabilityProtectionProfileResponseModel,
+    VulnerabilityProfileCreateModel,
+    VulnerabilityProfileResponseModel,
     SecurityRuleCreateModel,
     SecurityRuleMoveModel,
+    DecryptionProfileCreateModel,
+    DecryptionProfileResponseModel,
 )
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel,
 )
 from scm.models.security.anti_spyware_profiles import (
     PacketCapture,
-    ActionRequest,
     ThreatExceptionBase,
     Category,
     Severity,
@@ -52,6 +56,14 @@ from scm.models.security.anti_spyware_profiles import (
     InlinePolicyAction,
     MicaEngineSpywareEnabledEntry,
     ExemptIpEntry,
+)
+from scm.models.security.decryption_profiles import (
+    SSLVersion,
+    DecryptionProfileUpdateModel,
+    SSLNoProxy,
+    SSLInboundProxy,
+    SSLForwardProxy,
+    SSLProtocolSettings,
 )
 from scm.models.security.dns_security_profiles import (
     BotnetDomainsModel,
@@ -65,16 +77,36 @@ from scm.models.security.dns_security_profiles import (
     LogLevelEnum,
     ActionEnum,
     DNSSecurityCategoryEntryModel,
+    DNSSecurityProfileUpdateModel,
 )
 from scm.models.security.security_rules import (
-    ProfileSetting,
-    Rulebase,
-    RuleMoveDestination,
+    SecurityRuleProfileSetting,
+    SecurityRuleRulebase,
+    SecurityRuleMoveDestination,
     SecurityRuleResponseModel,
+    SecurityRuleAction,
+    SecurityRuleUpdateModel,
 )
 from scm.models.security.vulnerability_protection_profiles import (
-    ThreatExceptionModel,
-    VulnerabilityRuleModel,
+    VulnerabilityProfileThreatExceptionModel,
+    VulnerabilityProfileRuleModel,
+    VulnerabilityProfileHost,
+    VulnerabilityProfileCategory,
+    VulnerabilityProfileSeverity,
+    VulnerabilityProfileUpdateModel,
+    VulnerabilityProfilePacketCapture,
+    VulnerabilityProfileTimeAttribute,
+    VulnerabilityProfileExemptIpEntry,
+)
+from scm.models.security.wildfire_antivirus_profiles import (
+    WildfireAvDirection,
+    WildfireAvAnalysis,
+    WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel,
+    WildfireAvProfileUpdateModel,
+    WildfireAvThreatExceptionEntry,
+    WildfireAvMlavExceptionEntry,
+    WildfireAvRuleBase,
 )
 
 
@@ -837,6 +869,230 @@ class ApplicationUpdateModelFactory(factory.DictFactory):
             ports=["invalid-port"],
             folder="Invalid@Folder",
             **kwargs,
+        )
+
+
+# ----------------------------------------------------------------------------
+# Application Group object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class ApplicationGroupCreateApiFactory(factory.Factory):
+    """Factory for creating ApplicationGroupCreateModel instances."""
+
+    class Meta:
+        model = ApplicationGroupCreateModel
+
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Shared"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_members(cls, members: list[str], **kwargs):
+        """Create an instance with specific members."""
+        return cls(members=members, **kwargs)
+
+    @classmethod
+    def with_single_member(cls, member: str = "single-app", **kwargs):
+        """Create an instance with a single member."""
+        return cls(members=[member], **kwargs)
+
+
+class ApplicationGroupUpdateApiFactory(factory.Factory):
+    """Factory for creating ApplicationGroupUpdateModel instances."""
+
+    class Meta:
+        model = ApplicationGroupUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_members(cls, members: list[str], **kwargs):
+        """Create an instance with specific members."""
+        return cls(members=members, **kwargs)
+
+
+class ApplicationGroupResponseFactory(factory.Factory):
+    """Factory for creating ApplicationGroupResponseModel instances."""
+
+    class Meta:
+        model = ApplicationGroupResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Shared"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_members(cls, members: list[str], **kwargs):
+        """Create an instance with specific members."""
+        return cls(members=members, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: ApplicationGroupCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class ApplicationGroupCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationGroupCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Shared"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestApplicationGroup",
+            members=["app1", "app2"],
+            folder="Shared",
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            members=["app1"],
+            folder="Shared",
+        )
+
+    @classmethod
+    def build_with_empty_members(cls):
+        """Return a data dict with empty members list."""
+        return cls(
+            name="TestGroup",
+            members=[],
+            folder="Shared",
+        )
+
+    @classmethod
+    def build_with_invalid_folder(cls):
+        """Return a data dict with invalid folder pattern."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+            folder="Invalid@Folder#",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+            folder="Shared",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+        )
+
+
+class ApplicationGroupUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationGroupUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating an application group."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedGroup",
+            members=["updated-app1", "updated-app2"],
+            folder="UpdatedFolder",
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            members=[],
+            folder="Invalid@Folder",
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            members=["new-app"],
         )
 
 
@@ -1632,135 +1888,659 @@ class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
 
 
 # ----------------------------------------------------------------------------
-# Other object factories.
+# Decryption Profile object factories.
 # ----------------------------------------------------------------------------
 
 
-class SecurityRuleBaseFactory(factory.Factory):
-    """Base factory for common security rule fields."""
+# Sub factories
+class SSLProtocolSettingsFactory(factory.Factory):
+    """Factory for creating SSLProtocolSettings instances."""
 
-    name = factory.Sequence(lambda n: f"security_rule_{n}")
-    description = factory.Faker("sentence")
-    action = "allow"
+    class Meta:
+        model = SSLProtocolSettings
 
-    # Lists with default values
-    source = ["any"]
-    destination = ["any"]
-    application = ["any"]
-    service = ["any"]
-    source_user = ["any"]
-    source_hip = ["any"]
-    destination_hip = ["any"]
-    category = ["any"]
-    tag = factory.List([factory.Faker("word") for _ in range(2)])
+    auth_algo_md5 = True
+    auth_algo_sha1 = True
+    auth_algo_sha256 = True
+    auth_algo_sha384 = True
+    enc_algo_3des = True
+    enc_algo_aes_128_cbc = True
+    enc_algo_aes_128_gcm = True
+    enc_algo_aes_256_cbc = True
+    enc_algo_aes_256_gcm = True
+    enc_algo_chacha20_poly1305 = True
+    enc_algo_rc4 = True
+    keyxchg_algo_dhe = True
+    keyxchg_algo_ecdhe = True
+    keyxchg_algo_rsa = True
+    max_version = SSLVersion.tls1_2
+    min_version = SSLVersion.tls1_0
 
-    # Boolean fields
-    disabled = False
-    log_start = False
-    log_end = True
-
-    # Other fields
-    log_setting = "Cortex Data Lake"
-    profile_setting = factory.SubFactory("tests.factories.ProfileSettingFactory")
+    @classmethod
+    def with_versions(cls, min_ver: SSLVersion, max_ver: SSLVersion, **kwargs):
+        """Create an instance with specific SSL/TLS versions."""
+        return cls(min_version=min_ver, max_version=max_ver, **kwargs)
 
 
-class SecurityRuleRequestBaseFactory(SecurityRuleBaseFactory):
+class SSLForwardProxyFactory(factory.Factory):
+    """Factory for creating SSLForwardProxy instances."""
+
+    class Meta:
+        model = SSLForwardProxy
+
+    auto_include_altname = False
+    block_client_cert = False
+    block_expired_certificate = False
+    block_timeout_cert = False
+    block_tls13_downgrade_no_resource = False
+    block_unknown_cert = False
+    block_unsupported_cipher = False
+    block_unsupported_version = False
+    block_untrusted_issuer = False
+    restrict_cert_exts = False
+    strip_alpn = False
+
+    @classmethod
+    def with_all_blocks_enabled(cls, **kwargs):
+        """Create an instance with all blocking options enabled."""
+        return cls(
+            block_client_cert=True,
+            block_expired_certificate=True,
+            block_timeout_cert=True,
+            block_tls13_downgrade_no_resource=True,
+            block_unknown_cert=True,
+            block_unsupported_cipher=True,
+            block_unsupported_version=True,
+            block_untrusted_issuer=True,
+            **kwargs,
+        )
+
+
+class SSLInboundProxyFactory(factory.Factory):
+    """Factory for creating SSLInboundProxy instances."""
+
+    class Meta:
+        model = SSLInboundProxy
+
+    block_if_hsm_unavailable = False
+    block_if_no_resource = False
+    block_unsupported_cipher = False
+    block_unsupported_version = False
+
+    @classmethod
+    def with_all_blocks_enabled(cls, **kwargs):
+        """Create an instance with all blocking options enabled."""
+        return cls(
+            block_if_hsm_unavailable=True,
+            block_if_no_resource=True,
+            block_unsupported_cipher=True,
+            block_unsupported_version=True,
+            **kwargs,
+        )
+
+
+class SSLNoProxyFactory(factory.Factory):
+    """Factory for creating SSLNoProxy instances."""
+
+    class Meta:
+        model = SSLNoProxy
+
+    block_expired_certificate = False
+    block_untrusted_issuer = False
+
+    @classmethod
+    def with_all_blocks_enabled(cls, **kwargs):
+        """Create an instance with all blocking options enabled."""
+        return cls(
+            block_expired_certificate=True,
+            block_untrusted_issuer=True,
+            **kwargs,
+        )
+
+
+# SDK tests against SCM API
+class DecryptionProfileCreateApiFactory(factory.Factory):
+    """Factory for creating DecryptionProfileCreateModel instances."""
+
+    class Meta:
+        model = DecryptionProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"decryption_profile_{n}")
+    folder = "Shared"
+    ssl_protocol_settings = factory.SubFactory(SSLProtocolSettingsFactory)
+    ssl_forward_proxy = factory.SubFactory(SSLForwardProxyFactory)
+    ssl_inbound_proxy = factory.SubFactory(SSLInboundProxyFactory)
+    ssl_no_proxy = factory.SubFactory(SSLNoProxyFactory)
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_custom_ssl_settings(
+        cls,
+        min_ver: SSLVersion = SSLVersion.tls1_0,
+        max_ver: SSLVersion = SSLVersion.tls1_2,
+        **kwargs,
+    ):
+        """Create an instance with custom SSL protocol settings."""
+        return cls(
+            ssl_protocol_settings=SSLProtocolSettingsFactory.with_versions(
+                min_ver=min_ver, max_ver=max_ver
+            ),
+            **kwargs,
+        )
+
+
+class DecryptionProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating DecryptionProfileUpdateModel instances."""
+
+    class Meta:
+        model = DecryptionProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"decryption_profile_{n}")
+    ssl_protocol_settings = factory.SubFactory(SSLProtocolSettingsFactory)
+    ssl_forward_proxy = factory.SubFactory(SSLForwardProxyFactory)
+    ssl_inbound_proxy = factory.SubFactory(SSLInboundProxyFactory)
+    ssl_no_proxy = factory.SubFactory(SSLNoProxyFactory)
+
+    @classmethod
+    def with_updated_ssl_settings(cls, **kwargs):
+        """Create an instance with updated SSL protocol settings."""
+        return cls(
+            ssl_protocol_settings=SSLProtocolSettingsFactory(
+                min_version=SSLVersion.tls1_1,
+                max_version=SSLVersion.tls1_3,
+            ),
+            **kwargs,
+        )
+
+
+class DecryptionProfileResponseFactory(factory.Factory):
+    """Factory for creating DecryptionProfileResponseModel instances."""
+
+    class Meta:
+        model = DecryptionProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"decryption_profile_{n}")
+    folder = "Shared"
+    ssl_protocol_settings = factory.SubFactory(SSLProtocolSettingsFactory)
+    ssl_forward_proxy = factory.SubFactory(SSLForwardProxyFactory)
+    ssl_inbound_proxy = factory.SubFactory(SSLInboundProxyFactory)
+    ssl_no_proxy = factory.SubFactory(SSLNoProxyFactory)
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: DecryptionProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class DecryptionProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for DecryptionProfileCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"decryption_profile_{n}")
+    folder = "Shared"
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            ssl_protocol_settings={
+                "min_version": "tls1-0",
+                "max_version": "tls1-2",
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Shared",
+        )
+
+    @classmethod
+    def build_with_invalid_ssl_versions(cls):
+        """Return a data dict with invalid SSL version configuration."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            ssl_protocol_settings={
+                "min_version": "tls1-2",
+                "max_version": "tls1-0",  # Invalid: max < min
+            },
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestProfile",
+        )
+
+
+class DecryptionProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for DecryptionProfileUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"decryption_profile_{n}")
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a decryption profile."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedProfile",
+            ssl_protocol_settings={
+                "min_version": "tls1-1",
+                "max_version": "tls1-3",
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            ssl_protocol_settings={
+                "min_version": "invalid-version",
+                "max_version": "also-invalid",
+            },
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            ssl_forward_proxy={"block_client_cert": True},
+        )
+
+
+# ----------------------------------------------------------------------------
+# Security Rule object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class SecurityRuleProfileSettingFactory(factory.Factory):
+    """Factory for creating ProfileSetting instances."""
+
+    class Meta:
+        model = SecurityRuleProfileSetting
+
+    group = ["best-practice"]
+
+    @classmethod
+    def with_groups(cls, groups: list[str], **kwargs):
+        """Create a profile setting with specific groups."""
+        return cls(group=groups, **kwargs)
+
+    @classmethod
+    def with_empty_group(cls, **kwargs):
+        """Create a profile setting with empty group list."""
+        return cls(group=[], **kwargs)
+
+
+# SDK tests against SCM API
+class SecurityRuleCreateApiFactory(factory.Factory):
     """Factory for creating SecurityRuleCreateModel instances."""
 
     class Meta:
         model = SecurityRuleCreateModel
 
-    folder = "Shared"  # Default container type
+    name = factory.Sequence(lambda n: f"security_rule_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    disabled = False
+    tag = ["test-tag", "environment-prod"]
+
+    # Default lists
+    from_ = ["any"]
+    source = ["any"]
+    source_user = ["any"]
+    source_hip = ["any"]
+    to_ = ["any"]
+    destination = ["any"]
+    destination_hip = ["any"]
+    application = ["any"]
+    service = ["any"]
+    category = ["any"]
+
+    # Boolean flags
+    negate_source = False
+    negate_destination = False
+    log_start = False
+    log_end = True
+
+    # Optional fields
+    action = SecurityRuleAction.allow
+    profile_setting = factory.SubFactory(SecurityRuleProfileSettingFactory)
+    log_setting = "default-logging"
+    schedule = None
+    rulebase = SecurityRuleRulebase.PRE
 
     @classmethod
-    def with_snippet(cls, **kwargs) -> SecurityRuleCreateModel:
-        """Create a security rule with snippet container."""
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs) -> SecurityRuleCreateModel:
-        """Create a security rule with device container."""
-        return cls(folder=None, device="TestDevice", **kwargs)
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
 
     @classmethod
-    def create_batch_with_names(
-        cls, names: list[str], **kwargs
-    ) -> list[SecurityRuleCreateModel]:
-        """Create multiple security rules with specified names."""
-        return [cls(name=name, **kwargs) for name in names]
+    def with_custom_zones(cls, from_zones: list[str], to_zones: list[str], **kwargs):
+        """Create an instance with custom security zones."""
+        return cls(from_=from_zones, to_=to_zones, **kwargs)
+
+    @classmethod
+    def with_post_rulebase(cls, **kwargs):
+        """Create an instance in the post rulebase."""
+        return cls(rulebase=SecurityRuleRulebase.POST, **kwargs)
 
 
-class SecurityRuleResponseBaseFactory(SecurityRuleBaseFactory):
+class SecurityRuleUpdateApiFactory(factory.Factory):
+    """Factory for creating SecurityRuleUpdateModel instances."""
+
+    class Meta:
+        model = SecurityRuleUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"security_rule_{n}")
+    description = factory.Faker("sentence")
+    tag = ["updated-tag"]
+
+    # Optional fields with None defaults to allow partial updates
+    disabled = None
+    from_ = None
+    source = None
+    source_user = None
+    source_hip = None
+    to_ = None
+    destination = None
+    destination_hip = None
+    application = None
+    service = None
+    category = None
+    action = None
+    profile_setting = None
+    log_setting = None
+    schedule = None
+    rulebase = None
+
+    @classmethod
+    def with_action_update(
+        cls, action: SecurityRuleAction = SecurityRuleAction.deny, **kwargs
+    ):
+        """Create an instance updating only the action."""
+        return cls(action=action, **kwargs)
+
+    @classmethod
+    def with_zones_update(cls, from_zones: list[str], to_zones: list[str], **kwargs):
+        """Create an instance updating security zones."""
+        return cls(from_=from_zones, to_=to_zones, **kwargs)
+
+
+class SecurityRuleResponseFactory(factory.Factory):
     """Factory for creating SecurityRuleResponseModel instances."""
 
     class Meta:
         model = SecurityRuleResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    folder = factory.SelfAttribute("..folder")  # Inherits from request if provided
+    name = factory.Sequence(lambda n: f"security_rule_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["response-tag"]
+
+    # Default lists
+    from_ = ["any"]
+    source = ["any"]
+    source_user = ["any"]
+    source_hip = ["any"]
+    to_ = ["any"]
+    destination = ["any"]
+    destination_hip = ["any"]
+    application = ["any"]
+    service = ["any"]
+    category = ["any"]
+
+    # Boolean flags
+    disabled = False
+    negate_source = False
+    negate_destination = False
+    log_start = False
+    log_end = True
+
+    # Optional fields
+    action = SecurityRuleAction.allow
+    profile_setting = factory.SubFactory(SecurityRuleProfileSettingFactory)
+    log_setting = "default-logging"
+    schedule = None
 
     @classmethod
-    def from_request(
-        cls,
-        request_model: SecurityRuleCreateModel,
-        **kwargs,
-    ) -> SecurityRuleResponseModel:
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: SecurityRuleCreateModel, **kwargs):
         """Create a response model based on a request model."""
         data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
         data.update(kwargs)
         return cls(**data)
 
 
-class SecurityRuleMoveFactory(factory.Factory):
+class SecurityRuleMoveApiFactory(factory.Factory):
     """Factory for creating SecurityRuleMoveModel instances."""
 
     class Meta:
         model = SecurityRuleMoveModel
 
     source_rule = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    destination = RuleMoveDestination.TOP
-    rulebase = Rulebase.PRE
+    destination = SecurityRuleMoveDestination.TOP
+    rulebase = SecurityRuleRulebase.PRE
     destination_rule = None
 
     @classmethod
-    def before_rule(cls, **kwargs) -> SecurityRuleMoveModel:
+    def before_rule(cls, dest_rule: str = None, **kwargs):
         """Create a move configuration for placing before another rule."""
+        if dest_rule is None:
+            dest_rule = str(uuid.uuid4())
         return cls(
-            destination=RuleMoveDestination.BEFORE,
-            destination_rule=str(uuid.uuid4()),
+            destination=SecurityRuleMoveDestination.BEFORE,
+            destination_rule=dest_rule,
             **kwargs,
         )
 
     @classmethod
-    def after_rule(cls, **kwargs) -> SecurityRuleMoveModel:
+    def after_rule(cls, dest_rule: str = None, **kwargs):
         """Create a move configuration for placing after another rule."""
+        if dest_rule is None:
+            dest_rule = str(uuid.uuid4())
         return cls(
-            destination=RuleMoveDestination.AFTER,
-            destination_rule=str(uuid.uuid4()),
+            destination=SecurityRuleMoveDestination.AFTER,
+            destination_rule=dest_rule,
             **kwargs,
         )
 
-    @classmethod
-    def to_post_rulebase(cls, **kwargs) -> SecurityRuleMoveModel:
-        """Create a move configuration for the post rulebase."""
-        return cls(rulebase=Rulebase.POST, **kwargs)
 
+# Pydantic modeling tests
+class SecurityRuleCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for SecurityRuleCreateModel validation testing."""
 
-class ProfileSettingFactory(factory.Factory):
-    """Factory for creating ProfileSetting instances."""
-
-    class Meta:
-        model = ProfileSetting
-
-    group = ["best-practice"]
+    name = factory.Sequence(lambda n: f"security_rule_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    tag = ["test-tag"]
+    action = "allow"
 
     @classmethod
-    def with_groups(cls, groups: list[str]) -> ProfileSetting:
-        """Create a profile setting with specific groups."""
-        return cls(group=groups)
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestRule",
+            folder="Shared",
+            action="allow",
+            from_=["trust"],
+            to_=["untrust"],
+            source=["192.168.1.0/24"],
+            destination=["any"],
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Shared",
+            action="allow",
+        )
+
+    @classmethod
+    def build_with_invalid_action(cls):
+        """Return a data dict with invalid action."""
+        return cls(
+            name="TestRule",
+            folder="Shared",
+            action="invalid-action",
+        )
+
+    @classmethod
+    def build_with_duplicate_items(cls):
+        """Return a data dict with duplicate list items."""
+        return cls(
+            name="TestRule",
+            folder="Shared",
+            source=["any", "any"],
+            tag=["tag1", "tag1"],
+        )
 
 
+class SecurityRuleUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for SecurityRuleUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"security_rule_{n}")
+    description = factory.Faker("sentence")
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a security rule."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedRule",
+            action="deny",
+            source=["updated-source"],
+            destination=["updated-dest"],
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            action="invalid-action",
+            source=["source", "source"],  # Duplicate items
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
+        )
+
+
+class SecurityRuleMoveModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for SecurityRuleMoveModel validation testing."""
+
+    source_rule = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    destination = "top"
+    rulebase = "pre"
+
+    @classmethod
+    def build_valid_before(cls):
+        """Return a valid data dict for before move operation."""
+        return cls(
+            source_rule="123e4567-e89b-12d3-a456-426655440000",
+            destination="before",
+            destination_rule="987fcdeb-54ba-3210-9876-fedcba098765",
+            rulebase="pre",
+        )
+
+    @classmethod
+    def build_with_invalid_destination(cls):
+        """Return a data dict with invalid destination."""
+        return cls(
+            source_rule="123e4567-e89b-12d3-a456-426655440000",
+            destination="invalid",
+            rulebase="pre",
+        )
+
+    @classmethod
+    def build_missing_destination_rule(cls):
+        """Return a data dict missing required destination_rule."""
+        return cls(
+            source_rule="123e4567-e89b-12d3-a456-426655440000",
+            destination="before",
+            rulebase="pre",
+        )
+
+
+# ----------------------------------------------------------------------------
+# DNS Security Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
 class DNSSecurityCategoryEntryFactory(factory.Factory):
+    """Factory for creating DNSSecurityCategoryEntryModel instances."""
+
     class Meta:
         model = DNSSecurityCategoryEntryModel
 
@@ -1769,16 +2549,72 @@ class DNSSecurityCategoryEntryFactory(factory.Factory):
     log_level = LogLevelEnum.default
     packet_capture = PacketCaptureEnum.disable
 
+    @classmethod
+    def with_action(cls, action: ActionEnum = ActionEnum.block, **kwargs):
+        """Create an instance with a specific action."""
+        return cls(action=action, **kwargs)
+
+    @classmethod
+    def with_log_level(cls, level: LogLevelEnum = LogLevelEnum.high, **kwargs):
+        """Create an instance with a specific log level."""
+        return cls(log_level=level, **kwargs)
+
+
+class ListActionRequestFactory(factory.Factory):
+    """Factory for creating ListActionRequestModel instances."""
+
+    class Meta:
+        model = ListActionRequestModel
+
+    root = {"sinkhole": {}}
+
+    @classmethod
+    def with_action(cls, action: str = "block", **kwargs):
+        """Create an instance with a specific action."""
+        return cls(root={action: {}}, **kwargs)
+
+
+class ListEntryBaseFactory(factory.Factory):
+    """Factory for creating ListEntryBaseModel instances."""
+
+    class Meta:
+        model = ListEntryBaseModel
+
+    name = factory.Faker("word")
+    packet_capture = PacketCaptureEnum.disable
+    action = factory.SubFactory(ListActionRequestFactory)
+
+    @classmethod
+    def with_packet_capture(
+        cls, capture: PacketCaptureEnum = PacketCaptureEnum.single_packet, **kwargs
+    ):
+        """Create an instance with specific packet capture settings."""
+        return cls(packet_capture=capture, **kwargs)
+
 
 class SinkholeSettingsFactory(factory.Factory):
+    """Factory for creating SinkholeSettingsModel instances."""
+
     class Meta:
         model = SinkholeSettingsModel
 
     ipv4_address = IPv4AddressEnum.default_ip
     ipv6_address = IPv6AddressEnum.localhost
 
+    @classmethod
+    def with_custom_addresses(
+        cls,
+        ipv4: IPv4AddressEnum = IPv4AddressEnum.localhost,
+        ipv6: IPv6AddressEnum = IPv6AddressEnum.localhost,
+        **kwargs,
+    ):
+        """Create an instance with custom IPv4 and IPv6 addresses."""
+        return cls(ipv4_address=ipv4, ipv6_address=ipv6, **kwargs)
+
 
 class WhitelistEntryFactory(factory.Factory):
+    """Factory for creating WhitelistEntryModel instances."""
+
     class Meta:
         model = WhitelistEntryModel
 
@@ -1786,244 +2622,739 @@ class WhitelistEntryFactory(factory.Factory):
     description = factory.Faker("sentence")
 
 
-class ListEntryRequestFactory(factory.Factory):
-    class Meta:
-        model = ListEntryBaseModel
+class BotnetDomainsFactory(factory.Factory):
+    """Factory for creating BotnetDomainsModel instances."""
 
-    name = factory.Faker("word")
-    packet_capture = PacketCaptureEnum.disable
-    action = factory.LazyFunction(lambda: ListActionRequestModel("sinkhole"))  # noqa
-
-
-class BotnetDomainsRequestFactory(factory.Factory):
     class Meta:
         model = BotnetDomainsModel
 
     dns_security_categories = factory.List(
         [factory.SubFactory(DNSSecurityCategoryEntryFactory)]
     )
+    lists = factory.List([factory.SubFactory(ListEntryBaseFactory)])
     sinkhole = factory.SubFactory(SinkholeSettingsFactory)
-    lists = factory.List([factory.SubFactory(ListEntryRequestFactory)])
     whitelist = factory.List([factory.SubFactory(WhitelistEntryFactory)])
 
+    @classmethod
+    def with_empty_lists(cls, **kwargs):
+        """Create an instance with empty lists."""
+        return cls(dns_security_categories=[], lists=[], whitelist=[], **kwargs)
 
-class DNSSecurityProfileRequestFactory(factory.Factory):
+
+# SDK tests against SCM API
+class DNSSecurityProfileCreateApiFactory(factory.Factory):
+    """Factory for creating DNSSecurityProfileCreateModel instances."""
+
     class Meta:
         model = DNSSecurityProfileCreateModel
 
-    name = factory.Sequence(lambda n: f"profile_{n}")
-    folder = "All"
+    name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
     description = factory.Faker("sentence")
-    botnet_domains = factory.SubFactory(BotnetDomainsRequestFactory)
+    folder = "Shared"
+    botnet_domains = factory.SubFactory(BotnetDomainsFactory)
     snippet = None
     device = None
 
     @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        """Override the create method to exclude None values."""
-        # Remove None values before creating the model
-        kwargs = {k: v for k, v in kwargs.items() if v is not None}
-        return super()._create(model_class, *args, **kwargs)
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_empty_botnet_domains(cls, **kwargs):
+        """Create an instance with empty botnet domains configuration."""
+        return cls(botnet_domains=BotnetDomainsFactory.with_empty_lists(), **kwargs)
 
 
-class DNSSecurityProfileResponseFactory(DNSSecurityProfileRequestFactory):
+class DNSSecurityProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating DNSSecurityProfileUpdateModel instances."""
+
+    class Meta:
+        model = DNSSecurityProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
+    description = factory.Faker("sentence")
+    botnet_domains = factory.SubFactory(BotnetDomainsFactory)
+
+    @classmethod
+    def with_updated_sinkhole(cls, **kwargs):
+        """Create an instance with updated sinkhole settings."""
+        return cls(
+            botnet_domains=BotnetDomainsFactory(
+                sinkhole=SinkholeSettingsFactory.with_custom_addresses()
+            ),
+            **kwargs,
+        )
+
+
+class DNSSecurityProfileResponseFactory(factory.Factory):
+    """Factory for creating DNSSecurityProfileResponseModel instances."""
+
     class Meta:
         model = DNSSecurityProfileResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    botnet_domains = factory.SubFactory(BotnetDomainsFactory)
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
 
     @classmethod
     def from_request(cls, request_model: DNSSecurityProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
         data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
         data.update(kwargs)
         return cls(**data)
 
 
-class AddressGroupDynamicFilterFactory(factory.Factory):
-    class Meta:
-        model = DynamicFilter
+# Pydantic modeling tests
+class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for DNSSecurityProfileCreateModel validation testing."""
 
-    filter = "'test-tag' and 'environment-prod'"
-
-
-class AddressGroupRequestFactory(factory.Factory):
-    class Meta:
-        model = AddressGroupCreateModel
-
-    name = factory.Sequence(lambda n: f"address_group_{n}")
-    description = "Test Address Group"
+    name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
+    description = factory.Faker("sentence")
     folder = "Shared"
-    tag = ["test-tag", "environment-prod"]
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
-
-
-class AntiSpywareRuleCreateFactory(factory.Factory):
-    """Factory for creating RuleRequest instances."""
-
-    class Meta:
-        model = AntiSpywareRuleBaseModel
-
-    name = factory.Sequence(lambda n: f"rule_{n}")
-    severity = [Severity.critical, Severity.high]
-    category = Category.spyware
-    threat_name = "any"
-    packet_capture = PacketCapture.disable
-    action = factory.LazyAttribute(lambda _: ActionRequest("alert"))
-
-    @classmethod
-    def with_block_ip_action(cls, **kwargs):
-        """Create a rule with block_ip action."""
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
         return cls(
-            action={"block_ip": {"track_by": "source", "duration": 3600}}, **kwargs
+            name="TestProfile",
+            folder="Shared",
+            botnet_domains={
+                "dns_security_categories": [
+                    {"name": "malware", "action": "block", "log_level": "high"}
+                ]
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Shared",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_invalid_action(cls):
+        """Return a data dict with invalid action in botnet domains."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            botnet_domains={
+                "dns_security_categories": [
+                    {"name": "malware", "action": "invalid-action"}
+                ]
+            },
         )
 
 
-class ThreatExceptionCreateFactory(factory.Factory):
-    """Factory for creating ThreatExceptionRequest instances."""
+class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for DNSSecurityProfileUpdateModel validation testing."""
 
-    class Meta:
-        model = ThreatExceptionBase
-
-    name = factory.Sequence(lambda n: f"exception_{n}")
-    action = factory.LazyAttribute(lambda _: ActionRequest("allow"))
-    packet_capture = PacketCapture.single_packet
-    exempt_ip = [{"name": "192.168.1.1"}]
-    notes = "Test exception"
-
-
-class AntiSpywareProfileRequestFactory(factory.Factory):
-    """Factory for creating AntiSpywareProfileCreateModel instances."""
-
-    class Meta:
-        model = AntiSpywareProfileCreateModel
-
-    name = factory.Sequence(lambda n: f"profile_{n}")
-    folder = "Prisma Access"
-    description = "Test anti-spyware profile"
-    rules = factory.List([factory.SubFactory(AntiSpywareRuleCreateFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionCreateFactory)])
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
+    description = factory.Faker("sentence")
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        """Create a profile with snippet container."""
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        """Create a profile with device container."""
-        return cls(folder=None, device="TestDevice", **kwargs)
-
-
-class AntiSpywareProfileResponseFactory(AntiSpywareProfileRequestFactory):
-    """Factory for creating AntiSpywareProfileResponseModel instances."""
-
-    class Meta:
-        model = AntiSpywareProfileResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-
-    @classmethod
-    def from_request(cls, request_model: AntiSpywareProfileCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data.update(kwargs)
-        return cls(**data)
-
-
-class VulnerabilityRuleRequestFactory(factory.Factory):
-    """Factory for creating VulnerabilityRuleModel instances."""
-
-    class Meta:
-        model = VulnerabilityRuleModel
-
-    name = factory.Sequence(lambda n: f"rule_{n}")
-    severity = ["critical"]
-    category = "dos"
-    host = "client"
-    threat_name = "any"
-    packet_capture = "single-packet"
-    action = factory.LazyAttribute(lambda _: {"alert": {}})
-    cve = ["any"]
-    vendor_id = ["any"]
-
-    @classmethod
-    def with_block_ip_action(cls, **kwargs):
-        """Create a rule with block_ip action."""
+    def build_valid(cls):
+        """Return a valid data dict for updating a DNS security profile."""
         return cls(
-            action={"block_ip": {"track_by": "source", "duration": 3600}}, **kwargs
+            name="UpdatedProfile",
+            description="Updated description",
+            botnet_domains={
+                "sinkhole": {"ipv4_address": "127.0.0.1", "ipv6_address": "::1"}
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            botnet_domains={
+                "dns_security_categories": [{"name": "malware", "action": "invalid"}]
+            },
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000", description="Updated description"
         )
 
 
-class ThreatExceptionRequestFactory(factory.Factory):
-    """Factory for creating ThreatExceptionModel instances."""
+# ----------------------------------------------------------------------------
+# Vulnerability Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class VulnerabilityProfileExemptIpEntryFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileExemptIpEntry instances."""
 
     class Meta:
-        model = ThreatExceptionModel
+        model = VulnerabilityProfileExemptIpEntry
 
-    name = factory.Sequence(lambda n: f"exception_{n}")
-    action = factory.LazyAttribute(lambda _: ActionRequest("allow"))
-    packet_capture = "single-packet"
-    exempt_ip = [{"name": "192.168.1.1"}]
-    notes = "Test exception"
+    name = "192.168.1.1"
+
+    @classmethod
+    def with_custom_ip(cls, ip: str = "10.0.0.1", **kwargs):
+        """Create an instance with a custom IP address."""
+        return cls(name=ip, **kwargs)
 
 
-class VulnerabilityProtectionProfileRequestFactory(factory.Factory):
-    """Factory for creating VulnerabilityProtectionProfileCreateModel instances."""
+class VulnerabilityProfileTimeAttributeFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileTimeAttribute instances."""
 
     class Meta:
-        model = VulnerabilityProtectionProfileCreateModel
+        model = VulnerabilityProfileTimeAttribute
 
-    name = factory.Sequence(lambda n: f"profile_{n}")
-    folder = "Prisma Access"
-    description = "Test vulnerability protection profile"
-    rules = factory.List([factory.SubFactory(VulnerabilityRuleRequestFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionRequestFactory)])
-
-    @classmethod
-    def with_snippet(cls, **kwargs):
-        """Create a profile with snippet container."""
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        """Create a profile with device container."""
-        return cls(folder=None, device="TestDevice", **kwargs)
+    interval = 60
+    threshold = 10
+    track_by = "source"
 
 
-class VulnerabilityProtectionProfileResponseFactory(
-    VulnerabilityProtectionProfileRequestFactory
-):
-    """Factory for creating VulnerabilityProtectionProfileResponseModel instances."""
+class VulnerabilityProfileRuleModelFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileRuleModel instances."""
 
     class Meta:
-        model = VulnerabilityProtectionProfileResponseModel
+        model = VulnerabilityProfileRuleModel
 
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"rule_{n}")
+    severity = [VulnerabilityProfileSeverity.critical]
+    category = VulnerabilityProfileCategory.any
+    host = VulnerabilityProfileHost.any
+    packet_capture = VulnerabilityProfilePacketCapture.disable
 
     @classmethod
-    def from_request(
-        cls, request_model: VulnerabilityProtectionProfileCreateModel, **kwargs
+    def with_severity(cls, severities: List[VulnerabilityProfileSeverity], **kwargs):
+        """Create an instance with specific severity levels."""
+        return cls(severity=severities, **kwargs)
+
+    @classmethod
+    def with_category(
+        cls,
+        category: VulnerabilityProfileCategory = VulnerabilityProfileCategory.brute_force,
+        **kwargs,
     ):
+        """Create an instance with a specific category."""
+        return cls(category=category, **kwargs)
+
+
+class VulnerabilityProfileThreatExceptionModelFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileThreatExceptionModel instances."""
+
+    class Meta:
+        model = VulnerabilityProfileThreatExceptionModel
+
+    name = factory.Sequence(lambda n: f"exception_{n}")
+    packet_capture = VulnerabilityProfilePacketCapture.single_packet
+    exempt_ip = [factory.SubFactory(VulnerabilityProfileExemptIpEntryFactory)]
+
+    @classmethod
+    def with_multiple_exempt_ips(cls, ips: List[str], **kwargs):
+        """Create an instance with multiple exempt IPs."""
+        return cls(
+            exempt_ip=[VulnerabilityProfileExemptIpEntryFactory(name=ip) for ip in ips],
+            **kwargs,
+        )
+
+
+# SDK tests against SCM API
+class VulnerabilityProfileCreateApiFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileCreateModel instances."""
+
+    class Meta:
+        model = VulnerabilityProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
+    threat_exception = factory.List(
+        [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
+    )
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create a profile with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create a profile with device container."""
+        return cls(folder=None, device=device, **kwargs)
+
+    @classmethod
+    def with_multiple_rules(cls, rules_count: int = 3, **kwargs):
+        """Create a profile with multiple rules."""
+        rules = [VulnerabilityProfileRuleModelFactory() for _ in range(rules_count)]
+        return cls(rules=rules, **kwargs)
+
+
+class VulnerabilityProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileUpdateModel instances."""
+
+    class Meta:
+        model = VulnerabilityProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
+    description = factory.Faker("sentence")
+    rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
+    threat_exception = factory.List(
+        [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
+    )
+
+    @classmethod
+    def with_empty_rules(cls, **kwargs):
+        """Create an instance with no rules."""
+        return cls(rules=[], **kwargs)
+
+
+class VulnerabilityProfileResponseFactory(factory.Factory):
+    """Factory for creating VulnerabilityProfileResponseModel instances."""
+
+    class Meta:
+        model = VulnerabilityProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
+    threat_exception = factory.List(
+        [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
+    )
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create a profile with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create a profile with device container."""
+        return cls(folder=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: VulnerabilityProfileCreateModel, **kwargs):
         """Create a response model based on a request model."""
         data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
         data.update(kwargs)
         return cls(**data)
 
 
-class ApplicationGroupFactory(factory.Factory):
-    class Meta:
-        model = ApplicationGroupCreateModel
+# Pydantic modeling tests
+class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for VulnerabilityProfileCreateModel validation testing."""
 
-    name = "ValidStaticApplicationGroup"
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Prisma Access"
+    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="valid-profile-name",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [VulnerabilityProfileSeverity.critical],
+                    "category": VulnerabilityProfileCategory.any,
+                    "host": VulnerabilityProfileHost.any,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="valid-profile-name",
+            folder="Shared",
+            snippet="test123",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [VulnerabilityProfileSeverity.critical],
+                    "category": VulnerabilityProfileCategory.any,
+                    "host": VulnerabilityProfileHost.any,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-profile-name",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [VulnerabilityProfileSeverity.critical],
+                    "category": VulnerabilityProfileCategory.any,
+                    "host": VulnerabilityProfileHost.any,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_rules(cls):
+        """Return a data dict with invalid rules structure."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": ["invalid"],
+                    "category": "invalid",
+                    "host": "invalid",
+                }
+            ],
+        )
+
+
+class VulnerabilityProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for VulnerabilityProfileUpdateModel validation testing."""
+
+    id = "12345678-1234-5678-1234-567812345678"
+    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
+    description = factory.Faker("sentence")
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a profile."""
+        return cls(
+            name="valid-profile-name",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": [VulnerabilityProfileSeverity.critical],
+                    "category": VulnerabilityProfileCategory.any,
+                    "host": VulnerabilityProfileHost.any,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            rules=[{"invalid": "rule"}],
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            description="Updated description",
+        )
+
+
+# ----------------------------------------------------------------------------
+# Wildfire Antivirus Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class WildfireAvRuleBaseFactory(factory.Factory):
+    """Factory for creating WildfireAvRuleBase instances."""
+
+    class Meta:
+        model = WildfireAvRuleBase
+
+    name = factory.Sequence(lambda n: f"rule_{n}")
+    analysis = WildfireAvAnalysis.public_cloud
+    application = ["any"]
+    direction = WildfireAvDirection.both
+    file_type = ["any"]
+
+    @classmethod
+    def with_specific_analysis(cls, analysis: WildfireAvAnalysis, **kwargs):
+        """Create an instance with a specific analysis type."""
+        return cls(analysis=analysis, **kwargs)
+
+    @classmethod
+    def with_specific_direction(cls, direction: WildfireAvDirection, **kwargs):
+        """Create an instance with a specific direction."""
+        return cls(direction=direction, **kwargs)
+
+
+class WildfireAvMlavExceptionEntryFactory(factory.Factory):
+    """Factory for creating WildfireAvMlavExceptionEntry instances."""
+
+    class Meta:
+        model = WildfireAvMlavExceptionEntry
+
+    name = factory.Sequence(lambda n: f"mlav_exception_{n}")
+    description = factory.Faker("sentence")
+    filename = factory.Sequence(lambda n: f"file_{n}.txt")
+
+
+class WildfireAvThreatExceptionEntryFactory(factory.Factory):
+    """Factory for creating WildfireAvThreatExceptionEntry instances."""
+
+    class Meta:
+        model = WildfireAvThreatExceptionEntry
+
+    name = factory.Sequence(lambda n: f"threat_exception_{n}")
+    notes = factory.Faker("sentence")
+
+
+# SDK tests against SCM API
+class WildfireAvProfileCreateApiFactory(factory.Factory):
+    """Factory for creating WildfireAvProfileCreateModel instances."""
+
+    class Meta:
+        model = WildfireAvProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    packet_capture = False
+    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
+    mlav_exception = factory.List(
+        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
+    )
+    threat_exception = factory.List(
+        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
+    )
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, device=device, **kwargs)
+
+    @classmethod
+    def with_packet_capture(cls, enabled: bool = True, **kwargs):
+        """Create an instance with packet capture enabled/disabled."""
+        return cls(packet_capture=enabled, **kwargs)
+
+
+class WildfireAvProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating WildfireAvProfileUpdateModel instances."""
+
+    class Meta:
+        model = WildfireAvProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    description = factory.Faker("sentence")
+    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
+    mlav_exception = factory.List(
+        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
+    )
+    threat_exception = factory.List(
+        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
+    )
+
+    @classmethod
+    def with_packet_capture(cls, enabled: bool = True, **kwargs):
+        """Create an instance with packet capture enabled/disabled."""
+        return cls(packet_capture=enabled, **kwargs)
+
+
+class WildfireAvProfileResponseFactory(factory.Factory):
+    """Factory for creating WildfireAvProfileResponseModel instances."""
+
+    class Meta:
+        model = WildfireAvProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    packet_capture = False
+    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
+    mlav_exception = factory.List(
+        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
+    )
+    threat_exception = factory.List(
+        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
+    )
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: WildfireAvProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class WildfireAvProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for WildfireAvProfileCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    folder = "Shared"
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestWildfireProfile",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                    "analysis": WildfireAvAnalysis.public_cloud,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestWildfireProfile",
+            folder="Shared",
+            snippet="TestSnippet",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestWildfireProfile",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_rule(cls):
+        """Return a data dict with an invalid rule."""
+        return cls(
+            name="TestWildfireProfile",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": "invalid-direction",
+                }
+            ],
+        )
+
+
+class WildfireAvProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for WildfireAvProfileUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a Wildfire Antivirus Profile."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedWildfireProfile",
+            rules=[
+                {
+                    "name": "UpdatedRule",
+                    "direction": WildfireAvDirection.download,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            rules=[{"invalid": "rule"}],
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
+        )
