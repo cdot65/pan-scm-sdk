@@ -199,7 +199,7 @@ class TestServiceUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             ServiceUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert "2 validation errors for ServiceUpdateModel" in error_msg
+        assert "3 validation errors for ServiceUpdateModel" in error_msg
         assert "name\n  Field required" in error_msg
         assert "protocol\n  Field required" in error_msg
 
@@ -207,6 +207,7 @@ class TestServiceUpdateModel:
         """Test validation with partial update data."""
         data = {
             "name": "updated-service",
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "protocol": {"tcp": {"port": "8080"}},
             "description": "Updated description",
         }
