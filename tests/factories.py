@@ -2149,6 +2149,7 @@ class DecryptionProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict without any container."""
         return cls(
             name="TestProfile",
+            folder=None,
         )
 
 
