@@ -1,5 +1,6 @@
 # scm/models/security/wildfire_antivirus_profiles.py
 
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
@@ -9,18 +10,17 @@ from pydantic import (
     model_validator,
     ConfigDict,
 )
-from enum import Enum
 
 
 # Enums
-class Analysis(str, Enum):
+class WildfireAvAnalysis(str, Enum):
     """Enumeration of analysis types."""
 
     public_cloud = "public-cloud"
     private_cloud = "private-cloud"
 
 
-class Direction(str, Enum):
+class WildfireAvDirection(str, Enum):
     """Enumeration of directions."""
 
     download = "download"
@@ -29,23 +29,23 @@ class Direction(str, Enum):
 
 
 # Component Models
-class RuleBase(BaseModel):
+class WildfireAvRuleBase(BaseModel):
     """Base class for Rule configuration."""
 
     name: str = Field(..., description="Rule name")
-    analysis: Optional[Analysis] = Field(None, description="Analysis type")
+    analysis: Optional[WildfireAvAnalysis] = Field(None, description="Analysis type")
     application: List[str] = Field(
         default_factory=lambda: ["any"],
         description="List of applications",
     )
-    direction: Direction = Field(..., description="Direction")
+    direction: WildfireAvDirection = Field(..., description="Direction")
     file_type: List[str] = Field(
         default_factory=lambda: ["any"],
         description="List of file types",
     )
 
 
-class MlavExceptionEntry(BaseModel):
+class WildfireAvMlavExceptionEntry(BaseModel):
     """Represents an entry in the 'mlav_exception' list."""
 
     name: str = Field(..., description="Exception name")
@@ -53,7 +53,7 @@ class MlavExceptionEntry(BaseModel):
     filename: str = Field(..., description="Filename")
 
 
-class ThreatExceptionEntry(BaseModel):
+class WildfireAvThreatExceptionEntry(BaseModel):
     """Represents an entry in the 'threat_exception' list."""
 
     name: str = Field(..., description="Threat exception name")
@@ -61,7 +61,7 @@ class ThreatExceptionEntry(BaseModel):
 
 
 # Base Model
-class WildfireAntivirusProfileBase(BaseModel):
+class WildfireAvProfileBase(BaseModel):
     """
     Base model for Wildfire Antivirus Profile containing common fields.
     """
@@ -81,12 +81,12 @@ class WildfireAntivirusProfileBase(BaseModel):
         False,
         description="Packet capture enabled",
     )
-    mlav_exception: Optional[List[MlavExceptionEntry]] = Field(
+    mlav_exception: Optional[List[WildfireAvMlavExceptionEntry]] = Field(
         None,
         description="MLAV exceptions",
     )
-    rules: List[RuleBase] = Field(..., description="List of rules")
-    threat_exception: Optional[List[ThreatExceptionEntry]] = Field(
+    rules: List[WildfireAvRuleBase] = Field(..., description="List of rules")
+    threat_exception: Optional[List[WildfireAvThreatExceptionEntry]] = Field(
         None,
         description="List of threat exceptions",
     )
@@ -111,14 +111,14 @@ class WildfireAntivirusProfileBase(BaseModel):
 
 
 # Create Model
-class WildfireAntivirusProfileCreateModel(WildfireAntivirusProfileBase):
+class WildfireAvProfileCreateModel(WildfireAvProfileBase):
     """
     Model for creating a new Wildfire Antivirus Profile.
     Inherits from base model and adds container validation.
     """
 
     @model_validator(mode="after")
-    def validate_container(self) -> "WildfireAntivirusProfileCreateModel":
+    def validate_container(self) -> "WildfireAvProfileCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None
@@ -131,7 +131,7 @@ class WildfireAntivirusProfileCreateModel(WildfireAntivirusProfileBase):
 
 
 # Update Model
-class WildfireAntivirusProfileUpdateModel(WildfireAntivirusProfileBase):
+class WildfireAvProfileUpdateModel(WildfireAvProfileBase):
     """
     Model for updating an existing Wildfire Antivirus Profile.
     All fields are optional to allow partial updates.
@@ -139,7 +139,7 @@ class WildfireAntivirusProfileUpdateModel(WildfireAntivirusProfileBase):
 
 
 # Response Model
-class WildfireAntivirusProfileResponseModel(WildfireAntivirusProfileBase):
+class WildfireAvProfileResponseModel(WildfireAvProfileBase):
     """
     Model for Wildfire Antivirus Profile API responses.
     Includes all base fields plus the id field.
