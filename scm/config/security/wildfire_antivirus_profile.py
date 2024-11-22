@@ -16,9 +16,9 @@ from scm.exceptions import (
     ErrorHandler,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileCreateModel,
-    WildfireAntivirusProfileResponseModel,
-    WildfireAntivirusProfileUpdateModel,
+    WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel,
+    WildfireAvProfileUpdateModel,
 )
 
 
@@ -40,7 +40,7 @@ class WildfireAntivirusProfile(BaseObject):
     def create(
         self,
         data: Dict[str, Any],
-    ) -> WildfireAntivirusProfileResponseModel:
+    ) -> WildfireAvProfileResponseModel:
         """
         Creates a new wildfire antivirus profile object.
 
@@ -52,7 +52,7 @@ class WildfireAntivirusProfile(BaseObject):
         """
         try:
             # Use the dictionary "data" to pass into Pydantic and return a modeled object
-            profile = WildfireAntivirusProfileCreateModel(**data)
+            profile = WildfireAvProfileCreateModel(**data)
 
             # Convert back to a Python dictionary, removing any unset fields
             payload = profile.model_dump(exclude_unset=True)
@@ -67,7 +67,7 @@ class WildfireAntivirusProfile(BaseObject):
             response_data = response.json()
 
             # Return the SCM API response as a new Pydantic object
-            return WildfireAntivirusProfileResponseModel(**response_data)
+            return WildfireAvProfileResponseModel(**response_data)
 
         except HTTPError as e:
             response: Optional[Response] = e.response
@@ -83,7 +83,7 @@ class WildfireAntivirusProfile(BaseObject):
     def get(
         self,
         object_id: str,
-    ) -> WildfireAntivirusProfileResponseModel:
+    ) -> WildfireAvProfileResponseModel:
         """
         Gets a wildfire antivirus profile object by ID.
 
@@ -102,7 +102,7 @@ class WildfireAntivirusProfile(BaseObject):
             response_data = response.json()
 
             # Return the SCM API response as a new Pydantic object
-            return WildfireAntivirusProfileResponseModel(**response_data)
+            return WildfireAvProfileResponseModel(**response_data)
 
         except HTTPError as e:
             response: Optional[Response] = e.response
@@ -118,7 +118,7 @@ class WildfireAntivirusProfile(BaseObject):
     def update(
         self,
         data: Dict[str, Any],
-    ) -> WildfireAntivirusProfileResponseModel:
+    ) -> WildfireAvProfileResponseModel:
         """
         Updates an existing wildfire antivirus profile object.
 
@@ -130,7 +130,7 @@ class WildfireAntivirusProfile(BaseObject):
         """
         try:
             # Use the dictionary "data" to pass into Pydantic and return a modeled object
-            profile = WildfireAntivirusProfileUpdateModel(**data)
+            profile = WildfireAvProfileUpdateModel(**data)
 
             # Convert back to a Python dictionary, removing any unset fields
             payload = profile.model_dump(exclude_unset=True)
@@ -146,7 +146,7 @@ class WildfireAntivirusProfile(BaseObject):
             response_data = response.json()
 
             # Return the SCM API response as a new Pydantic object
-            return WildfireAntivirusProfileResponseModel(**response_data)
+            return WildfireAvProfileResponseModel(**response_data)
 
         except HTTPError as e:
             response: Optional[Response] = e.response
@@ -161,9 +161,9 @@ class WildfireAntivirusProfile(BaseObject):
 
     @staticmethod
     def _apply_filters(
-        profiles: List[WildfireAntivirusProfileResponseModel],
+        profiles: List[WildfireAvProfileResponseModel],
         filters: Dict[str, Any],
-    ) -> List[WildfireAntivirusProfileResponseModel]:
+    ) -> List[WildfireAvProfileResponseModel]:
         """
         Apply client-side filtering to the list of wildfire antivirus profiles.
 
@@ -172,7 +172,7 @@ class WildfireAntivirusProfile(BaseObject):
             filters: Dictionary of filter criteria
 
         Returns:
-            List[WildfireAntivirusProfileResponseModel]: Filtered list of profiles
+            List[WildfireAvProfileResponseModel]: Filtered list of profiles
 
         Raises:
             InvalidObjectError: If filter criteria are invalid
@@ -212,7 +212,7 @@ class WildfireAntivirusProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         **filters,
-    ) -> List[WildfireAntivirusProfileResponseModel]:
+    ) -> List[WildfireAvProfileResponseModel]:
         """
         Lists wildfire antivirus profile objects with optional filtering.
 
@@ -281,8 +281,7 @@ class WildfireAntivirusProfile(BaseObject):
                 )
 
             profiles = [
-                WildfireAntivirusProfileResponseModel(**item)
-                for item in response["data"]
+                WildfireAvProfileResponseModel(**item) for item in response["data"]
             ]
             return self._apply_filters(
                 profiles,
@@ -378,7 +377,7 @@ class WildfireAntivirusProfile(BaseObject):
                 )
 
             if "id" in response:
-                address = WildfireAntivirusProfileResponseModel(**response)
+                address = WildfireAvProfileResponseModel(**response)
                 return address.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
