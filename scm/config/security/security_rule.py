@@ -20,7 +20,7 @@ from scm.models.security import (
     SecurityRuleUpdateModel,
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
-    Rulebase,
+    SecurityRuleRulebase,
 )
 
 
@@ -55,9 +55,9 @@ class SecurityRule(BaseObject):
         """
         try:
             # Validate that the rulebase is of type `pre` or `post`
-            if not isinstance(rulebase, Rulebase):
+            if not isinstance(rulebase, SecurityRuleRulebase):
                 try:
-                    rulebase = Rulebase(rulebase.lower())
+                    rulebase = SecurityRuleRulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
@@ -110,9 +110,9 @@ class SecurityRule(BaseObject):
         """
         try:
             # Validate that the rulebase is of type `pre` or `post`
-            if not isinstance(rulebase, Rulebase):
+            if not isinstance(rulebase, SecurityRuleRulebase):
                 try:
-                    rulebase = Rulebase(rulebase.lower())
+                    rulebase = SecurityRuleRulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
@@ -156,9 +156,9 @@ class SecurityRule(BaseObject):
         """
         try:
             # Validate that the rulebase is of type `pre` or `post`
-            if not isinstance(rulebase, Rulebase):
+            if not isinstance(rulebase, SecurityRuleRulebase):
                 try:
-                    rulebase = Rulebase(rulebase.lower())
+                    rulebase = SecurityRuleRulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
@@ -403,9 +403,9 @@ class SecurityRule(BaseObject):
             )
 
         # Validate that the rulebase is of type `pre` or `post`
-        if not isinstance(rulebase, Rulebase):
+        if not isinstance(rulebase, SecurityRuleRulebase):
             try:
-                rulebase = Rulebase(rulebase.lower())
+                rulebase = SecurityRuleRulebase(rulebase.lower())
             except ValueError:
                 raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
@@ -517,9 +517,9 @@ class SecurityRule(BaseObject):
             )
 
         # Validate that the rulebase is of type `pre` or `post`
-        if not isinstance(rulebase, Rulebase):
+        if not isinstance(rulebase, SecurityRuleRulebase):
             try:
-                rulebase = Rulebase(rulebase.lower())
+                rulebase = SecurityRuleRulebase(rulebase.lower())
             except ValueError:
                 raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
@@ -604,9 +604,9 @@ class SecurityRule(BaseObject):
         """
         try:
             # Validate that the rulebase is of type `pre` or `post`
-            if not isinstance(rulebase, Rulebase):
+            if not isinstance(rulebase, SecurityRuleRulebase):
                 try:
-                    rulebase = Rulebase(rulebase.lower())
+                    rulebase = SecurityRuleRulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
