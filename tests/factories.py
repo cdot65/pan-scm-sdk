@@ -1100,6 +1100,29 @@ class ServiceResponseFactory(factory.Factory):
         return cls(protocol={"tcp": {"port": port}}, **kwargs)
 
     @classmethod
+    def with_tcp_override(
+        cls,
+        port="80,443",
+        timeout=None,
+        halfclose_timeout=None,
+        timewait_timeout=None,
+        **kwargs,
+    ):
+        """Create a ServiceResponseModel instance with TCP protocol and override settings."""
+        protocol = {"tcp": {"port": port}}
+
+        if any(x is not None for x in [timeout, halfclose_timeout, timewait_timeout]):
+            protocol["tcp"]["override"] = {}
+            if timeout is not None:
+                protocol["tcp"]["override"]["timeout"] = timeout
+            if halfclose_timeout is not None:
+                protocol["tcp"]["override"]["halfclose_timeout"] = halfclose_timeout
+            if timewait_timeout is not None:
+                protocol["tcp"]["override"]["timewait_timeout"] = timewait_timeout
+
+        return cls(protocol=protocol, **kwargs)
+
+    @classmethod
     def with_udp(cls, port="53", **kwargs):
         """Create a ServiceResponseModel instance with UDP protocol."""
         return cls(protocol={"udp": {"port": port}}, **kwargs)
