@@ -9,7 +9,7 @@ from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileCreateModel,
     AntiSpywareProfileUpdateModel,
     AntiSpywareProfileResponseModel,
-    RuleBaseModel,
+    AntiSpywareRuleBaseModel,
     ThreatExceptionBase,
     ActionRequest,
     ActionResponse,
@@ -40,7 +40,7 @@ class TestRuleBaseModel:
             "threat_name": "test_threat",
             "packet_capture": PacketCapture.disable,
         }
-        model = RuleBaseModel(**data)
+        model = AntiSpywareRuleBaseModel(**data)
         assert model.name == data["name"]
         assert model.severity == data["severity"]
         assert model.category == data["category"]
@@ -55,7 +55,7 @@ class TestRuleBaseModel:
             "category": Category.spyware,
         }
         with pytest.raises(ValidationError) as exc_info:
-            RuleBaseModel(**data)
+            AntiSpywareRuleBaseModel(**data)
         assert "Input should be 'critical'" in str(exc_info.value)
 
     def test_rule_base_model_invalid_category(self):
@@ -66,7 +66,7 @@ class TestRuleBaseModel:
             "category": "invalid",
         }
         with pytest.raises(ValidationError) as exc_info:
-            RuleBaseModel(**data)
+            AntiSpywareRuleBaseModel(**data)
         assert "Input should be 'dns-proxy'" in str(exc_info.value)
 
 
@@ -108,7 +108,7 @@ class TestAntiSpywareProfileCreateModel:
         assert model.name == data["name"]
         assert model.folder == data["folder"]
         assert len(model.rules) > 0
-        assert isinstance(model.rules[0], RuleBaseModel)
+        assert isinstance(model.rules[0], AntiSpywareRuleBaseModel)
 
     def test_profile_create_model_invalid_name(self):
         """Test validation with invalid name pattern."""
@@ -138,7 +138,7 @@ class TestAntiSpywareProfileUpdateModel:
         model = AntiSpywareProfileUpdateModel(**data)
         assert model.name == data["name"]
         assert model.description == data["description"]
-        assert isinstance(model.rules[0], RuleBaseModel)
+        assert isinstance(model.rules[0], AntiSpywareRuleBaseModel)
 
     def test_profile_update_model_partial_update(self):
         """Test validation with partial update data."""
@@ -174,7 +174,7 @@ class TestAntiSpywareProfileResponseModel:
         assert str(model.id) == data["id"]
         assert model.name == data["name"]
         assert model.folder == data["folder"]
-        assert isinstance(model.rules[0], RuleBaseModel)
+        assert isinstance(model.rules[0], AntiSpywareRuleBaseModel)
 
     def test_profile_response_model_invalid_uuid(self):
         """Test validation with invalid UUID format."""
