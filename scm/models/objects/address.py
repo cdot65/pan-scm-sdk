@@ -190,7 +190,7 @@ class AddressUpdateModel(AddressBaseModel):
     This class defines the structure and validation rules for an AddressUpdateModel object.
     """
 
-    id: Optional[str] = Field(
+    id: Optional[UUID] = Field(
         ...,  # This makes it optional
         description="The UUID of the address object",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
