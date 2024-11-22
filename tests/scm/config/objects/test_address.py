@@ -783,7 +783,7 @@ class TestAddressUpdate(TestAddressBase):
         """Test error handling when the object to update is not present."""
         # Create test data
         update_data = AddressUpdateApiFactory.with_ip_netmask(
-            id="nonexistent-id",
+            id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
             ip_netmask="10.0.0.0/24",
@@ -819,7 +819,11 @@ class TestAddressUpdate(TestAddressBase):
 
         with pytest.raises(HTTPError):
             self.client.update(
-                {"id": "test-id", "name": "test", "ip_netmask": "10.0.0.0/24"}
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test",
+                    "ip_netmask": "10.0.0.0/24",
+                }
             )
 
     def test_update_generic_exception_handling(self):
@@ -828,7 +832,11 @@ class TestAddressUpdate(TestAddressBase):
 
         with pytest.raises(Exception) as exc_info:
             self.client.update(
-                {"id": "test-id", "name": "test", "ip_netmask": "10.0.0.0/24"}
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test",
+                    "ip_netmask": "10.0.0.0/24",
+                }
             )
         assert str(exc_info.value) == "Generic error"
 
@@ -836,7 +844,7 @@ class TestAddressUpdate(TestAddressBase):
         """Test handling of server errors during update."""
         # Create test data
         update_data = AddressUpdateApiFactory.with_ip_netmask(
-            id="test-id",
+            id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
             ip_netmask="10.0.0.0/24",
@@ -879,7 +887,9 @@ class TestAddressDelete(TestAddressBase):
 
     def test_delete_referenced_object(self):
         """Test deleting an object that is referenced elsewhere."""
-        object_id = "abcdefg"
+        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+
+        # Configure mock to raise HTTPError with our custom error response
         self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
             status_code=409,
             error_code="E009",
@@ -1162,3 +1172,6 @@ class TestAddressFetch(TestAddressBase):
         assert "HTTP error: 500 - API error: E003" in error_msg
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
+
+
+# -------------------- End of Test Classes --------------------
