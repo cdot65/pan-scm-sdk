@@ -59,11 +59,11 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 
 # Using model directly
-from scm.models.security.wildfire_antivirus_profiles import WildfireAntivirusProfileCreateModel
+from scm.models.security.wildfire_antivirus_profiles import WildfireAvProfileCreateModel
 
 # Error: no container specified
 try:
-    profile = WildfireAntivirusProfileCreateModel(
+    profile = WildfireAvProfileCreateModel(
         name="invalid-profile",
         rules=[{
             "name": "rule1",
@@ -85,11 +85,11 @@ For response models, the ID field must be a valid UUID:
 <!-- termynal -->
 
 ```python
-from scm.models.security.wildfire_antivirus_profiles import WildfireAntivirusProfileResponseModel
+from scm.models.security.wildfire_antivirus_profiles import WildfireAvProfileResponseModel
 
 # Error: invalid UUID
 try:
-    profile = WildfireAntivirusProfileResponseModel(
+    profile = WildfireAvProfileResponseModel(
         id="invalid-uuid",
         name="test-profile",
         rules=[{
@@ -135,22 +135,22 @@ response = profile.create(profile_dict)
 
 # Using model directly
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileCreateModel,
-    RuleBase,
-    Analysis,
-    Direction
+    WildfireAvProfileCreateModel,
+    WildfireAvRuleBase,
+    WildfireAvAnalysis,
+    WildfireAvDirection
 )
 
-profile = WildfireAntivirusProfileCreateModel(
+profile = WildfireAvProfileCreateModel(
     name="basic-profile",
     description="Basic WildFire profile",
     folder="Shared",
     packet_capture=True,
     rules=[
-        RuleBase(
+        WildfireAvRuleBase(
             name="rule1",
-            direction=Direction.both,
-            analysis=Analysis.public_cloud,
+            direction=WildfireAvDirection.both,
+            analysis=WildfireAvAnalysis.public_cloud,
             application=["web-browsing", "ssl"],
             file_type=["pe", "pdf"]
         )
@@ -198,37 +198,37 @@ response = profile.create(profile_dict)
 
 # Using model directly
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileCreateModel,
-    RuleBase,
-    MlavExceptionEntry,
-    ThreatExceptionEntry,
-    Analysis,
-    Direction
+    WildfireAvProfileCreateModel,
+    WildfireAvRuleBase,
+    WildfireAvMlavExceptionEntry,
+    WildfireAvThreatExceptionEntry,
+    WildfireAvAnalysis,
+    WildfireAvDirection
 )
 
-profile = WildfireAntivirusProfileCreateModel(
+profile = WildfireAvProfileCreateModel(
     name="advanced-profile",
     description="Profile with exceptions",
     folder="Shared",
     packet_capture=True,
     rules=[
-        RuleBase(
+        WildfireAvRuleBase(
             name="rule1",
-            direction=Direction.both,
-            analysis=Analysis.public_cloud,
+            direction=WildfireAvDirection.both,
+            analysis=WildfireAvAnalysis.public_cloud,
             application=["any"],
             file_type=["any"]
         )
     ],
     mlav_exception=[
-        MlavExceptionEntry(
+        WildfireAvMlavExceptionEntry(
             name="exception1",
             description="Test exception",
             filename="test.exe"
         )
     ],
     threat_exception=[
-        ThreatExceptionEntry(
+        WildfireAvThreatExceptionEntry(
             name="threat1",
             notes="Known false positive"
         )
@@ -267,22 +267,22 @@ response = profile.update(update_dict)
 
 # Using model directly
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileUpdateModel,
-    RuleBase,
-    Analysis,
-    Direction
+    WildfireAvProfileUpdateModel,
+    WildfireAvRuleBase,
+    WildfireAvAnalysis,
+    WildfireAvDirection
 )
 
-update = WildfireAntivirusProfileUpdateModel(
+update = WildfireAvProfileUpdateModel(
     id="123e4567-e89b-12d3-a456-426655440000",
     name="updated-profile",
     description="Updated description",
     packet_capture=False,
     rules=[
-        RuleBase(
+        WildfireAvRuleBase(
             name="updated-rule",
-            direction=Direction.download,
-            analysis=Analysis.private_cloud,
+            direction=WildfireAvDirection.download,
+            analysis=WildfireAvAnalysis.private_cloud,
             application=["ftp"],
             file_type=["pe"]
         )

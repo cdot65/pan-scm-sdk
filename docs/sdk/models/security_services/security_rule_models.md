@@ -235,12 +235,12 @@ move_dict = {
 security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_dict)
 
 # Using model directly
-from scm.models.security import SecurityRuleMoveModel, RuleMoveDestination, Rulebase
+from scm.models.security import SecurityRuleMoveModel, RuleMoveDestination, SecurityRuleRulebase
 
 move_config = SecurityRuleMoveModel(
     source_rule="123e4567-e89b-12d3-a456-426655440000",
     destination=RuleMoveDestination.BEFORE,
-    rulebase=Rulebase.PRE,
+    rulebase=SecurityRuleRulebase.PRE,
     destination_rule="987fcdeb-51d3-a456-426655440000"
 )
 
