@@ -1,31 +1,27 @@
 # tests/scm/config/security/test_wildfire_antivirus_profile.py
 
-import pytest
 import logging
 from unittest.mock import MagicMock
+
+import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 from scm.config.security.wildfire_antivirus_profile import WildfireAntivirusProfile
 from scm.exceptions import (
     APIError,
-    BadRequestError,
     InvalidObjectError,
     ObjectNotPresentError,
     MalformedCommandError,
     MissingQueryParameterError,
-    ConflictError,
     ReferenceNotZeroError,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileCreateModel,
-    WildfireAntivirusProfileResponseModel,
-    RuleBase,
-    Analysis,
-    Direction,
+    WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel,
+    WildfireAvAnalysis,
+    WildfireAvDirection,
 )
 from scm.utils.logging import setup_logger
-
-from pydantic import ValidationError as PydanticValidationError
-
 
 logger = setup_logger(__name__, logging.DEBUG)
 
@@ -67,7 +63,7 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
             ],
         }
         with pytest.raises(PydanticValidationError) as exc_info:
-            WildfireAntivirusProfileCreateModel(**data)
+            WildfireAvProfileCreateModel(**data)
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
@@ -91,7 +87,7 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
             ],
         }
         with pytest.raises(PydanticValidationError) as exc_info:
-            WildfireAntivirusProfileCreateModel(**data)
+            WildfireAvProfileCreateModel(**data)
         assert (
             "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             in str(exc_info.value)
@@ -101,7 +97,7 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
     def test_invalid_action_rules(self):
         """Test validation when invalid action provided in rules."""
         with pytest.raises(PydanticValidationError) as exc_info:
-            WildfireAntivirusProfileCreateModel(
+            WildfireAvProfileCreateModel(
                 name="InvalidProfile",
                 folder="Shared",
                 rules=[
@@ -178,10 +174,10 @@ class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
             },
         )
         assert isinstance(existing_objects, list)
-        assert isinstance(existing_objects[0], WildfireAntivirusProfileResponseModel)
+        assert isinstance(existing_objects[0], WildfireAvProfileResponseModel)
         assert len(existing_objects) == 2
         assert existing_objects[0].name == "web-security-default"
-        assert existing_objects[0].rules[0].direction == Direction.both
+        assert existing_objects[0].rules[0].direction == WildfireAvDirection.both
         logger.info(f"Successfully listed {len(existing_objects)} objects")
 
     def test_object_list_multiple_containers(self):
@@ -246,10 +242,10 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             "/config/security/v1/wildfire-anti-virus-profiles",
             json=test_profile_data,
         )
-        assert isinstance(created_profile, WildfireAntivirusProfileResponseModel)
+        assert isinstance(created_profile, WildfireAvProfileResponseModel)
         assert str(created_profile.id) == "12345678-abcd-abcd-abcd-123456789012"
         assert created_profile.name == "NewWFProfile"
-        assert created_profile.rules[0].analysis == Analysis.public_cloud
+        assert created_profile.rules[0].analysis == WildfireAvAnalysis.public_cloud
         logger.info(f"Successfully created profile {created_profile.name}")
 
     def test_create_object_error_handling(self):
@@ -389,9 +385,9 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/security/v1/wildfire-anti-virus-profiles/{profile_id}"
         )
-        assert isinstance(get_object, WildfireAntivirusProfileResponseModel)
+        assert isinstance(get_object, WildfireAvProfileResponseModel)
         assert str(get_object.id) == profile_id
-        assert get_object.rules[0].analysis == Analysis.private_cloud
+        assert get_object.rules[0].analysis == WildfireAvAnalysis.private_cloud
         logger.info(f"Successfully retrieved profile {get_object.name}")
 
     def test_get_object_error_handling(self):
@@ -467,7 +463,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             "rules": [
                 {
                     "name": "UpdatedRule",
-                    "direction": Direction.upload,
+                    "direction": WildfireAvDirection.upload,
                     "application": ["app3"],
                     "file_type": ["docx"],
                 }
@@ -504,12 +500,12 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             json=expected_payload,
         )
 
-        assert isinstance(updated_object, WildfireAntivirusProfileResponseModel)
+        assert isinstance(updated_object, WildfireAvProfileResponseModel)
         assert isinstance(updated_object.id, UUID)
         assert updated_object.id == test_uuid
         assert str(updated_object.id) == update_data["id"]
         assert updated_object.name == "UpdatedProfile"
-        assert updated_object.rules[0].direction == Direction.upload
+        assert updated_object.rules[0].direction == WildfireAvDirection.upload
         logger.info(f"Successfully updated profile {updated_object.name}")
 
     def test_update_object_error_handling(self):
