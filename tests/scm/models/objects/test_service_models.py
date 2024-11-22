@@ -1,4 +1,4 @@
-# tests/scm/models/objects/test_service.py
+# tests/scm/models/objects/test_service_models.py
 
 # External libraries
 import pytest
@@ -48,6 +48,17 @@ class TestOverrideModel:
         assert model.halfclose_timeout is None
         assert model.timewait_timeout is None
 
+    def test_override_model_invalid_timeout(self):
+        """Test validation with invalid timeout values."""
+        data = {
+            "timeout": "invalid",
+            "halfclose_timeout": "invalid",
+            "timewait_timeout": "invalid",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            Override(**data)
+        assert "Input should be a valid integer" in str(exc_info.value)
+
 
 class TestProtocolModels:
     """Tests for Protocol-related models validation."""
@@ -65,6 +76,13 @@ class TestProtocolModels:
         assert model.port == data["port"]
         assert isinstance(model.override, Override)
         assert model.override.timeout == 10
+
+    def test_tcp_protocol_invalid_port(self):
+        """Test validation with invalid TCP port format."""
+        data = {"port": 1}
+        with pytest.raises(ValidationError) as exc_info:
+            TCPProtocol(**data)
+        assert "1 validation error for TCPProtocol" in str(exc_info.value)
 
     def test_udp_protocol_valid(self):
         """Test validation of UDP protocol with valid data."""
@@ -192,6 +210,7 @@ class TestServiceUpdateModel:
         model = ServiceUpdateModel(**data)
         assert model.name == data["name"]
         assert model.protocol.tcp.port == data["protocol"]["tcp"]["port"]
+        assert str(model.id) == data["id"]
 
     def test_service_update_model_invalid_data_error(self):
         """Test that ValidationError is raised when invalid data is provided."""
@@ -202,6 +221,7 @@ class TestServiceUpdateModel:
         assert "3 validation errors for ServiceUpdateModel" in error_msg
         assert "name\n  Field required" in error_msg
         assert "protocol\n  Field required" in error_msg
+        assert "id\n  Field required" in error_msg
 
     def test_service_update_model_partial_update(self):
         """Test validation with partial update data."""
@@ -215,6 +235,17 @@ class TestServiceUpdateModel:
         assert model.name == data["name"]
         assert model.protocol.tcp.port == "8080"
         assert model.description == "Updated description"
+
+    def test_service_update_model_invalid_uuid(self):
+        """Test validation with invalid UUID format."""
+        data = {
+            "id": "invalid-uuid",
+            "name": "test-service",
+            "protocol": {"tcp": {"port": "80"}},
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceUpdateModel(**data)
+        assert "Input should be a valid UUID" in str(exc_info.value)
 
 
 class TestServiceResponseModel:
