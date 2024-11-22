@@ -40,6 +40,9 @@ from scm.models.security import (
     SecurityRuleMoveModel,
 )
 from scm.models.security.anti_spyware_profiles import (
+    AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel,
+)
+from scm.models.security.anti_spyware_profiles import (
     PacketCapture,
     ActionRequest,
     ThreatExceptionBase,
@@ -49,9 +52,6 @@ from scm.models.security.anti_spyware_profiles import (
     InlinePolicyAction,
     MicaEngineSpywareEnabledEntry,
     ExemptIpEntry,
-)
-from scm.models.security.anti_spyware_profiles import (
-    RuleBaseModel as AntiSpywareRuleBaseModel,
 )
 from scm.models.security.dns_security_profiles import (
     BotnetDomainsModel,
@@ -647,9 +647,9 @@ class ApplicationCreateApiFactory(factory.Factory):
     risk = 1
     ports = ["tcp/80,443", "udp/3478"]
     folder = "Prisma Access"
-    snippet = None  # Default to None; can be set using with_snippet()
+    snippet = None
 
-    # Boolean attributes
+    # Boolean attributes with explicit defaults
     evasive = False
     pervasive = False
     excessive_bandwidth_use = False
@@ -661,42 +661,40 @@ class ApplicationCreateApiFactory(factory.Factory):
     no_certifications = False
 
     @classmethod
-    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
         """Create an instance with snippet container."""
         return cls(folder=None, snippet=snippet, **kwargs)
 
     @classmethod
-    def build_without_required_fields(cls, **kwargs):
-        """Return an instance without required fields (should fail validation)."""
+    def with_high_risk(cls, **kwargs):
+        """Create an instance with high risk level."""
+        return cls(risk=5, **kwargs)
+
+    @classmethod
+    def with_all_boolean_flags(cls, value: bool = True, **kwargs):
+        """Create an instance with all boolean flags set to specified value."""
         return cls(
-            name=None,
-            category=None,
-            subcategory=None,
-            technology=None,
-            risk=None,
+            evasive=value,
+            pervasive=value,
+            excessive_bandwidth_use=value,
+            used_by_malware=value,
+            transfers_files=value,
+            has_known_vulnerabilities=value,
+            tunnels_other_apps=value,
+            prone_to_misuse=value,
+            no_certifications=value,
             **kwargs,
         )
 
     @classmethod
-    def build_with_multiple_containers(cls, **kwargs):
-        """Return an instance with multiple containers (should fail validation)."""
-        return cls(folder="Shared", snippet="TestSnippet", **kwargs)
+    def build_with_invalid_name(cls, **kwargs):
+        """Return an instance with invalid name pattern."""
+        return cls(name="invalid@name#here", **kwargs)
 
     @classmethod
-    def build_with_no_container(cls, **kwargs):
-        """Return an instance without any container (should fail validation)."""
-        return cls(folder=None, snippet=None, **kwargs)
-
-    @classmethod
-    def build_with_long_description(cls, **kwargs):
-        """Return an instance with description exceeding max_length."""
-        long_description = "A" * 2000  # Exceeds 1023 characters
-        return cls(description=long_description, **kwargs)
-
-    @classmethod
-    def build_valid(cls, **kwargs):
-        """Return a valid instance."""
-        return cls(**kwargs)
+    def build_with_invalid_risk(cls, **kwargs):
+        """Return an instance with invalid risk value."""
+        return cls(risk=-1, **kwargs)
 
 
 class ApplicationUpdateApiFactory(factory.Factory):
@@ -727,36 +725,23 @@ class ApplicationUpdateApiFactory(factory.Factory):
     no_certifications = None
 
     @classmethod
-    def build_partial_update(cls, **kwargs):
-        """Return an instance with partial update data."""
-        return cls(
-            id=str(uuid.uuid4()),
-            name="updated-application",
-            description="Updated description",
-            **kwargs,
-        )
+    def with_risk_update(cls, risk: int = 3, **kwargs):
+        """Create an instance updating only the risk level."""
+        return cls(risk=risk, **kwargs)
 
     @classmethod
-    def build_full_update(cls, **kwargs):
-        """Return an instance with all fields for a full update."""
+    def with_boolean_updates(cls, **kwargs):
+        """Create an instance updating all boolean flags."""
         return cls(
-            id=str(uuid.uuid4()),
-            name=factory.Sequence(lambda n: f"application_{n}"),
-            description=factory.Faker("sentence"),
-            category="general-internet",
-            subcategory="file-sharing",
-            technology="client-server",
-            risk=1,
-            ports=["tcp/80,443", "udp/3478"],
-            evasive=False,
-            pervasive=False,
-            excessive_bandwidth_use=False,
-            used_by_malware=False,
-            transfers_files=False,
-            has_known_vulnerabilities=False,
-            tunnels_other_apps=False,
-            prone_to_misuse=False,
-            no_certifications=False,
+            evasive=True,
+            pervasive=True,
+            excessive_bandwidth_use=True,
+            used_by_malware=True,
+            transfers_files=True,
+            has_known_vulnerabilities=True,
+            tunnels_other_apps=True,
+            prone_to_misuse=True,
+            no_certifications=True,
             **kwargs,
         )
 
@@ -776,7 +761,7 @@ class ApplicationResponseFactory(factory.Factory):
     risk = 1
     ports = ["tcp/80,443", "udp/3478"]
     folder = "Prisma Access"
-    snippet = None  # Default to None; can be set using with_snippet()
+    snippet = None
 
     # Boolean attributes
     evasive = False
@@ -790,27 +775,25 @@ class ApplicationResponseFactory(factory.Factory):
     no_certifications = False
 
     @classmethod
-    def with_snippet(cls, snippet="TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, **kwargs)
+    def with_long_description(cls, length: int = 4000, **kwargs):
+        """Create an instance with a description near the maximum length."""
+        return cls(description="A" * length, **kwargs)
 
     @classmethod
-    def without_subcategory_and_technology(cls, **kwargs):
-        """Create an instance without subcategory and technology."""
-        return cls(subcategory=None, technology=None, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: ApplicationCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
+    def with_unknown_app(cls, **kwargs):
+        """Create an instance for unknown-tcp application type."""
+        return cls(
+            name="unknown-tcp",
+            subcategory=None,
+            technology=None,
+            risk=1,
+            **kwargs,
+        )
 
 
 # Pydantic modeling tests
 class ApplicationCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationCreateModel."""
+    """Factory for creating data dicts for ApplicationCreateModel validation testing."""
 
     name = factory.Sequence(lambda n: f"application_{n}")
     description = factory.Faker("sentence")
@@ -820,58 +803,23 @@ class ApplicationCreateModelFactory(factory.DictFactory):
     risk = 1
     ports = ["tcp/80,443", "udp/3478"]
     folder = "Prisma Access"
-    snippet = None  # Default to None; can be set using snippet field
-
-    # Boolean attributes
-    evasive = False
-    pervasive = False
-    excessive_bandwidth_use = False
-    used_by_malware = False
-    transfers_files = False
-    has_known_vulnerabilities = False
-    tunnels_other_apps = False
-    prone_to_misuse = False
-    no_certifications = False
+    snippet = None
 
     @classmethod
-    def build_valid(cls, **kwargs):
-        """Return a valid data dict for creating an application."""
-        return cls(**kwargs)
+    def build_with_invalid_ports(cls, **kwargs):
+        """Return a data dict with invalid port format."""
+        return cls(ports=["invalid-port-format"], **kwargs)
 
     @classmethod
-    def build_with_missing_required_fields(cls, **kwargs):
-        """Return a data dict missing required fields (should fail validation)."""
-        return cls(
-            name=None,
-            category=None,
-            subcategory=None,
-            technology=None,
-            risk=None,
-            **kwargs,
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls, **kwargs):
-        """Return a data dict with multiple containers (should fail validation)."""
-        return cls(folder="Shared", snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def build_with_no_container(cls, **kwargs):
-        """Return a data dict without any container (should fail validation)."""
-        return cls(folder=None, snippet=None, **kwargs)
-
-    @classmethod
-    def build_with_long_description(cls, **kwargs):
-        """Return a data dict with description exceeding max_length."""
-        long_description = "A" * 2000  # Exceeds 1023 characters
-        return cls(description=long_description, **kwargs)
+    def build_with_invalid_folder(cls, **kwargs):
+        """Return a data dict with invalid folder pattern."""
+        return cls(folder="Invalid@Folder#Pattern", **kwargs)
 
 
 class ApplicationUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationUpdateModel."""
+    """Factory for creating data dicts for ApplicationUpdateModel validation testing."""
 
     id = "123e4567-e89b-12d3-a456-426655440000"
-    # All fields are optional for updates
     name = None
     description = None
     category = None
@@ -880,53 +828,14 @@ class ApplicationUpdateModelFactory(factory.DictFactory):
     risk = None
     ports = None
 
-    # Boolean attributes
-    evasive = None
-    pervasive = None
-    excessive_bandwidth_use = None
-    used_by_malware = None
-    transfers_files = None
-    has_known_vulnerabilities = None
-    tunnels_other_apps = None
-    prone_to_misuse = None
-    no_certifications = None
-
     @classmethod
-    def build_valid(cls, **kwargs):
-        """Return a valid data dict for updating an application."""
-        return cls(**kwargs)
-
-    @classmethod
-    def build_partial_update(cls, **kwargs):
-        """Return a data dict for partial update."""
+    def build_with_invalid_fields(cls, **kwargs):
+        """Return a data dict with multiple invalid fields."""
         return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="updated-application",
-            description="Updated description",
-            **kwargs,
-        )
-
-    @classmethod
-    def build_full_update(cls, **kwargs):
-        """Return a data dict with all fields for a full update."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name=factory.Sequence(lambda n: f"application_{n}"),
-            description=factory.Faker("sentence"),
-            category="general-internet",
-            subcategory="file-sharing",
-            technology="client-server",
-            risk=1,
-            ports=["tcp/80,443", "udp/3478"],
-            evasive=False,
-            pervasive=False,
-            excessive_bandwidth_use=False,
-            used_by_malware=False,
-            transfers_files=False,
-            has_known_vulnerabilities=False,
-            tunnels_other_apps=False,
-            prone_to_misuse=False,
-            no_certifications=False,
+            name="invalid@name",
+            risk=-1,
+            ports=["invalid-port"],
+            folder="Invalid@Folder",
             **kwargs,
         )
 
@@ -1433,6 +1342,11 @@ class ExemptIpEntryFactory(factory.Factory):
 
     name = "192.168.1.1"
 
+    @classmethod
+    def with_custom_ip(cls, ip: str = "10.0.0.1", **kwargs):
+        """Create an instance with a custom IP address."""
+        return cls(name=ip, **kwargs)
+
 
 class MicaEngineSpywareEnabledEntryFactory(factory.Factory):
     """Factory for creating MicaEngineSpywareEnabledEntry instances."""
@@ -1443,9 +1357,16 @@ class MicaEngineSpywareEnabledEntryFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"mica_engine_{n}")
     inline_policy_action = InlinePolicyAction.alert
 
+    @classmethod
+    def with_action(
+        cls, action: InlinePolicyAction = InlinePolicyAction.drop, **kwargs
+    ):
+        """Create an instance with a specific inline policy action."""
+        return cls(inline_policy_action=action, **kwargs)
+
 
 class AntiSpywareRuleBaseFactory(factory.Factory):
-    """Factory for creating AntiSpywareRuleBaseModel instances."""
+    """Factory for creating RuleBaseModel instances."""
 
     class Meta:
         model = AntiSpywareRuleBaseModel
@@ -1455,6 +1376,16 @@ class AntiSpywareRuleBaseFactory(factory.Factory):
     category = Category.spyware
     threat_name = "any"
     packet_capture = PacketCapture.disable
+
+    @classmethod
+    def with_severity(cls, severities: list[Severity], **kwargs):
+        """Create an instance with specific severity levels."""
+        return cls(severity=severities, **kwargs)
+
+    @classmethod
+    def with_category(cls, category: Category = Category.botnet, **kwargs):
+        """Create an instance with a specific category."""
+        return cls(category=category, **kwargs)
 
 
 class ThreatExceptionBaseFactory(factory.Factory):
@@ -1467,6 +1398,11 @@ class ThreatExceptionBaseFactory(factory.Factory):
     packet_capture = PacketCapture.single_packet
     exempt_ip = [factory.SubFactory(ExemptIpEntryFactory)]
     notes = "Test exception"
+
+    @classmethod
+    def with_multiple_exempt_ips(cls, ips: list[str], **kwargs):
+        """Create an instance with multiple exempt IPs."""
+        return cls(exempt_ip=[ExemptIpEntryFactory(name=ip) for ip in ips], **kwargs)
 
 
 # SDK tests against SCM API
@@ -1484,23 +1420,29 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
 
     @classmethod
-    def with_snippet(cls, **kwargs):
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
         """Create a profile with snippet container."""
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+        return cls(folder=None, snippet=snippet, **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs):
+    def with_device(cls, device: str = "TestDevice", **kwargs):
         """Create a profile with device container."""
-        return cls(folder=None, device="TestDevice", **kwargs)
+        return cls(folder=None, device=device, **kwargs)
 
     @classmethod
-    def with_mica_engine(cls, **kwargs):
+    def with_mica_engine(cls, entries: list[dict] = None, **kwargs):
         """Create a profile with MICA engine entries."""
+        if entries is None:
+            entries = [MicaEngineSpywareEnabledEntryFactory()]
+        return cls(mica_engine_spyware_enabled=entries, **kwargs)
+
+    @classmethod
+    def with_inline_exceptions(
+        cls, urls: list[str] = None, ips: list[str] = None, **kwargs
+    ):
+        """Create a profile with inline exceptions."""
         return cls(
-            mica_engine_spyware_enabled=[
-                factory.SubFactory(MicaEngineSpywareEnabledEntryFactory)
-            ],
-            **kwargs,
+            inline_exception_edl_url=urls, inline_exception_ip_address=ips, **kwargs
         )
 
 
@@ -1515,6 +1457,16 @@ class AntiSpywareProfileUpdateApiFactory(factory.Factory):
     description = factory.Faker("sentence")
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+
+    @classmethod
+    def with_cloud_inline_analysis(cls, enabled: bool = True, **kwargs):
+        """Create an instance with cloud inline analysis enabled/disabled."""
+        return cls(cloud_inline_analysis=enabled, **kwargs)
+
+    @classmethod
+    def with_empty_rules(cls, **kwargs):
+        """Create an instance with no rules."""
+        return cls(rules=[], **kwargs)
 
 
 class AntiSpywareProfileResponseFactory(factory.Factory):
@@ -1532,14 +1484,14 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
     threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
 
     @classmethod
-    def with_snippet(cls, **kwargs):
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
         """Create a profile with snippet container."""
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+        return cls(folder=None, snippet=snippet, **kwargs)
 
     @classmethod
-    def with_device(cls, **kwargs):
+    def with_device(cls, device: str = "TestDevice", **kwargs):
         """Create a profile with device container."""
-        return cls(folder=None, device="TestDevice", **kwargs)
+        return cls(folder=None, device=device, **kwargs)
 
     @classmethod
     def from_request(cls, request_model: AntiSpywareProfileCreateModel, **kwargs):
@@ -1552,7 +1504,7 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
 
 # Pydantic modeling tests
 class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for AntiSpywareProfileCreateModel."""
+    """Factory for creating data dicts for AntiSpywareProfileCreateModel validation testing."""
 
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
@@ -1561,10 +1513,11 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
     rules = []
 
     @classmethod
-    def build_without_container(cls):
-        """Return a data dict without any containers."""
+    def build_valid(cls):
+        """Return a data dict with invalid name pattern."""
         return cls(
-            name="TestProfile",
+            name="valid-profile-name",
+            folder="Shared",
             rules=[
                 {
                     "name": "TestRule",
@@ -1572,16 +1525,15 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
                     "category": Category.spyware,
                 }
             ],
-            # No folder, snippet, or device
         )
 
     @classmethod
     def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
+        """Return a data dict with invalid name pattern."""
         return cls(
-            name="TestProfile",
+            name="valid-profile-name",
             folder="Shared",
-            snippet="this will fail",
+            snippet="test123",
             rules=[
                 {
                     "name": "TestRule",
@@ -1592,35 +1544,53 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
         )
 
     @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for creating a profile."""
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
         return cls(
-            name="TestProfile",
+            name="@invalid-profile-name",
             folder="Shared",
-            description="Test anti-spyware profile",
-            cloud_inline_analysis=True,
             rules=[
                 {
                     "name": "TestRule",
-                    "severity": [Severity.critical, Severity.high],
+                    "severity": [Severity.critical],
                     "category": Category.spyware,
-                    "threat_name": "test_threat",
-                    "packet_capture": PacketCapture.disable,
                 }
             ],
+        )
+
+    @classmethod
+    def build_with_invalid_rules(cls):
+        """Return a data dict with invalid rules structure."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "severity": ["invalid"],
+                    "category": "invalid",
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_exceptions(cls):
+        """Return a data dict with invalid threat exceptions."""
+        return cls(
+            name="TestProfile",
+            folder="Shared",
+            rules=[],
             threat_exception=[
                 {
                     "name": "TestException",
-                    "packet_capture": PacketCapture.single_packet,
-                    "exempt_ip": [{"name": "192.168.1.1"}],
-                    "notes": "Test exception",
+                    "packet_capture": "invalid",
                 }
             ],
         )
 
 
 class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for AntiSpywareProfileUpdateModel."""
+    """Factory for creating data dicts for AntiSpywareProfileUpdateModel validation testing."""
 
     id = "12345678-1234-5678-1234-567812345678"
     name = factory.Sequence(lambda n: f"profile_{n}")
@@ -1629,20 +1599,35 @@ class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls):
-        """Return a valid data dict for updating a profile."""
+        """Return a data dict with invalid name pattern."""
         return cls(
-            id="12345678-1234-5678-1234-567812345678",
-            name="UpdatedProfile",
-            description="Updated anti-spyware profile",
+            name="valid-profile-name",
+            folder="Shared",
             rules=[
                 {
-                    "name": "UpdatedRule",
-                    "severity": [Severity.high],
-                    "category": Category.botnet,
-                    "packet_capture": PacketCapture.extended_capture,
+                    "name": "TestRule",
+                    "severity": [Severity.critical],
+                    "category": Category.spyware,
                 }
             ],
-            threat_exception=[],
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            rules=[{"invalid": "rule"}],
+            threat_exception=[{"invalid": "exception"}],
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="12345678-1234-5678-1234-567812345678",
+            description="Updated description",
         )
 
 
