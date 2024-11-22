@@ -1,36 +1,26 @@
 # tests/scm/config/security/test_security_rules.py
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 from scm.config.security import SecurityRule
 from scm.exceptions import (
     APIError,
-    BadRequestError,
     InvalidObjectError,
     ObjectNotPresentError,
     MalformedCommandError,
     MissingQueryParameterError,
-    ConflictError,
     ReferenceNotZeroError,
 )
 from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleCreateModel,
-    SecurityRuleUpdateModel,
-    ProfileSetting,
-    Action,
-    Rulebase,
-    RuleMoveDestination,
-    SecurityRuleMoveModel,
 )
-
 from tests.factories import (
     SecurityRuleRequestBaseFactory,
-    SecurityRuleResponseBaseFactory,
 )
-
-from pydantic import ValidationError as PydanticValidationError
 
 
 @pytest.mark.usefixtures("load_env")
