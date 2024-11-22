@@ -1,16 +1,17 @@
 # scm/models/security/decryption_profiles.py
 
+# Standard library imports
+from enum import Enum
 from typing import Optional
 from uuid import UUID
 
+# External libraries
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
     ConfigDict,
     model_validator,
 )
-from enum import Enum
 
 
 # Enums
@@ -251,11 +252,16 @@ class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
 
     @model_validator(mode="after")
     def validate_container(self) -> "DecryptionProfileCreateModel":
-        container_fields = ["folder", "snippet", "device"]
-        provided_containers = [
+        """Validates that exactly one container type is provided."""
+        container_fields = [
+            "folder",
+            "snippet",
+            "device",
+        ]
+        provided = [
             field for field in container_fields if getattr(self, field) is not None
         ]
-        if len(provided_containers) != 1:
+        if len(provided) != 1:
             raise ValueError(
                 "Exactly one of 'folder', 'snippet', or 'device' must be provided."
             )
@@ -264,6 +270,12 @@ class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
 
 class DecryptionProfileUpdateModel(DecryptionProfileBaseModel):
     """Model for updating an existing Decryption Profile."""
+
+    id: Optional[UUID] = Field(
+        ...,
+        description="UUID of the resource",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
 
 
 class DecryptionProfileResponseModel(DecryptionProfileBaseModel):
