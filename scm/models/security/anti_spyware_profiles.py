@@ -1,5 +1,6 @@
 # scm/models/security/anti_spyware_profile.py
 
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
@@ -11,7 +12,6 @@ from pydantic import (
     ConfigDict,
     RootModel,
 )
-from enum import Enum
 
 
 # Enums
@@ -202,7 +202,7 @@ class ActionResponse(RootModel[dict]):
         return next(iter(self.root.keys()), "unknown")
 
 
-class RuleBaseModel(BaseModel):
+class AntiSpywareRuleBaseModel(BaseModel):
     """Base model for rules."""
 
     name: str = Field(
@@ -292,7 +292,7 @@ class AntiSpywareProfileBase(BaseModel):
         None,
         description="List of MICA engine spyware enabled entries",
     )
-    rules: List[RuleBaseModel] = Field(
+    rules: List[AntiSpywareRuleBaseModel] = Field(
         ...,
         description="List of rules",
     )
