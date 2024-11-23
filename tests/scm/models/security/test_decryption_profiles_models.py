@@ -1,4 +1,4 @@
-# tests/scm/models/security/test_decryption_profiles.py
+# tests/scm/models/security/test_decryption_profiles_models.py
 
 from uuid import UUID
 
