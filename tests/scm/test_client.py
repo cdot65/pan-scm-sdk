@@ -1,8 +1,10 @@
 # tests/test_client.py
 import logging
+from unittest.mock import patch, MagicMock
 
 import pytest
-from unittest.mock import patch, MagicMock
+from requests.exceptions import HTTPError, RequestException
+
 from scm.client import Scm
 from scm.exceptions import (
     APIError,
@@ -13,7 +15,6 @@ from scm.exceptions import (
     MalformedCommandError,
     ErrorHandler,
 )
-from requests.exceptions import HTTPError, RequestException
 
 
 class TestClientBase:
