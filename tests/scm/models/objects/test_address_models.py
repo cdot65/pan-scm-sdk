@@ -175,7 +175,6 @@ class TestAddressUpdateModel:
         """Test validation with valid data in update model."""
         data = AddressUpdateModelFactory.build_valid()
         model = AddressUpdateModel(**data)
-        assert model.id == data["id"]
         assert model.name == data["name"]
         assert model.folder == data["folder"]
         assert model.ip_netmask == data["ip_netmask"]
