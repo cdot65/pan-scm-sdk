@@ -1,4 +1,4 @@
-# tests/scm/config/security/test_security_rules.py
+# tests/scm/config/security/test_security_rules_models.py
 
 from unittest.mock import MagicMock
 
