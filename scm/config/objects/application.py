@@ -137,16 +137,13 @@ class Application(BaseObject):
 
             # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(
+            response: Dict[str, Any] = self.api_client.put(
                 endpoint,
                 json=payload,
             )
 
-            # Extract JSON data from the response
-            response_data = response.json()
-
             # Return the SCM API response as a new Pydantic object
-            return ApplicationResponseModel(**response_data)
+            return ApplicationResponseModel(**response)
 
         except HTTPError as e:
             response: Optional[Response] = e.response
@@ -391,12 +388,6 @@ class Application(BaseObject):
                     "Invalid response format: expected dictionary",
                     error_code="E003",
                     http_status_code=500,
-                )
-
-            if "_errors" in response:
-                ErrorHandler.raise_for_error(
-                    response,
-                    http_status_code=400,
                 )
 
             if "id" in response:
