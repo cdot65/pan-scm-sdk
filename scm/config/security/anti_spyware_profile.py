@@ -57,21 +57,23 @@ class AntiSpywareProfile(BaseObject):
             # Convert back to a Python dictionary, removing any unset fields
             payload = profile.model_dump(exclude_unset=True)
 
-            # Send the updated object to the remote API as JSON
-            response = self.api_client.post(
+            # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
+            response: Dict[str, Any] = self.api_client.post(
                 self.ENDPOINT,
                 json=payload,
             )
 
-            # Extract JSON data from the response
-            response_data = response.json()
-
             # Return the SCM API response as a new Pydantic object
-            return AntiSpywareProfileResponseModel(**response_data)
+            return AntiSpywareProfileResponseModel(**response)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -96,17 +98,19 @@ class AntiSpywareProfile(BaseObject):
         try:
             # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
-            response = self.api_client.get(endpoint)
-
-            # Extract JSON data from the response
-            response_data = response.json()
+            response: Dict[str, Any] = self.api_client.get(endpoint)
 
             # Return the SCM API response as a new Pydantic object
-            return AntiSpywareProfileResponseModel(**response_data)
+            return AntiSpywareProfileResponseModel(**response)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -137,20 +141,22 @@ class AntiSpywareProfile(BaseObject):
 
             # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(
+            response: Dict[str, Any] = self.api_client.put(
                 endpoint,
                 json=payload,
             )
 
-            # Extract JSON data from the response
-            response_data = response.json()
-
             # Return the SCM API response as a new Pydantic object
-            return AntiSpywareProfileResponseModel(**response_data)
+            return AntiSpywareProfileResponseModel(**response)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -289,8 +295,13 @@ class AntiSpywareProfile(BaseObject):
             )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -370,12 +381,6 @@ class AntiSpywareProfile(BaseObject):
                     http_status_code=500,
                 )
 
-            if "_errors" in response:
-                ErrorHandler.raise_for_error(
-                    response,
-                    http_status_code=400,
-                )
-
             if "id" in response:
                 address = AntiSpywareProfileResponseModel(**response)
                 return address.model_dump(
@@ -390,8 +395,13 @@ class AntiSpywareProfile(BaseObject):
                 )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -420,8 +430,13 @@ class AntiSpywareProfile(BaseObject):
             self.api_client.delete(endpoint)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
