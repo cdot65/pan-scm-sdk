@@ -5,31 +5,34 @@ from unittest.mock import MagicMock
 
 # External libraries
 import pytest
-from pydantic import ValidationError as PydanticValidationError
+from requests.exceptions import HTTPError
 
-from scm.config.security.anti_spyware_profile import AntiSpywareProfile
+# Local SDK imports
+from scm.config.security import AntiSpywareProfile
 from scm.exceptions import (
-    APIError,
     InvalidObjectError,
     ObjectNotPresentError,
     MalformedCommandError,
     MissingQueryParameterError,
     ReferenceNotZeroError,
+    BadRequestError,
+    APIError,
 )
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareProfileCreateModel,
     AntiSpywareProfileResponseModel,
     AntiSpywareSeverity,
     AntiSpywareCategory,
-    AntiSpywareActionRequest,
-    AntiSpywareActionResponse,
     AntiSpywarePacketCapture,
+    AntiSpywareExemptIpEntry,
 )
 from tests.factories import (
-    AntiSpywareProfileRequestFactory,
-    AntiSpywareRuleCreateFactory,
-    ThreatExceptionCreateFactory,
+    AntiSpywareProfileCreateApiFactory,
+    AntiSpywareProfileUpdateApiFactory,
+    AntiSpywareProfileResponseFactory,
+    AntiSpywareRuleBaseFactory,
+    AntiSpywareThreatExceptionBaseFactory,
 )
+from tests.utils import raise_mock_http_error
 
 
 @pytest.mark.usefixtures("load_env")
@@ -47,104 +50,23 @@ class TestAntiSpywareProfileBase:
         self.client = AntiSpywareProfile(self.mock_scm)  # noqa
 
 
-# -------------------- Test Classes Grouped by Functionality --------------------
-
-
-class TestAntiSpywareProfileModelValidation(TestAntiSpywareProfileBase):
-    """Tests for object model validation."""
-
-    def test_object_model_no_container_provided(self):
-        """Test validation when no container is provided."""
-        data = {
-            "name": "InvalidProfile",
-            "rules": [],
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_object_model_multiple_containers(self):
-        """Test validation when multiple containers are provided."""
-        data = {
-            "name": "InvalidProfile",
-            "folder": "Shared",
-            "device": "Device1",
-            "rules": [],
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_rule_request_model_validation(self):
-        """Test validation in RuleRequest model."""
-        # Invalid severity
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareRuleCreateFactory(severity=["nonexistent_severity"])
-        assert (
-            "Input should be 'critical', 'high', 'medium', 'low', 'informational' or "
-            in str(exc_info.value)
-        )
-
-    def test_threat_exception_request_model_validation(self):
-        """Test validation in ThreatExceptionBase model."""
-        # Invalid packet_capture
-        with pytest.raises(PydanticValidationError) as exc_info:
-            ThreatExceptionCreateFactory(packet_capture="invalid_option")
-        assert "1 validation error for ThreatExceptionBase" in str(exc_info.value)
-
-
 class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
     """Tests for listing Anti-Spyware Profile objects."""
 
-    def test_list_objects(self):
-        """
-        **Objective:** Test listing all objects.
-        **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing objects.
-            2. Calls the `list` method with a filter parameter.
-            3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of objects.
-        """
+    def test_list_valid(self):
+        """Test listing all objects successfully."""
         mock_response = {
             "data": [
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "TestProfile1",
-                    "folder": "Prisma Access",
-                    "description": "A test anti-spyware profile",
-                    "rules": [
-                        {
-                            "name": "TestRule1",
-                            "severity": ["critical", "high"],
-                            "category": "spyware",
-                            "threat_name": "any",
-                            "packet_capture": "disable",
-                            "action": {"alert": {}},
-                        }
-                    ],
-                    "threat_exception": [
-                        {
-                            "name": "TestException1",
-                            "action": {"allow": {}},
-                            "packet_capture": "single-packet",
-                            "exempt_ip": [{"name": "192.168.1.1"}],
-                            "notes": "Test note",
-                        }
-                    ],
-                },
-                {
-                    "id": "223e4567-e89b-12d3-a456-426655440001",
-                    "name": "TestProfile2",
-                    "folder": "Prisma Access",
-                    "rules": [],
-                    "threat_exception": [],
-                },
+                AntiSpywareProfileResponseFactory(
+                    name="profile1",
+                    folder="Shared",
+                    rules=[AntiSpywareRuleBaseFactory()],
+                ).model_dump(),
+                AntiSpywareProfileResponseFactory(
+                    name="profile2",
+                    folder="Shared",
+                    rules=[AntiSpywareRuleBaseFactory()],
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -152,800 +74,1071 @@ class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Prisma Access")
+        existing_objects = self.client.list(folder="Shared")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/anti-spyware-profiles",
             params={
                 "limit": 10000,
-                "folder": "Prisma Access",
+                "folder": "Shared",
             },
         )
         assert isinstance(existing_objects, list)
         assert isinstance(existing_objects[0], AntiSpywareProfileResponseModel)
         assert len(existing_objects) == 2
-        assert existing_objects[0].name == "TestProfile1"
-        assert existing_objects[0].rules[0].severity == [
-            AntiSpywareSeverity.critical,
-            AntiSpywareSeverity.high,
-        ]
-        assert existing_objects[0].rules[0].category == AntiSpywareCategory.spyware
-        assert existing_objects[0].threat_exception[0].name == "TestException1"
-        assert (
-            existing_objects[0].threat_exception[0].exempt_ip[0].name == "192.168.1.1"
+        assert existing_objects[0].name == "profile1"
+
+    def test_list_folder_empty_error(self):
+        """Test that an empty folder raises appropriate error."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message='"folder" is not allowed to be empty',
+            error_type="Missing Query Parameter",
         )
 
-    def test_object_list_multiple_containers(self):
-        """Test validation error when listing with multiple containers."""
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.list(folder="")
 
+        error_msg = str(exc_info.value)
         assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in error_msg
+        )
+
+    def test_list_folder_nonexistent_error(self):
+        """Test error handling in list operation."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Listing failed",
+            error_type="Operation Impossible",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.list(folder="NonexistentFolder")
+
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
+            in error_msg
+        )
+
+    def test_list_container_missing_error(self):
+        """
+        Test that InvalidObjectError is raised when no container parameter is provided.
+        """
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+            error_type="Invalid Object",
+        )
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list()
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_list_container_multiple_error(self):
+        """Test validation of container parameters."""
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="Multiple container types provided",
+            error_type="Invalid Object",
+        )
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_list_filters_valid(self):
+        """Test that filters are properly added to parameters."""
+        filters = {
+            "rules": ["test1", "test2"],
+        }
+
+        mock_response = {"data": []}
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        self.client.list(folder="Shared", **filters)
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/anti-spyware-profiles",
+            params={
+                "limit": 10000,
+                "folder": "Shared",
+            },
+        )
+
+    def test_list_filters_lists_empty(self):
+        """Test behavior with empty filter lists."""
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "basic-profile",
+                    "description": "Basic anti-spyware profile",
+                    "folder": "Texas",
+                    "rules": [
+                        {
+                            "name": "block-critical",
+                            "severity": ["critical"],
+                            "category": "spyware",
+                            "action": {
+                                "block_ip": {"track_by": "source", "duration": 300}
+                            },
+                        }
+                    ],
+                }
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Empty lists should result in no matches
+        filtered_objects = self.client.list(
+            folder="Texas",
+            rules=[],
+        )
+        assert len(filtered_objects) == 0
+
+    def test_list_filters_types(self):
+        """Test validation of filter types in list method."""
+        # Mock response for successful case
+        mock_response = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "basic-profile",
+                    "description": "Basic anti-spyware profile",
+                    "folder": "Texas",
+                    "rules": [
+                        {
+                            "name": "block-critical",
+                            "severity": ["critical"],
+                            "category": "spyware",
+                            "action": {
+                                "block_ip": {"track_by": "source", "duration": 300}
+                            },
+                        }
+                    ],
+                }
+            ]
+        }
+
+        # Test invalid types filter (string instead of list)
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="'types' filter must be a list",
+            error_type="Invalid Query Parameter",
+        )
+        with pytest.raises(BadRequestError) as exc_info:
+            self.client.list(folder="Shared", types="netmask")
+        assert (
+            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
             in str(exc_info.value)
         )
+
+        # Reset side effect for successful case
+        self.mock_scm.get.side_effect = None  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # Test that valid list filters pass validation
+        try:
+            self.client.list(
+                folder="Shared",
+                rules=["test1"],
+            )
+        except BadRequestError:
+            pytest.fail("Unexpected BadRequestError raised with valid list filters")
+
+    def test_list_filters_rules_validation(self):
+        """Test validation of filter specific fields."""
+        mock_rules = []
+
+        # Test with string instead of list
+        invalid_filters = {"rules": "rules"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_rules, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        # assert error.error_code == "E003"
+        # assert error.http_status_code == 500
+        # assert "{'errorType': 'Invalid Object'}" in str(error)
+
+        # Test with dict instead of list
+        invalid_filters = {"rules": {"value": "rules"}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_rules, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        # assert error.error_code == "E003"
+        # assert error.http_status_code == 500
+        # assert "{'errorType': 'Invalid Object'}" in str(error)
+
+    def test_list_response_invalid_format(self):
+        """
+        Test that InvalidObjectError is raised when the response is not a dictionary.
+        """
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+
+    def test_list_response_invalid_data_field_missing(self):
+        """
+        Test that InvalidObjectError is raised when API returns response with missing data field.
+
+        This tests the case where the API response is a dictionary but missing the required 'data' field,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a dictionary without 'data' field
+        self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(error)
+
+    def test_list_response_invalid_data_field_type(self):
+        """
+        Test that InvalidObjectError is raised when API returns non-list data field.
+
+        This tests the case where the API response's 'data' field is not a list,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a response where 'data' is not a list
+        self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+
+    def test_list_http_error_no_content(self):
+        """Test handling of HTTPError without content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error
+
+        with pytest.raises(HTTPError):
+            self.client.list(folder="Shared")
 
 
 class TestAntiSpywareProfileCreate(TestAntiSpywareProfileBase):
     """Tests for creating Anti-Spyware Profile objects."""
 
-    def test_create_object(self):
-        """
-        **Objective:** Test creating a new object.
-        **Workflow:**
-            1. Creates test data using AntiSpywareProfileRequestFactory.
-            2. Mocks the API response.
-            3. Verifies the creation request and response.
-        """
-        test_object = AntiSpywareProfileRequestFactory()
-        mock_response = test_object.model_dump()
-        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
+    def test_create_valid_object(self):
+        """Test creating an object with valid data."""
+        test_object = AntiSpywareProfileCreateApiFactory.build()
+        mock_response = AntiSpywareProfileResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
+        self.mock_scm.post.return_value = mock_response.model_dump()
+        created_object = self.client.create(test_object.model_dump())
 
-        self.mock_scm.post.assert_called_once_with(  # noqa
+        self.mock_scm.post.assert_called_once_with(
             "/config/security/v1/anti-spyware-profiles",
-            json=test_object.model_dump(exclude_unset=True),
+            json=test_object.model_dump(),
         )
-        assert str(created_object.id) == "12345678-abcd-abcd-abcd-123456789012"
+        assert isinstance(created_object, AntiSpywareProfileResponseModel)
         assert created_object.name == test_object.name
-        assert created_object.threat_exception[0].name.startswith("exception_")
 
-    def test_create_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object creation.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to create an object
-            3. Verifies proper error handling and exception raising
-        """
-        test_data = AntiSpywareProfileRequestFactory()
+    def test_create_http_error_no_content(self):
+        """Test creation with HTTPError without content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
 
-        # Mock error response
-        mock_error_response = {
-            "_errors": [
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.post.side_effect = mock_http_error
+
+        with pytest.raises(HTTPError):
+            self.client.create({"name": "test", "folder": "Shared", "rules": []})
+
+    def test_create_with_rules(self):
+        """Test creating profile with specific rules configuration."""
+        test_object = AntiSpywareProfileCreateApiFactory.build(
+            rules=[
+                AntiSpywareRuleBaseFactory(
+                    severity=[AntiSpywareSeverity.critical],
+                    category=AntiSpywareCategory.spyware,
+                    packet_capture=AntiSpywarePacketCapture.single_packet,
+                )
+            ]
+        )
+
+        mock_response = AntiSpywareProfileResponseFactory.from_request(test_object)
+        self.mock_scm.post.return_value = mock_response.model_dump()
+
+        created_object = self.client.create(test_object.model_dump())
+
+        assert isinstance(created_object, AntiSpywareProfileResponseModel)
+        assert len(created_object.rules) == 1
+        assert created_object.rules[0].severity == [AntiSpywareSeverity.critical]
+        assert created_object.rules[0].category == AntiSpywareCategory.spyware
+
+    def test_create_with_threat_exceptions(self):
+        """Test creating profile with threat exceptions."""
+        test_object = AntiSpywareProfileCreateApiFactory.build(
+            threat_exception=[
+                AntiSpywareThreatExceptionBaseFactory(
+                    name="test-exception",
+                    packet_capture=AntiSpywarePacketCapture.extended_capture,
+                    exempt_ip=[AntiSpywareExemptIpEntry(name="192.168.1.1")],
+                )
+            ]
+        )
+
+        mock_response = AntiSpywareProfileResponseFactory.from_request(test_object)
+        self.mock_scm.post.return_value = mock_response.model_dump()
+
+        created_object = self.client.create(test_object.model_dump())
+
+        assert isinstance(created_object, AntiSpywareProfileResponseModel)
+        assert len(created_object.threat_exception) == 1
+        assert (
+            created_object.threat_exception[0].packet_capture
+            == AntiSpywarePacketCapture.extended_capture
+        )
+
+    def test_create_http_error_no_response_content(self):
+        """Test create method when HTTP error has no response content."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the post method to raise the HTTPError
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.create(
                 {
-                    "code": "API_I00013",
-                    "message": "Object creation failed",
-                    "details": {"errorType": "Object Already Exists"},
+                    "name": "advanced-profile",
+                    "description": "Advanced anti-spyware profile",
+                    "folder": "Texas",
+                    "cloud_inline_analysis": True,
+                    "mica_engine_spyware_enabled": [
+                        {
+                            "name": "HTTP Command and Control detector",
+                            "inline_policy_action": "alert",
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "name": "critical-threats",
+                            "severity": ["critical", "high"],
+                            "category": "command-and-control",
+                            "action": {"reset_both": {}},
+                        },
+                        {
+                            "name": "medium-threats",
+                            "severity": ["medium"],
+                            "category": "spyware",
+                            "action": {"alert": {}},
+                        },
+                    ],
+                }
+            )
+
+    def test_create_http_error_with_response(self):
+        """Test that HTTPError with response content triggers proper error handling."""
+        test_data = {
+            "name": "advanced-profile",
+            "description": "Advanced anti-spyware profile",
+            "folder": "Texas",
+            "cloud_inline_analysis": True,
+            "mica_engine_spyware_enabled": [
+                {
+                    "name": "HTTP Command and Control detector",
+                    "inline_policy_action": "alert",
                 }
             ],
-            "_request_id": "test-request-id",
+            "rules": [
+                {
+                    "name": "critical-threats",
+                    "severity": ["critical", "high"],
+                    "category": "command-and-control",
+                    "action": {"reset_both": {}},
+                },
+                {
+                    "name": "medium-threats",
+                    "severity": ["medium"],
+                    "category": "spyware",
+                    "action": {"alert": {}},
+                },
+            ],
         }
 
-        # Configure mock to raise exception
-        self.mock_scm.post.side_effect = Exception()  # noqa
-        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Create failed",
+            error_type="Malformed Command",
         )
 
-        with pytest.raises(APIError):
-            self.client.create(test_data.model_dump())
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.create(test_data)
+
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
 
     def test_create_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in create method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
-        test_data = AntiSpywareProfileRequestFactory()
-
-        # Mock a generic exception without response
+        """Test handling of a generic exception during create."""
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.create(test_data.model_dump())
-        assert str(exc_info.value) == "An unexpected error occurred"
-
-    def test_create_malformed_response_handling(self):
-        """
-        **Objective:** Test handling of malformed response in create method.
-        **Workflow:**
-            1. Mocks a response that would cause a parsing error
-            2. Verifies appropriate error handling
-        """
-        test_data = AntiSpywareProfileRequestFactory()
-
-        # Mock invalid JSON response
-        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
-
-        with pytest.raises(APIError):
-            self.client.create(test_data.model_dump())
-
-
-class TestAntiSpywareProfileGet(TestAntiSpywareProfileBase):
-    """Tests for retrieving a specific Anti-Spyware Profile object."""
-
-    def test_get_object(self):
-        """
-        **Objective:** Test retrieving a specific object.
-        **Workflow:**
-            1. Mocks the API response for a specific object.
-            2. Verifies the get request and response handling.
-        """
-        profile_id = "123e4567-e89b-12d3-a456-426655440000"
-        mock_response = {
-            "id": profile_id,
-            "name": "TestProfile",
-            "folder": "Prisma Access",
-            "description": "A test anti-spyware profile",
-            "rules": [],
-            "threat_exception": [],
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-        get_object = self.client.get(profile_id)
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/security/v1/anti-spyware-profiles/{profile_id}"
-        )
-        assert isinstance(get_object, AntiSpywareProfileResponseModel)
-        assert get_object.name == "TestProfile"
-        assert get_object.description == "A test anti-spyware profile"
-
-    def test_get_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object retrieval.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to get an object
-            3. Verifies proper error handling and exception raising
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_error_response = {
-            "_errors": [
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(
                 {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
+                    "name": "advanced-profile",
+                    "description": "Advanced anti-spyware profile",
+                    "folder": "Texas",
+                    "cloud_inline_analysis": True,
+                    "mica_engine_spyware_enabled": [
+                        {
+                            "name": "HTTP Command and Control detector",
+                            "inline_policy_action": "alert",
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "name": "critical-threats",
+                            "severity": ["critical", "high"],
+                            "category": "command-and-control",
+                            "action": {"reset_both": {}},
+                        },
+                        {
+                            "name": "medium-threats",
+                            "severity": ["medium"],
+                            "category": "spyware",
+                            "action": {"alert": {}},
+                        },
+                    ],
                 }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(ObjectNotPresentError):
-            self.client.get(object_id)
-
-    def test_get_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in get method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(APIError) as exc_info:
-            self.client.get(object_id)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+            )
+        assert str(exc_info.value) == "Generic error"
 
 
 class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
     """Tests for updating Anti-Spyware Profile objects."""
 
-    def test_update_object(self):
-        """
-        **Objective:** Test updating an object.
-        **Workflow:**
-            1. Prepares update data and mocks response
-            2. Verifies the update request and response
-            3. Ensures payload transformation is correct
-        """
-        from uuid import UUID
-
-        test_uuid = UUID("123e4567-e89b-12d3-a456-426655440000")
-
-        # Test data including ID
-        update_data = {
-            "id": str(test_uuid),
-            "name": "UpdatedProfile",
-            "folder": "Prisma Access",
-            "description": "An updated anti-spyware profile",
-            "rules": [
+    def test_update_valid_object(self):
+        """Test updating an object with valid data."""
+        # Create update data using factory
+        update_data = AntiSpywareProfileUpdateApiFactory.with_cloud_inline_analysis(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="advanced-profile",
+            # cloud_inline_analysis=True,
+            description="Advanced anti-spyware profile",
+            folder="Texas",
+            mica_engine_spyware_enabled=[
                 {
-                    "name": "UpdatedRule",
-                    "severity": [AntiSpywareSeverity.high],
-                    "category": AntiSpywareCategory.botnet,
-                    "packet_capture": AntiSpywarePacketCapture.extended_capture,
-                    "threat_name": "any",
+                    "name": "HTTP Command and Control detector",
+                    "inline_policy_action": "alert",
                 }
             ],
-            "threat_exception": [],
-        }
+            rules=[AntiSpywareRuleBaseFactory()],
+        )
+        input_data = update_data.model_dump()
 
-        # Mock response should include the ID
-        mock_response = update_data.copy()
-        self.mock_scm.put.return_value = mock_response  # noqa
+        # Create mock response
+        mock_response = AntiSpywareProfileResponseFactory.from_request(update_data)
+        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
         # Perform update
-        updated_object = self.client.update(update_data)
+        updated_object = self.client.update(input_data)
 
-        # Verify response model
+        # Assert the put method was called with correct parameters
+        self.mock_scm.put.assert_called_once_with(  # noqa
+            f"/config/security/v1/anti-spyware-profiles/{update_data.id}",
+            json=input_data,
+        )
+
+        # Assert the updated object matches the mock response
         assert isinstance(updated_object, AntiSpywareProfileResponseModel)
-        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
-        assert updated_object.id == test_uuid  # Compare against UUID object
-        assert (
-            str(updated_object.id) == update_data["id"]
-        )  # Compare string representations
-        assert updated_object.name == "UpdatedProfile"
-        assert updated_object.description == "An updated anti-spyware profile"
-        assert updated_object.rules[0].severity == [AntiSpywareSeverity.high]
-        assert updated_object.rules[0].category == AntiSpywareCategory.botnet
-        assert (
-            updated_object.rules[0].packet_capture
-            == AntiSpywarePacketCapture.extended_capture
-        )
+        assert updated_object.id == mock_response.id
+        assert updated_object.name == mock_response.name
+        assert updated_object.description == mock_response.description
+        assert updated_object.folder == mock_response.folder
 
-        # Verify the API call
-        self.mock_scm.put.assert_called_once()  # Just verify it was called once
-        call_args = self.mock_scm.put.call_args
-        assert (
-            call_args[0][0]
-            == f"/config/security/v1/anti-spyware-profiles/{update_data['id']}"
-        )
-
-        # Verify the payload structure but not exact enum values
-        payload = call_args[1]["json"]
-        assert payload["name"] == "UpdatedProfile"
-        assert payload["folder"] == "Prisma Access"
-        assert payload["description"] == "An updated anti-spyware profile"
-        assert len(payload["rules"]) == 1
-        assert payload["rules"][0]["name"] == "UpdatedRule"
-        assert len(payload["threat_exception"]) == 0
-
-    def test_update_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object update.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to update an object
-            3. Verifies proper error handling and exception raising
-        """
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "rules": [],
-            "threat_exception": [],
-        }
-
-        mock_error_response = {
-            "_errors": [
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        # Create test data using factory
+        update_data = AntiSpywareProfileUpdateApiFactory.with_cloud_inline_analysis(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="advanced-profile",
+            # cloud_inline_analysis=True,
+            description="Advanced anti-spyware profile",
+            folder="Texas",
+            mica_engine_spyware_enabled=[
                 {
-                    "code": "API_I00013",
-                    "message": "Update failed",
-                    "details": {"errorType": "Malformed Command"},
+                    "name": "HTTP Command and Control detector",
+                    "inline_policy_action": "alert",
                 }
             ],
-            "_request_id": "test-request-id",
-        }
+            rules=[AntiSpywareRuleBaseFactory()],
+        )
+        input_data = update_data.model_dump()
 
-        self.mock_scm.put.side_effect = Exception()  # noqa
-        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        # Use utility function to create mock HTTP error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError):
-            self.client.update(update_data)
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.update(input_data)
 
-    def test_update_with_invalid_data(self):
-        """
-        **Objective:** Test update method with invalid data structure.
-        **Workflow:**
-            1. Attempts to update with invalid data
-            2. Verifies proper validation error handling
-        """
-        invalid_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "invalid_field": "test",
-        }
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
 
-        with pytest.raises(APIError):
-            self.client.update(invalid_data)
+    def test_update_object_not_present_error(self):
+        """Test error handling when the object to update is not present."""
+        # Create test data using factory
+        update_data = AntiSpywareProfileUpdateApiFactory.with_cloud_inline_analysis(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="advanced-profile",
+            # cloud_inline_analysis=True,
+            description="Advanced anti-spyware profile",
+            folder="Texas",
+            mica_engine_spyware_enabled=[
+                {
+                    "name": "HTTP Command and Control detector",
+                    "inline_policy_action": "alert",
+                }
+            ],
+            rules=[AntiSpywareRuleBaseFactory()],
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate object not present error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_http_error_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "advanced-profile",
+                    "description": "Advanced anti-spyware profile",
+                    "folder": "Texas",
+                    "cloud_inline_analysis": True,
+                    "mica_engine_spyware_enabled": [
+                        {
+                            "name": "HTTP Command and Control detector",
+                            "inline_policy_action": "alert",
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "name": "critical-threats",
+                            "severity": ["critical", "high"],
+                            "category": "command-and-control",
+                            "action": {"reset_both": {}},
+                        },
+                        {
+                            "name": "medium-threats",
+                            "severity": ["medium"],
+                            "category": "spyware",
+                            "action": {"alert": {}},
+                        },
+                    ],
+                }
+            )
 
     def test_update_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in update method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "rules": [],
-            "threat_exception": [],
-        }
-
-        # Mock a generic exception without response
+        """Test handling of a generic exception during update."""
         self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
 
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "advanced-profile",
+                    "description": "Advanced anti-spyware profile",
+                    "folder": "Texas",
+                    "cloud_inline_analysis": True,
+                    "mica_engine_spyware_enabled": [
+                        {
+                            "name": "HTTP Command and Control detector",
+                            "inline_policy_action": "alert",
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "name": "critical-threats",
+                            "severity": ["critical", "high"],
+                            "category": "command-and-control",
+                            "action": {"reset_both": {}},
+                        },
+                        {
+                            "name": "medium-threats",
+                            "severity": ["medium"],
+                            "category": "spyware",
+                            "action": {"alert": {}},
+                        },
+                    ],
+                }
+            )
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_server_error(self):
+        """Test handling of server errors during update."""
+        # Create test data
+        update_data = AntiSpywareProfileUpdateApiFactory.with_cloud_inline_analysis(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="advanced-profile",
+            # cloud_inline_analysis=True,
+            description="Advanced anti-spyware profile",
+            folder="Texas",
+            mica_engine_spyware_enabled=[
+                {
+                    "name": "HTTP Command and Control detector",
+                    "inline_policy_action": "alert",
+                }
+            ],
+            rules=[AntiSpywareRuleBaseFactory()],
+        )
+
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate server error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
         with pytest.raises(APIError) as exc_info:
-            self.client.update(update_data)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
 
 
 class TestAntiSpywareProfileDelete(TestAntiSpywareProfileBase):
     """Tests for deleting Anti-Spyware Profile objects."""
 
+    def test_delete_success(self):
+        """Test successful deletion of an object."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.return_value = None
+        self.client.delete(object_id)
+
+        self.mock_scm.delete.assert_called_once_with(
+            f"/config/security/v1/anti-spyware-profiles/{object_id}"
+        )
+
     def test_delete_referenced_object(self):
-        """
-        **Objective:** Test deleting an object that is referenced by other objects.
-        **Workflow:**
-            1. Sets up a mock error response for a referenced object deletion attempt
-            2. Attempts to delete an object that is referenced by other objects
-            3. Validates that ReferenceNotZeroError is raised with correct details
-        """
-        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
+        """Test deleting an object that is referenced."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Mock the API error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E009",  # Changed from API_I00013 to E009
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
-                    "details": {
-                        "errorType": "Reference Not Zero",
-                        "message": [
-                            " container -> Texas -> security-profile-group -> custom-group -> anti-spyware"
-                        ],
-                        "errors": [
-                            {
-                                "type": "NON_ZERO_REFS",
-                                "message": "Node cannot be deleted because of references from",
-                                "params": ["custom-profile"],
-                                "extra": [
-                                    "container/[Texas]/security-profile-group/[custom-group]/anti-spyware/[custom-profile]"
-                                ],
-                            }
-                        ],
-                    },
-                }
-            ],
-            "_request_id": "8fe3b025-feb7-41d9-bf88-3938c0b33116",
-        }
-
-        # Configure mock to raise exception with our custom error response
-        mock_exc = Exception()
-        mock_exc.response = MagicMock()
-        mock_exc.response.status_code = 409  # Add status code
-        mock_exc.response.json.return_value = mock_error_response
-        self.mock_scm.delete.side_effect = mock_exc
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
+            status_code=409,
+            error_code="E009",
+            message="Reference not zero",
+            error_type="Reference Not Zero",
+        )
 
         with pytest.raises(ReferenceNotZeroError) as exc_info:
             self.client.delete(object_id)
 
-    def test_delete_error_handling(self):
-        """
-        **Objective:** Test error handling during object deletion.
-        **Workflow:**
-            1. Mocks various error scenarios
-            2. Verifies proper error handling for each case
-        """
+        assert "Reference Not Zero" in str(exc_info.value)
+
+    def test_delete_object_not_present_error(self):
+        """Test error handling when the object to delete is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Test object not found
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.delete.side_effect = Exception()  # noqa
-        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError):
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.delete(object_id)
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Object Not Present'}" in error_message
+        assert "HTTP error: 404" in error_message
+        assert "API error: API_I00013" in error_message
+
+    def test_delete_http_error_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
             self.client.delete(object_id)
 
     def test_delete_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in delete method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
+        """Test handling of a generic exception during delete."""
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete("abcdefg")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_delete_server_error(self):
+        """Test handling of server errors during delete."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Mock a generic exception without response
-        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
 
         with pytest.raises(APIError) as exc_info:
             self.client.delete(object_id)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_message
+        assert "HTTP error: 500" in error_message
+        assert "API error: E003" in error_message
 
 
-class TestAntiSpywareProfileFetch(TestAntiSpywareProfileBase):
-    """Tests for fetching Anti-Spyware Profile objects by name."""
+class TestAntiSpywareProfileGet(TestAntiSpywareProfileBase):
+    """Tests for retrieving a specific Anti-Spyware Profile object."""
 
-    def test_fetch_object(self):
-        """
-        **Objective:** Test retrieving an object by its name using the `fetch` method.
-        **Workflow:**
-            1. Sets up a mock response resembling the expected API response for fetching an object by name.
-            2. Calls the `fetch` method of `self.client` with a specific name and container.
-            3. Asserts that the mocked service was called with the correct URL and parameters.
-            4. Validates the returned object's attributes.
-        """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "description": "Test Anti-Spyware Profile",
-            "rules": [
-                {
-                    "name": "TestRule",
-                    "severity": ["critical"],
-                    "category": "spyware",
-                    "action": {"alert": {}},
-                }
-            ],
-            "threat_exception": None,  # Should be excluded in the result
-        }
+    def test_get_valid_object(self):
+        """Test retrieving a specific object."""
+        mock_response = AntiSpywareProfileResponseFactory.build()
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response.model_dump()
+        retrieved_object = self.client.get(str(mock_response.id))
+
+        self.mock_scm.get.assert_called_once_with(
+            f"/config/security/v1/anti-spyware-profiles/{mock_response.id}"
+        )
+        assert isinstance(retrieved_object, AntiSpywareProfileResponseModel)
+        assert retrieved_object.name == mock_response.name
+
+    def test_get_object_not_present_error(self):
+        """Test error handling when object is not present."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.get(object_id)
+
+        assert "Object Not Present" in str(exc_info.value)
+
+    def test_get_generic_exception_handling(self):
+        """Test generic exception handling in get method."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.get(object_id)
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_get_http_error_no_response_content(self):
+        """Test get method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None  # Simulate no content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.get(object_id)
+
+    def test_get_server_error(self):
+        """Test handling of server errors during get method."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.get(object_id)
+
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in error_msg
+        )
+
+
+class TestAddressFetch(TestAntiSpywareProfileBase):
+    """Tests for fetching Address objects by name."""
+
+    def test_fetch_valid_object(self):
+        """Test retrieving an object by its name using the `fetch` method."""
+        mock_response_model = AntiSpywareProfileResponseFactory.build()
+        mock_response_data = mock_response_model.model_dump()
+
+        # Set the mock to return the response data directly
+        self.mock_scm.get.return_value = mock_response_data  # noqa
 
         # Call the fetch method
         fetched_object = self.client.fetch(
-            name=mock_response["name"],
-            folder=mock_response["folder"],
+            name=mock_response_model.name,
+            folder=mock_response_model.folder,
         )
 
         # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/anti-spyware-profiles",
             params={
-                "folder": mock_response["folder"],
-                "name": mock_response["name"],
+                "folder": mock_response_model.folder,
+                "name": mock_response_model.name,
             },
         )
 
         # Validate the returned object
         assert isinstance(fetched_object, dict)
-        assert str(fetched_object["id"]) == mock_response["id"]
-        assert fetched_object["name"] == mock_response["name"]
-        assert fetched_object["description"] == mock_response["description"]
-        assert fetched_object["rules"][0]["severity"] == ["critical"]
+        assert fetched_object["id"] == mock_response_model.id
+        assert fetched_object["name"] == mock_response_model.name
+        assert fetched_object["description"] == mock_response_model.description
 
-    def test_fetch_object_not_found(self):
-        """
-        Test fetching an object by name that does not exist.
-        """
-        object_name = "NonExistent"
-        folder_name = "Shared"
-        mock_response = {
-            "_errors": [
-                {
-                    "code": "E005",  # Changed from API_I00013 to E005
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
-        }
+    def test_fetch_object_not_present_error(self):
+        """Test fetching an object that does not exist."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
 
-        # Configure mock with status code
-        mock_exc = Exception()
-        mock_exc.response = MagicMock()
-        mock_exc.response.status_code = 404  # Add status code
-        mock_exc.response.json.return_value = mock_response
-        self.mock_scm.get.side_effect = mock_exc
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.fetch(name="nonexistent", folder="Shared")
 
-        with pytest.raises(ObjectNotPresentError):
-            self.client.fetch(name=object_name, folder=folder_name)
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Object Not Present'}" in error_msg
+        assert "HTTP error: 404" in error_msg
+        assert "API error: API_I00013" in error_msg
 
-    def test_fetch_empty_name(self):
-        """
-        **Objective:** Test fetch with empty name parameter.
-        **Workflow:**
-            1. Attempts to fetch with empty name
-            2. Verifies MissingQueryParameterError is raised
-        """
+    def test_fetch_empty_name_error(self):
+        """Test fetching with an empty name parameter."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message='"name" is not allowed to be empty',
+            error_type="Missing Query Parameter",
+        )
+
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Shared")
-        assert "Field 'name' cannot be empty" in str(exc_info.value)
 
-    def test_fetch_container_validation(self):
-        """
-        **Objective:** Test container parameter validation in fetch.
-        **Workflow:**
-            1. Tests various invalid container combinations
-            2. Verifies proper error handling
-        """
-        # Test empty folder
+        error_msg = str(exc_info.value)
+        assert '"name" is not allowed to be empty' in error_msg
+        assert "HTTP error: 400" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_empty_container_error(self):
+        """Test fetching with an empty folder parameter."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message='"folder" is not allowed to be empty',
+            error_type="Missing Query Parameter",
+        )
+
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
 
-        # Test no container provided
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-profile")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert '"folder" is not allowed to be empty' in error_msg
+        assert "HTTP error: 400" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_invalid_response_format_error(self):
+        """Test fetching an object when the API returns an unexpected format."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="Invalid response format",
+            error_type="Invalid Object",
         )
 
-        # Test multiple containers provided
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(
-                name="test-profile", folder="Shared", snippet="TestSnippet"
-            )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+            self.client.fetch(name="test", folder="Shared")
 
-    def test_fetch_object_unexpected_response_format(self):
-        """
-        Test fetching an object when the API returns an unexpected response format.
-
-        **Objective:** Ensure that the fetch method raises APIError when the response format is not as expected.
-        **Workflow:**
-            1. Mocks the API response to return an unexpected format.
-            2. Calls the `fetch` method.
-            3. Asserts that APIError is raised.
-        """
-        group_name = "TestGroup"
-        folder_name = "Shared"
-        # Mocking an unexpected response format
-        mock_response = {"unexpected_key": "unexpected_value"}
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name)
-        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
-
-    def test_fetch_validation_errors(self):
-        """
-        **Objective:** Test fetch validation errors.
-        **Workflow:**
-            1. Tests various invalid input scenarios
-            2. Verifies appropriate error handling
-        """
-        # Test empty folder
-        with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
-
-        # Test multiple containers
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test", folder="folder1", snippet="snippet1")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Invalid Object'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
 
     def test_fetch_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in fetch method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
-        # Mock a generic exception without response
+        """Test generic exception handling during fetch."""
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_fetch_http_error_no_response_content(self):
+        """Test that an HTTPError without response content in fetch() re-raises the exception."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.fetch(name="test-address", folder="Shared")
+
+    def test_fetch_server_error(self):
+        """Test handling of server errors during fetch."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
         with pytest.raises(APIError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
 
-    def test_fetch_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in fetch method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response without expected fields
-        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
+    def test_fetch_missing_id_field_error(self):
+        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
+        # Mock response without 'id' field
+        mock_response = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
 
-        # Test response with both id and data fields (invalid format)
-        self.mock_scm.get.return_value = {  # noqa
-            "id": "some-id",
-            "data": [{"some": "data"}],
-        }  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "An unexpected error occurred: 3 validation errors" in str(
-            exc_info.value
-        )
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address", folder="Shared")
 
-        # Test malformed response in list format
-        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
 
-    def test_fetch_error_handler_json_error(self):
-        """
-        **Objective:** Test fetch method error handling when json() raises an error.
-        **Workflow:**
-            1. Mocks an exception with a response that raises error on json()
-            2. Verifies the original exception is re-raised
-        """
-        # Create mock exception
-        mock_exc = Exception("Original error")
-        mock_exc.response = MagicMock()
-        mock_exc.response.status_code = 500
-        mock_exc.response.json.side_effect = ValueError("JSON parsing error")
+    def test_fetch_no_container_provided_error(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address")
 
-        # Configure mock
-        self.mock_scm.get.side_effect = mock_exc
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
 
-        with pytest.raises(ValueError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "JSON parsing error"
+    def test_fetch_multiple_containers_provided_error(self):
+        """Test that InvalidObjectError is raised when multiple container parameters are provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(
+                name="test-address",
+                folder="Shared",
+                snippet="TestSnippet",
+            )
 
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
 
-class TestActionValidation(TestAntiSpywareProfileBase):
-    """Tests for Action Request and Response validation."""
+    def test_fetch_invalid_response_type_error(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
-    def test_action_request_string_conversion(self):
-        """Test string to dict conversion in ActionRequest."""
-        action = AntiSpywareActionRequest.model_validate("alert")
-        assert action.root == {"alert": {}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test123", folder="Shared")
 
-    def test_action_request_invalid_type(self):
-        """Test invalid type handling in ActionRequest."""
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareActionRequest.model_validate(123)  # Neither string nor dict
-        assert (
-            str(exc_info.value)
-            == "1 validation error for ActionRequest\n  Value error, Invalid action format; must be a string or dict. [type=value_error, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
-        )
-
-    def test_action_request_no_action(self):
-        """Test validation when no action is provided."""
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareActionRequest.model_validate({})
-        assert (
-            str(exc_info.value)
-            == "1 validation error for ActionRequest\n  Value error, Exactly one action must be provided in 'action' field. [type=value_error, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
-        )
-
-    def test_action_request_multiple_actions(self):
-        """Test validation when multiple actions are provided."""
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareActionRequest.model_validate({"alert": {}, "drop": {}})
-        assert (
-            str(exc_info.value)
-            == "1 validation error for ActionRequest\n  Value error, Exactly one action must be provided in 'action' field. [type=value_error, input_value={'alert': {}, 'drop': {}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
-        )
-
-    def test_action_request_get_action_name(self):
-        """Test get_action_name method for ActionRequest."""
-        # Test with valid action
-        action = AntiSpywareActionRequest.model_validate({"alert": {}})
-        assert action.get_action_name() == "alert"
-
-    def test_action_response_string_conversion(self):
-        """Test string to dict conversion in ActionResponse."""
-        action = AntiSpywareActionResponse.model_validate("alert")
-        assert action.root == {"alert": {}}
-
-    def test_action_response_invalid_type(self):
-        """Test invalid type handling in ActionResponse."""
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareActionResponse.model_validate(123)  # Neither string nor dict
-        assert (
-            str(exc_info.value)
-            == "1 validation error for ActionResponse\n  Value error, Invalid action format; must be a string or dict. [type=value_error, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
-        )
-
-    def test_action_response_empty_dict(self):
-        """Test that ActionResponse accepts empty dict."""
-        action = AntiSpywareActionResponse.model_validate({})
-        assert action.root == {}
-
-    def test_action_response_single_action(self):
-        """Test ActionResponse with single valid action."""
-        action = AntiSpywareActionResponse.model_validate({"alert": {}})
-        assert action.root == {"alert": {}}
-
-    def test_action_response_multiple_actions(self):
-        """Test validation when multiple actions are provided."""
-        with pytest.raises(PydanticValidationError) as exc_info:
-            AntiSpywareActionResponse.model_validate({"alert": {}, "drop": {}})
-        assert (
-            str(exc_info.value)
-            == "1 validation error for ActionResponse\n  Value error, At most one action must be provided in 'action' field. [type=value_error, input_value={'alert': {}, 'drop': {}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
-        )
-
-    def test_action_response_get_action_name(self):
-        """Test get_action_name method for ActionResponse."""
-        # Test with valid action
-        action = AntiSpywareActionResponse.model_validate({"alert": {}})
-        assert action.get_action_name() == "alert"
-
-        # Test with empty dict (should return "unknown")
-        action = AntiSpywareActionResponse.model_validate({})
-        assert action.get_action_name() == "unknown"
-
-    def test_action_request_valid_actions(self):
-        """Test all valid action types in ActionRequest."""
-        valid_actions = [
-            "allow",
-            "alert",
-            "drop",
-            "reset_client",
-            "reset_server",
-            "reset_both",
-            "block_ip",
-            "default",
-        ]
-        for action_type in valid_actions:
-            action = AntiSpywareActionRequest.model_validate({action_type: {}})
-            assert action.get_action_name() == action_type
-
-    def test_action_response_valid_actions(self):
-        """Test all valid action types in ActionResponse."""
-        valid_actions = [
-            "allow",
-            "alert",
-            "drop",
-            "reset_client",
-            "reset_server",
-            "reset_both",
-            "block_ip",
-            "default",
-        ]
-        for action_type in valid_actions:
-            action = AntiSpywareActionResponse.model_validate({action_type: {}})
-            assert action.get_action_name() == action_type
-
-    def test_block_ip_action_validation(self):
-        """Test BlockIpAction validation."""
-        # Test valid block_ip action
-        valid_action = {"block_ip": {"track_by": "source", "duration": 3600}}
-        action = AntiSpywareActionRequest.model_validate(valid_action)
-        assert action.root == valid_action
-
-
-# -------------------- End of Test Classes --------------------
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500

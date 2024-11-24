@@ -45,17 +45,17 @@ from scm.models.security import (
     DecryptionProfileResponseModel,
 )
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel,
+    AntiSpywarePacketCapture,
+    AntiSpywareThreatExceptionBase,
+    AntiSpywareCategory,
+    AntiSpywareSeverity,
+    AntiSpywareProfileUpdateModel,
+    AntiSpywareInlinePolicyAction,
+    AntiSpywareMicaEngineSpywareEnabledEntry,
+    AntiSpywareExemptIpEntry,
 )
 from scm.models.security.anti_spyware_profiles import (
-    PacketCapture,
-    ThreatExceptionBase,
-    Category,
-    Severity,
-    AntiSpywareProfileUpdateModel,
-    InlinePolicyAction,
-    MicaEngineSpywareEnabledEntry,
-    ExemptIpEntry,
+    AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel,
 )
 from scm.models.security.decryption_profiles import (
     SSLVersion,
@@ -1590,11 +1590,11 @@ class TagUpdateModelFactory(factory.DictFactory):
 
 
 # Sub factories
-class ExemptIpEntryFactory(factory.Factory):
+class AntiSpywareExemptIpEntryFactory(factory.Factory):
     """Factory for creating ExemptIpEntry instances."""
 
     class Meta:
-        model = ExemptIpEntry
+        model = AntiSpywareExemptIpEntry
 
     name = "192.168.1.1"
 
@@ -1604,18 +1604,20 @@ class ExemptIpEntryFactory(factory.Factory):
         return cls(name=ip, **kwargs)
 
 
-class MicaEngineSpywareEnabledEntryFactory(factory.Factory):
+class AntiSpywareMicaEngineSpywareEnabledEntryFactory(factory.Factory):
     """Factory for creating MicaEngineSpywareEnabledEntry instances."""
 
     class Meta:
-        model = MicaEngineSpywareEnabledEntry
+        model = AntiSpywareMicaEngineSpywareEnabledEntry
 
     name = factory.Sequence(lambda n: f"mica_engine_{n}")
-    inline_policy_action = InlinePolicyAction.alert
+    inline_policy_action = AntiSpywareInlinePolicyAction.alert
 
     @classmethod
     def with_action(
-        cls, action: InlinePolicyAction = InlinePolicyAction.drop, **kwargs
+        cls,
+        action: AntiSpywareInlinePolicyAction = AntiSpywareInlinePolicyAction.drop,
+        **kwargs,
     ):
         """Create an instance with a specific inline policy action."""
         return cls(inline_policy_action=action, **kwargs)
@@ -1628,37 +1630,43 @@ class AntiSpywareRuleBaseFactory(factory.Factory):
         model = AntiSpywareRuleBaseModel
 
     name = factory.Sequence(lambda n: f"rule_{n}")
-    severity = [Severity.critical, Severity.high]
-    category = Category.spyware
+    severity = [AntiSpywareSeverity.critical, AntiSpywareSeverity.high]
+    category = AntiSpywareCategory.spyware
     threat_name = "any"
-    packet_capture = PacketCapture.disable
+    packet_capture = AntiSpywarePacketCapture.disable
 
     @classmethod
-    def with_severity(cls, severities: list[Severity], **kwargs):
+    def with_severity(cls, severities: list[AntiSpywareSeverity], **kwargs):
         """Create an instance with specific severity levels."""
         return cls(severity=severities, **kwargs)
 
     @classmethod
-    def with_category(cls, category: Category = Category.botnet, **kwargs):
+    def with_category(
+        cls, category: AntiSpywareCategory = AntiSpywareCategory.botnet, **kwargs
+    ):
         """Create an instance with a specific category."""
         return cls(category=category, **kwargs)
 
 
-class ThreatExceptionBaseFactory(factory.Factory):
+class AntiSpywareThreatExceptionBaseFactory(factory.Factory):
     """Factory for creating ThreatExceptionBase instances."""
 
     class Meta:
-        model = ThreatExceptionBase
+        model = AntiSpywareThreatExceptionBase
 
     name = factory.Sequence(lambda n: f"exception_{n}")
-    packet_capture = PacketCapture.single_packet
-    exempt_ip = [factory.SubFactory(ExemptIpEntryFactory)]
+    packet_capture = AntiSpywarePacketCapture.single_packet
+    exempt_ip = factory.LazyAttribute(
+        lambda _: [AntiSpywareExemptIpEntry(name="192.168.1.1")]
+    )
     notes = "Test exception"
 
     @classmethod
     def with_multiple_exempt_ips(cls, ips: list[str], **kwargs):
         """Create an instance with multiple exempt IPs."""
-        return cls(exempt_ip=[ExemptIpEntryFactory(name=ip) for ip in ips], **kwargs)
+        return cls(
+            exempt_ip=[AntiSpywareExemptIpEntry(name=ip) for ip in ips], **kwargs
+        )
 
 
 # SDK tests against SCM API
@@ -1672,8 +1680,10 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
     description = factory.Faker("sentence")
     folder = "Shared"
     cloud_inline_analysis = False
-    rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+    rules = factory.LazyAttribute(lambda _: [AntiSpywareRuleBaseFactory()])
+    threat_exception = factory.LazyAttribute(
+        lambda _: [AntiSpywareThreatExceptionBaseFactory()]
+    )
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -1689,7 +1699,7 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
     def with_mica_engine(cls, entries: list[dict] = None, **kwargs):
         """Create a profile with MICA engine entries."""
         if entries is None:
-            entries = [MicaEngineSpywareEnabledEntryFactory()]
+            entries = [AntiSpywareMicaEngineSpywareEnabledEntryFactory()]
         return cls(mica_engine_spyware_enabled=entries, **kwargs)
 
     @classmethod
@@ -1712,7 +1722,9 @@ class AntiSpywareProfileUpdateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+    threat_exception = factory.List(
+        [factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)]
+    )
 
     @classmethod
     def with_cloud_inline_analysis(cls, enabled: bool = True, **kwargs):
@@ -1737,7 +1749,9 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
     folder = "Shared"
     cloud_inline_analysis = False
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List([factory.SubFactory(ThreatExceptionBaseFactory)])
+    threat_exception = factory.List(
+        [factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)]
+    )
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -1777,8 +1791,8 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
             rules=[
                 {
                     "name": "TestRule",
-                    "severity": [Severity.critical],
-                    "category": Category.spyware,
+                    "severity": [AntiSpywareSeverity.critical],
+                    "category": AntiSpywareCategory.spyware,
                 }
             ],
         )
@@ -1793,8 +1807,8 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
             rules=[
                 {
                     "name": "TestRule",
-                    "severity": [Severity.critical],
-                    "category": Category.spyware,
+                    "severity": [AntiSpywareSeverity.critical],
+                    "category": AntiSpywareCategory.spyware,
                 }
             ],
         )
@@ -1808,8 +1822,8 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
             rules=[
                 {
                     "name": "TestRule",
-                    "severity": [Severity.critical],
-                    "category": Category.spyware,
+                    "severity": [AntiSpywareSeverity.critical],
+                    "category": AntiSpywareCategory.spyware,
                 }
             ],
         )
@@ -1862,8 +1876,8 @@ class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
             rules=[
                 {
                     "name": "TestRule",
-                    "severity": [Severity.critical],
-                    "category": Category.spyware,
+                    "severity": [AntiSpywareSeverity.critical],
+                    "category": AntiSpywareCategory.spyware,
                 }
             ],
         )
