@@ -15,7 +15,7 @@ from pydantic import (
 
 
 # Enums
-class InlinePolicyAction(str, Enum):
+class AntiSpywareInlinePolicyAction(str, Enum):
     """Enumeration of allowed inline policy actions."""
 
     alert = "alert"
@@ -26,7 +26,7 @@ class InlinePolicyAction(str, Enum):
     reset_server = "reset-server"
 
 
-class ExemptIpEntry(BaseModel):
+class AntiSpywareExemptIpEntry(BaseModel):
     """
     Represents an entry in the 'exempt_ip' list within a threat exception.
 
@@ -40,7 +40,7 @@ class ExemptIpEntry(BaseModel):
     )
 
 
-class PacketCapture(str, Enum):
+class AntiSpywarePacketCapture(str, Enum):
     """Enumeration of packet capture options."""
 
     disable = "disable"
@@ -48,7 +48,7 @@ class PacketCapture(str, Enum):
     extended_capture = "extended-capture"
 
 
-class Severity(str, Enum):
+class AntiSpywareSeverity(str, Enum):
     """Enumeration of severity levels."""
 
     critical = "critical"
@@ -59,7 +59,7 @@ class Severity(str, Enum):
     any = "any"
 
 
-class Category(str, Enum):
+class AntiSpywareCategory(str, Enum):
     """Enumeration of threat categories."""
 
     dns_proxy = "dns-proxy"
@@ -99,20 +99,20 @@ class Category(str, Enum):
 
 
 # Component Models
-class MicaEngineSpywareEnabledEntry(BaseModel):
+class AntiSpywareMicaEngineSpywareEnabledEntry(BaseModel):
     """Represents an entry in the 'mica_engine_spyware_enabled' list."""
 
     name: str = Field(
         ...,
         description="Name of the MICA engine spyware detector",
     )
-    inline_policy_action: InlinePolicyAction = Field(
-        InlinePolicyAction.alert,
+    inline_policy_action: AntiSpywareInlinePolicyAction = Field(
+        AntiSpywareInlinePolicyAction.alert,
         description="Inline policy action, defaults to 'alert'",
     )
 
 
-class BlockIpAction(BaseModel):
+class AntiSpywareBlockIpAction(BaseModel):
     """Represents the 'block_ip' action configuration."""
 
     track_by: str = Field(
@@ -128,7 +128,7 @@ class BlockIpAction(BaseModel):
     )
 
 
-class ActionRequest(RootModel[dict]):
+class AntiSpywareActionRequest(RootModel[dict]):
     """
     Represents the 'action' field in rules and threat exceptions for requests.
 
@@ -165,7 +165,7 @@ class ActionRequest(RootModel[dict]):
         return next(iter(self.root.keys()), "unknown")
 
 
-class ActionResponse(RootModel[dict]):
+class AntiSpywareActionResponse(RootModel[dict]):
     """
     Represents the 'action' field in rules and threat exceptions for responses.
 
@@ -209,11 +209,11 @@ class AntiSpywareRuleBaseModel(BaseModel):
         ...,
         description="Rule name",
     )
-    severity: List[Severity] = Field(
+    severity: List[AntiSpywareSeverity] = Field(
         ...,
         description="List of severities",
     )
-    category: Category = Field(
+    category: AntiSpywareCategory = Field(
         ...,
         description="Category",
     )
@@ -222,7 +222,7 @@ class AntiSpywareRuleBaseModel(BaseModel):
         description="Threat name",
         min_length=3,
     )
-    packet_capture: Optional[PacketCapture] = Field(
+    packet_capture: Optional[AntiSpywarePacketCapture] = Field(
         None,
         description="Packet capture setting",
     )
@@ -235,18 +235,18 @@ class AntiSpywareRuleBaseModel(BaseModel):
         return v or "any"
 
 
-class ThreatExceptionBase(BaseModel):
+class AntiSpywareThreatExceptionBase(BaseModel):
     """Base model for threat exceptions."""
 
     name: str = Field(
         ...,
         description="Threat exception name",
     )
-    packet_capture: PacketCapture = Field(
+    packet_capture: AntiSpywarePacketCapture = Field(
         ...,
         description="Packet capture setting",
     )
-    exempt_ip: Optional[List[ExemptIpEntry]] = Field(
+    exempt_ip: Optional[List[AntiSpywareExemptIpEntry]] = Field(
         None,
         description="Exempt IP list",
     )
@@ -288,7 +288,9 @@ class AntiSpywareProfileBase(BaseModel):
         None,
         description="Inline exception IP addresses",
     )
-    mica_engine_spyware_enabled: Optional[List[MicaEngineSpywareEnabledEntry]] = Field(
+    mica_engine_spyware_enabled: Optional[
+        List[AntiSpywareMicaEngineSpywareEnabledEntry]
+    ] = Field(
         None,
         description="List of MICA engine spyware enabled entries",
     )
@@ -296,7 +298,7 @@ class AntiSpywareProfileBase(BaseModel):
         ...,
         description="List of rules",
     )
-    threat_exception: Optional[List[ThreatExceptionBase]] = Field(
+    threat_exception: Optional[List[AntiSpywareThreatExceptionBase]] = Field(
         None,
         description="List of threat exceptions",
     )
@@ -349,6 +351,11 @@ class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
     Model for updating an existing Anti-Spyware Profile.
     All fields are optional to allow partial updates.
     """
+
+    id: Optional[UUID] = Field(
+        ...,
+        description="Profile ID",
+    )
 
 
 class AntiSpywareProfileResponseModel(AntiSpywareProfileBase):
