@@ -1,37 +1,35 @@
 # tests/scm/config/security/test_anti_spyware_profile.py
 
-import pytest
+# Standard library imports
 from unittest.mock import MagicMock
+
+# External libraries
+import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 from scm.config.security.anti_spyware_profile import AntiSpywareProfile
 from scm.exceptions import (
     APIError,
-    BadRequestError,
     InvalidObjectError,
     ObjectNotPresentError,
     MalformedCommandError,
     MissingQueryParameterError,
-    ConflictError,
     ReferenceNotZeroError,
 )
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileCreateModel,
     AntiSpywareProfileResponseModel,
-    Severity,
-    Category,
-    ActionRequest,
-    ActionResponse,
-    AntiSpywareProfileUpdateModel,
-    PacketCapture,
+    AntiSpywareSeverity,
+    AntiSpywareCategory,
+    AntiSpywareActionRequest,
+    AntiSpywareActionResponse,
+    AntiSpywarePacketCapture,
 )
-
 from tests.factories import (
     AntiSpywareProfileRequestFactory,
     AntiSpywareRuleCreateFactory,
     ThreatExceptionCreateFactory,
 )
-
-from pydantic import ValidationError as PydanticValidationError
 
 
 @pytest.mark.usefixtures("load_env")
@@ -168,10 +166,10 @@ class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
         assert len(existing_objects) == 2
         assert existing_objects[0].name == "TestProfile1"
         assert existing_objects[0].rules[0].severity == [
-            Severity.critical,
-            Severity.high,
+            AntiSpywareSeverity.critical,
+            AntiSpywareSeverity.high,
         ]
-        assert existing_objects[0].rules[0].category == Category.spyware
+        assert existing_objects[0].rules[0].category == AntiSpywareCategory.spyware
         assert existing_objects[0].threat_exception[0].name == "TestException1"
         assert (
             existing_objects[0].threat_exception[0].exempt_ip[0].name == "192.168.1.1"
@@ -379,9 +377,9 @@ class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
             "rules": [
                 {
                     "name": "UpdatedRule",
-                    "severity": [Severity.high],
-                    "category": Category.botnet,
-                    "packet_capture": PacketCapture.extended_capture,
+                    "severity": [AntiSpywareSeverity.high],
+                    "category": AntiSpywareCategory.botnet,
+                    "packet_capture": AntiSpywarePacketCapture.extended_capture,
                     "threat_name": "any",
                 }
             ],
@@ -404,9 +402,12 @@ class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
         )  # Compare string representations
         assert updated_object.name == "UpdatedProfile"
         assert updated_object.description == "An updated anti-spyware profile"
-        assert updated_object.rules[0].severity == [Severity.high]
-        assert updated_object.rules[0].category == Category.botnet
-        assert updated_object.rules[0].packet_capture == PacketCapture.extended_capture
+        assert updated_object.rules[0].severity == [AntiSpywareSeverity.high]
+        assert updated_object.rules[0].category == AntiSpywareCategory.botnet
+        assert (
+            updated_object.rules[0].packet_capture
+            == AntiSpywarePacketCapture.extended_capture
+        )
 
         # Verify the API call
         self.mock_scm.put.assert_called_once()  # Just verify it was called once
@@ -828,13 +829,13 @@ class TestActionValidation(TestAntiSpywareProfileBase):
 
     def test_action_request_string_conversion(self):
         """Test string to dict conversion in ActionRequest."""
-        action = ActionRequest.model_validate("alert")
+        action = AntiSpywareActionRequest.model_validate("alert")
         assert action.root == {"alert": {}}
 
     def test_action_request_invalid_type(self):
         """Test invalid type handling in ActionRequest."""
         with pytest.raises(PydanticValidationError) as exc_info:
-            ActionRequest.model_validate(123)  # Neither string nor dict
+            AntiSpywareActionRequest.model_validate(123)  # Neither string nor dict
         assert (
             str(exc_info.value)
             == "1 validation error for ActionRequest\n  Value error, Invalid action format; must be a string or dict. [type=value_error, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
@@ -843,7 +844,7 @@ class TestActionValidation(TestAntiSpywareProfileBase):
     def test_action_request_no_action(self):
         """Test validation when no action is provided."""
         with pytest.raises(PydanticValidationError) as exc_info:
-            ActionRequest.model_validate({})
+            AntiSpywareActionRequest.model_validate({})
         assert (
             str(exc_info.value)
             == "1 validation error for ActionRequest\n  Value error, Exactly one action must be provided in 'action' field. [type=value_error, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
@@ -852,7 +853,7 @@ class TestActionValidation(TestAntiSpywareProfileBase):
     def test_action_request_multiple_actions(self):
         """Test validation when multiple actions are provided."""
         with pytest.raises(PydanticValidationError) as exc_info:
-            ActionRequest.model_validate({"alert": {}, "drop": {}})
+            AntiSpywareActionRequest.model_validate({"alert": {}, "drop": {}})
         assert (
             str(exc_info.value)
             == "1 validation error for ActionRequest\n  Value error, Exactly one action must be provided in 'action' field. [type=value_error, input_value={'alert': {}, 'drop': {}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
@@ -861,18 +862,18 @@ class TestActionValidation(TestAntiSpywareProfileBase):
     def test_action_request_get_action_name(self):
         """Test get_action_name method for ActionRequest."""
         # Test with valid action
-        action = ActionRequest.model_validate({"alert": {}})
+        action = AntiSpywareActionRequest.model_validate({"alert": {}})
         assert action.get_action_name() == "alert"
 
     def test_action_response_string_conversion(self):
         """Test string to dict conversion in ActionResponse."""
-        action = ActionResponse.model_validate("alert")
+        action = AntiSpywareActionResponse.model_validate("alert")
         assert action.root == {"alert": {}}
 
     def test_action_response_invalid_type(self):
         """Test invalid type handling in ActionResponse."""
         with pytest.raises(PydanticValidationError) as exc_info:
-            ActionResponse.model_validate(123)  # Neither string nor dict
+            AntiSpywareActionResponse.model_validate(123)  # Neither string nor dict
         assert (
             str(exc_info.value)
             == "1 validation error for ActionResponse\n  Value error, Invalid action format; must be a string or dict. [type=value_error, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
@@ -880,18 +881,18 @@ class TestActionValidation(TestAntiSpywareProfileBase):
 
     def test_action_response_empty_dict(self):
         """Test that ActionResponse accepts empty dict."""
-        action = ActionResponse.model_validate({})
+        action = AntiSpywareActionResponse.model_validate({})
         assert action.root == {}
 
     def test_action_response_single_action(self):
         """Test ActionResponse with single valid action."""
-        action = ActionResponse.model_validate({"alert": {}})
+        action = AntiSpywareActionResponse.model_validate({"alert": {}})
         assert action.root == {"alert": {}}
 
     def test_action_response_multiple_actions(self):
         """Test validation when multiple actions are provided."""
         with pytest.raises(PydanticValidationError) as exc_info:
-            ActionResponse.model_validate({"alert": {}, "drop": {}})
+            AntiSpywareActionResponse.model_validate({"alert": {}, "drop": {}})
         assert (
             str(exc_info.value)
             == "1 validation error for ActionResponse\n  Value error, At most one action must be provided in 'action' field. [type=value_error, input_value={'alert': {}, 'drop': {}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/value_error"
@@ -900,11 +901,11 @@ class TestActionValidation(TestAntiSpywareProfileBase):
     def test_action_response_get_action_name(self):
         """Test get_action_name method for ActionResponse."""
         # Test with valid action
-        action = ActionResponse.model_validate({"alert": {}})
+        action = AntiSpywareActionResponse.model_validate({"alert": {}})
         assert action.get_action_name() == "alert"
 
         # Test with empty dict (should return "unknown")
-        action = ActionResponse.model_validate({})
+        action = AntiSpywareActionResponse.model_validate({})
         assert action.get_action_name() == "unknown"
 
     def test_action_request_valid_actions(self):
@@ -920,7 +921,7 @@ class TestActionValidation(TestAntiSpywareProfileBase):
             "default",
         ]
         for action_type in valid_actions:
-            action = ActionRequest.model_validate({action_type: {}})
+            action = AntiSpywareActionRequest.model_validate({action_type: {}})
             assert action.get_action_name() == action_type
 
     def test_action_response_valid_actions(self):
@@ -936,14 +937,14 @@ class TestActionValidation(TestAntiSpywareProfileBase):
             "default",
         ]
         for action_type in valid_actions:
-            action = ActionResponse.model_validate({action_type: {}})
+            action = AntiSpywareActionResponse.model_validate({action_type: {}})
             assert action.get_action_name() == action_type
 
     def test_block_ip_action_validation(self):
         """Test BlockIpAction validation."""
         # Test valid block_ip action
         valid_action = {"block_ip": {"track_by": "source", "duration": 3600}}
-        action = ActionRequest.model_validate(valid_action)
+        action = AntiSpywareActionRequest.model_validate(valid_action)
         assert action.root == valid_action
 
 

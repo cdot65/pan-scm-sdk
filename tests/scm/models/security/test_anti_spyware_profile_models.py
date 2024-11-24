@@ -10,14 +10,14 @@ from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileUpdateModel,
     AntiSpywareProfileResponseModel,
     AntiSpywareRuleBaseModel,
-    ThreatExceptionBase,
-    ActionRequest,
-    ActionResponse,
-    BlockIpAction,
-    Category,
-    Severity,
-    PacketCapture,
-    ExemptIpEntry,
+    AntiSpywareThreatExceptionBase,
+    AntiSpywareActionRequest,
+    AntiSpywareActionResponse,
+    AntiSpywareBlockIpAction,
+    AntiSpywareCategory,
+    AntiSpywareSeverity,
+    AntiSpywarePacketCapture,
+    AntiSpywareExemptIpEntry,
 )
 from tests.factories import (
     AntiSpywareProfileCreateModelFactory,
@@ -35,10 +35,10 @@ class TestRuleBaseModel:
         """Test validation with valid data."""
         data = {
             "name": "TestRule",
-            "severity": [Severity.critical, Severity.high],
-            "category": Category.spyware,
+            "severity": [AntiSpywareSeverity.critical, AntiSpywareSeverity.high],
+            "category": AntiSpywareCategory.spyware,
             "threat_name": "test_threat",
-            "packet_capture": PacketCapture.disable,
+            "packet_capture": AntiSpywarePacketCapture.disable,
         }
         model = AntiSpywareRuleBaseModel(**data)
         assert model.name == data["name"]
@@ -52,7 +52,7 @@ class TestRuleBaseModel:
         data = {
             "name": "TestRule",
             "severity": ["invalid"],
-            "category": Category.spyware,
+            "category": AntiSpywareCategory.spyware,
         }
         with pytest.raises(ValidationError) as exc_info:
             AntiSpywareRuleBaseModel(**data)
@@ -62,7 +62,7 @@ class TestRuleBaseModel:
         """Test validation with invalid category."""
         data = {
             "name": "TestRule",
-            "severity": [Severity.critical],
+            "severity": [AntiSpywareSeverity.critical],
             "category": "invalid",
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -77,14 +77,14 @@ class TestThreatExceptionBase:
         """Test validation with valid data."""
         data = {
             "name": "TestException",
-            "packet_capture": PacketCapture.single_packet,
+            "packet_capture": AntiSpywarePacketCapture.single_packet,
             "exempt_ip": [{"name": "192.168.1.1"}],
             "notes": "Test notes",
         }
-        model = ThreatExceptionBase(**data)
+        model = AntiSpywareThreatExceptionBase(**data)
         assert model.name == data["name"]
         assert model.packet_capture == data["packet_capture"]
-        assert isinstance(model.exempt_ip[0], ExemptIpEntry)
+        assert isinstance(model.exempt_ip[0], AntiSpywareExemptIpEntry)
         assert model.notes == data["notes"]
 
     def test_threat_exception_base_invalid_packet_capture(self):
@@ -94,7 +94,7 @@ class TestThreatExceptionBase:
             "packet_capture": "invalid",
         }
         with pytest.raises(ValidationError) as exc_info:
-            ThreatExceptionBase(**data)
+            AntiSpywareThreatExceptionBase(**data)
         assert "Input should be 'disable'" in str(exc_info.value)
 
 
@@ -165,8 +165,8 @@ class TestAntiSpywareProfileResponseModel:
             "rules": [
                 {
                     "name": "TestRule",
-                    "severity": [Severity.critical],
-                    "category": Category.spyware,
+                    "severity": [AntiSpywareSeverity.critical],
+                    "category": AntiSpywareCategory.spyware,
                 }
             ],
         }
@@ -195,7 +195,7 @@ class TestActionModels:
     def test_action_request_valid(self):
         """Test validation of ActionRequest with valid data."""
         data = {"alert": {}}
-        model = ActionRequest.model_validate(data)
+        model = AntiSpywareActionRequest.model_validate(data)
         assert model.get_action_name() == "alert"
 
     def test_action_request_with_block_ip(self):
@@ -206,13 +206,13 @@ class TestActionModels:
                 "duration": 3600,
             }
         }
-        model = ActionRequest.model_validate(data)
+        model = AntiSpywareActionRequest.model_validate(data)
         assert model.get_action_name() == "block_ip"
 
     def test_action_response_empty(self):
         """Test validation of empty ActionResponse."""
         data = {}
-        model = ActionResponse.model_validate(data)
+        model = AntiSpywareActionResponse.model_validate(data)
         assert model.get_action_name() == "unknown"
 
     def test_block_ip_action_valid(self):
@@ -221,7 +221,7 @@ class TestActionModels:
             "track_by": "source",
             "duration": 3600,
         }
-        model = BlockIpAction(**data)
+        model = AntiSpywareBlockIpAction(**data)
         assert model.track_by == data["track_by"]
         assert model.duration == data["duration"]
 
@@ -232,26 +232,26 @@ class TestActionModels:
             "duration": 3601,  # Exceeds maximum
         }
         with pytest.raises(ValidationError) as exc_info:
-            BlockIpAction(**data)
+            AntiSpywareBlockIpAction(**data)
         assert "Input should be less than or equal to 3600" in str(exc_info.value)
 
     def test_action_request_string_conversion(self):
         """Test string to dict conversion in ActionRequest."""
         data = "alert"
-        model = ActionRequest.model_validate(data)
+        model = AntiSpywareActionRequest.model_validate(data)
         assert model.root == {"alert": {}}
         assert model.get_action_name() == "alert"
 
     def test_action_request_invalid_type(self):
         """Test invalid type handling in ActionRequest."""
         with pytest.raises(ValidationError) as exc_info:
-            ActionRequest.model_validate(123)  # Neither string nor dict
+            AntiSpywareActionRequest.model_validate(123)  # Neither string nor dict
         assert "Invalid action format; must be a string or dict." in str(exc_info.value)
 
     def test_action_request_no_action(self):
         """Test validation when no action is provided."""
         with pytest.raises(ValidationError) as exc_info:
-            ActionRequest.model_validate({})
+            AntiSpywareActionRequest.model_validate({})
         assert "Exactly one action must be provided in 'action' field." in str(
             exc_info.value
         )
@@ -259,7 +259,7 @@ class TestActionModels:
     def test_action_request_multiple_actions(self):
         """Test validation when multiple actions are provided."""
         with pytest.raises(ValidationError) as exc_info:
-            ActionRequest.model_validate({"alert": {}, "drop": {}})
+            AntiSpywareActionRequest.model_validate({"alert": {}, "drop": {}})
         assert "Exactly one action must be provided in 'action' field." in str(
             exc_info.value
         )
@@ -267,34 +267,34 @@ class TestActionModels:
     def test_action_response_string_conversion(self):
         """Test string to dict conversion in ActionResponse."""
         data = "alert"
-        model = ActionResponse.model_validate(data)
+        model = AntiSpywareActionResponse.model_validate(data)
         assert model.root == {"alert": {}}
         assert model.get_action_name() == "alert"
 
     def test_action_response_invalid_type(self):
         """Test invalid type handling in ActionResponse."""
         with pytest.raises(ValidationError) as exc_info:
-            ActionResponse.model_validate(123)  # Neither string nor dict
+            AntiSpywareActionResponse.model_validate(123)  # Neither string nor dict
         assert "Invalid action format; must be a string or dict." in str(exc_info.value)
 
     def test_action_response_empty_dict(self):
         """Test that ActionResponse accepts empty dict."""
         data = {}
-        model = ActionResponse.model_validate(data)
+        model = AntiSpywareActionResponse.model_validate(data)
         assert model.root == {}
         assert model.get_action_name() == "unknown"
 
     def test_action_response_single_action(self):
         """Test ActionResponse with single valid action."""
         data = {"alert": {}}
-        model = ActionResponse.model_validate(data)
+        model = AntiSpywareActionResponse.model_validate(data)
         assert model.root == {"alert": {}}
         assert model.get_action_name() == "alert"
 
     def test_action_response_multiple_actions(self):
         """Test validation when multiple actions are provided."""
         with pytest.raises(ValidationError) as exc_info:
-            ActionResponse.model_validate({"alert": {}, "drop": {}})
+            AntiSpywareActionResponse.model_validate({"alert": {}, "drop": {}})
         assert "At most one action must be provided in 'action' field." in str(
             exc_info.value
         )
@@ -312,7 +312,7 @@ class TestActionModels:
             "default",
         ]
         for action_type in valid_actions:
-            model = ActionRequest.model_validate({action_type: {}})
+            model = AntiSpywareActionRequest.model_validate({action_type: {}})
             assert model.get_action_name() == action_type
 
     def test_action_response_valid_actions(self):
@@ -328,7 +328,7 @@ class TestActionModels:
             "default",
         ]
         for action_type in valid_actions:
-            model = ActionResponse.model_validate({action_type: {}})
+            model = AntiSpywareActionResponse.model_validate({action_type: {}})
             assert model.get_action_name() == action_type
 
 
