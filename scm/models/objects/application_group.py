@@ -99,6 +99,12 @@ class ApplicationGroupUpdateModel(ApplicationGroupBaseModel):
     All fields are optional to allow partial updates.
     """
 
+    id: Optional[UUID] = Field(
+        ...,
+        description="The UUID of the application group",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
+
 
 class ApplicationGroupResponseModel(ApplicationGroupBaseModel):
     """
