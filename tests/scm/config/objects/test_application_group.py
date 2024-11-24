@@ -33,12 +33,15 @@ class TestApplicationGroupBase:
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_scm):
         """Setup method that runs before each test."""
-        self.mock_scm = mock_scm
+        self.mock_scm = mock_scm  # noqa
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = ApplicationGroup(self.mock_scm)
+        self.client = ApplicationGroup(self.mock_scm)  # noqa
+
+
+# -------------------- Test Classes Grouped by Functionality --------------------
 
 
 class TestApplicationGroupList(TestApplicationGroupBase):
@@ -352,10 +355,10 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
         test_object = ApplicationGroupCreateApiFactory()
         mock_response = ApplicationGroupResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response.model_dump()
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
         created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
-        self.mock_scm.post.assert_called_once_with(
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
             json=test_object.model_dump(exclude_unset=True),
         )
@@ -438,12 +441,12 @@ class TestApplicationGroupGet(TestApplicationGroupBase):
             folder="Shared",
         )
 
-        self.mock_scm.get.return_value = mock_response.model_dump()
+        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
         object_id = mock_response.id
 
         retrieved_object = self.client.get(object_id)
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/objects/v1/application-groups/{object_id}"
         )
         assert isinstance(retrieved_object, ApplicationGroupResponseModel)
@@ -548,19 +551,120 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
         assert updated_object.name == mock_response.name
         assert updated_object.members == mock_response.members
 
-    def test_update_object_not_present_error(self):
-        """Test error handling when object to update doesn't exist."""
-        update_data = ApplicationGroupUpdateApiFactory().model_dump()
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        # Create test data using factory
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-address",
+            folder="Shared",
+            members=["tag1", "tag2"],
+        )
+        input_data = update_data.model_dump()
 
-        self.mock_scm.put.side_effect = raise_mock_http_error(
+        # Use utility function to create mock HTTP error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_object_not_present_error(self):
+        """Test error handling when the object to update is not present."""
+        # Create test data
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-address",
+            folder="Shared",
+            members=["tag1", "tag2"],
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate object not present error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError):
-            self.client.update(update_data)
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_http_error_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test",
+                    "members": ["test1", "test2"],
+                }
+            )
+
+    def test_update_generic_exception_handling(self):
+        """Test handling of a generic exception during update."""
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test",
+                    "members": ["test1", "test2"],
+                }
+            )
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_server_error(self):
+        """Test handling of server errors during update."""
+        # Create test data
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-address",
+            folder="Shared",
+            members=["test1", "test2"],
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate server error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
 
 
 class TestApplicationGroupDelete(TestApplicationGroupBase):
@@ -570,10 +674,10 @@ class TestApplicationGroupDelete(TestApplicationGroupBase):
         """Test successful deletion of an object."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.return_value = None
+        self.mock_scm.delete.return_value = None  # noqa
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with(
+        self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/objects/v1/application-groups/{object_id}"
         )
 
@@ -581,7 +685,7 @@ class TestApplicationGroupDelete(TestApplicationGroupBase):
         """Test error handling when object to delete doesn't exist."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error(
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -592,6 +696,48 @@ class TestApplicationGroupDelete(TestApplicationGroupBase):
             self.client.delete(object_id)
 
         assert "Object Not Present" in str(exc_info.value)
+
+    def test_delete_http_error_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.delete(object_id)
+
+    def test_delete_generic_exception_handling(self):
+        """Test handling of a generic exception during delete."""
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete("abcdefg")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_delete_server_error(self):
+        """Test handling of server errors during delete."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.delete(object_id)
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_message
+        assert "HTTP error: 500" in error_message
+        assert "API error: E003" in error_message
 
 
 class TestApplicationGroupFetch(TestApplicationGroupBase):
@@ -605,14 +751,14 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
             folder="Shared",
         ).model_dump()
 
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         fetched_object = self.client.fetch(
             name=mock_response["name"],
             folder=mock_response["folder"],
         )
 
-        self.mock_scm.get.assert_called_once_with(
+        self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
             params={
                 "folder": mock_response["folder"],
@@ -621,6 +767,23 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         )
         assert fetched_object["id"] == mock_response["id"]
         assert fetched_object["name"] == mock_response["name"]
+
+    def test_fetch_object_not_present_error(self):
+        """Test fetching an object that does not exist."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.fetch(name="nonexistent", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Object Not Present'}" in error_msg
+        assert "HTTP error: 404" in error_msg
+        assert "API error: API_I00013" in error_msg
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -631,3 +794,121 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         """Test fetching with an empty folder parameter."""
         with pytest.raises(MissingQueryParameterError):
             self.client.fetch(name="test", folder="")
+
+    def test_fetch_invalid_response_format_error(self):
+        """Test fetching an object when the API returns an unexpected format."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="Invalid response format",
+            error_type="Invalid Object",
+        )
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Invalid Object'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_generic_exception_handling(self):
+        """Test generic exception handling during fetch."""
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_fetch_http_error_no_response_content(self):
+        """Test that an HTTPError without response content in fetch() re-raises the exception."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.fetch(name="test-address", folder="Shared")
+
+    def test_fetch_server_error(self):
+        """Test handling of server errors during fetch."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_missing_id_field_error(self):
+        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
+        # Mock response without 'id' field
+        mock_response = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_fetch_no_container_provided_error(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_fetch_multiple_containers_provided_error(self):
+        """Test that InvalidObjectError is raised when multiple container parameters are provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(
+                name="test-address",
+                folder="Shared",
+                snippet="TestSnippet",
+            )
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_fetch_invalid_response_type_error(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test123", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+
+# -------------------- End of Test Classes --------------------
