@@ -1,6 +1,7 @@
 # tests/scm/config/security/test_security_rules.py
-import uuid
+
 # Standard library imports
+import uuid
 from unittest.mock import MagicMock
 
 # External libraries
