@@ -102,6 +102,7 @@ class TestApplicationGroupUpdateModel:
     def test_application_group_update_model_valid(self):
         """Test validation with valid update data."""
         data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
             "folder": "Shared",
