@@ -185,10 +185,7 @@ class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Prisma Access", snippet="TestSnippet")
 
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
         logger.debug("List validation failed as expected for multiple containers")
 
 
