@@ -3,6 +3,7 @@
 # Standard library imports
 import logging
 from typing import List, Dict, Any, Optional
+from uuid import UUID
 
 # External libraries
 from requests import Response
@@ -57,7 +58,7 @@ class SecurityRule(BaseObject):
             # Validate that the rulebase is of type `pre` or `post`
             if not isinstance(rulebase, SecurityRuleRulebase):
                 try:
-                    rulebase = SecurityRuleRulebase(rulebase.lower())
+                    SecurityRuleRulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
@@ -70,22 +71,23 @@ class SecurityRule(BaseObject):
                 by_alias=True,
             )
 
-            # Send the updated object to the remote API as JSON
-            response = self.api_client.post(
+            # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
+            response: Dict[str, Any] = self.api_client.post(
                 self.ENDPOINT,
-                params={"position": rulebase.value},
                 json=payload,
             )
 
-            # Extract JSON data from the response
-            response_data = response.json()
-
             # Return the SCM API response as a new Pydantic object
-            return SecurityRuleResponseModel(**response_data)
+            return SecurityRuleResponseModel(**response)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -112,26 +114,25 @@ class SecurityRule(BaseObject):
             # Validate that the rulebase is of type `pre` or `post`
             if not isinstance(rulebase, SecurityRuleRulebase):
                 try:
-                    rulebase = SecurityRuleRulebase(rulebase.lower())
+                    SecurityRuleRulebase(rulebase.lower())
                 except ValueError:
                     raise InvalidObjectError("rulebase must be either 'pre' or 'post'")
 
             # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
-            response = self.api_client.get(
-                endpoint,
-                params={"position": rulebase.value},
-            )
-
-            # Extract JSON data from the response
-            response_data = response.json()
+            response: Dict[str, Any] = self.api_client.get(endpoint)
 
             # Return the SCM API response as a new Pydantic object
-            return SecurityRuleResponseModel(**response_data)
+            return SecurityRuleResponseModel(**response)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -173,21 +174,23 @@ class SecurityRule(BaseObject):
 
             # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(
+            response: Dict[str, Any] = self.api_client.put(
                 endpoint,
                 params={"position": rulebase.value},
                 json=payload,
             )
 
-            # Extract JSON data from the response
-            response_data = response.json()
-
             # Return the SCM API response as a new Pydantic object
-            return SecurityRuleResponseModel(**response_data)
+            return SecurityRuleResponseModel(**response)
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -464,8 +467,13 @@ class SecurityRule(BaseObject):
             )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -555,12 +563,6 @@ class SecurityRule(BaseObject):
                     http_status_code=500,
                 )
 
-            if "_errors" in response:
-                ErrorHandler.raise_for_error(
-                    response,
-                    http_status_code=400,
-                )
-
             if "id" in response:
                 address = SecurityRuleResponseModel(**response)
                 return address.model_dump(
@@ -575,8 +577,13 @@ class SecurityRule(BaseObject):
                 )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -617,8 +624,13 @@ class SecurityRule(BaseObject):
             )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
@@ -629,7 +641,7 @@ class SecurityRule(BaseObject):
 
     def move(
         self,
-        rule_id: str,
+        rule_id: UUID,
         data: Dict[str, Any],
     ) -> None:
         """
@@ -649,12 +661,8 @@ class SecurityRule(BaseObject):
         """
         try:
             rule_id_str = str(rule_id)
-            move_config = SecurityRuleMoveModel(
-                source_rule=rule_id,
-                **data,
-            )
+            move_config = SecurityRuleMoveModel(**data)
             payload = move_config.model_dump(exclude_none=True)
-            payload["source_rule"] = rule_id_str
 
             endpoint = f"{self.ENDPOINT}/{rule_id_str}:move"
             self.api_client.post(
@@ -663,8 +671,13 @@ class SecurityRule(BaseObject):
             )
 
         except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
             response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
                     response.json(),
                     response.status_code,
