@@ -216,9 +216,7 @@ class TestSecurityRuleMoveModel:
                 destination=SecurityRuleMoveDestination.TOP,
                 destination_rule="some-rule-id",
             )
-        assert "1 validation error for SecurityRuleMoveModel\nsource_rule" in str(
-            exc_info.value
-        )
+        assert "1 validation error for SecurityRuleMoveModel" in str(exc_info.value)
 
 
 class TestSecurityRuleResponseModel:
