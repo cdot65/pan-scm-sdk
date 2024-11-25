@@ -2301,19 +2301,27 @@ class SecurityRuleUpdateApiFactory(factory.Factory):
     description = factory.Faker("sentence")
     tag = ["updated-tag"]
 
-    # Optional fields with None defaults to allow partial updates
-    disabled = None
-    from_ = None
-    source = None
-    source_user = None
-    source_hip = None
-    to_ = None
-    destination = None
-    destination_hip = None
-    application = None
-    service = None
-    category = None
-    action = None
+    # Default lists - change from None to empty lists
+    from_ = factory.List([])
+    source = factory.List([])
+    source_user = factory.List([])
+    source_hip = factory.List([])
+    to_ = factory.List([])
+    destination = factory.List([])
+    destination_hip = factory.List([])
+    application = factory.List([])
+    service = factory.List([])
+    category = factory.List([])
+
+    # Boolean flags with defaults
+    disabled = False
+    negate_source = False
+    negate_destination = False
+    log_start = False
+    log_end = True
+
+    # Optional fields
+    action = SecurityRuleAction.allow
     profile_setting = None
     log_setting = None
     schedule = None
@@ -2394,13 +2402,12 @@ class SecurityRuleMoveApiFactory(factory.Factory):
     class Meta:
         model = SecurityRuleMoveModel
 
-    source_rule = factory.LazyFunction(lambda: str(uuid.uuid4()))
     destination = SecurityRuleMoveDestination.TOP
     rulebase = SecurityRuleRulebase.PRE
     destination_rule = None
 
     @classmethod
-    def before_rule(cls, dest_rule: str = None, **kwargs):
+    def before_rule(cls, dest_rule=None, **kwargs):
         """Create a move configuration for placing before another rule."""
         if dest_rule is None:
             dest_rule = str(uuid.uuid4())
@@ -2411,7 +2418,7 @@ class SecurityRuleMoveApiFactory(factory.Factory):
         )
 
     @classmethod
-    def after_rule(cls, dest_rule: str = None, **kwargs):
+    def after_rule(cls, dest_rule=None, **kwargs):
         """Create a move configuration for placing after another rule."""
         if dest_rule is None:
             dest_rule = str(uuid.uuid4())
