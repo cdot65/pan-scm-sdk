@@ -171,7 +171,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 ).model_dump(by_alias=True),
             ]
         }
-        self.mock_scm.get.return_value = mock_response # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test each type of filter
         filters = {
@@ -203,7 +203,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 ).model_dump(by_alias=True)
             ]
         }
-        self.mock_scm.get.return_value = mock_response # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
@@ -278,7 +278,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 ).model_dump(by_alias=True),
             ]
         }
-        self.mock_scm.get.return_value = mock_response # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test multiple combined filters
         filtered_objects = self.client.list(
@@ -363,7 +363,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 ).model_dump(by_alias=True),
             ]
         }
-        self.mock_scm.get.return_value = mock_response # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test filtering disabled rules
         filtered_objects = self.client.list(folder="Shared", disabled=True)
@@ -393,7 +393,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 ).model_dump(by_alias=True),
             ]
         }
-        self.mock_scm.get.return_value = mock_response # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test filtering by log setting
         filtered_objects = self.client.list(
@@ -452,7 +452,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error # noqa
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
             self.client.list(folder="Shared")
@@ -510,10 +510,12 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         test_object = SecurityRuleCreateApiFactory.build()
         mock_response = SecurityRuleResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response.model_dump(by_alias=True) # noqa
+        self.mock_scm.post.return_value = mock_response.model_dump(
+            by_alias=True
+        )  # noqa
         created_object = self.client.create(test_object.model_dump(by_alias=True))
 
-        self.mock_scm.post.assert_called_once_with( # noqa
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
             json=test_object.model_dump(by_alias=True),
         )
@@ -527,7 +529,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_http_error # noqa
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
             self.client.create(
@@ -547,7 +549,9 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         )
 
         mock_response = SecurityRuleResponseFactory.from_request(test_object)
-        self.mock_scm.post.return_value = mock_response.model_dump(by_alias=True) # noqa
+        self.mock_scm.post.return_value = mock_response.model_dump(
+            by_alias=True
+        )  # noqa
 
         created_object = self.client.create(test_object.model_dump(by_alias=True))
 
@@ -616,10 +620,10 @@ class TestSecurityRuleGet(TestSecurityRuleBase):
         """Test retrieving a specific object."""
         mock_response = SecurityRuleResponseFactory.build()
 
-        self.mock_scm.get.return_value = mock_response.model_dump(by_alias=True) # noqa
+        self.mock_scm.get.return_value = mock_response.model_dump(by_alias=True)  # noqa
         retrieved_object = self.client.get(str(mock_response.id))
 
-        self.mock_scm.get.assert_called_once_with( # noqa
+        self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{mock_response.id}"
         )
         assert isinstance(retrieved_object, SecurityRuleResponseModel)
@@ -629,7 +633,7 @@ class TestSecurityRuleGet(TestSecurityRuleBase):
         """Test error handling when object is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.get.side_effect = raise_mock_http_error( # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -709,13 +713,13 @@ class TestSecurityRuleUpdate(TestSecurityRuleBase):
 
         # Create mock response
         mock_response = SecurityRuleResponseFactory.from_request(update_data)
-        self.mock_scm.put.return_value = mock_response.model_dump(by_alias=True) # noqa
+        self.mock_scm.put.return_value = mock_response.model_dump(by_alias=True)  # noqa
 
         # Perform update
         updated_object = self.client.update(input_data)
 
         # Assert the put method was called with correct parameters
-        self.mock_scm.put.assert_called_once_with( # noqa
+        self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{update_data.id}",
             params={"position": "pre"},
             json=input_data,
@@ -847,10 +851,10 @@ class TestSecurityRuleDelete(TestSecurityRuleBase):
         """Test successful deletion of an object."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.return_value = None # noqa
+        self.mock_scm.delete.return_value = None  # noqa
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with( # noqa
+        self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{object_id}",
             params={"position": "pre"},
         )
@@ -859,7 +863,7 @@ class TestSecurityRuleDelete(TestSecurityRuleBase):
         """Test deleting an object that is referenced."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error( # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
             status_code=409,
             error_code="E009",
             message="Reference not zero",
@@ -1107,10 +1111,10 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             "rulebase": "pre",
         }
 
-        self.mock_scm.post.return_value = None # noqa
-        self.client.move(source_rule, move_data) # noqa
+        self.mock_scm.post.return_value = None  # noqa
+        self.client.move(source_rule, move_data)  # noqa
 
-        self.mock_scm.post.assert_called_once_with( # noqa
+        self.mock_scm.post.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{source_rule}:move",
             json=move_data,
         )
@@ -1124,10 +1128,10 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             rulebase=SecurityRuleRulebase.PRE,
         ).model_dump(exclude_none=True)
 
-        self.mock_scm.post.return_value = None # noqa
-        self.client.move(source_rule, move_data) # noqa
+        self.mock_scm.post.return_value = None  # noqa
+        self.client.move(source_rule, move_data)  # noqa
 
-        self.mock_scm.post.assert_called_once_with( # noqa
+        self.mock_scm.post.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{source_rule}:move",
             json=move_data,
         )
@@ -1141,10 +1145,10 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             rulebase=SecurityRuleRulebase.PRE,
         ).model_dump(exclude_none=True)
 
-        self.mock_scm.post.return_value = None # noqa
-        self.client.move(source_rule, move_data) # noqa
+        self.mock_scm.post.return_value = None  # noqa
+        self.client.move(source_rule, move_data)  # noqa
 
-        self.mock_scm.post.assert_called_once_with( # noqa
+        self.mock_scm.post.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{source_rule}:move",
             json=move_data,
         )
@@ -1159,7 +1163,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         }
 
         with pytest.raises(ValidationError) as exc_info:
-            self.client.move(source_rule, move_data) # noqa
+            self.client.move(source_rule, move_data)  # noqa
 
         assert (
             "1 validation error for SecurityRuleMoveModel\ndestination\n  Input should be 'top', 'bottom', 'before' or 'after'"
@@ -1175,7 +1179,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         }
 
         with pytest.raises(ValidationError) as exc_info:
-            self.client.move(source_rule, move_data) # noqa
+            self.client.move(source_rule, move_data)  # noqa
 
         assert "destination_rule is required when destination is 'before'" in str(
             exc_info.value
@@ -1189,7 +1193,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             "rulebase": "pre",
         }
 
-        self.mock_scm.post.side_effect = raise_mock_http_error( # noqa
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Rule not found",
@@ -1197,7 +1201,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         )
 
         with pytest.raises(ObjectNotPresentError) as exc_info:
-            self.client.move(rule_id, move_data) # noqa
+            self.client.move(rule_id, move_data)  # noqa
 
         assert (
             "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
@@ -1217,10 +1221,10 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_http_error # noqa
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.move(rule_id, move_data) # noqa
+            self.client.move(rule_id, move_data)  # noqa
 
     def test_move_generic_exception_handling(self):
         """Test handling of a generic exception during move."""
@@ -1230,10 +1234,10 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             "rulebase": "pre",
         }
 
-        self.mock_scm.post.side_effect = Exception("Generic error") # noqa
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.move(rule_id, move_data) # noqa
+            self.client.move(rule_id, move_data)  # noqa
 
         assert str(exc_info.value) == "Generic error"
 
@@ -1245,7 +1249,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             "rulebase": "pre",
         }
 
-        self.mock_scm.post.side_effect = raise_mock_http_error( # noqa
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
             status_code=500,
             error_code="E003",
             message="An internal error occurred",
@@ -1253,7 +1257,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         )
 
         with pytest.raises(APIError) as exc_info:
-            self.client.move(rule_id, move_data) # noqa
+            self.client.move(rule_id, move_data)  # noqa
 
         error_message = str(exc_info.value)
         assert "{'errorType': 'Internal Error'}" in error_message
@@ -1271,14 +1275,16 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
     def test_ensure_list_of_strings_single_string(self):
         """Test that a single string is converted to a list containing that string."""
         model = SecurityRuleCreateModel(
-            name="test-rule", source="192.168.1.1", folder="Shared" # noqa
+            name="test-rule", source="192.168.1.1", folder="Shared"  # noqa
         )
         assert model.source == ["192.168.1.1"]
 
     def test_ensure_list_of_strings_invalid_type(self):
         """Test that a non-string, non-list value raises a ValueError."""
         with pytest.raises(ValueError, match="Value must be a list of strings"):
-            SecurityRuleCreateModel(name="test-rule", source=123, folder="Shared") # noqa
+            SecurityRuleCreateModel(
+                name="test-rule", source=123, folder="Shared"
+            )  # noqa
 
     def test_ensure_list_of_strings_non_string_items(self):
         """Test that a list containing non-string items raises a ValueError."""

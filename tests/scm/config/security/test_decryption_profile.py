@@ -225,7 +225,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error # noqa
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
             self.client.list(folder="Shared")
@@ -239,10 +239,10 @@ class TestDecryptionProfileCreate(TestDecryptionProfileBase):
         test_object = DecryptionProfileCreateApiFactory.build()
         mock_response = DecryptionProfileResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response.model_dump() # noqa
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
         created_object = self.client.create(test_object.model_dump())
 
-        self.mock_scm.post.assert_called_once_with( # noqa
+        self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/security/v1/decryption-profiles",
             json=test_object.model_dump(),
         )
@@ -256,7 +256,7 @@ class TestDecryptionProfileCreate(TestDecryptionProfileBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_http_error # noqa
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
             self.client.create(
@@ -278,7 +278,7 @@ class TestDecryptionProfileCreate(TestDecryptionProfileBase):
         )
 
         mock_response = DecryptionProfileResponseFactory.from_request(test_object)
-        self.mock_scm.post.return_value = mock_response.model_dump() # noqa
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
 
         created_object = self.client.create(test_object.model_dump())
 
@@ -337,10 +337,10 @@ class TestDecryptionProfileGet(TestDecryptionProfileBase):
         """Test retrieving a specific object."""
         mock_response = DecryptionProfileResponseFactory.build()
 
-        self.mock_scm.get.return_value = mock_response.model_dump() # noqa
+        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
         retrieved_object = self.client.get(str(mock_response.id))
 
-        self.mock_scm.get.assert_called_once_with( # noqa
+        self.mock_scm.get.assert_called_once_with(  # noqa
             f"/config/security/v1/decryption-profiles/{mock_response.id}"
         )
         assert isinstance(retrieved_object, DecryptionProfileResponseModel)
@@ -350,7 +350,7 @@ class TestDecryptionProfileGet(TestDecryptionProfileBase):
         """Test error handling when object is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.get.side_effect = raise_mock_http_error( # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -551,10 +551,10 @@ class TestDecryptionProfileDelete(TestDecryptionProfileBase):
         """Test successful deletion of an object."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.return_value = None # noqa
+        self.mock_scm.delete.return_value = None  # noqa
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with( # noqa
+        self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/security/v1/decryption-profiles/{object_id}"
         )
 
@@ -562,7 +562,7 @@ class TestDecryptionProfileDelete(TestDecryptionProfileBase):
         """Test deleting an object that is referenced."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error( # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
             status_code=409,
             error_code="E009",
             message="Reference not zero",
