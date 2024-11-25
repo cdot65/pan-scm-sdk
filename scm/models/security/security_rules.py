@@ -222,6 +222,12 @@ class SecurityRuleUpdateModel(SecurityRuleBaseModel):
 
     rulebase: Optional[SecurityRuleRulebase] = None
 
+    id: Optional[UUID] = Field(
+        ...,
+        description="The UUID of the security rule",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
+
 
 class SecurityRuleResponseModel(SecurityRuleBaseModel):
     """Model for Security Rule responses, including the id field."""
@@ -236,10 +242,6 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
 class SecurityRuleMoveModel(BaseModel):
     """Model for security rule move operations."""
 
-    source_rule: UUID = Field(
-        ...,
-        description="UUID of the security rule to be moved",
-    )
     destination: SecurityRuleMoveDestination = Field(
         ...,
         description="Where to move the rule (top, bottom, before, after)",
@@ -248,7 +250,7 @@ class SecurityRuleMoveModel(BaseModel):
         ...,
         description="Which rulebase to use (pre or post)",
     )
-    destination_rule: Optional[str] = Field(
+    destination_rule: Optional[UUID] = Field(
         None,
         description="UUID of the reference rule for before/after moves",
     )
@@ -268,8 +270,9 @@ class SecurityRuleMoveModel(BaseModel):
                 raise ValueError(
                     f"destination_rule is required when destination is '{self.destination.value}'"
                 )
-        elif self.destination_rule is not None:
-            raise ValueError(
-                f"destination_rule should not be provided when destination is '{self.destination.value}'"
-            )
+        else:
+            if self.destination_rule is not None:
+                raise ValueError(
+                    f"destination_rule should not be provided when destination is '{self.destination.value}'"
+                )
         return self
