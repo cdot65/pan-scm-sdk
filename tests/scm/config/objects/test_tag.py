@@ -18,6 +18,7 @@ from scm.exceptions import (
     ReferenceNotZeroError,
 )
 from scm.models.objects import TagResponseModel
+
 # Import factories
 from tests.factories import (
     TagCreateApiFactory,
