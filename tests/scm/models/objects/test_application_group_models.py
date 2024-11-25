@@ -115,6 +115,7 @@ class TestApplicationGroupUpdateModel:
     def test_application_group_update_model_partial_update(self):
         """Test validation with partial update data."""
         data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access"],
         }
