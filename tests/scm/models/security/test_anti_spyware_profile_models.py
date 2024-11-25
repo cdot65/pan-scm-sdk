@@ -143,6 +143,7 @@ class TestAntiSpywareProfileUpdateModel:
     def test_profile_update_model_partial_update(self):
         """Test validation with partial update data."""
         data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "UpdatedProfile",
             "description": "Updated description",
             "rules": [],
