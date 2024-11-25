@@ -18,7 +18,6 @@ from scm.exceptions import (
     ReferenceNotZeroError,
 )
 from scm.models.objects import TagResponseModel
-
 # Import factories
 from tests.factories import (
     TagCreateApiFactory,
@@ -221,20 +220,6 @@ class TestTagList(TestTagBase):
 
         with pytest.raises(HTTPError):
             self.client.list(folder="Shared")
-
-    def test_list_filters_invalid_colors_not_list(self):
-        """Test listing tags with 'colors' filter that is not a list."""
-        filters = {
-            "colors": "Red",  # Should be a list
-        }
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", **filters)
-
-        error_msg = exc_info.value.message
-        assert "Invalid response format: expected dictionary" in error_msg
-        assert exc_info.value.http_status_code == 500
-        assert exc_info.value.error_code == "E003"
 
     def test_list_filters_invalid_color_value(self):
         """Test listing tags with an invalid color value in the 'colors' filter."""

@@ -19,7 +19,6 @@ from scm.exceptions import (
     ReferenceNotZeroError,
 )
 from scm.models.objects import (
-    ServiceCreateModel,
     ServiceResponseModel,
 )
 from tests.factories import (

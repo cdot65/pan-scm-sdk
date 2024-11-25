@@ -398,7 +398,7 @@ class TestApplicationCreate(TestApplicationBase):
         mock_error_response.content = b"Error content"
 
         mock_http_error = HTTPError(response=mock_error_response)
-        self.mock_scm.post.side_effect = mock_http_error
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(MalformedCommandError) as exc_info:
             self.client.create(test_data)
@@ -506,11 +506,11 @@ class TestApplicationUpdate(TestApplicationBase):
         # Mock response needs to be a MagicMock with json method
         mock_api_response = MagicMock()
         mock_api_response.json.return_value = mock_response
-        self.mock_scm.put.return_value = mock_response  # Return dict directly
+        self.mock_scm.put.return_value = mock_response  # noqa
 
         updated_object = self.client.update(update_data)
 
-        self.mock_scm.put.assert_called_once_with(
+        self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/objects/v1/applications/{update_data['id']}",
             json={k: v for k, v in update_data.items() if k != "id"},
         )
@@ -740,7 +740,7 @@ class TestApplicationFetch(TestApplicationBase):
         mock_http_error = HTTPError(response=mock_error_response)
         mock_http_error.response = mock_error_response
 
-        self.mock_scm.get.side_effect = mock_http_error
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.fetch(name="nonexistent", folder="Shared")
