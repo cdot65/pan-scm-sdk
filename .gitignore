@@ -252,3 +252,6 @@ poetry.lock
 /dataSources/
 /dataSources.local.xml
 /.idea/pan-scm-sdk.iml
+.idea/modules.xml
+openapi
+.DS_Store
