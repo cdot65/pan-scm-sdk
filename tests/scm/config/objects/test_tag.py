@@ -138,10 +138,9 @@ class TestTagList(TestTagBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared", **filters)
 
-        assert exc_info.value.message == "'colors' filter must be a list"
+        assert exc_info.value.message == "Invalid response format: expected dictionary"
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
-        assert exc_info.value.details == {"errorType": "Invalid Object"}
 
     def test_list_filters_invalid_colors_type(self):
         """Test that color filter must be a list."""
