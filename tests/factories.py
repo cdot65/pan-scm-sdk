@@ -97,6 +97,7 @@ from scm.models.security.vulnerability_protection_profiles import (
     VulnerabilityProfilePacketCapture,
     VulnerabilityProfileTimeAttribute,
     VulnerabilityProfileExemptIpEntry,
+    VulnerabilityProfileTimeAttributeTrackBy,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvDirection,
@@ -2879,20 +2880,15 @@ class VulnerabilityProfileRuleModelFactory(factory.Factory):
     category = VulnerabilityProfileCategory.any
     host = VulnerabilityProfileHost.any
     packet_capture = VulnerabilityProfilePacketCapture.disable
+    threat_name = "any"  # Add the default threat_name here
+    action = None
+    cve = ["any"]
+    vendor_id = ["any"]
 
     @classmethod
-    def with_severity(cls, severities: List[VulnerabilityProfileSeverity], **kwargs):
-        """Create an instance with specific severity levels."""
-        return cls(severity=severities, **kwargs)
-
-    @classmethod
-    def with_category(
-        cls,
-        category: VulnerabilityProfileCategory = VulnerabilityProfileCategory.brute_force,
-        **kwargs,
-    ):
-        """Create an instance with a specific category."""
-        return cls(category=category, **kwargs)
+    def with_threat_name(cls, threat_name: str = "custom_threat", **kwargs):
+        """Create an instance with a specific threat name."""
+        return cls(threat_name=threat_name, **kwargs)
 
 
 class VulnerabilityProfileThreatExceptionModelFactory(factory.Factory):
@@ -2903,13 +2899,32 @@ class VulnerabilityProfileThreatExceptionModelFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"exception_{n}")
     packet_capture = VulnerabilityProfilePacketCapture.single_packet
-    exempt_ip = [factory.SubFactory(VulnerabilityProfileExemptIpEntryFactory)]
+    exempt_ip = None
+    time_attribute = None
+    notes = "Test threat exception"
+
+    # Remove threat_name related methods as they belong to RuleModel
+    @classmethod
+    def with_exempt_ips(cls, ips: List[str], **kwargs):
+        """Create an instance with exempt IPs."""
+        return cls(
+            exempt_ip=[VulnerabilityProfileExemptIpEntry(name=ip) for ip in ips],
+            **kwargs,
+        )
 
     @classmethod
-    def with_multiple_exempt_ips(cls, ips: List[str], **kwargs):
-        """Create an instance with multiple exempt IPs."""
+    def with_time_attribute(
+        cls,
+        interval=60,
+        threshold=10,
+        track_by=VulnerabilityProfileTimeAttributeTrackBy.source,
+        **kwargs,
+    ):
+        """Create an instance with time attribute settings."""
         return cls(
-            exempt_ip=[VulnerabilityProfileExemptIpEntryFactory(name=ip) for ip in ips],
+            time_attribute=VulnerabilityProfileTimeAttribute(
+                interval=interval, threshold=threshold, track_by=track_by
+            ),
             **kwargs,
         )
 
@@ -2925,9 +2940,7 @@ class VulnerabilityProfileCreateApiFactory(factory.Factory):
     description = factory.Faker("sentence")
     folder = "Shared"
     rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
-    )
+    threat_exception = None
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
