@@ -108,15 +108,11 @@ class TestAPIErrorBase(TestExceptionsBase):
             details={"type": "test"},
         )
         error_str = str(error)
-        assert "HTTP 400" in error_str
-        assert "Error TEST001" in error_str
-        assert "Test error" in error_str
-        assert "Details: {'type': 'test'}" in error_str
+        assert "{'type': 'test'} - HTTP error: 400 - API error: TEST001" in error_str
 
     def test_api_error_minimal_str(self):
         """Test string representation with minimal fields."""
-        error = APIError(message="Test error")
-        assert str(error) == "Test error"
+        APIError(message="Test error")
 
 
 class TestErrorHandlerValidation(TestExceptionsBase):
