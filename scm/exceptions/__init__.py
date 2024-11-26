@@ -39,7 +39,7 @@ class APIError(Exception):
         self.message = message
         self.error_code = error_code
         self.http_status_code = http_status_code
-        self.details = details or {}
+        self.details = details
 
     def __str__(self):
         parts = []
@@ -212,12 +212,15 @@ class ErrorHandler:
     }
 
     # Map error codes to specific exception classes
-    ERROR_CODE_MAP: Dict[str, Type[APIError]] = {
+    ERROR_CODE_MAP: Dict[str, Union[Type[APIError], Dict[str, Type[APIError]]]] = {
         "API_I00013": {
-            "Object Not Present": ObjectNotPresentError,
-            "Operation Impossible": ObjectNotPresentError,
-            "Object Already Exists": ConflictError,
-            "Malformed Command": MalformedCommandError,
+            "object not present": ObjectNotPresentError,
+            "operation impossible": ObjectNotPresentError,
+            "object already exists": NameNotUniqueError,
+            "object_already_exists": NameNotUniqueError,
+            "non_zero_refs": ReferenceNotZeroError,
+            "reference not zero": ReferenceNotZeroError,
+            "malformed command": MalformedCommandError,
         },
         "API_I00035": InvalidObjectError,
         "E003": {
@@ -270,26 +273,41 @@ class ErrorHandler:
         error_details = error_response.details
         error_type = None
 
-        # if the error_details is of type dictionary, get `errorType`
+        # Extract errorType from error_details
         if isinstance(error_details, dict):
             error_type = error_details.get("errorType")
 
-        # if the error code if found in the ERROR_CODE_MAP, set the mapping to the code
+            # If errorType is not found, check inside the 'errors' list
+            if not error_type and "errors" in error_details:
+                errors_list = error_details["errors"]
+                if isinstance(errors_list, list) and len(errors_list) > 0:
+                    error_type = errors_list[0].get("type")
+
+        # Now, attempt to match the error_type
         if error_code in cls.ERROR_CODE_MAP:
             code_mapping = cls.ERROR_CODE_MAP[error_code]
 
             # if code_mapping is of type dictionary
             if isinstance(code_mapping, dict):
 
-                # First, try to match errorType
-                if error_type and error_type in code_mapping:
-                    exception_cls = code_mapping[error_type]
+                # Try to match errorType (case-insensitive)
+                if error_type:
+                    error_type_lower = error_type.lower()
+                    code_mapping_lower = {k.lower(): v for k, v in code_mapping.items()}
 
-                # Then, try to match message
-                elif message in code_mapping:
-                    exception_cls = code_mapping[message]
+                    # First, try to match errorType
+                    if error_type_lower in code_mapping_lower:
+                        exception_cls = code_mapping_lower[error_type_lower]
 
-                # Fallback to base exception class from status code
+                    # Then, try to match message
+                    elif message in code_mapping:
+                        exception_cls = code_mapping[message]
+
+                    # Default to base exception
+                    else:
+                        exception_cls = exception_cls
+
+                # Default to base exception
                 else:
                     exception_cls = exception_cls
 

@@ -101,37 +101,11 @@ class Scm:
             # Handle HTTP errors
             response = e.response
             if response is not None and response.content:
-                try:
-                    error_content = response.json()
-                except ValueError:
-                    # If JSON parsing fails, create a standard error response
-                    self.logger.error(
-                        f"Failed to parse error response: {response.content}"
-                    )
-                    error_content = {
-                        "_errors": [
-                            {
-                                "message": "Invalid JSON response format",
-                                "code": "E003",
-                                "details": {"errorType": "Invalid Format"},
-                            }
-                        ]
-                    }
-
-                try:
-                    self.logger.debug(f"HTTP error occurred: {e} - {error_content}")
-                    ErrorHandler.raise_for_error(
-                        error_content,
-                        response.status_code,
-                    )
-                except ValueError:
-                    self.logger.error("Invalid error response format")
-                    raise APIError(
-                        message="Invalid error response format",
-                        error_code="E003",
-                        http_status_code=response.status_code,
-                        details={"errorType": "Invalid Format"},
-                    ) from e
+                error_content = response.json()
+                ErrorHandler.raise_for_error(
+                    error_content,
+                    response.status_code,
+                )
             else:
                 raise APIError(f"HTTP error occurred: {e}") from e
 
