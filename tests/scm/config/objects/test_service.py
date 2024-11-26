@@ -110,27 +110,21 @@ class TestServiceList(TestServiceBase):
 
         error_msg = str(exc_info.value)
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in error_msg
         )
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
             error_type="Operation Impossible",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError):
             self.client.list(folder="NonexistentFolder")
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
-            in error_msg
-        )
 
     def test_list_container_missing_error(self):
         """

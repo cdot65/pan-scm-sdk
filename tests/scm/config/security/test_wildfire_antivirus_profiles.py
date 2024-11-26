@@ -840,7 +840,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Shared")
         assert (
-            "['\"name\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'name', 'error': '\"name\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in str(exc_info.value)
         )
         logger.error("Fetch failed: Empty name parameter provided")
@@ -856,7 +856,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in str(exc_info.value)
         )
         logger.error("Fetch failed: Empty folder parameter provided")
@@ -993,7 +993,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.list(folder="")
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in str(exc_info.value)
         )
         logger.error("List operation failed: Empty folder parameter provided")

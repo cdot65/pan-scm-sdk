@@ -79,7 +79,7 @@ class TestAddressGroupList(TestAddressGroupBase):
 
         error_msg = str(exc_info.value)
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in error_msg
         )
 
@@ -578,7 +578,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 
         error_msg = str(exc_info.value)
         assert (
-            "['\"name\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'name', 'error': '\"name\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in error_msg
         )
 
@@ -589,7 +589,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 
         error_msg = str(exc_info.value)
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in error_msg
         )
 
