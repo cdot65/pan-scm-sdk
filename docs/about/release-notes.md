@@ -2,6 +2,16 @@
 
 - Dropped dependency version on crypto package.
 
+## Version 0.2.2
+
+**Release Date:** November 21st
+
+### Updates:
+
+* Drop dependency version on crypto package
+
+---
+
 ## Version 0.2.1
 
 - Added client-side filtering to address list method.
