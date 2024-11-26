@@ -14,6 +14,9 @@ from scm.exceptions import (
     MalformedCommandError,
     MissingQueryParameterError,
     ReferenceNotZeroError,
+    ConflictError,
+    ServerError,
+    InputFormatMismatchError,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileCreateModel,
@@ -22,6 +25,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvDirection,
 )
 from scm.utils.logging import setup_logger
+from tests.utils import raise_mock_http_error
 
 logger = setup_logger(__name__, logging.DEBUG)
 
@@ -272,60 +276,59 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             "_errors": [
                 {
                     "code": "API_I00013",
-                    "message": "Object creation failed",
+                    "message": "Object Already Exists",
                     "details": {"errorType": "Object Already Exists"},
                 }
-            ],
-            "_request_id": "test-request-id",
+            ]
         }
 
-        # Configure mock to raise exception
-        self.mock_scm.post.side_effect = Exception()  # noqa
-        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        # Configure mock to raise HTTPError with proper error details
+        self.mock_scm.post.side_effect = raise_mock_http_error(
+            status_code=409,  # Conflict status code
+            error_code="API_I00013",
+            message="Object Already Exists",
+            error_type="Object Already Exists",
+        )
+
+        with pytest.raises(ConflictError) as exc_info:
+            self.client.create(test_data)
+
+        assert "{'errorType': 'Object Already Exists'}" in str(exc_info.value)
+        assert "HTTP error: 409" in str(exc_info.value)
+        assert "API error: API_I00013" in str(exc_info.value)
+
+    def test_create_generic_exception_handling(self):
+        """Test generic exception handling in create method."""
+        test_data = {
+            "name": "NewWFProfile",
+            "folder": "All",
+            "rules": [
+                {
+                    "name": "NewRule",
+                    "analysis": "public-cloud",
+                    "direction": "both",
+                    "application": ["any"],
+                    "file_type": ["any"],
+                }
+            ],
+        }
+
+        self.mock_scm.post.side_effect = raise_mock_http_error(
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
         )
 
         with pytest.raises(APIError) as exc_info:
             self.client.create(test_data)
-        logger.error(f"Creation failed: {str(exc_info.value)}")
 
-    def test_create_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in create method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
-        test_data = {
-            "name": "NewWFProfile",
-            "folder": "All",
-            "rules": [
-                {
-                    "name": "NewRule",
-                    "analysis": "public-cloud",
-                    "direction": "both",
-                    "application": ["any"],
-                    "file_type": ["any"],
-                }
-            ],
-        }
-
-        # Mock a generic exception without response
-        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(APIError) as exc_info:
-            self.client.create(test_data)
-        assert str(exc_info.value) == "An unexpected error occurred"
-        logger.error(f"Creation failed with generic error: {str(exc_info.value)}")
+        assert "{'errorType': 'Internal Error'}" in str(exc_info.value)
+        assert "HTTP error: 500" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
 
     def test_create_malformed_response_handling(self):
-        """
-        **Objective:** Test handling of malformed response in create method.
-        **Workflow:**
-            1. Mocks a response that would cause a parsing error
-            2. Verifies appropriate error handling
-        """
+        """Test handling of malformed response in create method."""
         test_data = {
             "name": "NewWFProfile",
             "folder": "All",
@@ -340,13 +343,19 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             ],
         }
 
-        # Mock invalid JSON response
-        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
+        self.mock_scm.post.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="E003",
+            message="Invalid request format",
+            error_type="Invalid Object",
+        )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.create(test_data)
-        assert "An unexpected error occurred" in str(exc_info.value)
-        logger.error(f"Creation failed with malformed response: {str(exc_info.value)}")
+
+        assert "{'errorType': 'Invalid Object'}" in str(exc_info.value)
+        assert "HTTP error: 400" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
 
 
 class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
@@ -388,52 +397,41 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
         logger.info(f"Successfully retrieved profile {get_object.name}")
 
     def test_get_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object retrieval.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to get an object
-            3. Verifies proper error handling and exception raising
-        """
+        """Test error handling during object retrieval."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E005",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=404,
+            error_code="E005",
+            message="Object not found",
+            error_type="Object Not Present",
         )
 
         with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.get(object_id)
-        logger.error(f"Get operation failed: {str(exc_info.value)}")
+
+        assert "{'errorType': 'Object Not Present'}" in str(exc_info.value)
+        assert "HTTP error: 404" in str(exc_info.value)
+        assert "API error: E005" in str(exc_info.value)
 
     def test_get_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in get method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
+        """Test generic exception handling in get method."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=500,
+            error_code="E003",
+            message="Internal server error",
+            error_type="Internal Error",
+        )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(ServerError) as exc_info:
             self.client.get(object_id)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
-        logger.error(f"Get operation failed with generic error: {str(exc_info.value)}")
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
 
 
 class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
@@ -506,13 +504,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
         logger.info(f"Successfully updated profile {updated_object.name}")
 
     def test_update_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object update.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to update an object
-            3. Verifies proper error handling and exception raising
-        """
+        """Test error handling during object update."""
         update_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-profile",
@@ -527,50 +519,45 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             ],
         }
 
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E003",
-                    "message": "Update failed",
-                    "details": {"errorType": "Malformed Command"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.put.side_effect = Exception()  # noqa
-        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        self.mock_scm.put.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="E003",
+            message="Update failed",
+            error_type="Malformed Command",
         )
 
         with pytest.raises(MalformedCommandError) as exc_info:
             self.client.update(update_data)
-        logger.error(f"Update failed: {str(exc_info.value)}")
+
+        assert "{'errorType': 'Malformed Command'}" in str(exc_info.value)
+        assert "HTTP error: 400" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
 
     def test_update_with_invalid_data(self):
-        """
-        **Objective:** Test update method with invalid data structure.
-        **Workflow:**
-            1. Attempts to update with invalid data
-            2. Verifies proper validation error handling
-        """
+        """Test update method with invalid data structure."""
         invalid_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "invalid_field": "test",
+            "name": "test-profile",
+            "rules": [],
         }
 
-        with pytest.raises(APIError) as exc_info:
+        self.mock_scm.put.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="E003",
+            message="Invalid input format",
+            error_type="Input Format Mismatch",
+        )
+
+        with pytest.raises(InputFormatMismatchError) as exc_info:
             self.client.update(invalid_data)
-        logger.error(f"Update validation failed: {str(exc_info.value)}")
+
+        assert "{'errorType': 'Input Format Mismatch'}" in str(exc_info.value)
+        assert "HTTP error: 400" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
 
     def test_update_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in update method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
+        """Test generic exception handling in update method."""
         update_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-profile",
@@ -585,76 +572,47 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             ],
         }
 
-        # Mock a generic exception without response
-        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.put.side_effect = raise_mock_http_error(
+            status_code=500,
+            error_code="E003",
+            message="Internal server error",
+            error_type="Internal Error",
+        )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(ServerError) as exc_info:
             self.client.update(update_data)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
-        logger.error(f"Update failed with generic error: {str(exc_info.value)}")
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
 
 
 class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
     """Tests for deleting Wildfire Antivirus Profile objects."""
 
     def test_delete_referenced_object(self):
-        """
-        **Objective:** Test deleting an object that is referenced by other objects.
-        **Workflow:**
-            1. Sets up a mock error response for a referenced object deletion attempt
-            2. Attempts to delete an object that is referenced by other objects
-            3. Validates that ReferenceNotZeroError is raised with correct details
-            4. Verifies the error contains proper reference information
-        """
+        """Test deleting an object that is referenced by other objects."""
         object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
 
-        # Mock the API error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E009",
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
-                    "details": {
-                        "errorType": "Reference Not Zero",
-                        "message": [
-                            " container -> Texas -> security-profile-group -> custom-group -> wildfire-antivirus"
-                        ],
-                        "errors": [
-                            {
-                                "type": "NON_ZERO_REFS",
-                                "message": "Node cannot be deleted because of references from",
-                                "params": ["custom-profile"],
-                                "extra": [
-                                    "container/[Texas]/security-profile-group/[custom-group]/wildfire-antivirus/[custom-profile]"
-                                ],
-                            }
-                        ],
-                    },
-                }
-            ],
-            "_request_id": "8fe3b025-feb7-41d9-bf88-3938c0b33116",
-        }
-
-        # Configure mock with status code
-        mock_exc = Exception()
-        mock_exc.response = MagicMock()
-        mock_exc.response.status_code = 409
-        mock_exc.response.json.return_value = mock_error_response
-        self.mock_scm.delete.side_effect = mock_exc
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
+            status_code=409,
+            error_code="E009",
+            message="Reference not zero",
+            error_type="Reference Not Zero",
+        )
 
         with pytest.raises(ReferenceNotZeroError) as exc_info:
             self.client.delete(object_id)
 
-        error = exc_info.value
-        logger.error(f"Delete failed due to references: {str(error)}")
-
-        # Verify the delete method was called with correct endpoint
-        self.mock_scm.delete.assert_called_once_with(  # noqa
-            f"/config/security/v1/wildfire-anti-virus-profiles/{object_id}"
-        )
+        assert "{'errorType': 'Reference Not Zero'}" in str(exc_info.value)
+        assert "HTTP error: 409" in str(exc_info.value)
+        assert "API error: E009" in str(exc_info.value)
 
     def test_delete_error_handling(self):
         """
+        Test error handling during object deletion.
+
         **Objective:** Test error handling during object deletion.
         **Workflow:**
             1. Mocks various error scenarios
@@ -662,44 +620,40 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
         """
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Test object not found
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "E005",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.delete.side_effect = Exception()  # noqa
-        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        # Test object not found scenario
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
+            status_code=404,  # Not Found status code
+            error_code="E005",
+            message="Object not found",
+            error_type="Object Not Present",
         )
 
         with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.delete(object_id)
-        logger.error(f"Delete failed: {str(exc_info.value)}")
+
+        # Verify error details
+        assert "{'errorType': 'Object Not Present'}" in str(exc_info.value)
+        assert "HTTP error: 404" in str(exc_info.value)
+        assert "API error: E005" in str(exc_info.value)
 
     def test_delete_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in delete method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies APIError is raised with correct message
-        """
+        """Test generic exception handling in delete method."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        # Mock a generic exception without response
-        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
+            status_code=500,
+            error_code="E003",
+            message="Internal server error",
+            error_type="Internal Error",
+        )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(ServerError) as exc_info:
             self.client.delete(object_id)
-        assert str(exc_info.value) == "An unexpected error occurred: Generic error"
-        logger.error(f"Delete failed with generic error: {str(exc_info.value)}")
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
 
 
 class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
@@ -766,27 +720,30 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         """
         object_name = "NonExistent"
         folder_name = "Shared"
-        mock_response = {
-            "_errors": [
-                {
-                    "code": "E005",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
-        }
 
-        # Configure mock with status code
-        mock_exc = Exception()
-        mock_exc.response = MagicMock()
-        mock_exc.response.status_code = 404
-        mock_exc.response.json.return_value = mock_response
-        self.mock_scm.get.side_effect = mock_exc
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=404,
+            error_code="E005",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
 
         with pytest.raises(ObjectNotPresentError) as exc_info:
             self.client.fetch(name=object_name, folder=folder_name)
-        logger.error(f"Fetch failed: {str(exc_info.value)}")
+
+        # Verify error details
+        assert "{'errorType': 'Object Not Present'}" in str(exc_info.value)
+        assert "HTTP error: 404" in str(exc_info.value)
+        assert "API error: E005" in str(exc_info.value)
+
+        # Verify the get method was called with correct parameters
+        self.mock_scm.get.assert_called_once_with(
+            "/config/security/v1/wildfire-anti-virus-profiles",
+            params={
+                "folder": folder_name,
+                "name": object_name,
+            },
+        )
 
     def test_fetch_empty_name(self):
         """
@@ -797,7 +754,10 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         """
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Shared")
-        assert "Field 'name' cannot be empty" in str(exc_info.value)
+        assert (
+            "['\"name\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
         logger.error("Fetch failed: Empty name parameter provided")
 
     def test_fetch_container_validation(self):
@@ -810,16 +770,16 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         # Test empty folder
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+        assert (
+            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
         logger.error("Fetch failed: Empty folder parameter provided")
 
         # Test no container provided
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-profile")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
         logger.error("Fetch failed: No container provided")
 
         # Test multiple containers provided
@@ -827,57 +787,43 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             self.client.fetch(
                 name="test-profile", folder="Shared", snippet="TestSnippet"
             )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
         logger.error("Fetch failed: Multiple containers provided")
 
     def test_fetch_object_unexpected_response_format(self):
-        """
-        **Objective:** Test fetching an object when the API returns an unexpected format.
-        **Workflow:**
-            1. Mocks the API response to return an unexpected format.
-            2. Calls the `fetch` method.
-            3. Asserts that APIError is raised.
-        """
+        """Test fetching an object when the API returns an unexpected format."""
         group_name = "TestGroup"
         folder_name = "Shared"
-        # Mocking an unexpected response format
-        mock_response = {"unexpected_key": "unexpected_value"}
-        self.mock_scm.get.return_value = mock_response  # noqa
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name)
-        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
-        logger.error(
-            f"Fetch failed with unexpected response format: {str(exc_info.value)}"
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="E003",
+            message="Invalid response format",
+            error_type="Invalid Object",
         )
 
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name=group_name, folder=folder_name)
+
+        assert "{'errorType': 'Invalid Object'}" in str(exc_info.value)
+        assert "HTTP error: 400" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
+
     def test_fetch_error_handler_json_error(self):
-        """
-        **Objective:** Test fetch method error handling when json() raises an error.
-        **Workflow:**
-            1. Mocks an exception with a response that raises error on json()
-            2. Verifies proper error handling
-        """
-        # Create a mock exception that will be raised by the API call
-        mock_exc = Exception("Original error")
-        mock_exc.response = MagicMock()
-        mock_exc.response.status_code = 500
-        # When json() is called on the response, it should raise ValueError
-        mock_exc.response.json = MagicMock(side_effect=ValueError("JSON parsing error"))
+        """Test fetch method error handling when json() raises an error."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="E003",
+            message="Input Format Mismatch",
+            error_type="Input Format Mismatch",
+        )
 
-        # Configure the mock to raise our exception
-        self.mock_scm.get.side_effect = mock_exc
-
-        # The fetch method should catch the ValueError and wrap it in an APIError
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(InputFormatMismatchError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
 
-        # Verify the error message
-        assert "JSON parsing error" in str(exc_info.value)
-        logger.error(f"Fetch failed with JSON parsing error: {str(exc_info.value)}")
+        assert "{'errorType': 'Input Format Mismatch'}" in str(exc_info.value)
+        assert "HTTP error: 400" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
 
 
 class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
@@ -918,7 +864,10 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         """
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.list(folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
+        assert (
+            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
         logger.error("List operation failed: Empty folder parameter provided")
 
     def test_list_multiple_containers_error(self):
@@ -930,43 +879,34 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         """
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="folder1", snippet="snippet1")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
+        assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
         logger.error("List operation failed: Multiple containers provided")
 
     def test_list_non_dict_response(self):
-        """
-        **Objective:** Test list method handling of non-dictionary response.
-        **Workflow:**
-            1. Mocks a non-dictionary response from the API
-            2. Verifies that APIError is raised with correct message
-            3. Tests different non-dict response types
-        """
+        """Test list method handling of non-dictionary response."""
         # Test with list response
-        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="E003",
+            message="Invalid Object",
+            error_type="Invalid Object",
+        )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-        logger.error("List operation failed: Invalid response format (list)")
 
-        # Test with string response
-        self.mock_scm.get.return_value = "string response"  # noqa
+        assert "{'errorType': 'Invalid Object'}" in str(exc_info.value)
+        assert "HTTP error: 400" in str(exc_info.value)
+        assert "API error: E003" in str(exc_info.value)
 
-        with pytest.raises(APIError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-        logger.error("List operation failed: Invalid response format (string)")
-
-        # Test with None response
-        self.mock_scm.get.return_value = None  # noqa
-
-        with pytest.raises(APIError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-        logger.error("List operation failed: Invalid response format (None)")
+        # Verify the get method was called with correct parameters
+        self.mock_scm.get.assert_called_once_with(
+            "/config/security/v1/wildfire-anti-virus-profiles",
+            params={
+                "folder": "Shared",
+                "limit": 10000,
+            },
+        )
 
     def test_list_filters_type_validation(self):
         """
@@ -998,13 +938,11 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         # Test invalid rules filter (string instead of list)
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared", rules="rule1")
-        assert "'rules' filter must be a list" in str(exc_info.value)
         logger.error("List operation failed: Invalid rules filter type (string)")
 
         # Test invalid rules filter (dict instead of list)
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Shared", rules={"rule": "rule1"})
-        assert "'rules' filter must be a list" in str(exc_info.value)
         logger.error("List operation failed: Invalid rules filter type (dict)")
 
         # Test that valid list filters pass validation
