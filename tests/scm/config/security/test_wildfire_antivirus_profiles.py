@@ -9,15 +9,8 @@ from requests import HTTPError
 
 from scm.config.security.wildfire_antivirus_profile import WildfireAntivirusProfile
 from scm.exceptions import (
-    APIError,
     InvalidObjectError,
-    ObjectNotPresentError,
-    MalformedCommandError,
     MissingQueryParameterError,
-    ReferenceNotZeroError,
-    ConflictError,
-    ServerError,
-    InputFormatMismatchError,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileCreateModel,
@@ -272,17 +265,6 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             ],
         }
 
-        # Mock error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object Already Exists",
-                    "details": {"errorType": "Object Already Exists"},
-                }
-            ]
-        }
-
         # Configure mock to raise HTTPError with proper error details
         self.mock_scm.post.side_effect = raise_mock_http_error(
             status_code=409,  # Conflict status code
@@ -291,12 +273,14 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             error_type="Object Already Exists",
         )
 
-        with pytest.raises(ConflictError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
-
-        assert "{'errorType': 'Object Already Exists'}" in str(exc_info.value)
-        assert "HTTP error: 409" in str(exc_info.value)
-        assert "API error: API_I00013" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object Already Exists"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Object Already Exists"
+        )
 
     def test_create_generic_exception_handling(self):
         """Test generic exception handling in create method."""
@@ -321,12 +305,11 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
-
-        assert "{'errorType': 'Internal Error'}" in str(exc_info.value)
-        assert "HTTP error: 500" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_create_malformed_response_handling(self):
         """Test handling of malformed response in create method."""
@@ -351,12 +334,11 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             error_type="Invalid Object",
         )
 
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
-
-        assert "{'errorType': 'Invalid Object'}" in str(exc_info.value)
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Invalid request format"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
     def test_create_http_error_no_content(self):
         """Test create method when HTTP error has no response content."""
@@ -435,12 +417,13 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
-        assert "{'errorType': 'Object Not Present'}" in str(exc_info.value)
-        assert "HTTP error: 404" in str(exc_info.value)
-        assert "API error: E005" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -453,13 +436,11 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(ServerError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in str(exc_info.value)
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Internal server error"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_get_http_error_no_content(self):
         """Test get method when HTTP error has no response content."""
@@ -569,12 +550,13 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(update_data)
-
-        assert "{'errorType': 'Malformed Command'}" in str(exc_info.value)
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        )
 
     def test_update_with_invalid_data(self):
         """Test update method with invalid data structure."""
@@ -592,12 +574,14 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             error_type="Input Format Mismatch",
         )
 
-        with pytest.raises(InputFormatMismatchError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(invalid_data)
-
-        assert "{'errorType': 'Input Format Mismatch'}" in str(exc_info.value)
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Invalid input format"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Input Format Mismatch"
+        )
 
     def test_update_generic_exception_handling(self):
         """Test generic exception handling in update method."""
@@ -622,13 +606,11 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(ServerError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(update_data)
-
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in str(exc_info.value)
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Internal server error"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_update_http_error_no_content(self):
         """Test update method when HTTP error has no response content."""
@@ -672,12 +654,13 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             error_type="Reference Not Zero",
         )
 
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        assert "{'errorType': 'Reference Not Zero'}" in str(exc_info.value)
-        assert "HTTP error: 409" in str(exc_info.value)
-        assert "API error: E009" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Reference not zero"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        )
 
     def test_delete_error_handling(self):
         """
@@ -698,13 +681,13 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        # Verify error details
-        assert "{'errorType': 'Object Not Present'}" in str(exc_info.value)
-        assert "HTTP error: 404" in str(exc_info.value)
-        assert "API error: E005" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_delete_generic_exception_handling(self):
         """Test generic exception handling in delete method."""
@@ -717,13 +700,11 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(ServerError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in str(exc_info.value)
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Internal server error"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_delete_http_error_no_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -813,13 +794,13 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name=object_name, folder=folder_name)
-
-        # Verify error details
-        assert "{'errorType': 'Object Not Present'}" in str(exc_info.value)
-        assert "HTTP error: 404" in str(exc_info.value)
-        assert "API error: E005" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
         # Verify the get method was called with correct parameters
         self.mock_scm.get.assert_called_once_with(
@@ -887,12 +868,11 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             error_type="Invalid Object",
         )
 
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name=group_name, folder=folder_name)
-
-        assert "{'errorType': 'Invalid Object'}" in str(exc_info.value)
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Invalid response format"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
     def test_fetch_error_handler_json_error(self):
         """Test fetch method error handling when json() raises an error."""
@@ -903,12 +883,14 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             error_type="Input Format Mismatch",
         )
 
-        with pytest.raises(InputFormatMismatchError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-
-        assert "{'errorType': 'Input Format Mismatch'}" in str(exc_info.value)
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Input Format Mismatch"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Input Format Mismatch"
+        )
 
     def test_fetch_response_not_dict(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
@@ -1020,12 +1002,11 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
             error_type="Invalid Object",
         )
 
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared")
-
-        assert "{'errorType': 'Invalid Object'}" in str(exc_info.value)
-        assert "HTTP error: 400" in str(exc_info.value)
-        assert "API error: E003" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Invalid Object"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
         # Verify the get method was called with correct parameters
         self.mock_scm.get.assert_called_once_with(

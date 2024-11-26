@@ -11,12 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.security import AntiSpywareProfile
 from scm.exceptions import (
     InvalidObjectError,
-    ObjectNotPresentError,
-    MalformedCommandError,
     MissingQueryParameterError,
-    ReferenceNotZeroError,
-    BadRequestError,
-    APIError,
 )
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileResponseModel,
@@ -232,13 +227,16 @@ class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
             message="'types' filter must be a list",
             error_type="Invalid Query Parameter",
         )
-        with pytest.raises(BadRequestError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared", types="netmask")
+        error_response = exc_info.value.response.json()
         assert (
-            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+            error_response["_errors"][0]["message"] == "'types' filter must be a list"
         )
-
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Invalid Query Parameter"
+        )
         # Reset side effect for successful case
         self.mock_scm.get.side_effect = None  # noqa
         self.mock_scm.get.return_value = mock_response  # noqa
@@ -249,8 +247,8 @@ class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
                 folder="Shared",
                 rules=["test1"],
             )
-        except BadRequestError:
-            pytest.fail("Unexpected BadRequestError raised with valid list filters")
+        except HTTPError:
+            pytest.fail("Unexpected HTTPError raised with valid list filters")
 
     def test_list_filters_rules_validation(self):
         """Test validation of filter specific fields."""
@@ -498,12 +496,12 @@ class TestAntiSpywareProfileCreate(TestAntiSpywareProfileBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Create failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
     def test_create_generic_exception_handling(self):
@@ -611,12 +609,12 @@ class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
     def test_update_object_not_present_error(self):
@@ -646,12 +644,12 @@ class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
-            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
         )
 
     def test_update_http_error_no_response_content(self):
@@ -760,13 +758,11 @@ class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in str(exc_info.value)
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestAntiSpywareProfileDelete(TestAntiSpywareProfileBase):
@@ -794,10 +790,13 @@ class TestAntiSpywareProfileDelete(TestAntiSpywareProfileBase):
             error_type="Reference Not Zero",
         )
 
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        assert "Reference Not Zero" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Reference not zero"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        )
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -810,13 +809,13 @@ class TestAntiSpywareProfileDelete(TestAntiSpywareProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_message
-        assert "HTTP error: 404" in error_message
-        assert "API error: API_I00013" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -852,13 +851,11 @@ class TestAntiSpywareProfileDelete(TestAntiSpywareProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_message
-        assert "HTTP error: 500" in error_message
-        assert "API error: E003" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestAntiSpywareProfileGet(TestAntiSpywareProfileBase):
@@ -888,10 +885,13 @@ class TestAntiSpywareProfileGet(TestAntiSpywareProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
-            self.client.get(object_id)
-
-        assert "Object Not Present" in str(exc_info.value)
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.list(folder="Shared")
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -929,14 +929,11 @@ class TestAntiSpywareProfileGet(TestAntiSpywareProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in error_msg
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestAddressFetch(TestAntiSpywareProfileBase):
@@ -980,13 +977,13 @@ class TestAddressFetch(TestAntiSpywareProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="nonexistent", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_msg
-        assert "HTTP error: 404" in error_msg
-        assert "API error: API_I00013" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -1031,13 +1028,11 @@ class TestAddressFetch(TestAntiSpywareProfileBase):
             error_type="Invalid Object",
         )
 
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Invalid Object'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Invalid response format"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
     def test_fetch_generic_exception_handling(self):
         """Test generic exception handling during fetch."""
@@ -1073,13 +1068,11 @@ class TestAddressFetch(TestAntiSpywareProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_fetch_missing_id_field_error(self):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""

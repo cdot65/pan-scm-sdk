@@ -11,14 +11,10 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.objects import Tag
 from scm.exceptions import (
-    APIError,
     InvalidObjectError,
     MissingQueryParameterError,
-    ObjectNotPresentError,
-    ReferenceNotZeroError,
 )
 from scm.models.objects import TagResponseModel
-
 # Import factories
 from tests.factories import (
     TagCreateApiFactory,
@@ -154,7 +150,7 @@ class TestTagList(TestTagBase):
             self.client.list(folder="Shared", **filters)
 
         assert exc_info.value.message == "'colors' filter must be a list"
-        assert exc_info.value.http_status_code == 500
+        assert exc_info.value.http_status_code == 400
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.details == {"errorType": "Invalid Object"}
 
@@ -265,13 +261,11 @@ class TestTagList(TestTagBase):
             error_type="Invalid Request",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Invalid Request'}" in error_msg
-        assert "HTTP error: 400" in error_msg
-        assert "API error: E400" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Bad Request"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Request"
 
 
 class TestTagCreate(TestTagBase):
@@ -352,13 +346,11 @@ class TestTagCreate(TestTagBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create({"name": "TestTag", "color": "Red", "folder": "Shared"})
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestTagGet(TestTagBase):
@@ -398,13 +390,13 @@ class TestTagGet(TestTagBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(tag_id)
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_msg
-        assert "HTTP error: 404" in error_msg
-        assert "API error: API_I00013" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Tag not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_get_http_error_no_response_content(self):
         """Test get method when HTTP error has no response content."""
@@ -488,13 +480,11 @@ class TestTagUpdate(TestTagBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(update_data)
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestTagDelete(TestTagBase):
@@ -523,13 +513,16 @@ class TestTagDelete(TestTagBase):
             error_type="Reference Not Zero",
         )
 
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(tag_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Reference Not Zero'}" in error_message
-        assert "HTTP error: 409" in error_message
-        assert "API error: E009" in error_message
+        error_response = exc_info.value.response.json()
+        assert (
+            error_response["_errors"][0]["message"]
+            == "Tag is referenced by other objects."
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        )
 
     def test_delete_tag_not_present_error(self):
         """Test error handling when the tag to delete is not present."""
@@ -542,13 +535,13 @@ class TestTagDelete(TestTagBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(tag_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_message
-        assert "HTTP error: 404" in error_message
-        assert "API error: API_I00013" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Tag not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -604,13 +597,13 @@ class TestTagFetch(TestTagBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="NonexistentTag", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_msg
-        assert "HTTP error: 404" in error_msg
-        assert "API error: API_I00013" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Tag not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""

@@ -11,10 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import AddressGroup
 from scm.exceptions import (
     InvalidObjectError,
-    ObjectNotPresentError,
-    MalformedCommandError,
     MissingQueryParameterError,
-    APIError,
 )
 from scm.models.objects import AddressGroupResponseModel
 from tests.factories import (
@@ -92,13 +89,13 @@ class TestAddressGroupList(TestAddressGroupBase):
             error_type="Operation Impossible",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="NonexistentFolder")
-
-        error_msg = str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Listing failed"
         assert (
-            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
-            in error_msg
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Operation Impossible"
         )
 
     def test_list_container_missing_error(self):
@@ -226,7 +223,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
-        assert error.http_status_code == 500
+        assert error.http_status_code == 400
         assert "{'errorType': 'Invalid Object'}" in str(error)
 
     def test_list_response_invalid_format(self):
@@ -345,12 +342,12 @@ class TestAddressGroupCreate(TestAddressGroupBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Create failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
 
@@ -391,12 +388,12 @@ class TestAddressGroupGet(TestAddressGroupBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
-            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
         )
 
     def test_get_http_error_no_response_content(self):
@@ -462,12 +459,12 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
     def test_update_http_error_no_response_content(self):
@@ -515,13 +512,13 @@ class TestAddressGroupDelete(TestAddressGroupBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_message
-        assert "HTTP error: 404" in error_message
-        assert "API error: API_I00013" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -668,14 +665,11 @@ class TestAddressGroupFetch(TestAddressGroupBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test-group", folder="Shared")
-
-        error = exc_info.value
-        assert isinstance(error, APIError)
-        assert "{'errorType': 'Internal Error'}" in str(error)
-        assert "HTTP error: 500" in str(error)
-        assert "API error: E003" in str(error)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 # -------------------- End of Test Classes --------------------

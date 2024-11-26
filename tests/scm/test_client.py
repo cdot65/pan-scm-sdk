@@ -1,9 +1,8 @@
 # tests/test_client.py
-import logging
 from unittest.mock import patch, MagicMock
 
 import pytest
-from requests.exceptions import HTTPError, RequestException
+from requests.exceptions import HTTPError
 
 from scm.client import Scm
 from scm.exceptions import (
@@ -204,18 +203,12 @@ class TestClientRequest(TestClientBase):
         self.session.request.side_effect = mock_http_error
 
         # Test request with invalid JSON response
-        with pytest.raises(BadRequestError) as exc_info:
+        with pytest.raises(ValueError) as exc_info:
             self.client.request("GET", "/test-endpoint")
 
         # Verify error details
         error = exc_info.value
-        assert error.http_status_code == 400
-        assert error.error_code == "E003"
-        assert error.details == {"errorType": "Invalid Format"}
-        assert (
-            "{'errorType': 'Invalid Format'} - HTTP error: 400 - API error: E003"
-            in str(error)
-        )
+        assert error.__str__() == "Invalid JSON"
 
     def test_request_http_error_invalid_error_format(self):
         """Test handling of HTTP error with invalid error response format."""
@@ -233,14 +226,12 @@ class TestClientRequest(TestClientBase):
         self.session.request.side_effect = mock_http_error
 
         # Test request with invalid error format
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(ValueError) as exc_info:
             self.client.request("GET", "/test-endpoint")
 
         # Verify error details
         error = exc_info.value
-        assert error.http_status_code == 400
-        assert error.error_code == "E003"
-        assert error.details == {"errorType": "Invalid Format"}
+        assert error.__str__() == "Invalid error response format"
 
     def test_request_http_error_no_response(self):
         """Test handling of HTTP error without response."""

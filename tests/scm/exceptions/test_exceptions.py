@@ -1,7 +1,8 @@
 # tests/scm/exceptions/test_exceptions.py
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from scm.exceptions import (
     APIError,
@@ -152,7 +153,7 @@ class TestErrorHandlerValidation(TestExceptionsBase):
                 }
             ]
         }
-        with pytest.raises(NotAuthenticatedError):
+        with pytest.raises(AuthenticationError):
             ErrorHandler.raise_for_error(response_data, 401)
 
         # Test E007 Unauthorized
@@ -414,6 +415,59 @@ class TestSpecificExceptions(TestExceptionsBase):
         assert isinstance(error, ServerError)
         assert isinstance(error, GatewayTimeoutError)
         assert isinstance(error, SessionTimeoutError)
+
+
+class TestErrorHandlerMessageMapping(TestExceptionsBase):
+    """Test for ErrorHandler when message matches but errorType does not."""
+
+    def test_error_handler_message_mapping(self):
+        """Test exception mapping when message matches but errorType does not."""
+        response_data = {
+            "_errors": [
+                {
+                    "code": "E003",
+                    "message": "Invalid Command",
+                    "details": {"errorType": "Some Unknown Error Type"},
+                }
+            ]
+        }
+        with pytest.raises(InvalidCommandError) as exc_info:
+            ErrorHandler.raise_for_error(response_data, 400)
+        exception = exc_info.value
+        assert exception.error_code == "E003"
+        assert exception.http_status_code == 400
+        assert exception.message == "Invalid Command"
+        assert exception.details == {"errorType": "Some Unknown Error Type"}
+
+
+class TestErrorHandlerNestedErrorType(TestExceptionsBase):
+    """Test for ErrorHandler when errorType is in error_details['errors'][0]['type']."""
+
+    def test_error_handler_error_type_in_errors_list(self):
+        """Test error_type extraction from error_details['errors'][0]['type']."""
+        response_data = {
+            "_errors": [
+                {
+                    "code": "E003",
+                    "message": "Invalid Query Parameter",
+                    "details": {
+                        "errors": [
+                            {
+                                "type": "Invalid Query Parameter",
+                                "message": "Invalid parameter 'foo'",
+                            }
+                        ]
+                    },
+                }
+            ]
+        }
+        with pytest.raises(InvalidQueryParameterError) as exc_info:
+            ErrorHandler.raise_for_error(response_data, 400)
+        exception = exc_info.value
+        assert exception.error_code == "E003"
+        assert exception.http_status_code == 400
+        assert exception.message == "Invalid Query Parameter"
+        assert exception.details == response_data["_errors"][0]["details"]
 
 
 # -------------------- End of Test Classes --------------------
