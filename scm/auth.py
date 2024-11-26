@@ -1,10 +1,12 @@
 # scm/auth.py
+from typing import Optional
 
 # External libraries
 import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import ExpiredSignatureError, DecodeError, PyJWKClientError
 from oauthlib.oauth2 import BackendApplicationClient
+from requests import Response
 from requests.exceptions import HTTPError
 from requests_oauthlib import OAuth2Session
 
@@ -56,19 +58,16 @@ class OAuth2Client:
             return oauth
 
         except HTTPError as e:
-            # Handle HTTP errors from the token endpoint
-            response = e.response
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
             if response is not None and response.content:
-                try:
-                    error_content = response.json()
-                except ValueError:
-                    error_content = {}
+                # Perform our custom exception handler by sending the response.json() object and http status code
                 ErrorHandler.raise_for_error(
-                    error_content,
+                    response.json(),
                     response.status_code,
                 )
-            else:
-                raise APIError(f"HTTP error occurred while fetching token: {e}") from e
         except Exception as e:
             # Let other exceptions propagate
             raise APIError(f"Failed to create session: {e}") from e
@@ -137,10 +136,7 @@ class OAuth2Client:
         except HTTPError as e:
             response = e.response
             if response is not None and response.content:
-                try:
-                    error_content = response.json()
-                except ValueError:
-                    error_content = {}
+                error_content = response.json()
                 ErrorHandler.raise_for_error(error_content, response.status_code)
             else:
                 raise APIError(
