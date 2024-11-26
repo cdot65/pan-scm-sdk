@@ -15,6 +15,7 @@ from scm.exceptions import (
     MissingQueryParameterError,
 )
 from scm.models.objects import TagResponseModel
+
 # Import factories
 from tests.factories import (
     TagCreateApiFactory,
