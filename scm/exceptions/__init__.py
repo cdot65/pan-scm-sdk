@@ -206,6 +206,7 @@ class ErrorHandler:
         404: NotFoundError,
         405: MethodNotAllowedError,
         409: ConflictError,
+        500: ServerError,
         501: APINotImplementedError,
         504: GatewayTimeoutError,
     }
