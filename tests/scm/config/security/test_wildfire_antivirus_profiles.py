@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from pydantic import ValidationError as PydanticValidationError
+from requests import HTTPError
 
 from scm.config.security.wildfire_antivirus_profile import WildfireAntivirusProfile
 from scm.exceptions import (
@@ -357,6 +358,33 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
         assert "HTTP error: 400" in str(exc_info.value)
         assert "API error: E003" in str(exc_info.value)
 
+    def test_create_http_error_no_content(self):
+        """Test create method when HTTP error has no response content."""
+        test_data = {
+            "name": "NewWFProfile",
+            "folder": "All",
+            "rules": [
+                {
+                    "name": "NewRule",
+                    "analysis": "public-cloud",
+                    "direction": "both",
+                    "application": ["any"],
+                    "file_type": ["any"],
+                }
+            ],
+        }
+
+        # Mock an HTTPError with no response content
+        mock_response = MagicMock()
+        mock_response.content = None  # No content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.create(test_data)
+
 
 class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
     """Tests for retrieving a specific Wildfire Antivirus Profile object."""
@@ -432,6 +460,21 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
             "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
             in str(exc_info.value)
         )
+
+    def test_get_http_error_no_content(self):
+        """Test get method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock an HTTPError with no response content
+        mock_response = MagicMock()
+        mock_response.content = None  # No content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.get(object_id)
 
 
 class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
@@ -587,6 +630,33 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             in str(exc_info.value)
         )
 
+    def test_update_http_error_no_content(self):
+        """Test update method when HTTP error has no response content."""
+        update_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "folder": "Shared",
+            "rules": [
+                {
+                    "name": "TestRule",
+                    "direction": "both",
+                    "application": ["any"],
+                    "file_type": ["any"],
+                }
+            ],
+        }
+
+        # Mock an HTTPError with no response content
+        mock_response = MagicMock()
+        mock_response.content = None  # No content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(update_data)
+
 
 class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
     """Tests for deleting Wildfire Antivirus Profile objects."""
@@ -654,6 +724,21 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
             in str(exc_info.value)
         )
+
+    def test_delete_http_error_no_content(self):
+        """Test delete method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        # Mock an HTTPError with no response content
+        mock_response = MagicMock()
+        mock_response.content = None  # No content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.delete(object_id)
 
 
 class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
@@ -825,6 +910,49 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         assert "HTTP error: 400" in str(exc_info.value)
         assert "API error: E003" in str(exc_info.value)
 
+    def test_fetch_response_not_dict(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # Invalid format
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-profile", folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        logger.debug(
+            "Fetch operation failed as expected due to invalid response format"
+        )
+
+    def test_fetch_response_missing_id_field(self):
+        """Test that InvalidObjectError is raised when response is missing 'id' field."""
+        self.mock_scm.get.return_value = {
+            "name": "test-profile",
+            "folder": "Shared",
+            "rules": [],
+        }  # Missing 'id' field
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-profile", folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        logger.debug("Fetch operation failed as expected due to missing 'id' field")
+
+    def test_fetch_http_error_no_content(self):
+        """Test fetch method when HTTP error has no response content."""
+        # Mock an HTTPError with no response content
+        mock_response = MagicMock()
+        mock_response.content = None  # No content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.fetch(name="test-profile", folder="Shared")
+
 
 class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
     """Tests for filtering during listing Wildfire Antivirus Profile objects."""
@@ -954,6 +1082,55 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
             logger.debug("List operation with valid filters completed successfully")
         except InvalidObjectError:
             pytest.fail("Unexpected InvalidObjectError raised with valid list filters")
+
+    def test_list_response_not_dict(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # Invalid format
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        logger.debug("List operation failed as expected due to invalid response format")
+
+    def test_list_response_missing_data_field(self):
+        """Test that InvalidObjectError is raised when 'data' field is missing."""
+        self.mock_scm.get.return_value = {"invalid": "data"}  # Missing 'data' field
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        logger.debug("List operation failed as expected due to missing 'data' field")
+
+    def test_list_response_data_not_list(self):
+        """Test that InvalidObjectError is raised when 'data' field is not a list."""
+        self.mock_scm.get.return_value = {"data": "not a list"}  # 'data' is not a list
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+        logger.debug("List operation failed as expected due to 'data' not being a list")
+
+    def test_list_http_error_no_content(self):
+        """Test list method when HTTP error has no response content."""
+        # Mock an HTTPError with no response content
+        mock_response = MagicMock()
+        mock_response.content = None  # No content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.list(folder="Shared")
 
 
 # -------------------- End of Test Classes --------------------
