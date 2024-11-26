@@ -1,27 +1,34 @@
 # tests/scm/config/security/test_decryption_profile.py
 
-import pytest
+# Standard library imports
 from unittest.mock import MagicMock
 
-from scm.config.security.decryption_profile import DecryptionProfile
+# External libraries
+import pytest
+from requests.exceptions import HTTPError
+
+# Local SDK imports
+from scm.config.security import DecryptionProfile
 from scm.exceptions import (
-    ValidationError,
+    InvalidObjectError,
     ObjectNotPresentError,
-    EmptyFieldError,
-    ObjectAlreadyExistsError,
-    MalformedRequestError,
-    FolderNotFoundError,
-    BadResponseError,
+    MalformedCommandError,
+    MissingQueryParameterError,
     ReferenceNotZeroError,
+    APIError,
 )
 from scm.models.security.decryption_profiles import (
-    DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
-    SSLProtocolSettings,
     SSLVersion,
 )
-
-from pydantic import ValidationError as PydanticValidationError
+from tests.factories import (
+    DecryptionProfileCreateApiFactory,
+    DecryptionProfileUpdateApiFactory,
+    DecryptionProfileResponseFactory,
+    SSLProtocolSettingsFactory,
+    SSLForwardProxyFactory,
+)
+from tests.utils import raise_mock_http_error
 
 
 @pytest.mark.usefixtures("load_env")
@@ -42,839 +49,93 @@ class TestDecryptionProfileBase:
 # -------------------- Test Classes Grouped by Functionality --------------------
 
 
-class TestDecryptionProfileModelValidation(TestDecryptionProfileBase):
-    """Tests for object model validation."""
-
-    def test_object_model_no_container_provided(self):
-        """Test validation when no container is provided."""
-        data = {
-            "name": "InvalidProfile",
-            "ssl_forward_proxy": {},
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            DecryptionProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_object_model_multiple_containers(self):
-        """Test validation when multiple containers are provided."""
-        data = {
-            "name": "TestProfile",
-            "folder": "Shared",
-            "snippet": "TestSnippet",
-            "ssl_forward_proxy": {},
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            DecryptionProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_ssl_protocol_settings_validation(self):
-        """Test SSL protocol settings validation."""
-        valid_data = {
-            "min_version": "tls1-0",
-            "max_version": "tls1-2",
-        }
-        settings = SSLProtocolSettings(**valid_data)
-        assert settings.min_version == SSLVersion.tls1_0
-        assert settings.max_version == SSLVersion.tls1_2
-
-        invalid_data = {
-            "min_version": "tls1-2",
-            "max_version": "tls1-1",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            SSLProtocolSettings(**invalid_data)
-        assert "max_version cannot be less than min_version" in str(exc_info.value)
-
-    def test_name_pattern_validation(self):
-        """Test name pattern validation."""
-        invalid_name_data = {
-            "name": "Invalid!Name",
-            "folder": "Shared",
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            DecryptionProfileCreateModel(**invalid_name_data)
-        assert "String should match pattern" in str(exc_info.value)
-
-    def test_ssl_version_validation(self):
-        """Test SSL version validation."""
-        invalid_version_data = {
-            "name": "InvalidSSLVersionProfile",
-            "folder": "Shared",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-5",
-                "max_version": "max",
-            },
-        }
-        with pytest.raises(PydanticValidationError) as exc_info:
-            DecryptionProfileCreateModel(**invalid_version_data)
-        assert (
-            "Input should be 'sslv3', 'tls1-0', 'tls1-1', 'tls1-2', 'tls1-3' or 'max'"
-            in str(exc_info.value)
-        )
-
-
 class TestDecryptionProfileList(TestDecryptionProfileBase):
     """Tests for listing Decryption Profile objects."""
 
-    def test_list_objects(self):
-        """
-        **Objective:** Test listing all objects.
-        **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing objects.
-            2. Calls the `list` method with a filter parameter.
-            3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of objects.
-        """
+    def test_list_valid(self):
+        """Test listing all objects successfully."""
         mock_response = {
             "data": [
-                {
-                    "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-                    "name": "web-security-default",
-                    "folder": "All",
-                    "snippet": "Web-Security-Default",
-                    "ssl_protocol_settings": {
-                        "min_version": "tls1-2",
-                        "max_version": "max",
-                        "enc_algo_rc4": False,
-                        "auth_algo_sha1": False,
-                    },
-                    "ssl_forward_proxy": {
-                        "auto_include_altname": True,
-                        "block_client_cert": True,
-                        "block_expired_certificate": True,
-                        "block_untrusted_issuer": True,
-                    },
-                }
-            ]
+                DecryptionProfileResponseFactory(
+                    name="profile1",
+                    folder="Shared",
+                    ssl_protocol_settings=SSLProtocolSettingsFactory(),
+                ).model_dump(),
+                DecryptionProfileResponseFactory(
+                    name="profile2",
+                    folder="Shared",
+                    ssl_forward_proxy=SSLForwardProxyFactory(),
+                ).model_dump(),
+            ],
+            "offset": 0,
+            "total": 2,
+            "limit": 200,
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="All")
+        existing_objects = self.client.list(folder="Shared")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/decryption-profiles",
             params={
                 "limit": 10000,
-                "folder": "All",
+                "folder": "Shared",
             },
         )
         assert isinstance(existing_objects, list)
         assert isinstance(existing_objects[0], DecryptionProfileResponseModel)
-        assert existing_objects[0].name == "web-security-default"
+        assert len(existing_objects) == 2
+        assert existing_objects[0].name == "profile1"
+
+    def test_list_folder_empty_error(self):
+        """Test that an empty folder raises appropriate error."""
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.list(folder="")
+
+        error_msg = str(exc_info.value)
         assert (
-            existing_objects[0].ssl_protocol_settings.min_version == SSLVersion.tls1_2
+            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in error_msg
         )
 
-    def test_object_list_multiple_containers(self):
-        """Test validation error when listing with multiple containers."""
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+    def test_list_folder_nonexistent_error(self):
+        """Test error handling in list operation."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Listing failed",
+            error_type="Operation Impossible",
+        )
 
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.list(folder="NonexistentFolder")
+
+        error_msg = str(exc_info.value)
         assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
+            in error_msg
         )
 
-
-class TestDecryptionProfileCreate(TestDecryptionProfileBase):
-    """Tests for creating Decryption Profile objects."""
-
-    def test_create_object(self):
-        """
-        **Objective:** Test creating a new object.
-        **Workflow:**
-            1. Creates test data.
-            2. Mocks the API response.
-            3. Verifies the creation request and response.
-        """
-        test_profile_data = {
-            "name": "NewDecryptionProfile",
-            "folder": "All",
-            "ssl_forward_proxy": {
-                "block_expired_certificate": True,
-                "block_untrusted_issuer": True,
-            },
-            "ssl_protocol_settings": {
-                "min_version": "tls1-2",
-                "max_version": "tls1-3",
-                "enc_algo_rc4": False,
-                "auth_algo_sha1": False,
-            },
-        }
-
-        mock_response = test_profile_data.copy()
-        mock_response["id"] = "444e4567-e89b-12d3-a456-426655440003"
-
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_profile = self.client.create(test_profile_data)
-
-        self.mock_scm.post.assert_called_once_with(  # noqa
-            "/config/security/v1/decryption-profiles",
-            json=test_profile_data,
-        )
-        assert isinstance(created_profile, DecryptionProfileResponseModel)
-        assert str(created_profile.id) == "444e4567-e89b-12d3-a456-426655440003"
-
-    def test_create_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object creation.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to create an object
-            3. Verifies proper error handling and exception raising
-        """
-        test_data = {
-            "name": "NewDecryptionProfile",
-            "folder": "All",
-            "ssl_forward_proxy": {
-                "block_expired_certificate": True,
-                "block_untrusted_issuer": True,
-            },
-        }
-
-        # Mock error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object creation failed",
-                    "details": {"errorType": "Object Already Exists"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        # Configure mock to raise exception
-        self.mock_scm.post.side_effect = Exception()  # noqa
-        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(ObjectAlreadyExistsError):
-            self.client.create(test_data)
-
-    def test_create_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in create method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        test_data = {
-            "name": "NewDecryptionProfile",
-            "folder": "All",
-            "ssl_forward_proxy": {
-                "block_expired_certificate": True,
-                "block_untrusted_issuer": True,
-            },
-        }
-
-        # Mock a generic exception without response
-        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.create(test_data)
-        assert str(exc_info.value) == "Generic error"
-
-    def test_create_malformed_response_handling(self):
-        """
-        **Objective:** Test handling of malformed response in create method.
-        **Workflow:**
-            1. Mocks a response that would cause a parsing error
-            2. Verifies appropriate error handling
-        """
-        test_data = {
-            "name": "NewDecryptionProfile",
-            "folder": "All",
-            "ssl_forward_proxy": {
-                "block_expired_certificate": True,
-                "block_untrusted_issuer": True,
-            },
-        }
-
-        # Mock invalid JSON response
-        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
-
-        with pytest.raises(PydanticValidationError):
-            self.client.create(test_data)
-
-
-class TestDecryptionProfileGet(TestDecryptionProfileBase):
-    """Tests for retrieving a specific Decryption Profile object."""
-
-    def test_get_object(self):
-        """
-        **Objective:** Test retrieving a specific object.
-        **Workflow:**
-            1. Mocks the API response for a specific object.
-            2. Verifies the get request and response handling.
-        """
-        profile_id = "f6e434b2-f3f8-48bd-b84f-745e0daee648"
-        mock_response = {
-            "id": profile_id,
-            "name": "ExistingDecryptionProfile",
-            "folder": "All",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-2",
-                "max_version": "max",
-            },
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-        get_object = self.client.get(profile_id)
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/security/v1/decryption-profiles/{profile_id}"
-        )
-        assert isinstance(get_object, DecryptionProfileResponseModel)
-        assert str(get_object.id) == profile_id
-
-    def test_get_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object retrieval.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to get an object
-            3. Verifies proper error handling and exception raising
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(ObjectNotPresentError):
-            self.client.get(object_id)
-
-    def test_get_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in get method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.get(object_id)
-        assert str(exc_info.value) == "Generic error"
-
-
-class TestDecryptionProfileUpdate(TestDecryptionProfileBase):
-    """Tests for updating Decryption Profile objects."""
-
-    def test_update_object(self):
-        """
-        **Objective:** Test updating an object.
-        **Workflow:**
-            1. Prepares update data and mocks response
-            2. Verifies the update request and response
-            3. Ensures payload transformation is correct
-        """
-        from uuid import UUID
-
-        test_uuid = UUID("f6e434b2-f3f8-48bd-b84f-745e0daee648")
-
-        # Test data including ID
-        update_data = {
-            "id": str(test_uuid),
-            "name": "UpdatedDecryptionProfile",
-            "folder": "All",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-1",
-                "max_version": "tls1-2",
-            },
-        }
-
-        # Expected payload should not include the ID
-        expected_payload = {
-            "name": "UpdatedDecryptionProfile",
-            "folder": "All",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-1",
-                "max_version": "tls1-2",
-            },
-        }
-
-        # Mock response should include the ID
-        mock_response = update_data.copy()
-        self.mock_scm.put.return_value = mock_response  # noqa
-
-        # Perform update
-        updated_object = self.client.update(update_data)
-
-        # Verify correct endpoint and payload
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/security/v1/decryption-profiles/{update_data['id']}",
-            json=expected_payload,  # Should not include ID
-        )
-
-        # Verify response model
-        assert isinstance(updated_object, DecryptionProfileResponseModel)
-        assert isinstance(updated_object.id, UUID)  # Verify it's a UUID object
-        assert updated_object.id == test_uuid  # Compare against UUID object
-        assert (
-            str(updated_object.id) == update_data["id"]
-        )  # Compare string representations
-        assert updated_object.name == "UpdatedDecryptionProfile"
-        assert updated_object.ssl_protocol_settings.min_version == SSLVersion.tls1_1
-        assert updated_object.ssl_protocol_settings.max_version == SSLVersion.tls1_2
-
-    def test_update_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object update.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to update an object
-            3. Verifies proper error handling and exception raising
-        """
-        update_data = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "test-profile",
-            "folder": "Shared",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-1",
-                "max_version": "tls1-2",
-            },
-        }
-
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Update failed",
-                    "details": {"errorType": "Malformed Command"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.put.side_effect = Exception()  # noqa
-        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(MalformedRequestError):
-            self.client.update(update_data)
-
-    def test_update_with_invalid_data(self):
-        """
-        **Objective:** Test update method with invalid data structure.
-        **Workflow:**
-            1. Attempts to update with invalid data
-            2. Verifies proper validation error handling
-        """
-        invalid_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "invalid_field": "test",
-        }
-
-        with pytest.raises(PydanticValidationError):
-            self.client.update(invalid_data)
-
-    def test_update_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in update method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        update_data = {
-            "id": "f6e434b2-f3f8-48bd-b84f-745e0daee648",
-            "name": "test-profile",
-            "folder": "Shared",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-1",
-                "max_version": "tls1-2",
-            },
-        }
-
-        # Mock a generic exception without response
-        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.update(update_data)
-        assert str(exc_info.value) == "Generic error"
-
-
-class TestDecryptionProfileDelete(TestDecryptionProfileBase):
-    """Tests for deleting Decryption Profile objects."""
-
-    def test_delete_referenced_object(self):
-        """
-        **Objective:** Test deleting an object that is referenced by other objects.
-        **Workflow:**
-            1. Sets up a mock error response for a referenced object deletion attempt
-            2. Attempts to delete an object that is referenced by other objects
-            3. Validates that ReferenceNotZeroError is raised with correct details
-            4. Verifies the error contains proper reference information
-        """
-        object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
-
-        # Mock the API error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
-                    "details": {
-                        "errorType": "Reference Not Zero",
-                        "message": [
-                            " container -> Texas -> security-profile-group -> custom-group -> decryption"
-                        ],
-                        "errors": [
-                            {
-                                "type": "NON_ZERO_REFS",
-                                "message": "Node cannot be deleted because of references from",
-                                "params": ["custom-profile"],
-                                "extra": [
-                                    "container/[Texas]/security-profile-group/[custom-group]/decryption/[custom-profile]"
-                                ],
-                            }
-                        ],
-                    },
-                }
-            ],
-            "_request_id": "8fe3b025-feb7-41d9-bf88-3938c0b33116",
-        }
-
-        # Configure mock to raise HTTPError with our custom error response
-        self.mock_scm.delete.side_effect = Exception()  # noqa
-        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        # Attempt to delete the object and expect ReferenceNotZeroError
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
-            self.client.delete(object_id)
-
-        error = exc_info.value
-
-        # Verify the error contains the expected information
-        assert error.error_code == "API_I00013"
-        assert "custom-profile" in error.references
-        assert any("Texas" in path for path in error.reference_paths)
-        assert "Cannot delete object due to existing references" in str(error)
-
-        # Verify the delete method was called with correct endpoint
-        self.mock_scm.delete.assert_called_once_with(  # noqa
-            f"/config/security/v1/decryption-profiles/{object_id}"
-        )
-
-        # Verify detailed error message includes reference path
-        assert "custom-group" in error.detailed_message
-        assert "container/[Texas]" in error.detailed_message
-
-    def test_delete_error_handling(self):
-        """
-        **Objective:** Test error handling during object deletion.
-        **Workflow:**
-            1. Mocks various error scenarios
-            2. Verifies proper error handling for each case
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Test object not found
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.delete.side_effect = Exception()  # noqa
-        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(ObjectNotPresentError):
-            self.client.delete(object_id)
-
-    def test_delete_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in delete method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.delete(object_id)
-        assert str(exc_info.value) == "Generic error"
-
-
-class TestDecryptionProfileFetch(TestDecryptionProfileBase):
-    """Tests for fetching Decryption Profile objects by name."""
-
-    def test_fetch_object(self):
-        """
-        **Objective:** Test retrieving an object by its name using the `fetch` method.
-        **Workflow:**
-            1. Sets up a mock response resembling the expected API response for fetching an object by name.
-            2. Calls the `fetch` method of `self.client` with a specific name and container.
-            3. Asserts that the mocked service was called with the correct URL and parameters.
-            4. Validates the returned object's attributes.
-        """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "ssl_protocol_settings": {
-                "min_version": "tls1-2",
-                "max_version": "max",
-            },
-            "description": None,  # Should be excluded in the result
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method
-        fetched_object = self.client.fetch(
-            name=mock_response["name"],
-            folder=mock_response["folder"],
-        )
-
-        # Assert that the GET request was made with the correct parameters
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/security/v1/decryption-profiles",
-            params={
-                "folder": mock_response["folder"],
-                "name": mock_response["name"],
-            },
-        )
-
-        # Validate the returned object
-        assert isinstance(fetched_object, dict)
-        assert str(fetched_object["id"]) == mock_response["id"]
-        assert fetched_object["name"] == mock_response["name"]
-        assert fetched_object["ssl_protocol_settings"]["min_version"] == "tls1-2"
-
-    def test_fetch_object_not_found(self):
-        """
-        Test fetching an object by name that does not exist.
-
-        **Objective:** Test that fetching a non-existent object raises NotFoundError.
-        **Workflow:**
-            1. Mocks the API response to return an empty 'data' list.
-            2. Calls the `fetch` method with a name that does not exist.
-            3. Asserts that NotFoundError is raised.
-        """
-        object_name = "NonExistent"
-        folder_name = "Shared"
-        mock_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method and expect a NotFoundError
-        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
-            self.client.fetch(
-                name=object_name,
-                folder=folder_name,
-            )
-
-    def test_fetch_empty_name(self):
-        """
-        **Objective:** Test fetch with empty name parameter.
-        **Workflow:**
-            1. Attempts to fetch with empty name
-            2. Verifies ValidationError is raised
-        """
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
-        assert "Field 'name' cannot be empty" in str(exc_info.value)
-
-    def test_fetch_container_validation(self):
-        """
-        **Objective:** Test container parameter validation in fetch.
-        **Workflow:**
-            1. Tests various invalid container combinations
-            2. Verifies proper error handling
-        """
-        # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
-            self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
-
-        # Test no container provided
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="test-profile")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-        # Test multiple containers provided
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(
-                name="test-profile", folder="Shared", snippet="TestSnippet"
-            )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_fetch_object_unexpected_response_format(self):
-        """
-        Test fetching an object when the API returns an unexpected response format.
-
-        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
-        **Workflow:**
-            1. Mocks the API response to return an unexpected format.
-            2. Calls the `fetch` method.
-            3. Asserts that BadResponseError is raised.
-        """
-        group_name = "TestGroup"
-        folder_name = "Shared"
-        # Mocking an unexpected response format
-        mock_response = {"unexpected_key": "unexpected_value"}
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
-
-    def test_fetch_validation_errors(self):
-        """
-        **Objective:** Test fetch validation errors.
-        **Workflow:**
-            1. Tests various invalid input scenarios
-            2. Verifies appropriate error handling
-        """
-        # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
-            self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
-
-        # Test multiple containers
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="test", folder="folder1", snippet="snippet1")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(exc_info.value)
-        )
-
-    def test_fetch_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in fetch method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response without expected fields
-        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
-
-        # Test response with both id and data fields (invalid format)
-        self.mock_scm.get.return_value = {  # noqa
-            "id": "some-id",
-            "data": [{"some": "data"}],
-        }  # noqa
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert (
-            "2 validation errors for DecryptionProfileResponseModel\nname\n  Field required"
-            in str(exc_info.value)
-        )
-        assert "name\n  Field required" in str(exc_info.value)
-
-        # Test malformed response in list format
-        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-
-    def test_fetch_error_handler_json_error(self):
-        """
-        **Objective:** Test fetch method error handling when json() raises an error.
-        **Workflow:**
-            1. Mocks an exception with a response that raises error on json()
-            2. Verifies the original exception is re-raised
-        """
-
-        class MockResponse:
-            @property
-            def response(self):
-                return self
-
-            def json(self):
-                raise ValueError("Original error")
-
-        # Create mock exception with our special response
-        mock_exception = Exception("Original error")
-        mock_exception.response = MockResponse()
-
-        # Configure mock to raise our custom exception
-        self.mock_scm.get.side_effect = mock_exception  # noqa
-
-        # The original exception should be raised since json() failed
-        with pytest.raises(Exception) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Original error" in str(exc_info.value)
-
-
-class TestDecryptionProfileListFilters(TestDecryptionProfileBase):
-    """Tests for filtering during listing Decryption Profile objects."""
-
-    def test_list_with_filters(self):
-        """
-        **Objective:** Test that filters are properly added to parameters.
-        **Workflow:**
-            1. Calls list with various filters
-            2. Verifies filters are properly formatted in the request
-        """
+    def test_list_container_missing_error(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list()
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_list_container_multiple_error(self):
+        """Test validation of container parameters."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_list_filters_valid(self):
+        """Test that filters are properly added to parameters."""
         filters = {
-            "ssl_protocol_settings": ["tls1-2", "tls1-3"],
-            "ssl_forward_proxy": [
-                "block_expired_certificate",
-                "block_untrusted_issuer",
-            ],
+            "types": ["forward", "inbound", "no"],
         }
 
         mock_response = {"data": []}
@@ -890,178 +151,636 @@ class TestDecryptionProfileListFilters(TestDecryptionProfileBase):
             },
         )
 
-    def test_list_filters_type_validation(self):
-        """
-        **Objective:** Test validation of filter types in list method.
-        **Workflow:**
-            1. Tests various invalid filter type scenarios
-            2. Verifies ValidationError is raised with correct message
-            3. Tests valid filter types pass validation
-        """
+    def test_list_filters_lists_empty(self):
+        """Test behavior with empty filter lists."""
         mock_response = {
             "data": [
-                {
-                    "id": "1cbeeef0-59dd-49a3-9753-3b7c4d174cef",
-                    "name": "Morrowind",
-                    "folder": "Shared",
-                    "ssl_forward_proxy": {
-                        "auto_include_altname": True,
-                        "block_client_cert": False,
-                        "block_expired_certificate": True,
-                        "block_timeout_cert": False,
-                        "block_tls13_downgrade_no_resource": False,
-                        "block_unknown_cert": False,
-                        "block_unsupported_cipher": False,
-                        "block_unsupported_version": False,
-                        "block_untrusted_issuer": False,
-                        "restrict_cert_exts": False,
-                        "strip_alpn": False,
-                    },
-                    "ssl_protocol_settings": {
-                        "auth_algo_md5": True,
-                        "auth_algo_sha1": True,
-                        "auth_algo_sha256": True,
-                        "auth_algo_sha384": True,
-                        "enc_algo_3des": True,
-                        "enc_algo_aes_128_cbc": True,
-                        "enc_algo_aes_128_gcm": True,
-                        "enc_algo_aes_256_cbc": True,
-                        "enc_algo_aes_256_gcm": True,
-                        "enc_algo_chacha20_poly1305": True,
-                        "enc_algo_rc4": True,
-                        "keyxchg_algo_dhe": True,
-                        "keyxchg_algo_ecdhe": True,
-                        "keyxchg_algo_rsa": True,
-                        "max_version": "tls1-2",
-                        "min_version": "tls1-0",
-                    },
-                }
-            ],
-            "offset": 0,
-            "total": 1,
-            "limit": 200,
+                DecryptionProfileResponseFactory(
+                    name="profile1",
+                    folder="Shared",
+                    ssl_protocol_settings=SSLProtocolSettingsFactory(),
+                ).model_dump()
+            ]
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Test invalid types filter (string instead of list)
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", types="ssl_forward_proxy")
-        assert str(exc_info.value) == "'types' filter must be a list"
+        filtered_objects = self.client.list(
+            folder="Shared",
+            types=[],
+        )
+        assert len(filtered_objects) == 0
 
-        # Test invalid types filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", types={"type": "ssl_forward_proxy"})
-        assert str(exc_info.value) == "'types' filter must be a list"
+    def test_list_filters_types_validation(self):
+        """Test validation of 'types' filter specifically."""
+        mock_profiles = []
 
-        # Test that valid list filters pass validation
-        try:
-            self.client.list(
-                folder="Shared",
-                types=["ssl_forward_proxy"],
-            )
-        except ValidationError:
-            pytest.fail("Unexpected ValidationError raised with valid list filters")
+        # Test with string instead of list
+        invalid_filters = {"types": "type1"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_profiles, invalid_filters)
 
-    def test_list_empty_folder_error(self):
-        """
-        **Objective:** Test that empty folder raises appropriate error.
-        **Workflow:**
-            1. Attempts to list objects with empty folder
-            2. Verifies EmptyFieldError is raised
-        """
-        with pytest.raises(EmptyFieldError) as exc_info:
-            self.client.list(folder="")
-        assert str(exc_info.value) == "Field 'folder' cannot be empty"
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
 
-    def test_list_error_handling(self):
-        """
-        **Objective:** Test error handling in list operation.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to list objects
-            3. Verifies proper error handling
-        """
-        mock_error_response = {
-            "_errors": [
+    def test_list_response_invalid_format(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+
+    def test_list_response_invalid_data_field_missing(self):
+        """Test that InvalidObjectError is raised when API returns response with missing data field."""
+        self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(error)
+
+    def test_list_response_invalid_data_field_type(self):
+        """Test that InvalidObjectError is raised when API returns non-list data field."""
+        self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+
+    def test_list_http_error_no_content(self):
+        """Test handling of HTTPError without content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.list(folder="Shared")
+
+
+class TestDecryptionProfileCreate(TestDecryptionProfileBase):
+    """Tests for creating Decryption Profile objects."""
+
+    def test_create_valid_object(self):
+        """Test creating an object with valid data."""
+        test_object = DecryptionProfileCreateApiFactory.build()
+        mock_response = DecryptionProfileResponseFactory.from_request(test_object)
+
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump())
+
+        self.mock_scm.post.assert_called_once_with(  # noqa
+            "/config/security/v1/decryption-profiles",
+            json=test_object.model_dump(),
+        )
+        assert isinstance(created_object, DecryptionProfileResponseModel)
+        assert created_object.name == test_object.name
+
+    def test_create_http_error_no_content(self):
+        """Test creation with HTTPError without content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.create(
                 {
-                    "code": "API_I00013",
-                    "message": "Listing failed",
-                    "details": {"errorType": "Operation Impossible"},
+                    "name": "test",
+                    "folder": "Shared",
+                    "ssl_protocol_settings": {
+                        "min_version": "tls1-0",
+                        "max_version": "tls1-2",
+                    },
                 }
-            ],
-            "_request_id": "test-request-id",
-        }
+            )
 
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+    def test_create_with_ssl_settings(self):
+        """Test creating profile with SSL protocol settings."""
+        test_object = DecryptionProfileCreateApiFactory.with_custom_ssl_settings(
+            min_ver=SSLVersion.tls1_1,
+            max_ver=SSLVersion.tls1_3,
         )
 
-        with pytest.raises(FolderNotFoundError):
-            self.client.list(folder="NonexistentFolder")
+        mock_response = DecryptionProfileResponseFactory.from_request(test_object)
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
 
-    def test_list_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in list method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        # Mock a generic exception without response
+        created_object = self.client.create(test_object.model_dump())
+
+        assert isinstance(created_object, DecryptionProfileResponseModel)
+        assert created_object.ssl_protocol_settings.min_version == SSLVersion.tls1_1
+        assert created_object.ssl_protocol_settings.max_version == SSLVersion.tls1_3
+
+    def test_create_http_error_with_response(self):
+        """Test that HTTPError with response content triggers proper error handling."""
+        test_data = {
+            "name": "test-profile",
+            "folder": "Shared",
+            "ssl_protocol_settings": {
+                "min_version": "tls1-0",
+                "max_version": "tls1-2",
+            },
+        }
+
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Create failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.create(test_data)
+
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_create_generic_exception_handling(self):
+        """Test handling of a generic exception during create."""
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(
+                {
+                    "name": "test-profile",
+                    "folder": "Shared",
+                    "ssl_protocol_settings": {
+                        "min_version": "tls1-0",
+                        "max_version": "tls1-2",
+                    },
+                }
+            )
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestDecryptionProfileGet(TestDecryptionProfileBase):
+    """Tests for retrieving a specific Decryption Profile object."""
+
+    def test_get_valid_object(self):
+        """Test retrieving a specific object."""
+        mock_response = DecryptionProfileResponseFactory.build()
+
+        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
+        retrieved_object = self.client.get(str(mock_response.id))
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            f"/config/security/v1/decryption-profiles/{mock_response.id}"
+        )
+        assert isinstance(retrieved_object, DecryptionProfileResponseModel)
+        assert retrieved_object.name == mock_response.name
+
+    def test_get_object_not_present_error(self):
+        """Test error handling when object is not present."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.get(object_id)
+
+        assert "Object Not Present" in str(exc_info.value)
+
+    def test_get_generic_exception_handling(self):
+        """Test generic exception handling in get method."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.get(object_id)
+
         assert str(exc_info.value) == "Generic error"
 
-    def test_list_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in list method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response
-        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
+    def test_get_http_error_no_response_content(self):
+        """Test get method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        with pytest.raises(BadResponseError):
-            self.client.list(folder="Shared")
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
 
-        # Test invalid data format
-        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
 
-        with pytest.raises(BadResponseError):
-            self.client.list(folder="Shared")
+        with pytest.raises(HTTPError):
+            self.client.get(object_id)
 
-    def test_list_non_dict_response(self):
-        """
-        **Objective:** Test list method handling of non-dictionary response.
-        **Workflow:**
-            1. Mocks a non-dictionary response from the API
-            2. Verifies that BadResponseError is raised with correct message
-            3. Tests different non-dict response types
-        """
-        # Test with list response
-        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
+    def test_get_server_error(self):
+        """Test handling of server errors during get method."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
 
-        # Test with string response
-        self.mock_scm.get.return_value = "string response"  # noqa
+        with pytest.raises(APIError) as exc_info:
+            self.client.get(object_id)
 
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in error_msg
+        )
 
-        # Test with None response
-        self.mock_scm.get.return_value = None  # noqa
 
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
+class TestDecryptionProfileUpdate(TestDecryptionProfileBase):
+    """Tests for updating Decryption Profile objects."""
+
+    def test_update_valid_object(self):
+        """Test updating an object with valid data."""
+        update_data = DecryptionProfileUpdateApiFactory.with_updated_ssl_settings(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="updated-profile",
+        )
+        input_data = update_data.model_dump()
+
+        # Create mock response
+        mock_response = DecryptionProfileResponseFactory.from_request(update_data)
+        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
+
+        # Perform update
+        updated_object = self.client.update(input_data)
+
+        # Assert the put method was called with correct parameters
+        self.mock_scm.put.assert_called_once_with(  # noqa
+            f"/config/security/v1/decryption-profiles/{update_data.id}",
+            json=input_data,
+        )
+
+        assert isinstance(updated_object, DecryptionProfileResponseModel)
+        assert updated_object.id == mock_response.id
+        assert updated_object.name == mock_response.name
+
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        update_data = DecryptionProfileUpdateApiFactory.with_updated_ssl_settings(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-profile",
+        )
+        input_data = update_data.model_dump()
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_object_not_present_error(self):
+        """Test error handling when the object to update is not present."""
+        update_data = DecryptionProfileUpdateApiFactory.with_updated_ssl_settings(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-profile",
+        )
+        input_data = update_data.model_dump()
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_http_error_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-profile",
+                    "ssl_protocol_settings": {
+                        "min_version": "tls1-0",
+                        "max_version": "tls1-2",
+                    },
+                }
+            )
+
+    def test_update_generic_exception_handling(self):
+        """Test handling of a generic exception during update."""
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test-profile",
+                    "ssl_protocol_settings": {
+                        "min_version": "tls1-0",
+                        "max_version": "tls1-2",
+                    },
+                }
+            )
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_server_error(self):
+        """Test handling of server errors during update."""
+        update_data = DecryptionProfileUpdateApiFactory.with_updated_ssl_settings(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-profile",
+        )
+        input_data = update_data.model_dump()
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
+
+
+class TestDecryptionProfileDelete(TestDecryptionProfileBase):
+    """Tests for deleting Decryption Profile objects."""
+
+    def test_delete_success(self):
+        """Test successful deletion of an object."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.return_value = None  # noqa
+        self.client.delete(object_id)
+
+        self.mock_scm.delete.assert_called_once_with(  # noqa
+            f"/config/security/v1/decryption-profiles/{object_id}"
+        )
+
+    def test_delete_referenced_object(self):
+        """Test deleting an object that is referenced."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=409,
+            error_code="E009",
+            message="Reference not zero",
+            error_type="Reference Not Zero",
+        )
+
+        with pytest.raises(ReferenceNotZeroError) as exc_info:
+            self.client.delete(object_id)
+
+        assert "Reference Not Zero" in str(exc_info.value)
+
+    def test_delete_object_not_present_error(self):
+        """Test error handling when the object to delete is not present."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.delete(object_id)
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Object Not Present'}" in error_message
+        assert "HTTP error: 404" in error_message
+        assert "API error: API_I00013" in error_message
+
+    def test_delete_http_error_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.delete(object_id)
+
+    def test_delete_generic_exception_handling(self):
+        """Test handling of a generic exception during delete."""
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete("abcdefg")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_delete_server_error(self):
+        """Test handling of server errors during delete."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.delete(object_id)
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_message
+        assert "HTTP error: 500" in error_message
+        assert "API error: E003" in error_message
+
+
+class TestDecryptionProfileFetch(TestDecryptionProfileBase):
+    """Tests for fetching Decryption Profile objects by name."""
+
+    def test_fetch_valid_object(self):
+        """Test retrieving an object by its name using the `fetch` method."""
+        mock_response_model = DecryptionProfileResponseFactory.build()
+        mock_response_data = mock_response_model.model_dump()
+
+        self.mock_scm.get.return_value = mock_response_data  # noqa
+
+        fetched_object = self.client.fetch(
+            name=mock_response_model.name,
+            folder=mock_response_model.folder,
+        )
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/security/v1/decryption-profiles",
+            params={
+                "folder": mock_response_model.folder,
+                "name": mock_response_model.name,
+            },
+        )
+
+        assert isinstance(fetched_object, dict)
+        assert fetched_object["id"] == mock_response_model.id
+        assert fetched_object["name"] == mock_response_model.name
+
+    def test_fetch_object_not_present_error(self):
+        """Test fetching an object that does not exist."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.fetch(name="nonexistent", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Object Not Present'}" in error_msg
+        assert "HTTP error: 404" in error_msg
+        assert "API error: API_I00013" in error_msg
+
+    def test_fetch_empty_name_error(self):
+        """Test fetching with an empty name parameter."""
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.fetch(name="", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert '"name" is not allowed to be empty' in error_msg
+        assert "HTTP error: 400" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_empty_container_error(self):
+        """Test fetching with an empty folder parameter."""
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.fetch(name="test", folder="")
+
+        error_msg = str(exc_info.value)
+        assert '"folder" is not allowed to be empty' in error_msg
+        assert "HTTP error: 400" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_no_container_provided_error(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-profile")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_fetch_multiple_containers_provided_error(self):
+        """Test that InvalidObjectError is raised when multiple container parameters are provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(
+                name="test-profile",
+                folder="Shared",
+                snippet="TestSnippet",
+            )
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_fetch_http_error_no_response_content(self):
+        """Test that an HTTPError without response content in fetch() re-raises the exception."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.fetch(name="test-profile", folder="Shared")
+
+    def test_fetch_server_error(self):
+        """Test handling of server errors during fetch."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_missing_id_field_error(self):
+        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
+        mock_response = {
+            "name": "test-profile",
+            "folder": "Shared",
+            "ssl_protocol_settings": {
+                "min_version": "tls1-0",
+                "max_version": "tls1-2",
+            },
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-profile", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_fetch_invalid_response_type_error(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test123", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
 
 
 # -------------------- End of Test Classes --------------------

@@ -20,15 +20,15 @@ from .security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleMoveModel,
     SecurityRuleUpdateModel,
-    Rulebase,
+    SecurityRuleRulebase,
 )
 from .vulnerability_protection_profiles import (
-    VulnerabilityProtectionProfileCreateModel,
-    VulnerabilityProtectionProfileResponseModel,
-    VulnerabilityProtectionProfileUpdateModel,
+    VulnerabilityProfileCreateModel,
+    VulnerabilityProfileResponseModel,
+    VulnerabilityProfileUpdateModel,
 )
 from .wildfire_antivirus_profiles import (
-    WildfireAntivirusProfileCreateModel,
-    WildfireAntivirusProfileResponseModel,
-    WildfireAntivirusProfileUpdateModel,
+    WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel,
+    WildfireAvProfileUpdateModel,
 )

@@ -12,7 +12,6 @@ from pydantic import (
     constr,
 )
 
-
 TagString = constr(max_length=64)
 
 
@@ -153,11 +152,10 @@ class AddressGroupUpdateModel(AddressGroupBaseModel):
     All fields are optional to allow partial updates.
     """
 
-    name: Optional[str] = Field(
-        None,
-        max_length=63,
-        description="The name of the address group",
-        pattern=r"^[a-zA-Z0-9_ \.-]+$",
+    id: Optional[str] = Field(
+        ...,  # This makes it optional
+        description="The UUID of the address object",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
 
 

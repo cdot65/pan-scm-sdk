@@ -1,17 +1,24 @@
 # scm/config/objects/application_group.py
 
+# Standard library imports
+import logging
 from typing import List, Dict, Any, Optional
+
+# External libraries
+from requests import Response
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config import BaseObject
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    ErrorHandler,
+)
 from scm.models.objects import (
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
-)
-from scm.exceptions import (
-    ValidationError,
-    EmptyFieldError,
-    ErrorHandler,
-    BadResponseError,
 )
 
 
@@ -28,6 +35,7 @@ class ApplicationGroup(BaseObject):
         api_client,
     ):
         super().__init__(api_client)
+        self.logger = logging.getLogger(__name__)
 
     def create(
         self,
@@ -46,20 +54,33 @@ class ApplicationGroup(BaseObject):
             # Use the dictionary "data" to pass into Pydantic and return a modeled object
             app_group = ApplicationGroupCreateModel(**data)
 
-            # Convert back to a Python dictionary, but removing any excluded object
+            # Convert back to a Python dictionary, removing any unset fields
             payload = app_group.model_dump(exclude_unset=True)
 
-            # Send the updated object to the remote API as JSON
-            response = self.api_client.post(self.ENDPOINT, json=payload)
+            # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
+            response: Dict[str, Any] = self.api_client.post(
+                self.ENDPOINT,
+                json=payload,
+            )
 
             # Return the SCM API response as a new Pydantic object
             return ApplicationGroupResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
-        except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+        except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
+            if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
+                )
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def get(
         self,
@@ -77,16 +98,26 @@ class ApplicationGroup(BaseObject):
         try:
             # Send the request to the remote API
             endpoint = f"{self.ENDPOINT}/{object_id}"
-            response = self.api_client.get(endpoint)
+            response: Dict[str, Any] = self.api_client.get(endpoint)
 
             # Return the SCM API response as a new Pydantic object
             return ApplicationGroupResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
-        except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+        except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
+            if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
+                )
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def update(
         self,
@@ -105,21 +136,34 @@ class ApplicationGroup(BaseObject):
             # Use the dictionary "data" to pass into Pydantic and return a modeled object
             app_group = ApplicationGroupUpdateModel(**data)
 
-            # Convert back to a Python dictionary, but removing any excluded object
+            # Convert back to a Python dictionary, removing any unset fields
             payload = app_group.model_dump(exclude_unset=True)
 
             # Send the updated object to the remote API as JSON
             endpoint = f"{self.ENDPOINT}/{data['id']}"
-            response = self.api_client.put(endpoint, json=payload)
+            response: Dict[str, Any] = self.api_client.put(
+                endpoint,
+                json=payload,
+            )
 
             # Return the SCM API response as a new Pydantic object
             return ApplicationGroupResponseModel(**response)
 
-        # Forward exceptions to our custom ErrorHandler object
-        except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+        except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
+            if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
+                )
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     @staticmethod
     def _apply_filters(
@@ -135,15 +179,17 @@ class ApplicationGroup(BaseObject):
 
         Returns:
             List[ApplicationGroupResponseModel]: Filtered list of application groups
+
+        Raises:
+            InvalidObjectError: If filter criteria are invalid
         """
-        # Build a list of what criteria we are looking to filter our response from
+
         filter_criteria = app_groups
 
-        # Perform filtering if the presence of "members" is found within the filters
+        # Filter by members
         if "members" in filters:
             if not isinstance(filters["members"], list):
-                raise ValidationError("'members' filter must be a list")
-
+                raise InvalidObjectError("'members' filter must be a list")
             members = filters["members"]
             filter_criteria = [
                 group
@@ -160,7 +206,6 @@ class ApplicationGroup(BaseObject):
         device: Optional[str],
     ) -> dict:
         """Builds container parameters dictionary."""
-        # Only return a key of "folder", "snippet", or "device" if their value is not None
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -183,71 +228,88 @@ class ApplicationGroup(BaseObject):
             device: Optional device name
             **filters: Additional filters including:
                 - members: List[str] - Filter by member applications
+
         Raises:
-            EmptyFieldError: If provided container fields are empty
-            FolderNotFoundError: If the specified folder doesn't exist
-            ValidationError: If the container parameters are invalid
-            BadResponseError: If response format is invalid
+            MissingQueryParameterError: If provided container fields are empty
+            InvalidObjectError: If the container parameters are invalid
+            APIError: If response format is invalid
         """
-        # If the folder object is empty, raise exception
         if folder == "":
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
-        # Set the parameters, starting with a high limit for more than the default 200
         params = {"limit": self.DEFAULT_LIMIT}
 
-        # Build the configuration container object (folder, snippet, or device)
         container_parameters = self._build_container_params(
             folder,
             snippet,
             device,
         )
 
-        # Ensure that we have only a single instance of "folder", "device", or "snippet"
         if len(container_parameters) != 1:
-            raise ValidationError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            raise InvalidObjectError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                error_code="E003",
+                http_status_code=400,
             )
 
-        # Add the resulting container object to our parameters
         params.update(container_parameters)
 
-        # Perform our request
         try:
             response = self.api_client.get(
                 self.ENDPOINT,
                 params=params,
             )
 
-            # return errors if invalid structure
             if not isinstance(response, dict):
-                raise BadResponseError("Invalid response format: expected dictionary")
-
-            if "data" not in response:
-                raise BadResponseError("Invalid response format: missing 'data' field")
-
-            if not isinstance(response["data"], list):
-                raise BadResponseError(
-                    "Invalid response format: 'data' field must be a list"
+                raise InvalidObjectError(
+                    "Invalid response format: expected dictionary",
+                    error_code="E003",
+                    http_status_code=500,
                 )
 
-            # Return a list object of the entries as Pydantic modeled objects
-            app_groups = [
+            if "data" not in response:
+                raise InvalidObjectError(
+                    "Invalid response format: missing 'data' field",
+                    error_code="E003",
+                    http_status_code=500,
+                )
+
+            if not isinstance(response["data"], list):
+                raise InvalidObjectError(
+                    "Invalid response format: 'data' field must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                )
+
+            addresses = [
                 ApplicationGroupResponseModel(**item) for item in response["data"]
             ]
 
-            # Apply client-side filtering
-            return self._apply_filters(app_groups, filters)
+            return self._apply_filters(
+                addresses,
+                filters,
+            )
 
-        # Forward exceptions to our custom ErrorHandler object
-        except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+        except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
+            if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
+                )
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def fetch(
         self,
@@ -269,43 +331,42 @@ class ApplicationGroup(BaseObject):
             Dict: The fetched object.
 
         Raises:
-            EmptyFieldError: If name or container fields are empty
-            FolderNotFoundError: If the specified folder doesn't exist
-            ObjectNotPresentError: If the object is not found
-            ValidationError: If the parameters are invalid
-            BadResponseError: For other API-related errors
+            MissingQueryParameterError: If name or container fields are empty
+            InvalidObjectError: If the parameters are invalid
+            APIError: For other API-related errors
         """
         if not name:
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'name' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"name" is not allowed to be empty'],  # noqa
             )
 
         if folder == "":
-            raise EmptyFieldError(
+            raise MissingQueryParameterError(
                 message="Field 'folder' cannot be empty",
-                error_code="API_I00035",
+                error_code="E003",
+                http_status_code=400,
                 details=['"folder" is not allowed to be empty'],  # noqa
             )
 
-        # Build the configuration container object (folder, snippet, or device)
+        params = {}
+
         container_parameters = self._build_container_params(
             folder,
             snippet,
             device,
         )
 
-        # Ensure that we have only a single instance of "folder", "device", or "snippet"
         if len(container_parameters) != 1:
-            raise ValidationError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+            raise InvalidObjectError(
+                "Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                error_code="E003",
+                http_status_code=400,
             )
 
-        # Start with container parameters
-        params = container_parameters
-
-        # Add name parameter
+        params.update(container_parameters)
         params["name"] = name
 
         try:
@@ -314,33 +375,41 @@ class ApplicationGroup(BaseObject):
                 params=params,
             )
 
-            # return errors if invalid structure
             if not isinstance(response, dict):
-                raise BadResponseError("Invalid response format: expected dictionary")
+                raise InvalidObjectError(
+                    "Invalid response format: expected dictionary",
+                    error_code="E003",
+                    http_status_code=500,
+                )
 
-            # If the response has a key of "_errors", pass to our custom error handler
-            if "_errors" in response:
-                ErrorHandler.raise_for_error(response)
-
-            # If the response has a key of "id"
-            elif "id" in response:
-                # Create a new object by passing the response through our Pydantic model
-                app_group = ApplicationGroupResponseModel(**response)
-
-                # Return an instance of the object as a Python dictionary
-                return app_group.model_dump(
+            if "id" in response:
+                address = ApplicationGroupResponseModel(**response)
+                return address.model_dump(
                     exclude_unset=True,
                     exclude_none=True,
                 )
-
             else:
-                raise BadResponseError("Invalid response format: missing 'id' field")
+                raise InvalidObjectError(
+                    "Invalid response format: missing 'id' field",
+                    error_code="E003",
+                    http_status_code=500,
+                )
 
-        # Forward exceptions to our custom ErrorHandler object
-        except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+        except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
+            if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
+                )
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise
 
     def delete(
         self,
@@ -355,14 +424,24 @@ class ApplicationGroup(BaseObject):
         Raises:
             ObjectNotPresentError: If the object doesn't exist
             ReferenceNotZeroError: If the object is still referenced by other objects
-            MalformedRequestError: If the request is malformed
+            MalformedCommandError: If the request is malformed
         """
         try:
             endpoint = f"{self.ENDPOINT}/{object_id}"
             self.api_client.delete(endpoint)
 
-        # Forward exceptions to our custom ErrorHandler object
-        except Exception as e:
-            if hasattr(e, "response") and e.response is not None:  # noqa
-                ErrorHandler.raise_for_error(e.response.json())
-            raise
+        except HTTPError as e:
+            # create an object of the type Response and store the contents of e.response within it
+            response: Optional[Response] = e.response
+
+            # if the response is not none, and there is data within response.content
+            if response is not None and response.content:
+
+                # Perform our custom exception handler by sending the response.json() object and http status code
+                ErrorHandler.raise_for_error(
+                    response.json(),
+                    response.status_code,
+                )
+            else:
+                self.logger.error("No response content available for error parsing.")
+                raise

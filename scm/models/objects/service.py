@@ -164,6 +164,12 @@ class ServiceUpdateModel(ServiceBaseModel):
     All fields are optional to allow partial updates.
     """
 
+    id: Optional[UUID] = Field(
+        ...,  # This makes it optional
+        description="The UUID of the address object",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
+
 
 class ServiceResponseModel(ServiceBaseModel):
     """

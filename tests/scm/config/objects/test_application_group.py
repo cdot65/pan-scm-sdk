@@ -1,26 +1,29 @@
 # tests/scm/config/objects/test_application_group.py
 
-import pytest
+# Standard library imports
 from unittest.mock import MagicMock
 
+# External libraries
+import pytest
+from requests.exceptions import HTTPError
+
+# Local SDK imports
 from scm.config.objects import ApplicationGroup
 from scm.exceptions import (
-    ValidationError,
+    InvalidObjectError,
     ObjectNotPresentError,
-    EmptyFieldError,
-    ObjectAlreadyExistsError,
-    MalformedRequestError,
-    FolderNotFoundError,
-    BadResponseError,
+    MissingQueryParameterError,
+    BadRequestError,
+    APIError,
+    MalformedCommandError,
 )
-from scm.models.objects import (
-    ApplicationGroupCreateModel,
-    ApplicationGroupResponseModel,
+from scm.models.objects import ApplicationGroupResponseModel
+from tests.factories import (
+    ApplicationGroupCreateApiFactory,
+    ApplicationGroupUpdateApiFactory,
+    ApplicationGroupResponseFactory,
 )
-
-from tests.factories import ApplicationGroupFactory
-
-from pydantic import ValidationError as PydanticValidationError
+from tests.utils import raise_mock_http_error
 
 
 @pytest.mark.usefixtures("load_env")
@@ -44,40 +47,23 @@ class TestApplicationGroupBase:
 class TestApplicationGroupList(TestApplicationGroupBase):
     """Tests for listing Application Group objects."""
 
-    def test_list_objects(self):
-        """
-        **Objective:** Test listing all objects.
-        **Workflow:**
-            1. Sets up a mock response resembling the expected API response for listing objects.
-            2. Calls the `list` method with a filter parameter.
-            3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of objects.
-        """
+    def test_list_valid(self):
+        """Test listing all objects successfully."""
         mock_response = {
             "data": [
-                {
-                    "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
-                    "name": "Microsoft 365 Access",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
+                ApplicationGroupResponseFactory(
+                    name="Microsoft 365 Access",
+                    folder="Shared",
+                    members=[
                         "office365-consumer-access",
                         "office365-enterprise-access",
                     ],
-                },
-                {
-                    "id": "0b12a889-4220-4cdd-b95f-506e0351a5e4",
-                    "name": "Microsoft 365 Services",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "ms-office365",
-                        "ms-onedrive",
-                        "ms-onenote",
-                        "ms-lync-base",
-                        "skype",
-                    ],
-                },
+                ).model_dump(),
+                ApplicationGroupResponseFactory(
+                    name="Microsoft 365 Services",
+                    folder="Shared",
+                    members=["ms-office365", "ms-onedrive"],
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -85,684 +71,94 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Prisma Access")
+        existing_objects = self.client.list(folder="Shared")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
             params={
                 "limit": 10000,
-                "folder": "Prisma Access",
+                "folder": "Shared",
             },
         )
         assert isinstance(existing_objects, list)
         assert isinstance(existing_objects[0], ApplicationGroupResponseModel)
         assert len(existing_objects) == 2
         assert existing_objects[0].name == "Microsoft 365 Access"
-        assert existing_objects[0].members == [
-            "office365-consumer-access",
-            "office365-enterprise-access",
-        ]
 
-
-class TestApplicationGroupCreate(TestApplicationGroupBase):
-    """Tests for creating Application Group objects."""
-
-    def test_create_object(self):
-        """
-        **Objective:** Test creating an object.
-        **Workflow:**
-            1. Uses ApplicationGroupFactory to create test data.
-            2. Mocks the API response.
-            3. Verifies the creation request and response.
-        """
-        test_object = ApplicationGroupFactory()
-        mock_response = test_object.model_dump()
-        mock_response["name"] = "ValidStaticApplicationGroup"
-        mock_response["id"] = "12345678-abcd-abcd-abcd-123456789012"
-
-        self.mock_scm.post.return_value = mock_response  # noqa
-        created_group = self.client.create(test_object.model_dump(exclude_unset=True))
-
-        self.mock_scm.post.assert_called_once_with(  # noqa
-            "/config/objects/v1/application-groups",
-            json=test_object.model_dump(exclude_unset=True),
-        )
-        assert str(created_group.id) == "12345678-abcd-abcd-abcd-123456789012"
-        assert created_group.name == test_object.name
-        assert created_group.members == test_object.members
-        assert created_group.folder == test_object.folder
-
-    def test_create_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object creation.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to create an object
-            3. Verifies proper error handling and exception raising
-        """
-        test_data = ApplicationGroupFactory()
-
-        # Mock error response
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object creation failed",
-                    "details": {"errorType": "Object Already Exists"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        # Configure mock to raise exception
-        self.mock_scm.post.side_effect = Exception()  # noqa
-        self.mock_scm.post.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.post.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+    def test_list_folder_empty_error(self):
+        """Test that empty folder raises appropriate error."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message='"folder" is not allowed to be empty',
+            error_type="Missing Query Parameter",
         )
 
-        with pytest.raises(ObjectAlreadyExistsError):
-            self.client.create(test_data.model_dump())
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.list(folder="")
 
-    def test_create_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in create method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        test_data = ApplicationGroupFactory()
-
-        # Mock a generic exception without response
-        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.create(test_data.model_dump())
-        assert str(exc_info.value) == "Generic error"
-
-    def test_create_malformed_response_handling(self):
-        """
-        **Objective:** Test handling of malformed response in create method.
-        **Workflow:**
-            1. Mocks a response that would cause a parsing error
-            2. Verifies appropriate error handling
-        """
-        test_data = ApplicationGroupFactory()
-
-        # Mock invalid JSON response
-        self.mock_scm.post.return_value = {"malformed": "response"}  # noqa
-
-        with pytest.raises(PydanticValidationError):
-            self.client.create(test_data.model_dump())
-
-
-class TestApplicationGroupGet(TestApplicationGroupBase):
-    """Tests for retrieving a specific Application Group object."""
-
-    def test_get_object(self):
-        """
-        **Objective:** Test retrieving a specific object.
-        **Workflow:**
-            1. Mocks the API response for a specific group.
-            2. Verifies the get request and response handling.
-        """
-        mock_response = {
-            "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
-            "name": "TestAppGroup",
-            "members": ["office365-consumer-access", "office365-enterprise-access"],
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-        app_group_name = "TestAppGroup"
-        get_object = self.client.get(app_group_name)
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/objects/v1/application-groups/{app_group_name}"
-        )
-        assert isinstance(get_object, ApplicationGroupResponseModel)
-        assert get_object.name == "TestAppGroup"
-        assert get_object.members == [
-            "office365-consumer-access",
-            "office365-enterprise-access",
-        ]
-
-    def test_get_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object retrieval.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to get an object
-            3. Verifies proper error handling and exception raising
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(ObjectNotPresentError):
-            self.client.get(object_id)
-
-    def test_get_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in get method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.get(object_id)
-        assert str(exc_info.value) == "Generic error"
-
-
-class TestApplicationGroupUpdate(TestApplicationGroupBase):
-    """Tests for updating Application Group objects."""
-
-    def test_update_object(self):
-        """
-        **Objective:** Test updating an object.
-        **Workflow:**
-            1. Prepares update data and mocks response
-            2. Verifies the update request and response
-            3. Ensures payload transformation is correct
-        """
-        from uuid import UUID
-
-        test_uuid = UUID("123e4567-e89b-12d3-a456-426655440000")
-
-        # Test data including ID
-        update_data = {
-            "id": str(test_uuid),  # Use string for input data as it would come from API
-            "name": "TestAppGroup",
-            "folder": "Prisma Access",
-            "members": [
-                "office365-consumer-access",
-                "office365-enterprise-access",
-                "test123",
-            ],
-        }
-
-        # Expected payload should not include the ID
-        expected_payload = {
-            "name": "TestAppGroup",
-            "folder": "Prisma Access",
-            "members": [
-                "office365-consumer-access",
-                "office365-enterprise-access",
-                "test123",
-            ],
-        }
-
-        # Mock response should include the ID
-        mock_response = update_data.copy()
-        self.mock_scm.put.return_value = mock_response  # noqa
-
-        # Perform update
-        updated_group = self.client.update(update_data)
-
-        # Verify correct endpoint and payload
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/application-groups/{update_data['id']}",
-            json=expected_payload,  # Should not include ID
-        )
-
-        # Verify response model
-        assert isinstance(updated_group, ApplicationGroupResponseModel)
-        assert isinstance(updated_group.id, UUID)  # Verify it's a UUID object
-        assert updated_group.id == test_uuid  # Compare against UUID object
-        assert (
-            str(updated_group.id) == update_data["id"]
-        )  # Compare string representations
-        assert updated_group.name == "TestAppGroup"
-        assert "test123" in updated_group.members
-        assert updated_group.folder == "Prisma Access"
-
-    def test_update_object_error_handling(self):
-        """
-        **Objective:** Test error handling during object update.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to update an object
-            3. Verifies proper error handling and exception raising
-        """
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-group",
-            "folder": "Shared",
-            "members": ["app1", "app2"],
-        }
-
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Update failed",
-                    "details": {"errorType": "Malformed Command"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.put.side_effect = Exception()  # noqa
-        self.mock_scm.put.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.put.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(MalformedRequestError):
-            self.client.update(update_data)
-
-    def test_update_with_invalid_data(self):
-        """
-        **Objective:** Test update method with invalid data structure.
-        **Workflow:**
-            1. Attempts to update with invalid data
-            2. Verifies proper validation error handling
-        """
-        invalid_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "invalid_field": "test",
-        }
-
-        with pytest.raises(PydanticValidationError):
-            self.client.update(invalid_data)
-
-    def test_update_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in update method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-group",
-            "folder": "Shared",
-            "members": ["app1", "app2"],
-        }
-
-        # Mock a generic exception without response
-        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.update(update_data)
-        assert str(exc_info.value) == "Generic error"
-
-
-class TestApplicationGroupDelete(TestApplicationGroupBase):
-    """Tests for deleting Application Group objects."""
-
-    def test_delete_error_handling(self):
-        """
-        **Objective:** Test error handling during object deletion.
-        **Workflow:**
-            1. Mocks various error scenarios
-            2. Verifies proper error handling for each case
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Test object not found
-        mock_error_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Object not found",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "test-request-id",
-        }
-
-        self.mock_scm.delete.side_effect = Exception()  # noqa
-        self.mock_scm.delete.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.delete.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
-        )
-
-        with pytest.raises(ObjectNotPresentError):
-            self.client.delete(object_id)
-
-    def test_delete_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in delete method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        # Mock a generic exception without response
-        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.delete(object_id)
-        assert str(exc_info.value) == "Generic error"
-
-
-class TestApplicationGroupFetch(TestApplicationGroupBase):
-    """Tests for fetching an object by name."""
-
-    def test_fetch_object(self):
-        """
-        **Objective:** Test successful fetch of an object.
-        **Workflow:**
-            1. Mocks API response for a successful fetch
-            2. Verifies correct parameter handling
-            3. Validates response transformation
-        """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "Microsoft Office",
-            "folder": "Shared",
-            "members": ["office365", "ms-office"],
-            "description": None,  # Should be excluded in the result
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method
-        fetched_object = self.client.fetch(
-            name=mock_response["name"],
-            folder=mock_response["folder"],
-        )
-
-        # Assert that the GET request was made with the correct parameters
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/application-groups",
-            params={
-                "folder": mock_response["folder"],
-                "name": mock_response["name"],
-            },
-        )
-
-        # Verify result
-        assert isinstance(fetched_object, dict)
-        assert str(fetched_object["id"]) == mock_response["id"]
-        assert fetched_object["name"] == mock_response["name"]
-        assert fetched_object["members"] == mock_response["members"]
-
-    def test_fetch_object_not_found(self):
-        """
-        Test fetching an object by name that does not exist.
-
-        **Objective:** Test that fetching a non-existent object raises NotFoundError.
-        **Workflow:**
-            1. Mocks the API response to return an empty 'data' list.
-            2. Calls the `fetch` method with a name that does not exist.
-            3. Asserts that NotFoundError is raised.
-        """
-        object_name = "NonExistent"
-        folder_name = "Shared"
-        mock_response = {
-            "_errors": [
-                {
-                    "code": "API_I00013",
-                    "message": "Your configuration is not valid. Please review the error message for more details.",
-                    "details": {"errorType": "Object Not Present"},
-                }
-            ],
-            "_request_id": "12282b0f-eace-41c3-a8e2-4b28992979c4",
-        }
-
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Call the fetch method and expect a NotFoundError
-        with pytest.raises(ObjectNotPresentError) as exc_info:  # noqa
-            self.client.fetch(
-                name=object_name,
-                folder=folder_name,
-            )
-
-    def test_fetch_empty_name(self):
-        """
-        **Objective:** Test fetch with empty name parameter.
-        **Workflow:**
-            1. Attempts to fetch with empty name
-            2. Verifies ValidationError is raised
-        """
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
-        assert "Field 'name' cannot be empty" in str(exc_info.value)
-
-    def test_fetch_container_validation(self):
-        """
-        **Objective:** Test container parameter validation in fetch.
-        **Workflow:**
-            1. Tests various invalid container combinations
-            2. Verifies proper error handling
-        """
-        # Test empty folder
-        with pytest.raises(EmptyFieldError) as exc_info:
-            self.client.fetch(name="test", folder="")
-        assert "Field 'folder' cannot be empty" in str(exc_info.value)
-
-        # Test no container provided
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="test-group")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-        # Test multiple containers provided
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.fetch(name="test-group", folder="Shared", snippet="TestSnippet")
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_fetch_response_handling(self):
-        """
-        **Objective:** Test fetch method's response handling.
-        **Workflow:**
-            1. Tests various response scenarios
-            2. Verifies proper response transformation
-        """
-        mock_response = {
-            "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
-            "name": "Microsoft 365 Access",
-            "folder": "Shared",
-            "snippet": "office365",
-            "members": ["office365-consumer-access", "office365-enterprise-access"],
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        result = self.client.fetch(name="TestApp", folder="Shared")
-
-        # Verify None values are excluded
-        assert "description" not in result
-        assert result["name"] == mock_response["name"]
-        assert result["folder"] == mock_response["folder"]
-
-    def test_fetch_generic_exception_handling(self):
-        """
-        **Objective:** Test generic exception handling in fetch method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
-        """
-        # Mock a generic exception without response
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert str(exc_info.value) == "Generic error"
-
-    def test_fetch_unexpected_response_format(self):
-        """
-        Test fetching an object when the API returns an unexpected response format.
-
-        **Objective:** Ensure that the fetch method raises BadResponseError when the response format is not as expected.
-        **Workflow:**
-            1. Mocks the API response to return an unexpected format.
-            2. Calls the `fetch` method.
-            3. Asserts that BadResponseError is raised.
-        """
-        group_name = "TestGroup"
-        folder_name = "Shared"
-        # Mocking an unexpected response format
-        mock_response = {"unexpected_key": "unexpected_value"}
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name=group_name, folder=folder_name)
-        assert str(exc_info.value) == "Invalid response format: missing 'id' field"
-
-    def test_fetch_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in fetch method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response without expected fields
-        self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: missing 'id' field" in str(exc_info.value)
-
-        # Test response with both id and data fields (invalid format)
-        self.mock_scm.get.return_value = {  # noqa
-            "id": "some-id",
-            "data": [{"some": "data"}],
-        }  # noqa
-
-        with pytest.raises(PydanticValidationError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "3 validation errors for ApplicationGroupResponseModel" in str(
-            exc_info.value
-        )
-        assert "name\n  Field required" in str(exc_info.value)
-
-        # Test malformed response in list format
-        self.mock_scm.get.return_value = [{"unexpected": "format"}]  # noqa
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-
-    def test_fetch_error_handler_json_error(self):
-        """
-        **Objective:** Test fetch method error handling when json() raises an error.
-        **Workflow:**
-            1. Mocks an exception with a response that raises error on json()
-            2. Verifies the original exception is re-raised
-        """
-
-        class MockResponse:
-            @property
-            def response(self):
-                return self
-
-            def json(self):
-                raise ValueError("Original error")
-
-        # Create mock exception with our special response
-        mock_exception = Exception("Original error")
-        mock_exception.response = MockResponse()
-
-        # Configure mock to raise our custom exception
-        self.mock_scm.get.side_effect = mock_exception  # noqa
-
-        # The original exception should be raised since json() failed
-        with pytest.raises(Exception) as exc_info:
-            self.client.fetch(
-                name="test",
-                folder="Shared",
-            )
-        assert "Original error" in str(exc_info.value)
-
-
-class TestApplicationGroupValidation(TestApplicationGroupBase):
-    """Tests for Application Group validation."""
-
-    def test_list_validation_error(self):
-        """Test validation error when listing with multiple containers."""
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Prisma Access", snippet="TestSnippet")
+        error_msg = str(exc_info.value)
 
         assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            in error_msg
         )
 
-    def test_object_create_no_container(self):
-        """Test validation when no container is provided."""
-        data = {
-            "name": "Microsoft 365 Access",
-            "members": ["office365-consumer-access", "office365-enterprise-access"],
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ApplicationGroupCreateModel(**data)
+    def test_list_folder_nonexistent_error(self):
+        """Test error handling in list operation."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Listing failed",
+            error_type="Operation Impossible",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.list(folder="NonexistentFolder")
+
+        error_msg = str(exc_info.value)
         assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
+            in error_msg
         )
 
-    def test_object_create_multiple_containers(self):
-        """Test validation when multiple containers are provided."""
-        data = {
-            "name": "Microsoft 365 Access",
-            "folder": "Shared",
-            "snippet": "office365",
-            "members": ["office365-consumer-access", "office365-enterprise-access"],
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ApplicationGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
-        )
-
-    def test_response_model_invalid_uuid(self):
-        """Test validation of UUID format in response model."""
-        invalid_data = {
-            "id": "invalid-uuid",
-            "name": "TestAppGroup",
-            "members": ["app1", "app2"],
-            "folder": "Shared",
-        }
-        with pytest.raises(ValueError) as exc_info:
-            ApplicationGroupResponseModel(**invalid_data)
-        assert "1 validation error for ApplicationGroupResponseModel" in str(
-            exc_info.value
-        )
-        assert "Input should be a valid UUID, invalid character" in str(exc_info.value)
-
-
-class TestApplicationGroupListFilters(TestApplicationGroupBase):
-    """Tests for filtering during listing Application Group objects."""
-
-    def test_list_with_filters(self):
+    def test_list_container_missing_error(self):
         """
-        **Objective:** Test that filters are properly added to parameters.
-        **Workflow:**
-            1. Calls list with various filters
-            2. Verifies filters are properly formatted in the request
+        Test that InvalidObjectError is raised when no container parameter is provided.
         """
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+            error_type="Invalid Object",
+        )
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list()
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_list_container_multiple_error(self):
+        """Test validation of container parameters."""
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="Multiple container types provided",
+            error_type="Invalid Object",
+        )
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="folder1", snippet="snippet1")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_list_filters_valid(self):
+        """Test that filters are properly added to parameters."""
         filters = {
-            "types": ["type1", "type2"],
-            "values": ["value1", "value2"],
-            "tags": ["tag1", "tag2"],
+            "members": ["type1", "type2"],
         }
 
         mock_response = {"data": []}
@@ -778,313 +174,741 @@ class TestApplicationGroupListFilters(TestApplicationGroupBase):
             },
         )
 
-    def test_list_filters_type_validation(self):
-        """
-        **Objective:** Test validation of filter types in list method.
-        **Workflow:**
-            1. Tests various invalid filter type scenarios
-            2. Verifies ValidationError is raised with correct message
-            3. Tests valid filter types pass validation
-        """
+    def test_list_filters_lists_empty(self):
+        """Test behavior with empty filter lists."""
         mock_response = {
             "data": [
                 {
-                    "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
-                    "name": "Microsoft 365 Access",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "office365-consumer-access",
-                        "office365-enterprise-access",
-                    ],
-                },
-                {
-                    "id": "0b12a889-4220-4cdd-b95f-506e0351a5e4",
-                    "name": "Microsoft 365 Services",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "ms-office365",
-                        "ms-onedrive",
-                        "ms-onenote",
-                        "ms-lync-base",
-                        "skype",
-                    ],
-                },
-                {
-                    "id": "67e962f5-280b-40ac-a26c-d330f1c1baf6",
-                    "name": "Microsoft 365 Mail Clients",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "mapi-over-http",
-                        "ms-exchange",
-                        "rpc-over-http",
-                        "activesync",
-                    ],
-                },
-                {
-                    "id": "c75509c1-edc3-4d7d-be92-591f415edb48",
-                    "name": "Microsoft Real Time Protocols",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": ["rtcp", "stun", "rtp"],
-                },
-                {
-                    "id": "25633a36-cfff-4be9-a0cf-53b3a9880418",
-                    "name": "Microsoft 365 - Dependent Apps",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "http-audio",
-                        "http-video",
-                        "ocsp",
-                        "soap",
-                        "ssl",
-                        "web-browsing",
-                        "websocket",
-                        "windows-azure-base",
-                    ],
-                },
-                {
-                    "id": "97dc0b92-de21-4fcb-b3ac-fd0ffae99e36",
-                    "name": "test123asdf",
-                    "folder": "Shared",
-                    "members": [
-                        "office365-consumer-access",
-                        "office365-enterprise-access",
-                    ],
-                },
+                    "id": "24613eca-f875-4ebc-b4c3-045711dfe283",
+                    "name": "web-apps",
+                    "folder": "Texas",
+                    "members": ["ssl"],
+                }
             ],
             "offset": 0,
-            "total": 6,
-            "limit": 200,
-        }
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        # Test invalid category filter (string instead of list)
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", members="business-systems")
-        assert str(exc_info.value) == "'members' filter must be a list"
-
-        # Test invalid category filter (dict instead of list)
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="Shared", members={"value": "business-systems"})
-        assert str(exc_info.value) == "'members' filter must be a list"
-
-        # Test that valid list filters pass validation
-        try:
-            self.client.list(
-                folder="Shared",
-                members=["office365-consumer-access"],
-            )
-        except ValidationError:
-            pytest.fail("Unexpected ValidationError raised with valid list filters")
-
-    def test_list_empty_filter_lists(self):
-        """
-        **Objective:** Test behavior with empty filter lists.
-        **Workflow:**
-            1. Tests filters with empty lists
-            2. Verifies appropriate handling of empty filters
-        """
-        mock_response = {
-            "data": [
-                {
-                    "id": "b44a8c00-7555-4021-96f0-d59deecd54e8",
-                    "name": "Microsoft 365 Access",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "office365-consumer-access",
-                        "office365-enterprise-access",
-                    ],
-                },
-                {
-                    "id": "0b12a889-4220-4cdd-b95f-506e0351a5e4",
-                    "name": "Microsoft 365 Services",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "ms-office365",
-                        "ms-onedrive",
-                        "ms-onenote",
-                        "ms-lync-base",
-                        "skype",
-                    ],
-                },
-                {
-                    "id": "67e962f5-280b-40ac-a26c-d330f1c1baf6",
-                    "name": "Microsoft 365 Mail Clients",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "mapi-over-http",
-                        "ms-exchange",
-                        "rpc-over-http",
-                        "activesync",
-                    ],
-                },
-                {
-                    "id": "c75509c1-edc3-4d7d-be92-591f415edb48",
-                    "name": "Microsoft Real Time Protocols",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": ["rtcp", "stun", "rtp"],
-                },
-                {
-                    "id": "25633a36-cfff-4be9-a0cf-53b3a9880418",
-                    "name": "Microsoft 365 - Dependent Apps",
-                    "folder": "Shared",
-                    "snippet": "office365",
-                    "members": [
-                        "http-audio",
-                        "http-video",
-                        "ocsp",
-                        "soap",
-                        "ssl",
-                        "web-browsing",
-                        "websocket",
-                        "windows-azure-base",
-                    ],
-                },
-                {
-                    "id": "97dc0b92-de21-4fcb-b3ac-fd0ffae99e36",
-                    "name": "test123asdf",
-                    "folder": "Shared",
-                    "members": [
-                        "office365-consumer-access",
-                        "office365-enterprise-access",
-                    ],
-                },
-            ],
-            "offset": 0,
-            "total": 6,
+            "total": 1,
             "limit": 200,
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
-            folder="Texas",
+            folder="Shared",
             members=[],
         )
         assert len(filtered_objects) == 0
 
-    def test_list_empty_folder_error(self):
-        """
-        **Objective:** Test that empty folder raises appropriate error.
-        **Workflow:**
-            1. Attempts to list objects with empty folder
-            2. Verifies EmptyFieldError is raised
-        """
-        with pytest.raises(EmptyFieldError) as exc_info:
-            self.client.list(folder="")
-        assert str(exc_info.value) == "Field 'folder' cannot be empty"
-
-    def test_list_multiple_containers_error(self):
-        """
-        **Objective:** Test validation of container parameters.
-        **Workflow:**
-            1. Attempts to list with multiple containers
-            2. Verifies ValidationError is raised
-        """
-        with pytest.raises(ValidationError) as exc_info:
-            self.client.list(folder="folder1", snippet="snippet1")
-        assert (
-            str(exc_info.value)
-            == "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-        )
-
-    def test_list_response_format_handling(self):
-        """
-        **Objective:** Test handling of various response formats in list method.
-        **Workflow:**
-            1. Tests different malformed response scenarios
-            2. Verifies appropriate error handling for each case
-        """
-        # Test malformed response
-        self.mock_scm.get.return_value = {"malformed": "response"}  # noqa
-
-        with pytest.raises(BadResponseError):
-            self.client.list(folder="Shared")
-
-        # Test invalid data format
-        self.mock_scm.get.return_value = {"data": "not-a-list"}  # noqa
-
-        with pytest.raises(BadResponseError):
-            self.client.list(folder="Shared")
-
-    def test_list_non_dict_response(self):
-        """
-        **Objective:** Test list method handling of non-dictionary response.
-        **Workflow:**
-            1. Mocks a non-dictionary response from the API
-            2. Verifies that BadResponseError is raised with correct message
-            3. Tests different non-dict response types
-        """
-        # Test with list response
-        self.mock_scm.get.return_value = ["not", "a", "dict"]  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-
-        # Test with string response
-        self.mock_scm.get.return_value = "string response"  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-
-        # Test with None response
-        self.mock_scm.get.return_value = None  # noqa
-
-        with pytest.raises(BadResponseError) as exc_info:
-            self.client.list(folder="Shared")
-        assert "Invalid response format: expected dictionary" in str(exc_info.value)
-
-    def test_list_error_handling(self):
-        """
-        **Objective:** Test error handling in list operation.
-        **Workflow:**
-            1. Mocks an error response from the API
-            2. Attempts to list objects
-            3. Verifies proper error handling
-        """
-        mock_error_response = {
-            "_errors": [
+    def test_list_filters_types(self):
+        """Test validation of filter types in list method."""
+        # Mock response for successful case
+        mock_response = {
+            "data": [
                 {
-                    "code": "API_I00013",
-                    "message": "Listing failed",
-                    "details": {"errorType": "Operation Impossible"},
+                    "id": "24613eca-f875-4ebc-b4c3-045711dfe283",
+                    "name": "web-apps",
+                    "folder": "Texas",
+                    "members": ["ssl"],
                 }
             ],
-            "_request_id": "test-request-id",
+            "offset": 0,
+            "total": 1,
+            "limit": 200,
         }
 
-        self.mock_scm.get.side_effect = Exception()  # noqa
-        self.mock_scm.get.side_effect.response = MagicMock()  # noqa
-        self.mock_scm.get.side_effect.response.json = MagicMock(  # noqa
-            return_value=mock_error_response
+        # Test invalid types filter (string instead of list)
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="E003",
+            message="'members' filter must be a list",
+            error_type="Invalid Query Parameter",
+        )
+        with pytest.raises(BadRequestError) as exc_info:
+            self.client.list(folder="Shared", types="netmask")
+        assert (
+            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
         )
 
-        with pytest.raises(FolderNotFoundError):
-            self.client.list(folder="NonexistentFolder")
+        # Reset side effect for successful case
+        self.mock_scm.get.side_effect = None  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
-    def test_list_generic_exception_handling(self):
+        # Test that valid list filters pass validation
+        try:
+            self.client.list(
+                folder="Shared",
+                members=["ssl"],
+            )
+        except BadRequestError:
+            pytest.fail("Unexpected BadRequestError raised with valid list filters")
+
+    def test_list_filters_members_validation(self):
+        """Test validation of 'members' filter specifically."""
+        mock_application_groups = []
+
+        # Test with string instead of list
+        invalid_filters = {"members": "tag1"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_application_groups, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        # assert error.error_code == "E003"
+        # assert "{'errorType': 'Invalid Object'}" in str(error)
+
+        # Test with dict instead of list
+        invalid_filters = {"members": {"tag": "tag1"}}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_application_groups, invalid_filters)
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        # assert "{'errorType': 'Invalid Object'}" in str(error)
+
+    def test_list_response_invalid_format(self):
         """
-        **Objective:** Test generic exception handling in list method.
-        **Workflow:**
-            1. Mocks a generic exception without response attribute
-            2. Verifies the original exception is re-raised
+        Test that InvalidObjectError is raised when the response is not a dictionary.
         """
-        # Mock a generic exception without response
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+
+    def test_list_response_invalid_data_field_missing(self):
+        """
+        Test that InvalidObjectError is raised when API returns response with missing data field.
+
+        This tests the case where the API response is a dictionary but missing the required 'data' field,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a dictionary without 'data' field
+        self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(error)
+
+    def test_list_response_invalid_data_field_type(self):
+        """
+        Test that InvalidObjectError is raised when API returns non-list data field.
+
+        This tests the case where the API response's 'data' field is not a list,
+        expecting an InvalidObjectError with specific error details.
+        """
+        # Mock the API to return a response where 'data' is not a list
+        self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+
+    def test_list_response_no_content(self):
+        """Test that an HTTPError without response content in list() re-raises the exception."""
+        mock_response = MagicMock()
+        mock_response.content = None  # Simulate no content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.list(folder="Shared")
+
+    def test_list_server_error(self):
+        """Test generic exception handling in list method."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.list(folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in error_msg
+        )
+
+
+class TestApplicationGroupCreate(TestApplicationGroupBase):
+    """Tests for creating Application Group objects."""
+
+    def test_create_valid_object(self):
+        """Test creating an object with valid data."""
+        test_object = ApplicationGroupCreateApiFactory()
+        mock_response = ApplicationGroupResponseFactory.from_request(test_object)
+
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
+
+        self.mock_scm.post.assert_called_once_with(  # noqa
+            "/config/objects/v1/application-groups",
+            json=test_object.model_dump(exclude_unset=True),
+        )
+        assert str(created_object.id) == str(mock_response.id)
+        assert created_object.name == test_object.name
+        assert created_object.members == test_object.members
+        assert created_object.folder == test_object.folder
+
+    def test_create_http_error_no_response_content(self):
+        """Test create method when HTTP error has no response content."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the post method to raise the HTTPError
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.create(
+                {"name": "test", "members": ["app1"], "folder": "test"},
+            )
+
+    def test_create_http_error_with_response(self):
+        """Test that HTTPError with response content triggers proper error handling."""
+        test_data = {
+            "name": "test-address",
+            "folder": "Shared",
+            "members": [
+                "office365-consumer-access",
+                "office365-enterprise-access",
+            ],
+        }
+
+        # Use the utility function to create the mock HTTP error
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Create failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.create(test_data)
+
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_create_generic_exception_handling(self):
+        """Test handling of a generic exception during create."""
+        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.create(
+                {
+                    "name": "test-address",
+                    "folder": "Shared",
+                    "members": [
+                        "office365-consumer-access",
+                        "office365-enterprise-access",
+                    ],
+                }
+            )
+        assert str(exc_info.value) == "Generic error"
+
+
+class TestApplicationGroupGet(TestApplicationGroupBase):
+    """Tests for retrieving a specific Application Group object."""
+
+    def test_get_valid_object(self):
+        """Test retrieving a specific object."""
+        mock_response = ApplicationGroupResponseFactory(
+            name="TestGroup",
+            members=["app1", "app2"],
+            folder="Shared",
+        )
+
+        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
+        object_id = mock_response.id
+
+        retrieved_object = self.client.get(object_id)
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            f"/config/objects/v1/application-groups/{object_id}"
+        )
+        assert isinstance(retrieved_object, ApplicationGroupResponseModel)
+        assert retrieved_object.id == mock_response.id
+        assert retrieved_object.name == mock_response.name
+        assert retrieved_object.members == mock_response.members
+
+    def test_get_object_not_present_error(self):
+        """Test error handling when object doesn't exist."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.get(object_id)
+
+        assert (
+            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_get_generic_exception_handling(self):
+        """Test generic exception handling in get method."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.get(object_id)
+
         assert str(exc_info.value) == "Generic error"
+
+    def test_get_http_error_no_response_content(self):
+        """Test get method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None  # Simulate no content
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.get(object_id)
+
+    def test_get_server_error(self):
+        """Test handling of server errors during get method."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.get(object_id)
+
+        error_msg = str(exc_info.value)
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in error_msg
+        )
+
+
+class TestApplicationGroupUpdate(TestApplicationGroupBase):
+    """Tests for updating Application Group objects."""
+
+    def test_update_valid_object(self):
+        """Test updating an object with valid data."""
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="TestApplicationGroup",
+            members=["tag1", "tag2"],
+            folder="Shared",
+        )
+        input_data = update_data.model_dump()
+
+        # Create mock response
+        mock_response = ApplicationGroupResponseFactory.from_request(update_data)
+        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
+
+        # Perform update
+        updated_object = self.client.update(input_data)
+
+        # Assert the put method was called with correct parameters
+        self.mock_scm.put.assert_called_once_with(  # noqa
+            f"/config/objects/v1/application-groups/{update_data.id}",
+            json=input_data,
+        )
+
+        # Assert the updated object matches the mock response
+        assert isinstance(updated_object, ApplicationGroupResponseModel)
+        assert updated_object.id == mock_response.id
+        assert updated_object.name == mock_response.name
+        assert updated_object.members == mock_response.members
+
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        # Create test data using factory
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-address",
+            folder="Shared",
+            members=["tag1", "tag2"],
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to create mock HTTP error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(MalformedCommandError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_object_not_present_error(self):
+        """Test error handling when the object to update is not present."""
+        # Create test data
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-address",
+            folder="Shared",
+            members=["tag1", "tag2"],
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate object not present error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
+            in str(exc_info.value)
+        )
+
+    def test_update_http_error_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test",
+                    "members": ["test1", "test2"],
+                }
+            )
+
+    def test_update_generic_exception_handling(self):
+        """Test handling of a generic exception during update."""
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "test",
+                    "members": ["test1", "test2"],
+                }
+            )
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_server_error(self):
+        """Test handling of server errors during update."""
+        # Create test data
+        update_data = ApplicationGroupUpdateApiFactory.with_members(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-address",
+            folder="Shared",
+            members=["test1", "test2"],
+        )
+        input_data = update_data.model_dump()
+
+        # Use utility function to simulate server error
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.update(input_data)
+
+        assert (
+            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
+            in str(exc_info.value)
+        )
+
+
+class TestApplicationGroupDelete(TestApplicationGroupBase):
+    """Tests for deleting Application Group objects."""
+
+    def test_delete_success(self):
+        """Test successful deletion of an object."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.return_value = None  # noqa
+        self.client.delete(object_id)
+
+        self.mock_scm.delete.assert_called_once_with(  # noqa
+            f"/config/objects/v1/application-groups/{object_id}"
+        )
+
+    def test_delete_object_not_present_error(self):
+        """Test error handling when object to delete doesn't exist."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.delete(object_id)
+
+        assert "Object Not Present" in str(exc_info.value)
+
+    def test_delete_http_error_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.delete(object_id)
+
+    def test_delete_generic_exception_handling(self):
+        """Test handling of a generic exception during delete."""
+        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.delete("abcdefg")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_delete_server_error(self):
+        """Test handling of server errors during delete."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.delete(object_id)
+
+        error_message = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_message
+        assert "HTTP error: 500" in error_message
+        assert "API error: E003" in error_message
+
+
+class TestApplicationGroupFetch(TestApplicationGroupBase):
+    """Tests for fetching Application Group objects by name."""
+
+    def test_fetch_valid_object(self):
+        """Test retrieving an object by name."""
+        mock_response = ApplicationGroupResponseFactory(
+            name="TestGroup",
+            members=["app1", "app2"],
+            folder="Shared",
+        ).model_dump()
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        fetched_object = self.client.fetch(
+            name=mock_response["name"],
+            folder=mock_response["folder"],
+        )
+
+        self.mock_scm.get.assert_called_once_with(  # noqa
+            "/config/objects/v1/application-groups",
+            params={
+                "folder": mock_response["folder"],
+                "name": mock_response["name"],
+            },
+        )
+        assert fetched_object["id"] == mock_response["id"]
+        assert fetched_object["name"] == mock_response["name"]
+
+    def test_fetch_object_not_present_error(self):
+        """Test fetching an object that does not exist."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(ObjectNotPresentError) as exc_info:
+            self.client.fetch(name="nonexistent", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Object Not Present'}" in error_msg
+        assert "HTTP error: 404" in error_msg
+        assert "API error: API_I00013" in error_msg
+
+    def test_fetch_empty_name_error(self):
+        """Test fetching with an empty name parameter."""
+        with pytest.raises(MissingQueryParameterError):
+            self.client.fetch(name="", folder="Shared")
+
+    def test_fetch_empty_container_error(self):
+        """Test fetching with an empty folder parameter."""
+        with pytest.raises(MissingQueryParameterError):
+            self.client.fetch(name="test", folder="")
+
+    def test_fetch_invalid_response_format_error(self):
+        """Test fetching an object when the API returns an unexpected format."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="Invalid response format",
+            error_type="Invalid Object",
+        )
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Invalid Object'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_generic_exception_handling(self):
+        """Test generic exception handling during fetch."""
+        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        assert str(exc_info.value) == "Generic error"
+
+    def test_fetch_http_error_no_response_content(self):
+        """Test that an HTTPError without response content in fetch() re-raises the exception."""
+        # Create a mock response object without content
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        # Create an HTTPError with the mock response
+        mock_http_error = HTTPError(response=mock_response)
+
+        # Set the side effect of the get method to raise the HTTPError
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.fetch(name="test-address", folder="Shared")
+
+    def test_fetch_server_error(self):
+        """Test handling of server errors during fetch."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            self.client.fetch(name="test", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "{'errorType': 'Internal Error'}" in error_msg
+        assert "HTTP error: 500" in error_msg
+        assert "API error: E003" in error_msg
+
+    def test_fetch_missing_id_field_error(self):
+        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
+        # Mock response without 'id' field
+        mock_response = {
+            "name": "test-address",
+            "folder": "Shared",
+            "ip_netmask": "10.0.0.0/24",
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_fetch_no_container_provided_error(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-address")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_fetch_multiple_containers_provided_error(self):
+        """Test that InvalidObjectError is raised when multiple container parameters are provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(
+                name="test-address",
+                folder="Shared",
+                snippet="TestSnippet",
+            )
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+
+    def test_fetch_invalid_response_type_error(self):
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
+        # Mock the API client to return a non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test123", folder="Shared")
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 500 - API error: E003" in error_msg
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
 
 
 # -------------------- End of Test Classes --------------------

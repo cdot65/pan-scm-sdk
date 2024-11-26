@@ -1,16 +1,16 @@
 # scm/models/security/dns_security_profiles.py
 
+from enum import Enum
 from typing import List, Optional
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     Field,
     model_validator,
-    field_validator,
     ConfigDict,
     RootModel,
 )
-from enum import Enum
-from uuid import UUID
 
 
 # Enums
@@ -236,6 +236,12 @@ class DNSSecurityProfileCreateModel(DNSSecurityProfileBaseModel):
 
 class DNSSecurityProfileUpdateModel(DNSSecurityProfileBaseModel):
     """Model for updating an existing DNS Security Profile."""
+
+    id: Optional[UUID] = Field(
+        ...,
+        description="UUID of the resource",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
 
 
 class DNSSecurityProfileResponseModel(DNSSecurityProfileBaseModel):

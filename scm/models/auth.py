@@ -1,6 +1,6 @@
 # scm/models/auth.py
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 
 
 class AuthRequestModel(BaseModel):
@@ -31,7 +31,6 @@ class AuthRequestModel(BaseModel):
     )
 
     @model_validator(mode="before")
-    @classmethod
     def construct_scope(cls, values):
         if values.get("scope") is None:
             tsg_id = values.get("tsg_id")
@@ -39,3 +38,9 @@ class AuthRequestModel(BaseModel):
                 raise ValueError("tsg_id is required to construct scope")
             values["scope"] = f"tsg_id:{tsg_id}"
         return values
+
+    @field_validator("scope")
+    def validate_scope(cls, v):
+        if v is not None and v.strip() == "":
+            raise ValueError("Scope cannot be empty string")
+        return v
