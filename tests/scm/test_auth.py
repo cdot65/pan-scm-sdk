@@ -1,12 +1,13 @@
 # tests/test_auth.py
 
 # Standard library imports
+import time
 from unittest.mock import MagicMock, patch
 
 # External libraries
 import pytest
 from jwt.exceptions import ExpiredSignatureError, PyJWKClientError
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, Timeout, RequestException
 
 # Local SDK imports
 from scm.auth import OAuth2Client
@@ -83,23 +84,37 @@ class TestOAuth2Client:
             client_id=auth_request.client_id,
             client_secret=auth_request.client_secret,
             scope=auth_request.scope,
+            timeout=30,
             include_client_id=True,
             client_kwargs={"tsg_id": auth_request.tsg_id},
         )
 
-    def test_create_session_http_error(self, auth_request):
-        """Test session creation with HTTP error."""
-        self.mock_session.fetch_token.side_effect = raise_mock_http_error(
-            status_code=401,
-            error_code="E016",
-            message="{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016",
-            error_type="Invalid Credential",
-        )
+    def test_get_signing_key_no_token(self, auth_request):
+        """Test signing key retrieval with no token available."""
+        # Set up a session with no token
+        self.mock_session.token = None
 
+        # Instantiate client and inject mock session without token
+        client = OAuth2Client(auth_request)
+        client.session = self.mock_session
+
+        # Expect APIError when trying to get signing key without token
         with pytest.raises(APIError) as exc_info:
-            OAuth2Client(auth_request)
+            client._get_signing_key()
 
-        # assert "Invalid credentials" in str(exc_info.value)
+    def test_token_expires_soon_with_expiry(self, auth_request):
+        """Test token expiration check that returns True when token is about to expire."""
+        # Set the token's expiration time in the near future (5 minutes from now)
+        future_time = time.time() + 120  # 2 minutes in the future
+        self.mock_token["expires_at"] = future_time
+        self.mock_session.token = self.mock_token
+
+        # Instantiate client and inject mock session
+        client = OAuth2Client(auth_request)
+        client.session = self.mock_session
+
+        # Since the token expiry time is in less than the buffer time (5 minutes), token_expires_soon should return True
+        assert client.token_expires_soon
 
     def test_create_session_general_error(self, auth_request):
         """Test session creation with general error."""
@@ -186,6 +201,8 @@ class TestOAuth2Client:
             client_id=auth_request.client_id,
             client_secret=auth_request.client_secret,
             scope=auth_request.scope,
+            timeout=30,
+            verify=True,
             include_client_id=True,
             client_kwargs={"tsg_id": auth_request.tsg_id},
         )
@@ -226,3 +243,89 @@ class TestOAuth2Client:
 
         with pytest.raises(APIError) as exc_info:
             client.refresh_token()
+
+    def test_create_session_network_error(self, auth_request):
+        """Test session creation with network error."""
+        self.mock_session.fetch_token.side_effect = Timeout("Test timeout error")
+
+        with pytest.raises(APIError):
+            OAuth2Client(auth_request)
+
+    # def test_create_session_http_error(self, auth_request):
+    #     """Test session creation with HTTP error."""
+    #     # Simulate an HTTPError during token fetching
+    #     self.mock_session.fetch_token.side_effect = raise_mock_http_error(
+    #         status_code=401,
+    #         error_code="E016",
+    #         message="{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016",
+    #         error_type="Invalid Credential",
+    #     )
+    #
+    #     with pytest.raises(APIError) as exc_info:
+    #         OAuth2Client(auth_request)
+    #
+    #     # Check if APIError was raised with the expected message
+    #     assert (
+    #         "{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016"
+    #         in str(exc_info.value)
+    #     )
+
+    def test_token_expires_soon_no_token(self, auth_request):
+        """Test token expiration check with no token available."""
+        self.mock_session.token = None
+        client = OAuth2Client(auth_request)
+        client.session = self.mock_session
+
+        assert client.token_expires_soon
+
+    def test_is_expired_no_token(self, auth_request):
+        """Test token expiration check with no token, expect True."""
+        self.mock_session.token = None
+        client = OAuth2Client(auth_request)
+        client.session = self.mock_session
+
+        assert client.is_expired
+
+    def test_refresh_token_network_error(self, auth_request):
+        """Test token refresh with network error."""
+        client = OAuth2Client(auth_request)
+        self.mock_session.fetch_token.side_effect = Timeout("Timeout during refresh")
+
+        with pytest.raises(APIError):
+            client.refresh_token()
+
+    def test_refresh_token_request_exception(self, auth_request):
+        """Test token refresh with general request error."""
+        client = OAuth2Client(auth_request)
+        self.mock_session.fetch_token.side_effect = RequestException(
+            "Request failed during refresh"
+        )
+
+        with pytest.raises(APIError) as exc_info:
+            client.refresh_token()
+
+    def test_create_session_http_error(self, auth_request):
+        """Test session creation with HTTP error."""
+        # Create mock HTTP error response with correct error format
+        mock_response = MagicMock()
+        mock_response.content = b'{"error": "test_error"}'
+        mock_response.content = (
+            b'{"_errors": [{"code": "E001", "message": "HTTP Error"}]}'
+        )
+        mock_response.json.return_value = {
+            "_errors": [{"code": "E001", "message": "HTTP Error"}]
+        }
+        mock_response.status_code = 500
+
+        # Create HTTPError with mock response
+        http_error = HTTPError("Test HTTP Error")
+        http_error.response = mock_response
+
+        # Patch OAuth2Session to raise the HTTP error
+        self.mock_session.fetch_token.side_effect = http_error
+
+        # Assert APIError is raised with expected message
+        with pytest.raises(APIError) as exc_info:
+            OAuth2Client(auth_request)
+
+        assert "HTTP error: 500 - API error: E001" in str(exc_info.value)

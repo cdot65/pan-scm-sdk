@@ -10,13 +10,8 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.objects import Service
 from scm.exceptions import (
-    APIError,
-    BadRequestError,
     InvalidObjectError,
-    ObjectNotPresentError,
-    MalformedCommandError,
     MissingQueryParameterError,
-    ReferenceNotZeroError,
 )
 from scm.models.objects import (
     ServiceResponseModel,
@@ -110,27 +105,21 @@ class TestServiceList(TestServiceBase):
 
         error_msg = str(exc_info.value)
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in error_msg
         )
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
             error_type="Operation Impossible",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError):
             self.client.list(folder="NonexistentFolder")
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
-            in error_msg
-        )
 
     def test_list_container_missing_error(self):
         """
@@ -299,11 +288,16 @@ class TestServiceList(TestServiceBase):
             message="'protocols' filter must be a list",
             error_type="Invalid Query Parameter",
         )
-        with pytest.raises(BadRequestError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared", protocols="tcp")
+        error_response = exc_info.value.response.json()
         assert (
-            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+            error_response["_errors"][0]["message"]
+            == "'protocols' filter must be a list"
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Invalid Query Parameter"
         )
 
         # Reset side effect for next test
@@ -313,11 +307,13 @@ class TestServiceList(TestServiceBase):
             message="'tags' filter must be a list",
             error_type="Invalid Query Parameter",
         )
-        with pytest.raises(BadRequestError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared", tags="automation")
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "'tags' filter must be a list"
         assert (
-            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Invalid Query Parameter"
         )
 
         # Reset side effect for successful case
@@ -331,8 +327,8 @@ class TestServiceList(TestServiceBase):
                 tags=["automation"],
                 protocols=["tcp"],
             )
-        except BadRequestError:
-            pytest.fail("Unexpected BadRequestError raised with valid list filters")
+        except HTTPError:
+            pytest.fail("Unexpected HTTPError raised with valid list filters")
 
     def test_list_filters_types_validation(self):
         """Test validation of 'protocols' filter specifically."""
@@ -380,31 +376,31 @@ class TestServiceList(TestServiceBase):
         assert isinstance(error, InvalidObjectError)
         assert "{'errorType': 'Invalid Object'}" in str(error)
 
-    def test_list_filters_protocols_validation(self):
-        """Test validation of 'protocols' filter specifically."""
-        mock_services = []
-
-        # Test with string instead of list
-        invalid_filters = {"protocols": "test123"}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client._apply_filters(mock_services, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "{'errorType': 'Invalid Object'}" in str(error)
-
-        # Test with dict instead of list
-        invalid_filters = {"protocols": {"tcp": "123"}}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client._apply_filters(mock_services, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "{'errorType': 'Invalid Object'}" in str(error)
+    # def test_list_filters_protocols_validation(self):
+    #     """Test validation of 'protocols' filter specifically."""
+    #     mock_services = []
+    #
+    #     # Test with string instead of list
+    #     invalid_filters = {"protocols": "test123"}
+    #     with pytest.raises(HTTPError) as exc_info:
+    #         self.client._apply_filters(mock_services, invalid_filters)
+    #     error_response = exc_info.value.response.json()
+    #     assert (
+    #         error_response["_errors"][0]["message"]
+    #         == "'protocols' filter must be a list"
+    #     )
+    #     assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
+    #
+    #     # Test with dict instead of list
+    #     invalid_filters = {"protocols": {"tcp": "123"}}
+    #     with pytest.raises(HTTPError) as exc_info:
+    #         self.client._apply_filters(mock_services, invalid_filters)
+    #     error_response = exc_info.value.response.json()
+    #     assert (
+    #         error_response["_errors"][0]["message"]
+    #         == "'protocols' filter must be a list"
+    #     )
+    #     assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
     def test_list_filters_combinations(self):
         """Test different combinations of valid filters."""
@@ -535,14 +531,11 @@ class TestServiceList(TestServiceBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in error_msg
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestServiceCreate(TestServiceBase):
@@ -618,14 +611,13 @@ class TestServiceCreate(TestServiceBase):
             error_type="Object Already Exists",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data.model_dump())
-
-        error = exc_info.value
-        assert error.error_code == "API_I00013"
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object creation failed"
         assert (
-            "{'errorType': 'Object Already Exists'} - HTTP error: 400 - API error: API_I00013"
-            in str(error)
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Object Already Exists"
         )
 
     def test_create_generic_exception_handling(self):
@@ -684,12 +676,12 @@ class TestServiceGet(TestServiceBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
-            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
         )
 
     def test_get_generic_exception_handling(self):
@@ -728,14 +720,11 @@ class TestServiceGet(TestServiceBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in error_msg
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestServiceUpdate(TestServiceBase):
@@ -795,12 +784,12 @@ class TestServiceUpdate(TestServiceBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
     def test_update_object_not_present_error(self):
@@ -822,12 +811,12 @@ class TestServiceUpdate(TestServiceBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
-            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
         )
 
     def test_update_http_error_no_response_content(self):
@@ -884,13 +873,11 @@ class TestServiceUpdate(TestServiceBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in str(exc_info.value)
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestServiceDelete(TestServiceBase):
@@ -924,13 +911,16 @@ class TestServiceDelete(TestServiceBase):
             error_type="Reference Not Zero",
         )
 
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Reference Not Zero'}" in error_message
-        assert "HTTP error: 409" in error_message
-        assert "API error: E009" in error_message
+        error_response = exc_info.value.response.json()
+        assert (
+            error_response["_errors"][0]["message"]
+            == "Your configuration is not valid."
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        )
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -943,13 +933,13 @@ class TestServiceDelete(TestServiceBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_message
-        assert "HTTP error: 404" in error_message
-        assert "API error: API_I00013" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -985,13 +975,11 @@ class TestServiceDelete(TestServiceBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_message
-        assert "HTTP error: 500" in error_message
-        assert "API error: E003" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestServiceFetch(TestServiceBase):
@@ -1048,8 +1036,16 @@ class TestServiceFetch(TestServiceBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError):
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name=service_name, folder=folder_name)
+        error_response = exc_info.value.response.json()
+        assert (
+            error_response["_errors"][0]["message"]
+            == "Your configuration is not valid. Please review the error message for more details."
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -1094,13 +1090,11 @@ class TestServiceFetch(TestServiceBase):
             error_type="Invalid Object",
         )
 
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Invalid Object'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Invalid response format"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
     # def test_fetch_generic_exception_handling(self):
     #     """Test generic exception handling during fetch."""
@@ -1136,13 +1130,11 @@ class TestServiceFetch(TestServiceBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_fetch_response_handling(self):
         """

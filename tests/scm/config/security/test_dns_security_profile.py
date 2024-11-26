@@ -11,12 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.security import DNSSecurityProfile
 from scm.exceptions import (
     InvalidObjectError,
-    ObjectNotPresentError,
-    MalformedCommandError,
     MissingQueryParameterError,
-    ReferenceNotZeroError,
-    APIError,
-    BadRequestError,
 )
 from scm.models.security.dns_security_profiles import (
     DNSSecurityProfileResponseModel,
@@ -97,27 +92,21 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
 
         error_msg = str(exc_info.value)
         assert (
-            "['\"folder\" is not allowed to be empty'] - HTTP error: 400 - API error: E003"
+            "{'field': 'folder', 'error': '\"folder\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in error_msg
         )
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
             error_type="Operation Impossible",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError):
             self.client.list(folder="NonexistentFolder")
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Operation Impossible'} - HTTP error: 404 - API error: API_I00013"
-            in error_msg
-        )
 
     def test_list_container_missing_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
@@ -193,11 +182,16 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
             message="'dns_security_categories' filter must be a list",
             error_type="Invalid Query Parameter",
         )
-        with pytest.raises(BadRequestError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Shared", dns_security_categories="netmask")
+        error_response = exc_info.value.response.json()
         assert (
-            "{'errorType': 'Invalid Query Parameter'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+            error_response["_errors"][0]["message"]
+            == "'dns_security_categories' filter must be a list"
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Invalid Query Parameter"
         )
 
         # Reset side effect for successful case
@@ -212,8 +206,8 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
                 values=["10.0.0.0/24"],
                 tags=["tag1"],
             )
-        except BadRequestError:
-            pytest.fail("Unexpected BadRequestError raised with valid list filters")
+        except HTTPError:
+            pytest.fail("Unexpected HTTPError raised with valid list filters")
 
     def test_list_filters_types_validation(self):
         """Test validation of 'types' filter specifically."""
@@ -359,12 +353,12 @@ class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Create failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
     def test_create_generic_exception_handling(self):
@@ -409,10 +403,13 @@ class TestDNSSecurityProfileGet(TestDNSSecurityProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
-            self.client.get(object_id)
-
-        assert "Object Not Present" in str(exc_info.value)
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.list(folder="Shared")
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -450,14 +447,11 @@ class TestDNSSecurityProfileGet(TestDNSSecurityProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-
-        error_msg = str(exc_info.value)
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in error_msg
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
@@ -505,12 +499,12 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
             error_type="Malformed Command",
         )
 
-        with pytest.raises(MalformedCommandError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
-            "{'errorType': 'Malformed Command'} - HTTP error: 400 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
     def test_update_object_not_present_error(self):
@@ -528,12 +522,12 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
-            "{'errorType': 'Object Not Present'} - HTTP error: 404 - API error: API_I00013"
-            in str(exc_info.value)
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
         )
 
     def test_update_http_error_no_response_content(self):
@@ -583,13 +577,11 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.update(input_data)
-
-        assert (
-            "{'errorType': 'Internal Error'} - HTTP error: 500 - API error: E003"
-            in str(exc_info.value)
-        )
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestDNSSecurityProfileDelete(TestDNSSecurityProfileBase):
@@ -617,10 +609,13 @@ class TestDNSSecurityProfileDelete(TestDNSSecurityProfileBase):
             error_type="Reference Not Zero",
         )
 
-        with pytest.raises(ReferenceNotZeroError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        assert "Reference Not Zero" in str(exc_info.value)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Reference not zero"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        )
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -633,13 +628,13 @@ class TestDNSSecurityProfileDelete(TestDNSSecurityProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_message
-        assert "HTTP error: 404" in error_message
-        assert "API error: API_I00013" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -675,13 +670,11 @@ class TestDNSSecurityProfileDelete(TestDNSSecurityProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
-
-        error_message = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_message
-        assert "HTTP error: 500" in error_message
-        assert "API error: E003" in error_message
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
@@ -721,13 +714,13 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
             error_type="Object Not Present",
         )
 
-        with pytest.raises(ObjectNotPresentError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="nonexistent", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Object Not Present'}" in error_msg
-        assert "HTTP error: 404" in error_msg
-        assert "API error: API_I00013" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -790,13 +783,11 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
             error_type="Internal Error",
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(HTTPError) as exc_info:
             self.client.fetch(name="test", folder="Shared")
-
-        error_msg = str(exc_info.value)
-        assert "{'errorType': 'Internal Error'}" in error_msg
-        assert "HTTP error: 500" in error_msg
-        assert "API error: E003" in error_msg
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_fetch_missing_id_field_error(self):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""

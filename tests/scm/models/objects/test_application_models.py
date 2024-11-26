@@ -227,13 +227,13 @@ class TestApplicationResponseModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "internal-chat",
             "category": "collaboration",
+            "subcategory": "instant-messaging",
+            "technology": "client-server",
             "risk": 2,
         }
         model = ApplicationResponseModel(**data)
         assert str(model.id) == data["id"]
         assert model.name == data["name"]
-        assert model.subcategory is None
-        assert model.technology is None
 
     def test_application_response_model_invalid_id(self):
         """Test validation of id field in response."""
@@ -253,11 +253,14 @@ class TestApplicationResponseModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "internal-chat",
             "category": "collaboration",
+            "subcategory": "instant-messaging",
+            "technology": "client-server",
             "risk": 2,
             "description": "x" * 4000,  # Test with a long description
         }
-        model = ApplicationResponseModel(**data)
-        assert model.description == data["description"]
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationResponseModel(**data)
+        assert "String should have at most 1023 characters" in str(exc_info.value)
 
 
 # -------------------- End of Test Classes --------------------

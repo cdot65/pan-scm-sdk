@@ -166,24 +166,3 @@ class ApplicationResponseModel(ApplicationBaseModel):
         description="The UUID of the application",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    # Optional fields
-    description: Optional[str] = Field(
-        None,
-        max_length=4096,
-        description="Description for the application.",
-        examples=[
-            '100bao (literally translated as "100 treasures") is a free Chinese P2P file-sharing program.'
-        ],
-    )
-    subcategory: Optional[str] = Field(
-        None,
-        max_length=50,
-        description="Specific sub-category within the high-level category.",
-        examples=["file-sharing"],
-    )
-    technology: Optional[str] = Field(
-        None,
-        max_length=50,
-        description="The underlying technology utilized by the application.",
-    )
