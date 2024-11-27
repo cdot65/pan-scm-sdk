@@ -39,8 +39,10 @@ class ServiceGroupBaseModel(BaseModel):
 
     members: List[str] = Field(
         ...,
-        max_length=63,
+        min_length=1,
+        max_length=1024,
         description="A list of members of the service group.",
+        examples=[["custom-service1", "custom-service2"]],
     )
 
     # Optional fields
