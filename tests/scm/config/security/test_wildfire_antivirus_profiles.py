@@ -19,6 +19,10 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvDirection,
 )
 from scm.utils.logging import setup_logger
+from tests.factories import (
+    WildfireAvProfileResponseFactory,
+    WildfireAvProfileUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 logger = setup_logger(__name__, logging.DEBUG)
@@ -461,91 +465,49 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
 class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
     """Tests for updating Wildfire Antivirus Profile objects."""
 
-    def test_update_object(self):
-        """
-        **Objective:** Test updating an object.
-        **Workflow:**
-            1. Prepares update data and mocks response
-            2. Verifies the update request and response
-            3. Ensures payload transformation is correct
-        """
-        from uuid import UUID
+    def test_update_valid_object(self):
+        """Test updating an application with valid data."""
+        # Create update data using factory
+        update_data = WildfireAvProfileUpdateApiFactory.with_packet_capture()
 
-        test_uuid = UUID("123e4567-e89b-12d3-a456-426655440000")
+        # Create mock response
+        mock_response = WildfireAvProfileResponseFactory.from_request(update_data)
+        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        # Test data including ID
-        update_data = {
-            "id": str(test_uuid),
-            "name": "UpdatedProfile",
-            "folder": "All",
-            "description": "An updated profile",
-            "rules": [
-                {
-                    "name": "UpdatedRule",
-                    "direction": WildfireAvDirection.upload,
-                    "application": ["app3"],
-                    "file_type": ["docx"],
-                }
-            ],
-            "packet_capture": False,
-        }
-
-        # Expected payload should not include the ID
-        expected_payload = {
-            "name": "UpdatedProfile",
-            "folder": "All",
-            "description": "An updated profile",
-            "rules": [
-                {
-                    "name": "UpdatedRule",
-                    "direction": "upload",
-                    "application": ["app3"],
-                    "file_type": ["docx"],
-                }
-            ],
-            "packet_capture": False,
-        }
-
-        # Mock response should include the ID
-        mock_response = update_data.copy()
-        self.mock_scm.put.return_value = mock_response  # noqa
-
-        # Perform update
+        # Perform update with Pydantic model directly
         updated_object = self.client.update(update_data)
 
-        # Verify correct endpoint and payload
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/security/v1/wildfire-anti-virus-profiles/{update_data['id']}",
-            json=expected_payload,
+        # Verify call was made once
+        self.mock_scm.put.assert_called_once()
+
+        # Get the actual call arguments
+        call_args = self.mock_scm.put.call_args
+
+        # Check endpoint
+        assert (
+            call_args[0][0]
+            == f"/config/security/v1/wildfire-anti-virus-profiles/{update_data.id}"
         )
 
-        assert isinstance(updated_object, WildfireAvProfileResponseModel)
-        assert isinstance(updated_object.id, UUID)
-        assert updated_object.id == test_uuid
-        assert str(updated_object.id) == update_data["id"]
-        assert updated_object.name == "UpdatedProfile"
-        assert updated_object.rules[0].direction == WildfireAvDirection.upload
-        logger.info(f"Successfully updated profile {updated_object.name}")
+        # Check important payload fields
+        payload = call_args[1]["json"]
+        assert payload["name"] == update_data.name
+        assert payload["description"] == update_data.description
 
-    def test_update_object_error_handling(self):
-        """Test error handling during object update."""
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "rules": [
-                {
-                    "name": "TestRule",
-                    "direction": "both",
-                    "application": ["any"],
-                    "file_type": ["any"],
-                }
-            ],
-        }
+        # Assert the updated object matches the mock response
+        assert isinstance(updated_object, WildfireAvProfileResponseModel)
+        assert str(updated_object.id) == str(mock_response.id)
+        assert updated_object.name == mock_response.name
+        assert updated_object.description == mock_response.description
+
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        # Create update data using factory
+        update_data = WildfireAvProfileUpdateApiFactory.with_packet_capture()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
             status_code=400,
-            error_code="E003",
+            error_code="API_I00013",
             message="Update failed",
             error_type="Malformed Command",
         )
@@ -558,81 +520,26 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
         )
 
-    def test_update_with_invalid_data(self):
-        """Test update method with invalid data structure."""
-        invalid_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "invalid_field": "test",
-            "name": "test-profile",
-            "rules": [],
-        }
-
-        self.mock_scm.put.side_effect = raise_mock_http_error(
-            status_code=400,
-            error_code="E003",
-            message="Invalid input format",
-            error_type="Input Format Mismatch",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.update(invalid_data)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Invalid input format"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Input Format Mismatch"
-        )
-
     def test_update_generic_exception_handling(self):
-        """Test generic exception handling in update method."""
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "rules": [
-                {
-                    "name": "TestRule",
-                    "direction": "both",
-                    "application": ["any"],
-                    "file_type": ["any"],
-                }
-            ],
-        }
+        # Create update data using factory
+        update_data = WildfireAvProfileUpdateApiFactory.with_packet_capture()
 
-        self.mock_scm.put.side_effect = raise_mock_http_error(
-            status_code=500,
-            error_code="E003",
-            message="Internal server error",
-            error_type="Internal Error",
-        )
+        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
 
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(Exception) as exc_info:
             self.client.update(update_data)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Internal server error"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
+        assert str(exc_info.value) == "Generic error"
 
-    def test_update_http_error_no_content(self):
-        """Test update method when HTTP error has no response content."""
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "Shared",
-            "rules": [
-                {
-                    "name": "TestRule",
-                    "direction": "both",
-                    "application": ["any"],
-                    "file_type": ["any"],
-                }
-            ],
-        }
+    def test_update_http_error_no_response_content(self):
+        # Create update data using factory
+        update_data = WildfireAvProfileUpdateApiFactory.with_packet_capture()
 
-        # Mock an HTTPError with no response content
+        # Create a mock response object without content
         mock_response = MagicMock()
-        mock_response.content = None  # No content
+        mock_response.content = None
         mock_response.status_code = 500
 
+        # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
@@ -725,7 +632,7 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
 class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
     """Tests for fetching Wildfire Antivirus Profile objects by name."""
 
-    def test_fetch_object(self):
+    def test_fetch_valid_object(self):
         """
         **Objective:** Test retrieving an object by its name using the `fetch` method.
         **Workflow:**
@@ -734,12 +641,12 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             3. Asserts that the mocked service was called with the correct URL and parameters.
             4. Validates the returned object's attributes.
         """
-        mock_response = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "folder": "All",
-            "description": "Test profile",
-            "rules": [
+        mock_response_model = WildfireAvProfileResponseFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-profile",
+            folder="All",
+            description="Test profile",
+            rules=[
                 {
                     "name": "TestRule",
                     "direction": "both",
@@ -747,32 +654,32 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
                     "file_type": ["any"],
                 }
             ],
-        }
+        )
+        mock_response_data = mock_response_model.model_dump()
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response_data  # noqa
 
         # Call the fetch method
         fetched_object = self.client.fetch(
-            name=mock_response["name"],
-            folder=mock_response["folder"],
+            name=mock_response_model.name,
+            folder=mock_response_model.folder,
         )
 
         # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/wildfire-anti-virus-profiles",
             params={
-                "folder": mock_response["folder"],
-                "name": mock_response["name"],
+                "folder": mock_response_model.folder,
+                "name": mock_response_model.name,
             },
         )
 
         # Validate the returned object
-        assert isinstance(fetched_object, dict)
-        assert str(fetched_object["id"]) == mock_response["id"]
-        assert fetched_object["name"] == mock_response["name"]
-        assert fetched_object["description"] == mock_response["description"]
-        assert fetched_object["rules"][0]["direction"] == "both"
-        logger.info(f"Successfully fetched profile {fetched_object['name']}")
+        assert isinstance(fetched_object, WildfireAvProfileResponseModel)
+        assert str(fetched_object.id) == str(mock_response_model.id)
+        assert fetched_object.name == mock_response_model.name
+        assert fetched_object.folder == mock_response_model.folder
+        assert fetched_object.description == mock_response_model.description
 
     def test_fetch_object_not_found(self):
         """

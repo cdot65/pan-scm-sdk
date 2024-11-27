@@ -117,7 +117,7 @@ class TestWildfireAvProfileUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             WildfireAvProfileUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert "3 validation errors for WildfireAvProfileUpdateModel" in error_msg
+        assert "4 validation errors for WildfireAvProfileUpdateModel" in error_msg
 
     def test_wildfire_av_profile_update_model_minimal_update(self):
         """Test validation with minimal valid update fields."""

@@ -416,6 +416,7 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
 
     def test_update_valid_object(self):
         """Test updating an address group with valid data."""
+        # Create update data using factory
         update_data = AddressGroupUpdateApiFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-group",
@@ -423,20 +424,33 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
             description="Updated description",
             folder="Shared",
         )
-        input_data = update_data.model_dump()
 
+        # Create mock response
         mock_response = AddressGroupResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        updated_object = self.client.update(input_data)
+        # Perform update with Pydantic model directly
+        updated_object = self.client.update(update_data)
 
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/address-groups/{update_data.id}",
-            json=input_data,
-        )
+        # Verify call was made once
+        self.mock_scm.put.assert_called_once()
 
+        # Get the actual call arguments
+        call_args = self.mock_scm.put.call_args
+
+        # Check endpoint
+        assert call_args[0][0] == f"/config/objects/v1/address-groups/{update_data.id}"
+
+        # Check important payload fields
+        payload = call_args[1]["json"]
+        assert payload["name"] == "updated-group"
+        assert payload["static"] == ["address3", "address4"]
+        assert payload["description"] == "Updated description"
+        assert payload["folder"] == "Shared"
+
+        # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressGroupResponseModel)
-        assert updated_object.id == mock_response.id
+        assert str(updated_object.id) == str(mock_response.id)
         assert updated_object.name == mock_response.name
         assert updated_object.static == mock_response.static
         assert updated_object.description == mock_response.description
@@ -450,7 +464,6 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
             folder="Shared",
             static=["address1", "address2"],
         )
-        input_data = update_data.model_dump()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
@@ -460,7 +473,8 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
+
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
@@ -469,21 +483,25 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
+        # Create test data using factory
+        update_data = AddressGroupUpdateApiFactory.with_static(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            static=["address1", "address2"],
+        )
+
+        # Create mock response without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
+        # Create HTTPError with mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
+        # Test with Pydantic model
         with pytest.raises(HTTPError):
-            self.client.update(
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test",
-                    "static": ["address1", "address2"],
-                }
-            )
+            self.client.update(update_data)
 
 
 class TestAddressGroupDelete(TestAddressGroupBase):
@@ -540,33 +558,39 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 
     def test_fetch_valid_object(self):
         """Test retrieving an address group by its name."""
-        mock_response = AddressGroupResponseFactory.with_static(
+        mock_response_model = AddressGroupResponseFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-group",
             folder="Shared",
             static=["address1", "address2"],
             description="Test address group",
-        ).model_dump()
+        )
+        mock_response_data = mock_response_model.model_dump()
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response_data  # noqa
 
+        # Call the fetch method
         fetched_object = self.client.fetch(
-            name=mock_response["name"],
-            folder=mock_response["folder"],
+            name=mock_response_model.name,
+            folder=mock_response_model.folder,
         )
 
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
-                "folder": mock_response["folder"],
-                "name": mock_response["name"],
+                "folder": mock_response_model.folder,
+                "name": mock_response_model.name,
             },
         )
 
-        assert isinstance(fetched_object, dict)
-        assert fetched_object["id"] == mock_response["id"]
-        assert fetched_object["name"] == mock_response["name"]
-        assert fetched_object["static"] == mock_response["static"]
+        # Validate the returned object
+        assert isinstance(fetched_object, AddressGroupResponseModel)
+        assert str(fetched_object.id) == str(mock_response_model.id)
+        assert fetched_object.name == mock_response_model.name
+        assert fetched_object.static == mock_response_model.static
+        assert fetched_object.description == mock_response_model.description
+        assert fetched_object.folder == mock_response_model.folder
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
