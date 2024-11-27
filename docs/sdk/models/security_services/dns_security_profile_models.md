@@ -32,6 +32,20 @@ The models handle validation of inputs and outputs when interacting with the SCM
 | sinkhole                | SinkholeSettings               | No       | None    | Sinkhole configuration         |
 | whitelist               | List[WhitelistEntry]           | No       | None    | Whitelisted domains            |
 
+## Exceptions
+
+The DNS Security Profile models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When invalid action formats are provided (must be string or dict)
+    - When multiple actions are specified in a list entry (must be exactly one)
+    - When action parameters are provided where none are allowed
+    - When name pattern validation fails
+    - When container field pattern validation fails
+    - When field length limits are exceeded
+
 ## Model Validators
 
 ### Container Type Validation
@@ -44,9 +58,6 @@ For create operations, exactly one container type must be specified:
 
 ```python
 # Using dictionary
-from scm.config.security import DNSSecurityProfile
-
-# Error: multiple containers specified
 try:
     profile_dict = {
         "name": "invalid-profile",
@@ -61,10 +72,11 @@ except ValueError as e:
 # Using model directly
 from scm.models.security import DNSSecurityProfileCreateModel
 
-# Error: no container specified
 try:
     profile = DNSSecurityProfileCreateModel(
-        name="invalid-profile"
+        name="invalid-profile",
+        folder="Shared",
+        device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."

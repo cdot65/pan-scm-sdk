@@ -5,6 +5,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
 
 ## Contents
 
+- [Client](client.md)
 - Configuration
     - [Objects](config/objects/index)
         - [Address](config/objects/address.md)
@@ -33,6 +34,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Security Rule Models](models/security_services/security_rule_models.md)
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
         - [Wildfire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
+- [Exceptions](exceptions.md)
 
 ---
 

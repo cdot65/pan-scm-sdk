@@ -3,11 +3,10 @@
 ## Overview
 
 The Decryption Profile models provide a structured way to manage SSL/TLS decryption settings in Palo Alto Networks'
-Strata Cloud Manager.
-These models support configuring forward proxy, inbound proxy, and no-proxy SSL settings, as well as protocol-specific
-settings like
-allowed algorithms and TLS versions. The models handle validation of inputs and outputs when interacting with the SCM
-API.
+Strata Cloud Manager. These models support configuring forward proxy, inbound proxy, and no-proxy SSL settings, as well
+as
+protocol-specific settings like allowed algorithms and TLS versions. The models handle validation of inputs and outputs
+when interacting with the SCM API.
 
 ## Attributes
 
@@ -26,68 +25,19 @@ API.
 \* Exactly one container type (folder/snippet/device) must be provided
 \** Only required for response model
 
-### SSL Protocol Settings Attributes
+## Exceptions
 
-| Attribute            | Type       | Required | Default | Description                     |
-|----------------------|------------|----------|---------|---------------------------------|
-| min_version          | SSLVersion | Yes      | tls1_0  | Minimum allowed SSL/TLS version |
-| max_version          | SSLVersion | Yes      | tls1_2  | Maximum allowed SSL/TLS version |
-| auth_algo_md5        | bool       | No       | True    | Allow MD5 authentication        |
-| auth_algo_sha1       | bool       | No       | True    | Allow SHA1 authentication       |
-| auth_algo_sha256     | bool       | No       | True    | Allow SHA256 authentication     |
-| auth_algo_sha384     | bool       | No       | True    | Allow SHA384 authentication     |
-| enc_algo_3des        | bool       | No       | True    | Allow 3DES encryption           |
-| enc_algo_aes_128_cbc | bool       | No       | True    | Allow AES-128-CBC encryption    |
-| enc_algo_aes_256_cbc | bool       | No       | True    | Allow AES-256-CBC encryption    |
-| enc_algo_rc4         | bool       | No       | True    | Allow RC4 encryption            |
+The Decryption Profile models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When SSL version validation fails (max_version < min_version)
+    - When name pattern validation fails (must start with alphanumeric character)
+    - When container field pattern validation fails
+    - When field length limits are exceeded
 
 ## Model Validators
-
-### Container Type Validation
-
-For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# Using dictionary
-from scm.config.security import DecryptionProfile
-
-# Error: multiple containers specified
-try:
-    profile_dict = {
-        "name": "invalid-profile",
-        "folder": "Shared",
-        "device": "fw01",  # Can't specify both folder and device
-        "ssl_protocol_settings": {
-            "min_version": "tls1-2",
-            "max_version": "tls1-3"
-        }
-    }
-    profile = DecryptionProfile(api_client)
-    response = profile.create(profile_dict)
-except ValueError as e:
-    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-
-# Using model directly
-from scm.models.security import DecryptionProfileCreateModel
-
-# Error: no container specified
-try:
-    profile = DecryptionProfileCreateModel(
-        name="invalid-profile",
-        ssl_protocol_settings={
-            "min_version": "tls1-2",
-            "max_version": "tls1-3"
-        }
-    )
-except ValueError as e:
-    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-```
-
-</div>
 
 ### SSL Version Validation
 
@@ -122,6 +72,37 @@ try:
     )
 except ValueError as e:
     print(e)  # "max_version cannot be less than min_version"
+```
+
+</div>
+
+### Container Type Validation
+
+For create operations, exactly one container type must be specified:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+from scm.config.security import DecryptionProfile
+
+# Error: multiple containers specified
+try:
+    profile_dict = {
+        "name": "invalid-profile",
+        "folder": "Shared",
+        "device": "fw01",  # Can't specify both folder and device
+        "ssl_protocol_settings": {
+            "min_version": "tls1-2",
+            "max_version": "tls1-3"
+        }
+    }
+    profile = DecryptionProfile(api_client)
+    response = profile.create(profile_dict)
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
 </div>

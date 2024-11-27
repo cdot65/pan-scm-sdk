@@ -3,12 +3,10 @@
 ## Overview
 
 The WildFire Antivirus Profile models provide a structured way to manage WildFire antivirus profiles in Palo Alto
-Networks'
-Strata Cloud Manager. These profiles define rules for malware analysis using either public or private cloud
-infrastructure,
-with support for packet capture, MLAV exceptions, and threat exceptions. The models handle validation of inputs and
-outputs
-when interacting with the SCM API.
+Networks' Strata Cloud Manager. These profiles define rules for malware analysis using either public or private cloud
+infrastructure, with support for packet capture, MLAV exceptions, and threat exceptions. The models handle validation of
+inputs and
+outputs when interacting with the SCM API.
 
 ## Attributes
 
@@ -27,6 +25,17 @@ when interacting with the SCM API.
 
 \* Exactly one container type (folder/snippet/device) must be provided
 \** Only required for response model
+
+## Exceptions
+
+The WildFire Antivirus Profile models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When the name pattern validation fails (must match ^[a-zA-Z0-9._-]+$)
+    - When container field pattern validation fails (must match ^[a-zA-Z\d\-_. ]+$)
+    - When field length limits are exceeded (e.g., name > 63 chars, container fields > 64 chars)
 
 ## Model Validators
 

@@ -13,6 +13,9 @@ Address objects are fundamental building blocks used in security policies and NA
 - IP addresses with wildcard masks
 - Fully Qualified Domain Names (FQDNs)
 
+The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during address object
+management.
+
 ## Methods
 
 | Method     | Description                                   |
@@ -24,49 +27,67 @@ Address objects are fundamental building blocks used in security policies and NA
 | `list()`   | Lists address objects with optional filtering |
 | `fetch()`  | Retrieves a single address object by name     |
 
+## Exceptions
+
+The SDK uses a hierarchical exception system for error handling:
+
+### Client Errors (4xx)
+
+- `InvalidObjectError`: Raised when address object data is invalid
+- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
+- `NotFoundError`: Raised when an address object doesn't exist
+- `AuthenticationError`: Raised for authentication failures
+- `AuthorizationError`: Raised for permission issues
+- `ConflictError`: Raised when address names conflict
+- `NameNotUniqueError`: Raised when creating duplicate address names
+
+### Server Errors (5xx)
+
+- `ServerError`: Base class for server-side errors
+- `APINotImplementedError`: When API endpoint isn't implemented
+- `GatewayTimeoutError`: When request times out
+
 ## Creating Address Objects
 
-The `create()` method allows you to create new address objects. You must specify exactly one address type (ip_netmask,
-ip_range, ip_wildcard, or fqdn) and one container type (folder, snippet, or device).
+The `create()` method allows you to create new address objects with proper error handling.
 
 **Example: Creating an IP/Netmask Address**
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-address_data = {
-    "name": "internal_network",
-    "ip_netmask": "192.168.1.0/24",
-    "description": "Internal network segment",
-    "folder": "Texas",
-    "tag": ["Python", "Automation"]
-}
+from scm.client import Scm
+from scm.config.objects import Address
+from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-new_address = addresses.create(address_data)
-print(f"Created address with ID: {new_address.id}")
-```
+# Initialize client with logging
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    log_level="DEBUG"  # Enable detailed logging
+)
 
-</div>
+addresses = Address(client)
 
-**Example: Creating an FQDN Address**
+try:
+    address_data = {
+        "name": "internal_network",
+        "ip_netmask": "192.168.1.0/24",
+        "description": "Internal network segment",
+        "folder": "Texas",
+        "tag": ["Python", "Automation"]
+    }
 
-<div class="termy">
+    new_address = addresses.create(address_data)
+    print(f"Created address with ID: {new_address.id}")
 
-<!-- termynal -->
-
-```python
-address_data = {
-    "name": "example_website",
-    "fqdn": "www.example.com",
-    "description": "Example website address",
-    "folder": "Texas",
-    "tag": ["Python", "Automation"]
-}
-
-new_address = addresses.create(address_data)
-print(f"Created address with ID: {new_address.id}")
+except NameNotUniqueError as e:
+    print(f"Address name already exists: {e.message}")
+except InvalidObjectError as e:
+    print(f"Invalid address data: {e.message}")
+    if e.details:
+        print(f"Details: {e.details}")
 ```
 
 </div>
@@ -203,55 +224,82 @@ print(f"Found address: {desktop1['name']}")
 
 ## Full Workflow Example
 
-Here's a complete example demonstrating the full lifecycle of an address object:
+Here's a complete example demonstrating the full lifecycle of an address object with proper error handling:
 
 <div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
 from scm.config.objects import Address
-
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+from scm.exceptions import (
+    InvalidObjectError,
+    NotFoundError,
+    AuthenticationError,
+    NameNotUniqueError
 )
 
-# Initialize address object
-addresses = Address(client)
+try:
+    # Initialize client with debug logging
+    client = Scm(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id",
+        log_level="DEBUG"
+    )
 
-# Create new address
-create_data = {
-    "name": "test_network",
-    "ip_netmask": "10.0.0.0/24",
-    "description": "Test network segment",
-    "folder": "Texas",
-    "tag": ["Python", "Automation"]
-}
+    # Initialize address object
+    addresses = Address(client)
 
-new_address = addresses.create(create_data)
-print(f"Created address: {new_address.name}")
+    try:
+        # Create new address
+        create_data = {
+            "name": "test_network",
+            "ip_netmask": "10.0.0.0/24",
+            "description": "Test network segment",
+            "folder": "Texas",
+            "tag": ["Python", "Automation"]
+        }
 
-# Fetch the address by name
-fetched = addresses.fetch(name="test_network", folder="Texas")
+        new_address = addresses.create(create_data)
+        print(f"Created address: {new_address.name}")
 
-# Modify the fetched object
-fetched["description"] = "Updated test network segment"
-fetched["tag"] = ["Python"]
+        # Fetch the address by name
+        try:
+            fetched = addresses.fetch(
+                name="test_network",
+                folder="Texas"
+            )
+            print(f"Found address: {fetched['name']}")
 
-# Update using the modified object
-updated = addresses.update(fetched)
-print(f"Updated description: {updated.description}")
+            # Update the address
+            fetched["description"] = "Updated test network segment"
+            updated = addresses.update(fetched)
+            print(f"Updated description: {updated.description}")
 
-# Clean up
-addresses.delete(new_address.id)
-print("Address deleted successfully")
+        except NotFoundError as e:
+            print(f"Address not found: {e.message}")
+
+        # Clean up
+        addresses.delete(new_address.id)
+        print("Address deleted successfully")
+
+    except NameNotUniqueError as e:
+        print(f"Address name conflict: {e.message}")
+    except InvalidObjectError as e:
+        print(f"Invalid address data: {e.message}")
+        if e.details:
+            print(f"Details: {e.details}")
+
+except AuthenticationError as e:
+    print(f"Authentication failed: {e.message}")
+    print(f"Status code: {e.http_status_code}")
 ```
 
 </div>
+
+## Full script examples
+
+Refer to the [examples](../../../../examples/scm/config/objects) directory.
 
 ## Related Models
 

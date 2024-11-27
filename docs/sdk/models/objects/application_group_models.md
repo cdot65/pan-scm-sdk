@@ -3,10 +3,9 @@
 ## Overview
 
 The Application Group models provide a structured way to manage application groups in Palo Alto Networks' Strata Cloud
-Manager.
-These models support grouping applications together and defining them within folders, snippets, or devices. The models
-handle
-validation of inputs and outputs when interacting with the SCM API.
+Manager. These models support grouping applications together and defining them within folders, snippets, or devices. The
+models
+handle validation of inputs and outputs when interacting with the SCM API.
 
 ## Attributes
 
@@ -21,6 +20,16 @@ validation of inputs and outputs when interacting with the SCM API.
 
 \* Exactly one container type (folder/snippet/device) must be provided
 \** Only required for response model
+
+## Exceptions
+
+The Application Group models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When members list is empty or exceeds maximum length
+    - When name or container fields don't match required patterns
 
 ## Model Validators
 
