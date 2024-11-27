@@ -82,7 +82,11 @@ class ServiceGroupBaseModel(BaseModel):
     )
 
     # Custom Validators
-    @field_validator("tag", mode="before")
+    @field_validator(
+        "tag",
+        "members",
+        mode="before",
+    )
     def ensure_list_of_strings(cls, v):  # noqa
         if isinstance(v, str):
             return [v]
@@ -91,7 +95,10 @@ class ServiceGroupBaseModel(BaseModel):
         else:
             raise ValueError("Tag must be a string or a list of strings")
 
-    @field_validator("tag")
+    @field_validator(
+        "tag",
+        "members",
+    )
     def ensure_unique_items(cls, v):  # noqa
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
