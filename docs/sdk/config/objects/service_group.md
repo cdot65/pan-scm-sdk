@@ -74,8 +74,7 @@ service_groups = ServiceGroup(client)
 try:
     group_data = {
         "name": "web-services",
-        "description": "Web service group",
-        "services": ["HTTP", "HTTPS"],
+        "members": ["HTTP", "HTTPS"],
         "folder": "Texas",
         "tag": ["Python", "Automation"]
     }
@@ -105,7 +104,7 @@ try:
     group_id = "123e4567-e89b-12d3-a456-426655440000"
     group = service_groups.get(group_id)
     print(f"Group Name: {group.name}")
-    print(f"Services: {', '.join(group.services)}")
+    print(f"Members: {', '.join(group.members)}")
 
 except NotFoundError as e:
     print(f"Group not found: {e.message}")
@@ -125,14 +124,13 @@ try:
     # Fetch returns a Pydantic model
     web_group = service_groups.fetch(folder='Texas', name='web-services')
     
-    # Update the model's description attribute
-    web_group.description = 'Updated web services group'
-    web_group.services.append('HTTP-8080')
+    # Update the model's members
+    web_group.members.append('HTTP-8080')
     
     # Update using the Pydantic model
     updated_group = service_groups.update(web_group)
     print(f"Updated group: {updated_group.name}")
-    print(f"New services: {', '.join(updated_group.services)}")
+    print(f"New members: {', '.join(updated_group.members)}")
 
 except NotFoundError as e:
     print(f"Group not found: {e.message}")
@@ -168,7 +166,7 @@ except ReferenceNotZeroError as e:
 The `list()` method retrieves multiple service groups with optional filtering. You can filter the results using the
 following kwargs:
 
-- `values`: List[str] - Filter by service values (e.g., ['HTTP', 'HTTPS'])
+- `values`: List[str] - Filter by member values (e.g., ['HTTP', 'HTTPS'])
 - `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
 
 <div class="termy">
@@ -179,7 +177,7 @@ try:
     # List all groups in a folder
     groups = service_groups.list(folder="Texas")
 
-    # List groups with specific services
+    # List groups with specific members
     web_groups = service_groups.list(
         folder="Texas",
         values=['HTTP', 'HTTPS']
@@ -194,7 +192,7 @@ try:
     # Print the results
     for group in groups:
         print(f"Name: {group.name}")
-        print(f"Services: {', '.join(group.services)}")
+        print(f"Members: {', '.join(group.members)}")
 
 except InvalidObjectError as e:
     print(f"Invalid filter parameters: {e.message}")
@@ -218,7 +216,7 @@ try:
         folder="Texas"
     )
     print(f"Found group: {group.name}")
-    print(f"Current services: {', '.join(group.services)}")
+    print(f"Current members: {', '.join(group.members)}")
 
 except NotFoundError as e:
     print(f"Group not found: {e.message}")
@@ -262,8 +260,7 @@ try:
         # Create new service group
         group_data = {
             "name": "test-services",
-            "description": "Test service group",
-            "services": ["HTTP", "HTTPS", "SSH"],
+            "members": ["HTTP", "HTTPS", "SSH"],
             "folder": "Texas",
             "tag": ["Automation"]
         }
@@ -280,12 +277,11 @@ try:
             print(f"Found group: {fetched_group.name}")
 
             # Update the group using Pydantic model
-            fetched_group.description = "Updated test services"
-            fetched_group.services.append("FTP")
+            fetched_group.members.append("FTP")
 
             updated_group = service_groups.update(fetched_group)
             print(f"Updated group: {updated_group.name}")
-            print(f"New services: {', '.join(updated_group.services)}")
+            print(f"New members: {', '.join(updated_group.members)}")
 
         except NotFoundError as e:
             print(f"Group not found: {e.message}")
