@@ -300,6 +300,6 @@ Refer to the [examples](../../../../examples/scm/config/objects) directory.
 
 ## Related Models
 
-- [ApplicationGroupCreateModel](../../models/objects/application_group_models.md#applicationgroupcreatemodel)
-- [ApplicationGroupUpdateModel](../../models/objects/application_group_models.md#applicationgroupupdatemodel)
-- [ApplicationGroupResponseModel](../../models/objects/application_group_models.md#applicationgroupresponsemodel)
+- [ApplicationGroupCreateModel](../../models/objects/application_group_models.md#Overview)
+- [ApplicationGroupUpdateModel](../../models/objects/application_group_models.md#Overview)
+- [ApplicationGroupResponseModel](../../models/objects/application_group_models.md#Overview)

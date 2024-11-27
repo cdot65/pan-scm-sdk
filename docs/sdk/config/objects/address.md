@@ -303,6 +303,6 @@ Refer to the [examples](../../../../examples/scm/config/objects) directory.
 
 ## Related Models
 
-- [AddressCreateModel](../../models/objects/address_models.md#addresscreatemodel)
-- [AddressUpdateModel](../../models/objects/address_models.md#addressupdatemodel)
-- [AddressResponseModel](../../models/objects/address_models.md#addressresponsemodel)
+- [AddressCreateModel](../../models/objects/address_models.md#Overview)
+- [AddressUpdateModel](../../models/objects/address_models.md#Overview)
+- [AddressResponseModel](../../models/objects/address_models.md#Overview)

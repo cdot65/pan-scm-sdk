@@ -333,6 +333,6 @@ Refer to the [examples](../../../../examples/scm/config/objects) directory.
 
 ## Related Models
 
-- [ApplicationCreateModel](../../models/objects/application_models.md#applicationcreatemodel)
-- [ApplicationUpdateModel](../../models/objects/application_models.md#applicationupdatemodel)
-- [ApplicationResponseModel](../../models/objects/application_models.md#applicationresponsemodel)
+- [ApplicationCreateModel](../../models/objects/application_models.md#Overview)
+- [ApplicationUpdateModel](../../models/objects/application_models.md#Overview)
+- [ApplicationResponseModel](../../models/objects/application_models.md#Overview)

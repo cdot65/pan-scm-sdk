@@ -360,6 +360,6 @@ Refer to the [examples](../../../../examples/scm/config/objects) directory.
 
 ## Related Models
 
-- [AddressGroupCreateModel](../../models/objects/address_group_models.md#addressgroupcreatemodel)
-- [AddressGroupUpdateModel](../../models/objects/address_group_models.md#addressgroupupdatemodel)
-- [AddressGroupResponseModel](../../models/objects/address_group_models.md#addressgroupresponsemodel)
+- [AddressGroupCreateModel](../../models/objects/address_group_models.md#Overview)
+- [AddressGroupUpdateModel](../../models/objects/address_group_models.md#Overview)
+- [AddressGroupResponseModel](../../models/objects/address_group_models.md#Overview)

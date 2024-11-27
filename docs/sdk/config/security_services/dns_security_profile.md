@@ -378,6 +378,6 @@ except AuthenticationError as e:
 
 ## Related Models
 
-- [DNSSecurityProfileCreateModel](../../models/security/dns_security_profile_models.md#dnssecurityprofilecreatemodel)
-- [DNSSecurityProfileUpdateModel](../../models/security/dns_security_profile_models.md#dnssecurityprofileupdatemodel)
-- [DNSSecurityProfileResponseModel](../../models/security/dns_security_profile_models.md#dnssecurityprofileresponsemodel)
+- [DNSSecurityProfileCreateModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [DNSSecurityProfileUpdateModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [DNSSecurityProfileResponseModel](../../models/security_services/dns_security_profile_models.md#Overview)
