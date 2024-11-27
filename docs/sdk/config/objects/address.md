@@ -55,6 +55,8 @@ The `create()` method allows you to create new address objects with proper error
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import Address
@@ -227,6 +229,8 @@ print(f"Found address: {desktop1['name']}")
 Here's a complete example demonstrating the full lifecycle of an address object with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

@@ -10,6 +10,10 @@ calls with proper error handling.
 
 ### Class Definition
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 class Scm:
     def __init__(
@@ -21,6 +25,8 @@ class Scm:
             log_level: str = "ERROR"
     )
 ```
+
+</div>
 
 ### Attributes
 
@@ -35,9 +41,15 @@ class Scm:
 
 #### Request Methods
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 def request(self, method: str, endpoint: str, **kwargs)
 ```
+
+</div>
 
 Makes a generic HTTP request to the API.
 
@@ -47,33 +59,61 @@ Makes a generic HTTP request to the API.
 - `endpoint`: API endpoint path
 - `**kwargs`: Additional request parameters
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs)
 ```
 
+</div>
+
 Makes a GET request to the specified endpoint.
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 def post(self, endpoint: str, **kwargs)
 ```
 
+</div>
+
 Makes a POST request to the specified endpoint.
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 def put(self, endpoint: str, **kwargs)
 ```
 
+</div>
+
 Makes a PUT request to the specified endpoint.
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 def delete(self, endpoint: str, **kwargs)
 ```
+
+</div>
 
 Makes a DELETE request to the specified endpoint.
 
 ## Usage Examples
 
 ### Basic Client Initialization
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -87,7 +127,13 @@ client = Scm(
 )
 ```
 
+</div>
+
 ### Using Debug Logging
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Initialize with debug logging
@@ -100,9 +146,15 @@ client = Scm(
 )
 ```
 
+</div>
+
 ### Making API Requests
 
 #### GET Request Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # List addresses with parameters
@@ -112,7 +164,13 @@ response = client.get(
 )
 ```
 
+</div>
+
 #### POST Request Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Create a new address object
@@ -127,7 +185,13 @@ response = client.post(
 )
 ```
 
+</div>
+
 #### PUT Request Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Update an existing address
@@ -141,7 +205,13 @@ response = client.put(
 )
 ```
 
+</div>
+
 #### DELETE Request Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Delete an address object
@@ -150,9 +220,15 @@ response = client.delete(
 )
 ```
 
+</div>
+
 ## Error Handling
 
 ### Comprehensive Error Handling Example
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -216,6 +292,8 @@ def perform_api_operations():
         print(f"Unexpected error: {str(e)}")
 ```
 
+</div>
+
 ## Best Practices
 
 ### Client Configuration
@@ -240,6 +318,10 @@ def perform_api_operations():
 
 #### Reusing Client Instance
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 # Create a single client instance
 client = Scm(
@@ -258,7 +340,13 @@ def create_address(address_data: dict):
     return client.post("/v1/objects/addresses", json=address_data)
 ```
 
+</div>
+
 #### Using with Context Managers
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from contextlib import contextmanager
@@ -283,6 +371,8 @@ with scm_client_session(
     addresses = client.get("/v1/objects/addresses")
 ```
 
+</div>
+
 ## Common Error Scenarios
 
 ### Authentication Failures
@@ -304,32 +394,3 @@ with scm_client_session(
 - Timeouts
 - Service unavailable
 - Internal server errors
-
-## Troubleshooting
-
-1. **Enable Debug Logging**
-   ```python
-   client = Scm(..., log_level="DEBUG")
-   ```
-
-2. **Check Response Details**
-   ```python
-   try:
-       response = client.get("/v1/objects/addresses")
-   except APIError as e:
-       print(f"Error Code: {e.error_code}")
-       print(f"Message: {e.message}")
-       print(f"Details: {e.details}")
-   ```
-
-3. **Verify Request Parameters**
-   ```python
-   params = {
-       "folder": "Shared",
-       "limit": 100
-   }
-   try:
-       response = client.get("/v1/objects/addresses", params=params)
-   except BadRequestError as e:
-       print(f"Invalid parameters: {e.details}")
-   ```

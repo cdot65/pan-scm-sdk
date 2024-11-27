@@ -59,6 +59,8 @@ The `create()` method allows you to create new DNS Security profiles with proper
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.security import DNSSecurityProfile
@@ -118,6 +120,8 @@ except InvalidObjectError as e:
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_data = {
@@ -165,6 +169,8 @@ Use the `get()` method to retrieve a DNS Security profile by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -183,6 +189,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing DNS Security profiles.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -205,6 +213,8 @@ except InvalidObjectError as e:
 Use the `delete()` method to remove a DNS Security profile.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -229,6 +239,8 @@ the following kwargs:
   e.g., ['pan-dns-sec-malware', 'pan-dns-sec-phishing'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -267,6 +279,8 @@ The `fetch()` method retrieves a single DNS Security profile by name from a spec
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile = dns_security_profiles.fetch(
@@ -290,6 +304,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of a DNS Security profile with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

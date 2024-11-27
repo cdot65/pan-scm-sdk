@@ -12,6 +12,10 @@ module helps in handling and raising appropriate exceptions based on HTTP status
 
 A dataclass that represents a standardized API error response.
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 @dataclass
 class ErrorResponse:
@@ -19,6 +23,8 @@ class ErrorResponse:
     message: str
     details: Optional[Union[Dict[str, Any], List[Any]]] = None
 ```
+
+</div>
 
 #### Attributes
 
@@ -124,6 +130,10 @@ The `ErrorHandler` class provides centralized error handling functionality for t
 
 Maps HTTP status codes to base exception classes:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 ERROR_STATUS_CODE_MAP = {
     400: BadRequestError,
@@ -138,6 +148,8 @@ ERROR_STATUS_CODE_MAP = {
 }
 ```
 
+</div>
+
 #### Error Code Mapping
 
 Maps API error codes and messages to specific exception classes. Supports both direct mappings and nested mappings based
@@ -147,6 +159,10 @@ on error messages or types.
 
 The `raise_for_error` class method handles error response mapping:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 @classmethod
 def raise_for_error(
@@ -155,6 +171,8 @@ def raise_for_error(
         http_status_code: int,
 ) -> None:
 ```
+
+</div>
 
 This method:
 
@@ -167,6 +185,10 @@ This method:
 3. Raises the appropriate exception with all relevant details
 
 ## Example Usage
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -184,3 +206,5 @@ except InvalidCredentialError as e:
 except APIError as e:
     print(f"General API error: {e}")
 ```
+
+</div>

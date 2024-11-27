@@ -58,6 +58,8 @@ The `create()` method allows you to define new custom applications with proper e
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import Application
@@ -106,6 +108,8 @@ Use the `get()` method to retrieve an application by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     app_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -124,6 +128,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing applications.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -147,6 +153,8 @@ except InvalidObjectError as e:
 Use the `delete()` method to remove an application.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -173,6 +181,8 @@ following kwargs:
 - `risk`: List[int] - Filter by risk level (e.g., [1, 2, 3])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -223,6 +233,8 @@ The `fetch()` method retrieves a single application by name from a specific cont
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     app = applications.fetch(
@@ -245,6 +257,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of an application with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
