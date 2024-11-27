@@ -5,6 +5,8 @@
 - Updated tests
 - Addressed issue with refresh_token of oauth client
 - Added support for tag objects
+- `fetch()` returns a Pydantic modeled object now
+- `update()` supports passing of Pydantic modeled objects
 
 ## Version 0.2.2
 
