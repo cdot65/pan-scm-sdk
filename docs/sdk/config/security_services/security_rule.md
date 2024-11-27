@@ -450,6 +450,6 @@ except AuthenticationError as e:
 
 ## Related Models
 
-- [SecurityRuleRequestModel](../../models/security/security_rule_models.md#securityrulerequestmodel)
-- [SecurityRuleUpdateModel](../../models/security/security_rule_models.md#securityruleupdatemodel)
-- [SecurityRuleResponseModel](../../models/security/security_rule_models.md#securityruleresponsemodel)
+- [SecurityRuleRequestModel](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleUpdateModel](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleResponseModel](../../models/security_services/security_rule_models.md#Overview)

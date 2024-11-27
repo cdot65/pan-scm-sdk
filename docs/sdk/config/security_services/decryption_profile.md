@@ -350,6 +350,6 @@ except AuthenticationError as e:
 
 ## Related Models
 
-- [DecryptionProfileCreateModel](../../models/security/decryption_profile_models.md#decryptionprofilecreatemodel)
-- [DecryptionProfileUpdateModel](../../models/security/decryption_profile_models.md#decryptionprofileupdatemodel)
-- [DecryptionProfileResponseModel](../../models/security/decryption_profile_models.md#decryptionprofileresponsemodel)
+- [DecryptionProfileCreateModel](../../models/security_services/decryption_profile_models.md#Overview)
+- [DecryptionProfileUpdateModel](../../models/security_services/decryption_profile_models.md#Overview)
+- [DecryptionProfileResponseModel](../../models/security_services/decryption_profile_models.md#Overview)

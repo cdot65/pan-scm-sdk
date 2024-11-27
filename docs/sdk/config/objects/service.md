@@ -353,6 +353,6 @@ Refer to the [examples](../../../../examples/scm/config/objects) directory.
 
 ## Related Models
 
-- [ServiceCreateModel](../../models/objects/service_models.md#servicecreatemodel)
-- [ServiceUpdateModel](../../models/objects/service_models.md#serviceupdatemodel)
-- [ServiceResponseModel](../../models/objects/service_models.md#serviceresponsemodel)
+- [ServiceCreateModel](../../models/objects/service_models.md#Overview)
+- [ServiceUpdateModel](../../models/objects/service_models.md#Overview)
+- [ServiceResponseModel](../../models/objects/service_models.md#Overview)

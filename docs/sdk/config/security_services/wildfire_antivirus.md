@@ -395,6 +395,6 @@ except AuthenticationError as e:
 
 ## Related Models
 
-- [WildfireAntivirusProfileCreateModel](../../models/security/wildfire_antivirus_profile_models.md#wildfireantivirusprofilecreatemodel)
-- [WildfireAntivirusProfileUpdateModel](../../models/security/wildfire_antivirus_profile_models.md#wildfireantivirusprofileupdatemodel)
-- [WildfireAntivirusProfileResponseModel](../../models/security/wildfire_antivirus_profile_models.md#wildfireantivirusprofileresponsemodel)
+- [WildfireAntivirusProfileCreateModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAntivirusProfileUpdateModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAntivirusProfileResponseModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)

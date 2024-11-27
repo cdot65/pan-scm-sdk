@@ -378,6 +378,6 @@ Refer to the [examples](../../../../examples/scm/config/security_services) direc
 
 ## Related Models
 
-- [AntiSpywareProfileRequestModel](../../models/security/anti_spyware_profile_models.md#antispywareprofilerequest)
-- [AntiSpywareProfileUpdateModel](../../models/security/anti_spyware_profile_models.md#antispywareprofileupdate)
-- [AntiSpywareProfileResponseModel](../../models/security/anti_spyware_profile_models.md#antispywareprofileresponse)
+- [AntiSpywareProfileRequestModel](../../models/security_services/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileUpdateModel](../../models/security_services/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileResponseModel](../../models/security_services/anti_spyware_profile_models.md#Overview)
