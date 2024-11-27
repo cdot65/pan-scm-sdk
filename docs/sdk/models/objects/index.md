@@ -21,3 +21,4 @@ For each configuration object, there are corresponding request and response mode
 - [Application Models](application_models.md)
 - [Application Group Models](application_group_models.md)
 - [Service Models](service_models.md)
+- [Tag Models](tag_models.md)
