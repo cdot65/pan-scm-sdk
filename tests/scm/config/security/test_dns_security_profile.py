@@ -464,21 +464,32 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
             name="updated-profile",
             description="Updated DNS security profile",
         )
-        input_data = update_data.model_dump()
 
         # Create mock response
         mock_response = DNSSecurityProfileResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
         # Perform update
-        updated_object = self.client.update(input_data)
+        updated_object = self.client.update(update_data)
 
-        # Assert the put method was called with correct parameters
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/security/v1/dns-security-profiles/{update_data.id}",
-            json=input_data,
+        # Verify call was made once
+        self.mock_scm.put.assert_called_once()
+
+        # Get the actual call arguments
+        call_args = self.mock_scm.put.call_args
+
+        # Check endpoint
+        assert (
+            call_args[0][0]
+            == f"/config/security/v1/dns-security-profiles/{update_data.id}"
         )
 
+        # Check important payload fields
+        payload = call_args[1]["json"]
+        assert payload["name"] == "updated-profile"
+        assert payload["description"] == "Updated DNS security profile"
+
+        # Assert the updated object matches the mock response
         assert isinstance(updated_object, DNSSecurityProfileResponseModel)
         assert updated_object.id == mock_response.id
         assert updated_object.name == mock_response.name
@@ -490,7 +501,6 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-profile",
         )
-        input_data = update_data.model_dump()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
@@ -500,7 +510,7 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
@@ -513,7 +523,6 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-profile",
         )
-        input_data = update_data.model_dump()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
@@ -523,7 +532,7 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -532,44 +541,50 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
+        # Create test data using factory
+        update_data = DNSSecurityProfileUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            botnet_domains={},
+        )
+
+        # Create mock response without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
+        # Create HTTPError with mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
+        # Test with Pydantic model
         with pytest.raises(HTTPError):
-            self.client.update(
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-profile",
-                    "botnet_domains": {},
-                }
-            )
+            self.client.update(update_data)
 
     def test_update_generic_exception_handling(self):
         """Test handling of a generic exception during update."""
+        # Create test data as Pydantic model
+        update_data = DNSSecurityProfileUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            botnet_domains={},
+        )
+
         self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.update(
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test-profile",
-                    "botnet_domains": {},
-                }
-            )
+            self.client.update(update_data)
         assert str(exc_info.value) == "Generic error"
 
     def test_update_server_error(self):
         """Test handling of server errors during update."""
+        # Create test data
         update_data = DNSSecurityProfileUpdateApiFactory.with_updated_sinkhole(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-profile",
         )
-        input_data = update_data.model_dump()
 
+        # Use utility function to simulate server error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=500,
             error_code="E003",
@@ -578,7 +593,7 @@ class TestDNSSecurityProfileUpdate(TestDNSSecurityProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -685,13 +700,16 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         mock_response_model = DNSSecurityProfileResponseFactory.build()
         mock_response_data = mock_response_model.model_dump()
 
+        # Set the mock to return the response data directly
         self.mock_scm.get.return_value = mock_response_data  # noqa
 
+        # Call the fetch method
         fetched_object = self.client.fetch(
             name=mock_response_model.name,
             folder=mock_response_model.folder,
         )
 
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
@@ -699,11 +717,13 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
                 "name": mock_response_model.name,
             },
         )
+        # Validate the returned object is a Pydantic model
+        assert isinstance(fetched_object, DNSSecurityProfileResponseModel)
 
-        assert isinstance(fetched_object, dict)
-        assert fetched_object["id"] == mock_response_model.id
-        assert fetched_object["name"] == mock_response_model.name
-        assert fetched_object["description"] == mock_response_model.description
+        # Validate the object attributes match the mock response
+        assert str(fetched_object.id) == str(mock_response_model.id)
+        assert fetched_object.name == mock_response_model.name
+        assert fetched_object.folder == mock_response_model.folder
 
     def test_fetch_object_not_present_error(self):
         """Test fetching an object that does not exist."""

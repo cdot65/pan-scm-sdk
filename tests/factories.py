@@ -823,6 +823,18 @@ class ApplicationResponseFactory(factory.Factory):
             **kwargs,
         )
 
+    @classmethod
+    def from_request(
+        cls,
+        request_model: ApplicationCreateModel,
+        **kwargs,
+    ):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
 
 # Pydantic modeling tests
 class ApplicationCreateModelFactory(factory.DictFactory):
