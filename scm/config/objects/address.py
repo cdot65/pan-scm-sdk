@@ -76,22 +76,26 @@ class Address(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        address: AddressUpdateModel,
     ) -> AddressResponseModel:
         """
         Updates an existing address object.
 
+        Args:
+            address: AddressUpdateModel instance containing the update data
+
         Returns:
             AddressResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        address = AddressUpdateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields
+        # Convert to dict for API request, excluding unset fields
         payload = address.model_dump(exclude_unset=True)
 
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(address.id)
+        payload.pop("id", None)
+
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
@@ -286,7 +290,7 @@ class Address(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> AddressResponseModel:
         """
         Fetches a single object by name.
 
@@ -297,7 +301,7 @@ class Address(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            AddressResponseModel: The fetched address object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -356,11 +360,7 @@ class Address(BaseObject):
             )
 
         if "id" in response:
-            address = AddressResponseModel(**response)
-            return address.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return AddressResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",

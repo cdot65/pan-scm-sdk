@@ -78,28 +78,32 @@ class Tag(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        tag: TagUpdateModel,
     ) -> TagResponseModel:
         """
         Updates an existing tag object.
 
+        Args:
+            tag: TagUpdateModel instance containing the update data
+
         Returns:
             TagResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        tag = TagUpdateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields
+        # Convert to dict for API request, excluding unset fields
         payload = tag.model_dump(exclude_unset=True)
 
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(tag.id)
+        payload.pop("id", None)
+
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
 
-        # Return the SCM API response as a new Pydantic object
+        # Return the SCM API response as a new Pydantic model
         return TagResponseModel(**response)
 
     @staticmethod
@@ -260,9 +264,9 @@ class Tag(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> TagResponseModel:
         """
-        Fetches a single object by name.
+        Fetches a single tag by name.
 
         Args:
             name (str): The name of the tag to fetch.
@@ -271,7 +275,7 @@ class Tag(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            TagResponseModel: The fetched tag object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -330,11 +334,7 @@ class Tag(BaseObject):
             )
 
         if "id" in response:
-            tag = TagResponseModel(**response)
-            return tag.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return TagResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",
