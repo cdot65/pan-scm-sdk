@@ -35,7 +35,7 @@ class TestWildfireAvProfileCreateModel:
         data = WildfireAvProfileCreateModelFactory.build_valid()
         model = WildfireAvProfileCreateModel(**data)
         assert model.name == "TestWildfireProfile"
-        assert model.folder == "Shared"
+        assert model.folder == "Texas"
         assert len(model.rules) == 1
         assert model.rules[0].direction == WildfireAvDirection.both
         assert model.rules[0].analysis == WildfireAvAnalysis.public_cloud
@@ -140,7 +140,7 @@ class TestWildfireAvProfileResponseModel:
         model = WildfireAvProfileResponseModel(**data)
         assert isinstance(model.id, UUID)
         assert model.name.startswith("wildfire_profile_")
-        assert model.folder == "Shared"
+        assert model.folder == "Texas"
         assert len(model.rules) > 0
 
     def test_wildfire_av_profile_response_model_from_request(self):

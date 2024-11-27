@@ -107,7 +107,7 @@ security_rule = SecurityRule(api_client)
 # Define your intended object as a Python dictionary
 sec_rule_dictionary = {
     "name": "test123",
-    "folder": "Prisma Access",
+    "folder": "Texas",
     "etc": "etc.."
 }
 # Perform operations

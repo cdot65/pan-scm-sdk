@@ -61,12 +61,12 @@ class TestSecurityRuleList(TestSecurityRuleBase):
             "data": [
                 SecurityRuleResponseFactory(
                     name="rule1",
-                    folder="Shared",
+                    folder="Texas",
                     action=SecurityRuleAction.allow,
                 ).model_dump(by_alias=True),
                 SecurityRuleResponseFactory(
                     name="rule2",
-                    folder="Shared",
+                    folder="Texas",
                     action=SecurityRuleAction.deny,
                 ).model_dump(by_alias=True),
             ],
@@ -76,13 +76,13 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Shared")
+        existing_objects = self.client.list(folder="Texas")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
                 "position": "pre",
             },
         )
@@ -137,7 +137,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
             "data": [
                 SecurityRuleResponseFactory(
                     name="rule1",
-                    folder="Shared",
+                    folder="Texas",
                     action=SecurityRuleAction.allow,
                     source=["10.0.0.0/24"],
                     destination=["any"],
@@ -150,7 +150,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 ).model_dump(by_alias=True),
                 SecurityRuleResponseFactory(
                     name="rule2",
-                    folder="Shared",
+                    folder="Texas",
                     action=SecurityRuleAction.deny,
                     source=["any"],
                     destination=["10.1.0.0/24"],
@@ -177,7 +177,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
             "profile_setting": ["best-practice"],
         }
 
-        filtered_objects = self.client.list(folder="Shared", **filters)
+        filtered_objects = self.client.list(folder="Texas", **filters)
 
         # Verify the filtering
         assert len(filtered_objects) == 1
@@ -189,7 +189,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         mock_response = {
             "data": [
                 SecurityRuleResponseFactory(
-                    name="rule1", folder="Shared", action=SecurityRuleAction.allow
+                    name="rule1", folder="Texas", action=SecurityRuleAction.allow
                 ).model_dump(by_alias=True)
             ]
         }
@@ -197,31 +197,31 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             action=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             category=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             service=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             disabled=False,
         )
         assert len(filtered_objects) == 1
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             log_setting=[],
         )
         assert len(filtered_objects) == 0
@@ -272,7 +272,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
         # Test multiple combined filters
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             action=[SecurityRuleAction.allow],
             source=["10.0.0.0/24"],
             tag=["tag1"],
@@ -344,25 +344,25 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 SecurityRuleResponseFactory(
                     name="rule1",
                     disabled=True,
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(by_alias=True),
                 SecurityRuleResponseFactory(
                     name="rule2",
                     disabled=False,
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(by_alias=True),
             ]
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test filtering disabled rules
-        filtered_objects = self.client.list(folder="Shared", disabled=True)
+        filtered_objects = self.client.list(folder="Texas", disabled=True)
         assert len(filtered_objects) == 1
         assert filtered_objects[0].name == "rule1"
         assert filtered_objects[0].disabled is True
 
         # Test filtering enabled rules
-        filtered_objects = self.client.list(folder="Shared", disabled=False)
+        filtered_objects = self.client.list(folder="Texas", disabled=False)
         assert len(filtered_objects) == 1
         assert filtered_objects[0].name == "rule2"
         assert filtered_objects[0].disabled is False
@@ -374,12 +374,12 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 SecurityRuleResponseFactory(
                     name="rule1",
                     log_setting="default-logging",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(by_alias=True),
                 SecurityRuleResponseFactory(
                     name="rule2",
                     log_setting="custom-logging",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(by_alias=True),
             ]
         }
@@ -387,7 +387,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
         # Test filtering by log setting
         filtered_objects = self.client.list(
-            folder="Shared", log_setting=["default-logging"]
+            folder="Texas", log_setting=["default-logging"]
         )
         assert len(filtered_objects) == 1
         assert filtered_objects[0].name == "rule1"
@@ -395,7 +395,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
         # Test filtering by multiple log settings
         filtered_objects = self.client.list(
-            folder="Shared", log_setting=["default-logging", "custom-logging"]
+            folder="Texas", log_setting=["default-logging", "custom-logging"]
         )
         assert len(filtered_objects) == 2
 
@@ -404,7 +404,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -415,7 +415,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -428,7 +428,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -445,11 +445,11 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
     def test_list_invalid_action_filter(self):
         """Test that list method raises InvalidObjectError when 'action' filter is not a list."""
-        folder = "Shared"
+        folder = "Texas"
         filters = {"action": "allow"}  # Should be a list, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -458,7 +458,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
     def test_list_invalid_disabled_filter(self):
         """Test that list method raises InvalidObjectError when 'disabled' filter is not a bool."""
-        folder = "Shared"
+        folder = "Texas"
         filters = {"disabled": "True"}  # Should be a bool, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -467,7 +467,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
     def test_list_invalid_source_filter(self):
         """Test that list method raises InvalidObjectError when 'source' filter is not a list."""
-        folder = "Shared"
+        folder = "Texas"
         filters = {"source": "192.168.1.1"}  # Should be a list, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -476,7 +476,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
     def test_list_invalid_profile_setting_filter(self):
         """Test that list method raises InvalidObjectError when 'profile_setting' filter is not a list."""
-        folder = "Shared"
+        folder = "Texas"
         filters = {"profile_setting": "default"}  # Should be a list, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -485,7 +485,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
     def test_list_invalid_rulebase(self):
         """Test that list method raises InvalidObjectError when rulebase is invalid."""
-        folder = "Shared"
+        folder = "Texas"
         invalid_rulebase = "invalid"
 
         with pytest.raises(InvalidObjectError):
@@ -525,7 +525,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             self.client.create(
                 {
                     "name": "test",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "action": "allow",
                 }
             )
@@ -553,7 +553,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         """Test that HTTPError with response content triggers proper error handling."""
         test_data = {
             "name": "test-rule",
-            "folder": "Shared",
+            "folder": "Texas",
             "action": "allow",
             "from": ["any"],
             "to": ["any"],
@@ -582,7 +582,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             self.client.create(
                 {
                     "name": "test-rule",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "action": "allow",
                 }
             )
@@ -592,7 +592,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         """Test that create method raises InvalidObjectError when rulebase is invalid."""
         data = {
             "name": "test-rule",
-            "folder": "Shared",
+            "folder": "Texas",
             "source": ["any"],
             "destination": ["any"],
             "action": "allow",
@@ -630,7 +630,7 @@ class TestSecurityRuleGet(TestSecurityRuleBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -1020,7 +1020,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="nonexistent", folder="Shared")
+            self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -1030,7 +1030,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert '"name" is not allowed to be empty' in error_msg
@@ -1060,7 +1060,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-rule",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -1077,7 +1077,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-rule", folder="Shared")
+            self.client.fetch(name="test-rule", folder="Texas")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
@@ -1089,7 +1089,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -1098,14 +1098,14 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""
         mock_response = {
             "name": "test-rule",
-            "folder": "Shared",
+            "folder": "Texas",
             "action": "allow",
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-rule", folder="Shared")
+            self.client.fetch(name="test-rule", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -1117,7 +1117,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test123", folder="Shared")
+            self.client.fetch(name="test123", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -1127,7 +1127,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
     def test_fetch_invalid_rulebase(self):
         """Test that fetch method raises InvalidObjectError when rulebase is invalid."""
         name = "test-rule"
-        folder = "Shared"
+        folder = "Texas"
         invalid_rulebase = "invalid"
 
         with pytest.raises(InvalidObjectError):
@@ -1307,7 +1307,7 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
     def test_ensure_list_of_strings_single_string(self):
         """Test that a single string is converted to a list containing that string."""
         model = SecurityRuleCreateModel(
-            name="test-rule", source="192.168.1.1", folder="Shared"  # noqa
+            name="test-rule", source="192.168.1.1", folder="Texas"  # noqa
         )
         assert model.source == ["192.168.1.1"]
 
@@ -1317,21 +1317,21 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
             SecurityRuleCreateModel(
                 name="test-rule",
                 source=123,  # noqa
-                folder="Shared",
+                folder="Texas",
             )  # noqa
 
     def test_ensure_list_of_strings_non_string_items(self):
         """Test that a list containing non-string items raises a ValueError."""
         with pytest.raises(ValueError, match="All items must be strings"):
             SecurityRuleCreateModel(
-                name="test-rule", source=["192.168.1.1", 123], folder="Shared"
+                name="test-rule", source=["192.168.1.1", 123], folder="Texas"
             )
 
     def test_ensure_unique_items_duplicates(self):
         """Test that duplicate items in lists raise a ValueError."""
         with pytest.raises(ValueError, match="List items must be unique"):
             SecurityRuleCreateModel(
-                name="test-rule", source=["192.168.1.1", "192.168.1.1"], folder="Shared"
+                name="test-rule", source=["192.168.1.1", "192.168.1.1"], folder="Texas"
             )
 
     def test_security_rule_create_no_container(self):
@@ -1349,7 +1349,7 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
             match="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
         ):
             SecurityRuleCreateModel(
-                name="test-rule", folder="Shared", snippet="MySnippet"
+                name="test-rule", folder="Texas", snippet="MySnippet"
             )
 
     def test_move_model_unexpected_destination_rule_top(self):

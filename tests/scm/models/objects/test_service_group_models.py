@@ -23,7 +23,7 @@ class TestServiceGroupCreateModel:
         """Test validation with valid data."""
         data = {
             "name": "Microsoft 365 Access",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
         }
         model = ServiceGroupCreateModel(**data)
@@ -35,7 +35,7 @@ class TestServiceGroupCreateModel:
         """Test validation when multiple containers are provided."""
         data = {
             "name": "Microsoft 365 Access",
-            "folder": "Shared",
+            "folder": "Texas",
             "snippet": "office365",
             "device": "firewall1",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
@@ -63,7 +63,7 @@ class TestServiceGroupCreateModel:
     def test_service_group_create_model_missing_required_fields(self):
         """Test validation when required fields are missing."""
         data = {
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupCreateModel(**data)
@@ -76,7 +76,7 @@ class TestServiceGroupCreateModel:
         """Test validation of name field constraints."""
         data = {
             "name": "invalid@name#",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": ["app1", "app2"],
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -87,7 +87,7 @@ class TestServiceGroupCreateModel:
         """Test validation when members list is empty."""
         data = {
             "name": "test-group",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": [],
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -112,7 +112,7 @@ class TestServiceGroupCreateModel:
             ServiceGroupCreateModel(
                 name="test-rule",
                 members=123,  # noqa
-                folder="Shared",
+                folder="Texas",
             )
 
     def test_ensure_list_of_strings_non_string_items(self):
@@ -121,7 +121,7 @@ class TestServiceGroupCreateModel:
             ServiceGroupCreateModel(
                 name="test-rule",
                 members=["test1", 123],
-                folder="Shared",
+                folder="Texas",
             )
 
     def test_ensure_unique_items_duplicates(self):
@@ -130,7 +130,7 @@ class TestServiceGroupCreateModel:
             ServiceGroupCreateModel(
                 name="test-rule",
                 members=["test1", "test1"],
-                folder="Shared",
+                folder="Texas",
             )
 
 
@@ -143,7 +143,7 @@ class TestServiceGroupUpdateModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         model = ServiceGroupUpdateModel(**data)
         assert model.name == data["name"]
@@ -194,7 +194,7 @@ class TestServiceGroupResponseModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         model = ServiceGroupResponseModel(**data)
         assert str(model.id) == data["id"]
@@ -207,7 +207,7 @@ class TestServiceGroupResponseModel:
         data = {
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupResponseModel(**data)
@@ -219,7 +219,7 @@ class TestServiceGroupResponseModel:
             "id": "invalid-uuid",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupResponseModel(**data)

@@ -70,7 +70,7 @@ class TestServiceList(TestServiceBase):
                     halfclose_timeout=10,
                     timewait_timeout=10,
                     name="Test",
-                    folder="Shared",
+                    folder="Texas",
                     description="This is just a test",
                 ).model_dump(),
             ]
@@ -164,13 +164,13 @@ class TestServiceList(TestServiceBase):
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        self.client.list(folder="Shared", **filters)
+        self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/services",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -193,7 +193,7 @@ class TestServiceList(TestServiceBase):
                 {
                     "id": "5e7600f1-8681-4048-973b-4117da7e446c",
                     "name": "Test",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "protocol": {
                         "tcp": {
                             "port": "4433,4333,4999,9443",
@@ -209,7 +209,7 @@ class TestServiceList(TestServiceBase):
                 {
                     "id": "5a3d6182-c5f1-4b1e-8ec9-e984ae5247fb",
                     "name": "Test123UDP",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "description": "UDP test",
                     "protocol": {"udp": {"port": "5444,5432"}},
                     "tag": ["Automation"],
@@ -223,13 +223,13 @@ class TestServiceList(TestServiceBase):
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             protocols=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             tags=[],
         )
         assert len(filtered_objects) == 0
@@ -254,7 +254,7 @@ class TestServiceList(TestServiceBase):
                 {
                     "id": "5e7600f1-8681-4048-973b-4117da7e446c",
                     "name": "Test",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "protocol": {
                         "tcp": {
                             "port": "4433,4333,4999,9443",
@@ -270,7 +270,7 @@ class TestServiceList(TestServiceBase):
                 {
                     "id": "5a3d6182-c5f1-4b1e-8ec9-e984ae5247fb",
                     "name": "Test123UDP",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "description": "UDP test",
                     "protocol": {"udp": {"port": "5444,5432"}},
                     "tag": ["Automation"],
@@ -289,7 +289,7 @@ class TestServiceList(TestServiceBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", protocols="tcp")
+            self.client.list(folder="Texas", protocols="tcp")
         error_response = exc_info.value.response.json()
         assert (
             error_response["_errors"][0]["message"]
@@ -308,7 +308,7 @@ class TestServiceList(TestServiceBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", tags="automation")
+            self.client.list(folder="Texas", tags="automation")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "'tags' filter must be a list"
         assert (
@@ -323,7 +323,7 @@ class TestServiceList(TestServiceBase):
         # Test that valid list filters pass validation
         try:
             self.client.list(
-                folder="Shared",
+                folder="Texas",
                 tags=["automation"],
                 protocols=["tcp"],
             )
@@ -422,7 +422,7 @@ class TestServiceList(TestServiceBase):
                 {
                     "id": "5e7600f1-8681-4048-973b-4117da7e446c",
                     "name": "Test",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "protocol": {
                         "tcp": {
                             "port": "4433,4333,4999,9443",
@@ -438,7 +438,7 @@ class TestServiceList(TestServiceBase):
                 {
                     "id": "5a3d6182-c5f1-4b1e-8ec9-e984ae5247fb",
                     "name": "Test123UDP",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "description": "UDP test",
                     "protocol": {"udp": {"port": "5444,5432"}},
                     "tag": ["Automation"],
@@ -467,7 +467,7 @@ class TestServiceList(TestServiceBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -484,7 +484,7 @@ class TestServiceList(TestServiceBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -503,7 +503,7 @@ class TestServiceList(TestServiceBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -520,7 +520,7 @@ class TestServiceList(TestServiceBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
     def test_list_server_error(self):
         """Test generic exception handling in list method."""
@@ -532,7 +532,7 @@ class TestServiceList(TestServiceBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -645,7 +645,7 @@ class TestServiceGet(TestServiceBase):
         mock_response = ServiceResponseFactory.with_tcp(
             id="5e7600f1-8681-4048-973b-4117da7e446c",
             name="Test",
-            folder="Shared",
+            folder="Texas",
             description="This is just a test",
             port="80,8080",
             tag=["Automation"],
@@ -738,7 +738,7 @@ class TestServiceUpdate(TestServiceBase):
         # Create update data using factory
         update_data = ServiceUpdateApiFactory.with_tcp(
             name="UpdatedService",
-            folder="Shared",
+            folder="Texas",
             description="An updated service",
             port="80,8080",
         )
@@ -764,7 +764,7 @@ class TestServiceUpdate(TestServiceBase):
         assert payload["name"] == "UpdatedService"
         assert payload["description"] == "An updated service"
         assert payload["protocol"]["tcp"]["port"] == "80,8080"
-        assert payload["folder"] == "Shared"
+        assert payload["folder"] == "Texas"
 
         # Assert the updated object matches the mock response
         assert isinstance(updated_object, ServiceResponseModel)
@@ -779,7 +779,7 @@ class TestServiceUpdate(TestServiceBase):
         update_data = ServiceUpdateApiFactory.with_tcp(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="UpdatedService",
-            folder="Shared",
+            folder="Texas",
             description="An updated service",
             port="80,8080",
         )
@@ -805,7 +805,7 @@ class TestServiceUpdate(TestServiceBase):
         # Create test data
         update_data = ServiceResponseFactory.with_tcp(
             name="UpdatedService",
-            folder="Shared",
+            folder="Texas",
             description="An updated service",
             port="80,8080",
         )
@@ -868,7 +868,7 @@ class TestServiceUpdate(TestServiceBase):
         update_data = ServiceUpdateApiFactory.with_tcp(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="UpdatedService",
-            folder="Shared",
+            folder="Texas",
             description="An updated service",
             port="80,8080",
         )
@@ -998,7 +998,7 @@ class TestServiceFetch(TestServiceBase):
         mock_response_model = ServiceResponseFactory.with_tcp(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="web-browsing",
-            folder="Shared",
+            folder="Texas",
             port="80,8080",
             description=None,
             tag=["web"],
@@ -1038,7 +1038,7 @@ class TestServiceFetch(TestServiceBase):
         **Objective:** Test that fetching a non-existent object raises NotFoundError.
         """
         service_name = "NonExistent"
-        folder_name = "Shared"
+        folder_name = "Texas"
 
         # Configure mock to raise HTTPError with the mock response
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
@@ -1069,7 +1069,7 @@ class TestServiceFetch(TestServiceBase):
         )
 
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert '"name" is not allowed to be empty' in error_msg
@@ -1103,7 +1103,7 @@ class TestServiceFetch(TestServiceBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Invalid response format"
         assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
@@ -1113,7 +1113,7 @@ class TestServiceFetch(TestServiceBase):
     #     self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
     #
     #     with pytest.raises(Exception) as exc_info:
-    #         self.client.fetch(name="test", folder="Shared")
+    #         self.client.fetch(name="test", folder="Texas")
     #
     #     assert str(exc_info.value) == "Generic error"
 
@@ -1131,7 +1131,7 @@ class TestServiceFetch(TestServiceBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-address", folder="Shared")
+            self.client.fetch(name="test-address", folder="Texas")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
@@ -1143,7 +1143,7 @@ class TestServiceFetch(TestServiceBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -1155,7 +1155,7 @@ class TestServiceFetch(TestServiceBase):
         mock_response_model = ServiceResponseFactory.with_tcp_override(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestService",
-            folder="Shared",
+            folder="Texas",
             port="80",
             description=None,
             tag=None,
@@ -1192,14 +1192,14 @@ class TestServiceFetch(TestServiceBase):
         # Mock response without 'id' field
         mock_response = {
             "name": "test-address",
-            "folder": "Shared",
+            "folder": "Texas",
             "ip_netmask": "10.0.0.0/24",
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-address", folder="Shared")
+            self.client.fetch(name="test-address", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -1221,7 +1221,7 @@ class TestServiceFetch(TestServiceBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-address",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -1236,7 +1236,7 @@ class TestServiceFetch(TestServiceBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test123", folder="Shared")
+            self.client.fetch(name="test123", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg

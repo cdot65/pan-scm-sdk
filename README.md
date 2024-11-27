@@ -103,7 +103,7 @@ address_data = {
     "name": "test123",
     "fqdn": "test123.example.com",
     "description": "Created via pan-scm-sdk",
-    "folder": "Prisma Access",
+    "folder": "Texas",
 }
 
 # Create the address in Strata Cloud Manager

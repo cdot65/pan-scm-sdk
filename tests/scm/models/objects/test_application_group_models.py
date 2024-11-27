@@ -22,7 +22,7 @@ class TestApplicationGroupCreateModel:
         """Test validation with valid data."""
         data = {
             "name": "Microsoft 365 Access",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
         }
         model = ApplicationGroupCreateModel(**data)
@@ -34,7 +34,7 @@ class TestApplicationGroupCreateModel:
         """Test validation when multiple containers are provided."""
         data = {
             "name": "Microsoft 365 Access",
-            "folder": "Shared",
+            "folder": "Texas",
             "snippet": "office365",
             "device": "firewall1",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
@@ -62,7 +62,7 @@ class TestApplicationGroupCreateModel:
     def test_application_group_create_model_missing_required_fields(self):
         """Test validation when required fields are missing."""
         data = {
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupCreateModel(**data)
@@ -75,7 +75,7 @@ class TestApplicationGroupCreateModel:
         """Test validation of name field constraints."""
         data = {
             "name": "invalid@name#",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": ["app1", "app2"],
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -86,7 +86,7 @@ class TestApplicationGroupCreateModel:
         """Test validation when members list is empty."""
         data = {
             "name": "test-group",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": [],
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -105,7 +105,7 @@ class TestApplicationGroupUpdateModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         model = ApplicationGroupUpdateModel(**data)
         assert model.name == data["name"]
@@ -156,7 +156,7 @@ class TestApplicationGroupResponseModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access", "office365-enterprise-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         model = ApplicationGroupResponseModel(**data)
         assert str(model.id) == data["id"]
@@ -169,7 +169,7 @@ class TestApplicationGroupResponseModel:
         data = {
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupResponseModel(**data)
@@ -181,7 +181,7 @@ class TestApplicationGroupResponseModel:
             "id": "invalid-uuid",
             "name": "Microsoft 365 Access",
             "members": ["office365-consumer-access"],
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupResponseModel(**data)

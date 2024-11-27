@@ -159,8 +159,8 @@ client = Scm(
 ```python
 # List addresses with parameters
 response = client.get(
-    endpoint="/v1/objects/addresses",
-    params={"folder": "Shared", "limit": 100}
+    endpoint="/config/objects/v1/addresses",
+    params={"folder": "Texas", "limit": 100}
 )
 ```
 
@@ -176,11 +176,11 @@ response = client.get(
 # Create a new address object
 new_address = {
     "name": "example-address",
-    "folder": "Shared",
+    "folder": "Texas",
     "ip_netmask": "192.168.1.0/24"
 }
 response = client.post(
-    endpoint="/v1/objects/addresses",
+    endpoint="/config/objects/v1/addresses",
     json=new_address
 )
 ```
@@ -200,7 +200,7 @@ updated_address = {
     "ip_netmask": "192.168.2.0/24"
 }
 response = client.put(
-    endpoint="/v1/objects/addresses/example-address",
+    endpoint="/config/objects/v1/addresses/example-address",
     json=updated_address
 )
 ```
@@ -216,7 +216,7 @@ response = client.put(
 ```python
 # Delete an address object
 response = client.delete(
-    endpoint="/v1/objects/addresses/example-address"
+    endpoint="/config/objects/v1/addresses/example-address"
 )
 ```
 
@@ -254,16 +254,16 @@ def perform_api_operations():
         # Perform API operations
         try:
             # List addresses
-            addresses = client.get("/v1/objects/addresses")
+            addresses = client.get("/config/objects/v1/addresses")
             print(f"Found {len(addresses)} addresses")
 
             # Create new address
             new_address = {
                 "name": "test-address",
-                "folder": "Shared",
+                "folder": "Texas",
                 "ip_netmask": "192.168.1.0/24"
             }
-            created = client.post("/v1/objects/addresses", json=new_address)
+            created = client.post("/config/objects/v1/addresses", json=new_address)
             print(f"Created address: {created['name']}")
 
         except AuthenticationError as e:
@@ -332,12 +332,12 @@ client = Scm(
 
 
 # Reuse for multiple operations
-def get_address(name: str):
-    return client.get(f"/v1/objects/addresses/{name}")
+def get_address(object_uuid: str):
+    return client.get(f"/config/objects/v1/addresses/{object_uuid}")
 
 
 def create_address(address_data: dict):
-    return client.post("/v1/objects/addresses", json=address_data)
+    return client.post("/config/objects/v1/addresses", json=address_data)
 ```
 
 </div>
@@ -368,7 +368,7 @@ with scm_client_session(
         client_secret="your_client_secret",
         tsg_id="your_tsg_id"
 ) as client:
-    addresses = client.get("/v1/objects/addresses")
+    addresses = client.get("/config/objects/v1/addresses")
 ```
 
 </div>

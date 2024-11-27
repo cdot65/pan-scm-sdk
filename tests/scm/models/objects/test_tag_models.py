@@ -23,7 +23,7 @@ class TestTagCreateModel:
         """Test validation with valid data."""
         data = {
             "name": "test-tag",
-            "folder": "Shared",
+            "folder": "Texas",
             "comments": "Test tag",
             "color": "Red",
         }
@@ -44,7 +44,7 @@ class TestTagCreateModel:
         """Test validation with invalid name pattern."""
         data = {
             "name": "@invalid_name$",
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             TagCreateModel(**data)
@@ -54,7 +54,7 @@ class TestTagCreateModel:
         """Test validation when name exceeds maximum length."""
         data = {
             "name": "a" * 64,  # Max length is 63
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             TagCreateModel(**data)
@@ -87,7 +87,7 @@ class TestTagCreateModel:
         """Test validation when comments exceed maximum length."""
         data = {
             "name": "test-tag",
-            "folder": "Shared",
+            "folder": "Texas",
             "comments": "a" * 1024,  # Max length is 1023
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -98,7 +98,7 @@ class TestTagCreateModel:
         """Test validation when color is None."""
         data = {
             "name": "test-tag",
-            "folder": "Shared",
+            "folder": "Texas",
             "color": None,
         }
         model = TagCreateModel(**data)
@@ -158,7 +158,7 @@ class TestTagResponseModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-tag",
-            "folder": "Shared",
+            "folder": "Texas",
             "comments": "Test tag",
             "color": "Red",
         }

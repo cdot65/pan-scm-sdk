@@ -68,7 +68,7 @@ try:
             "tcp": {"port": "80"},
             "udp": {"port": "53"}  # Can't specify both TCP and UDP
         },
-        "folder": "Shared"
+        "folder": "Texas"
     }
     service = Service(api_client)
     response = service.create(service_dict)
@@ -83,7 +83,7 @@ try:
     service = ServiceCreateModel(
         name="invalid-service",
         protocol=Protocol(),
-        folder="Shared"
+        folder="Texas"
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'tcp' or 'udp' must be provided in 'protocol'."
@@ -105,7 +105,7 @@ try:
     service_dict = {
         "name": "invalid-service",
         "protocol": {"tcp": {"port": "80"}},
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01"  # Can't specify both folder and device
     }
     response = service.create(service_dict)
@@ -117,7 +117,7 @@ try:
     service = ServiceCreateModel(
         name="invalid-service",
         protocol=Protocol(tcp=TCPProtocol(port="80")),
-        folder="Shared",
+        folder="Texas",
         device="fw01"
     )
 except ValueError as e:
@@ -150,7 +150,7 @@ tcp_dict = {
         }
     },
     "description": "Web service ports",
-    "folder": "Shared",
+    "folder": "Texas",
     "tag": ["web", "production"]
 }
 
@@ -172,7 +172,7 @@ tcp_service = ServiceCreateModel(
         )
     ),
     description="Web service ports",
-    folder="Shared",
+    folder="Texas",
     tag=["web", "production"]
 )
 

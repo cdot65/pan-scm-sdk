@@ -65,7 +65,7 @@ class TestAddressGroupCreateModel:
 
     def test_address_group_create_model_missing_required_fields_error(self):
         """Test validation when required fields are missing."""
-        data = {"static": ["address1", "address2"], "folder": "Shared"}
+        data = {"static": ["address1", "address2"], "folder": "Texas"}
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupCreateModel(**data)
         error_msg = str(exc_info.value)
@@ -200,7 +200,7 @@ class TestAddressGroupUpdateModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-address-group",
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupUpdateModel(**data)

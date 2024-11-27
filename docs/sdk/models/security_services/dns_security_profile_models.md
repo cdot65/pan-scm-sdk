@@ -61,7 +61,7 @@ For create operations, exactly one container type must be specified:
 try:
     profile_dict = {
         "name": "invalid-profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01"  # Can't specify both folder and device
     }
     profile = DNSSecurityProfile(api_client)
@@ -75,7 +75,7 @@ from scm.models.security import DNSSecurityProfileCreateModel
 try:
     profile = DNSSecurityProfileCreateModel(
         name="invalid-profile",
-        folder="Shared",
+        folder="Texas",
         device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
@@ -104,7 +104,7 @@ try:
     }
     profile_dict = {
         "name": "test-profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "botnet_domains": {
             "lists": [list_dict]
         }
@@ -142,7 +142,7 @@ from scm.config.security import DNSSecurityProfile
 profile_dict = {
     "name": "basic-profile",
     "description": "Basic DNS security profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "botnet_domains": {
         "dns_security_categories": [
             {
@@ -169,7 +169,7 @@ from scm.models.security import (
 profile = DNSSecurityProfileCreateModel(
     name="basic-profile",
     description="Basic DNS security profile",
-    folder="Shared",
+    folder="Texas",
     botnet_domains=BotnetDomainsModel(
         dns_security_categories=[
             DNSSecurityCategoryEntryModel(
@@ -198,7 +198,7 @@ response = profile.create(payload)
 profile_dict = {
     "name": "advanced-profile",
     "description": "Advanced DNS security profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "botnet_domains": {
         "lists": [
             {
@@ -230,7 +230,7 @@ from scm.models.security import (
 profile = DNSSecurityProfileCreateModel(
     name="advanced-profile",
     description="Advanced DNS security profile",
-    folder="Shared",
+    folder="Texas",
     botnet_domains=BotnetDomainsModel(
         lists=[
             ListEntryBaseModel(

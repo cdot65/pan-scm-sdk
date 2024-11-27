@@ -50,13 +50,13 @@ class TestTagList(TestTagBase):
                 TagResponseFactory.with_color(
                     name="TestTag1",
                     color="Red",
-                    folder="Shared",
+                    folder="Texas",
                     comments="First test tag",
                 ).model_dump(),
                 TagResponseFactory.with_color(
                     name="TestTag2",
                     color="Blue",
-                    folder="Shared",
+                    folder="Texas",
                     comments="Second test tag",
                 ).model_dump(),
             ],
@@ -66,13 +66,13 @@ class TestTagList(TestTagBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_tags = self.client.list(folder="Shared")
+        existing_tags = self.client.list(folder="Texas")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/tags",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
         assert isinstance(existing_tags, list)
@@ -92,17 +92,17 @@ class TestTagList(TestTagBase):
                 TagResponseFactory.with_color(
                     name="TestTag1",
                     color="Red",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(),
                 TagResponseFactory.with_color(
                     name="TestTag2",
                     color="Blue",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(),
                 TagResponseFactory.with_color(
                     name="TestTag3",
                     color="Green",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(),
             ],
             "offset": 0,
@@ -112,13 +112,13 @@ class TestTagList(TestTagBase):
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        filtered_tags = self.client.list(folder="Shared", **filters)
+        filtered_tags = self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/tags",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -133,7 +133,7 @@ class TestTagList(TestTagBase):
 
         # Don't set up any mock response so validation runs first
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", **filters)
+            self.client.list(folder="Texas", **filters)
 
         assert exc_info.value.message == "Invalid response format: expected dictionary"
         assert exc_info.value.error_code == "E003"
@@ -148,7 +148,7 @@ class TestTagList(TestTagBase):
         filters = {"colors": "Red"}  # String instead of list
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", **filters)
+            self.client.list(folder="Texas", **filters)
 
         assert exc_info.value.message == "'colors' filter must be a list"
         assert exc_info.value.http_status_code == 400
@@ -174,7 +174,7 @@ class TestTagList(TestTagBase):
     def test_list_container_multiple_error(self):
         """Test validation of container parameters."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", snippet="TestSnippet")
+            self.client.list(folder="Texas", snippet="TestSnippet")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 400 - API error: E003" in error_msg
@@ -184,7 +184,7 @@ class TestTagList(TestTagBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
@@ -193,7 +193,7 @@ class TestTagList(TestTagBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
@@ -202,7 +202,7 @@ class TestTagList(TestTagBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
@@ -216,7 +216,7 @@ class TestTagList(TestTagBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
     def test_list_filters_invalid_color_value(self):
         """Test listing tags with an invalid color value in the 'colors' filter."""
@@ -230,12 +230,12 @@ class TestTagList(TestTagBase):
                 TagResponseFactory.with_color(
                     name="TestTag1",
                     color="Red",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(),
                 TagResponseFactory.with_color(
                     name="TestTag2",
                     color="Blue",
-                    folder="Shared",
+                    folder="Texas",
                 ).model_dump(),
             ],
             "offset": 0,
@@ -246,7 +246,7 @@ class TestTagList(TestTagBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared", **filters)
+            self.client.list(folder="Texas", **filters)
 
         error_msg = exc_info.value.message
         assert "Invalid color 'InvalidColor'" in error_msg
@@ -263,7 +263,7 @@ class TestTagList(TestTagBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Bad Request"
         assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Request"
@@ -274,7 +274,7 @@ class TestTagCreate(TestTagBase):
 
     def test_create_valid_tag(self):
         """Test creating a tag with valid data."""
-        test_tag = TagCreateApiFactory.with_color(color="Red", folder="Shared")
+        test_tag = TagCreateApiFactory.with_color(color="Red", folder="Texas")
         mock_response = TagResponseFactory.from_request(test_tag)
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
@@ -302,7 +302,7 @@ class TestTagCreate(TestTagBase):
     def test_create_multiple_containers(self):
         """Test creating a tag with multiple containers."""
         test_tag_data = TagCreateApiFactory.build().model_dump()
-        test_tag_data["folder"] = "Shared"
+        test_tag_data["folder"] = "Texas"
         test_tag_data["snippet"] = "TestSnippet"
 
         with pytest.raises(ValidationError) as exc_info:
@@ -336,7 +336,7 @@ class TestTagCreate(TestTagBase):
         self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.create({"name": "TestTag", "color": "Red", "folder": "Shared"})
+            self.client.create({"name": "TestTag", "color": "Red", "folder": "Texas"})
 
     def test_create_server_error(self):
         """Test generic exception handling in create method."""
@@ -348,7 +348,7 @@ class TestTagCreate(TestTagBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.create({"name": "TestTag", "color": "Red", "folder": "Shared"})
+            self.client.create({"name": "TestTag", "color": "Red", "folder": "Texas"})
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -363,7 +363,7 @@ class TestTagGet(TestTagBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestTag",
             color="Red",
-            folder="Shared",
+            folder="Texas",
         )
 
         self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
@@ -589,7 +589,7 @@ class TestTagFetch(TestTagBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestTag",
             color="Red",
-            folder="Shared",
+            folder="Texas",
         )
 
         mock_response_data = mock_response_model.model_dump()
@@ -631,7 +631,7 @@ class TestTagFetch(TestTagBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="NonexistentTag", folder="Shared")
+            self.client.fetch(name="NonexistentTag", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Tag not found"
         assert (
@@ -641,7 +641,7 @@ class TestTagFetch(TestTagBase):
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert '"name" is not allowed to be empty' in error_msg
@@ -672,7 +672,7 @@ class TestTagFetch(TestTagBase):
     def test_fetch_multiple_containers_provided_error(self):
         """Test fetching when multiple container parameters are provided."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="TestTag", folder="Shared", snippet="TestSnippet")
+            self.client.fetch(name="TestTag", folder="Texas", snippet="TestSnippet")
 
         error_msg = exc_info.value.message
         assert (
@@ -685,7 +685,7 @@ class TestTagFetch(TestTagBase):
         self.mock_scm.get.return_value = {"unexpected": "format"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="TestTag", folder="Shared")
+            self.client.fetch(name="TestTag", folder="Texas")
 
         error_msg = exc_info.value.message
         assert "Invalid response format: missing 'id' field" in error_msg
@@ -700,14 +700,14 @@ class TestTagFetch(TestTagBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="TestTag", folder="Shared")
+            self.client.fetch(name="TestTag", folder="Texas")
 
     def test_fetch_response_invalid_format(self):
         """Test fetching when the API returns a response that is not a dictionary."""
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="TestTag", folder="Shared")
+            self.client.fetch(name="TestTag", folder="Texas")
 
         error_msg = exc_info.value.message
         assert "Invalid response format: expected dictionary" in error_msg

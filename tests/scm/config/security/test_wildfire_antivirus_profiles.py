@@ -74,7 +74,7 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
         """Test validation when multiple containers are provided."""
         data = {
             "name": "InvalidProfile",
-            "folder": "Shared",
+            "folder": "Texas",
             "device": "Device1",
             "rules": [
                 {
@@ -664,7 +664,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             3. Asserts that ObjectNotPresentError is raised
         """
         object_name = "NonExistent"
-        folder_name = "Shared"
+        folder_name = "Texas"
 
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
@@ -698,7 +698,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             2. Verifies MissingQueryParameterError is raised
         """
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
         assert (
             "{'field': 'name', 'error': '\"name\" is not allowed to be empty'} - HTTP error: 400 - API error: E003"
             in str(exc_info.value)
@@ -727,14 +727,14 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         # Test multiple containers provided
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
-                name="test-profile", folder="Shared", snippet="TestSnippet"
+                name="test-profile", folder="Texas", snippet="TestSnippet"
             )
         assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
 
     def test_fetch_object_unexpected_response_format(self):
         """Test fetching an object when the API returns an unexpected format."""
         group_name = "TestGroup"
-        folder_name = "Shared"
+        folder_name = "Texas"
 
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
@@ -759,7 +759,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Input Format Mismatch"
         assert (
@@ -772,7 +772,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -782,12 +782,12 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         """Test that InvalidObjectError is raised when response is missing 'id' field."""
         self.mock_scm.get.return_value = {  # noqa
             "name": "test-profile",
-            "folder": "Shared",
+            "folder": "Texas",
             "rules": [],
         }  # Missing 'id' field
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -804,7 +804,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
 
 class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
@@ -825,13 +825,13 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        self.client.list(folder="Shared", **filters)
+        self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/wildfire-anti-virus-profiles",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -871,7 +871,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Invalid Object"
         assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
@@ -880,7 +880,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/wildfire-anti-virus-profiles",
             params={
-                "folder": "Shared",
+                "folder": "Texas",
                 "limit": 10000,
             },
         )
@@ -914,16 +914,16 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
 
         # Test invalid rules filter (string instead of list)
         with pytest.raises(InvalidObjectError):
-            self.client.list(folder="Shared", rules="rule1")
+            self.client.list(folder="Texas", rules="rule1")
 
         # Test invalid rules filter (dict instead of list)
         with pytest.raises(InvalidObjectError):
-            self.client.list(folder="Shared", rules={"rule": "rule1"})
+            self.client.list(folder="Texas", rules={"rule": "rule1"})
 
         # Test that valid list filters pass validation
         try:
             self.client.list(
-                folder="Shared",
+                folder="Texas",
                 rules=["rule1"],
             )
         except InvalidObjectError:
@@ -934,7 +934,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -945,7 +945,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.return_value = {"invalid": "data"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -956,7 +956,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -973,7 +973,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
 
 # -------------------- End of Test Classes --------------------

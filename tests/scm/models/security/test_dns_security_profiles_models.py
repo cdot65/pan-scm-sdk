@@ -227,7 +227,7 @@ class TestDNSSecurityProfileResponseModel:
         model = DNSSecurityProfileResponseModel(**data)
         assert isinstance(model.id, UUID)
         assert model.name.startswith("dns_security_profile_")
-        assert model.folder == "Shared"
+        assert model.folder == "Texas"
         assert model.botnet_domains is not None
 
     def test_dns_security_profile_response_model_from_request(self):

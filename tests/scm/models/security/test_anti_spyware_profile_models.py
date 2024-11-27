@@ -162,7 +162,7 @@ class TestAntiSpywareProfileResponseModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "TestProfile",
-            "folder": "Shared",
+            "folder": "Texas",
             "rules": [
                 {
                     "name": "TestRule",
@@ -182,7 +182,7 @@ class TestAntiSpywareProfileResponseModel:
         data = {
             "id": "invalid-uuid",
             "name": "TestProfile",
-            "folder": "Shared",
+            "folder": "Texas",
             "rules": [],
         }
         with pytest.raises(ValidationError) as exc_info:

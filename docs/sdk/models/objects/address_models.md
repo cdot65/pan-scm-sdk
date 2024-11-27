@@ -59,7 +59,7 @@ try:
         name="invalid-address",
         ip_netmask="192.168.1.0/24",
         fqdn="example.com",
-        folder="Shared"
+        folder="Texas"
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
@@ -68,7 +68,7 @@ except ValueError as e:
 try:
     address = AddressCreateModel(
         name="invalid-address",
-        folder="Shared"
+        folder="Texas"
     )
 except ValueError as e:
     print(e)  # "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
@@ -90,7 +90,7 @@ try:
     address = AddressCreateModel(
         name="invalid-address",
         ip_netmask="192.168.1.0/24",
-        folder="Shared",
+        folder="Texas",
         device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
@@ -113,7 +113,7 @@ try:
     address = AddressCreateModel(
         name="invalid-address",
         ip_netmask="192.168.1.0/24",
-        folder="Shared",
+        folder="Texas",
         tag=["web", "web"]  # Duplicate tags not allowed
     )
 except ValueError as e:
@@ -123,7 +123,7 @@ except ValueError as e:
 address = AddressCreateModel(
     name="valid-address",
     ip_netmask="192.168.1.0/24",
-    folder="Shared",
+    folder="Texas",
     tag="web"  # Will be converted to ["web"]
 )
 ```
@@ -146,7 +146,7 @@ address_dict = {
     "name": "web-server",
     "description": "Primary web server",
     "ip_netmask": "192.168.1.100/32",
-    "folder": "Shared",
+    "folder": "Texas",
     "tag": ["web", "production"]
 }
 
@@ -160,7 +160,7 @@ address_obj = AddressCreateModel(
     name="web-server",
     description="Primary web server",
     ip_netmask="192.168.1.100/32",
-    folder="Shared",
+    folder="Texas",
     tag=["web", "production"]
 )
 
@@ -182,7 +182,7 @@ fqdn_dict = {
     "name": "example-domain",
     "description": "Example domain address",
     "fqdn": "www.example.com",
-    "folder": "Shared",
+    "folder": "Texas",
     "tag": ["web", "domain"]
 }
 
@@ -195,7 +195,7 @@ fqdn_address = AddressCreateModel(
     name="example-domain",
     description="Example domain address",
     fqdn="www.example.com",
-    folder="Shared",
+    folder="Texas",
     tag=["web", "domain"]
 )
 

@@ -193,7 +193,7 @@ class TestServiceCreateModel:
         """Test validation of name field constraints."""
         data = {
             "name": "invalid@name#",
-            "folder": "Shared",
+            "folder": "Texas",
             "protocol": {"tcp": {"port": "80"}},
         }
         with pytest.raises(ValidationError) as exc_info:
@@ -257,13 +257,13 @@ class TestServiceResponseModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-service",
             "protocol": {"tcp": {"port": "80"}},
-            "folder": "Shared",
+            "folder": "Texas",
         }
         model = ServiceResponseModel(**data)
         assert str(model.id) == data["id"]
         assert model.name == data["name"]
         assert model.protocol.tcp.port == "80"
-        assert model.folder == "Shared"
+        assert model.folder == "Texas"
 
     def test_service_response_model_optional_fields(self):
         """Test validation with optional fields in response."""

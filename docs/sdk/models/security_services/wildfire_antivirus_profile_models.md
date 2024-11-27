@@ -59,7 +59,7 @@ try:
             "name": "rule1",
             "direction": "both"
         }],
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01"  # Can't specify both folder and device
     }
     profile = WildfireAntivirusProfile(api_client)
@@ -105,7 +105,7 @@ try:
             "name": "rule1",
             "direction": "both"
         }],
-        folder="Shared"
+        folder="Texas"
     )
 except ValueError as e:
     print(e)  # "Invalid UUID format for 'id'"
@@ -128,7 +128,7 @@ from scm.config.security import WildfireAntivirusProfile
 profile_dict = {
     "name": "basic-profile",
     "description": "Basic WildFire profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "packet_capture": True,
     "rules": [{
         "name": "rule1",
@@ -153,7 +153,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
 profile = WildfireAvProfileCreateModel(
     name="basic-profile",
     description="Basic WildFire profile",
-    folder="Shared",
+    folder="Texas",
     packet_capture=True,
     rules=[
         WildfireAvRuleBase(
@@ -183,7 +183,7 @@ response = profile.create(payload)
 profile_dict = {
     "name": "advanced-profile",
     "description": "Profile with exceptions",
-    "folder": "Shared",
+    "folder": "Texas",
     "packet_capture": True,
     "rules": [{
         "name": "rule1",
@@ -218,7 +218,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
 profile = WildfireAvProfileCreateModel(
     name="advanced-profile",
     description="Profile with exceptions",
-    folder="Shared",
+    folder="Texas",
     packet_capture=True,
     rules=[
         WildfireAvRuleBase(

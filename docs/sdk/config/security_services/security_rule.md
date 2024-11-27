@@ -78,7 +78,7 @@ security_rule = SecurityRule(client)
 try:
     rule_data = {
         "name": "allow-web",
-        "folder": "Shared",
+        "folder": "Texas",
         "from_": ["trust"],
         "to": ["untrust"],
         "source": ["any"],
@@ -111,7 +111,7 @@ except InvalidObjectError as e:
 try:
     rule_data = {
         "name": "secure-web",
-        "folder": "Shared",
+        "folder": "Texas",
         "from_": ["trust"],
         "to": ["untrust"],
         "source": ["internal-subnet"],
@@ -173,7 +173,7 @@ try:
     # First fetch the existing rule as a Pydantic model
     fetched_rule = security_rule.fetch(
         name="allow-web",
-        folder="Shared",
+        folder="Texas",
         rulebase="pre"
     )
 
@@ -275,27 +275,27 @@ following kwargs:
 try:
     # List all rules in a folder's pre-rulebase
     rules = security_rule.list(
-        folder="Shared",
+        folder="Texas",
         rulebase="pre"
     )
 
     # List only allow rules
     allow_rules = security_rule.list(
-        folder="Shared",
+        folder="Texas",
         rulebase="pre",
         action=['allow']
     )
 
     # List rules with specific applications
     web_rules = security_rule.list(
-        folder="Shared",
+        folder="Texas",
         rulebase="pre",
         application=['web-browsing', 'ssl']
     )
 
     # List rules with specific zones
     zone_rules = security_rule.list(
-        folder="Shared",
+        folder="Texas",
         rulebase="pre",
         from_=['trust'],
         to_=['untrust']
@@ -303,14 +303,14 @@ try:
 
     # List rules with security profiles
     secure_rules = security_rule.list(
-        folder="Shared",
+        folder="Texas",
         rulebase="pre",
         profile_setting=['strict-security']
     )
 
     # Combine multiple filters
     filtered_rules = security_rule.list(
-        folder="Shared",
+        folder="Texas",
         rulebase="pre",
         action=['allow'],
         application=['web-browsing'],
@@ -344,7 +344,7 @@ The `fetch()` method retrieves a single security rule by name from a specific co
 try:
     rule = security_rule.fetch(
         name="allow-web",
-        folder="Shared",
+        folder="Texas",
         rulebase="pre"
     )
 
@@ -395,7 +395,7 @@ try:
         create_data = {
             "name": "test-web-access",
             "description": "Test web access rule",
-            "folder": "Shared",
+            "folder": "Texas",
             "from_": ["trust"],
             "to": ["untrust"],
             "source": ["internal-net"],
@@ -423,7 +423,7 @@ try:
         try:
             fetched_rule = security_rule.fetch(
                 name="test-web-access",
-                folder="Shared",
+                folder="Texas",
                 rulebase="pre"
             )
             print(f"Found rule: {fetched_rule.name}")

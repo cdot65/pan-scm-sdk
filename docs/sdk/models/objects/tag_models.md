@@ -52,7 +52,7 @@ from scm.config.objects import Tag
 try:
     tag_dict = {
         "name": "invalid-tag",
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01"  # Can't specify both folder and device
     }
     tag = Tag(api_client)
@@ -66,7 +66,7 @@ from scm.models.objects import TagCreateModel
 try:
     tag = TagCreateModel(
         name="invalid-tag",
-        folder="Shared",
+        folder="Texas",
         device="fw01"
     )
 except ValueError as e:
@@ -88,7 +88,7 @@ Colors must be one of the predefined values:
 try:
     tag_dict = {
         "name": "invalid-tag",
-        "folder": "Shared",
+        "folder": "Texas",
         "color": "Invalid Color"  # Must be a valid color name
     }
     response = tag.create(tag_dict)
@@ -99,7 +99,7 @@ except ValueError as e:
 try:
     tag = TagCreateModel(
         name="invalid-tag",
-        folder="Shared",
+        folder="Texas",
         color="Invalid Color"
     )
 except ValueError as e:
@@ -122,7 +122,7 @@ tag_dict = {
     "name": "production",
     "color": "Red",
     "comments": "Production environment resources",
-    "folder": "Shared"
+    "folder": "Texas"
 }
 
 tag = Tag(api_client)
@@ -135,7 +135,7 @@ tag = TagCreateModel(
     name="production",
     color="Red",
     comments="Production environment resources",
-    folder="Shared"
+    folder="Texas"
 )
 
 payload = tag.model_dump(exclude_unset=True)

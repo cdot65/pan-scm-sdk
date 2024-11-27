@@ -54,12 +54,12 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
             "data": [
                 DecryptionProfileResponseFactory(
                     name="profile1",
-                    folder="Shared",
+                    folder="Texas",
                     ssl_protocol_settings=SSLProtocolSettingsFactory(),
                 ).model_dump(),
                 DecryptionProfileResponseFactory(
                     name="profile2",
-                    folder="Shared",
+                    folder="Texas",
                     ssl_forward_proxy=SSLForwardProxyFactory(),
                 ).model_dump(),
             ],
@@ -69,13 +69,13 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Shared")
+        existing_objects = self.client.list(folder="Texas")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/decryption-profiles",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
         assert isinstance(existing_objects, list)
@@ -131,13 +131,13 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        self.client.list(folder="Shared", **filters)
+        self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/decryption-profiles",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -147,7 +147,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
             "data": [
                 DecryptionProfileResponseFactory(
                     name="profile1",
-                    folder="Shared",
+                    folder="Texas",
                     ssl_protocol_settings=SSLProtocolSettingsFactory(),
                 ).model_dump()
             ]
@@ -155,7 +155,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             types=[],
         )
         assert len(filtered_objects) == 0
@@ -177,7 +177,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -188,7 +188,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -201,7 +201,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -218,7 +218,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
 
 class TestDecryptionProfileCreate(TestDecryptionProfileBase):
@@ -252,7 +252,7 @@ class TestDecryptionProfileCreate(TestDecryptionProfileBase):
             self.client.create(
                 {
                     "name": "test",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "ssl_protocol_settings": {
                         "min_version": "tls1-0",
                         "max_version": "tls1-2",
@@ -280,7 +280,7 @@ class TestDecryptionProfileCreate(TestDecryptionProfileBase):
         """Test that HTTPError with response content triggers proper error handling."""
         test_data = {
             "name": "test-profile",
-            "folder": "Shared",
+            "folder": "Texas",
             "ssl_protocol_settings": {
                 "min_version": "tls1-0",
                 "max_version": "tls1-2",
@@ -310,7 +310,7 @@ class TestDecryptionProfileCreate(TestDecryptionProfileBase):
             self.client.create(
                 {
                     "name": "test-profile",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "ssl_protocol_settings": {
                         "min_version": "tls1-0",
                         "max_version": "tls1-2",
@@ -346,7 +346,7 @@ class TestDecryptionProfileGet(TestDecryptionProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -679,7 +679,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="nonexistent", folder="Shared")
+            self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -689,7 +689,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert '"name" is not allowed to be empty' in error_msg
@@ -719,7 +719,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-profile",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -736,7 +736,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
@@ -748,7 +748,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -757,7 +757,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""
         mock_response = {
             "name": "test-profile",
-            "folder": "Shared",
+            "folder": "Texas",
             "ssl_protocol_settings": {
                 "min_version": "tls1-0",
                 "max_version": "tls1-2",
@@ -767,7 +767,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -779,7 +779,7 @@ class TestDecryptionProfileFetch(TestDecryptionProfileBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test123", folder="Shared")
+            self.client.fetch(name="test123", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg

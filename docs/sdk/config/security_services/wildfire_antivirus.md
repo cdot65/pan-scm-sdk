@@ -80,7 +80,7 @@ try:
     profile_data = {
         "name": "basic-profile",
         "description": "Basic WildFire profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "rules": [
             {
                 "name": "basic-rule",
@@ -116,7 +116,7 @@ try:
     profile_data = {
         "name": "advanced-profile",
         "description": "Advanced WildFire profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "packet_capture": True,
         "rules": [
             {
@@ -191,7 +191,7 @@ try:
     # First fetch the existing profile
     profile = wildfire_antivirus_profile.fetch(
         name="basic-profile",
-        folder="Shared"
+        folder="Texas"
     )
 
     # Update the profile attributes using Pydantic model
@@ -248,12 +248,12 @@ using the following kwargs:
 try:
     # List all profiles in a folder
     profiles = wildfire_antivirus_profile.list(
-        folder="Shared"
+        folder="Texas"
     )
 
     # List profiles with specific rules
     rule_profiles = wildfire_antivirus_profile.list(
-        folder="Shared",
+        folder="Texas",
         rules=['basic-rule', 'upload-rule']
     )
 
@@ -287,7 +287,7 @@ Pydantic model.
 try:
     profile = wildfire_antivirus_profile.fetch(
         name="basic-profile",
-        folder="Shared"
+        folder="Texas"
     )
 
     print(f"Found profile: {profile.name}")
@@ -338,7 +338,7 @@ try:
         create_data = {
             "name": "test-profile",
             "description": "Test WildFire profile",
-            "folder": "Shared",
+            "folder": "Texas",
             "rules": [
                 {
                     "name": "test-rule",
@@ -357,7 +357,7 @@ try:
         try:
             fetched_profile = wildfire_antivirus_profile.fetch(
                 name="test-profile",
-                folder="Shared"
+                folder="Texas"
             )
             print(f"Found profile: {fetched_profile.name}")
 

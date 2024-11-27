@@ -128,7 +128,7 @@ class AddressCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"address_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = [
         "test-tag",
         "environment-prod",
@@ -217,7 +217,7 @@ class AddressResponseFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"address_{n}")
     description = factory.Faker("sentence")
     tag = ["response-tag"]
-    folder = "Shared"
+    folder = "Texas"
 
     # Address types default to None
     ip_netmask = None
@@ -276,7 +276,7 @@ class AddressCreateModelFactory(factory.DictFactory):
         """Return a data dict without the required address type fields."""
         return cls(
             name="Test123",
-            folder="Shared",
+            folder="Texas",
             # No address type fields provided
         )
 
@@ -285,7 +285,7 @@ class AddressCreateModelFactory(factory.DictFactory):
         """Return a data dict multiple type fields."""
         return cls(
             name="Test123",
-            folder="Shared",
+            folder="Texas",
             ip_netmask="1.1.1.1/32",
             fqdn="example.com",
         )
@@ -303,7 +303,7 @@ class AddressCreateModelFactory(factory.DictFactory):
         """Return a data dict multiple containers."""
         return cls(
             name="Test123",
-            folder="Shared",
+            folder="Texas",
             snippet="this will fail",
             fqdn="example.com",
         )
@@ -325,7 +325,7 @@ class AddressUpdateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"address_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = [
         "test-tag",
         "environment-prod",
@@ -338,7 +338,7 @@ class AddressUpdateModelFactory(factory.DictFactory):
         """Return a data dict without the required address type fields."""
         return cls(
             name="Test123",
-            folder="Shared",
+            folder="Texas",
             # No address type fields provided
         )
 
@@ -347,7 +347,7 @@ class AddressUpdateModelFactory(factory.DictFactory):
         """Return a data dict multiple type fields."""
         return cls(
             name="Test123",
-            folder="Shared",
+            folder="Texas",
             ip_netmask="1.1.1.1/32",
             fqdn="example.com",
         )
@@ -365,7 +365,7 @@ class AddressUpdateModelFactory(factory.DictFactory):
         """Return a data dict multiple containers."""
         return cls(
             name="Test123",
-            folder="Shared",
+            folder="Texas",
             snippet="this will fail",
             fqdn="example.com",
         )
@@ -405,7 +405,7 @@ class AddressGroupCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"address_group_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = ["test-tag", "environment-prod"]
 
     # Address group types default to None
@@ -491,7 +491,7 @@ class AddressGroupResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"address_group_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = ["response-tag"]
 
     # Address group types default to None
@@ -537,7 +537,7 @@ class AddressGroupCreateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"address_group_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = ["test-tag", "environment-prod"]
 
     # Group type fields default to None
@@ -549,7 +549,7 @@ class AddressGroupCreateModelFactory(factory.DictFactory):
         """Return a data dict without the required group type fields."""
         return cls(
             name="TestAddressGroup",
-            folder="Shared",
+            folder="Texas",
             # No group type fields provided
         )
 
@@ -558,7 +558,7 @@ class AddressGroupCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple type fields."""
         return cls(
             name="TestAddressGroup",
-            folder="Shared",
+            folder="Texas",
             static=["address1", "address2"],
             dynamic={"filter": "'tag1 and tag2'"},
         )
@@ -577,7 +577,7 @@ class AddressGroupCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple containers."""
         return cls(
             name="TestAddressGroup",
-            folder="Shared",
+            folder="Texas",
             snippet="this will fail",
             static=["address1", "address2"],
         )
@@ -588,7 +588,7 @@ class AddressGroupCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestAddressGroup",
             static=["address1", "address2"],
-            folder="Shared",
+            folder="Texas",
             tag=["Python", "Automation"],
             description="This is a test static address group",
         )
@@ -599,7 +599,7 @@ class AddressGroupCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestAddressGroup",
             dynamic={"filter": "'tag1 and tag2'"},
-            folder="Shared",
+            folder="Texas",
             tag=["Python", "Automation"],
             description="This is a test dynamic address group",
         )
@@ -623,7 +623,7 @@ class AddressGroupUpdateModelFactory(factory.DictFactory):
         return cls(
             id="12345678-1234-5678-1234-567812345678",
             name="TestAddressGroup",
-            folder="Shared",
+            folder="Texas",
             # No group type fields provided
         )
 
@@ -633,7 +633,7 @@ class AddressGroupUpdateModelFactory(factory.DictFactory):
         return cls(
             id="12345678-1234-5678-1234-567812345678",
             name="TestAddressGroup",
-            folder="Shared",
+            folder="Texas",
             static=["address1", "address2"],
             dynamic={"filter": "'tag1 and tag2'"},
         )
@@ -645,7 +645,7 @@ class AddressGroupUpdateModelFactory(factory.DictFactory):
             id="12345678-1234-5678-1234-567812345678",
             name="TestAddressGroup",
             static=["address1", "address2"],
-            folder="Shared",
+            folder="Texas",
             tag=["Python", "Automation"],
             description="This is a test static address group",
         )
@@ -657,7 +657,7 @@ class AddressGroupUpdateModelFactory(factory.DictFactory):
             id="12345678-1234-5678-1234-567812345678",
             name="TestAddressGroup",
             dynamic={"filter": "'tag1 and tag2'"},
-            folder="Shared",
+            folder="Texas",
             tag=["Python", "Automation"],
             description="This is a test dynamic address group",
         )
@@ -905,7 +905,7 @@ class ApplicationGroupCreateApiFactory(factory.Factory):
         "office365-consumer-access",
         "office365-enterprise-access",
     ]
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
 
@@ -974,7 +974,7 @@ class ApplicationGroupResponseFactory(factory.Factory):
         "office365-consumer-access",
         "office365-enterprise-access",
     ]
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
 
@@ -1011,7 +1011,7 @@ class ApplicationGroupCreateModelFactory(factory.DictFactory):
         "office365-consumer-access",
         "office365-enterprise-access",
     ]
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
 
@@ -1021,7 +1021,7 @@ class ApplicationGroupCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestApplicationGroup",
             members=["app1", "app2"],
-            folder="Shared",
+            folder="Texas",
         )
 
     @classmethod
@@ -1030,7 +1030,7 @@ class ApplicationGroupCreateModelFactory(factory.DictFactory):
         return cls(
             name="@invalid-name#",
             members=["app1"],
-            folder="Shared",
+            folder="Texas",
         )
 
     @classmethod
@@ -1039,7 +1039,7 @@ class ApplicationGroupCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestGroup",
             members=[],
-            folder="Shared",
+            folder="Texas",
         )
 
     @classmethod
@@ -1057,7 +1057,7 @@ class ApplicationGroupCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestGroup",
             members=["app1"],
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
         )
 
@@ -1158,7 +1158,7 @@ class ServiceCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"service_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
     tag = ["test-tag", "environment-prod"]
@@ -1208,7 +1208,7 @@ class ServiceCreateApiFactory(factory.Factory):
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
         """Return an instance with multiple containers (should fail validation)."""
-        return cls(folder="Shared", snippet="TestSnippet", device=None, **kwargs)
+        return cls(folder="Texas", snippet="TestSnippet", device=None, **kwargs)
 
 
 class ServiceUpdateApiFactory(factory.Factory):
@@ -1257,7 +1257,7 @@ class ServiceUpdateApiFactory(factory.Factory):
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
         """Return an instance with multiple containers."""
-        return cls(folder="Shared", snippet="TestSnippet", device=None, **kwargs)
+        return cls(folder="Texas", snippet="TestSnippet", device=None, **kwargs)
 
 
 class ServiceResponseFactory(factory.Factory):
@@ -1269,7 +1269,7 @@ class ServiceResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"service_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
     tag = ["response-tag"]
@@ -1331,7 +1331,7 @@ class ServiceCreateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"service_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
     tag = ["test-tag", "environment-prod"]
@@ -1362,7 +1362,7 @@ class ServiceCreateModelFactory(factory.DictFactory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return a data dict with multiple containers."""
         return cls(
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             protocol={"tcp": {"port": "80,443"}},
             device=None,
@@ -1413,7 +1413,7 @@ class ServiceUpdateModelFactory(factory.DictFactory):
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
         """Return a data dict with multiple containers."""
-        return cls(folder="Shared", snippet="TestSnippet", device=None, **kwargs)
+        return cls(folder="Texas", snippet="TestSnippet", device=None, **kwargs)
 
     @classmethod
     def build_valid(cls, **kwargs):
@@ -1502,7 +1502,7 @@ class ServiceGroupCreateApiFactory(factory.Factory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return an instance with multiple containers (should fail validation)."""
         return cls(
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             device=None,
             members=["test1", "test1"],
@@ -1586,7 +1586,7 @@ class ServiceGroupUpdateApiFactory(factory.Factory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return an instance with multiple containers (should fail validation)."""
         return cls(
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             device=None,
             members=["test1", "test1"],
@@ -1670,7 +1670,7 @@ class ServiceGroupResponseFactory(factory.Factory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return an instance with multiple containers (should fail validation)."""
         return cls(
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             device=None,
             members=["test1", "test1"],
@@ -1720,7 +1720,7 @@ class ServiceGroupCreateModelFactory(factory.DictFactory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return a data dict with multiple containers."""
         return cls(
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             device=None,
             members=["test1", "test1"],
@@ -1770,7 +1770,7 @@ class ServiceGroupUpdateModelFactory(factory.DictFactory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return a data dict with multiple containers."""
         return cls(
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             device=None,
             members=["test1", "test1"],
@@ -1801,12 +1801,12 @@ class TagCreateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"tag_{n}")
     comments = factory.Faker("sentence")
     color = None  # Default to None; can be set using with_color()
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
 
     @classmethod
-    def with_folder(cls, folder="Shared", **kwargs):
+    def with_folder(cls, folder="Texas", **kwargs):
         """Create a tag with a specific folder."""
         return cls(folder=folder, snippet=None, device=None, **kwargs)
 
@@ -1853,12 +1853,12 @@ class TagResponseFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"tag_{n}")
     comments = factory.Faker("sentence")
     color = None
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
 
     @classmethod
-    def with_folder(cls, folder="Shared", **kwargs):
+    def with_folder(cls, folder="Texas", **kwargs):
         """Create a response model with a specific folder."""
         return cls(folder=folder, snippet=None, device=None, **kwargs)
 
@@ -1893,7 +1893,7 @@ class TagCreateModelFactory(factory.DictFactory):
     name = factory.Sequence(lambda n: f"tag_{n}")
     comments = factory.Faker("sentence")
     color = "Red"  # Default color; can be overridden
-    folder = "Shared"
+    folder = "Texas"
     snippet = None
     device = None
 
@@ -1914,7 +1914,7 @@ class TagCreateModelFactory(factory.DictFactory):
             name="InvalidColorTag",
             comments="This tag has an invalid color",
             color="InvalidColor",
-            folder="Shared",
+            folder="Texas",
         )
 
     @classmethod
@@ -1922,7 +1922,7 @@ class TagCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple containers (should fail validation)."""
         return cls(
             name="TestTag",
-            folder="Shared",
+            folder="Texas",
             snippet="MySnippet",
             color="Blue",
         )
@@ -2059,7 +2059,7 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     cloud_inline_analysis = False
     rules = factory.LazyAttribute(lambda _: [AntiSpywareRuleBaseFactory()])
     threat_exception = factory.LazyAttribute(
@@ -2127,7 +2127,7 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     cloud_inline_analysis = False
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
     threat_exception = factory.List(
@@ -2159,7 +2159,7 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     cloud_inline_analysis = False
     rules = []
 
@@ -2168,7 +2168,7 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="valid-profile-name",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -2183,7 +2183,7 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="valid-profile-name",
-            folder="Shared",
+            folder="Texas",
             snippet="test123",
             rules=[
                 {
@@ -2199,7 +2199,7 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="@invalid-profile-name",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -2214,7 +2214,7 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid rules structure."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -2229,7 +2229,7 @@ class AntiSpywareProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid threat exceptions."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             rules=[],
             threat_exception=[
                 {
@@ -2253,7 +2253,7 @@ class AntiSpywareProfileUpdateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="valid-profile-name",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -2401,7 +2401,7 @@ class DecryptionProfileCreateApiFactory(factory.Factory):
         model = DecryptionProfileCreateModel
 
     name = factory.Sequence(lambda n: f"decryption_profile_{n}")
-    folder = "Shared"
+    folder = "Texas"
     ssl_protocol_settings = factory.SubFactory(SSLProtocolSettingsFactory)
     ssl_forward_proxy = factory.SubFactory(SSLForwardProxyFactory)
     ssl_inbound_proxy = factory.SubFactory(SSLInboundProxyFactory)
@@ -2466,7 +2466,7 @@ class DecryptionProfileResponseFactory(factory.Factory):
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"decryption_profile_{n}")
-    folder = "Shared"
+    folder = "Texas"
     ssl_protocol_settings = factory.SubFactory(SSLProtocolSettingsFactory)
     ssl_forward_proxy = factory.SubFactory(SSLForwardProxyFactory)
     ssl_inbound_proxy = factory.SubFactory(SSLInboundProxyFactory)
@@ -2496,14 +2496,14 @@ class DecryptionProfileCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for DecryptionProfileCreateModel validation testing."""
 
     name = factory.Sequence(lambda n: f"decryption_profile_{n}")
-    folder = "Shared"
+    folder = "Texas"
 
     @classmethod
     def build_valid(cls):
         """Return a valid data dict with all expected attributes."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             ssl_protocol_settings={
                 "min_version": "tls1-0",
                 "max_version": "tls1-2",
@@ -2515,7 +2515,7 @@ class DecryptionProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="@invalid-name#",
-            folder="Shared",
+            folder="Texas",
         )
 
     @classmethod
@@ -2523,7 +2523,7 @@ class DecryptionProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid SSL version configuration."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             ssl_protocol_settings={
                 "min_version": "tls1-2",
                 "max_version": "tls1-0",  # Invalid: max < min
@@ -2535,7 +2535,7 @@ class DecryptionProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple containers."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
         )
 
@@ -2621,7 +2621,7 @@ class SecurityRuleCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"security_rule_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     disabled = False
     tag = ["test-tag", "environment-prod"]
 
@@ -2730,7 +2730,7 @@ class SecurityRuleResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"security_rule_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = ["response-tag"]
 
     # Default lists
@@ -2816,7 +2816,7 @@ class SecurityRuleCreateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"security_rule_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     tag = ["test-tag"]
     action = "allow"
 
@@ -2825,7 +2825,7 @@ class SecurityRuleCreateModelFactory(factory.DictFactory):
         """Return a valid data dict with all expected attributes."""
         return cls(
             name="TestRule",
-            folder="Shared",
+            folder="Texas",
             action="allow",
             from_=["trust"],
             to_=["untrust"],
@@ -2838,7 +2838,7 @@ class SecurityRuleCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="@invalid-name#",
-            folder="Shared",
+            folder="Texas",
             action="allow",
         )
 
@@ -2847,7 +2847,7 @@ class SecurityRuleCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid action."""
         return cls(
             name="TestRule",
-            folder="Shared",
+            folder="Texas",
             action="invalid-action",
         )
 
@@ -2856,7 +2856,7 @@ class SecurityRuleCreateModelFactory(factory.DictFactory):
         """Return a data dict with duplicate list items."""
         return cls(
             name="TestRule",
-            folder="Shared",
+            folder="Texas",
             source=["any", "any"],
             tag=["tag1", "tag1"],
         )
@@ -3053,7 +3053,7 @@ class DNSSecurityProfileCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     botnet_domains = factory.SubFactory(BotnetDomainsFactory)
     snippet = None
     device = None
@@ -3105,7 +3105,7 @@ class DNSSecurityProfileResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     botnet_domains = factory.SubFactory(BotnetDomainsFactory)
     snippet = None
     device = None
@@ -3135,14 +3135,14 @@ class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
 
     @classmethod
     def build_valid(cls):
         """Return a valid data dict with all expected attributes."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             botnet_domains={
                 "dns_security_categories": [
                     {"name": "malware", "action": "block", "log_level": "high"}
@@ -3155,7 +3155,7 @@ class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="@invalid-name#",
-            folder="Shared",
+            folder="Texas",
         )
 
     @classmethod
@@ -3163,7 +3163,7 @@ class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple containers."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
         )
 
@@ -3172,7 +3172,7 @@ class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid action in botnet domains."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             botnet_domains={
                 "dns_security_categories": [
                     {"name": "malware", "action": "invalid-action"}
@@ -3318,7 +3318,7 @@ class VulnerabilityProfileCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
     threat_exception = None
 
@@ -3368,7 +3368,7 @@ class VulnerabilityProfileResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
     threat_exception = factory.List(
         [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
@@ -3399,7 +3399,7 @@ class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
 
     name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     rules = []
 
     @classmethod
@@ -3407,7 +3407,7 @@ class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
         """Return a valid data dict with all expected attributes."""
         return cls(
             name="valid-profile-name",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -3423,7 +3423,7 @@ class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple containers."""
         return cls(
             name="valid-profile-name",
-            folder="Shared",
+            folder="Texas",
             snippet="test123",
             rules=[
                 {
@@ -3440,7 +3440,7 @@ class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="@invalid-profile-name",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -3456,7 +3456,7 @@ class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid rules structure."""
         return cls(
             name="TestProfile",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -3481,7 +3481,7 @@ class VulnerabilityProfileUpdateModelFactory(factory.DictFactory):
         """Return a valid data dict for updating a profile."""
         return cls(
             name="valid-profile-name",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -3569,7 +3569,7 @@ class WildfireAvProfileCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     packet_capture = False
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
     mlav_exception = factory.List(
@@ -3627,7 +3627,7 @@ class WildfireAvProfileResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
     description = factory.Faker("sentence")
-    folder = "Shared"
+    folder = "Texas"
     packet_capture = False
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
     mlav_exception = factory.List(
@@ -3661,7 +3661,7 @@ class WildfireAvProfileCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for WildfireAvProfileCreateModel validation testing."""
 
     name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
-    folder = "Shared"
+    folder = "Texas"
     rules = []
 
     @classmethod
@@ -3669,7 +3669,7 @@ class WildfireAvProfileCreateModelFactory(factory.DictFactory):
         """Return a valid data dict with all expected attributes."""
         return cls(
             name="TestWildfireProfile",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -3684,7 +3684,7 @@ class WildfireAvProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with invalid name pattern."""
         return cls(
             name="@invalid-name#",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
@@ -3698,7 +3698,7 @@ class WildfireAvProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with multiple containers."""
         return cls(
             name="TestWildfireProfile",
-            folder="Shared",
+            folder="Texas",
             snippet="TestSnippet",
             rules=[
                 {
@@ -3726,7 +3726,7 @@ class WildfireAvProfileCreateModelFactory(factory.DictFactory):
         """Return a data dict with an invalid rule."""
         return cls(
             name="TestWildfireProfile",
-            folder="Shared",
+            folder="Texas",
             rules=[
                 {
                     "name": "TestRule",
