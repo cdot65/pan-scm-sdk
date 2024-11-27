@@ -34,7 +34,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when application data is invalid or malformed
+- `InvalidObjectError`: Raised when application data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when an application doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -48,7 +48,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Applications
 
@@ -125,7 +124,7 @@ except NotFoundError as e:
 
 ## Updating Applications
 
-The `update()` method allows you to modify existing applications.
+The `update()` method allows you to modify existing applications using Pydantic models.
 
 <div class="termy">
 
@@ -135,7 +134,7 @@ The `update()` method allows you to modify existing applications.
 try:
     fetched_app = applications.fetch(folder='Texas', name='internal-chat')
 
-    fetched_app['description'] = 'Updated description for internal chat application'
+    fetched_app.description = 'Updated description for internal chat application'
 
     updated_app = applications.update(fetched_app)
     print(f"Updated application: {updated_app.name}")
@@ -229,7 +228,7 @@ except MissingQueryParameterError as e:
 
 ## Fetching Applications
 
-The `fetch()` method retrieves a single application by name from a specific container.
+The `fetch()` method retrieves a single application by name from a specific container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -241,8 +240,8 @@ try:
         name="internal-chat",
         folder="Texas"
     )
-    print(f"Found application: {app['name']}")
-    print(f"Current risk level: {app['risk']}")
+    print(f"Found application: {app.name}")
+    print(f"Current risk level: {app.risk}")
 
 except NotFoundError as e:
     print(f"Application not found: {e.message}")
@@ -306,12 +305,12 @@ try:
                 name="custom-app",
                 folder="Texas"
             )
-            print(f"Found application: {fetched_app['name']}")
+            print(f"Found application: {fetched_app.name}")
 
-            # Update the application
-            fetched_app["description"] = "Updated database application"
-            fetched_app["risk"] = 4
-            fetched_app["has_known_vulnerabilities"] = True
+            # Update the application using Pydantic model
+            fetched_app.description = "Updated database application"
+            fetched_app.risk = 4
+            fetched_app.has_known_vulnerabilities = True
 
             updated_app = applications.update(fetched_app)
             print(f"Updated application: {updated_app.name}")

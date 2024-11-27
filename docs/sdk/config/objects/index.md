@@ -35,6 +35,10 @@ Manage application group definitions, including their characteristics and associ
 
 Manage service definitions, including their characteristics and associated protocols / ports.
 
+### [Tag](tag.md)
+
+Manage tag definitions, including their colors.
+
 ---
 
 Select an object above to view detailed documentation, including methods, parameters, and examples.

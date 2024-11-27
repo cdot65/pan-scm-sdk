@@ -108,11 +108,15 @@ class SecurityRule(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        rule: SecurityRuleUpdateModel,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
         """
         Updates an existing security rule object.
+
+        Args:
+            rule: SecurityRuleUpdateModel instance containing the update data
+            rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
 
         Returns:
             SecurityRuleResponseModel
@@ -129,24 +133,25 @@ class SecurityRule(BaseObject):
                     details={"error": "Invalid rulebase value"},
                 )
 
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        profile = SecurityRuleUpdateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields and using aliases
-        payload = profile.model_dump(
+        # Convert to dict for API request, excluding unset fields and using aliases
+        payload = rule.model_dump(
             exclude_unset=True,
             by_alias=True,
         )
 
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(rule.id)
+        payload.pop("id", None)
+
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             params={"position": rulebase.value},
             json=payload,
         )
 
-        # Return the SCM API response as a new Pydantic object
+        # Return the SCM API response as a new Pydantic model
         return SecurityRuleResponseModel(**response)
 
     @staticmethod
@@ -491,7 +496,7 @@ class SecurityRule(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         rulebase: str = "pre",
-    ) -> Dict[str, Any]:
+    ) -> SecurityRuleResponseModel:
         """
         Fetches a single security rule by name.
 
@@ -503,7 +508,7 @@ class SecurityRule(BaseObject):
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            SecurityRuleResponseModel: The fetched security rule object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -575,11 +580,7 @@ class SecurityRule(BaseObject):
             )
 
         if "id" in response:
-            address = SecurityRuleResponseModel(**response)
-            return address.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return SecurityRuleResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",

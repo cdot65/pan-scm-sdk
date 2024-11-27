@@ -76,28 +76,32 @@ class AddressGroup(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        address_group: AddressGroupUpdateModel,
     ) -> AddressGroupResponseModel:
         """
         Updates an existing address group object.
 
+        Args:
+            address_group: AddressGroupUpdateModel instance containing the update data
+
         Returns:
             AddressGroupResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        address = AddressGroupUpdateModel(**data)
+        # Convert to dict for API request, excluding unset fields
+        payload = address_group.model_dump(exclude_unset=True)
 
-        # Convert back to a Python dictionary, removing any unset fields
-        payload = address.model_dump(exclude_unset=True)
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(address_group.id)
+        payload.pop("id", None)
 
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
 
-        # Return the SCM API response as a new Pydantic object
+        # Return the SCM API response as a new Pydantic model
         return AddressGroupResponseModel(**response)
 
     @staticmethod
@@ -283,7 +287,7 @@ class AddressGroup(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> AddressGroupResponseModel:
         """
         Fetches a single address group by name.
 
@@ -294,7 +298,7 @@ class AddressGroup(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            AddressGroupResponseModel: The fetched address group object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -353,11 +357,7 @@ class AddressGroup(BaseObject):
             )
 
         if "id" in response:
-            address = AddressGroupResponseModel(**response)
-            return address.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return AddressGroupResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",

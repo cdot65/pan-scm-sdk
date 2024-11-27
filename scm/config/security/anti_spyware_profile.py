@@ -76,28 +76,32 @@ class AntiSpywareProfile(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        profile: AntiSpywareProfileUpdateModel,
     ) -> AntiSpywareProfileResponseModel:
         """
         Updates an existing anti-spyware profile object.
 
+        Args:
+            profile: AntiSpywareProfileUpdateModel instance containing the update data
+
         Returns:
             AntiSpywareProfileResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        profile = AntiSpywareProfileUpdateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields
+        # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
 
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(profile.id)
+        payload.pop("id", None)
+
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
 
-        # Return the SCM API response as a new Pydantic object
+        # Return the SCM API response as a new Pydantic model
         return AntiSpywareProfileResponseModel(**response)
 
     @staticmethod
@@ -243,7 +247,7 @@ class AntiSpywareProfile(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> AntiSpywareProfileResponseModel:
         """
         Fetches a single anti-spyware profile by name.
 
@@ -254,7 +258,7 @@ class AntiSpywareProfile(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            AntiSpywareProfileResponseModel: The fetched anti-spyware profile object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -313,11 +317,7 @@ class AntiSpywareProfile(BaseObject):
             )
 
         if "id" in response:
-            address = AntiSpywareProfileResponseModel(**response)
-            return address.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return AntiSpywareProfileResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",

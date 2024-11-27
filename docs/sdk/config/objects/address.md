@@ -33,7 +33,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when address object data is invalid
+- `InvalidObjectError`: Raised when address object data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when an address object doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -112,7 +112,7 @@ print(f"Address Name: {address_obj.name}")
 
 ## Updating Address Objects
 
-The `update()` method allows you to modify existing address objects.
+The `update()` method allows you to modify existing address objects using Pydantic models.
 
 <div class="termy">
 
@@ -122,8 +122,8 @@ The `update()` method allows you to modify existing address objects.
 # first fetch an existing object by its folder and name
 example_website = addresses.fetch(folder='Texas', name='example_website')
 
-# update the dictionary's description
-example_website['description'] = "this is just a test"
+# update the description using the Pydantic model
+example_website.description = "this is just a test"
 addresses.update(example_website)
 ```
 
@@ -205,7 +205,7 @@ for addr in texas_addresses:
 
 ## Fetching Address Objects
 
-The `fetch()` method retrieves a single address object by name and container.
+The `fetch()` method retrieves a single address object by name and container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -218,8 +218,9 @@ desktop1 = addresses.fetch(
     folder="Texas"
 )
 
-# fetch will return a Python dictionary, not a pydantic model
-print(f"Found address: {desktop1['name']}")
+# fetch will return a Pydantic model
+print(f"Found address: {desktop1.name}")
+print(f"Description: {desktop1.description}")
 ```
 
 </div>
@@ -273,10 +274,10 @@ try:
                 name="test_network",
                 folder="Texas"
             )
-            print(f"Found address: {fetched['name']}")
+            print(f"Found address: {fetched.name}")
 
-            # Update the address
-            fetched["description"] = "Updated test network segment"
+            # Update the address using Pydantic model
+            fetched.description = "Updated test network segment"
             updated = addresses.update(fetched)
             print(f"Updated description: {updated.description}")
 

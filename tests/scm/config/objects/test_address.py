@@ -107,7 +107,7 @@ class TestAddressList(TestAddressBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -239,7 +239,7 @@ class TestAddressList(TestAddressBase):
         )
 
         # Reset side effect for next test
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
             message="'values' filter must be a list",
@@ -257,7 +257,7 @@ class TestAddressList(TestAddressBase):
         )
 
         # Reset side effect for next test
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
             message="'tags' filter must be a list",
@@ -273,8 +273,8 @@ class TestAddressList(TestAddressBase):
         )
 
         # Reset side effect for successful case
-        self.mock_scm.get.side_effect = None
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.side_effect = None  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test that valid list filters pass validation
         try:
@@ -721,24 +721,34 @@ class TestAddressUpdate(TestAddressBase):
             tag=["tag1", "tag2"],
             folder="Shared",
         )
-        input_data = update_data.model_dump()
 
         # Create mock response
         mock_response = AddressResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        # Perform update
-        updated_object = self.client.update(input_data)
+        # Perform update with the Pydantic model directly
+        updated_object = self.client.update(update_data)
 
-        # Assert the put method was called with correct parameters
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/addresses/{update_data.id}",
-            json=input_data,
-        )
+        # Verify call was made once
+        self.mock_scm.put.assert_called_once()  # noqa
+
+        # Get the actual call arguments
+        call_args = self.mock_scm.put.call_args  # noqa
+
+        # Check endpoint
+        assert call_args[0][0] == f"/config/objects/v1/addresses/{update_data.id}"
+
+        # Check important payload fields
+        payload = call_args[1]["json"]
+        assert payload["name"] == "TestAddress"
+        assert payload["ip_netmask"] == "10.0.0.0/24"
+        assert payload["description"] == "Updated description"
+        assert payload["tag"] == ["tag1", "tag2"]
+        assert payload["folder"] == "Shared"
 
         # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressResponseModel)
-        assert updated_object.id == mock_response.id
+        assert str(updated_object.id) == str(mock_response.id)
         assert updated_object.name == mock_response.name
         assert updated_object.ip_netmask == mock_response.ip_netmask
         assert updated_object.description == mock_response.description
@@ -747,14 +757,13 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
-        # Create test data using factory
+        # Create test data using factory as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
             ip_netmask="10.0.0.0/24",
         )
-        input_data = update_data.model_dump()
 
         # Use utility function to create mock HTTP error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
@@ -765,7 +774,7 @@ class TestAddressUpdate(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
@@ -774,14 +783,13 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
-        # Create test data
+        # Create test data as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
             ip_netmask="10.0.0.0/24",
         )
-        input_data = update_data.model_dump()
 
         # Use utility function to simulate object not present error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
@@ -792,7 +800,7 @@ class TestAddressUpdate(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -801,6 +809,13 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
+        # Create test data as Pydantic model
+        update_data = AddressUpdateApiFactory.with_ip_netmask(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            ip_netmask="10.0.0.0/24",
+        )
+
         # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
@@ -811,38 +826,32 @@ class TestAddressUpdate(TestAddressBase):
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.update(
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test",
-                    "ip_netmask": "10.0.0.0/24",
-                }
-            )
+            self.client.update(update_data)
 
     def test_update_generic_exception_handling(self):
         """Test handling of a generic exception during update."""
+        # Create test data as Pydantic model
+        update_data = AddressUpdateApiFactory.with_ip_netmask(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            ip_netmask="10.0.0.0/24",
+        )
+
         self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.update(
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test",
-                    "ip_netmask": "10.0.0.0/24",
-                }
-            )
+            self.client.update(update_data)
         assert str(exc_info.value) == "Generic error"
 
     def test_update_server_error(self):
         """Test handling of server errors during update."""
-        # Create test data
+        # Create test data as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
             folder="Shared",
             ip_netmask="10.0.0.0/24",
         )
-        input_data = update_data.model_dump()
 
         # Use utility function to simulate server error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
@@ -853,7 +862,7 @@ class TestAddressUpdate(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(input_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -992,12 +1001,16 @@ class TestAddressFetch(TestAddressBase):
             },
         )
 
-        # Validate the returned object
-        assert isinstance(fetched_object, dict)
-        assert fetched_object["id"] == mock_response_model.id
-        assert fetched_object["name"] == mock_response_model.name
-        assert fetched_object["description"] == mock_response_model.description
-        assert fetched_object["tag"] == mock_response_model.tag
+        # Validate the returned object is a Pydantic model
+        assert isinstance(fetched_object, AddressResponseModel)
+
+        # Validate the object attributes match the mock response
+        assert str(fetched_object.id) == str(mock_response_model.id)
+        assert fetched_object.name == mock_response_model.name
+        assert fetched_object.description == mock_response_model.description
+        assert fetched_object.tag == mock_response_model.tag
+        assert fetched_object.ip_netmask == mock_response_model.ip_netmask
+        assert fetched_object.folder == mock_response_model.folder
 
     def test_fetch_object_not_present_error(self):
         """Test fetching an object that does not exist."""

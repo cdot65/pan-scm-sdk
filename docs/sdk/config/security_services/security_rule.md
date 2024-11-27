@@ -35,7 +35,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when security rule data is invalid or malformed
+- `InvalidObjectError`: Raised when security rule data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when a security rule doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -43,24 +43,12 @@ The SDK uses a hierarchical exception system for error handling:
 - `ConflictError`: Raised when security rule names conflict
 - `NameNotUniqueError`: Raised when creating duplicate rule names
 - `ReferenceNotZeroError`: Raised when deleting rules still referenced by other objects
-- `InputFormatMismatchError`: Raised when input data format is incorrect
-- `OutputFormatMismatchError`: Raised when response format is incorrect
-- `InvalidQueryParameterError`: Raised when query parameters are invalid
-- `MissingBodyError`: Raised when request body is missing
-- `InvalidCommandError`: Raised when an invalid command is issued
-- `MalformedCommandError`: Raised when a command is malformed
-- `BadXPathError`: Raised when an invalid XPath is used
-- `ObjectNotPresentError`: Raised when referenced objects don't exist
-- `ActionNotSupportedError`: Raised when an action is not supported
 
 ### Server Errors (5xx)
 
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
-- `VersionAPINotSupportedError`: When API version is not supported
-- `MethodAPINotSupportedError`: When method is not supported
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Security Rules
 
@@ -174,7 +162,7 @@ except InvalidObjectError as e:
 
 ## Updating Security Rules
 
-The `update()` method allows you to modify existing security rules.
+The `update()` method allows you to modify existing security rules using Pydantic models.
 
 <div class="termy">
 
@@ -182,17 +170,20 @@ The `update()` method allows you to modify existing security rules.
 
 ```python
 try:
-    update_data = {
-        "id": "123e4567-e89b-12d3-a456-426655440000",
-        "description": "Updated web access rule",
-        "application": ["web-browsing", "ssl", "http2"],
-        "profile_setting": {
-            "group": ["strict-security"]
-        },
-        "folder": "Shared"
-    }
+    # First fetch the existing rule as a Pydantic model
+    fetched_rule = security_rule.fetch(
+        name="allow-web",
+        folder="Shared",
+        rulebase="pre"
+    )
 
-    updated_rule = security_rule.update(update_data, rulebase="pre")
+    # Update the model's attributes
+    fetched_rule.description = "Updated web access rule"
+    fetched_rule.application = ["web-browsing", "ssl", "http2"]
+    fetched_rule.profile_setting.group = ["strict-security"]
+
+    # Perform the update with the modified model
+    updated_rule = security_rule.update(fetched_rule, rulebase="pre")
     print(f"Updated rule: {updated_rule.name}")
 
 except NotFoundError as e:
@@ -343,7 +334,7 @@ except MissingQueryParameterError as e:
 
 ## Fetching Security Rules
 
-The `fetch()` method retrieves a single security rule by name from a specific container.
+The `fetch()` method retrieves a single security rule by name from a specific container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -357,8 +348,8 @@ try:
         rulebase="pre"
     )
 
-    print(f"Found rule: {rule['name']}")
-    print(f"Current applications: {rule['application']}")
+    print(f"Found rule: {rule.name}")
+    print(f"Current applications: {rule.application}")
 
 except NotFoundError as e:
     print(f"Rule not found: {e.message}")
@@ -435,10 +426,10 @@ try:
                 folder="Shared",
                 rulebase="pre"
             )
-            print(f"Found rule: {fetched_rule['name']}")
+            print(f"Found rule: {fetched_rule.name}")
 
-            # Update the rule
-            fetched_rule["description"] = "Updated web access rule"
+            # Update the rule using Pydantic model
+            fetched_rule.description = "Updated web access rule"
             updated_rule = security_rule.update(fetched_rule, rulebase="pre")
             print(f"Updated description: {updated_rule.description}")
 

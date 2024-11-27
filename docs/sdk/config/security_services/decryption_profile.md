@@ -36,7 +36,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when profile data is invalid or malformed
+- `InvalidObjectError`: Raised when profile data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when a profile doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -50,7 +50,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Decryption Profiles
 
@@ -164,7 +163,7 @@ except NotFoundError as e:
 
 ## Updating Decryption Profiles
 
-The `update()` method allows you to modify existing decryption profiles.
+The `update()` method allows you to modify existing decryption profiles using Pydantic models.
 
 <div class="termy">
 
@@ -173,7 +172,7 @@ The `update()` method allows you to modify existing decryption profiles.
 ```python
 try:
     fetched_profile = decryption_profiles.fetch(folder='Texas', name="forward-proxy")
-    fetched_profile["ssl_forward_proxy"]["auto_include_altname"] = False
+    fetched_profile.ssl_forward_proxy.auto_include_altname = False
 
     updated_profile = decryption_profiles.update(fetched_profile)
     print(f"Updated profile: {updated_profile.name}")
@@ -256,7 +255,8 @@ except MissingQueryParameterError as e:
 
 ## Fetching Decryption Profiles
 
-The `fetch()` method retrieves a single decryption profile by name from a specific container.
+The `fetch()` method retrieves a single decryption profile by name from a specific container, returning a Pydantic
+model.
 
 <div class="termy">
 
@@ -265,8 +265,8 @@ The `fetch()` method retrieves a single decryption profile by name from a specif
 ```python
 try:
     profile = decryption_profiles.fetch(name="Oblivion", folder="Texas")
-    print(f"Found profile: {profile['name']}")
-    print(f"Current settings: {profile['ssl_protocol_settings']}")
+    print(f"Found profile: {profile.name}")
+    print(f"Current settings: {profile.ssl_protocol_settings}")
 
 except NotFoundError as e:
     print(f"Profile not found: {e.message}")
@@ -333,10 +333,10 @@ try:
                 name="forward-proxy",
                 folder="Texas"
             )
-            print(f"Found profile: {fetched_profile['name']}")
+            print(f"Found profile: {fetched_profile.name}")
 
-            # Update the profile
-            fetched_profile["ssl_forward_proxy"]["auto_include_altname"] = False
+            # Update the profile using Pydantic model
+            fetched_profile.ssl_forward_proxy.auto_include_altname = False
             updated_profile = decryption_profiles.update(fetched_profile)
             print(f"Updated profile: {updated_profile.name}")
 

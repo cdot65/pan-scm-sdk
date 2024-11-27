@@ -14,7 +14,7 @@ from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
 )
-from scm.models.objects import TagResponseModel
+from scm.models.objects import TagResponseModel, TagUpdateModel
 
 # Import factories
 from tests.factories import (
@@ -417,7 +417,7 @@ class TestTagGet(TestTagBase):
 class TestTagUpdate(TestTagBase):
     """Tests for updating Tag objects."""
 
-    def test_update_valid_tag(self):
+    def test_update_valid_object(self):
         """Test updating a tag with valid data."""
         update_data = TagUpdateApiFactory.with_color(
             id="123e4567-e89b-12d3-a456-426655440000",
@@ -425,18 +425,30 @@ class TestTagUpdate(TestTagBase):
             color="Blue",
             comments="Updated comments",
         )
-        input_data = update_data.model_dump()
 
+        # Create mock response
         mock_response = TagResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        updated_tag = self.client.update(input_data)
+        # Perform update with Pydantic model directly
+        updated_tag = self.client.update(update_data)
 
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/tags/{update_data.id}",
-            json=input_data,
-        )
+        # Verify call was made once
+        self.mock_scm.put.assert_called_once()  # noqa
 
+        # Get the actual call arguments
+        call_args = self.mock_scm.put.call_args  # noqa
+
+        # Check endpoint
+        assert call_args[0][0] == f"/config/objects/v1/tags/{update_data.id}"
+
+        # Check important payload fields
+        payload = call_args[1]["json"]
+        assert payload["name"] == "UpdatedTag"
+        assert payload["color"] == "Blue"
+        assert payload["comments"] == "Updated comments"
+
+        # Assert the updated object matches the mock response
         assert isinstance(updated_tag, TagResponseModel)
         assert updated_tag.id == mock_response.id
         assert updated_tag.name == mock_response.name
@@ -445,34 +457,43 @@ class TestTagUpdate(TestTagBase):
 
     def test_update_invalid_color(self):
         """Test updating a tag with an invalid color."""
-        update_data = TagUpdateApiFactory.build().model_dump()
-        update_data["color"] = "InvalidColor"
+        # Instead of modifying after creation, build with invalid data
+        tag_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-tag",
+            "color": "InvalidColor",
+        }
 
         with pytest.raises(ValidationError) as exc_info:
-            self.client.update(update_data)
+            # Try to create the model with invalid data
+            TagUpdateModel(**tag_data)
 
         assert "Color must be one of" in str(exc_info.value)
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
+        # Create test data as Pydantic model
+        update_data = TagUpdateApiFactory.with_color(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            with_color="asdf",
+        )
+
+        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
+        # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
-        # Provide valid data to avoid ValidationError
-        valid_id = "123e4567-e89b-12d3-a456-426655440000"
-        update_data = {"id": valid_id, "name": "TestTag", "color": "Red"}
-
         with pytest.raises(HTTPError):
-            self.client.update(update_data)
             self.client.update(update_data)
 
     def test_update_server_error(self):
         """Test handling of server errors during update."""
-        update_data = TagUpdateApiFactory.build().model_dump()
+        update_data = TagUpdateApiFactory.build()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=500,
@@ -562,32 +583,43 @@ class TestTagDelete(TestTagBase):
 class TestTagFetch(TestTagBase):
     """Tests for fetching Tag objects by name."""
 
-    def test_fetch_valid_tag(self):
+    def test_fetch_valid_object(self):
         """Test fetching a tag by name."""
-        mock_response = TagResponseFactory.with_color(
+        mock_response_model = TagResponseFactory.with_color(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestTag",
             color="Red",
             folder="Shared",
-        ).model_dump()
+        )
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        mock_response_data = mock_response_model.model_dump()
 
-        fetched_tag = self.client.fetch(name="TestTag", folder="Shared")
+        # Set the mock to return the response data directly
+        self.mock_scm.get.return_value = mock_response_data  # noqa
 
+        # Call the fetch method
+        fetched_object = self.client.fetch(
+            name=mock_response_model.name,
+            folder=mock_response_model.folder,
+        )
+
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/tags",
             params={
-                "folder": "Shared",
-                "name": "TestTag",
+                "folder": mock_response_model.folder,
+                "name": mock_response_model.name,
             },
         )
 
-        assert isinstance(fetched_tag, dict)
-        assert fetched_tag["id"] == mock_response["id"]
-        assert fetched_tag["name"] == mock_response["name"]
-        assert fetched_tag["color"] == mock_response["color"]
-        assert fetched_tag["folder"] == mock_response["folder"]
+        # Validate the returned object is a Pydantic model
+        assert isinstance(fetched_object, TagResponseModel)
+
+        # Validate the object attributes match the mock response
+        assert str(fetched_object.id) == str(mock_response_model.id)
+        assert fetched_object.name == mock_response_model.name
+        assert fetched_object.color == mock_response_model.color
+        assert fetched_object.folder == mock_response_model.folder
 
     def test_fetch_tag_not_present_error(self):
         """Test fetching a tag that does not exist."""

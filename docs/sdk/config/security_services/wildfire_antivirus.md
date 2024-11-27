@@ -36,7 +36,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when profile data is invalid or malformed
+- `InvalidObjectError`: Raised when profile data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when a profile doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -44,24 +44,12 @@ The SDK uses a hierarchical exception system for error handling:
 - `ConflictError`: Raised when profile names conflict
 - `NameNotUniqueError`: Raised when creating duplicate profile names
 - `ReferenceNotZeroError`: Raised when deleting profiles still referenced by policies
-- `InputFormatMismatchError`: Raised when input data format is incorrect
-- `OutputFormatMismatchError`: Raised when response format is incorrect
-- `InvalidQueryParameterError`: Raised when query parameters are invalid
-- `MissingBodyError`: Raised when request body is missing
-- `InvalidCommandError`: Raised when an invalid command is issued
-- `MalformedCommandError`: Raised when a command is malformed
-- `BadXPathError`: Raised when an invalid XPath is used
-- `ObjectNotPresentError`: Raised when referenced objects don't exist
-- `ActionNotSupportedError`: Raised when an action is not supported
 
 ### Server Errors (5xx)
 
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
-- `VersionAPINotSupportedError`: When API version is not supported
-- `MethodAPINotSupportedError`: When method is not supported
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating WildFire Antivirus Profiles
 
@@ -192,7 +180,7 @@ except InvalidObjectError as e:
 
 ## Updating WildFire Antivirus Profiles
 
-The `update()` method allows you to modify existing WildFire antivirus profiles.
+The `update()` method allows you to modify existing WildFire antivirus profiles using Pydantic models.
 
 <div class="termy">
 
@@ -200,28 +188,19 @@ The `update()` method allows you to modify existing WildFire antivirus profiles.
 
 ```python
 try:
-    update_data = {
-        "id": "123e4567-e89b-12d3-a456-426655440000",
-        "description": "Updated profile description",
-        "folder": "Shared",
-        "rules": [
-            {
-                "name": "updated-rule",
-                "direction": "both",
-                "analysis": "public-cloud",
-                "application": ["any"],
-                "file_type": ["any"]
-            }
-        ],
-        "threat_exception": [
-            {
-                "name": "exception1",
-                "notes": "Known false positive"
-            }
-        ]
-    }
+    # First fetch the existing profile
+    profile = wildfire_antivirus_profile.fetch(
+        name="basic-profile",
+        folder="Shared"
+    )
 
-    updated_profile = wildfire_antivirus_profile.update(update_data)
+    # Update the profile attributes using Pydantic model
+    profile.description = "Updated profile description"
+    profile.rules[0].direction = "both"
+    profile.rules[0].application = ["any"]
+    profile.rules[0].file_type = ["any"]
+
+    updated_profile = wildfire_antivirus_profile.update(profile)
     print(f"Updated profile: {updated_profile.name}")
 
 except NotFoundError as e:
@@ -297,7 +276,8 @@ except MissingQueryParameterError as e:
 
 ## Fetching WildFire Antivirus Profiles
 
-The `fetch()` method retrieves a single WildFire antivirus profile by name from a specific container.
+The `fetch()` method retrieves a single WildFire antivirus profile by name from a specific container, returning a
+Pydantic model.
 
 <div class="termy">
 
@@ -310,8 +290,9 @@ try:
         folder="Shared"
     )
 
-    print(f"Found profile: {profile['name']}")
-    print(f"Current rules: {len(profile['rules'])}")
+    print(f"Found profile: {profile.name}")
+    print(f"Current rules: {len(profile.rules)}")
+    print(f"Description: {profile.description}")
 
 except NotFoundError as e:
     print(f"Profile not found: {e.message}")
@@ -378,10 +359,10 @@ try:
                 name="test-profile",
                 folder="Shared"
             )
-            print(f"Found profile: {fetched_profile['name']}")
+            print(f"Found profile: {fetched_profile.name}")
 
-            # Update the profile
-            fetched_profile["description"] = "Updated test profile"
+            # Update the profile using Pydantic model
+            fetched_profile.description = "Updated test profile"
             updated_profile = wildfire_antivirus_profile.update(fetched_profile)
             print(f"Updated description: {updated_profile.description}")
 

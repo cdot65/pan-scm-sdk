@@ -17,6 +17,7 @@ from scm.models.objects import ApplicationResponseModel
 from tests.factories import (
     ApplicationResponseFactory,
     ApplicationCreateApiFactory,
+    ApplicationUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error
 
@@ -431,55 +432,64 @@ class TestApplicationUpdate(TestApplicationBase):
 
     def test_update_valid_object(self):
         """Test updating an application with valid data."""
-        update_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "updated-app",
-            "description": "Updated description",
-            "category": "networking",
-            "subcategory": "networking",
-            "technology": "client-server",
-            "risk": 2,
-        }
-
-        # Create mock response that matches ApplicationResponseModel requirements
-        mock_response = {
-            "id": update_data["id"],
-            "name": update_data["name"],
-            "description": update_data["description"],
-            "category": update_data["category"],
-            "subcategory": update_data["subcategory"],
-            "technology": update_data["technology"],
-            "risk": update_data["risk"],
-            "folder": "Shared",  # Required field
-        }
-
-        # Mock response needs to be a MagicMock with json method
-        mock_api_response = MagicMock()
-        mock_api_response.json.return_value = mock_response
-        self.mock_scm.put.return_value = mock_response  # noqa
-
-        updated_object = self.client.update(update_data)
-
-        self.mock_scm.put.assert_called_once_with(  # noqa
-            f"/config/objects/v1/applications/{update_data['id']}",
-            json={k: v for k, v in update_data.items() if k != "id"},
+        # Create update data using factory
+        update_data = ApplicationUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="updated-app",
+            description="Updated description",
+            category="networking",
+            subcategory="networking",
+            technology="client-server",
+            risk=2,
         )
 
+        # Create mock response
+        mock_response = ApplicationResponseFactory.from_request(update_data)
+        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
+
+        # Perform update with Pydantic model directly
+        updated_object = self.client.update(update_data)
+
+        # Verify call was made once
+        self.mock_scm.put.assert_called_once()  # noqa
+
+        # Get the actual call arguments
+        call_args = self.mock_scm.put.call_args  # noqa
+
+        # Check endpoint
+        assert call_args[0][0] == f"/config/objects/v1/applications/{update_data.id}"
+
+        # Check important payload fields
+        payload = call_args[1]["json"]
+        assert payload["name"] == "updated-app"
+        assert payload["description"] == "Updated description"
+        assert payload["category"] == "networking"
+        assert payload["subcategory"] == "networking"
+        assert payload["technology"] == "client-server"
+        assert payload["risk"] == 2
+
+        # Assert the updated object matches the mock response
         assert isinstance(updated_object, ApplicationResponseModel)
-        assert updated_object.name == mock_response["name"]
-        assert updated_object.category == mock_response["category"]
-        assert updated_object.risk == mock_response["risk"]
+        assert str(updated_object.id) == str(mock_response.id)
+        assert updated_object.name == mock_response.name
+        assert updated_object.description == mock_response.description
+        assert updated_object.category == mock_response.category
+        assert updated_object.subcategory == mock_response.subcategory
+        assert updated_object.technology == mock_response.technology
+        assert updated_object.risk == mock_response.risk
 
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
-        test_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-app",
-            "category": "invalid-category",
-            "subcategory": "invalid-subcategory",
-            "technology": "client-server",
-            "risk": 2,
-        }
+        # Create update data using factory
+        update_data = ApplicationUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="updated-app",
+            description="Updated description",
+            category="networking",
+            subcategory="networking",
+            technology="client-server",
+            risk=2,
+        )
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
@@ -489,7 +499,7 @@ class TestApplicationUpdate(TestApplicationBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.update(test_data)
+            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
         assert (
@@ -498,24 +508,28 @@ class TestApplicationUpdate(TestApplicationBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
+        # Create test data using factory
+        update_data = ApplicationUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            category="general-internet",
+            subcategory="file-sharing",
+            technology="peer-to-peer",
+            risk=2,
+        )
+
+        # Create mock response without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
+        # Create HTTPError with mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
+        # Test with Pydantic model
         with pytest.raises(HTTPError):
-            self.client.update(
-                {
-                    "id": "123e4567-e89b-12d3-a456-426655440000",
-                    "name": "test",
-                    "category": "general-internet",
-                    "subcategory": "file-sharing",
-                    "technology": "peer-to-peer",
-                    "risk": 2,
-                }
-            )
+            self.client.update(update_data)
 
 
 class TestApplicationDelete(TestApplicationBase):
@@ -572,7 +586,7 @@ class TestApplicationFetch(TestApplicationBase):
 
     def test_fetch_valid_object(self):
         """Test retrieving an application by its name."""
-        mock_response = ApplicationResponseFactory(
+        mock_response_model = ApplicationResponseFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-app",
             folder="Shared",
@@ -581,27 +595,36 @@ class TestApplicationFetch(TestApplicationBase):
             technology="peer-to-peer",
             risk=5,
             description="Test application",
-        ).model_dump()
+        )
+        mock_response_data = mock_response_model.model_dump()
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response_data  # noqa
 
+        # Call the fetch method
         fetched_object = self.client.fetch(
-            name=mock_response["name"],
-            folder=mock_response["folder"],
+            name=mock_response_model.name,
+            folder=mock_response_model.folder,
         )
 
+        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/applications",
             params={
-                "folder": mock_response["folder"],
-                "name": mock_response["name"],
+                "folder": mock_response_model.folder,
+                "name": mock_response_model.name,
             },
         )
 
-        assert isinstance(fetched_object, dict)
-        assert fetched_object["id"] == mock_response["id"]
-        assert fetched_object["name"] == mock_response["name"]
-        assert fetched_object["category"] == mock_response["category"]
+        # Validate the returned object
+        assert isinstance(fetched_object, ApplicationResponseModel)
+        assert str(fetched_object.id) == str(mock_response_model.id)
+        assert fetched_object.name == mock_response_model.name
+        assert fetched_object.folder == mock_response_model.folder
+        assert fetched_object.category == mock_response_model.category
+        assert fetched_object.subcategory == mock_response_model.subcategory
+        assert fetched_object.technology == mock_response_model.technology
+        assert fetched_object.risk == mock_response_model.risk
+        assert fetched_object.description == mock_response_model.description
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
