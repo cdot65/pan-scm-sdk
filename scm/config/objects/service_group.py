@@ -128,10 +128,15 @@ class ServiceGroup(BaseObject):
                 raise InvalidObjectError(
                     message="'values' filter must be a list",
                     error_code="E003",
-                    http_status_code=500,
+                    http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
             values = filters["values"]
+            filter_criteria = [
+                group
+                for group in filter_criteria
+                if (group.members and any(value in group.members for value in values))
+            ]
 
         # Filter by tags
         if "tags" in filters:
@@ -139,10 +144,15 @@ class ServiceGroup(BaseObject):
                 raise InvalidObjectError(
                     message="'tags' filter must be a list",
                     error_code="E003",
-                    http_status_code=500,
+                    http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
             tags = filters["tags"]
+            filter_criteria = [
+                group
+                for group in filter_criteria
+                if group.tag and any(tag in group.tag for tag in tags)
+            ]
 
         return filter_criteria
 
