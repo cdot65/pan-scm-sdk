@@ -111,7 +111,7 @@ class TestServiceList(TestServiceBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -751,10 +751,10 @@ class TestServiceUpdate(TestServiceBase):
         updated_object = self.client.update(update_data)
 
         # Verify call was made once
-        self.mock_scm.put.assert_called_once()
+        self.mock_scm.put.assert_called_once()  # noqa
 
         # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args
+        call_args = self.mock_scm.put.call_args  # noqa
 
         # Check endpoint
         assert call_args[0][0] == f"/config/objects/v1/services/{update_data.id}"

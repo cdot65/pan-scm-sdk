@@ -451,10 +451,10 @@ class TestApplicationUpdate(TestApplicationBase):
         updated_object = self.client.update(update_data)
 
         # Verify call was made once
-        self.mock_scm.put.assert_called_once()
+        self.mock_scm.put.assert_called_once()  # noqa
 
         # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args
+        call_args = self.mock_scm.put.call_args  # noqa
 
         # Check endpoint
         assert call_args[0][0] == f"/config/objects/v1/applications/{update_data.id}"

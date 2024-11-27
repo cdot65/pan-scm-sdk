@@ -104,7 +104,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -500,7 +500,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         test_object = SecurityRuleCreateApiFactory.build()
         mock_response = SecurityRuleResponseFactory.from_request(test_object)
 
-        self.mock_scm.post.return_value = mock_response.model_dump(
+        self.mock_scm.post.return_value = mock_response.model_dump(  # noqa
             by_alias=True
         )  # noqa
         created_object = self.client.create(test_object.model_dump(by_alias=True))
@@ -539,7 +539,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
         )
 
         mock_response = SecurityRuleResponseFactory.from_request(test_object)
-        self.mock_scm.post.return_value = mock_response.model_dump(
+        self.mock_scm.post.return_value = mock_response.model_dump(  # noqa
             by_alias=True
         )  # noqa
 
@@ -621,7 +621,6 @@ class TestSecurityRuleGet(TestSecurityRuleBase):
 
     def test_get_object_not_present_error(self):
         """Test error handling when object is not present."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
@@ -708,10 +707,10 @@ class TestSecurityRuleUpdate(TestSecurityRuleBase):
         updated_object = self.client.update(update_data)
 
         # Verify call was made once
-        self.mock_scm.put.assert_called_once()
+        self.mock_scm.put.assert_called_once()  # noqa
 
         # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args
+        call_args = self.mock_scm.put.call_args  # noqa
 
         # Check endpoint
         assert call_args[0][0] == f"/config/security/v1/security-rules/{update_data.id}"
@@ -835,7 +834,10 @@ class TestSecurityRuleUpdate(TestSecurityRuleBase):
         invalid_rulebase = "invalid"
 
         with pytest.raises(InvalidObjectError):
-            self.client.update(data, rulebase=invalid_rulebase)
+            self.client.update(
+                data,  # noqa
+                rulebase=invalid_rulebase,
+            )
 
 
 class TestSecurityRuleDelete(TestSecurityRuleBase):
@@ -1313,7 +1315,9 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
         """Test that a non-string, non-list value raises a ValueError."""
         with pytest.raises(ValueError, match="Value must be a list of strings"):
             SecurityRuleCreateModel(
-                name="test-rule", source=123, folder="Shared"
+                name="test-rule",
+                source=123,  # noqa
+                folder="Shared",
             )  # noqa
 
     def test_ensure_list_of_strings_non_string_items(self):

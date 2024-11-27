@@ -107,7 +107,7 @@ class TestAddressList(TestAddressBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -239,7 +239,7 @@ class TestAddressList(TestAddressBase):
         )
 
         # Reset side effect for next test
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
             message="'values' filter must be a list",
@@ -257,7 +257,7 @@ class TestAddressList(TestAddressBase):
         )
 
         # Reset side effect for next test
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
             message="'tags' filter must be a list",
@@ -273,8 +273,8 @@ class TestAddressList(TestAddressBase):
         )
 
         # Reset side effect for successful case
-        self.mock_scm.get.side_effect = None
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.side_effect = None  # noqa
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test that valid list filters pass validation
         try:
@@ -730,10 +730,10 @@ class TestAddressUpdate(TestAddressBase):
         updated_object = self.client.update(update_data)
 
         # Verify call was made once
-        self.mock_scm.put.assert_called_once()
+        self.mock_scm.put.assert_called_once()  # noqa
 
         # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args
+        call_args = self.mock_scm.put.call_args  # noqa
 
         # Check endpoint
         assert call_args[0][0] == f"/config/objects/v1/addresses/{update_data.id}"
