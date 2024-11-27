@@ -73,7 +73,7 @@ class AddressBaseModel(BaseModel):
         max_length=1023,
         description="The description of the address object",
     )
-    tag: Optional[List[TagString]] = Field(
+    tag: Optional[List[TagString]] = Field(  # type: ignore
         None,
         description="Tags associated with the address object",
     )
