@@ -354,6 +354,10 @@ except AuthenticationError as e:
 
 </div>
 
+## Full script examples
+
+Refer to the [examples](../../../../examples/scm/config/objects) directory.
+
 ## Related Models
 
 - [AddressGroupCreateModel](../../models/objects/address_group_models.md#addressgroupcreatemodel)

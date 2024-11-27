@@ -14,6 +14,9 @@ Security rules in Strata Cloud Manager allow you to:
 - Organize rules within pre and post rulebases
 - Position rules for optimal policy enforcement
 
+The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during security rule
+management.
+
 ## Methods
 
 | Method     | Description                                  |
@@ -26,32 +29,84 @@ Security rules in Strata Cloud Manager allow you to:
 | `fetch()`  | Retrieves a single security rule by name     |
 | `move()`   | Moves a security rule within the rulebase    |
 
+## Exceptions
+
+The SDK uses a hierarchical exception system for error handling:
+
+### Client Errors (4xx)
+
+- `InvalidObjectError`: Raised when security rule data is invalid or malformed
+- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
+- `NotFoundError`: Raised when a security rule doesn't exist
+- `AuthenticationError`: Raised for authentication failures
+- `AuthorizationError`: Raised for permission issues
+- `ConflictError`: Raised when security rule names conflict
+- `NameNotUniqueError`: Raised when creating duplicate rule names
+- `ReferenceNotZeroError`: Raised when deleting rules still referenced by other objects
+- `InputFormatMismatchError`: Raised when input data format is incorrect
+- `OutputFormatMismatchError`: Raised when response format is incorrect
+- `InvalidQueryParameterError`: Raised when query parameters are invalid
+- `MissingBodyError`: Raised when request body is missing
+- `InvalidCommandError`: Raised when an invalid command is issued
+- `MalformedCommandError`: Raised when a command is malformed
+- `BadXPathError`: Raised when an invalid XPath is used
+- `ObjectNotPresentError`: Raised when referenced objects don't exist
+- `ActionNotSupportedError`: Raised when an action is not supported
+
+### Server Errors (5xx)
+
+- `ServerError`: Base class for server-side errors
+- `APINotImplementedError`: When API endpoint isn't implemented
+- `VersionAPINotSupportedError`: When API version is not supported
+- `MethodAPINotSupportedError`: When method is not supported
+- `GatewayTimeoutError`: When request times out
+- `SessionTimeoutError`: When the API session times out
+
 ## Creating Security Rules
 
-The `create()` method allows you to define new security rules. You must specify a name, zones, and exactly one
-container type (folder, snippet, or device). You can also specify which rulebase to use (pre or post).
+The `create()` method allows you to create new security rules with proper error handling.
 
 **Example: Basic Allow Rule**
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-rule_data = {
-    "name": "allow-web",
-    "folder": "Shared",
-    "from_": ["trust"],
-    "to": ["untrust"],
-    "source": ["any"],
-    "destination": ["any"],
-    "application": ["web-browsing", "ssl"],
-    "action": "allow",
-    "log_end": True
-}
+from scm.client import Scm
+from scm.config.security import SecurityRule
+from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-new_rule = security_rule.create(rule_data, rulebase="pre")
-print(f"Created rule: {new_rule['name']}")
+# Initialize client with logging
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    log_level="DEBUG"  # Enable detailed logging
+)
+
+security_rule = SecurityRule(client)
+
+try:
+    rule_data = {
+        "name": "allow-web",
+        "folder": "Shared",
+        "from_": ["trust"],
+        "to": ["untrust"],
+        "source": ["any"],
+        "destination": ["any"],
+        "application": ["web-browsing", "ssl"],
+        "action": "allow",
+        "log_end": True
+    }
+
+    new_rule = security_rule.create(rule_data, rulebase="pre")
+    print(f"Created rule: {new_rule.name}")
+
+except NameNotUniqueError as e:
+    print(f"Rule name already exists: {e.message}")
+except InvalidObjectError as e:
+    print(f"Invalid rule data: {e.message}")
+    if e.details:
+        print(f"Details: {e.details}")
 ```
 
 </div>
@@ -60,44 +115,53 @@ print(f"Created rule: {new_rule['name']}")
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-rule_data = {
-    "name": "secure-web",
-    "folder": "Shared",
-    "from_": ["trust"],
-    "to": ["untrust"],
-    "source": ["internal-subnet"],
-    "destination": ["any"],
-    "application": ["web-browsing", "ssl"],
-    "profile_setting": {
-        "group": ["strict-security"]
-    },
-    "action": "allow",
-    "log_setting": "default-logging",
-    "log_end": True
-}
+try:
+    rule_data = {
+        "name": "secure-web",
+        "folder": "Shared",
+        "from_": ["trust"],
+        "to": ["untrust"],
+        "source": ["internal-subnet"],
+        "destination": ["any"],
+        "application": ["web-browsing", "ssl"],
+        "profile_setting": {
+            "group": ["strict-security"]
+        },
+        "action": "allow",
+        "log_setting": "default-logging",
+        "log_end": True
+    }
 
-new_rule = security_rule.create(rule_data, rulebase="pre")
-print(f"Created rule: {new_rule['name']}")
+    new_rule = security_rule.create(rule_data, rulebase="pre")
+    print(f"Created rule: {new_rule.name}")
+
+except InvalidObjectError as e:
+    print(f"Invalid rule data: {e.message}")
+    print(f"Error code: {e.error_code}")
+    if e.details:
+        print(f"Details: {e.details}")
 ```
 
 </div>
 
 ## Getting Security Rules
 
-Use the `get()` method to retrieve a security rule by its ID. You can specify which rulebase to search.
+Use the `get()` method to retrieve a security rule by its ID.
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-rule_id = "123e4567-e89b-12d3-a456-426655440000"
-rule = security_rule.get(rule_id, rulebase="pre")
-print(f"Rule Name: {rule['name']}")
-print(f"Applications: {rule['application']}")
+try:
+    rule_id = "123e4567-e89b-12d3-a456-426655440000"
+    rule = security_rule.get(rule_id, rulebase="pre")
+    print(f"Rule Name: {rule.name}")
+    print(f"Applications: {rule.application}")
+
+except NotFoundError as e:
+    print(f"Rule not found: {e.message}")
+except InvalidObjectError as e:
+    print(f"Invalid rule ID: {e.message}")
 ```
 
 </div>
@@ -108,21 +172,25 @@ The `update()` method allows you to modify existing security rules.
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "description": "Updated web access rule",
-    "application": ["web-browsing", "ssl", "http2"],
-    "profile_setting": {
-        "group": ["strict-security"]
-    },
-    "folder": "Shared"
-}
+try:
+    update_data = {
+        "id": "123e4567-e89b-12d3-a456-426655440000",
+        "description": "Updated web access rule",
+        "application": ["web-browsing", "ssl", "http2"],
+        "profile_setting": {
+            "group": ["strict-security"]
+        },
+        "folder": "Shared"
+    }
 
-updated_rule = security_rule.update(update_data, rulebase="pre")
-print(f"Updated rule: {updated_rule['name']}")
+    updated_rule = security_rule.update(update_data, rulebase="pre")
+    print(f"Updated rule: {updated_rule.name}")
+
+except NotFoundError as e:
+    print(f"Rule not found: {e.message}")
+except InvalidObjectError as e:
+    print(f"Invalid update data: {e.message}")
 ```
 
 </div>
@@ -133,12 +201,16 @@ Use the `delete()` method to remove a security rule.
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-rule_id = "123e4567-e89b-12d3-a456-426655440000"
-security_rule.delete(rule_id, rulebase="pre")
-print("Rule deleted successfully")
+try:
+    rule_id = "123e4567-e89b-12d3-a456-426655440000"
+    security_rule.delete(rule_id, rulebase="pre")
+    print("Rule deleted successfully")
+
+except NotFoundError as e:
+    print(f"Rule not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Rule still in use: {e.message}")
 ```
 
 </div>
@@ -149,23 +221,27 @@ The `move()` method allows you to reposition rules within the rulebase.
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-# Move rule to top of pre-rulebase
-move_data = {
-    "destination": "top",
-    "rulebase": "pre"
-}
-security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+try:
+    # Move rule to top of pre-rulebase
+    move_data = {
+        "destination": "top",
+        "rulebase": "pre"
+    }
+    security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
 
-# Move rule before another rule
-move_data = {
-    "destination": "before",
-    "rulebase": "pre",
-    "destination_rule": "987fcdeb-51d3-a456-426655440000"
-}
-security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+    # Move rule before another rule
+    move_data = {
+        "destination": "before",
+        "rulebase": "pre",
+        "destination_rule": "987fcdeb-51d3-a456-426655440000"
+    }
+    security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+
+except InvalidObjectError as e:
+    print(f"Invalid move parameters: {e.message}")
+except NotFoundError as e:
+    print(f"Rule not found: {e.message}")
 ```
 
 </div>
@@ -190,59 +266,63 @@ following kwargs:
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-# List all rules in a folder's pre-rulebase
-rules = security_rule.list(
-    folder="Shared",
-    rulebase="pre"
-)
+try:
+    # List all rules in a folder's pre-rulebase
+    rules = security_rule.list(
+        folder="Shared",
+        rulebase="pre"
+    )
 
-# List only allow rules
-allow_rules = security_rule.list(
-    folder="Shared",
-    rulebase="pre",
-    action=['allow']
-)
+    # List only allow rules
+    allow_rules = security_rule.list(
+        folder="Shared",
+        rulebase="pre",
+        action=['allow']
+    )
 
-# List rules with specific applications
-web_rules = security_rule.list(
-    folder="Shared",
-    rulebase="pre",
-    application=['web-browsing', 'ssl']
-)
+    # List rules with specific applications
+    web_rules = security_rule.list(
+        folder="Shared",
+        rulebase="pre",
+        application=['web-browsing', 'ssl']
+    )
 
-# List rules with specific zones
-zone_rules = security_rule.list(
-    folder="Shared",
-    rulebase="pre",
-    from_=['trust'],
-    to_=['untrust']
-)
+    # List rules with specific zones
+    zone_rules = security_rule.list(
+        folder="Shared",
+        rulebase="pre",
+        from_=['trust'],
+        to_=['untrust']
+    )
 
-# List rules with security profiles
-secure_rules = security_rule.list(
-    folder="Shared",
-    rulebase="pre",
-    profile_setting=['strict-security']
-)
+    # List rules with security profiles
+    secure_rules = security_rule.list(
+        folder="Shared",
+        rulebase="pre",
+        profile_setting=['strict-security']
+    )
 
-# Combine multiple filters
-filtered_rules = security_rule.list(
-    folder="Shared",
-    rulebase="pre",
-    action=['allow'],
-    application=['web-browsing'],
-    tag=['Production']
-)
+    # Combine multiple filters
+    filtered_rules = security_rule.list(
+        folder="Shared",
+        rulebase="pre",
+        action=['allow'],
+        application=['web-browsing'],
+        tag=['Production']
+    )
 
-# Print the results
-for rule in rules:
-    print(f"Name: {rule.name}")
-    print(f"Action: {rule.action}")
-    print(f"Applications: {rule.application}")
-    print("---")
+    # Print the results
+    for rule in rules:
+        print(f"Name: {rule.name}")
+        print(f"Action: {rule.action}")
+        print(f"Applications: {rule.application}")
+        print("---")
+
+except InvalidObjectError as e:
+    print(f"Invalid filter parameters: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing required parameter: {e.message}")
 ```
 
 </div>
@@ -253,89 +333,117 @@ The `fetch()` method retrieves a single security rule by name from a specific co
 
 <div class="termy">
 
-<!-- termynal -->
-
 ```python
-rule = security_rule.fetch(
-    name="allow-web",
-    folder="Shared"
-)
+try:
+    rule = security_rule.fetch(
+        name="allow-web",
+        folder="Shared",
+        rulebase="pre"
+    )
 
-print(f"Found rule: {rule['name']}")
-print(f"Current applications: {rule['application']}")
+    print(f"Found rule: {rule['name']}")
+    print(f"Current applications: {rule['application']}")
+
+except NotFoundError as e:
+    print(f"Rule not found: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing required parameter: {e.message}")
 ```
 
 </div>
 
 ## Full Workflow Example
 
-Here's a complete example demonstrating the full lifecycle of a security rule:
+Here's a complete example demonstrating the full lifecycle of a security rule with proper error handling:
 
 <div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
 from scm.config.security import SecurityRule
-
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+from scm.exceptions import (
+    InvalidObjectError,
+    NotFoundError,
+    AuthenticationError,
+    NameNotUniqueError,
+    ReferenceNotZeroError
 )
 
-# Initialize security rule object
-security_rule = SecurityRule(client)
+try:
+    # Initialize client with debug logging
+    client = Scm(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id",
+        log_level="DEBUG"  # Enable detailed logging
+    )
 
-# Create new rule
-create_data = {
-    "name": "test-web-access",
-    "description": "Test web access rule",
-    "folder": "Shared",
-    "from_": ["trust"],
-    "to": ["untrust"],
-    "source": ["internal-net"],
-    "destination": ["any"],
-    "application": ["web-browsing", "ssl"],
-    "action": "allow",
-    "log_end": True
-}
+    # Initialize security rule object
+    security_rule = SecurityRule(client)
 
-new_rule = security_rule.create(create_data, rulebase="pre")
-print(f"Created rule: {new_rule['name']}")
+    try:
+        # Create new rule
+        create_data = {
+            "name": "test-web-access",
+            "description": "Test web access rule",
+            "folder": "Shared",
+            "from_": ["trust"],
+            "to": ["untrust"],
+            "source": ["internal-net"],
+            "destination": ["any"],
+            "application": ["web-browsing", "ssl"],
+            "action": "allow",
+            "log_end": True
+        }
 
-# Move rule to top
-move_data = {
-    "destination": "top",
-    "rulebase": "pre"
-}
-security_rule.move(new_rule['id'], move_data)
+        new_rule = security_rule.create(create_data, rulebase="pre")
+        print(f"Created rule: {new_rule.name}")
 
-# Fetch the rule by name
-fetched_rule = security_rule.fetch(
-    name="test-web-access",
-    folder="Shared"
-)
+        # Move rule to top
+        try:
+            move_data = {
+                "destination": "top",
+                "rulebase": "pre"
+            }
+            security_rule.move(new_rule.id, move_data)
+            print("Rule moved to top")
+        except InvalidObjectError as e:
+            print(f"Invalid move parameters: {e.message}")
 
-# Modify the fetched rule
-fetched_rule["description"] = "Updated web access rule"
-fetched_rule["application"].append("http2")
+        # Fetch and update the rule
+        try:
+            fetched_rule = security_rule.fetch(
+                name="test-web-access",
+                folder="Shared",
+                rulebase="pre"
+            )
+            print(f"Found rule: {fetched_rule['name']}")
 
-# Update using the modified object
-updated_rule = security_rule.update(fetched_rule, rulebase="pre")
-print(f"Updated rule: {updated_rule['name']}")
-print(f"New description: {updated_rule['description']}")
+            # Update the rule
+            fetched_rule["description"] = "Updated web access rule"
+            updated_rule = security_rule.update(fetched_rule, rulebase="pre")
+            print(f"Updated description: {updated_rule.description}")
 
-# List all rules
-rules = security_rule.list(folder="Shared", rulebase="pre")
-for rule in rules:
-    print(f"Listed rule: {rule['name']}")
+        except NotFoundError as e:
+            print(f"Rule not found: {e.message}")
 
-# Clean up
-security_rule.delete(new_rule['id'], rulebase="pre")
-print("Rule deleted successfully")
+        # Clean up
+        try:
+            security_rule.delete(new_rule.id, rulebase="pre")
+            print("Rule deleted successfully")
+        except ReferenceNotZeroError as e:
+            print(f"Cannot delete rule - still in use: {e.message}")
+
+    except NameNotUniqueError as e:
+        print(f"Rule name conflict: {e.message}")
+    except InvalidObjectError as e:
+        print(f"Invalid rule data: {e.message}")
+        if e.details:
+            print(f"Details: {e.details}")
+
+except AuthenticationError as e:
+    print(f"Authentication failed: {e.message}")
+    print(f"Status code: {e.http_status_code}")
 ```
 
 </div>

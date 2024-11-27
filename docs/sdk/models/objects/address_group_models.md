@@ -18,11 +18,22 @@ models handle validation of inputs and outputs when interacting with the SCM API
 | folder      | str           | No**     | None    | Folder where group is defined. Max length: 64 chars                                      |
 | snippet     | str           | No**     | None    | Snippet where group is defined. Max length: 64 chars                                     |
 | device      | str           | No**     | None    | Device where group is defined. Max length: 64 chars                                      |
-| id          | str           | Yes***   | None    | UUID of the address group (response only)                                                |
+| id          | UUID          | Yes***   | None    | UUID of the address group (response only)                                                |
 
 \* Either dynamic or static must be provided, but not both
 \** Exactly one container type (folder/snippet/device) must be provided
 \*** Only required for response model
+
+## Exceptions
+
+The Address Group models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When neither or both static and dynamic fields are provided
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When tag values are not unique in a list
+    - When tag input is neither a string nor a list
 
 ## Model Validators
 
@@ -80,6 +91,37 @@ try:
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+```
+
+</div>
+
+### Tag Validation
+
+Tags must be unique and properly formatted:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# This will raise a validation error for duplicate tags
+try:
+    group = AddressGroupCreateModel(
+        name="invalid-group",
+        static=["addr1"],
+        folder="Shared",
+        tag=["web", "web"]  # Duplicate tags not allowed
+    )
+except ValueError as e:
+    print(e)  # "List items must be unique"
+
+# This will convert a single string tag to a list
+group = AddressGroupCreateModel(
+    name="valid-group",
+    static=["addr1"],
+    folder="Shared",
+    tag="web"  # Will be converted to ["web"]
+)
 ```
 
 </div>

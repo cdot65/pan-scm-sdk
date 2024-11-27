@@ -36,6 +36,17 @@ API.
 \* Exactly one container type (folder/snippet) must be provided
 \** Only required for response model
 
+## Exceptions
+
+The Application models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet) are specified for create operations
+    - When no container type is specified for create operations
+    - When name pattern validation fails
+    - When field length validations fail
+    - When required fields are missing
+
 ## Model Validators
 
 ### Container Type Validation

@@ -4,8 +4,8 @@
 
 The Security Rule models provide a structured way to manage security rules in Palo Alto Networks' Strata Cloud Manager.
 These models support defining security policies with source/destination zones, addresses, applications, and actions.
-Rules
-can be defined in folders, snippets, or devices and placed in either pre or post rulebases. The models handle validation
+Rules can be defined in folders, snippets, or devices and placed in either pre or post rulebases. The models handle
+validation
 of inputs and outputs when interacting with the SCM API.
 
 ## Attributes
@@ -42,6 +42,21 @@ of inputs and outputs when interacting with the SCM API.
 \* Exactly one container type (folder/snippet/device) must be provided
 \** Only required for response model
 
+## Exceptions
+
+The Security Rule models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When list field values are not unique
+    - When list field values are not strings
+    - When invalid action types are provided
+    - When name pattern validation fails
+    - When container field pattern validation fails
+    - When field length limits are exceeded
+    - When invalid move configurations are provided (e.g. missing destination_rule for before/after moves)
+
 ## Model Validators
 
 ### Container Type Validation
@@ -70,11 +85,11 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 
 # Using model directly
-from scm.models.security import SecurityRuleRequestModel
+from scm.models.security import SecurityRuleCreateModel
 
 # Error: no container specified
 try:
-    rule = SecurityRuleRequestModel(
+    rule = SecurityRuleCreateModel(
         name="invalid-rule",
         action="allow"
     )
@@ -107,7 +122,7 @@ except ValueError as e:
 
 # Using model directly
 try:
-    rule = SecurityRuleRequestModel(
+    rule = SecurityRuleCreateModel(
         name="invalid-rule",
         folder="Shared",
         source=["10.0.0.0/8", "10.0.0.0/8"]
@@ -145,7 +160,7 @@ rule_dict = {
 response = security_rule.create(rule_dict)
 
 # Using model directly
-rule = SecurityRuleRequestModel(
+rule = SecurityRuleCreateModel(
     name="allow-web",
     description="Allow web traffic",
     folder="Shared",
@@ -193,9 +208,9 @@ rule_dict = {
 response = security_rule.create(rule_dict)
 
 # Using model directly
-from scm.models.security import SecurityRuleRequestModel, ProfileSetting
+from scm.models.security import SecurityRuleCreateModel, SecurityRuleProfileSetting
 
-rule = SecurityRuleRequestModel(
+rule = SecurityRuleCreateModel(
     name="secure-web",
     folder="Shared",
     from_=["trust"],
@@ -204,7 +219,7 @@ rule = SecurityRuleRequestModel(
     destination=["any"],
     application=["web-browsing", "ssl"],
     action="allow",
-    profile_setting=ProfileSetting(
+    profile_setting=SecurityRuleProfileSetting(
         group=["strict-security"]
     ),
     log_setting="detailed-logging",
@@ -235,17 +250,16 @@ move_dict = {
 security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_dict)
 
 # Using model directly
-from scm.models.security import SecurityRuleMoveModel, RuleMoveDestination, SecurityRuleRulebase
+from scm.models.security import SecurityRuleMoveModel, SecurityRuleMoveDestination, SecurityRuleRulebase
 
 move_config = SecurityRuleMoveModel(
-    source_rule="123e4567-e89b-12d3-a456-426655440000",
-    destination=RuleMoveDestination.BEFORE,
+    destination=SecurityRuleMoveDestination.BEFORE,
     rulebase=SecurityRuleRulebase.PRE,
     destination_rule="987fcdeb-51d3-a456-426655440000"
 )
 
 payload = move_config.model_dump(exclude_unset=True)
-security_rule.move(move_config.source_rule, payload)
+security_rule.move("123e4567-e89b-12d3-a456-426655440000", payload)
 ```
 
 </div>

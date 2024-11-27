@@ -4,10 +4,9 @@
 
 The Service models provide a structured way to manage network services in Palo Alto Networks' Strata Cloud Manager.
 These models support both TCP and UDP protocols with port configurations and protocol-specific overrides. Services can
-be
-defined in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with the
-SCM
-API.
+be defined in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with
+the
+SCM API.
 
 ## Attributes
 
@@ -35,6 +34,17 @@ API.
 | override  | Override | No       | None    | Protocol override settings            |
 
 \* Exactly one protocol type (tcp/udp) must be provided
+
+## Exceptions
+
+The Service models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When neither or both TCP and UDP protocols are provided in protocol configuration
+    - When multiple container types (folder/snippet/device) are specified for create operations
+    - When no container type is specified for create operations
+    - When name pattern validation fails
+    - When port format validation fails
 
 ## Model Validators
 

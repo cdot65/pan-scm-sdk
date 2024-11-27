@@ -3,10 +3,11 @@
 ## Overview
 
 The Anti-Spyware Profile models provide a structured way to manage anti-spyware security profiles in Palo Alto Networks'
-Strata Cloud Manager.
-These models support configuring rules, threat exceptions, and MICA engine settings to detect and prevent spyware
-threats. Profiles can be defined
-in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with the SCM API.
+Strata Cloud Manager. These models support configuring rules, threat exceptions, and MICA engine settings to detect and
+prevent spyware
+threats. Profiles can be defined in folders, snippets, or devices. The models handle validation of inputs and outputs
+when interacting
+with the SCM API.
 
 ## Attributes
 
@@ -28,6 +29,20 @@ in folders, snippets, or devices. The models handle validation of inputs and out
 \* Exactly one container type (folder/snippet/device) must be provided
 \** Only required for response model
 
+## Exceptions
+
+The Anti-Spyware Profile models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When multiple container types (folder/snippet/device) are specified
+    - When no container type is specified for create operations
+    - When invalid action configurations are provided in rules or threat exceptions
+    - When invalid severity levels or categories are specified
+    - When invalid packet capture settings are provided
+    - When name pattern validation fails
+    - When track_by pattern validation fails in block_ip actions
+    - When duration values are outside allowed range (1-3600) in block_ip actions
+
 ## Model Validators
 
 ### Container Type Validation
@@ -39,34 +54,12 @@ For create operations, exactly one container type must be specified:
 <!-- termynal -->
 
 ```python
-# Using dictionary
-from scm.config.security import AntiSpywareProfile
-
-# Error: multiple containers specified
+# This will raise a validation error
 try:
-    profile_dict = {
-        "name": "invalid-profile",
-        "folder": "Shared",
-        "device": "fw01",  # Can't specify both folder and device
-        "rules": [{
-            "name": "rule1",
-            "severity": ["critical"],
-            "category": "spyware",
-            "action": {"alert": {}}
-        }]
-    }
-    profile = AntiSpywareProfile(api_client)
-    response = profile.create(profile_dict)
-except ValueError as e:
-    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-
-# Using model directly
-from scm.models.security import AntiSpywareProfileRequestModel
-
-# Error: no container specified
-try:
-    profile = AntiSpywareProfileRequestModel(
+    profile = AntiSpywareProfileCreateModel(
         name="invalid-profile",
+        folder="Shared",
+        device="fw01",  # Can't specify both folder and device
         rules=[{
             "name": "rule1",
             "severity": ["critical"],
@@ -153,22 +146,22 @@ response = profile.create(basic_dict)
 
 # Using model directly
 from scm.models.security import (
-    AntiSpywareProfileRequestModel,
+    AntiSpywareProfileCreateModel,
     RuleRequest,
     ActionRequest,
-    Severity,
-    Category
+    AntiSpywareSeverity,
+    AntiSpywareCategory
 )
 
-basic_profile = AntiSpywareProfileRequestModel(
+basic_profile = AntiSpywareProfileCreateModel(
     name="basic-profile",
     description="Basic anti-spyware profile",
     folder="Shared",
     rules=[
         RuleRequest(
             name="basic-rule",
-            severity=[Severity.critical, Severity.high],
-            category=Category.spyware,
+            severity=[AntiSpywareSeverity.critical, AntiSpywareSeverity.high],
+            category=AntiSpywareCategory.spyware,
             action=ActionRequest(root={"alert": {}})
         )
     ]
@@ -211,19 +204,19 @@ response = profile.create(advanced_dict)
 # Using model directly
 from scm.models.security import (
     ThreatExceptionRequest,
-    ExemptIpEntry,
-    PacketCapture
+    AntiSpywareExemptIpEntry,
+    AntiSpywarePacketCapture
 )
 
-advanced_profile = AntiSpywareProfileRequestModel(
+advanced_profile = AntiSpywareProfileCreateModel(
     name="advanced-profile",
     folder="Security",
     cloud_inline_analysis=True,
     rules=[
         RuleRequest(
             name="strict-rule",
-            severity=[Severity.critical],
-            category=Category.spyware,
+            severity=[AntiSpywareSeverity.critical],
+            category=AntiSpywareCategory.spyware,
             action=ActionRequest(root={
                 "block_ip": {
                     "track_by": "source",
@@ -235,9 +228,9 @@ advanced_profile = AntiSpywareProfileRequestModel(
     threat_exception=[
         ThreatExceptionRequest(
             name="exception1",
-            packet_capture=PacketCapture.single_packet,
+            packet_capture=AntiSpywarePacketCapture.single_packet,
             action=ActionRequest(root={"allow": {}}),
-            exempt_ip=[ExemptIpEntry(name="10.0.0.1")]
+            exempt_ip=[AntiSpywareExemptIpEntry(name="10.0.0.1")]
         )
     ]
 )
@@ -280,8 +273,8 @@ update_profile = AntiSpywareProfileUpdateModel(
     rules=[
         RuleRequest(
             name="updated-rule",
-            severity=[Severity.high],
-            category=Category.dns_security,
+            severity=[AntiSpywareSeverity.high],
+            category=AntiSpywareCategory.dns_security,
             action=ActionRequest(root={"drop": {}})
         )
     ]

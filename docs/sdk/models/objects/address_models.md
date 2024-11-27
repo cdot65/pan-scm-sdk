@@ -1,67 +1,77 @@
-# Address Group Models
+# Address Models
 
 ## Overview
 
-The Address Group models provide a structured way to manage address groups in Palo Alto Networks' Strata Cloud Manager.
-These models support both static and dynamic address groups, which can be defined in folders, snippets, or devices. The
-models handle validation of inputs and outputs when interacting with the SCM API.
+The Address models provide a structured way to manage network addresses in Palo Alto Networks' Strata Cloud Manager.
+These models support IP addresses (with CIDR notation), IP ranges, IP wildcards, and FQDNs. The models handle validation
+of inputs and outputs when interacting with the SCM API.
 
 ## Attributes
 
-| Attribute   | Type          | Required | Default | Description                                                                              |
-|-------------|---------------|----------|---------|------------------------------------------------------------------------------------------|
-| name        | str           | Yes      | None    | Name of the address group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
-| description | str           | No       | None    | Description of the address group. Max length: 1023 chars                                 |
-| tag         | List[str]     | No       | None    | List of tags. Each tag max length: 64 chars                                              |
-| dynamic     | DynamicFilter | No*      | None    | Dynamic filter for group membership                                                      |
-| static      | List[str]     | No*      | None    | List of static addresses. Min: 1, Max: 255                                               |
-| folder      | str           | No**     | None    | Folder where group is defined. Max length: 64 chars                                      |
-| snippet     | str           | No**     | None    | Snippet where group is defined. Max length: 64 chars                                     |
-| device      | str           | No**     | None    | Device where group is defined. Max length: 64 chars                                      |
-| id          | str           | Yes***   | None    | UUID of the address group (response only)                                                |
+| Attribute   | Type      | Required | Default | Description                                                                        |
+|-------------|-----------|----------|---------|------------------------------------------------------------------------------------|
+| name        | str       | Yes      | None    | Name of the address. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| description | str       | No       | None    | Description of the address. Max length: 1023 chars                                 |
+| tag         | List[str] | No       | None    | List of tags. Each tag max length: 64 chars                                        |
+| ip_netmask  | str       | No*      | None    | IP address with optional CIDR notation (e.g. "192.168.80.0/24")                    |
+| ip_range    | str       | No*      | None    | IP address range (e.g. "10.0.0.1-10.0.0.4")                                        |
+| ip_wildcard | str       | No*      | None    | IP wildcard mask (e.g. "10.20.1.0/0.0.248.255")                                    |
+| fqdn        | str       | No*      | None    | Fully qualified domain name. Max length: 255 chars                                 |
+| folder      | str       | No**     | None    | Folder where address is defined. Max length: 64 chars                              |
+| snippet     | str       | No**     | None    | Snippet where address is defined. Max length: 64 chars                             |
+| device      | str       | No**     | None    | Device where address is defined. Max length: 64 chars                              |
+| id          | UUID      | Yes***   | None    | UUID of the address (response only)                                                |
 
-\* Either dynamic or static must be provided, but not both
-\** Exactly one container type (folder/snippet/device) must be provided
+\* Exactly one address type (ip_netmask/ip_range/ip_wildcard/fqdn) must be provided
+\** Exactly one container type (folder/snippet/device) must be provided for create operations
 \*** Only required for response model
+
+## Exceptions
+
+The Address models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When no address type or multiple address types are provided
+    - When multiple container types (folder/snippet/device) are specified for create operations
+    - When no container type is specified for create operations
+    - When tag values are not unique in a list
+    - When tag input is neither a string nor a list
+    - When FQDN pattern validation fails
+    - When name pattern validation fails
 
 ## Model Validators
 
-### Address Group Type Validation
+### Address Type Validation
 
-The models enforce that exactly one group type (static or dynamic) must be specified:
+The models enforce that exactly one address type must be specified:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Using dictionary
-from scm.config.objects import AddressGroup
+# This will raise a validation error
+from scm.models.objects import AddressCreateModel
 
-# Error: both static and dynamic provided
+# Error: multiple address types provided
 try:
-    group_dict = {
-        "name": "invalid-group",
-        "static": ["addr1"],
-        "dynamic": {"filter": "'tag1'"},
-        "folder": "Shared"
-    }
-    address_group = AddressGroup(api_client)
-    response = address_group.create(group_dict)
-except ValueError as e:
-    print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
-
-# Using model directly
-from scm.models.objects import AddressGroupCreateModel
-
-# Error: neither static nor dynamic provided
-try:
-    group = AddressGroupCreateModel(
-        name="invalid-group",
+    address = AddressCreateModel(
+        name="invalid-address",
+        ip_netmask="192.168.1.0/24",
+        fqdn="example.com",
         folder="Shared"
     )
 except ValueError as e:
-    print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
+    print(e)  # "Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
+
+# Error: no address type provided
+try:
+    address = AddressCreateModel(
+        name="invalid-address",
+        folder="Shared"
+    )
+except ValueError as e:
+    print(e)  # "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
 ```
 
 </div>
@@ -75,25 +85,13 @@ For create operations, exactly one container type must be specified:
 <!-- termynal -->
 
 ```python
-# Using dictionary
+# This will raise a validation error
 try:
-    group_dict = {
-        "name": "invalid-group",
-        "static": ["addr1"],
-        "folder": "Shared",
-        "device": "fw01"  # Can't specify both folder and device
-    }
-    response = address_group.create(group_dict)
-except ValueError as e:
-    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-
-# Using model directly
-try:
-    group = AddressGroupCreateModel(
-        name="invalid-group",
-        static=["addr1"],
+    address = AddressCreateModel(
+        name="invalid-address",
+        ip_netmask="192.168.1.0/24",
         folder="Shared",
-        device="fw01"
+        device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
@@ -101,9 +99,40 @@ except ValueError as e:
 
 </div>
 
+### Tag Validation
+
+Tags must be unique and properly formatted:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# This will raise a validation error for duplicate tags
+try:
+    address = AddressCreateModel(
+        name="invalid-address",
+        ip_netmask="192.168.1.0/24",
+        folder="Shared",
+        tag=["web", "web"]  # Duplicate tags not allowed
+    )
+except ValueError as e:
+    print(e)  # "List items must be unique"
+
+# This will convert a single string tag to a list
+address = AddressCreateModel(
+    name="valid-address",
+    ip_netmask="192.168.1.0/24",
+    folder="Shared",
+    tag="web"  # Will be converted to ["web"]
+)
+```
+
+</div>
+
 ## Usage Examples
 
-### Creating a Static Address Group
+### Creating an Address Object
 
 <div class="termy">
 
@@ -111,37 +140,37 @@ except ValueError as e:
 
 ```python
 # Using dictionary
-from scm.config.objects import AddressGroup
+from scm.config.objects import Address
 
-static_group_dict = {
-    "name": "web-servers",
-    "description": "Web server group",
-    "static": ["web1", "web2", "web3"],
+address_dict = {
+    "name": "web-server",
+    "description": "Primary web server",
+    "ip_netmask": "192.168.1.100/32",
     "folder": "Shared",
     "tag": ["web", "production"]
 }
 
-address_group = AddressGroup(api_client)
-response = address_group.create(static_group_dict)
+address = Address(api_client)
+response = address.create(address_dict)
 
 # Using model directly
-from scm.models.objects import AddressGroupCreateModel
+from scm.models.objects import AddressCreateModel
 
-static_group = AddressGroupCreateModel(
-    name="web-servers",
-    description="Web server group",
-    static=["web1", "web2", "web3"],
+address_obj = AddressCreateModel(
+    name="web-server",
+    description="Primary web server",
+    ip_netmask="192.168.1.100/32",
     folder="Shared",
     tag=["web", "production"]
 )
 
-payload = static_group.model_dump(exclude_unset=True)
-response = address_group.create(payload)
+payload = address_obj.model_dump(exclude_unset=True)
+response = address.create(payload)
 ```
 
 </div>
 
-### Creating a Dynamic Address Group
+### Creating an FQDN Address
 
 <div class="termy">
 
@@ -149,36 +178,34 @@ response = address_group.create(payload)
 
 ```python
 # Using dictionary
-dynamic_group_dict = {
-    "name": "aws-instances",
-    "description": "AWS EC2 instances",
-    "dynamic": {
-        "filter": "'aws-tag' and 'production'"
-    },
-    "folder": "Cloud",
-    "tag": ["aws", "dynamic"]
+fqdn_dict = {
+    "name": "example-domain",
+    "description": "Example domain address",
+    "fqdn": "www.example.com",
+    "folder": "Shared",
+    "tag": ["web", "domain"]
 }
 
-response = address_group.create(dynamic_group_dict)
+response = address.create(fqdn_dict)
 
 # Using model directly
-from scm.models.objects import AddressGroupCreateModel, DynamicFilter
+from scm.models.objects import AddressCreateModel
 
-dynamic_group = AddressGroupCreateModel(
-    name="aws-instances",
-    description="AWS EC2 instances",
-    dynamic=DynamicFilter(filter="'aws-tag' and 'production'"),
-    folder="Cloud",
-    tag=["aws", "dynamic"]
+fqdn_address = AddressCreateModel(
+    name="example-domain",
+    description="Example domain address",
+    fqdn="www.example.com",
+    folder="Shared",
+    tag=["web", "domain"]
 )
 
-payload = dynamic_group.model_dump(exclude_unset=True)
-response = address_group.create(payload)
+payload = fqdn_address.model_dump(exclude_unset=True)
+response = address.create(payload)
 ```
 
 </div>
 
-### Updating an Address Group
+### Updating an Address
 
 <div class="termy">
 
@@ -188,27 +215,27 @@ response = address_group.create(payload)
 # Using dictionary
 update_dict = {
     "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "web-servers-updated",
-    "description": "Updated web server group",
-    "static": ["web1", "web2", "web3", "web4"],
+    "name": "web-server-updated",
+    "description": "Updated web server",
+    "ip_netmask": "192.168.1.101/32",
     "tag": ["web", "production", "updated"]
 }
 
-response = address_group.update(update_dict)
+response = address.update(update_dict)
 
 # Using model directly
-from scm.models.objects import AddressGroupUpdateModel
+from scm.models.objects import AddressUpdateModel
 
-update_group = AddressGroupUpdateModel(
+update_address = AddressUpdateModel(
     id="123e4567-e89b-12d3-a456-426655440000",
-    name="web-servers-updated",
-    description="Updated web server group",
-    static=["web1", "web2", "web3", "web4"],
+    name="web-server-updated",
+    description="Updated web server",
+    ip_netmask="192.168.1.101/32",
     tag=["web", "production", "updated"]
 )
 
-payload = update_group.model_dump(exclude_unset=True)
-response = address_group.update(payload)
+payload = update_address.model_dump(exclude_unset=True)
+response = address.update(payload)
 ```
 
 </div>
