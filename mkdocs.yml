@@ -42,6 +42,7 @@ nav:
               - Application: sdk/config/objects/application.md
               - Application Group: sdk/config/objects/application_group.md
               - Service: sdk/config/objects/service.md
+              - Service Group: sdk/config/objects/service_group.md
               - Tag: sdk/config/objects/tag.md
           - Security Services:
               - Overview: sdk/config/security_services/index.md
@@ -59,6 +60,7 @@ nav:
               - Application Models: sdk/models/objects/application_models.md
               - Application Group Models: sdk/models/objects/application_group_models.md
               - Service Models: sdk/models/objects/service_models.md
+              - Service Group Models: sdk/models/objects/service_group_models.md
               - Tag Models: sdk/models/objects/tag_models.md
           - Security Services:
               - Overview: sdk/models/security_services/index.md
