@@ -31,6 +31,9 @@ nav:
       - License: about/license.md
   - Developer Documentation:
       - Overview: sdk/index.md
+      - Auth: sdk/auth.md
+      - Client: sdk/client.md
+      - Exceptions: sdk/exceptions.md
       - Configuration:
           - Objects:
               - Overview: sdk/config/objects/index.md
@@ -65,7 +68,6 @@ nav:
               - Security Rule Models: sdk/models/security_services/security_rule_models.md
               - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
               - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
-      - SCM Client: sdk/client.md
 extra_css:
   - css/termynal.css
   - css/custom.css
