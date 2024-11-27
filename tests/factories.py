@@ -26,6 +26,9 @@ from scm.models.objects import (
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
+    ServiceGroupCreateModel,
+    ServiceGroupUpdateModel,
+    ServiceGroupResponseModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -1416,6 +1419,371 @@ class ServiceUpdateModelFactory(factory.DictFactory):
     def build_valid(cls, **kwargs):
         """Return a valid data dict for updating a service."""
         return cls(protocol={"tcp": {"port": "80,443"}}, **kwargs)
+
+
+# ----------------------------------------------------------------------------
+# Service Group object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class ServiceGroupCreateApiFactory(factory.Factory):
+    """Factory for creating ServiceGroupCreateModel instances with members."""
+
+    class Meta:
+        model = ServiceGroupCreateModel
+
+    name = factory.Sequence(lambda n: f"service_{n}")
+    members = None  # Will be set in specific methods
+    tag = ["test-tag", "environment-prod"]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_members(cls, **kwargs):
+        """Create a ServiceGroupCreateModel instance with two members."""
+        return cls(
+            folder="Texas",
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(
+            folder=None,
+            snippet=snippet,
+            device=None,
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=device,
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_without_members(cls, **kwargs):
+        """Return an instance without the required protocol field."""
+        return cls(
+            members=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_duplicate_protocols(cls, **kwargs):
+        """Return an instance with both TCP and UDP protocols."""
+        return cls(
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return an instance without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers (should fail validation)."""
+        return cls(
+            folder="Shared",
+            snippet="TestSnippet",
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+
+class ServiceGroupUpdateApiFactory(factory.Factory):
+    """Factory for creating ServiceUpdateModel instances."""
+
+    class Meta:
+        model = ServiceGroupUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_{n}")
+    members = None  # Will be set in specific methods
+    tag = ["test-tag", "environment-prod"]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_members(cls, **kwargs):
+        """Create a ServiceGroupCreateModel instance with two members."""
+        return cls(
+            folder="Texas",
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(
+            folder=None,
+            snippet=snippet,
+            device=None,
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=device,
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_without_members(cls, **kwargs):
+        """Return an instance without the required protocol field."""
+        return cls(
+            members=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_duplicate_protocols(cls, **kwargs):
+        """Return an instance with both TCP and UDP protocols."""
+        return cls(
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return an instance without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers (should fail validation)."""
+        return cls(
+            folder="Shared",
+            snippet="TestSnippet",
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+
+class ServiceGroupResponseFactory(factory.Factory):
+    """Factory for creating ServiceResponseModel instances."""
+
+    class Meta:
+        model = ServiceGroupResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_{n}")
+    members = None  # Will be set in specific methods
+    tag = ["test-tag", "environment-prod"]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_members(cls, **kwargs):
+        """Create a ServiceGroupCreateModel instance with two members."""
+        return cls(
+            folder="Texas",
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(
+            folder=None,
+            snippet=snippet,
+            device=None,
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=device,
+            members=["test1", "test2"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_without_members(cls, **kwargs):
+        """Return an instance without the required protocol field."""
+        return cls(
+            members=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_duplicate_protocols(cls, **kwargs):
+        """Return an instance with both TCP and UDP protocols."""
+        return cls(
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return an instance without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers (should fail validation)."""
+        return cls(
+            folder="Shared",
+            snippet="TestSnippet",
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def from_request(cls, request_model: ServiceGroupCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class ServiceGroupCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ServiceGroupCreateModel."""
+
+    name = factory.Sequence(lambda n: f"service_{n}")
+    members = None  # Will be set in specific methods
+    tag = ["test-tag", "environment-prod"]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_without_members(cls, **kwargs):
+        """Return a data dict without the required members field."""
+        return cls(
+            members=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return a data dict without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return a data dict with multiple containers."""
+        return cls(
+            folder="Shared",
+            snippet="TestSnippet",
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_valid_members(cls, **kwargs):
+        """Return a valid data dict for a service group."""
+        return cls(
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+
+class ServiceGroupUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ServiceUpdateModel."""
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_{n}")
+    members = None  # Will be set in specific methods
+    tag = ["test-tag", "environment-prod"]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_without_members(cls, **kwargs):
+        """Return a data dict without the required members field."""
+        return cls(
+            members=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return a data dict without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return a data dict with multiple containers."""
+        return cls(
+            folder="Shared",
+            snippet="TestSnippet",
+            device=None,
+            members=["test1", "test1"],
+            **kwargs,
+        )
+
+    @classmethod
+    def build_valid_members(cls, **kwargs):
+        """Return a valid data dict for a service group."""
+        return cls(
+            members=["test1", "test1"],
+            **kwargs,
+        )
 
 
 # ----------------------------------------------------------------------------

@@ -35,6 +35,10 @@ Manage application group definitions, including their characteristics and associ
 
 Manage service definitions, including their characteristics and associated protocols / ports.
 
+### [Service Group](service_group.md)
+
+Manage service group definitions, including their nested services.
+
 ### [Tag](tag.md)
 
 Manage tag definitions, including their colors.
