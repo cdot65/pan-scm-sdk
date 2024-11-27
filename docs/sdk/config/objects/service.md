@@ -33,7 +33,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when service object data is invalid or malformed
+- `InvalidObjectError`: Raised when service object data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when a service doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -47,7 +47,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Services
 
@@ -148,7 +147,7 @@ try:
     service_id = "123e4567-e89b-12d3-a456-426655440000"
     service_obj = services.get(service_id)
     print(f"Service: {service_obj.name}")
-    print(f"Protocol: {'TCP' if 'tcp' in service_obj.protocol else 'UDP'}")
+    print(f"Protocol: {'TCP' if service_obj.protocol.tcp else 'UDP'}")
 
 except NotFoundError as e:
     print(f"Service not found: {e.message}")
@@ -158,7 +157,7 @@ except NotFoundError as e:
 
 ## Updating Services
 
-The `update()` method allows you to modify existing services.
+The `update()` method allows you to modify existing services using Pydantic models.
 
 <div class="termy">
 
@@ -167,7 +166,7 @@ The `update()` method allows you to modify existing services.
 ```python
 try:
     service_object = services.fetch(folder='Texas', name='dns-service')
-    service_object['description'] = 'updated description'
+    service_object.description = 'updated description'
     updated_service = services.update(service_object)
     print(f"Updated service: {updated_service.name}")
 
@@ -255,7 +254,7 @@ except MissingQueryParameterError as e:
 
 ## Fetching Services
 
-The `fetch()` method retrieves a single service by name from a specific container.
+The `fetch()` method retrieves a single service by name from a specific container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -264,8 +263,8 @@ The `fetch()` method retrieves a single service by name from a specific containe
 ```python
 try:
     service_obj = services.fetch(name="web-service", folder="Texas")
-    print(f"Found service: {service_obj['name']}")
-    print(f"Current ports: {service_obj['protocol']['tcp']['port']}")
+    print(f"Found service: {service_obj.name}")
+    print(f"Current ports: {service_obj.protocol.tcp.port}")
 
 except NotFoundError as e:
     print(f"Service not found: {e.message}")
@@ -331,11 +330,11 @@ try:
                 name="test-service",
                 folder="Texas"
             )
-            print(f"Found service: {fetched_service['name']}")
+            print(f"Found service: {fetched_service.name}")
 
-            # Update the service
-            fetched_service["description"] = "Updated test service"
-            fetched_service["protocol"]["tcp"]["port"] = "8080,8443"
+            # Update the service using Pydantic model
+            fetched_service.description = "Updated test service"
+            fetched_service.protocol.tcp.port = "8080,8443"
             updated_service = services.update(fetched_service)
             print(f"Updated ports: {updated_service.protocol.tcp.port}")
 

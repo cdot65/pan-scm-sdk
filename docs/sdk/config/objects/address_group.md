@@ -34,7 +34,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when address group data is invalid
+- `InvalidObjectError`: Raised when address group data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when an address group doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -48,7 +48,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Address Groups
 
@@ -140,7 +139,7 @@ try:
     group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
     group = address_groups.get(group_id)
     print(f"Group Name: {group.name}")
-    print(f"Type: {'Dynamic' if 'dynamic' in group else 'Static'}")
+    print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
 
 except NotFoundError as e:
     print(f"Group not found: {e.message}")
@@ -150,7 +149,7 @@ except NotFoundError as e:
 
 ## Updating Address Groups
 
-The `update()` method allows you to modify existing address groups.
+The `update()` method allows you to modify existing address groups using Pydantic models.
 
 <div class="termy">
 
@@ -158,11 +157,11 @@ The `update()` method allows you to modify existing address groups.
 
 ```python
 try:
-    # return an existing group
+    # return an existing group as a Pydantic model
     python_server_group = address_groups.fetch(folder='Texas', name='python servers')
 
-    # perform the update
-    python_server_group['description'] = 'updated description'
+    # update the model's description attribute
+    python_server_group.description = 'updated description'
 
     # push changes to the SCM API
     updated_group = address_groups.update(python_server_group)
@@ -249,7 +248,7 @@ except MissingQueryParameterError as e:
 
 ## Fetching Address Groups
 
-The `fetch()` method retrieves a single address group by name from a specific container.
+The `fetch()` method retrieves a single address group by name from a specific container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -259,7 +258,8 @@ The `fetch()` method retrieves a single address group by name from a specific co
 try:
     # pass in the folder and name required parameters
     dag_group = address_groups.fetch(folder='Texas', name='DAG_test')
-    print(f"Found group: {dag_group['name']}")
+    print(f"Found group: {dag_group.name}")
+    print(f"Description: {dag_group.description}")
 
 except NotFoundError as e:
     print(f"Group not found: {e.message}")
@@ -339,10 +339,10 @@ try:
                 name="test_network_group",
                 folder="Texas"
             )
-            print(f"Found group: {fetched_group['name']}")
+            print(f"Found group: {fetched_group.name}")
 
-            # Update the group
-            fetched_group["description"] = "Updated test networks"
+            # Update the group using Pydantic model
+            fetched_group.description = "Updated test networks"
             updated = address_groups.update(fetched_group)
             print(f"Updated description: {updated.description}")
 
