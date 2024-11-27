@@ -25,8 +25,9 @@ from .service import (
     ServiceResponseModel,
     ServiceUpdateModel,
 )
-from .tag import (
-    TagCreateModel,
-    TagResponseModel,
-    TagUpdateModel
+from .service_group import (
+    ServiceGroupResponseModel,
+    ServiceGroupCreateModel,
+    ServiceGroupUpdateModel,
 )
+from .tag import TagCreateModel, TagResponseModel, TagUpdateModel
