@@ -23,7 +23,6 @@ class ServiceGroupBaseModel(BaseModel):
 
     Attributes:
         name (str): The name of the service group.
-        description (Optional[str]): The description of the service group.
         tag (Optional[List[TagString]]): Tags associated with the service group.
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
@@ -38,12 +37,13 @@ class ServiceGroupBaseModel(BaseModel):
         pattern=r"^[a-zA-Z0-9_ \.-]+$",
     )
 
-    # Optional fields
-    description: Optional[str] = Field(
-        None,
-        max_length=1023,
-        description="The description of the service group",
+    members: List[str] = Field(
+        ...,
+        max_length=63,
+        description="A list of members of the service group.",
     )
+
+    # Optional fields
     tag: Optional[List[TagString]] = Field(  # type: ignore
         None,
         description="Tags associated with the service group",
