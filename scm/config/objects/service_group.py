@@ -62,7 +62,7 @@ class ServiceGroup(BaseObject):
         object_id: str,
     ) -> ServiceGroupResponseModel:
         """
-        Gets an service group object by ID.
+        Gets a service group object by ID.
 
         Returns:
             ServiceGroupResponseModel
@@ -81,10 +81,13 @@ class ServiceGroup(BaseObject):
         """
         Updates an existing service group object.
 
+        Args:
+            service_group (ServiceGroupUpdateModel):
+
         Returns:
             ServiceGroupResponseModel
         """
-        # Convert to a Python dictionary, removing any unset fields
+        # Convert to dict for API request, excluding unset fields
         payload = service_group.model_dump(exclude_unset=True)
 
         # Extract ID and remove from payload since it's in the URL
@@ -241,6 +244,7 @@ class ServiceGroup(BaseObject):
         service_groups = [
             ServiceGroupResponseModel(**item) for item in response["data"]
         ]
+
         return self._apply_filters(
             service_groups,
             filters,
@@ -336,10 +340,11 @@ class ServiceGroup(BaseObject):
         object_id: str,
     ) -> None:
         """
-        Deletes an service group object.
+        Deletes a service group object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

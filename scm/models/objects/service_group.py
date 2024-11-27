@@ -1,8 +1,10 @@
 # scm/models/objects/service_group.py
 
+# Standard library imports
 from typing import Optional, List
 from uuid import UUID
 
+# External libraries
 from pydantic import (
     BaseModel,
     Field,
@@ -28,18 +30,15 @@ class ServiceGroupBaseModel(BaseModel):
         device (Optional[str]): The device in which the resource is defined.
     """
 
-    model_config = ConfigDict(
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-        populate_by_name=True,
-    )
-
+    # Required fields
     name: str = Field(
         ...,
         max_length=63,
         description="The name of the service group",
         pattern=r"^[a-zA-Z0-9_ \.-]+$",
     )
+
+    # Optional fields
     description: Optional[str] = Field(
         None,
         max_length=1023,
@@ -49,6 +48,8 @@ class ServiceGroupBaseModel(BaseModel):
         None,
         description="Tags associated with the service group",
     )
+
+    # Container Types
     folder: Optional[str] = Field(
         None,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
@@ -71,6 +72,13 @@ class ServiceGroupBaseModel(BaseModel):
         examples=["My Device"],
     )
 
+    # Pydantic model configuration
+    model_config = ConfigDict(
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     # Custom Validators
     @field_validator("tag", mode="before")
     def ensure_list_of_strings(cls, v):  # noqa
@@ -90,13 +98,27 @@ class ServiceGroupBaseModel(BaseModel):
 
 class ServiceGroupCreateModel(ServiceGroupBaseModel):
     """
-    Model for creating a new Service Group.
-    Inherits from ServiceGroupBase and adds container type validation.
+    Represents the creation of a new Service Group object for Palo Alto Networks' Strata Cloud Manager.
+
+    This class defines the structure and validation rules for an ServiceGroupCreateModel object,
+    it inherits all fields from the ServiceGroupBaseModel class, and provides a custom validator
+    to ensure that the creation request contains exactly one of the following container types:
+        - folder
+        - snippet
+        - device
+
+    Error:
+        ValueError: Raised when container type validation fails.
     """
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "ServiceGroupCreateModel":
-        container_fields = ["folder", "snippet", "device"]
+        """Validates that exactly one container type is provided."""
+        container_fields = [
+            "folder",
+            "snippet",
+            "device",
+        ]
         provided = [
             field for field in container_fields if getattr(self, field) is not None
         ]
@@ -109,8 +131,9 @@ class ServiceGroupCreateModel(ServiceGroupBaseModel):
 
 class ServiceGroupUpdateModel(ServiceGroupBaseModel):
     """
-    Model for updating an existing Service Group.
-    All fields are optional to allow partial updates.
+    Represents the update of an existing Service Group object for Palo Alto Networks' Strata Cloud Manager.
+
+    This class defines the structure and validation rules for an ServiceGroupUpdateModel object.
     """
 
     id: Optional[UUID] = Field(
