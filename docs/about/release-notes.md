@@ -1,10 +1,14 @@
+## Version 0.3.0
+
+- Refactored Exceptions
+- Refactored logging
+- Updated tests
+- Addressed issue with refresh_token of oauth client
+- Added support for tag objects
+
 ## Version 0.2.2
 
 - Dropped dependency version on crypto package.
-
-## Version 0.2.2
-
-**Release Date:** November 21st
 
 ### Updates:
 
@@ -105,4 +109,6 @@
 
 ---
 
-For more detailed information on each release, visit the [GitHub repository](https://github.com/cdot65/pan-scm-sdk/releases) or check the [commit history](https://github.com/cdot65/pan-scm-sdk/commits/main).
+For more detailed information on each release, visit
+the [GitHub repository](https://github.com/cdot65/pan-scm-sdk/releases) or check
+the [commit history](https://github.com/cdot65/pan-scm-sdk/commits/main).
