@@ -161,13 +161,13 @@ class TestAddressList(TestAddressBase):
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        self.client.list(folder="Shared", **filters)
+        self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -178,7 +178,7 @@ class TestAddressList(TestAddressBase):
                 {
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "test-address",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "ip_netmask": "10.0.0.0/24",
                     "tag": ["tag1"],
                 }
@@ -188,19 +188,19 @@ class TestAddressList(TestAddressBase):
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             types=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             values=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             tags=[],
         )
         assert len(filtered_objects) == 0
@@ -213,7 +213,7 @@ class TestAddressList(TestAddressBase):
                 {
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "test-address",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "ip_netmask": "10.0.0.0/24",
                     "tag": ["tag1", "tag2"],
                 }
@@ -228,7 +228,7 @@ class TestAddressList(TestAddressBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", types="netmask")
+            self.client.list(folder="Texas", types="netmask")
         error_response = exc_info.value.response.json()
         assert (
             error_response["_errors"][0]["message"] == "'types' filter must be a list"
@@ -246,7 +246,7 @@ class TestAddressList(TestAddressBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", values="10.0.0.0/24")
+            self.client.list(folder="Texas", values="10.0.0.0/24")
         error_response = exc_info.value.response.json()
         assert (
             error_response["_errors"][0]["message"] == "'values' filter must be a list"
@@ -264,7 +264,7 @@ class TestAddressList(TestAddressBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", tags="tag1")
+            self.client.list(folder="Texas", tags="tag1")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "'tags' filter must be a list"
         assert (
@@ -279,7 +279,7 @@ class TestAddressList(TestAddressBase):
         # Test that valid list filters pass validation
         try:
             self.client.list(
-                folder="Shared",
+                folder="Texas",
                 types=["netmask"],
                 values=["10.0.0.0/24"],
                 tags=["tag1"],
@@ -366,21 +366,21 @@ class TestAddressList(TestAddressBase):
                 {
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "test-address1",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "ip_netmask": "10.0.0.0/24",
                     "tag": ["tag1", "tag2"],
                 },
                 {
                     "id": "223e4567-e89b-12d3-a456-426655440000",
                     "name": "test-address2",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "ip_range": "10.0.0.1-10.0.0.10",
                     "tag": ["tag2", "tag3"],
                 },
                 {
                     "id": "323e4567-e89b-12d3-a456-426655440000",
                     "name": "test-address3",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "fqdn": "test.example.com",
                     "tag": ["tag1", "tag3"],
                 },
@@ -390,7 +390,7 @@ class TestAddressList(TestAddressBase):
 
         # Test combining types and tags filters
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             types=["netmask"],
             tags=["tag1"],
         )
@@ -399,7 +399,7 @@ class TestAddressList(TestAddressBase):
 
         # Test combining values and tags filters
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             values=["10.0.0.0/24"],
             tags=["tag2"],
         )
@@ -408,7 +408,7 @@ class TestAddressList(TestAddressBase):
 
         # Test all filters together
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             types=["netmask"],
             values=["10.0.0.0/24"],
             tags=["tag1"],
@@ -424,7 +424,7 @@ class TestAddressList(TestAddressBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -441,7 +441,7 @@ class TestAddressList(TestAddressBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -460,7 +460,7 @@ class TestAddressList(TestAddressBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -477,7 +477,7 @@ class TestAddressList(TestAddressBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
     def test_list_server_error(self):
         """Test generic exception handling in list method."""
@@ -489,7 +489,7 @@ class TestAddressList(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -588,7 +588,7 @@ class TestAddressCreate(TestAddressBase):
         """Test that HTTPError with response content triggers proper error handling."""
         test_data = {
             "name": "test-address",
-            "folder": "Shared",
+            "folder": "Texas",
             "ip_netmask": "10.0.0.0/24",
         }
 
@@ -628,7 +628,7 @@ class TestAddressGet(TestAddressBase):
             id="b44a8c00-7555-4021-96f0-d59deecd54e8",
             name="TestAddress",
             ip_netmask="10.0.0.0/24",
-            folder="Shared",
+            folder="Texas",
         )
 
         self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
@@ -719,7 +719,7 @@ class TestAddressUpdate(TestAddressBase):
             ip_netmask="10.0.0.0/24",
             description="Updated description",
             tag=["tag1", "tag2"],
-            folder="Shared",
+            folder="Texas",
         )
 
         # Create mock response
@@ -744,7 +744,7 @@ class TestAddressUpdate(TestAddressBase):
         assert payload["ip_netmask"] == "10.0.0.0/24"
         assert payload["description"] == "Updated description"
         assert payload["tag"] == ["tag1", "tag2"]
-        assert payload["folder"] == "Shared"
+        assert payload["folder"] == "Texas"
 
         # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressResponseModel)
@@ -761,7 +761,7 @@ class TestAddressUpdate(TestAddressBase):
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
-            folder="Shared",
+            folder="Texas",
             ip_netmask="10.0.0.0/24",
         )
 
@@ -787,7 +787,7 @@ class TestAddressUpdate(TestAddressBase):
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
-            folder="Shared",
+            folder="Texas",
             ip_netmask="10.0.0.0/24",
         )
 
@@ -849,7 +849,7 @@ class TestAddressUpdate(TestAddressBase):
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
-            folder="Shared",
+            folder="Texas",
             ip_netmask="10.0.0.0/24",
         )
 
@@ -1022,7 +1022,7 @@ class TestAddressFetch(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="nonexistent", folder="Shared")
+            self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -1039,7 +1039,7 @@ class TestAddressFetch(TestAddressBase):
         )
 
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert '"name" is not allowed to be empty' in error_msg
@@ -1073,7 +1073,7 @@ class TestAddressFetch(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Invalid response format"
         assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
@@ -1083,7 +1083,7 @@ class TestAddressFetch(TestAddressBase):
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
 
         assert str(exc_info.value) == "Generic error"
 
@@ -1101,7 +1101,7 @@ class TestAddressFetch(TestAddressBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-address", folder="Shared")
+            self.client.fetch(name="test-address", folder="Texas")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
@@ -1113,7 +1113,7 @@ class TestAddressFetch(TestAddressBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -1123,14 +1123,14 @@ class TestAddressFetch(TestAddressBase):
         # Mock response without 'id' field
         mock_response = {
             "name": "test-address",
-            "folder": "Shared",
+            "folder": "Texas",
             "ip_netmask": "10.0.0.0/24",
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-address", folder="Shared")
+            self.client.fetch(name="test-address", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -1152,7 +1152,7 @@ class TestAddressFetch(TestAddressBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-address",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -1167,7 +1167,7 @@ class TestAddressFetch(TestAddressBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test123", folder="Shared")
+            self.client.fetch(name="test123", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg

@@ -58,7 +58,7 @@ For create operations, exactly one container type must be specified:
 try:
     profile = AntiSpywareProfileCreateModel(
         name="invalid-profile",
-        folder="Shared",
+        folder="Texas",
         device="fw01",  # Can't specify both folder and device
         rules=[{
             "name": "rule1",
@@ -95,7 +95,7 @@ try:
     }
     profile_dict = {
         "name": "test-profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "rules": [rule_dict]
     }
     response = profile.create(profile_dict)
@@ -132,7 +132,7 @@ except ValueError as e:
 basic_dict = {
     "name": "basic-profile",
     "description": "Basic anti-spyware profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "rules": [{
         "name": "basic-rule",
         "severity": ["critical", "high"],
@@ -156,7 +156,7 @@ from scm.models.security import (
 basic_profile = AntiSpywareProfileCreateModel(
     name="basic-profile",
     description="Basic anti-spyware profile",
-    folder="Shared",
+    folder="Texas",
     rules=[
         RuleRequest(
             name="basic-rule",
@@ -183,7 +183,7 @@ response = profile.create(payload)
 # Using dictionary
 advanced_dict = {
     "name": "advanced-profile",
-    "folder": "Security",
+    "folder": "Texas",
     "cloud_inline_analysis": True,
     "rules": [{
         "name": "strict-rule",

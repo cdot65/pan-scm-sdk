@@ -69,7 +69,7 @@ try:
         "subcategory": "database",
         "technology": "client-server",
         "risk": 3,
-        "folder": "Shared",
+        "folder": "Texas",
         "snippet": "Config"  # Can't specify both folder and snippet
     }
     app = Application(api_client)
@@ -113,7 +113,7 @@ app_dict = {
     "subcategory": "database",
     "technology": "client-server",
     "risk": 3,
-    "folder": "Custom Apps",
+    "folder": "Texas",
     "ports": ["tcp/1433"]
 }
 
@@ -153,7 +153,7 @@ app_dict = {
     "subcategory": "file-sharing",
     "technology": "peer-to-peer",
     "risk": 4,
-    "folder": "Shared",
+    "folder": "Texas",
     "description": "Custom file sharing application",
     "ports": ["tcp/6346", "tcp/6347"],
     "evasive": True,
@@ -171,7 +171,7 @@ app = ApplicationCreateModel(
     subcategory="file-sharing",
     technology="peer-to-peer",
     risk=4,
-    folder="Shared",
+    folder="Texas",
     description="Custom file sharing application",
     ports=["tcp/6346", "tcp/6347"],
     evasive=True,

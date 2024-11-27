@@ -52,7 +52,7 @@ The SSL protocol settings enforce that max_version cannot be less than min_versi
 try:
     profile_dict = {
         "name": "invalid-profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "ssl_protocol_settings": {
             "min_version": "tls1-2",
             "max_version": "tls1-1"  # Invalid: max < min
@@ -92,7 +92,7 @@ from scm.config.security import DecryptionProfile
 try:
     profile_dict = {
         "name": "invalid-profile",
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01",  # Can't specify both folder and device
         "ssl_protocol_settings": {
             "min_version": "tls1-2",
@@ -119,7 +119,7 @@ except ValueError as e:
 # Using dictionary
 profile_dict = {
     "name": "basic-profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "ssl_protocol_settings": {
         "min_version": "tls1-2",
         "max_version": "tls1-3",
@@ -140,7 +140,7 @@ from scm.models.security import (
 
 profile = DecryptionProfileCreateModel(
     name="basic-profile",
-    folder="Shared",
+    folder="Texas",
     ssl_protocol_settings=SSLProtocolSettings(
         min_version=SSLVersion.tls1_2,
         max_version=SSLVersion.tls1_3,
@@ -165,7 +165,7 @@ response = profile.create(payload)
 # Using dictionary
 forward_proxy_dict = {
     "name": "forward-proxy-profile",
-    "folder": "Shared",
+    "folder": "Texas",
     "ssl_forward_proxy": {
         "auto_include_altname": True,
         "block_expired_certificate": True,
@@ -190,7 +190,7 @@ from scm.models.security import (
 
 forward_proxy = DecryptionProfileCreateModel(
     name="forward-proxy-profile",
-    folder="Shared",
+    folder="Texas",
     ssl_forward_proxy=SSLForwardProxy(
         auto_include_altname=True,
         block_expired_certificate=True,

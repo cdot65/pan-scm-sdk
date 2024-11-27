@@ -121,7 +121,7 @@ class ServiceBaseModel(BaseModel):
         pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
         description="The folder where the service is defined.",
-        examples=["Shared"],
+        examples=["Texas"],
     )
     snippet: Optional[str] = Field(
         None,

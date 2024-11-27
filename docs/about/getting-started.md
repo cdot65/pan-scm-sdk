@@ -72,7 +72,7 @@ address_data = {
     "name": "test-address",
     "fqdn": "test.example.com",
     "description": "Created via pan-scm-sdk",
-    "folder": "Prisma Access",
+    "folder": "Texas",
 }
 
 new_address = address.create(address_data)
@@ -103,7 +103,7 @@ address_group_data = {
     "name": "example-group",
     "description": "Test address group",
     "static": ["test-address"],
-    "folder": "Prisma Access",
+    "folder": "Texas",
 }
 
 new_group = address_group.create(address_group_data)
@@ -138,7 +138,7 @@ application_data = {
     "risk": 1,
     "description": "Created via pan-scm-sdk",
     "ports": ["tcp/80,443"],
-    "folder": "Prisma Access",
+    "folder": "Texas",
 }
 
 new_application = application.create(application_data)

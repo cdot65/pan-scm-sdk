@@ -75,7 +75,7 @@ class TestAddressCreateModel:
 
     def test_address_create_model_missing_address_type(self):
         """Test validation when required address type is missing."""
-        data = {"name": "test", "folder": "Shared"}
+        data = {"name": "test", "folder": "Texas"}
         with pytest.raises(ValidationError) as exc_info:
             AddressCreateModel(**data)
         assert "1 validation error for AddressCreateModel" in str(exc_info.value)
@@ -149,7 +149,7 @@ class TestAddressUpdateModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-address",
-            "folder": "Shared",
+            "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             AddressUpdateModel(**data)

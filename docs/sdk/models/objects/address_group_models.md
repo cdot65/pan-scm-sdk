@@ -55,7 +55,7 @@ try:
         name="invalid-group",
         static=["addr1"],
         dynamic={"filter": "'tag1'"},
-        folder="Shared"
+        folder="Texas"
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
@@ -64,7 +64,7 @@ except ValueError as e:
 try:
     group = AddressGroupCreateModel(
         name="invalid-group",
-        folder="Shared"
+        folder="Texas"
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
@@ -86,7 +86,7 @@ try:
     group = AddressGroupCreateModel(
         name="invalid-group",
         static=["addr1"],
-        folder="Shared",
+        folder="Texas",
         device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
@@ -109,7 +109,7 @@ try:
     group = AddressGroupCreateModel(
         name="invalid-group",
         static=["addr1"],
-        folder="Shared",
+        folder="Texas",
         tag=["web", "web"]  # Duplicate tags not allowed
     )
 except ValueError as e:
@@ -119,7 +119,7 @@ except ValueError as e:
 group = AddressGroupCreateModel(
     name="valid-group",
     static=["addr1"],
-    folder="Shared",
+    folder="Texas",
     tag="web"  # Will be converted to ["web"]
 )
 ```
@@ -142,7 +142,7 @@ static_group_dict = {
     "name": "web-servers",
     "description": "Web server group",
     "static": ["web1", "web2", "web3"],
-    "folder": "Shared",
+    "folder": "Texas",
     "tag": ["web", "production"]
 }
 
@@ -156,7 +156,7 @@ static_group = AddressGroupCreateModel(
     name="web-servers",
     description="Web server group",
     static=["web1", "web2", "web3"],
-    folder="Shared",
+    folder="Texas",
     tag=["web", "production"]
 )
 

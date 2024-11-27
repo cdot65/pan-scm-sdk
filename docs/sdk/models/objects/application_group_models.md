@@ -50,7 +50,7 @@ try:
     app_group_dict = {
         "name": "invalid-group",
         "members": ["app1", "app2"],
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01"  # Can't specify both folder and device
     }
     app_group = ApplicationGroup(api_client)
@@ -88,7 +88,7 @@ from scm.config.objects import ApplicationGroup
 app_group_dict = {
     "name": "web-apps",
     "members": ["http", "https", "web-browsing"],
-    "folder": "Shared",
+    "folder": "Texas",
 }
 
 app_group = ApplicationGroup(api_client)
@@ -100,7 +100,7 @@ from scm.models.objects import ApplicationGroupCreateModel
 app_group = ApplicationGroupCreateModel(
     name="web-apps",
     members=["http", "https", "web-browsing"],
-    folder="Shared"
+    folder="Texas"
 )
 
 payload = app_group.model_dump(exclude_unset=True)

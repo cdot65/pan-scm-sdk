@@ -51,7 +51,7 @@ try:
     service_group_dict = {
         "name": "invalid-group",
         "members": ["service1", "service2"],
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01"  # Can't specify both folder and device
     }
     service_group = ServiceGroup(api_client)
@@ -87,7 +87,7 @@ try:
     service_group = ServiceGroupCreateModel(
         name="invalid-group",
         members=["service1"],
-        folder="Shared",
+        folder="Texas",
         tag=["web", "web"]  # Duplicate tags not allowed
     )
 except ValueError as e:
@@ -97,7 +97,7 @@ except ValueError as e:
 service_group = ServiceGroupCreateModel(
     name="valid-group",
     members=["service1"],
-    folder="Shared",
+    folder="Texas",
     tag="web"  # Will be converted to ["web"]
 )
 ```
@@ -118,7 +118,7 @@ from scm.config.objects import ServiceGroup
 service_group_dict = {
     "name": "web-services",
     "members": ["http", "https", "web-browsing"],
-    "folder": "Shared",
+    "folder": "Texas",
     "tag": ["web", "production"]
 }
 
@@ -131,7 +131,7 @@ from scm.models.objects import ServiceGroupCreateModel
 service_group = ServiceGroupCreateModel(
     name="web-services",
     members=["http", "https", "web-browsing"],
-    folder="Shared",
+    folder="Texas",
     tag=["web", "production"]
 )
 

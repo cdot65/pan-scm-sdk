@@ -56,13 +56,13 @@ class TestAddressGroupList(TestAddressGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Shared")
+        existing_objects = self.client.list(folder="Texas")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
         assert isinstance(existing_objects, list)
@@ -127,7 +127,7 @@ class TestAddressGroupList(TestAddressGroupBase):
                 AddressGroupResponseFactory.with_static(
                     id="123e4567-e89b-12d3-a456-426655440000",
                     name="static_group",
-                    folder="Shared",
+                    folder="Texas",
                     static=["address1", "address2"],
                     description="Static address group",
                     tag=["tag1"],
@@ -139,13 +139,13 @@ class TestAddressGroupList(TestAddressGroupBase):
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.client.list(folder="Shared", **filters)
+        result = self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
         assert len(result) == 1
@@ -166,19 +166,19 @@ class TestAddressGroupList(TestAddressGroupBase):
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             types=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             values=[],
         )
         assert len(filtered_objects) == 0
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             tags=[],
         )
         assert len(filtered_objects) == 0
@@ -231,7 +231,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -242,7 +242,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -255,7 +255,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -273,7 +273,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
 
 class TestAddressGroupCreate(TestAddressGroupBase):
@@ -331,7 +331,7 @@ class TestAddressGroupCreate(TestAddressGroupBase):
         """Test that HTTPError with response content triggers proper error handling."""
         test_data = {
             "name": "test-address-group",
-            "folder": "Shared",
+            "folder": "Texas",
             "static": ["address1", "address2"],
         }
 
@@ -359,7 +359,7 @@ class TestAddressGroupGet(TestAddressGroupBase):
         mock_response = AddressGroupResponseFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-group",
-            folder="Shared",
+            folder="Texas",
             static=["address1", "address2"],
         ).model_dump()
 
@@ -422,7 +422,7 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
             name="updated-group",
             static=["address3", "address4"],
             description="Updated description",
-            folder="Shared",
+            folder="Texas",
         )
 
         # Create mock response
@@ -446,7 +446,7 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
         assert payload["name"] == "updated-group"
         assert payload["static"] == ["address3", "address4"]
         assert payload["description"] == "Updated description"
-        assert payload["folder"] == "Shared"
+        assert payload["folder"] == "Texas"
 
         # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressGroupResponseModel)
@@ -461,7 +461,7 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
         update_data = AddressGroupUpdateApiFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-group",
-            folder="Shared",
+            folder="Texas",
             static=["address1", "address2"],
         )
 
@@ -561,7 +561,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         mock_response_model = AddressGroupResponseFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-group",
-            folder="Shared",
+            folder="Texas",
             static=["address1", "address2"],
             description="Test address group",
         )
@@ -595,7 +595,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert (
@@ -627,7 +627,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-group",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -644,7 +644,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-group", folder="Shared")
+            self.client.fetch(name="test-group", folder="Texas")
 
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
@@ -652,7 +652,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-group", folder="Shared")
+            self.client.fetch(name="test-group", folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -665,14 +665,14 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         # Mock response without 'id' field
         mock_response = {
             "name": "test-group",
-            "folder": "Shared",
+            "folder": "Texas",
             "static": ["address1", "address2"],
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-group", folder="Shared")
+            self.client.fetch(name="test-group", folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -690,7 +690,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test-group", folder="Shared")
+            self.client.fetch(name="test-group", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"

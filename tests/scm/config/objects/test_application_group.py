@@ -49,7 +49,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
             "data": [
                 ApplicationGroupResponseFactory(
                     name="Microsoft 365 Access",
-                    folder="Shared",
+                    folder="Texas",
                     members=[
                         "office365-consumer-access",
                         "office365-enterprise-access",
@@ -57,7 +57,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
                 ).model_dump(),
                 ApplicationGroupResponseFactory(
                     name="Microsoft 365 Services",
-                    folder="Shared",
+                    folder="Texas",
                     members=["ms-office365", "ms-onedrive"],
                 ).model_dump(),
             ],
@@ -67,13 +67,13 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Shared")
+        existing_objects = self.client.list(folder="Texas")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
         assert isinstance(existing_objects, list)
@@ -154,13 +154,13 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        self.client.list(folder="Shared", **filters)
+        self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-groups",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -183,7 +183,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             members=[],
         )
         assert len(filtered_objects) == 0
@@ -213,7 +213,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", types="netmask")
+            self.client.list(folder="Texas", types="netmask")
         error_response = exc_info.value.response.json()
         assert (
             error_response["_errors"][0]["message"] == "'members' filter must be a list"
@@ -230,7 +230,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         # Test that valid list filters pass validation
         try:
             self.client.list(
-                folder="Shared",
+                folder="Texas",
                 members=["ssl"],
             )
         except HTTPError:
@@ -267,7 +267,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -284,7 +284,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -303,7 +303,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -320,7 +320,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
     def test_list_server_error(self):
         """Test generic exception handling in list method."""
@@ -332,7 +332,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -380,7 +380,7 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
         """Test that HTTPError with response content triggers proper error handling."""
         test_data = {
             "name": "test-address",
-            "folder": "Shared",
+            "folder": "Texas",
             "members": [
                 "office365-consumer-access",
                 "office365-enterprise-access",
@@ -411,7 +411,7 @@ class TestApplicationGroupCreate(TestApplicationGroupBase):
             self.client.create(
                 {
                     "name": "test-address",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "members": [
                         "office365-consumer-access",
                         "office365-enterprise-access",
@@ -429,7 +429,7 @@ class TestApplicationGroupGet(TestApplicationGroupBase):
         mock_response = ApplicationGroupResponseFactory(
             name="TestGroup",
             members=["app1", "app2"],
-            folder="Shared",
+            folder="Texas",
         )
 
         self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
@@ -516,7 +516,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestApplicationGroup",
             members=["tag1", "tag2"],
-            folder="Shared",
+            folder="Texas",
         )
 
         # Create mock response
@@ -554,7 +554,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
         update_data = ApplicationGroupUpdateApiFactory.with_members(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
-            folder="Shared",
+            folder="Texas",
             members=["tag1", "tag2"],
         )
 
@@ -580,7 +580,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
         update_data = ApplicationGroupUpdateApiFactory.with_members(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
-            folder="Shared",
+            folder="Texas",
             members=["tag1", "tag2"],
         )
 
@@ -643,7 +643,7 @@ class TestApplicationGroupUpdate(TestApplicationGroupBase):
         update_data = ApplicationGroupUpdateApiFactory.with_members(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
-            folder="Shared",
+            folder="Texas",
             members=["test1", "test2"],
         )
 
@@ -744,7 +744,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         mock_response_model = ApplicationGroupResponseFactory(
             name="TestGroup",
             members=["app1", "app2"],
-            folder="Shared",
+            folder="Texas",
         )
         mock_response_data = mock_response_model.model_dump()
 
@@ -784,7 +784,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="nonexistent", folder="Shared")
+            self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -794,7 +794,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
         with pytest.raises(MissingQueryParameterError):
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
     def test_fetch_empty_container_error(self):
         """Test fetching with an empty folder parameter."""
@@ -811,7 +811,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Invalid response format"
         assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
@@ -821,7 +821,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
 
         assert str(exc_info.value) == "Generic error"
 
@@ -839,7 +839,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-address", folder="Shared")
+            self.client.fetch(name="test-address", folder="Texas")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
@@ -851,7 +851,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -861,14 +861,14 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         # Mock response without 'id' field
         mock_response = {
             "name": "test-address",
-            "folder": "Shared",
+            "folder": "Texas",
             "ip_netmask": "10.0.0.0/24",
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-address", folder="Shared")
+            self.client.fetch(name="test-address", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -890,7 +890,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-address",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -905,7 +905,7 @@ class TestApplicationGroupFetch(TestApplicationGroupBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test123", folder="Shared")
+            self.client.fetch(name="test123", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg

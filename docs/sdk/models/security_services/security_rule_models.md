@@ -75,7 +75,7 @@ from scm.config.security import SecurityRule
 try:
     rule_dict = {
         "name": "invalid-rule",
-        "folder": "Shared",
+        "folder": "Texas",
         "device": "fw01",  # Can't specify both folder and device
         "action": "allow"
     }
@@ -112,7 +112,7 @@ All list fields are validated to ensure they contain only unique string values:
 try:
     rule_dict = {
         "name": "invalid-rule",
-        "folder": "Shared",
+        "folder": "Texas",
         "source": ["10.0.0.0/8", "10.0.0.0/8"],  # Duplicate values not allowed
         "action": "allow"
     }
@@ -124,7 +124,7 @@ except ValueError as e:
 try:
     rule = SecurityRuleCreateModel(
         name="invalid-rule",
-        folder="Shared",
+        folder="Texas",
         source=["10.0.0.0/8", "10.0.0.0/8"]
     )
 except ValueError as e:
@@ -146,7 +146,7 @@ except ValueError as e:
 rule_dict = {
     "name": "allow-web",
     "description": "Allow web traffic",
-    "folder": "Shared",
+    "folder": "Texas",
     "from_": ["trust"],
     "to_": ["untrust"],
     "source": ["10.0.0.0/8"],
@@ -163,7 +163,7 @@ response = security_rule.create(rule_dict)
 rule = SecurityRuleCreateModel(
     name="allow-web",
     description="Allow web traffic",
-    folder="Shared",
+    folder="Texas",
     from_=["trust"],
     to_=["untrust"],
     source=["10.0.0.0/8"],
@@ -190,7 +190,7 @@ response = security_rule.create(payload)
 # Using dictionary
 rule_dict = {
     "name": "secure-web",
-    "folder": "Shared",
+    "folder": "Texas",
     "from_": ["trust"],
     "to_": ["untrust"],
     "source": ["10.0.0.0/8"],
@@ -212,7 +212,7 @@ from scm.models.security import SecurityRuleCreateModel, SecurityRuleProfileSett
 
 rule = SecurityRuleCreateModel(
     name="secure-web",
-    folder="Shared",
+    folder="Texas",
     from_=["trust"],
     to_=["untrust"],
     source=["10.0.0.0/8"],

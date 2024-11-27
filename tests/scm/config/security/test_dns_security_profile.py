@@ -56,12 +56,12 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
             "data": [
                 DNSSecurityProfileResponseFactory(
                     name="profile1",
-                    folder="Shared",
+                    folder="Texas",
                     botnet_domains=BotnetDomainsFactory(),
                 ).model_dump(),
                 DNSSecurityProfileResponseFactory(
                     name="profile2",
-                    folder="Shared",
+                    folder="Texas",
                     botnet_domains=BotnetDomainsFactory(),
                 ).model_dump(),
             ],
@@ -71,13 +71,13 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
-        existing_objects = self.client.list(folder="Shared")
+        existing_objects = self.client.list(folder="Texas")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
         assert isinstance(existing_objects, list)
@@ -133,13 +133,13 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         mock_response = {"data": []}
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        self.client.list(folder="Shared", **filters)
+        self.client.list(folder="Texas", **filters)
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
                 "limit": 10000,
-                "folder": "Shared",
+                "folder": "Texas",
             },
         )
 
@@ -149,7 +149,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
             "data": [
                 DNSSecurityProfileResponseFactory(
                     name="profile1",
-                    folder="Shared",
+                    folder="Texas",
                     botnet_domains=BotnetDomainsFactory(),
                 ).model_dump()
             ]
@@ -157,7 +157,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         filtered_objects = self.client.list(
-            folder="Shared",
+            folder="Texas",
             dns_security_categories=[],
         )
         assert len(filtered_objects) == 0
@@ -169,7 +169,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
             "data": [
                 DNSSecurityProfileResponseFactory(
                     name="profile1",
-                    folder="Shared",
+                    folder="Texas",
                     botnet_domains=BotnetDomainsFactory(),
                 ).model_dump()
             ]
@@ -183,7 +183,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
             error_type="Invalid Query Parameter",
         )
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared", dns_security_categories="netmask")
+            self.client.list(folder="Texas", dns_security_categories="netmask")
         error_response = exc_info.value.response.json()
         assert (
             error_response["_errors"][0]["message"]
@@ -201,7 +201,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         # Test that valid list filters pass validation
         try:
             self.client.list(
-                folder="Shared",
+                folder="Texas",
                 types=["netmask"],
                 values=["10.0.0.0/24"],
                 tags=["tag1"],
@@ -228,7 +228,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -239,7 +239,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -252,7 +252,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
@@ -269,7 +269,7 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
 
 
 class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
@@ -301,7 +301,7 @@ class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
 
         with pytest.raises(HTTPError):
             self.client.create(
-                {"name": "test", "folder": "Shared", "botnet_domains": {}}
+                {"name": "test", "folder": "Texas", "botnet_domains": {}}
             )
 
     def test_create_with_dns_security_categories(self):
@@ -334,7 +334,7 @@ class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
         """Test that HTTPError with response content triggers proper error handling."""
         test_data = {
             "name": "test-profile",
-            "folder": "Shared",
+            "folder": "Texas",
             "botnet_domains": {
                 "dns_security_categories": [
                     {
@@ -369,7 +369,7 @@ class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
             self.client.create(
                 {
                     "name": "test-profile",
-                    "folder": "Shared",
+                    "folder": "Texas",
                     "botnet_domains": {"dns_security_categories": []},
                 }
             )
@@ -402,7 +402,7 @@ class TestDNSSecurityProfileGet(TestDNSSecurityProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Shared")
+            self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -733,7 +733,7 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="nonexistent", folder="Shared")
+            self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -743,7 +743,7 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.fetch(name="", folder="Shared")
+            self.client.fetch(name="", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert '"name" is not allowed to be empty' in error_msg
@@ -773,7 +773,7 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(
                 name="test-profile",
-                folder="Shared",
+                folder="Texas",
                 snippet="TestSnippet",
             )
 
@@ -790,7 +790,7 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
@@ -802,7 +802,7 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         )
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test", folder="Shared")
+            self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -811,14 +811,14 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""
         mock_response = {
             "name": "test-profile",
-            "folder": "Shared",
+            "folder": "Texas",
             "botnet_domains": {},
         }
 
         self.mock_scm.get.return_value = mock_response  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-profile", folder="Shared")
+            self.client.fetch(name="test-profile", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg
@@ -830,7 +830,7 @@ class TestDNSSecurityProfileFetch(TestDNSSecurityProfileBase):
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test123", folder="Shared")
+            self.client.fetch(name="test123", folder="Texas")
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 500 - API error: E003" in error_msg

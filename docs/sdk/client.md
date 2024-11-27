@@ -160,7 +160,7 @@ client = Scm(
 # List addresses with parameters
 response = client.get(
     endpoint="/v1/objects/addresses",
-    params={"folder": "Shared", "limit": 100}
+    params={"folder": "Texas", "limit": 100}
 )
 ```
 
@@ -176,7 +176,7 @@ response = client.get(
 # Create a new address object
 new_address = {
     "name": "example-address",
-    "folder": "Shared",
+    "folder": "Texas",
     "ip_netmask": "192.168.1.0/24"
 }
 response = client.post(
@@ -260,7 +260,7 @@ def perform_api_operations():
             # Create new address
             new_address = {
                 "name": "test-address",
-                "folder": "Shared",
+                "folder": "Texas",
                 "ip_netmask": "192.168.1.0/24"
             }
             created = client.post("/v1/objects/addresses", json=new_address)

@@ -115,7 +115,7 @@ except InvalidObjectError as e:
 try:
     inbound_proxy = {
         "name": "inbound-proxy",
-        "folder": "Shared",
+        "folder": "Texas",
         "ssl_inbound_proxy": {
             "block_if_no_resource": True,
             "block_unsupported_cipher": True,

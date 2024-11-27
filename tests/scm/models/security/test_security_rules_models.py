@@ -228,7 +228,7 @@ class TestSecurityRuleResponseModel:
         model = SecurityRuleResponseModel(**data)
         assert isinstance(model.id, UUID)
         assert model.name.startswith("security_rule_")
-        assert model.folder == "Shared"
+        assert model.folder == "Texas"
         assert model.action == SecurityRuleAction.allow
 
     def test_security_rule_response_model_from_request(self):
