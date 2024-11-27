@@ -76,28 +76,32 @@ class WildfireAntivirusProfile(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        profile: WildfireAvProfileUpdateModel,
     ) -> WildfireAvProfileResponseModel:
         """
         Updates an existing wildfire antivirus profile object.
 
-        Returns:
-            WildfireAntivirusProfileResponseModel
-        """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        profile = WildfireAvProfileUpdateModel(**data)
+        Args:
+            profile: WildfireAvProfileUpdateModel instance containing the update data
 
-        # Convert back to a Python dictionary, removing any unset fields
+        Returns:
+            WildfireAvProfileResponseModel
+        """
+        # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
 
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(profile.id)
+        payload.pop("id", None)
+
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
 
-        # Return the SCM API response as a new Pydantic object
+        # Return the SCM API response as a new Pydantic model
         return WildfireAvProfileResponseModel(**response)
 
     @staticmethod
@@ -241,7 +245,7 @@ class WildfireAntivirusProfile(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> WildfireAvProfileResponseModel:
         """
         Fetches a single wildfire antivirus profile by name.
 
@@ -252,7 +256,7 @@ class WildfireAntivirusProfile(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            WildfireAvProfileResponseModel: The fetched wildfire antivirus profile object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -311,11 +315,7 @@ class WildfireAntivirusProfile(BaseObject):
             )
 
         if "id" in response:
-            address = WildfireAvProfileResponseModel(**response)
-            return address.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return WildfireAvProfileResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",

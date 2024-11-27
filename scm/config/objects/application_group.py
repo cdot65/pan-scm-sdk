@@ -76,28 +76,32 @@ class ApplicationGroup(BaseObject):
 
     def update(
         self,
-        data: Dict[str, Any],
+        app_group: ApplicationGroupUpdateModel,
     ) -> ApplicationGroupResponseModel:
         """
         Updates an existing application group object.
 
+        Args:
+            app_group: ApplicationGroupUpdateModel instance containing the update data
+
         Returns:
             ApplicationGroupResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        app_group = ApplicationGroupUpdateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields
+        # Convert to dict for API request, excluding unset fields
         payload = app_group.model_dump(exclude_unset=True)
 
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(app_group.id)
+        payload.pop("id", None)
+
         # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{data['id']}"
+        endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
 
-        # Return the SCM API response as a new Pydantic object
+        # Return the SCM API response as a new Pydantic model
         return ApplicationGroupResponseModel(**response)
 
     @staticmethod
@@ -242,7 +246,7 @@ class ApplicationGroup(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> ApplicationGroupResponseModel:
         """
         Fetches a single application group by name.
 
@@ -253,7 +257,7 @@ class ApplicationGroup(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            Dict[str, Any]: The fetched object.
+            ApplicationGroupResponseModel: The fetched application group object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -312,11 +316,7 @@ class ApplicationGroup(BaseObject):
             )
 
         if "id" in response:
-            address = ApplicationGroupResponseModel(**response)
-            return address.model_dump(
-                exclude_unset=True,
-                exclude_none=True,
-            )
+            return ApplicationGroupResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",
