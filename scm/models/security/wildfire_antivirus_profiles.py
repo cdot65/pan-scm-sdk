@@ -137,6 +137,11 @@ class WildfireAvProfileUpdateModel(WildfireAvProfileBase):
     All fields are optional to allow partial updates.
     """
 
+    id: Optional[UUID] = Field(
+        ...,
+        description="Profile ID",
+    )
+
 
 # Response Model
 class WildfireAvProfileResponseModel(WildfireAvProfileBase):
