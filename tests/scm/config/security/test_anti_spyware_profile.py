@@ -103,7 +103,7 @@ class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -569,10 +569,10 @@ class TestAntiSpywareProfileUpdate(TestAntiSpywareProfileBase):
         updated_object = self.client.update(update_data)
 
         # Verify call was made once
-        self.mock_scm.put.assert_called_once()
+        self.mock_scm.put.assert_called_once()  # noqa
 
         # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args
+        call_args = self.mock_scm.put.call_args  # noqa
 
         # Check endpoint
         assert (
@@ -890,7 +890,6 @@ class TestAntiSpywareProfileGet(TestAntiSpywareProfileBase):
 
     def test_get_object_not_present_error(self):
         """Test error handling when object is not present."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
