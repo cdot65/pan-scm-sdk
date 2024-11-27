@@ -22,47 +22,49 @@ plugins:
 nav:
   - Home: index.md
   - About:
-    - Introduction: about/introduction.md
-    - Installation: about/installation.md
-    - Getting Started: about/getting-started.md
-    - Troubleshooting: about/troubleshooting.md
-    - Contributing: about/contributing.md
-    - Release Notes: about/release-notes.md
-    - License: about/license.md
+      - Introduction: about/introduction.md
+      - Installation: about/installation.md
+      - Getting Started: about/getting-started.md
+      - Troubleshooting: about/troubleshooting.md
+      - Contributing: about/contributing.md
+      - Release Notes: about/release-notes.md
+      - License: about/license.md
   - Developer Documentation:
       - Overview: sdk/index.md
       - Configuration:
-        - Objects:
-            - Overview: sdk/config/objects/index.md
-            - Address: sdk/config/objects/address.md
-            - Address Group: sdk/config/objects/address_group.md
-            - Application: sdk/config/objects/application.md
-            - Application Group: sdk/config/objects/application_group.md
-            - Service: sdk/config/objects/service.md
-        - Security Services:
-            - Overview: sdk/config/security_services/index.md
-            - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware_profile.md
-            - Decryption Profile: sdk/config/security_services/decryption_profile.md
-            - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
-            - Security Rule: sdk/config/security_services/security_rule.md
-            - Vulnerability Protection Security Profile: sdk/config/security_services/vulnerability_protection_profile.md
-            - Wildfire Anti Virus Security Profile: sdk/config/security_services/wildfire_antivirus.md
+          - Objects:
+              - Overview: sdk/config/objects/index.md
+              - Address: sdk/config/objects/address.md
+              - Address Group: sdk/config/objects/address_group.md
+              - Application: sdk/config/objects/application.md
+              - Application Group: sdk/config/objects/application_group.md
+              - Service: sdk/config/objects/service.md
+              - Tag: sdk/config/objects/tag.md
+          - Security Services:
+              - Overview: sdk/config/security_services/index.md
+              - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware_profile.md
+              - Decryption Profile: sdk/config/security_services/decryption_profile.md
+              - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
+              - Security Rule: sdk/config/security_services/security_rule.md
+              - Vulnerability Protection Security Profile: sdk/config/security_services/vulnerability_protection_profile.md
+              - Wildfire Anti Virus Security Profile: sdk/config/security_services/wildfire_antivirus.md
       - Data Models:
           - Objects:
-            - Overview: sdk/models/objects/index.md
-            - Address Models: sdk/models/objects/address_models.md
-            - Address Group Models: sdk/models/objects/address_group_models.md
-            - Application Models: sdk/models/objects/application_models.md
-            - Application Group Models: sdk/models/objects/application_group_models.md
-            - Service Models: sdk/models/objects/service_models.md
+              - Overview: sdk/models/objects/index.md
+              - Address Models: sdk/models/objects/address_models.md
+              - Address Group Models: sdk/models/objects/address_group_models.md
+              - Application Models: sdk/models/objects/application_models.md
+              - Application Group Models: sdk/models/objects/application_group_models.md
+              - Service Models: sdk/models/objects/service_models.md
+              - Tag Models: sdk/models/objects/tag_models.md
           - Security Services:
-            - Overview: sdk/models/security_services/index.md
-            - Anti Spyware Security Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
-            - Decryption Profile Models: sdk/models/security_services/decryption_profile_models.md
-            - DNS Security Profile Models: sdk/models/security_services/dns_security_profile_models.md
-            - Security Rule Models: sdk/models/security_services/security_rule_models.md
-            - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
-            - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
+              - Overview: sdk/models/security_services/index.md
+              - Anti Spyware Security Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
+              - Decryption Profile Models: sdk/models/security_services/decryption_profile_models.md
+              - DNS Security Profile Models: sdk/models/security_services/dns_security_profile_models.md
+              - Security Rule Models: sdk/models/security_services/security_rule_models.md
+              - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
+              - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
       - SCM Client: sdk/client.md
 extra_css:
   - css/termynal.css

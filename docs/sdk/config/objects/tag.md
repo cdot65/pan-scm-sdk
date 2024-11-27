@@ -53,6 +53,8 @@ The `create()` method allows you to create new tags with proper error handling.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import Tag
@@ -95,6 +97,8 @@ Use the `get()` method to retrieve a tag by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     tag_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -113,6 +117,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing tags using Pydantic models.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -140,6 +146,8 @@ Use the `delete()` method to remove a tag.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     tag_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -162,6 +170,8 @@ following kwargs:
 - `colors`: List[str] - Filter by tag colors (e.g., ['Red', 'Blue', 'Green'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -192,6 +202,8 @@ The `fetch()` method retrieves a single tag by name from a specific container, r
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     # Fetch a tag by name from a specific folder
@@ -215,6 +227,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of a tag with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
