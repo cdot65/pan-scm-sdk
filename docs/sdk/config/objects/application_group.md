@@ -60,6 +60,8 @@ The `create()` method allows you to create new application groups with proper er
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import ApplicationGroup
@@ -101,6 +103,8 @@ Use the `get()` method to retrieve an application group by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     group_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -119,6 +123,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing application groups.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -142,6 +148,8 @@ Use the `delete()` method to remove an application group.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     group_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -164,6 +172,8 @@ following kwargs:
 - `members`: List[str] - Filter by member applications (e.g., ['ssl', 'web-browsing'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -200,6 +210,8 @@ The `fetch()` method retrieves a single application group by name from a specifi
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     group = application_groups.fetch(
@@ -222,6 +234,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of an application group with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

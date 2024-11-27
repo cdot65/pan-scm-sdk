@@ -70,6 +70,8 @@ The `create()` method allows you to create new security rules with proper error 
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.security import SecurityRule
@@ -115,6 +117,8 @@ except InvalidObjectError as e:
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     rule_data = {
@@ -151,6 +155,8 @@ Use the `get()` method to retrieve a security rule by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     rule_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -171,6 +177,8 @@ except InvalidObjectError as e:
 The `update()` method allows you to modify existing security rules.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -201,6 +209,8 @@ Use the `delete()` method to remove a security rule.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     rule_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -220,6 +230,8 @@ except ReferenceNotZeroError as e:
 The `move()` method allows you to reposition rules within the rulebase.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -265,6 +277,8 @@ following kwargs:
 - `log_setting`: List[str] - Filter by log settings (e.g., ['default-logging'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -333,6 +347,8 @@ The `fetch()` method retrieves a single security rule by name from a specific co
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     rule = security_rule.fetch(
@@ -357,6 +373,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of a security rule with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

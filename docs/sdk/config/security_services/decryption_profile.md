@@ -60,6 +60,8 @@ The `create()` method allows you to create new decryption profiles with proper e
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.security import DecryptionProfile
@@ -108,6 +110,8 @@ except InvalidObjectError as e:
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     inbound_proxy = {
@@ -144,6 +148,8 @@ Use the `get()` method to retrieve a decryption profile by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -161,6 +167,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing decryption profiles.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -184,6 +192,8 @@ Use the `delete()` method to remove a decryption profile.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -206,6 +216,8 @@ following kwargs:
 - `types`: List[str] - Filter by proxy types (e.g., ['forward', 'inbound', 'no'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -248,6 +260,8 @@ The `fetch()` method retrieves a single decryption profile by name from a specif
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile = decryption_profiles.fetch(name="Oblivion", folder="Texas")
@@ -267,6 +281,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of a decryption profile with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

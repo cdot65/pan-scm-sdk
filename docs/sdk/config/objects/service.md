@@ -57,6 +57,8 @@ The `create()` method allows you to create new services with proper error handli
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import Service
@@ -106,6 +108,8 @@ except InvalidObjectError as e:
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     udp_service = {
@@ -137,6 +141,8 @@ Use the `get()` method to retrieve a service by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     service_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -155,6 +161,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing services.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -176,6 +184,8 @@ except InvalidObjectError as e:
 Use the `delete()` method to remove a service.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -200,6 +210,8 @@ following kwargs:
 - `tag`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -247,6 +259,8 @@ The `fetch()` method retrieves a single service by name from a specific containe
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     service_obj = services.fetch(name="web-service", folder="Texas")
@@ -266,6 +280,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of a service with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

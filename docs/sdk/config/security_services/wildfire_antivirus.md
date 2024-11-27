@@ -71,6 +71,8 @@ The `create()` method allows you to create new WildFire antivirus profiles with 
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.security import WildfireAntivirusProfile
@@ -118,6 +120,8 @@ except InvalidObjectError as e:
 **Example: Profile with Multiple Rules and Exceptions**
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -169,6 +173,8 @@ Use the `get()` method to retrieve a WildFire antivirus profile by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -189,6 +195,8 @@ except InvalidObjectError as e:
 The `update()` method allows you to modify existing WildFire antivirus profiles.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -230,6 +238,8 @@ Use the `delete()` method to remove a WildFire antivirus profile.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -252,6 +262,8 @@ using the following kwargs:
 - `rules`: List[str] - Filter by rule names (e.g., ['basic-rule', 'upload-rule'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -289,6 +301,8 @@ The `fetch()` method retrieves a single WildFire antivirus profile by name from 
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile = wildfire_antivirus_profile.fetch(
@@ -312,6 +326,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of a WildFire antivirus profile with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

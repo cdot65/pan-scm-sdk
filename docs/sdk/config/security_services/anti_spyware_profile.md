@@ -60,6 +60,8 @@ The `create()` method allows you to create new anti-spyware profiles with proper
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.security import AntiSpywareProfile
@@ -106,6 +108,8 @@ except InvalidObjectError as e:
 **Example: Profile with Multiple Rules and MICA Engine**
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -154,6 +158,8 @@ Use the `get()` method to retrieve an anti-spyware profile by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -177,6 +183,8 @@ The `update()` method allows you to modify existing anti-spyware profiles.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     fetched_profile = profiles.fetch(folder='Texas', name='advanced-profile')
@@ -198,6 +206,8 @@ except InvalidObjectError as e:
 Use the `delete()` method to remove an anti-spyware profile.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -221,6 +231,8 @@ the following kwargs:
 - `rules`: List[str] - Filter by rule names (e.g., ['block-critical', 'medium-threats'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -261,6 +273,8 @@ The `fetch()` method retrieves a single anti-spyware profile by name from a spec
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     profile = profiles.fetch(
@@ -284,6 +298,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of an anti-spyware profile with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm

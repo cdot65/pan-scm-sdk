@@ -12,10 +12,16 @@ handling and retry mechanisms.
 
 The main class that handles OAuth2 authentication with Palo Alto Networks' services.
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 class OAuth2Client:
     def __init__(self, auth_request: AuthRequestModel)
 ```
+
+</div>
 
 #### Configuration Constants
 
@@ -40,6 +46,10 @@ The client establishes an authenticated session using the following steps:
 3. Fetches initial OAuth2 token
 4. Sets up HTTP adapters with retry logic
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 auth_client = OAuth2Client(
     AuthRequestModel(
@@ -52,6 +62,8 @@ auth_client = OAuth2Client(
 )
 ```
 
+</div>
+
 ### Retry Strategy
 
 The client implements a robust retry mechanism for handling transient failures:
@@ -60,6 +72,10 @@ The client implements a robust retry mechanism for handling transient failures:
 - Supports retries on both POST and GET methods
 - Uses exponential backoff
 - Configurable maximum retry attempts
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 retry_strategy = Retry(
@@ -70,6 +86,8 @@ retry_strategy = Retry(
 )
 ```
 
+</div>
+
 ## Token Management
 
 ### Token Validation
@@ -77,6 +95,10 @@ retry_strategy = Retry(
 The client provides several methods for token validation and management:
 
 #### Token Expiration Check
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Check if token will expire soon
@@ -88,7 +110,13 @@ if auth_client.is_expired:
     auth_client.refresh_token()
 ```
 
+</div>
+
 #### Token Decoding
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Decode token to access payload
@@ -99,6 +127,8 @@ except ExpiredSignatureError:
     auth_client.refresh_token()
 ```
 
+</div>
+
 ### Token Refresh
 
 The client handles automatic token refresh with the following features:
@@ -108,6 +138,10 @@ The client handles automatic token refresh with the following features:
 - Updates signing key after successful refresh
 - Comprehensive error handling
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 try:
     auth_client.refresh_token()
@@ -115,6 +149,8 @@ except APIError as e:
     # Handle refresh failure
     logger.error(f"Token refresh failed: {e}")
 ```
+
+</div>
 
 ## Error Handling
 
@@ -141,6 +177,10 @@ The module implements comprehensive error handling for various scenarios:
 
 Example error handling:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 try:
     auth_client = OAuth2Client(auth_request)
@@ -155,6 +195,8 @@ except APIError as e:
         # Handle other API errors
         logger.error(f"Authentication error: {e}")
 ```
+
+</div>
 
 ## Security Features
 
@@ -182,6 +224,10 @@ The module includes comprehensive logging for troubleshooting:
 - Error-level logs for failures
 - Detailed error messages for exceptional cases
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 # Configure logging
 logger = setup_logger(__name__)
@@ -192,6 +238,8 @@ logger = setup_logger(__name__)
 # - Error conditions
 # - Network issues
 ```
+
+</div>
 
 ## Dependencies
 

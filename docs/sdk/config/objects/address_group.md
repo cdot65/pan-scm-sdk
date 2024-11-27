@@ -58,6 +58,8 @@ The `create()` method allows you to create new address groups with proper error 
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import AddressGroup
@@ -99,6 +101,8 @@ except InvalidObjectError as e:
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     dynamic_group = {
@@ -129,6 +133,8 @@ Use the `get()` method to retrieve an address group by its ID.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
@@ -147,6 +153,8 @@ except NotFoundError as e:
 The `update()` method allows you to modify existing address groups.
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -174,6 +182,8 @@ Use the `delete()` method to remove an address group.
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
@@ -198,6 +208,8 @@ following kwargs:
 - `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 try:
@@ -241,6 +253,8 @@ The `fetch()` method retrieves a single address group by name from a specific co
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 try:
     # pass in the folder and name required parameters
@@ -260,6 +274,8 @@ except MissingQueryParameterError as e:
 Here's a complete example demonstrating the full lifecycle of an address group with proper error handling:
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
