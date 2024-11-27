@@ -36,7 +36,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when application group data is invalid or malformed
+- `InvalidObjectError`: Raised when application group data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when an application group doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -50,7 +50,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Application Groups
 
@@ -120,7 +119,7 @@ except NotFoundError as e:
 
 ## Updating Application Groups
 
-The `update()` method allows you to modify existing application groups.
+The `update()` method allows you to modify existing application groups using Pydantic models.
 
 <div class="termy">
 
@@ -129,7 +128,7 @@ The `update()` method allows you to modify existing application groups.
 ```python
 try:
     web_apps = application_groups.fetch(folder='Texas', name='web-apps')
-    web_apps['members'] = ['ssl', 'web-browsing', 'dns-base']
+    web_apps.members = ['ssl', 'web-browsing', 'dns-base']
 
     updated_group = application_groups.update(web_apps)
     print(f"Updated group: {updated_group.name}")
@@ -206,7 +205,7 @@ except MissingQueryParameterError as e:
 
 ## Fetching Application Groups
 
-The `fetch()` method retrieves a single application group by name from a specific container.
+The `fetch()` method retrieves a single application group by name from a specific container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -218,8 +217,8 @@ try:
         name="web-apps",
         folder="Texas"
     )
-    print(f"Found group: {group['name']}")
-    print(f"Current members: {group['members']}")
+    print(f"Found group: {group.name}")
+    print(f"Current members: {group.members}")
 
 except NotFoundError as e:
     print(f"Group not found: {e.message}")
@@ -277,10 +276,10 @@ try:
                 name="web-apps",
                 folder="Texas"
             )
-            print(f"Found group: {fetched_group['name']}")
+            print(f"Found group: {fetched_group.name}")
 
-            # Update the group
-            fetched_group["members"] = ['ssl', 'web-browsing', 'dns-base']
+            # Update the group using Pydantic model
+            fetched_group.members = ['ssl', 'web-browsing', 'dns-base']
             updated_group = application_groups.update(fetched_group)
             print(f"Updated members: {updated_group.members}")
 

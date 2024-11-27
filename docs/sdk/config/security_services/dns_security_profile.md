@@ -35,7 +35,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when profile data is invalid or malformed
+- `InvalidObjectError`: Raised when profile data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when a profile doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -49,7 +49,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating DNS Security Profiles
 
@@ -186,7 +185,7 @@ except NotFoundError as e:
 
 ## Updating DNS Security Profiles
 
-The `update()` method allows you to modify existing DNS Security profiles.
+The `update()` method allows you to modify existing DNS Security profiles using Pydantic models.
 
 <div class="termy">
 
@@ -195,7 +194,7 @@ The `update()` method allows you to modify existing DNS Security profiles.
 ```python
 try:
     profile = dns_security_profiles.fetch(folder='Texas', name='test dns security')
-    profile['description'] = "Updated description"
+    profile.description = "Updated description"
 
     updated_profile = dns_security_profiles.update(profile)
     print(f"Updated profile: {updated_profile.name}")
@@ -275,7 +274,8 @@ except MissingQueryParameterError as e:
 
 ## Fetching DNS Security Profiles
 
-The `fetch()` method retrieves a single DNS Security profile by name from a specific container.
+The `fetch()` method retrieves a single DNS Security profile by name from a specific container, returning a Pydantic
+model.
 
 <div class="termy">
 
@@ -288,8 +288,8 @@ try:
         folder="Texas"
     )
 
-    print(f"Found profile: {profile['name']}")
-    print(f"Current settings: {profile['botnet_domains']}")
+    print(f"Found profile: {profile.name}")
+    print(f"Current settings: {profile.botnet_domains}")
 
 except NotFoundError as e:
     print(f"Profile not found: {e.message}")
@@ -361,10 +361,10 @@ try:
                 name="test-profile",
                 folder="Texas"
             )
-            print(f"Found profile: {fetched_profile['name']}")
+            print(f"Found profile: {fetched_profile.name}")
 
-            # Update the profile
-            fetched_profile["description"] = "Updated test profile"
+            # Update the profile using Pydantic model
+            fetched_profile.description = "Updated test profile"
             updated_profile = dns_security_profiles.update(fetched_profile)
             print(f"Updated description: {updated_profile.description}")
 

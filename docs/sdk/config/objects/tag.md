@@ -32,7 +32,7 @@ The SDK uses a hierarchical exception system for error handling:
 
 ### Client Errors (4xx)
 
-- `InvalidObjectError`: Raised when tag data is invalid or malformed
+- `InvalidObjectError`: Raised when tag data is invalid or for invalid response formats
 - `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
 - `NotFoundError`: Raised when a tag doesn't exist
 - `AuthenticationError`: Raised for authentication failures
@@ -46,7 +46,6 @@ The SDK uses a hierarchical exception system for error handling:
 - `ServerError`: Base class for server-side errors
 - `APINotImplementedError`: When API endpoint isn't implemented
 - `GatewayTimeoutError`: When request times out
-- `SessionTimeoutError`: When the API session times out
 
 ## Creating Tags
 
@@ -111,18 +110,18 @@ except NotFoundError as e:
 
 ## Updating Tags
 
-The `update()` method allows you to modify existing tags.
+The `update()` method allows you to modify existing tags using Pydantic models.
 
 <div class="termy">
 
 ```python
 try:
-    # First fetch the existing tag
+    # First fetch the existing tag as a Pydantic model
     tag = tags.fetch(name="Production", folder="Texas")
 
-    # Update the tag's color and description
-    tag["color"] = "Blue"
-    tag["description"] = "Updated production tag"
+    # Update the tag's attributes
+    tag.color = "Blue"
+    tag.description = "Updated production tag"
 
     updated_tag = tags.update(tag)
     print(f"Updated tag: {updated_tag.name}")
@@ -189,7 +188,7 @@ except MissingQueryParameterError as e:
 
 ## Fetching Tags
 
-The `fetch()` method retrieves a single tag by name from a specific container.
+The `fetch()` method retrieves a single tag by name from a specific container, returning a Pydantic model.
 
 <div class="termy">
 
@@ -260,8 +259,8 @@ try:
             )
             print(f"Found tag: {fetched_tag.name}")
 
-            # Update the tag
-            fetched_tag["description"] = "Updated test tag"
+            # Update the tag using Pydantic model
+            fetched_tag.description = "Updated test tag"
             updated_tag = tags.update(fetched_tag)
             print(f"Updated description: {updated_tag.description}")
 
@@ -291,6 +290,6 @@ except AuthenticationError as e:
 
 ## Related Models
 
-- [TagCreateModel](../../models/objects/tag_models.md#tagcreatemodel)
-- [TagUpdateModel](../../models/objects/tag_models.md#tagupdatemodel)
-- [TagResponseModel](../../models/objects/tag_models.md#tagresponsemodel)
+- [TagCreateModel](../../models/objects/tag_models.md#Overview)
+- [TagUpdateModel](../../models/objects/tag_models.md#Overview)
+- [TagResponseModel](../../models/objects/tag_models.md#Overview)
