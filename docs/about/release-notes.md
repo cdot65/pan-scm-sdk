@@ -1,3 +1,10 @@
+## Version 0.3.2
+
+- Added support for performing commits
+- Added support for pulling in job status
+
+---
+
 ## Version 0.3.1
 
 - Added support for Service Group objects
