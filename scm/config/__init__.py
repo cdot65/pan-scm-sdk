@@ -3,7 +3,11 @@
 from typing import List, Dict, Any, Optional
 
 from scm.client import Scm
-from scm.models.operations import CandidatePushResponseModel, JobStatusResponse
+from scm.models.operations import (
+    CandidatePushResponseModel,
+    JobStatusResponse,
+    JobListResponse,
+)
 
 
 class BaseObject:
@@ -84,6 +88,29 @@ class BaseObject:
             params=params,
         )
         return response.get("data", [])
+
+    def list_jobs(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        parent_id: Optional[str] = None,
+    ) -> JobListResponse:
+        """
+        List jobs in SCM with pagination support and optional parent ID filtering.
+
+        Args:
+            limit: Maximum number of jobs to return (default: 100)
+            offset: Number of jobs to skip (default: 0)
+            parent_id: Filter jobs by parent job ID (default: None)
+
+        Returns:
+            JobListResponse: Paginated list of jobs
+        """
+        return self.api_client.list_jobs(
+            limit=limit,
+            offset=offset,
+            parent_id=parent_id,
+        )
 
     def get_job_status(self, job_id: str) -> JobStatusResponse:
         """
