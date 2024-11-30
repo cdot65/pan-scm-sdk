@@ -4,7 +4,7 @@
 
 The SCM (Strata Cloud Manager) client module provides the primary interface for interacting with the Palo Alto Networks
 Strata Cloud Manager API. It handles authentication, request management, and provides a clean interface for making API
-calls with proper error handling.
+calls with proper error handling and Pydantic model validation.
 
 ## SCM Client
 
@@ -21,7 +21,7 @@ class Scm:
             client_id: str,
             client_secret: str,
             tsg_id: str,
-            api_base_url: str,
+            api_base_url: str = "https://api.strata.paloaltonetworks.com",
             log_level: str = "ERROR"
     )
 ```
@@ -51,7 +51,7 @@ def request(self, method: str, endpoint: str, **kwargs)
 
 </div>
 
-Makes a generic HTTP request to the API.
+Makes a generic HTTP request to the API and returns a Pydantic model or None.
 
 **Parameters:**
 
@@ -69,7 +69,7 @@ def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs)
 
 </div>
 
-Makes a GET request to the specified endpoint.
+Makes a GET request to the specified endpoint, automatically handling token refresh.
 
 <div class="termy">
 
@@ -81,7 +81,7 @@ def post(self, endpoint: str, **kwargs)
 
 </div>
 
-Makes a POST request to the specified endpoint.
+Makes a POST request to the specified endpoint, automatically handling token refresh.
 
 <div class="termy">
 
@@ -93,7 +93,7 @@ def put(self, endpoint: str, **kwargs)
 
 </div>
 
-Makes a PUT request to the specified endpoint.
+Makes a PUT request to the specified endpoint, automatically handling token refresh.
 
 <div class="termy">
 
@@ -105,7 +105,43 @@ def delete(self, endpoint: str, **kwargs)
 
 </div>
 
-Makes a DELETE request to the specified endpoint.
+Makes a DELETE request to the specified endpoint, automatically handling token refresh.
+
+### Job Management Methods
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+def list_jobs(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        parent_id: Optional[str] = None
+) -> JobListResponse
+```
+
+</div>
+
+Lists jobs with pagination support and optional parent ID filtering.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+def wait_for_job(
+        self,
+        job_id: str,
+        timeout: int = 300,
+        poll_interval: int = 10
+) -> Optional[JobStatusResponse]
+```
+
+</div>
+
+Waits for a job to complete with configurable timeout and polling interval.
 
 ## Usage Examples
 
@@ -122,8 +158,7 @@ from scm.client import Scm
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    api_base_url="https://api.example.com"
+    tsg_id="your_tsg_id"
 )
 ```
 
@@ -141,7 +176,6 @@ client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
-    api_base_url="https://api.example.com",
     log_level="DEBUG"  # Enable detailed logging
 )
 ```
@@ -166,58 +200,47 @@ response = client.get(
 
 </div>
 
-#### POST Request Example
+#### POST Request Example with Pydantic Models
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Create a new address object
-new_address = {
-    "name": "example-address",
-    "folder": "Texas",
-    "ip_netmask": "192.168.1.0/24"
-}
+from scm.models.operations import CandidatePushRequestModel
+
+# Create a commit request
+commit_request = CandidatePushRequestModel(
+    folders=["Texas"],
+    admin=["admin@example.com"],
+    description="Initial commit"
+)
+
 response = client.post(
-    endpoint="/config/objects/v1/addresses",
-    json=new_address
+    endpoint="/config/operations/v1/config-versions/candidate:push",
+    json=commit_request.model_dump()
 )
 ```
 
 </div>
 
-#### PUT Request Example
+#### Commit Changes Example
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Update an existing address
-updated_address = {
-    "name": "example-address",
-    "ip_netmask": "192.168.2.0/24"
-}
-response = client.put(
-    endpoint="/config/objects/v1/addresses/example-address",
-    json=updated_address
+# Commit changes with synchronous wait
+response = client.commit(
+    folders=["Texas"],
+    description="Configuration update",
+    sync=True,
+    timeout=300
 )
-```
 
-</div>
-
-#### DELETE Request Example
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# Delete an address object
-response = client.delete(
-    endpoint="/config/objects/v1/addresses/example-address"
-)
+if response.success:
+    print(f"Commit successful! Job ID: {response.job_id}")
 ```
 
 </div>
@@ -233,11 +256,12 @@ response = client.delete(
 ```python
 from scm.client import Scm
 from scm.exceptions import (
+    APIError,
     AuthenticationError,
     NotFoundError,
-    BadRequestError,
+    InvalidObjectError,
     ServerError,
-    APIError
+    TimeoutError
 )
 
 
@@ -251,35 +275,26 @@ def perform_api_operations():
             log_level="INFO"
         )
 
-        # Perform API operations
         try:
-            # List addresses
-            addresses = client.get("/config/objects/v1/addresses")
-            print(f"Found {len(addresses)} addresses")
-
-            # Create new address
-            new_address = {
-                "name": "test-address",
-                "folder": "Texas",
-                "ip_netmask": "192.168.1.0/24"
-            }
-            created = client.post("/config/objects/v1/addresses", json=new_address)
-            print(f"Created address: {created['name']}")
+            # Commit changes
+            response = client.commit(
+                folders=["Texas"],
+                description="Test commit",
+                sync=True
+            )
+            print(f"Commit job ID: {response.job_id}")
 
         except AuthenticationError as e:
             print(f"Authentication failed: {e.message}")
             print(f"Error code: {e.error_code}")
-            print(f"HTTP status: {e.http_status_code}")
 
-        except NotFoundError as e:
-            print(f"Resource not found: {e.message}")
-            if e.details:
-                print(f"Additional details: {e.details}")
-
-        except BadRequestError as e:
-            print(f"Invalid request: {e.message}")
+        except InvalidObjectError as e:
+            print(f"Invalid request data: {e.message}")
             if e.details:
                 print(f"Validation errors: {e.details}")
+
+        except TimeoutError as e:
+            print(f"Operation timed out: {str(e)}")
 
         except ServerError as e:
             print(f"Server error occurred: {e.message}")
@@ -287,9 +302,6 @@ def perform_api_operations():
 
     except APIError as e:
         print(f"API error occurred: {e}")
-
-    except Exception as e:
-        print(f"Unexpected error: {str(e)}")
 ```
 
 </div>
@@ -299,20 +311,23 @@ def perform_api_operations():
 ### Client Configuration
 
 1. **Logging Configuration**
+
     - Use appropriate log levels for different environments
     - Set to DEBUG for development and troubleshooting
     - Set to ERROR or WARNING for production
 
 2. **Error Handling**
+
     - Always wrap API calls in try-except blocks
     - Handle specific exceptions before generic ones
     - Log error details for troubleshooting
     - Include proper error recovery mechanisms
 
-3. **Session Management**
-    - Reuse client instances when possible
-    - Properly close/cleanup sessions when done
-    - Handle token refresh scenarios
+3. **Token Management**
+
+    - The client automatically handles token refresh
+    - No manual token management required
+    - Tokens are refreshed when expired before requests
 
 ### Code Examples
 
@@ -332,43 +347,16 @@ client = Scm(
 
 
 # Reuse for multiple operations
-def get_address(object_uuid: str):
-    return client.get(f"/config/objects/v1/addresses/{object_uuid}")
+def commit_changes(folders: List[str], description: str):
+    return client.commit(
+        folders=folders,
+        description=description,
+        sync=True
+    )
 
 
-def create_address(address_data: dict):
-    return client.post("/config/objects/v1/addresses", json=address_data)
-```
-
-</div>
-
-#### Using with Context Managers
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from contextlib import contextmanager
-
-
-@contextmanager
-def scm_client_session(**kwargs):
-    client = Scm(**kwargs)
-    try:
-        yield client
-    finally:
-        # Cleanup if needed
-        pass
-
-
-# Usage
-with scm_client_session(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id"
-) as client:
-    addresses = client.get("/config/objects/v1/addresses")
+def check_job_status(job_id: str):
+    return client.get_job_status(job_id)
 ```
 
 </div>
@@ -377,20 +365,19 @@ with scm_client_session(
 
 ### Authentication Failures
 
-- Invalid credentials
-- Expired tokens
-- Missing required parameters
+- Invalid credentials (`AuthenticationError`)
+- Expired tokens (handled automatically)
+- Missing required parameters (`InvalidObjectError`)
 
 ### Request Failures
 
-- Malformed requests
-- Invalid parameters
-- Missing required fields
-- Resource not found
-- Duplicate resources
+- Malformed requests (`InvalidObjectError`)
+- Invalid parameters (`InvalidObjectError`)
+- Resource not found (`NotFoundError`)
+- Operation timeouts (`TimeoutError`)
 
 ### Server Errors
 
-- Timeouts
-- Service unavailable
-- Internal server errors
+- Service unavailable (`ServerError`)
+- Internal server errors (`ServerError`)
+- Gateway timeouts (`GatewayTimeoutError`)
