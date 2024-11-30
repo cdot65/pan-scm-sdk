@@ -69,7 +69,7 @@ class OAuth2Client:
         # Configure retry strategy
         retry_strategy = self._setup_retry_strategy()
         adapter = HTTPAdapter(max_retries=retry_strategy)
-        oauth.mount("http://", adapter)
+        oauth.mount("http://", adapter)  # noqa
         oauth.mount("https://", adapter)
 
         logger.debug("Fetching initial token...")
@@ -171,7 +171,7 @@ class OAuth2Client:
         temp_session = Session()
         retry_strategy = self._setup_retry_strategy()
         adapter = HTTPAdapter(max_retries=retry_strategy)
-        temp_session.mount("http://", adapter)
+        temp_session.mount("http://", adapter)  # noqa
         temp_session.mount("https://", adapter)
 
         try:

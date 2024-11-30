@@ -33,7 +33,6 @@ nav:
       - Overview: sdk/index.md
       - Auth: sdk/auth.md
       - Client: sdk/client.md
-      - Exceptions: sdk/exceptions.md
       - Configuration:
           - Objects:
               - Overview: sdk/config/objects/index.md
@@ -62,6 +61,9 @@ nav:
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
               - Tag Models: sdk/models/objects/tag_models.md
+          - Operations:
+              - Candidate Push (commit config): sdk/models/operations/candidate_push.md
+              - Jobs: sdk/models/operations/jobs.md
           - Security Services:
               - Overview: sdk/models/security_services/index.md
               - Anti Spyware Security Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
@@ -70,6 +72,7 @@ nav:
               - Security Rule Models: sdk/models/security_services/security_rule_models.md
               - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
               - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
+      - Exceptions: sdk/exceptions.md
 extra_css:
   - css/termynal.css
   - css/custom.css

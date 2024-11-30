@@ -7,9 +7,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
 
 - [Auth](auth.md)
 - [Client](client.md)
-- [Exceptions](exceptions.md)
 - Configuration
-    - [Objects](config/objects/index)
+    - Objects
         - [Address](config/objects/address.md)
         - [Address Group](config/objects/address_group.md)
         - [Application](config/objects/application.md)
@@ -17,7 +16,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service](config/objects/service.md)
         - [Service Group](config/objects/service_group.md)
         - [Tag](config/objects/tag.md)
-    - [Security Services](config/security_services/index)
+    - Security Services
         - [Anti-Spyware Profile](config/security_services/anti_spyware_profile)
         - [Decryption Profile](config/security_services/decryption_profile.md)
         - [DNS Security Profile](config/security_services/dns_security_profile.md)
@@ -25,7 +24,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Vulnerability Protection Profile](config/security_services/vulnerability_protection_profile.md)
         - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
 - Data Models
-    - [Objects](models/objects/index)
+    - Objects
         - [Address Models](models/objects/address_models.md)
         - [Address Group Models](models/objects/address_group_models.md)
         - [Application Models](models/objects/application_models.md)
@@ -33,13 +32,17 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service Models](models/objects/service_models.md)
         - [Service Group Models](models/objects/service_group_models.md)
         - [Tag Models](models/objects/tag_models.md)
-    - [Security Services](models/security_services/index.md)
+    - Operations
+        - [Candidate Push (commit) Models](models/operations/candidate_push.md)
+        - [Jobs Models](models/operations/jobs.md)
+    - Security Services
         - [Anti-Spyware Profile Models](models/security_services/anti_spyware_profile_models.md)
         - [Decryption Profile Models](models/security_services/decryption_profile_models.md)
         - [DNS Security Profile Models](models/security_services/dns_security_profile_models.md)
         - [Security Rule Models](models/security_services/security_rule_models.md)
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
         - [Wildfire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
+- [Exceptions](exceptions.md)
 
 ---
 
