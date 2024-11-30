@@ -8,4 +8,6 @@ from .jobs import (
     JobDetails,
     JobStatusData,
     JobStatusResponse,
+    JobListItem,
+    JobListResponse,
 )
