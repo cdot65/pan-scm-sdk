@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_serializer, field_validator
 
 
 class JobDetails(BaseModel):
@@ -47,9 +47,17 @@ class JobStatusData(BaseModel):
     type_str: str
     uname: str
 
-    model_config = ConfigDict(
-        populate_by_name=True, json_encoders={datetime: lambda dt: dt.isoformat()}
+    model_config = ConfigDict(populate_by_name=True)
+
+    @field_serializer(
+        "end_ts",
+        "insert_ts",
+        "last_update",
+        "start_ts",
     )
+    def serialize_datetime(self, dt: Optional[datetime], _info) -> Optional[str]:
+        """Serialize datetime fields to ISO format."""
+        return dt.isoformat() if dt else None
 
 
 class JobStatusResponse(BaseModel):
@@ -79,11 +87,12 @@ class JobListItem(BaseModel):
     uname: str
     description: str = Field(default="")
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-    )
+    model_config = ConfigDict(populate_by_name=True)
 
-    @field_validator("end_ts", "start_ts")
+    @field_validator(
+        "end_ts",
+        "start_ts",
+    )
     def validate_timestamp(cls, v: Optional[str]) -> Optional[str]:
         """Validate timestamp fields, allowing empty strings."""
         if v == "":
