@@ -1,9 +1,16 @@
 # tests/scm/config/test_base_object.py
 
-import pytest
 from unittest.mock import MagicMock
-from scm.config import BaseObject
+
+import pytest
+
 from scm.client import Scm
+from scm.config import BaseObject
+from scm.models.operations import (
+    CandidatePushResponseModel,
+    JobStatusResponse,
+    JobListResponse,
+)
 
 
 @pytest.mark.usefixtures("load_env")
@@ -19,10 +26,17 @@ class TestBaseObject:
     def setup_method(self, mock_scm):
         """Setup method that runs before each test."""
         self.mock_scm = mock_scm
+        # Mock basic HTTP methods
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
+
+        # Mock API-specific methods
+        self.mock_scm.list_jobs = MagicMock()
+        self.mock_scm.get_job_status = MagicMock()
+        self.mock_scm.commit = MagicMock()
+
         self.test_object = self.MockConfigObject(self.mock_scm)
 
     def test_initialization(self):
@@ -221,4 +235,133 @@ class TestBaseObject:
         self.mock_scm.post.assert_called_with(  # noqa
             "/api/v1/test-objects",
             json=nested_data,
+        )
+
+    def test_list_jobs(self):
+        """
+        **Objective:** Test list_jobs method return value.
+        **Workflow:**
+            1. Tests job listing with pagination and filtering
+            2. Verifies return type and value
+            3. Validates parameter passing
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "1",
+                    "status_str": "FIN",
+                    "job_result": "2",
+                    "job_status": "2",
+                    "job_type": "53",
+                    "type_str": "CommitAndPush",
+                    "result_str": "OK",
+                    "start_ts": "2024-11-30T10:00:00",
+                    "uname": "test@example.com",
+                    "parent_id": "0",
+                }
+            ],
+            "total": 1,
+            "limit": 100,
+            "offset": 0,
+        }
+        self.mock_scm.list_jobs.return_value = JobListResponse(**mock_response)
+
+        # Test with default parameters
+        response = self.test_object.list_jobs()
+        assert isinstance(response, JobListResponse)
+        self.mock_scm.list_jobs.assert_called_with(limit=100, offset=0, parent_id=None)
+
+        # Test with custom parameters
+        response = self.test_object.list_jobs(
+            limit=50, offset=10, parent_id="parent123"
+        )
+        assert isinstance(response, JobListResponse)
+        self.mock_scm.list_jobs.assert_called_with(
+            limit=50, offset=10, parent_id="parent123"
+        )
+
+    def test_get_job_status(self):
+        """
+        **Objective:** Test get_job_status method return value.
+        **Workflow:**
+            1. Tests job status retrieval
+            2. Verifies return type and value
+            3. Validates parameter passing
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "1595",
+                    "status_str": "FIN",
+                    "status_i": "2",
+                    "start_ts": "2024-11-30T10:00:00",
+                    "insert_ts": "2024-11-30T10:00:00",
+                    "last_update": "2024-11-30T10:02:00",
+                    "job_status": "2",
+                    "job_type": "53",
+                    "job_result": "2",
+                    "result_i": "2",
+                    "result_str": "OK",
+                    "details": "completed",
+                    "owner": "test",
+                    "percent": "100",
+                    "type_i": "53",
+                    "type_str": "CommitAndPush",
+                    "uname": "test-user",
+                }
+            ]
+        }
+        self.mock_scm.get_job_status.return_value = JobStatusResponse(**mock_response)
+
+        response = self.test_object.get_job_status("1595")
+        assert isinstance(response, JobStatusResponse)
+        assert response.data[0].id == "1595"
+        assert response.data[0].status_str == "FIN"
+        self.mock_scm.get_job_status.assert_called_with("1595")
+
+    def test_commit(self):
+        """
+        **Objective:** Test commit method return value.
+        **Workflow:**
+            1. Tests configuration commit operation
+            2. Verifies return type and value
+            3. Validates parameter passing with different combinations
+        """
+        mock_response = {
+            "success": True,
+            "job_id": "1586",
+            "message": "CommitAndPush job enqueued with jobid 1586",
+        }
+        self.mock_scm.commit.return_value = CandidatePushResponseModel(**mock_response)
+
+        # Test with minimal required parameters
+        response = self.test_object.commit(
+            folders=["folder1"], description="Test commit"
+        )
+        assert isinstance(response, CandidatePushResponseModel)
+        assert response.success is True
+        assert response.job_id == "1586"
+        self.mock_scm.commit.assert_called_with(
+            folders=["folder1"],
+            description="Test commit",
+            admin=None,
+            sync=False,
+            timeout=300,
+        )
+
+        # Test with all parameters
+        response = self.test_object.commit(
+            folders=["folder1", "folder2"],
+            description="Test commit with all params",
+            admin=["admin@example.com"],
+            sync=True,
+            timeout=600,
+        )
+        assert isinstance(response, CandidatePushResponseModel)
+        self.mock_scm.commit.assert_called_with(
+            folders=["folder1", "folder2"],
+            description="Test commit with all params",
+            admin=["admin@example.com"],
+            sync=True,
+            timeout=600,
         )
