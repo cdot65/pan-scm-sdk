@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 class JobDetails(BaseModel):
@@ -56,5 +56,47 @@ class JobStatusResponse(BaseModel):
     """Model for job status response."""
 
     data: List[JobStatusData]
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class JobListItem(BaseModel):
+    """Model for individual job in list response."""
+
+    device_name: str = Field(default="")
+    end_ts: Optional[str] = Field(default=None)
+    id: str
+    job_result: str
+    job_status: str
+    job_type: str
+    parent_id: str
+    percent: str = Field(default="")
+    result_str: str
+    start_ts: str
+    status_str: str
+    summary: str = Field(default="")
+    type_str: str
+    uname: str
+    description: str = Field(default="")
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+    )
+
+    @field_validator("end_ts", "start_ts")
+    def validate_timestamp(cls, v: Optional[str]) -> Optional[str]:
+        """Validate timestamp fields, allowing empty strings."""
+        if v == "":
+            return None
+        return v
+
+
+class JobListResponse(BaseModel):
+    """Model for jobs list response with pagination."""
+
+    data: List[JobListItem]
+    total: int
+    limit: int
+    offset: int
 
     model_config = ConfigDict(populate_by_name=True)
