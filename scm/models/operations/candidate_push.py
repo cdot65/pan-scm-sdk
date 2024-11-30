@@ -1,4 +1,4 @@
-# scm/models/operations/config_versions/candidate_push.py
+# scm/models/operations/candidate_push.py
 
 from typing import List
 
