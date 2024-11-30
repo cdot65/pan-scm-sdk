@@ -3,7 +3,8 @@
 # Standard library imports
 import logging
 import sys
-from typing import Optional, Dict, Any
+import time
+from typing import Optional, Dict, Any, List
 
 # External libraries
 from requests.exceptions import HTTPError
@@ -15,6 +16,11 @@ from scm.exceptions import (
     ErrorHandler,
 )
 from scm.models.auth import AuthRequestModel
+from scm.models.operations import (
+    CandidatePushRequestModel,
+    CandidatePushResponseModel,
+    JobStatusResponse,
+)
 
 
 class Scm:
@@ -174,3 +180,106 @@ class Scm:
             endpoint,
             **kwargs,
         )
+
+    def get_job_status(self, job_id: str) -> JobStatusResponse:
+        """
+        Get the status of a job.
+
+        Args:
+            job_id: The ID of the job to check
+
+        Returns:
+            JobStatusResponse: The job status response
+        """
+        response = self.get(f"/config/operations/v1/jobs/{job_id}")
+        return JobStatusResponse(**response)
+
+    def wait_for_job(
+        self, job_id: str, timeout: int = 300, poll_interval: int = 10
+    ) -> Optional[JobStatusResponse]:
+        """
+        Wait for a job to complete.
+
+        Args:
+            job_id: The ID of the job to check
+            timeout: Maximum time to wait in seconds (default: 300)
+            poll_interval: Time between status checks in seconds (default: 10)
+
+        Returns:
+            JobStatusResponse: The final job status response
+
+        Raises:
+            TimeoutError: If the job doesn't complete within the timeout period
+        """
+        start_time = time.time()
+        while True:
+            if time.time() - start_time > timeout:
+                raise TimeoutError(
+                    f"Job {job_id} did not complete within {timeout} seconds"
+                )
+
+            status = self.get_job_status(job_id)
+            if not status.data:
+                time.sleep(poll_interval)
+                continue
+
+            job_status = status.data[0]
+            if job_status.status_str == "FIN":
+                return status
+
+            time.sleep(poll_interval)
+
+    def commit(
+        self,
+        folders: List[str],
+        description: str,
+        admin: Optional[List[str]] = None,
+        sync: bool = False,
+        timeout: int = 300,
+    ) -> CandidatePushResponseModel:
+        """
+        Commits configuration changes to SCM.
+
+        Args:
+            folders: List of folder names to commit changes from
+            description: Description of the commit
+            admin: List of admin emails. Defaults to client_id if not provided
+            sync: Whether to wait for job completion
+            timeout: Maximum time to wait for job completion in seconds
+
+        Returns:
+            CandidatePushResponseModel: Response containing job information
+        """
+        if admin is None:
+            admin = [self.oauth_client.auth_request.client_id]
+
+        commit_request = CandidatePushRequestModel(
+            folders=folders,
+            admin=admin,
+            description=description,
+        )
+
+        self.logger.debug(f"Commit request: {commit_request.model_dump()}")
+
+        response = self.post(
+            "/config/operations/v1/config-versions/candidate:push",
+            json=commit_request.model_dump(),
+        )
+
+        commit_response = CandidatePushResponseModel(**response)
+
+        if sync and commit_response.success and commit_response.job_id:
+            try:
+                final_status = self.wait_for_job(
+                    commit_response.job_id, timeout=timeout
+                )
+                if final_status:
+                    self.logger.info(
+                        f"Commit job {commit_response.job_id} completed: "
+                        f"{final_status.data[0].result_str}"
+                    )
+            except TimeoutError as e:
+                self.logger.error(f"Commit job timed out: {str(e)}")
+                raise
+
+        return commit_response
