@@ -20,6 +20,7 @@ from scm.models.operations import (
     CandidatePushRequestModel,
     CandidatePushResponseModel,
     JobStatusResponse,
+    JobListResponse,
 )
 
 
@@ -180,6 +181,45 @@ class Scm:
             endpoint,
             **kwargs,
         )
+
+    def list_jobs(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        parent_id: Optional[str] = None,
+    ) -> JobListResponse:
+        """
+        List jobs in SCM with pagination support and optional parent ID filtering.
+
+        Args:
+            limit: Maximum number of jobs to return (default: 100)
+            offset: Number of jobs to skip (default: 0)
+            parent_id: Filter jobs by parent job ID (default: None)
+
+        Returns:
+            JobListResponse: Paginated list of jobs
+        """
+        # Make API request with just pagination parameters
+        response = self.get(
+            "/config/operations/v1/jobs",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
+        )
+
+        # Convert to Pydantic model
+        jobs_response = JobListResponse(**response)
+
+        # If parent_id filter is specified, filter the jobs
+        if parent_id is not None:
+            filtered_data = [
+                job for job in jobs_response.data if job.parent_id == parent_id
+            ]
+            jobs_response.data = filtered_data
+            jobs_response.total = len(filtered_data)
+
+        return jobs_response
 
     def get_job_status(self, job_id: str) -> JobStatusResponse:
         """
