@@ -46,6 +46,7 @@ from scm.models.security import (
     SecurityRuleMoveModel,
     DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
+    URLCategoriesCreateModel,
 )
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywarePacketCapture,
@@ -89,6 +90,11 @@ from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleAction,
     SecurityRuleUpdateModel,
+)
+from scm.models.security.url_categories import (
+    URLCategoriesListTypeEnum,
+    URLCategoriesUpdateModel,
+    URLCategoriesResponseModel,
 )
 from scm.models.security.vulnerability_protection_profiles import (
     VulnerabilityProfileThreatExceptionModel,
@@ -3214,7 +3220,269 @@ class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
     def build_minimal_update(cls):
         """Return a data dict with minimal valid update fields."""
         return cls(
-            id="123e4567-e89b-12d3-a456-426655440000", description="Updated description"
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
+        )
+
+
+# ----------------------------------------------------------------------------
+# URL Categories factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class URLCategoriesCreateApiFactory(factory.Factory):
+    """Factory for creating URLCategoriesCreateModel instances."""
+
+    class Meta:
+        model = URLCategoriesCreateModel
+
+    name = factory.Sequence(lambda n: f"url_categories_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    list = factory.List([factory.Faker("word") for _ in range(3)])
+    type = URLCategoriesListTypeEnum.url_list
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_empty_list(cls, **kwargs):
+        """Create an instance with empty list."""
+        return cls(list=[], **kwargs)
+
+    @classmethod
+    def with_category_match(cls, **kwargs):
+        """Create an instance with category match."""
+        return cls(
+            type=URLCategoriesListTypeEnum.category_match,
+            list=[
+                "hacking",
+                "low-risk",
+            ],
+            **kwargs,
+        )
+
+    @classmethod
+    def with_invalid_type(cls, **kwargs):
+        """Create an instance with category match."""
+        return cls(
+            type="invalid-type",
+            **kwargs,
+        )
+
+
+class URLCategoriesUpdateApiFactory(factory.Factory):
+    """Factory for creating URLCategoriesUpdateModel instances."""
+
+    class Meta:
+        model = URLCategoriesUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"url_categories_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    list = factory.List([factory.Faker("word") for _ in range(3)])
+    type = URLCategoriesListTypeEnum.url_list
+
+    @classmethod
+    def with_updated_list(cls, **kwargs):
+        """Create an instance with an updated list."""
+        updates_list = factory.List([factory.Faker("word") for _ in range(3)])
+        return cls(
+            list=updates_list,
+            **kwargs,
+        )
+
+    @classmethod
+    def with_category_match(cls, **kwargs):
+        """Create an instance with category match."""
+        return cls(
+            type=URLCategoriesListTypeEnum.category_match,
+            list=cls.list.append(factory.Faker("word")),
+            **kwargs,
+        )
+
+    @classmethod
+    def with_invalid_type(cls, **kwargs):
+        """Create an instance with category match."""
+        return cls(
+            type="invalid-type",
+            **kwargs,
+        )
+
+
+class URLCategoriesResponseFactory(factory.Factory):
+    """Factory for creating URLCategoriesResponseModel instances."""
+
+    class Meta:
+        model = URLCategoriesResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"url_categories_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    list = [
+        "http.kali.org/kali/dists/kali-rolling/InRelease",
+    ]
+    type = URLCategoriesListTypeEnum.url_list
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: URLCategoriesCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class URLCategoriesCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for URLCategoriesCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"url_categories_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    list = [
+        factory.Faker("word"),
+        factory.Faker("word"),
+        factory.Faker("word"),
+    ]
+    type = URLCategoriesListTypeEnum.url_list
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestProfile",
+            folder="Texas",
+            list=[
+                factory.Faker("word"),
+                factory.Faker("word"),
+                factory.Faker("word"),
+            ],
+            type=URLCategoriesListTypeEnum.url_list,
+        )
+
+    @classmethod
+    def build_valid_category_match(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestProfile",
+            folder="Texas",
+            list=[
+                factory.Faker("word"),
+                factory.Faker("word"),
+                factory.Faker("word"),
+            ],
+            type=URLCategoriesListTypeEnum.category_match,
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Texas",
+            description=factory.Faker("sentence"),
+            list=[
+                "test1",
+                "test2",
+                "test3",
+            ],
+            type=URLCategoriesListTypeEnum.url_list,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestProfile",
+            folder="Texas",
+            snippet="TestSnippet",
+            description=factory.Faker("sentence"),
+            list=[
+                "test1",
+                "test2",
+                "test3",
+                "test4",
+            ],
+            type=URLCategoriesListTypeEnum.url_list,
+        )
+
+    @classmethod
+    def build_with_invalid_type(cls):
+        """Return a data dict with invalid type."""
+        return cls(
+            name="TestProfile",
+            folder="Texas",
+            type="invalid-type",
+            description=factory.Faker("sentence"),
+            list=[
+                factory.Faker("word"),
+                factory.Faker("word"),
+                factory.Faker("word"),
+            ],
+        )
+
+
+class URLCategoriesUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for URLCategoriesUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"url_categories_{n}")
+    folder = "Texas"
+    list = [
+        factory.Faker("word"),
+        factory.Faker("word"),
+        factory.Faker("word"),
+    ]
+    type = URLCategoriesListTypeEnum.url_list
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a DNS security profile."""
+        return cls(
+            name="Updated URL Categories",
+            description="Updated description",
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            botnet_domains={
+                "dns_security_categories": [{"name": "malware", "action": "invalid"}]
+            },
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
         )
 
 
