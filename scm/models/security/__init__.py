@@ -22,6 +22,11 @@ from .security_rules import (
     SecurityRuleUpdateModel,
     SecurityRuleRulebase,
 )
+from .url_categories import (
+    URLCategoriesCreateModel,
+    URLCategoriesUpdateModel,
+    URLCategoriesResponseModel,
+)
 from .vulnerability_protection_profiles import (
     VulnerabilityProfileCreateModel,
     VulnerabilityProfileResponseModel,

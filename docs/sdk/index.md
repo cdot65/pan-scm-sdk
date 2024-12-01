@@ -21,6 +21,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Decryption Profile](config/security_services/decryption_profile.md)
         - [DNS Security Profile](config/security_services/dns_security_profile.md)
         - [Security Rule](config/security_services/security_rule.md)
+        - [URL Categories](config/security_services/url_categories.md)
         - [Vulnerability Protection Profile](config/security_services/vulnerability_protection_profile.md)
         - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
 - Data Models
@@ -40,6 +41,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Decryption Profile Models](models/security_services/decryption_profile_models.md)
         - [DNS Security Profile Models](models/security_services/dns_security_profile_models.md)
         - [Security Rule Models](models/security_services/security_rule_models.md)
+        - [URL Categories Models](models/security_services/url_categories_models.md)
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
         - [Wildfire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
 - [Exceptions](exceptions.md)
