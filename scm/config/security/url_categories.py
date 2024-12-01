@@ -109,21 +109,10 @@ class URLCategories(BaseObject):
         url_categories: List[URLCategoriesResponseModel],
         filters: Dict[str, Any],
     ) -> List[URLCategoriesResponseModel]:
-        """
-        Apply client-side filtering to the list of URL Categories.
-
-        Args:
-            url_categories: List of URLCategoriesResponseModel objects
-            filters: Dictionary of filter criteria
-
-        Returns:
-            List[URLCategoriesResponseModel]: Filtered list of profiles
-        """
         filter_criteria = url_categories
 
         # Filter by members of the list entry
         if "members" in filters:
-
             # Validate that the filter was passed in as a list object
             if not isinstance(filters["members"], list):
                 raise InvalidObjectError(
@@ -136,9 +125,9 @@ class URLCategories(BaseObject):
             # Set the filter
             entries = filters["members"]
             filter_criteria = [
-                member
-                for member in filter_criteria
-                if any(entry.name in entries for entry in entries)
+                category
+                for category in filter_criteria
+                if any(member in entries for member in category.list)
             ]
 
         return filter_criteria
