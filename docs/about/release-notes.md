@@ -1,3 +1,9 @@
+## Version 0.3.3
+
+- Added support for URL Categories
+
+---
+
 ## Version 0.3.2
 
 - Added support for performing commits
