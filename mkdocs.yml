@@ -49,6 +49,7 @@ nav:
               - Decryption Profile: sdk/config/security_services/decryption_profile.md
               - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
               - Security Rule: sdk/config/security_services/security_rule.md
+              - URL Categories: sdk/config/security_services/url_categories.md
               - Vulnerability Protection Security Profile: sdk/config/security_services/vulnerability_protection_profile.md
               - Wildfire Anti Virus Security Profile: sdk/config/security_services/wildfire_antivirus.md
       - Data Models:
@@ -70,6 +71,7 @@ nav:
               - Decryption Profile Models: sdk/models/security_services/decryption_profile_models.md
               - DNS Security Profile Models: sdk/models/security_services/dns_security_profile_models.md
               - Security Rule Models: sdk/models/security_services/security_rule_models.md
+              - URL Categories Models: sdk/models/security_services/url_categories_models.md
               - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
               - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
       - Exceptions: sdk/exceptions.md
