@@ -8,6 +8,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
 - [Auth](auth.md)
 - [Client](client.md)
 - Configuration
+    - [BaseObject](config/base_object.md)
     - Objects
         - [Address](config/objects/address.md)
         - [Address Group](config/objects/address_group.md)

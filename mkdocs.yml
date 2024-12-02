@@ -34,6 +34,7 @@ nav:
       - Auth: sdk/auth.md
       - Client: sdk/client.md
       - Configuration:
+          - BaseObject: sdk/config/base_object.md
           - Objects:
               - Overview: sdk/config/objects/index.md
               - Address: sdk/config/objects/address.md
