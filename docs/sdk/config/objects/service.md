@@ -1,58 +1,79 @@
 # Service Configuration Object
 
-The `Service` class provides functionality to manage service objects in Palo Alto Networks' Strata Cloud Manager.
-Services define network protocols and ports that can be referenced in security policies and NAT rules.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Service Model Attributes](#service-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Services](#creating-services)
+    - [Retrieving Services](#retrieving-services)
+    - [Updating Services](#updating-services)
+    - [Listing Services](#listing-services)
+    - [Deleting Services](#deleting-services)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Services in Strata Cloud Manager allow you to:
+The `Service` class provides functionality to manage service objects in Palo Alto Networks' Strata Cloud Manager. This
+class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting service
+definitions that specify network protocols and ports for use in security policies.
 
-- Define TCP and UDP services with specific ports
-- Configure protocol timeout overrides
-- Organize services within folders, snippets, or devices
-- Apply tags for better organization
-- Reference services in security policies and other configurations
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during service object
-management.
+| Method     | Description                    | Parameters                    | Return Type                  |
+|------------|--------------------------------|-------------------------------|------------------------------|
+| `create()` | Creates a new service          | `data: Dict[str, Any]`        | `ServiceResponseModel`       |
+| `get()`    | Retrieves a service by ID      | `object_id: str`              | `ServiceResponseModel`       |
+| `update()` | Updates an existing service    | `service: ServiceUpdateModel` | `ServiceResponseModel`       |
+| `delete()` | Deletes a service              | `object_id: str`              | `None`                       |
+| `list()`   | Lists services with filtering  | `folder: str`, `**filters`    | `List[ServiceResponseModel]` |
+| `fetch()`  | Gets service by name/container | `name: str`, `folder: str`    | `ServiceResponseModel`       |
 
-## Methods
+## Service Model Attributes
 
-| Method     | Description                            |
-|------------|----------------------------------------|
-| `create()` | Creates a new service                  |
-| `get()`    | Retrieves a service by ID              |
-| `update()` | Updates an existing service            |
-| `delete()` | Deletes a service                      |
-| `list()`   | Lists services with optional filtering |
-| `fetch()`  | Retrieves a single service by name     |
+| Attribute      | Type        | Required     | Description                                 |
+|----------------|-------------|--------------|---------------------------------------------|
+| `name`         | str         | Yes          | Name of service (max 63 chars)              |
+| `id`           | UUID        | Yes*         | Unique identifier (*response only)          |
+| `protocol`     | Protocol    | Yes          | Protocol configuration (TCP/UDP)            |
+| `protocol.tcp` | TCPProtocol | One Required | TCP protocol settings                       |
+| `protocol.udp` | UDPProtocol | One Required | UDP protocol settings                       |
+| `description`  | str         | No           | Description (max 1023 chars)                |
+| `tag`          | List[str]   | No           | List of tags                                |
+| `folder`       | str         | Yes**        | Folder location (**one container required)  |
+| `snippet`      | str         | Yes**        | Snippet location (**one container required) |
+| `device`       | str         | Yes**        | Device location (**one container required)  |
+
+### Protocol Override Settings
+
+| Attribute           | Type | Required | Description                  |
+|---------------------|------|----------|------------------------------|
+| `timeout`           | int  | No       | Connection timeout (seconds) |
+| `halfclose_timeout` | int  | No       | Half-close timeout (seconds) |
+| `timewait_timeout`  | int  | No       | Time-wait timeout (seconds)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                    |
+|------------------------------|-----------|--------------------------------|
+| `InvalidObjectError`         | 400       | Invalid service data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters    |
+| `NameNotUniqueError`         | 409       | Service name already exists    |
+| `ObjectNotPresentError`      | 404       | Service not found              |
+| `ReferenceNotZeroError`      | 409       | Service still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed          |
+| `ServerError`                | 500       | Internal server error          |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when service object data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a service doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when service names conflict
-- `NameNotUniqueError`: Raised when creating duplicate service names
-- `ReferenceNotZeroError`: Raised when deleting services still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Services
-
-The `create()` method allows you to create new services with proper error handling.
-
-**Example: Creating a TCP Service**
+## Basic Configuration
 
 <div class="termy">
 
@@ -61,310 +82,307 @@ The `create()` method allows you to create new services with proper error handli
 ```python
 from scm.client import Scm
 from scm.config.objects import Service
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize Service object
 services = Service(client)
+```
 
-try:
-    tcp_service = {
-        "name": "web-service",
-        "protocol": {
-            "tcp": {
-                "port": "80,443",
-                "override": {
-                    "timeout": 60,
-                    "halfclose_timeout": 30
-                }
+</div>
+
+## Usage Examples
+
+### Creating Services
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# TCP service configuration
+tcp_service = {
+    "name": "web-service",
+    "protocol": {
+        "tcp": {
+            "port": "80,443",
+            "override": {
+                "timeout": 60,
+                "halfclose_timeout": 30
             }
-        },
-        "description": "Web service for HTTP/HTTPS",
-        "folder": "Texas",
-        "tag": ["Automation"]
-    }
+        }
+    },
+    "description": "Web service ports",
+    "folder": "Texas",
+    "tag": ["Web", "Production"]
+}
 
-    new_service = services.create(tcp_service)
-    print(f"Created service: {new_service.name}")
+# Create TCP service
+tcp_service_obj = services.create(tcp_service)
 
-except NameNotUniqueError as e:
-    print(f"Service name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid service data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
-```
-
-</div>
-
-**Example: Creating a UDP Service**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    udp_service = {
-        "name": "dns-service",
-        "protocol": {
-            "udp": {
-                "port": "53"
+# UDP service configuration
+udp_service = {
+    "name": "dns-service",
+    "protocol": {
+        "udp": {
+            "port": "53",
+            "override": {
+                "timeout": 30
             }
-        },
-        "description": "DNS service",
-        "folder": "Texas"
-    }
+        }
+    },
+    "description": "DNS service",
+    "folder": "Texas",
+    "tag": ["DNS"]
+}
 
-    new_service = services.create(udp_service)
-    print(f"Created service: {new_service.name}")
-
-except InvalidObjectError as e:
-    print(f"Invalid service data: {e.message}")
-    print(f"Error code: {e.error_code}")
-    if e.details:
-        print(f"Details: {e.details}")
+# Create UDP service
+udp_service_obj = services.create(udp_service)
 ```
 
 </div>
 
-## Getting Services
-
-Use the `get()` method to retrieve a service by its ID.
+### Retrieving Services
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    service_id = "123e4567-e89b-12d3-a456-426655440000"
-    service_obj = services.get(service_id)
-    print(f"Service: {service_obj.name}")
-    print(f"Protocol: {'TCP' if service_obj.protocol.tcp else 'UDP'}")
+# Fetch by name and folder
+service = services.fetch(name="web-service", folder="Texas")
+print(f"Found service: {service.name}")
 
-except NotFoundError as e:
-    print(f"Service not found: {e.message}")
+# Get by ID
+service_by_id = services.get(service.id)
+print(f"Protocol: {'TCP' if service_by_id.protocol.tcp else 'UDP'}")
+if service_by_id.protocol.tcp:
+    print(f"Ports: {service_by_id.protocol.tcp.port}")
 ```
 
 </div>
 
-## Updating Services
-
-The `update()` method allows you to modify existing services using Pydantic models.
+### Updating Services
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    service_object = services.fetch(folder='Texas', name='dns-service')
-    service_object.description = 'updated description'
-    updated_service = services.update(service_object)
-    print(f"Updated service: {updated_service.name}")
+# Fetch existing service
+existing_service = services.fetch(name="web-service", folder="Texas")
 
-except NotFoundError as e:
-    print(f"Service not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Update ports and timeouts
+if existing_service.protocol.tcp:
+    existing_service.protocol.tcp.port = "80,443,8443"
+    existing_service.protocol.tcp.override.timeout = 120
+
+# Update description and tags
+existing_service.description = "Updated web service ports"
+existing_service.tag = ["Web", "Production", "Updated"]
+
+# Perform update
+updated_service = services.update(existing_service)
 ```
 
 </div>
 
-## Deleting Services
-
-Use the `delete()` method to remove a service.
+### Listing Services
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    service_id = "123e4567-e89b-12d3-a456-426655440000"
-    services.delete(service_id)
-    print("Service deleted successfully")
+# List with direct filter parameters
+filtered_services = services.list(
+    folder='Texas',
+    protocols=['tcp'],
+    tags=['Production']
+)
 
-except NotFoundError as e:
-    print(f"Service not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Service still in use: {e.message}")
+# Process results
+for svc in filtered_services:
+    print(f"Name: {svc.name}")
+    if svc.protocol.tcp:
+        print(f"TCP Ports: {svc.protocol.tcp.port}")
+    elif svc.protocol.udp:
+        print(f"UDP Ports: {svc.protocol.udp.port}")
+
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "protocols": ["udp"],
+    "tags": ["DNS"]
+}
+
+# List with filters as kwargs
+filtered_services = services.list(**list_params)
 ```
 
 </div>
 
-## Listing Services
-
-The `list()` method retrieves multiple services with optional filtering. You can filter the results using the
-following kwargs:
-
-- `protocol`: List[str] - Filter by protocol type (e.g., ['tcp', 'udp'])
-- `tag`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
+### Deleting Services
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all services in a folder
-    all_services = services.list(folder="Texas")
-
-    # List only TCP services
-    tcp_services = services.list(
-        folder="Texas",
-        protocol=['tcp']
-    )
-
-    # List services with specific tags
-    tagged_services = services.list(
-        folder="Texas",
-        tag=['Automation']
-    )
-
-    # Combine multiple filters
-    filtered_services = services.list(
-        folder="Texas",
-        protocol=['tcp'],
-        tag=['Production']
-    )
-
-    # Print the results
-    for svc in all_services:
-        print(f"Name: {svc.name}")
-        if svc.protocol.tcp:
-            print(f"TCP Ports: {svc.protocol.tcp.port}")
-        elif svc.protocol.udp:
-            print(f"UDP Ports: {svc.protocol.udp.port}")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Delete by ID
+service_id = "123e4567-e89b-12d3-a456-426655440000"
+services.delete(service_id)
 ```
 
 </div>
 
-## Fetching Services
+## Managing Configuration Changes
 
-The `fetch()` method retrieves a single service by name from a specific container, returning a Pydantic model.
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    service_obj = services.fetch(name="web-service", folder="Texas")
-    print(f"Found service: {service_obj.name}")
-    print(f"Current ports: {service_obj.protocol.tcp.port}")
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated service definitions",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-except NotFoundError as e:
-    print(f"Service not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Commit the changes
+result = services.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of a service with proper error handling:
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.config.objects import Service
+# Get status of specific job
+job_status = services.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = services.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create service configuration
+    service_config = {
+        "name": "test-service",
+        "protocol": {
+            "tcp": {
+                "port": "8080",
+                "override": {
+                    "timeout": 30
+                }
+            }
+        },
+        "folder": "Texas",
+        "description": "Test service",
+        "tag": ["Test"]
+    }
+
+    # Create the service
+    new_service = services.create(service_config)
+
+    # Commit changes
+    result = services.commit(
+        folders=["Texas"],
+        description="Added test service",
+        sync=True
     )
 
-    # Initialize service object
-    services = Service(client)
+    # Check job status
+    status = services.get_job_status(result.job_id)
 
-    try:
-        # Create new service
-        create_data = {
-            "name": "test-service",
-            "protocol": {
-                "tcp": {
-                    "port": "8080",
-                    "override": {
-                        "timeout": 30
-                    }
-                }
-            },
-            "description": "Test service",
-            "folder": "Texas"
-        }
-
-        new_service = services.create(create_data)
-        print(f"Created service: {new_service.name}")
-
-        # Fetch the service by name
-        try:
-            fetched_service = services.fetch(
-                name="test-service",
-                folder="Texas"
-            )
-            print(f"Found service: {fetched_service.name}")
-
-            # Update the service using Pydantic model
-            fetched_service.description = "Updated test service"
-            fetched_service.protocol.tcp.port = "8080,8443"
-            updated_service = services.update(fetched_service)
-            print(f"Updated ports: {updated_service.protocol.tcp.port}")
-
-        except NotFoundError as e:
-            print(f"Service not found: {e.message}")
-
-        # Clean up
-        try:
-            services.delete(new_service.id)
-            print("Service deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete service - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Service name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid service data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid service data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Service name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Service not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Service still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Full script examples
+## Best Practices
 
-Refer to the [examples](../../../../examples/scm/config/objects) directory.
+1. **Protocol Configuration**
+    - Define clear port ranges
+    - Use appropriate timeouts
+    - Document protocol choices
+    - Consider service dependencies
+    - Validate port conflicts
+
+2. **Container Management**
+    - Always specify exactly one container
+    - Use consistent container names
+    - Validate container existence
+    - Group related services
+
+3. **Error Handling**
+    - Validate input data
+    - Handle specific exceptions
+    - Log error details
+    - Monitor commit status
+    - Track job completion
+
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed services
+    - Implement proper retry logic
+    - Monitor timeout settings
+
+5. **Security**
+    - Follow least privilege principle
+    - Validate port ranges
+    - Document security implications
+    - Monitor service usage
+    - Track policy references
+
+## Full Script Examples
+
+Refer to
+the [service.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/service.py).
 
 ## Related Models
 

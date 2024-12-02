@@ -1,59 +1,80 @@
 # Application Configuration Object
 
-The `Application` class provides functionality to manage custom application definitions in Palo Alto Networks' Strata
-Cloud Manager. Applications represent network applications and their characteristics, allowing you to define custom
-applications beyond the predefined ones available in the system.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Application Model Attributes](#application-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Applications](#creating-applications)
+    - [Retrieving Applications](#retrieving-applications)
+    - [Updating Applications](#updating-applications)
+    - [Listing Applications](#listing-applications)
+    - [Deleting Applications](#deleting-applications)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Applications in Strata Cloud Manager allow you to:
+The `Application` class provides functionality to manage custom application definitions in Palo Alto Networks' Strata
+Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and
+deleting custom applications with specific characteristics, risk levels, and behaviors.
 
-- Define custom applications with specific characteristics
-- Categorize applications by type, risk level, and behavior
-- Specify application properties like ports and protocols
-- Track security-relevant attributes like known vulnerabilities
-- Organize applications within folders or snippets
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during application
-management.
+| Method     | Description                     | Parameters                            | Return Type                      |
+|------------|---------------------------------|---------------------------------------|----------------------------------|
+| `create()` | Creates a new application       | `data: Dict[str, Any]`                | `ApplicationResponseModel`       |
+| `get()`    | Retrieves an application by ID  | `object_id: str`                      | `ApplicationResponseModel`       |
+| `update()` | Updates an existing application | `application: ApplicationUpdateModel` | `ApplicationResponseModel`       |
+| `delete()` | Deletes an application          | `object_id: str`                      | `None`                           |
+| `list()`   | Lists apps with filtering       | `folder: str`, `**filters`            | `List[ApplicationResponseModel]` |
+| `fetch()`  | Gets app by name and container  | `name: str`, `folder: str`            | `ApplicationResponseModel`       |
 
-## Methods
+## Application Model Attributes
 
-| Method     | Description                                |
-|------------|--------------------------------------------|
-| `create()` | Creates a new application definition       |
-| `get()`    | Retrieves an application by ID             |
-| `update()` | Updates an existing application            |
-| `delete()` | Deletes an application                     |
-| `list()`   | Lists applications with optional filtering |
-| `fetch()`  | Retrieves a single application by name     |
+| Attribute                   | Type      | Required | Description                                 |
+|-----------------------------|-----------|----------|---------------------------------------------|
+| `name`                      | str       | Yes      | Name of application (max 63 chars)          |
+| `id`                        | UUID      | Yes*     | Unique identifier (*response only)          |
+| `category`                  | str       | Yes      | High-level category (max 50 chars)          |
+| `subcategory`               | str       | Yes      | Specific sub-category (max 50 chars)        |
+| `technology`                | str       | Yes      | Underlying technology (max 50 chars)        |
+| `risk`                      | int       | Yes      | Risk level (1-5)                            |
+| `description`               | str       | No       | Description (max 1023 chars)                |
+| `ports`                     | List[str] | No       | Associated TCP/UDP ports                    |
+| `folder`                    | str       | Yes**    | Folder location (**one container required)  |
+| `snippet`                   | str       | Yes**    | Snippet location (**one container required) |
+| `evasive`                   | bool      | No       | Uses evasive techniques                     |
+| `pervasive`                 | bool      | No       | Widely used                                 |
+| `excessive_bandwidth_use`   | bool      | No       | Uses excessive bandwidth                    |
+| `used_by_malware`           | bool      | No       | Used by malware                             |
+| `transfers_files`           | bool      | No       | Transfers files                             |
+| `has_known_vulnerabilities` | bool      | No       | Has known vulnerabilities                   |
+| `tunnels_other_apps`        | bool      | No       | Tunnels other applications                  |
+| `prone_to_misuse`           | bool      | No       | Prone to misuse                             |
+| `no_certifications`         | bool      | No       | Lacks certifications                        |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                        |
+|------------------------------|-----------|------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid application data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters        |
+| `NameNotUniqueError`         | 409       | Application name already exists    |
+| `ObjectNotPresentError`      | 404       | Application not found              |
+| `ReferenceNotZeroError`      | 409       | Application still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed              |
+| `ServerError`                | 500       | Internal server error              |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when application data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when an application doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when application names conflict
-- `NameNotUniqueError`: Raised when creating duplicate application names
-- `ReferenceNotZeroError`: Raised when deleting applications still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Applications
-
-The `create()` method allows you to define new custom applications with proper error handling.
-
-**Example: Creating a Custom Application**
+## Basic Configuration
 
 <div class="termy">
 
@@ -62,287 +83,292 @@ The `create()` method allows you to define new custom applications with proper e
 ```python
 from scm.client import Scm
 from scm.config.objects import Application
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize Application object
 applications = Application(client)
-
-try:
-    app_data = {
-        "name": "internal-chat",
-        "category": "collaboration",
-        "subcategory": "instant-messaging",
-        "technology": "client-server",
-        "risk": 2,
-        "description": "Internal chat application",
-        "ports": ["tcp/8443"],
-        "folder": "Texas",
-        "transfers_files": True,
-        "has_known_vulnerabilities": False
-    }
-
-    new_app = applications.create(app_data)
-    print(f"Created application: {new_app.name}")
-
-except NameNotUniqueError as e:
-    print(f"Application name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid application data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
 ```
 
 </div>
 
-## Getting Applications
+## Usage Examples
 
-Use the `get()` method to retrieve an application by its ID.
+### Creating Applications
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    app_id = "123e4567-e89b-12d3-a456-426655440000"
-    app = applications.get(app_id)
-    print(f"Application: {app.name}")
-    print(f"Risk Level: {app.risk}")
+# Basic application configuration
+basic_app = {
+    "name": "custom-database",
+    "category": "business-systems",
+    "subcategory": "database",
+    "technology": "client-server",
+    "risk": 3,
+    "description": "Custom database application",
+    "ports": ["tcp/1521"],
+    "folder": "Texas"
+}
 
-except NotFoundError as e:
-    print(f"Application not found: {e.message}")
+# Create basic application
+basic_app_obj = applications.create(basic_app)
+
+# Advanced application with security attributes
+secure_app = {
+    "name": "secure-chat",
+    "category": "collaboration",
+    "subcategory": "instant-messaging",
+    "technology": "client-server",
+    "risk": 2,
+    "description": "Secure internal chat application",
+    "ports": ["tcp/8443"],
+    "folder": "Texas",
+    "transfers_files": True,
+    "has_known_vulnerabilities": False,
+    "evasive": False,
+    "pervasive": True
+}
+
+# Create secure application
+secure_app_obj = applications.create(secure_app)
 ```
 
 </div>
 
-## Updating Applications
-
-The `update()` method allows you to modify existing applications using Pydantic models.
+### Retrieving Applications
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    fetched_app = applications.fetch(folder='Texas', name='internal-chat')
+# Fetch by name and folder
+app = applications.fetch(name="custom-database", folder="Texas")
+print(f"Found application: {app.name}")
 
-    fetched_app.description = 'Updated description for internal chat application'
-
-    updated_app = applications.update(fetched_app)
-    print(f"Updated application: {updated_app.name}")
-
-except NotFoundError as e:
-    print(f"Application not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Get by ID
+app_by_id = applications.get(app.id)
+print(f"Retrieved application: {app_by_id.name}")
+print(f"Risk level: {app_by_id.risk}")
 ```
 
 </div>
 
-## Deleting Applications
-
-Use the `delete()` method to remove an application.
+### Updating Applications
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    app_id = "123e4567-e89b-12d3-a456-426655440000"
-    applications.delete(app_id)
-    print("Application deleted successfully")
+# Fetch existing application
+existing_app = applications.fetch(name="custom-database", folder="Texas")
 
-except NotFoundError as e:
-    print(f"Application not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Application still in use: {e.message}")
+# Update attributes
+existing_app.description = "Updated database application"
+existing_app.risk = 4
+existing_app.has_known_vulnerabilities = True
+existing_app.ports = ["tcp/1521", "tcp/1522"]
+
+# Perform update
+updated_app = applications.update(existing_app)
 ```
 
 </div>
 
-## Listing Applications
-
-The `list()` method retrieves multiple applications with optional filtering. You can filter the results using the
-following kwargs:
-
-- `category`: List[str] - Filter by category (e.g., ['collaboration', 'business-systems'])
-- `subcategory`: List[str] - Filter by subcategory (e.g., ['instant-messaging', 'database'])
-- `technology`: List[str] - Filter by technology (e.g., ['client-server', 'peer-to-peer'])
-- `risk`: List[int] - Filter by risk level (e.g., [1, 2, 3])
+### Listing Applications
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all applications in a folder
-    apps = applications.list(folder="Texas")
+# List with direct filter parameters
+filtered_apps = applications.list(
+    folder='Texas',
+    category=['business-systems'],
+    risk=[3, 4, 5]
+)
 
-    # List applications by category
-    collab_apps = applications.list(
-        folder="Texas",
-        category=['collaboration']
-    )
+# Process results
+for app in filtered_apps:
+    print(f"Name: {app.name}")
+    print(f"Category: {app.category}")
+    print(f"Risk: {app.risk}")
 
-    # List applications by risk level
-    high_risk_apps = applications.list(
-        folder="Texas",
-        risk=[4, 5]
-    )
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "technology": ["client-server"],
+    "subcategory": ["database"]
+}
 
-    # List applications by technology
-    client_server_apps = applications.list(
-        folder="Texas",
-        technology=['client-server']
-    )
-
-    # Combine multiple filters
-    filtered_apps = applications.list(
-        folder="Texas",
-        category=['business-systems'],
-        subcategory=['database'],
-        risk=[3, 4, 5]
-    )
-
-    # Print the results
-    for app in apps:
-        print(f"Name: {app.name}, Category: {app.category}, Risk: {app.risk}")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# List with filters as kwargs
+filtered_apps = applications.list(**list_params)
 ```
 
 </div>
 
-## Fetching Applications
-
-The `fetch()` method retrieves a single application by name from a specific container, returning a Pydantic model.
+### Deleting Applications
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    app = applications.fetch(
-        name="internal-chat",
-        folder="Texas"
-    )
-    print(f"Found application: {app.name}")
-    print(f"Current risk level: {app.risk}")
-
-except NotFoundError as e:
-    print(f"Application not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Delete by ID
+app_id = "123e4567-e89b-12d3-a456-426655440000"
+applications.delete(app_id)
 ```
 
 </div>
 
-## Full Workflow Example
+## Managing Configuration Changes
 
-Here's a complete example demonstrating the full lifecycle of an application with proper error handling:
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.config.objects import Application
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated application definitions",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes
+result = applications.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
+```
+
+</div>
+
+### Monitoring Jobs
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get status of specific job
+job_status = applications.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = applications.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create application configuration
+    app_config = {
+        "name": "test-app",
+        "category": "business-systems",
+        "subcategory": "database",
+        "technology": "client-server",
+        "risk": 3,
+        "folder": "Texas",
+        "description": "Test application",
+        "ports": ["tcp/1521"]
+    }
+
+    # Create the application
+    new_app = applications.create(app_config)
+
+    # Commit changes
+    result = applications.commit(
+        folders=["Texas"],
+        description="Added test application",
+        sync=True
     )
 
-    # Initialize application object
-    applications = Application(client)
+    # Check job status
+    status = applications.get_job_status(result.job_id)
 
-    try:
-        # Create new application
-        app_data = {
-            "name": "custom-app",
-            "category": "business-systems",
-            "subcategory": "database",
-            "technology": "client-server",
-            "risk": 3,
-            "description": "Custom database application",
-            "ports": ["tcp/1521"],
-            "folder": "Texas",
-            "transfers_files": True
-        }
-
-        new_app = applications.create(app_data)
-        print(f"Created application: {new_app.name}")
-
-        # Fetch the application by name
-        try:
-            fetched_app = applications.fetch(
-                name="custom-app",
-                folder="Texas"
-            )
-            print(f"Found application: {fetched_app.name}")
-
-            # Update the application using Pydantic model
-            fetched_app.description = "Updated database application"
-            fetched_app.risk = 4
-            fetched_app.has_known_vulnerabilities = True
-
-            updated_app = applications.update(fetched_app)
-            print(f"Updated application: {updated_app.name}")
-            print(f"New risk level: {updated_app.risk}")
-
-        except NotFoundError as e:
-            print(f"Application not found: {e.message}")
-
-        # Clean up
-        try:
-            applications.delete(new_app.id)
-            print("Application deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete application - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Application name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid application data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid application data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Application name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Application not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Application still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Full script examples
+## Best Practices
 
-Refer to the [examples](../../../../examples/scm/config/objects) directory.
+1. **Application Definition**
+    - Use descriptive names and categories
+    - Set appropriate risk levels
+    - Document security characteristics
+    - Specify all relevant ports
+    - Keep descriptions current
+
+2. **Container Management**
+    - Always specify exactly one container (folder or snippet)
+    - Use consistent container names
+    - Validate container existence
+    - Group related applications
+
+3. **Security Attributes**
+    - Accurately flag security concerns
+    - Update vulnerability status
+    - Document evasive behaviors
+    - Track certification status
+    - Monitor risk levels
+
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed apps
+    - Implement proper retry logic
+    - Monitor bandwidth flags
+
+5. **Error Handling**
+    - Validate input data
+    - Handle specific exceptions
+    - Log error details
+    - Monitor commit status
+    - Track job completion
+
+## Full Script Examples
+
+Refer to
+the [application.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/application.py).
 
 ## Related Models
 

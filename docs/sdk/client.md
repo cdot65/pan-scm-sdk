@@ -39,25 +39,7 @@ class Scm:
 
 ### Core Methods
 
-#### Request Methods
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-def request(self, method: str, endpoint: str, **kwargs)
-```
-
-</div>
-
-Makes a generic HTTP request to the API and returns a Pydantic model or None.
-
-**Parameters:**
-
-- `method`: HTTP method (GET, POST, PUT, DELETE)
-- `endpoint`: API endpoint path
-- `**kwargs`: Additional request parameters
+#### HTTP Methods
 
 <div class="termy">
 
@@ -124,7 +106,20 @@ def list_jobs(
 
 </div>
 
-Lists jobs with pagination support and optional parent ID filtering.
+Lists jobs with pagination support and optional parent ID filtering. When parent_id is provided, returns only child jobs
+of the specified parent job.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+def get_job_status(self, job_id: str) -> JobStatusResponse
+```
+
+</div>
+
+Gets the status of a specific job.
 
 <div class="termy">
 
@@ -142,6 +137,27 @@ def wait_for_job(
 </div>
 
 Waits for a job to complete with configurable timeout and polling interval.
+
+### Configuration Management Methods
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+def commit(
+        self,
+        folders: List[str],
+        description: str,
+        admin: Optional[List[str]] = None,
+        sync: bool = False,
+        timeout: int = 300,
+) -> CandidatePushResponseModel
+```
+
+</div>
+
+Commits configuration changes to SCM with options for synchronous waiting and custom timeout.
 
 ## Usage Examples
 
@@ -164,220 +180,120 @@ client = Scm(
 
 </div>
 
-### Using Debug Logging
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# Initialize with debug logging
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
-)
-```
-
-</div>
-
 ### Making API Requests
 
-#### GET Request Example
+Please consider using the dedicated class objects for making API requests to specific configuration objects, but if
+there is no existing class object, you can use the `request()` method directly to get your job done until coverage has
+improved.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# List addresses with parameters
+# List objects with parameters
 response = client.get(
     endpoint="/config/objects/v1/addresses",
     params={"folder": "Texas", "limit": 100}
 )
-```
 
-</div>
-
-#### POST Request Example with Pydantic Models
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.models.operations import CandidatePushRequestModel
-
-# Create a commit request
-commit_request = CandidatePushRequestModel(
-    folders=["Texas"],
-    admin=["admin@example.com"],
-    description="Initial commit"
-)
-
+# Create new object
 response = client.post(
-    endpoint="/config/operations/v1/config-versions/candidate:push",
-    json=commit_request.model_dump()
+    endpoint="/config/objects/v1/addresses",
+    json={
+        "name": "test-address",
+        "ip_netmask": "192.168.1.0/24",
+        "folder": "Texas"
+    }
 )
 ```
 
 </div>
 
-#### Commit Changes Example
+### Job Management
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Commit changes with synchronous wait
-response = client.commit(
+# List recent jobs
+jobs = client.list_jobs(limit=10)
+
+# Get child jobs of a specific job
+child_jobs = client.list_jobs(parent_id="parent-job-id")
+
+# Wait for job completion
+status = client.wait_for_job("job-id", timeout=600)
+```
+
+</div>
+
+### Committing Changes
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Commit changes synchronously
+result = client.commit(
     folders=["Texas"],
-    description="Configuration update",
+    description="Update network configuration",
     sync=True,
     timeout=300
 )
 
-if response.success:
-    print(f"Commit successful! Job ID: {response.job_id}")
+print(f"Commit job ID: {result.job_id}")
+
+# Check commit status
+status = client.get_job_status(result.job_id)
+print(f"Status: {status.data[0].status_str}")
 ```
 
 </div>
 
 ## Error Handling
 
-### Comprehensive Error Handling Example
-
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.exceptions import (
-    APIError,
-    AuthenticationError,
-    NotFoundError,
-    InvalidObjectError,
-    ServerError,
-    TimeoutError
-)
+from scm.exceptions import APIError, AuthenticationError, TimeoutError
 
-
-def perform_api_operations():
-    try:
-        # Initialize client
-        client = Scm(
-            client_id="your_client_id",
-            client_secret="your_client_secret",
-            tsg_id="your_tsg_id",
-            log_level="INFO"
-        )
-
-        try:
-            # Commit changes
-            response = client.commit(
-                folders=["Texas"],
-                description="Test commit",
-                sync=True
-            )
-            print(f"Commit job ID: {response.job_id}")
-
-        except AuthenticationError as e:
-            print(f"Authentication failed: {e.message}")
-            print(f"Error code: {e.error_code}")
-
-        except InvalidObjectError as e:
-            print(f"Invalid request data: {e.message}")
-            if e.details:
-                print(f"Validation errors: {e.details}")
-
-        except TimeoutError as e:
-            print(f"Operation timed out: {str(e)}")
-
-        except ServerError as e:
-            print(f"Server error occurred: {e.message}")
-            print(f"Status code: {e.http_status_code}")
-
-    except APIError as e:
-        print(f"API error occurred: {e}")
+try:
+    result = client.commit(
+        folders=["Texas"],
+        description="Update configuration",
+        sync=True
+    )
+except AuthenticationError as e:
+    print(f"Authentication failed: {e.message}")
+except TimeoutError as e:
+    print(f"Operation timed out: {str(e)}")
+except APIError as e:
+    print(f"API error: {str(e)}")
 ```
 
 </div>
 
 ## Best Practices
 
-### Client Configuration
-
-1. **Logging Configuration**
-
-    - Use appropriate log levels for different environments
-    - Set to DEBUG for development and troubleshooting
-    - Set to ERROR or WARNING for production
+1. **Client Reuse**
+    - Create a single client instance and reuse it
+    - Avoid creating multiple client instances
 
 2. **Error Handling**
-
     - Always wrap API calls in try-except blocks
     - Handle specific exceptions before generic ones
     - Log error details for troubleshooting
-    - Include proper error recovery mechanisms
 
-3. **Token Management**
+3. **Job Management**
+    - Use sync=True for simpler workflows when waiting for job completion
+    - Set appropriate timeouts based on operation complexity
+    - Monitor child jobs for complex operations
 
-    - The client automatically handles token refresh
-    - No manual token management required
-    - Tokens are refreshed when expired before requests
-
-### Code Examples
-
-#### Reusing Client Instance
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# Create a single client instance
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-
-# Reuse for multiple operations
-def commit_changes(folders: List[str], description: str):
-    return client.commit(
-        folders=folders,
-        description=description,
-        sync=True
-    )
-
-
-def check_job_status(job_id: str):
-    return client.get_job_status(job_id)
-```
-
-</div>
-
-## Common Error Scenarios
-
-### Authentication Failures
-
-- Invalid credentials (`AuthenticationError`)
-- Expired tokens (handled automatically)
-- Missing required parameters (`InvalidObjectError`)
-
-### Request Failures
-
-- Malformed requests (`InvalidObjectError`)
-- Invalid parameters (`InvalidObjectError`)
-- Resource not found (`NotFoundError`)
-- Operation timeouts (`TimeoutError`)
-
-### Server Errors
-
-- Service unavailable (`ServerError`)
-- Internal server errors (`ServerError`)
-- Gateway timeouts (`GatewayTimeoutError`)
+4. **Logging**
+    - Use DEBUG level for development and troubleshooting
+    - Use ERROR level for production environments

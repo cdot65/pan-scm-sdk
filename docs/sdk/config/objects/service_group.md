@@ -1,315 +1,344 @@
 # Service Group Configuration Object
 
-The `ServiceGroup` class provides functionality to manage service groups in Palo Alto Networks' Strata Cloud Manager.
-Service groups allow you to organize and manage collections of services for use in security policies and NAT rules.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Service Group Model Attributes](#service-group-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Service Groups](#creating-service-groups)
+    - [Retrieving Service Groups](#retrieving-service-groups)
+    - [Updating Service Groups](#updating-service-groups)
+    - [Listing Service Groups](#listing-service-groups)
+    - [Deleting Service Groups](#deleting-service-groups)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Service Groups in Strata Cloud Manager allow you to:
+The `ServiceGroup` class provides functionality to manage service groups in Palo Alto Networks' Strata Cloud Manager.
+This
+class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting service groups
+that can be used to organize and manage collections of services for security policies and NAT rules.
 
-- Create groups of services for simplified policy management
-- Organize services within folders, snippets, or devices
-- Apply tags for better organization and management
-- Reference multiple services in a single policy rule
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during service group
-management.
+| Method     | Description                      | Parameters                               | Return Type                       |
+|------------|----------------------------------|------------------------------------------|-----------------------------------|
+| `create()` | Creates a new service group      | `data: Dict[str, Any]`                   | `ServiceGroupResponseModel`       |
+| `get()`    | Retrieves a group by ID          | `object_id: str`                         | `ServiceGroupResponseModel`       |
+| `update()` | Updates an existing group        | `service_group: ServiceGroupUpdateModel` | `ServiceGroupResponseModel`       |
+| `delete()` | Deletes a group                  | `object_id: str`                         | `None`                            |
+| `list()`   | Lists groups with filtering      | `folder: str`, `**filters`               | `List[ServiceGroupResponseModel]` |
+| `fetch()`  | Gets group by name and container | `name: str`, `folder: str`               | `ServiceGroupResponseModel`       |
 
-## Methods
+## Service Group Model Attributes
 
-| Method     | Description                                   |
-|------------|-----------------------------------------------|
-| `create()` | Creates a new service group                   |
-| `get()`    | Retrieves a service group by ID               |
-| `update()` | Updates an existing service group             |
-| `delete()` | Deletes a service group                       |
-| `list()`   | Lists service groups with optional filtering  |
-| `fetch()`  | Retrieves a single service group by name      |
+| Attribute | Type      | Required | Description                                 |
+|-----------|-----------|----------|---------------------------------------------|
+| `name`    | str       | Yes      | Name of group (max 63 chars)                |
+| `id`      | UUID      | Yes*     | Unique identifier (*response only)          |
+| `members` | List[str] | Yes      | List of service members                     |
+| `tag`     | List[str] | No       | List of tags (max 64 chars each)            |
+| `folder`  | str       | Yes**    | Folder location (**one container required)  |
+| `snippet` | str       | Yes**    | Snippet location (**one container required) |
+| `device`  | str       | Yes**    | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                        |
+|------------------------------|-----------|------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid group data or format       |
+| `MissingQueryParameterError` | 400       | Missing required parameters        |
+| `NameNotUniqueError`         | 409       | Group name already exists          |
+| `ObjectNotPresentError`      | 404       | Group not found                    |
+| `ReferenceNotZeroError`      | 409       | Group still referenced by policies |
+| `AuthenticationError`        | 401       | Authentication failed              |
+| `ServerError`                | 500       | Internal server error              |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when service group data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a service group doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when service group names conflict
-- `NameNotUniqueError`: Raised when creating duplicate group names
-- `ReferenceNotZeroError`: Raised when deleting groups still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Service Groups
-
-The `create()` method allows you to create new service groups with proper error handling.
-
-**Example: Creating a Service Group**
+## Basic Configuration
 
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import ServiceGroup
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize ServiceGroup object
 service_groups = ServiceGroup(client)
-
-try:
-    group_data = {
-        "name": "web-services",
-        "members": ["HTTP", "HTTPS"],
-        "folder": "Texas",
-        "tag": ["Python", "Automation"]
-    }
-
-    new_group = service_groups.create(group_data)
-    print(f"Created group: {new_group.name}")
-
-except NameNotUniqueError as e:
-    print(f"Group name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid group data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
 ```
 
 </div>
 
-## Getting Service Groups
+## Usage Examples
 
-Use the `get()` method to retrieve a service group by its ID.
+### Creating Service Groups
 
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
-try:
-    group_id = "123e4567-e89b-12d3-a456-426655440000"
-    group = service_groups.get(group_id)
-    print(f"Group Name: {group.name}")
+# Basic service group configuration
+basic_group = {
+    "name": "web-services",
+    "members": ["HTTP", "HTTPS"],
+    "folder": "Texas",
+    "tag": ["Web"]
+}
+
+# Create basic group
+basic_group_obj = service_groups.create(basic_group)
+
+# Extended service group configuration
+extended_group = {
+    "name": "app-services",
+    "members": ["HTTP", "HTTPS", "SSH", "FTP"],
+    "folder": "Texas",
+    "tag": ["Application", "Production"]
+}
+
+# Create extended group
+extended_group_obj = service_groups.create(extended_group)
+```
+
+</div>
+
+### Retrieving Service Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch by name and folder
+group = service_groups.fetch(name="web-services", folder="Texas")
+print(f"Found group: {group.name}")
+
+# Get by ID
+group_by_id = service_groups.get(group.id)
+print(f"Retrieved group: {group_by_id.name}")
+print(f"Members: {', '.join(group_by_id.members)}")
+```
+
+</div>
+
+### Updating Service Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch existing group
+existing_group = service_groups.fetch(name="web-services", folder="Texas")
+
+# Update members
+existing_group.members = ["HTTP", "HTTPS", "HTTP-8080"]
+existing_group.tag = ["Web", "Updated"]
+
+# Perform update
+updated_group = service_groups.update(existing_group)
+```
+
+</div>
+
+### Listing Service Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List with direct filter parameters
+filtered_groups = service_groups.list(
+    folder='Texas',
+    values=['HTTP', 'HTTPS'],
+    tags=['Production']
+)
+
+# Process results
+for group in filtered_groups:
+    print(f"Name: {group.name}")
     print(f"Members: {', '.join(group.members)}")
 
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "values": ["SSH", "FTP"],
+    "tags": ["Application"]
+}
+
+# List with filters as kwargs
+filtered_groups = service_groups.list(**list_params)
 ```
 
 </div>
 
-## Updating Service Groups
-
-The `update()` method allows you to modify existing service groups using Pydantic models.
+### Deleting Service Groups
 
 <div class="termy">
 
 <!-- termynal -->
-```python
-try:
-    # Fetch returns a Pydantic model
-    web_group = service_groups.fetch(folder='Texas', name='web-services')
-    
-    # Update the model's members
-    web_group.members.append('HTTP-8080')
-    
-    # Update using the Pydantic model
-    updated_group = service_groups.update(web_group)
-    print(f"Updated group: {updated_group.name}")
-    print(f"New members: {', '.join(updated_group.members)}")
 
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+```python
+# Delete by ID
+group_id = "123e4567-e89b-12d3-a456-426655440000"
+service_groups.delete(group_id)
 ```
 
 </div>
 
-## Deleting Service Groups
+## Managing Configuration Changes
 
-Use the `delete()` method to remove a service group.
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
-```python
-try:
-    group_id = "123e4567-e89b-12d3-a456-426655440000"
-    service_groups.delete(group_id)
-    print("Group deleted successfully")
 
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Group still in use: {e.message}")
+```python
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated service groups",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes
+result = service_groups.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Listing Service Groups
-
-The `list()` method retrieves multiple service groups with optional filtering. You can filter the results using the
-following kwargs:
-
-- `values`: List[str] - Filter by member values (e.g., ['HTTP', 'HTTPS'])
-- `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
-try:
-    # List all groups in a folder
-    groups = service_groups.list(folder="Texas")
+# Get status of specific job
+job_status = service_groups.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
 
-    # List groups with specific members
-    web_groups = service_groups.list(
-        folder="Texas",
-        values=['HTTP', 'HTTPS']
-    )
-
-    # List groups with specific tags
-    tagged_groups = service_groups.list(
-        folder="Texas",
-        tags=['Automation', 'Production']
-    )
-
-    # Print the results
-    for group in groups:
-        print(f"Name: {group.name}")
-        print(f"Members: {', '.join(group.members)}")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# List recent jobs
+recent_jobs = service_groups.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
 
-## Fetching Service Groups
-
-The `fetch()` method retrieves a single service group by name from a specific container, returning a Pydantic model.
+## Error Handling
 
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
-try:
-    group = service_groups.fetch(
-        name="web-services",
-        folder="Texas"
-    )
-    print(f"Found group: {group.name}")
-    print(f"Current members: {', '.join(group.members)}")
-
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
-```
-
-</div>
-
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of a service group with proper error handling:
-
-<div class="termy">
-
-<!-- termynal -->
-```python
-from scm.client import Scm
-from scm.config.objects import ServiceGroup
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create group configuration
+    group_config = {
+        "name": "test-group",
+        "members": ["HTTP", "HTTPS"],
+        "folder": "Texas",
+        "tag": ["Test"]
+    }
+
+    # Create the group
+    new_group = service_groups.create(group_config)
+
+    # Commit changes
+    result = service_groups.commit(
+        folders=["Texas"],
+        description="Added test group",
+        sync=True
     )
 
-    # Initialize service group object
-    service_groups = ServiceGroup(client)
+    # Check job status
+    status = service_groups.get_job_status(result.job_id)
 
-    try:
-        # Create new service group
-        group_data = {
-            "name": "test-services",
-            "members": ["HTTP", "HTTPS", "SSH"],
-            "folder": "Texas",
-            "tag": ["Automation"]
-        }
-
-        new_group = service_groups.create(group_data)
-        print(f"Created group: {new_group.name}")
-
-        # Fetch and update the group
-        try:
-            fetched_group = service_groups.fetch(
-                name="test-services",
-                folder="Texas"
-            )
-            print(f"Found group: {fetched_group.name}")
-
-            # Update the group using Pydantic model
-            fetched_group.members.append("FTP")
-
-            updated_group = service_groups.update(fetched_group)
-            print(f"Updated group: {updated_group.name}")
-            print(f"New members: {', '.join(updated_group.members)}")
-
-        except NotFoundError as e:
-            print(f"Group not found: {e.message}")
-
-        # Clean up
-        try:
-            service_groups.delete(new_group.id)
-            print("Group deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete group - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Group name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid group data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid group data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Group name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Group not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Group still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Full script examples
+## Best Practices
 
-Refer to the [examples](../../../../examples/scm/config/objects) directory.
+1. **Member Management**
+    - Use descriptive member names
+    - Keep member lists organized
+    - Document member purposes
+    - Validate member existence
+    - Monitor member changes
+
+2. **Container Management**
+    - Always specify exactly one container (folder, snippet, or device)
+    - Use consistent container names
+    - Validate container existence
+    - Group related service groups
+
+3. **Error Handling**
+    - Implement comprehensive error handling
+    - Check job status after commits
+    - Handle specific exceptions
+    - Log error details
+    - Monitor commit status
+
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed groups
+    - Implement proper retry logic
+    - Monitor group sizes
+
+5. **Security**
+    - Follow least privilege principle
+    - Validate input data
+    - Use secure connection settings
+    - Implement proper authentication
+    - Monitor policy references
+
+## Full Script Examples
+
+Refer to
+the [service_group.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/service_group.py).
 
 ## Related Models
 

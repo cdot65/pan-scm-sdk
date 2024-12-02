@@ -1,60 +1,72 @@
 # DNS Security Profile Configuration Object
 
-The `DNSSecurityProfile` class provides functionality to manage DNS Security profiles in Palo Alto Networks' Strata
-Cloud Manager. DNS Security profiles define policies for protecting against DNS-based threats, including botnet domains,
-malware, and phishing attempts.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [DNS Security Profile Model Attributes](#dns-security-profile-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating DNS Security Profiles](#creating-dns-security-profiles)
+    - [Retrieving DNS Security Profiles](#retrieving-dns-security-profiles)
+    - [Updating DNS Security Profiles](#updating-dns-security-profiles)
+    - [Listing DNS Security Profiles](#listing-dns-security-profiles)
+    - [Deleting DNS Security Profiles](#deleting-dns-security-profiles)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-DNS Security profiles in Strata Cloud Manager allow you to:
+The `DNSSecurityProfile` class provides functionality to manage DNS Security profiles in Palo Alto Networks' Strata
+Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and
+deleting profiles that protect against DNS-based threats including botnet domains, malware, and phishing attempts.
 
-- Configure actions for different DNS security categories
-- Define custom blocklists and allowlists
-- Set up sinkhole configurations for malicious domains
-- Specify whitelist entries for trusted domains
-- Control packet capture and logging behavior
-- Organize profiles within folders, snippets, or devices
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during profile
-management.
+| Method     | Description                     | Parameters                               | Return Type                             |
+|------------|---------------------------------|------------------------------------------|-----------------------------------------|
+| `create()` | Creates a new profile           | `data: Dict[str, Any]`                   | `DNSSecurityProfileResponseModel`       |
+| `get()`    | Retrieves a profile by ID       | `object_id: str`                         | `DNSSecurityProfileResponseModel`       |
+| `update()` | Updates an existing profile     | `profile: DNSSecurityProfileUpdateModel` | `DNSSecurityProfileResponseModel`       |
+| `delete()` | Deletes a profile               | `object_id: str`                         | `None`                                  |
+| `list()`   | Lists profiles with filtering   | `folder: str`, `**filters`               | `List[DNSSecurityProfileResponseModel]` |
+| `fetch()`  | Gets profile by name and folder | `name: str`, `folder: str`               | `DNSSecurityProfileResponseModel`       |
 
-## Methods
+## DNS Security Profile Model Attributes
 
-| Method     | Description                                       |
-|------------|---------------------------------------------------|
-| `create()` | Creates a new DNS Security profile                |
-| `get()`    | Retrieves a DNS Security profile by ID            |
-| `update()` | Updates an existing DNS Security profile          |
-| `delete()` | Deletes a DNS Security profile                    |
-| `list()`   | Lists DNS Security profiles with optional filters |
-| `fetch()`  | Retrieves a single DNS Security profile by name   |
+| Attribute                 | Type                 | Required | Description                                 |
+|---------------------------|----------------------|----------|---------------------------------------------|
+| `name`                    | str                  | Yes      | Profile name (max 63 chars)                 |
+| `id`                      | UUID                 | Yes*     | Unique identifier (*response only)          |
+| `description`             | str                  | No       | Profile description                         |
+| `botnet_domains`          | BotnetDomainsModel   | No       | Botnet domains configuration                |
+| `dns_security_categories` | List[CategoryEntry]  | No       | DNS security category settings              |
+| `lists`                   | List[ListEntry]      | No       | Custom domain lists                         |
+| `sinkhole`                | SinkholeSettings     | No       | Sinkhole configuration                      |
+| `whitelist`               | List[WhitelistEntry] | No       | Whitelisted domains                         |
+| `folder`                  | str                  | Yes**    | Folder location (**one container required)  |
+| `snippet`                 | str                  | Yes**    | Snippet location (**one container required) |
+| `device`                  | str                  | Yes**    | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                    |
+|------------------------------|-----------|--------------------------------|
+| `InvalidObjectError`         | 400       | Invalid profile data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters    |
+| `NameNotUniqueError`         | 409       | Profile name already exists    |
+| `ObjectNotPresentError`      | 404       | Profile not found              |
+| `ReferenceNotZeroError`      | 409       | Profile still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed          |
+| `ServerError`                | 500       | Internal server error          |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when profile data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a profile doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when profile names conflict
-- `NameNotUniqueError`: Raised when creating duplicate profile names
-- `ReferenceNotZeroError`: Raised when deleting profiles still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating DNS Security Profiles
-
-The `create()` method allows you to create new DNS Security profiles with proper error handling.
-
-**Example: Basic Profile with DNS Security Categories**
+## Basic Configuration
 
 <div class="termy">
 
@@ -63,334 +75,317 @@ The `create()` method allows you to create new DNS Security profiles with proper
 ```python
 from scm.client import Scm
 from scm.config.security import DNSSecurityProfile
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize DNS Security Profile object
 dns_security_profiles = DNSSecurityProfile(client)
+```
 
-try:
-    profile_data = {
-        'name': 'new-test',
-        'description': 'Best practice dns security profile',
-        'botnet_domains': {
-            'dns_security_categories': [
-                {
-                    'name': 'pan-dns-sec-grayware',
-                    'action': 'sinkhole',
-                    'log_level': 'default',
-                    'packet_capture': 'disable'
-                },
-                {
-                    'name': 'pan-dns-sec-malware',
-                    'action': 'sinkhole',
-                    'log_level': 'default',
-                    'packet_capture': 'disable'
-                }
-            ],
-            'sinkhole': {
-                'ipv4_address': 'pan-sinkhole-default-ip',
-                'ipv6_address': '::1'
+</div>
+
+## Usage Examples
+
+### Creating DNS Security Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Basic profile with DNS security categories
+basic_profile = {
+    'name': 'basic-profile',
+    'description': 'Basic DNS security profile',
+    'botnet_domains': {
+        'dns_security_categories': [
+            {
+                'name': 'pan-dns-sec-malware',
+                'action': 'block',
+                'log_level': 'high',
+                'packet_capture': 'single-packet'
             }
-        },
-        'folder': 'Texas'
-    }
+        ]
+    },
+    'folder': 'Texas'
+}
 
-    new_profile = dns_security_profiles.create(profile_data)
-    print(f"Created profile: {new_profile.name}")
+# Create basic profile
+basic_profile_obj = dns_security_profiles.create(basic_profile)
 
-except NameNotUniqueError as e:
-    print(f"Profile name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid profile data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
-```
-
-</div>
-
-**Example: Profile with Custom Lists and Sinkhole**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    profile_data = {
-        'name': 'test-profile',
-        'description': 'Custom DNS security profile',
-        'botnet_domains': {
-            'lists': [
-                {
-                    'name': 'default-paloalto-dns',
-                    'packet_capture': 'single-packet',
-                    'action': {
-                        'sinkhole': {}
-                    }
-                }
-            ],
-            'sinkhole': {
-                'ipv4_address': 'pan-sinkhole-default-ip',
-                'ipv6_address': '::1'
+# Advanced profile with sinkhole and whitelist
+advanced_profile = {
+    'name': 'advanced-profile',
+    'description': 'Advanced DNS security profile',
+    'botnet_domains': {
+        'dns_security_categories': [
+            {
+                'name': 'pan-dns-sec-malware',
+                'action': 'sinkhole',
+                'log_level': 'high'
             },
-            'whitelist': [
-                {
-                    'name': 'trusted-domain.com',
-                    'description': 'Trusted domain'
-                }
-            ]
+            {
+                'name': 'pan-dns-sec-phishing',
+                'action': 'block',
+                'log_level': 'critical'
+            }
+        ],
+        'sinkhole': {
+            'ipv4_address': 'pan-sinkhole-default-ip',
+            'ipv6_address': '::1'
         },
-        'folder': 'Texas'
-    }
+        'whitelist': [
+            {
+                'name': 'trusted.example.com',
+                'description': 'Trusted domain'
+            }
+        ]
+    },
+    'folder': 'Texas'
+}
 
-    new_profile = dns_security_profiles.create(profile_data)
-    print(f"Created profile: {new_profile.name}")
-
-except InvalidObjectError as e:
-    print(f"Invalid profile data: {e.message}")
-    print(f"Error code: {e.error_code}")
-    if e.details:
-        print(f"Details: {e.details}")
+# Create advanced profile
+advanced_profile_obj = dns_security_profiles.create(advanced_profile)
 ```
 
 </div>
 
-## Getting DNS Security Profiles
-
-Use the `get()` method to retrieve a DNS Security profile by its ID.
+### Retrieving DNS Security Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile_id = "123e4567-e89b-12d3-a456-426655440000"
-    profile = dns_security_profiles.get(profile_id)
-    print(f"Profile Name: {profile.name}")
-    print(f"Description: {profile.description}")
+# Fetch by name and folder
+profile = dns_security_profiles.fetch(name="basic-profile", folder="Texas")
+print(f"Found profile: {profile.name}")
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
+# Get by ID
+profile_by_id = dns_security_profiles.get(profile.id)
+print(f"Retrieved profile: {profile_by_id.name}")
+print(f"Categories: {profile_by_id.botnet_domains.dns_security_categories}")
 ```
 
 </div>
 
-## Updating DNS Security Profiles
-
-The `update()` method allows you to modify existing DNS Security profiles using Pydantic models.
+### Updating DNS Security Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile = dns_security_profiles.fetch(folder='Texas', name='test dns security')
-    profile.description = "Updated description"
+# Fetch existing profile
+existing_profile = dns_security_profiles.fetch(name="basic-profile", folder="Texas")
 
-    updated_profile = dns_security_profiles.update(profile)
-    print(f"Updated profile: {updated_profile.name}")
+# Update description and categories
+existing_profile.description = "Updated DNS security profile"
+existing_profile.botnet_domains.dns_security_categories.append({
+    'name': 'pan-dns-sec-grayware',
+    'action': 'block',
+    'log_level': 'high'
+})
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Perform update
+updated_profile = dns_security_profiles.update(existing_profile)
 ```
 
 </div>
 
-## Deleting DNS Security Profiles
-
-Use the `delete()` method to remove a DNS Security profile.
+### Listing DNS Security Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile_id = "123e4567-e89b-12d3-a456-426655440000"
-    dns_security_profiles.delete(profile_id)
-    print("Profile deleted successfully")
+# List with direct filter parameters
+filtered_profiles = dns_security_profiles.list(
+    folder='Texas',
+    dns_security_categories=['pan-dns-sec-malware']
+)
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Profile still in use: {e.message}")
+# Process results
+for profile in filtered_profiles:
+    print(f"Name: {profile.name}")
+    if profile.botnet_domains and profile.botnet_domains.dns_security_categories:
+        for category in profile.botnet_domains.dns_security_categories:
+            print(f"Category: {category.name}, Action: {category.action}")
+
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "dns_security_categories": ["pan-dns-sec-phishing", "pan-dns-sec-malware"]
+}
+
+# List with filters as kwargs
+filtered_profiles = dns_security_profiles.list(**list_params)
 ```
 
 </div>
 
-## Listing DNS Security Profiles
-
-The `list()` method retrieves multiple DNS Security profiles with optional filtering. You can filter the results using
-the following kwargs:
-
-- `dns_security_categories`: List[str] - Filter by DNS security category names (
-  e.g., ['pan-dns-sec-malware', 'pan-dns-sec-phishing'])
+### Deleting DNS Security Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all profiles in a folder
-    profiles = dns_security_profiles.list(folder="Texas")
-
-    # List profiles with specific DNS security categories
-    malware_profiles = dns_security_profiles.list(
-        folder="Texas",
-        dns_security_categories=['pan-dns-sec-malware']
-    )
-
-    # List profiles with multiple category matches
-    filtered_profiles = dns_security_profiles.list(
-        folder="Texas",
-        dns_security_categories=['pan-dns-sec-malware', 'pan-dns-sec-phishing']
-    )
-
-    # Print the results
-    for profile in profiles:
-        print(f"Name: {profile.name}")
-        if profile.botnet_domains and profile.botnet_domains.dns_security_categories:
-            print("Categories:", [cat.name for cat in profile.botnet_domains.dns_security_categories])
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Delete by ID
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+dns_security_profiles.delete(profile_id)
 ```
 
 </div>
 
-## Fetching DNS Security Profiles
+## Managing Configuration Changes
 
-The `fetch()` method retrieves a single DNS Security profile by name from a specific container, returning a Pydantic
-model.
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile = dns_security_profiles.fetch(
-        name="test asdf",
-        folder="Texas"
-    )
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated DNS security profiles",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-    print(f"Found profile: {profile.name}")
-    print(f"Current settings: {profile.botnet_domains}")
+# Commit the changes
+result = dns_security_profiles.commit(**commit_params)
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of a DNS Security profile with proper error handling:
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.config.security import DNSSecurityProfile
+# Get status of specific job
+job_status = dns_security_profiles.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = dns_security_profiles.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create profile configuration
+    profile_config = {
+        "name": "test-profile",
+        "description": "Test DNS security profile",
+        "botnet_domains": {
+            "dns_security_categories": [
+                {
+                    "name": "pan-dns-sec-malware",
+                    "action": "block",
+                    "log_level": "high"
+                }
+            ]
+        },
+        "folder": "Texas"
+    }
+
+    # Create the profile
+    new_profile = dns_security_profiles.create(profile_config)
+
+    # Commit changes
+    result = dns_security_profiles.commit(
+        folders=["Texas"],
+        description="Added test profile",
+        sync=True
     )
 
-    # Initialize DNS Security profile object
-    dns_security_profiles = DNSSecurityProfile(client)
+    # Check job status
+    status = dns_security_profiles.get_job_status(result.job_id)
 
-    try:
-        # Create new profile
-        profile_data = {
-            'name': 'test-profile',
-            'description': 'Test DNS security profile',
-            'botnet_domains': {
-                'dns_security_categories': [
-                    {
-                        'name': 'pan-dns-sec-malware',
-                        'action': 'sinkhole',
-                        'log_level': 'default',
-                        'packet_capture': 'disable'
-                    }
-                ],
-                'sinkhole': {
-                    'ipv4_address': 'pan-sinkhole-default-ip',
-                    'ipv6_address': '::1'
-                }
-            },
-            'folder': 'Texas'
-        }
-
-        new_profile = dns_security_profiles.create(profile_data)
-        print(f"Created profile: {new_profile.name}")
-
-        # Fetch and update the profile
-        try:
-            fetched_profile = dns_security_profiles.fetch(
-                name="test-profile",
-                folder="Texas"
-            )
-            print(f"Found profile: {fetched_profile.name}")
-
-            # Update the profile using Pydantic model
-            fetched_profile.description = "Updated test profile"
-            updated_profile = dns_security_profiles.update(fetched_profile)
-            print(f"Updated description: {updated_profile.description}")
-
-        except NotFoundError as e:
-            print(f"Profile not found: {e.message}")
-
-        # Clean up
-        try:
-            dns_security_profiles.delete(new_profile.id)
-            print("Profile deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete profile - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Profile name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid profile data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid profile data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Profile name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Profile not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Profile still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
+
+## Best Practices
+
+1. **Profile Configuration**
+    - Use descriptive profile names
+    - Configure appropriate actions per category
+    - Document security decisions
+    - Maintain whitelist entries
+    - Review sinkhole settings
+
+2. **Container Management**
+    - Always specify exactly one container
+    - Use consistent container names
+    - Validate container existence
+    - Group related profiles
+
+3. **Security Categories**
+    - Configure all relevant categories
+    - Set appropriate log levels
+    - Enable packet capture selectively
+    - Review category actions regularly
+    - Document exceptions
+
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed profiles
+    - Implement proper retry logic
+    - Monitor commit operations
+
+5. **Error Handling**
+    - Validate input data
+    - Handle specific exceptions
+    - Log error details
+    - Monitor job status
+    - Track completion status
+
+## Full Script Examples
+
+Refer to
+the [dns_security_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/dns_security_profile.py).
 
 ## Related Models
 
