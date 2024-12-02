@@ -1,59 +1,71 @@
 # Address Group Configuration Object
 
-The `AddressGroup` class provides functionality to manage address groups in Palo Alto Networks' Strata Cloud Manager.
-Address groups can be used to organize and manage collections of addresses either statically (by explicitly listing
-addresses)
-or dynamically (using tag-based filters).
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Address Group Model Attributes](#address-group-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Address Groups](#creating-address-groups)
+    - [Retrieving Address Groups](#retrieving-address-groups)
+    - [Updating Address Groups](#updating-address-groups)
+    - [Listing Address Groups](#listing-address-groups)
+    - [Deleting Address Groups](#deleting-address-groups)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Address groups are essential components in network security policy management, allowing you to:
+The `AddressGroup` class provides functionality to manage address groups in Palo Alto Networks' Strata Cloud Manager.
+This
+class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting address groups
+that can be either static (explicit list of addresses) or dynamic (tag-based filters).
 
-- Create static groups with explicit lists of addresses
-- Define dynamic groups that automatically update based on tag filters
-- Organize addresses within folders, snippets, or devices
-- Apply tags for better organization and management
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during address group
-management.
+| Method     | Description                      | Parameters                               | Return Type                       |
+|------------|----------------------------------|------------------------------------------|-----------------------------------|
+| `create()` | Creates a new address group      | `data: Dict[str, Any]`                   | `AddressGroupResponseModel`       |
+| `get()`    | Retrieves a group by ID          | `object_id: str`                         | `AddressGroupResponseModel`       |
+| `update()` | Updates an existing group        | `address_group: AddressGroupUpdateModel` | `AddressGroupResponseModel`       |
+| `delete()` | Deletes a group                  | `object_id: str`                         | `None`                            |
+| `list()`   | Lists groups with filtering      | `folder: str`, `**filters`               | `List[AddressGroupResponseModel]` |
+| `fetch()`  | Gets group by name and container | `name: str`, `folder: str`               | `AddressGroupResponseModel`       |
 
-## Methods
+## Address Group Model Attributes
 
-| Method     | Description                                  |
-|------------|----------------------------------------------|
-| `create()` | Creates a new address group                  |
-| `get()`    | Retrieves an address group by ID             |
-| `update()` | Updates an existing address group            |
-| `delete()` | Deletes an address group                     |
-| `list()`   | Lists address groups with optional filtering |
-| `fetch()`  | Retrieves a single address group by name     |
+| Attribute     | Type          | Required     | Description                                 |
+|---------------|---------------|--------------|---------------------------------------------|
+| `name`        | str           | Yes          | Name of group (max 63 chars)                |
+| `id`          | UUID          | Yes*         | Unique identifier (*response only)          |
+| `static`      | List[str]     | One Required | List of static addresses                    |
+| `dynamic`     | DynamicFilter | One Required | Tag-based filter for dynamic membership     |
+| `description` | str           | No           | Object description (max 1023 chars)         |
+| `tag`         | List[str]     | No           | List of tags (max 64 chars each)            |
+| `folder`      | str           | Yes**        | Folder location (**one container required)  |
+| `snippet`     | str           | Yes**        | Snippet location (**one container required) |
+| `device`      | str           | Yes**        | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                        |
+|------------------------------|-----------|------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid group data or format       |
+| `MissingQueryParameterError` | 400       | Missing required parameters        |
+| `NameNotUniqueError`         | 409       | Group name already exists          |
+| `ObjectNotPresentError`      | 404       | Group not found                    |
+| `ReferenceNotZeroError`      | 409       | Group still referenced by policies |
+| `AuthenticationError`        | 401       | Authentication failed              |
+| `ServerError`                | 500       | Internal server error              |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when address group data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when an address group doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when address group names conflict
-- `NameNotUniqueError`: Raised when creating duplicate group names
-- `ReferenceNotZeroError`: Raised when deleting groups still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Address Groups
-
-The `create()` method allows you to create new address groups with proper error handling.
-
-**Example: Creating a Static Address Group**
+## Basic Configuration
 
 <div class="termy">
 
@@ -62,212 +74,272 @@ The `create()` method allows you to create new address groups with proper error 
 ```python
 from scm.client import Scm
 from scm.config.objects import AddressGroup
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize AddressGroup object
 address_groups = AddressGroup(client)
+```
+
+</div>
+
+## Usage Examples
+
+### Creating Address Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Static group configuration
+static_config = {
+    "name": "web_servers",
+    "static": ["web-server1", "web-server2"],
+    "description": "Web server group",
+    "folder": "Texas",
+    "tag": ["Production", "Web"]
+}
+
+# Create static group
+static_group = address_groups.create(static_config)
+
+# Dynamic group configuration
+dynamic_config = {
+    "name": "python_servers",
+    "dynamic": {
+        "filter": "'Python' and 'Production'"
+    },
+    "description": "Python production servers",
+    "folder": "Texas",
+    "tag": ["Automation"]
+}
+
+# Create dynamic group
+dynamic_group = address_groups.create(dynamic_config)
+```
+
+</div>
+
+### Retrieving Address Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch by name and folder
+group = address_groups.fetch(name="web_servers", folder="Texas")
+print(f"Found group: {group.name}")
+
+# Get by ID
+group_by_id = address_groups.get(group.id)
+print(f"Retrieved group: {group_by_id.name}")
+```
+
+</div>
+
+### Updating Address Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch existing group
+existing_group = address_groups.fetch(name="web_servers", folder="Texas")
+
+# Update static members
+existing_group.static = ["web-server1", "web-server2", "web-server3"]
+existing_group.description = "Updated web server group"
+existing_group.tag = ["Production", "Web", "Updated"]
+
+# Perform update
+updated_group = address_groups.update(existing_group)
+```
+
+</div>
+
+### Listing Address Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List with direct filter parameters
+filtered_groups = address_groups.list(
+    folder='Texas',
+    types=['static'],
+    tags=['Production']
+)
+
+# Process results
+for group in filtered_groups:
+    print(f"Name: {group.name}")
+    if group.static:
+        print(f"Members: {', '.join(group.static)}")
+    elif group.dynamic:
+        print(f"Filter: {group.dynamic.filter}")
+
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "types": ["dynamic"],
+    "tags": ["Automation"]
+}
+
+# List with filters as kwargs
+filtered_groups = address_groups.list(**list_params)
+```
+
+</div>
+
+### Deleting Address Groups
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Delete by ID
+group_id = "123e4567-e89b-12d3-a456-426655440000"
+address_groups.delete(group_id)
+```
+
+</div>
+
+## Managing Configuration Changes
+
+### Performing Commits
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated address groups",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes
+result = address_groups.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
+```
+
+</div>
+
+### Monitoring Jobs
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get status of specific job
+job_status = address_groups.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = address_groups.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    NameNotUniqueError,
+    ObjectNotPresentError,
+    ReferenceNotZeroError
+)
 
 try:
-    static_group = {
-        "name": "web_servers",
-        "description": "Web server group",
-        "static": ["example_website", "webserver_network"],
+    # Create group configuration
+    group_config = {
+        "name": "test_group",
+        "static": ["server1", "server2"],
         "folder": "Texas",
-        "tag": ["Automation"]
+        "description": "Test server group",
+        "tag": ["Test"]
     }
 
-    new_group = address_groups.create(static_group)
-    print(f"Created group: {new_group.name}")
+    # Create the group
+    new_group = address_groups.create(group_config)
 
+    # Commit changes
+    result = address_groups.commit(
+        folders=["Texas"],
+        description="Added test group",
+        sync=True
+    )
+
+    # Check job status
+    status = address_groups.get_job_status(result.job_id)
+
+except InvalidObjectError as e:
+    print(f"Invalid group data: {e.message}")
 except NameNotUniqueError as e:
     print(f"Group name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid group data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
-```
-
-</div>
-
-**Example: Creating a Dynamic Address Group**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    dynamic_group = {
-        "name": "python servers",
-        "description": "Python-based automation servers",
-        "dynamic": {
-            "filter": "'Python'"
-        },
-        "folder": "Texas",
-        "tag": ["Automation"]
-    }
-
-    new_group = address_groups.create(dynamic_group)
-    print(f"Created group: {new_group.name}")
-
-except InvalidObjectError as e:
-    print(f"Invalid group data: {e.message}")
-    print(f"Error code: {e.error_code}")
-    if e.details:
-        print(f"Details: {e.details}")
-```
-
-</div>
-
-## Getting Address Groups
-
-Use the `get()` method to retrieve an address group by its ID.
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
-    group = address_groups.get(group_id)
-    print(f"Group Name: {group.name}")
-    print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
-
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-```
-
-</div>
-
-## Updating Address Groups
-
-The `update()` method allows you to modify existing address groups using Pydantic models.
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    # return an existing group as a Pydantic model
-    python_server_group = address_groups.fetch(folder='Texas', name='python servers')
-
-    # update the model's description attribute
-    python_server_group.description = 'updated description'
-
-    # push changes to the SCM API
-    updated_group = address_groups.update(python_server_group)
-    print(f"Updated group: {updated_group.name}")
-
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
-```
-
-</div>
-
-## Deleting Address Groups
-
-Use the `delete()` method to remove an address group.
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    group_id = "d4d09614-55a3-4a94-911b-f1bbda353ca6"
-    address_groups.delete(group_id)
-    print("Group deleted successfully")
-
-except NotFoundError as e:
+except ObjectNotPresentError as e:
     print(f"Group not found: {e.message}")
 except ReferenceNotZeroError as e:
     print(f"Group still in use: {e.message}")
-```
-
-</div>
-
-## Listing Address Groups
-
-The `list()` method retrieves multiple address groups with optional filtering. You can filter the results using the
-following kwargs:
-
-- `types`: List[str] - Filter by group types (e.g., ['static', 'dynamic'])
-- `values`: List[str] - Filter by group values (static members or dynamic filter values)
-- `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    # List all groups in a folder
-    groups = address_groups.list(folder="Texas")
-
-    # List only static groups
-    static_groups = address_groups.list(
-        folder="Texas",
-        types=['static']
-    )
-
-    # List groups with specific values
-    specific_groups = address_groups.list(
-        folder="Texas",
-        values=['web_server1', 'web_server2']
-    )
-
-    # List groups with specific tags
-    tagged_groups = address_groups.list(
-        folder="Texas",
-        tags=['Automation', 'Production']
-    )
-
-    # Print the results
-    for group in groups:
-        print(f"Name: {group.name}")
-        print(f"Type: {'Dynamic' if group.dynamic else 'Static'}")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
 except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Fetching Address Groups
+## Best Practices
 
-The `fetch()` method retrieves a single address group by name from a specific container, returning a Pydantic model.
+1. **Group Type Management**
+    - Use static groups for explicit member lists
+    - Use dynamic groups for tag-based filtering
+    - Validate group type before creation
+    - Consider member resolution time for dynamic groups
 
-<div class="termy">
+2. **Container Management**
+    - Always specify exactly one container (folder, snippet, or device)
+    - Use consistent container names across operations
+    - Validate container existence before operations
 
-<!-- termynal -->
+3. **Error Handling**
+    - Implement comprehensive error handling for all operations
+    - Check job status after commits
+    - Handle specific exceptions before generic ones
+    - Log error details for troubleshooting
 
-```python
-try:
-    # pass in the folder and name required parameters
-    dag_group = address_groups.fetch(folder='Texas', name='DAG_test')
-    print(f"Found group: {dag_group.name}")
-    print(f"Description: {dag_group.description}")
+4. **Performance**
+    - Use appropriate pagination for list operations
+    - Cache frequently accessed groups
+    - Implement proper retry mechanisms
+    - Consider dynamic group evaluation impact
 
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
-```
-
-</div>
+5. **Security**
+    - Follow least privilege principle
+    - Validate input data
+    - Use secure connection settings
+    - Implement proper authentication handling
 
 ## Full script examples
 

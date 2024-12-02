@@ -1,57 +1,72 @@
 # Address Configuration Object
 
-The `Address` class provides functionality to manage address objects in Palo Alto Networks' Strata Cloud Manager. This
-includes creating, retrieving, updating, and deleting address objects of various types including IP/Netmask, IP Range,
-IP Wildcard, and FQDN (Fully Qualified Domain Name).
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Address Model Attributes](#address-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Address Objects](#creating-address-objects)
+    - [Retrieving Addresses](#retrieving-addresses)
+    - [Updating Addresses](#updating-addresses)
+    - [Listing Addresses](#listing-addresses)
+    - [Deleting Addresses](#deleting-addresses)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Address objects are fundamental building blocks used in security policies and NAT rules. They can represent:
+The `Address` class provides functionality to manage address objects in Palo Alto Networks' Strata Cloud Manager. This
+class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting address objects
+of various types including IP/Netmask, IP Range, IP Wildcard, and FQDN (Fully Qualified Domain Name).
 
-- Individual IP addresses or networks (using CIDR notation)
-- IP address ranges
-- IP addresses with wildcard masks
-- Fully Qualified Domain Names (FQDNs)
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during address object
-management.
+| Method     | Description                        | Parameters                    | Return Type                  |
+|------------|------------------------------------|-------------------------------|------------------------------|
+| `create()` | Creates a new address object       | `data: Dict[str, Any]`        | `AddressResponseModel`       |
+| `get()`    | Retrieves an address by ID         | `object_id: str`              | `AddressResponseModel`       |
+| `update()` | Updates an existing address        | `address: AddressUpdateModel` | `AddressResponseModel`       |
+| `delete()` | Deletes an address                 | `object_id: str`              | `None`                       |
+| `list()`   | Lists addresses with filtering     | `folder: str`, `**filters`    | `List[AddressResponseModel]` |
+| `fetch()`  | Gets address by name and container | `name: str`, `folder: str`    | `AddressResponseModel`       |
 
-## Methods
+## Address Model Attributes
 
-| Method     | Description                                   |
-|------------|-----------------------------------------------|
-| `create()` | Creates a new address object                  |
-| `get()`    | Retrieves an address object by ID             |
-| `update()` | Updates an existing address object            |
-| `delete()` | Deletes an address object                     |
-| `list()`   | Lists address objects with optional filtering |
-| `fetch()`  | Retrieves a single address object by name     |
+| Attribute     | Type      | Required     | Description                                 |
+|---------------|-----------|--------------|---------------------------------------------|
+| `name`        | str       | Yes          | Name of address object (max 63 chars)       |
+| `id`          | UUID      | Yes*         | Unique identifier (*response only)          |
+| `ip_netmask`  | str       | One Required | IP address with CIDR notation               |
+| `ip_range`    | str       | One Required | IP address range format                     |
+| `ip_wildcard` | str       | One Required | IP wildcard mask format                     |
+| `fqdn`        | str       | One Required | Fully qualified domain name                 |
+| `description` | str       | No           | Object description (max 1023 chars)         |
+| `tag`         | List[str] | No           | List of tags (max 64 chars each)            |
+| `folder`      | str       | Yes**        | Folder location (**one container required)  |
+| `snippet`     | str       | Yes**        | Snippet location (**one container required) |
+| `device`      | str       | Yes**        | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                    |
+|------------------------------|-----------|--------------------------------|
+| `InvalidObjectError`         | 400       | Invalid address data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters    |
+| `NameNotUniqueError`         | 409       | Address name already exists    |
+| `ObjectNotPresentError`      | 404       | Address not found              |
+| `ReferenceNotZeroError`      | 409       | Address still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed          |
+| `ServerError`                | 500       | Internal server error          |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when address object data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when an address object doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when address names conflict
-- `NameNotUniqueError`: Raised when creating duplicate address names
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Address Objects
-
-The `create()` method allows you to create new address objects with proper error handling.
-
-**Example: Creating an IP/Netmask Address**
+## Basic Configuration
 
 <div class="termy">
 
@@ -60,170 +75,276 @@ The `create()` method allows you to create new address objects with proper error
 ```python
 from scm.client import Scm
 from scm.config.objects import Address
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize Address object
 addresses = Address(client)
-
-try:
-    address_data = {
-        "name": "internal_network",
-        "ip_netmask": "192.168.1.0/24",
-        "description": "Internal network segment",
-        "folder": "Texas",
-        "tag": ["Python", "Automation"]
-    }
-
-    new_address = addresses.create(address_data)
-    print(f"Created address with ID: {new_address.id}")
-
-except NameNotUniqueError as e:
-    print(f"Address name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid address data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
 ```
 
 </div>
 
-## Getting Address Objects
+## Usage Examples
 
-Use the `get()` method to retrieve an address object by its ID.
+### Creating Address Objects
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-address_id = "123e4567-e89b-12d3-a456-426655440000"
-address_obj = addresses.get(address_id)
-print(f"Address Name: {address_obj.name}")
+# Prepare IP/Netmask address configuration
+netmask_config = {
+    "name": "internal_network",
+    "ip_netmask": "192.168.1.0/24",
+    "description": "Internal network segment",
+    "folder": "Texas",
+    "tag": ["Python", "Automation"]
+}
+
+# Create the address object
+netmask_address = addresses.create(netmask_config)
+
+# Prepare FQDN address configuration
+fqdn_config = {
+    "name": "example_site",
+    "fqdn": "example.com",
+    "folder": "Texas",
+    "description": "Example website"
+}
+
+# Create the FQDN address object
+fqdn_address = addresses.create(fqdn_config)
+
+# Prepare IP Range address configuration
+range_config = {
+    "name": "dhcp_pool",
+    "ip_range": "192.168.1.100-192.168.1.200",
+    "folder": "Texas",
+    "description": "DHCP address pool"
+}
+
+# Create the IP Range address object
+range_address = addresses.create(range_config)
 ```
 
 </div>
 
-## Updating Address Objects
-
-The `update()` method allows you to modify existing address objects using Pydantic models.
+### Retrieving Addresses
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# first fetch an existing object by its folder and name
-example_website = addresses.fetch(folder='Texas', name='example_website')
+# Fetch by name and folder
+address = addresses.fetch(name="internal_network", folder="Texas")
+print(f"Found address: {address.name}")
 
-# update the description using the Pydantic model
-example_website.description = "this is just a test"
-addresses.update(example_website)
+# Get by ID
+address_by_id = addresses.get(address.id)
+print(f"Retrieved address: {address_by_id.name}")
 ```
 
 </div>
 
-## Deleting Address Objects
-
-Use the `delete()` method to remove an address object.
+### Updating Addresses
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
+# Fetch existing address
+existing_address = addresses.fetch(name="internal_network", folder="Texas")
+
+# Update specific attributes
+existing_address.description = "Updated network segment"
+existing_address.tag = ["Network", "Internal", "Updated"]
+
+# Perform update
+updated_address = addresses.update(existing_address)
+```
+
+</div>
+
+### Listing Addresses
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Pass filters directly into the list method
+filtered_addresses = addresses.list(
+    folder='Texas',
+    types=['fqdn'],
+    tags=['Automation']
+)
+
+# Process results
+for addr in filtered_addresses:
+    print(f"Name: {addr.name}, Value: {addr.fqdn}")
+
+# Define filter parameters as a dictionary
+list_params = {
+    "folder": "Texas",
+    "types": ["netmask"],
+    "tags": ["Production"]
+}
+
+# List addresses with filters as kwargs
+filtered_addresses = addresses.list(**list_params)
+
+# Process results
+for addr in filtered_addresses:
+    print(f"Name: {addr.name}, Value: {addr.ip_netmask}")
+```
+
+</div>
+
+### Deleting Addresses
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Delete by ID
 address_id = "123e4567-e89b-12d3-a456-426655440000"
 addresses.delete(address_id)
-print("Address object deleted successfully")
 ```
 
 </div>
 
-## Listing Address Objects
+## Managing Configuration Changes
 
-The `list()` method retrieves multiple address objects with optional filtering. You can filter the results using the
-following kwargs:
-
-- `types`: List[str] - Filter by address types (e.g., ['netmask', 'range', 'wildcard', 'fqdn'])
-- `values`: List[str] - Filter by address values (e.g., ['10.0.0.0/24', '192.168.1.0/24'])
-- `tags`: List[str] - Filter by tags (e.g., ['Automation', 'Production'])
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# List all addresses in a folder
-texas_addresses = addresses.list(
-    folder="Texas",
-)
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Added new network addresses",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-# List only netmask addresses
-netmask_addresses = addresses.list(
-    folder="Texas",
-    types=['netmask']
-)
+# Commit the changes
+result = addresses.commit(**commit_params)
 
-# List addresses with specific values
-specific_networks = addresses.list(
-    folder="Texas",
-    values=['10.0.0.0/24', '192.168.1.0/24']
-)
-
-# List addresses with specific tags
-tagged_addresses = addresses.list(
-    folder="Texas",
-    tags=['Automation', 'Production']
-)
-
-# Combine multiple filters
-filtered_addresses = addresses.list(
-    folder="Texas",
-    types=['netmask', 'range'],
-    tags=['Production']
-)
-
-# Print the results
-for addr in texas_addresses:
-    if addr.ip_netmask:
-        print(f"Name: {addr.name}, Value: {addr.ip_netmask}")
-    elif addr.fqdn:
-        print(f"Name: {addr.name}, Value: {addr.fqdn}")
-    elif addr.ip_range:
-        print(f"Name: {addr.name}, Value: {addr.ip_range}")
-    else:
-        print(f"Name: {addr.name}, Value: {addr.wildcard}")
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Fetching Address Objects
-
-The `fetch()` method retrieves a single address object by name and container, returning a Pydantic model.
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Fetch an address by name from a specific folder
-desktop1 = addresses.fetch(
-    name="dallas-desktop1",
-    folder="Texas"
-)
+# Get status of specific job
+job_status = addresses.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
 
-# fetch will return a Pydantic model
-print(f"Found address: {desktop1.name}")
-print(f"Description: {desktop1.description}")
+# List recent jobs
+recent_jobs = addresses.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    NameNotUniqueError,
+    ObjectNotPresentError
+)
+
+try:
+    # Create address configuration
+    address_config = {
+        "name": "test_address",
+        "ip_netmask": "192.168.1.0/24",
+        "folder": "Texas",
+        "description": "Test network segment",
+        "tag": ["Test"]
+    }
+
+    # Create the address
+    new_address = addresses.create(address_config)
+
+    # Commit changes
+    result = addresses.commit(
+        folders=["Texas"],
+        description="Added test address",
+        sync=True
+    )
+
+    # Check job status
+    status = addresses.get_job_status(result.job_id)
+
+except InvalidObjectError as e:
+    print(f"Invalid address data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Address name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Address not found: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
+```
+
+</div>
+
+## Best Practices
+
+1. **Container Management**
+    - Always specify exactly one container (folder, snippet, or device)
+    - Use consistent container names across operations
+    - Validate container existence before operations
+
+2. **Error Handling**
+    - Implement comprehensive error handling for all operations
+    - Check job status after commits
+    - Handle specific exceptions before generic ones
+    - Log error details for troubleshooting
+
+3. **Address Types**
+    - Specify exactly one address type per object
+    - Use appropriate address format for each type
+    - Validate address formats before creation
+    - Consider FQDN resolution time in automation scripts
+
+4. **Performance**
+    - Reuse client instances
+    - Use appropriate pagination for list operations
+    - Implement proper retry mechanisms
+    - Cache frequently accessed objects
+
+5. **Security**
+    - Follow least privilege principle
+    - Validate input data
+    - Use secure connection settings
+    - Implement proper authentication handling
 
 ## Full script examples
 

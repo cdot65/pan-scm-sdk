@@ -1,60 +1,82 @@
 # Security Rule Configuration Object
 
-The `SecurityRule` class provides functionality to manage security rules in Palo Alto Networks' Strata Cloud Manager.
-Security rules define network access policies, controlling traffic flow between zones, applications, and users.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Security Rule Model Attributes](#security-rule-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Security Rules](#creating-security-rules)
+    - [Retrieving Security Rules](#retrieving-security-rules)
+    - [Updating Security Rules](#updating-security-rules)
+    - [Listing Security Rules](#listing-security-rules)
+    - [Moving Security Rules](#moving-security-rules)
+    - [Deleting Security Rules](#deleting-security-rules)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Security rules in Strata Cloud Manager allow you to:
+The `SecurityRule` class provides functionality to manage security rules in Palo Alto Networks' Strata Cloud Manager.
+This
+class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting security rules
+that control traffic flow between zones, applications, and users.
 
-- Define traffic control policies between security zones
-- Specify source and destination addresses
-- Control application and service access
-- Apply security profiles and logging settings
-- Organize rules within pre and post rulebases
-- Position rules for optimal policy enforcement
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during security rule
-management.
+| Method     | Description                     | Parameters                              | Return Type                       |
+|------------|---------------------------------|-----------------------------------------|-----------------------------------|
+| `create()` | Creates a new security rule     | `data: Dict[str, Any]`, `rulebase: str` | `SecurityRuleResponseModel`       |
+| `get()`    | Retrieves a rule by ID          | `object_id: str`, `rulebase: str`       | `SecurityRuleResponseModel`       |
+| `update()` | Updates an existing rule        | `rule: SecurityRuleUpdateModel`         | `SecurityRuleResponseModel`       |
+| `delete()` | Deletes a rule                  | `object_id: str`, `rulebase: str`       | `None`                            |
+| `list()`   | Lists rules with filtering      | `folder: str`, `rulebase: str`          | `List[SecurityRuleResponseModel]` |
+| `fetch()`  | Gets rule by name and container | `name: str`, `folder: str`              | `SecurityRuleResponseModel`       |
+| `move()`   | Moves rule within rulebase      | `rule_id: UUID`, `data: Dict[str, Any]` | `None`                            |
 
-## Methods
+## Security Rule Model Attributes
 
-| Method     | Description                                  |
-|------------|----------------------------------------------|
-| `create()` | Creates a new security rule                  |
-| `get()`    | Retrieves a security rule by ID              |
-| `update()` | Updates an existing security rule            |
-| `delete()` | Deletes a security rule                      |
-| `list()`   | Lists security rules with optional filtering |
-| `fetch()`  | Retrieves a single security rule by name     |
-| `move()`   | Moves a security rule within the rulebase    |
+| Attribute         | Type                | Required | Description                                 |
+|-------------------|---------------------|----------|---------------------------------------------|
+| `name`            | str                 | Yes      | Name of rule (max 63 chars)                 |
+| `id`              | UUID                | Yes*     | Unique identifier (*response only)          |
+| `action`          | SecurityRuleAction  | Yes      | Rule action (allow, deny, etc.)             |
+| `from_`           | List[str]           | Yes      | Source zones                                |
+| `to_`             | List[str]           | Yes      | Destination zones                           |
+| `source`          | List[str]           | Yes      | Source addresses                            |
+| `destination`     | List[str]           | Yes      | Destination addresses                       |
+| `application`     | List[str]           | Yes      | Allowed applications                        |
+| `service`         | List[str]           | Yes      | Allowed services                            |
+| `category`        | List[str]           | Yes      | URL categories                              |
+| `profile_setting` | SecurityRuleProfile | No       | Security profile settings                   |
+| `log_setting`     | str                 | No       | Log forwarding profile                      |
+| `description`     | str                 | No       | Rule description                            |
+| `disabled`        | bool                | No       | Rule enabled/disabled status                |
+| `tag`             | List[str]           | No       | Associated tags                             |
+| `folder`          | str                 | Yes**    | Folder location (**one container required)  |
+| `snippet`         | str                 | Yes**    | Snippet location (**one container required) |
+| `device`          | str                 | Yes**    | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                 |
+|------------------------------|-----------|-----------------------------|
+| `InvalidObjectError`         | 400       | Invalid rule data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters |
+| `NameNotUniqueError`         | 409       | Rule name already exists    |
+| `ObjectNotPresentError`      | 404       | Rule not found              |
+| `ReferenceNotZeroError`      | 409       | Rule still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed       |
+| `ServerError`                | 500       | Internal server error       |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when security rule data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a security rule doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when security rule names conflict
-- `NameNotUniqueError`: Raised when creating duplicate rule names
-- `ReferenceNotZeroError`: Raised when deleting rules still referenced by other objects
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Security Rules
-
-The `create()` method allows you to create new security rules with proper error handling.
-
-**Example: Basic Allow Rule**
+## Basic Configuration
 
 <div class="termy">
 
@@ -63,402 +85,355 @@ The `create()` method allows you to create new security rules with proper error 
 ```python
 from scm.client import Scm
 from scm.config.security import SecurityRule
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
-security_rule = SecurityRule(client)
-
-try:
-    rule_data = {
-        "name": "allow-web",
-        "folder": "Texas",
-        "from_": ["trust"],
-        "to": ["untrust"],
-        "source": ["any"],
-        "destination": ["any"],
-        "application": ["web-browsing", "ssl"],
-        "action": "allow",
-        "log_end": True
-    }
-
-    new_rule = security_rule.create(rule_data, rulebase="pre")
-    print(f"Created rule: {new_rule.name}")
-
-except NameNotUniqueError as e:
-    print(f"Rule name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid rule data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
+# Initialize SecurityRule object
+security_rules = SecurityRule(client)
 ```
 
 </div>
 
-**Example: Rule with Security Profiles**
+## Usage Examples
+
+### Creating Security Rules
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    rule_data = {
-        "name": "secure-web",
-        "folder": "Texas",
-        "from_": ["trust"],
-        "to": ["untrust"],
-        "source": ["internal-subnet"],
-        "destination": ["any"],
-        "application": ["web-browsing", "ssl"],
-        "profile_setting": {
-            "group": ["strict-security"]
-        },
-        "action": "allow",
-        "log_setting": "default-logging",
-        "log_end": True
-    }
+# Basic allow rule configuration
+allow_rule = {
+    "name": "allow-web",
+    "folder": "Texas",
+    "from_": ["trust"],
+    "to_": ["untrust"],
+    "source": ["internal-net"],
+    "destination": ["any"],
+    "application": ["web-browsing", "ssl"],
+    "service": ["application-default"],
+    "action": "allow",
+    "log_end": True
+}
 
-    new_rule = security_rule.create(rule_data, rulebase="pre")
-    print(f"Created rule: {new_rule.name}")
+# Create basic allow rule
+basic_rule = security_rules.create(allow_rule, rulebase="pre")
 
-except InvalidObjectError as e:
-    print(f"Invalid rule data: {e.message}")
-    print(f"Error code: {e.error_code}")
-    if e.details:
-        print(f"Details: {e.details}")
+# Security profile rule configuration
+secure_rule = {
+    "name": "secure-web",
+    "folder": "Texas",
+    "from_": ["trust"],
+    "to_": ["untrust"],
+    "source": ["internal-net"],
+    "destination": ["any"],
+    "application": ["web-browsing", "ssl"],
+    "service": ["application-default"],
+    "profile_setting": {
+        "group": ["strict-security"]
+    },
+    "action": "allow",
+    "log_setting": "default-logging",
+    "log_end": True
+}
+
+# Create rule with security profiles
+profile_rule = security_rules.create(secure_rule, rulebase="pre")
 ```
 
 </div>
 
-## Getting Security Rules
-
-Use the `get()` method to retrieve a security rule by its ID.
+### Retrieving Security Rules
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    rule_id = "123e4567-e89b-12d3-a456-426655440000"
-    rule = security_rule.get(rule_id, rulebase="pre")
-    print(f"Rule Name: {rule.name}")
+# Fetch by name and folder
+rule = security_rules.fetch(
+    name="allow-web",
+    folder="Texas",
+    rulebase="pre"
+)
+print(f"Found rule: {rule.name}")
+
+# Get by ID
+rule_by_id = security_rules.get(rule.id, rulebase="pre")
+print(f"Retrieved rule: {rule_by_id.name}")
+print(f"Applications: {rule_by_id.application}")
+```
+
+</div>
+
+### Updating Security Rules
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch existing rule
+existing_rule = security_rules.fetch(
+    name="allow-web",
+    folder="Texas",
+    rulebase="pre"
+)
+
+# Update attributes
+existing_rule.description = "Updated web access rule"
+existing_rule.application = ["web-browsing", "ssl", "http2"]
+existing_rule.profile_setting = {
+    "group": ["strict-security"]
+}
+
+# Perform update
+updated_rule = security_rules.update(existing_rule, rulebase="pre")
+```
+
+</div>
+
+### Listing Security Rules
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List with direct filter parameters
+filtered_rules = security_rules.list(
+    folder='Texas',
+    rulebase='pre',
+    action=['allow'],
+    application=['web-browsing', 'ssl']
+)
+
+# Process results
+for rule in filtered_rules:
+    print(f"Name: {rule.name}")
+    print(f"Action: {rule.action}")
     print(f"Applications: {rule.application}")
 
-except NotFoundError as e:
-    print(f"Rule not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid rule ID: {e.message}")
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "rulebase": "pre",
+    "from_": ["trust"],
+    "to_": ["untrust"],
+    "tag": ["Production"]
+}
+
+# List with filters as kwargs
+filtered_rules = security_rules.list(**list_params)
 ```
 
 </div>
 
-## Updating Security Rules
-
-The `update()` method allows you to modify existing security rules using Pydantic models.
+### Moving Security Rules
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # First fetch the existing rule as a Pydantic model
-    fetched_rule = security_rule.fetch(
-        name="allow-web",
-        folder="Texas",
-        rulebase="pre"
-    )
+# Move rule to top of rulebase
+top_move = {
+    "destination": "top",
+    "rulebase": "pre"
+}
+security_rules.move(rule.id, top_move)
 
-    # Update the model's attributes
-    fetched_rule.description = "Updated web access rule"
-    fetched_rule.application = ["web-browsing", "ssl", "http2"]
-    fetched_rule.profile_setting.group = ["strict-security"]
+# Move rule before another rule
+before_move = {
+    "destination": "before",
+    "rulebase": "pre",
+    "destination_rule": "987fcdeb-54ba-3210-9876-fedcba098765"
+}
+security_rules.move(rule.id, before_move)
 
-    # Perform the update with the modified model
-    updated_rule = security_rule.update(fetched_rule, rulebase="pre")
-    print(f"Updated rule: {updated_rule.name}")
-
-except NotFoundError as e:
-    print(f"Rule not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Move rule after another rule
+after_move = {
+    "destination": "after",
+    "rulebase": "pre",
+    "destination_rule": "987fcdeb-54ba-3210-9876-fedcba098765"
+}
+security_rules.move(rule.id, after_move)
 ```
 
 </div>
 
-## Deleting Security Rules
-
-Use the `delete()` method to remove a security rule.
+### Deleting Security Rules
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    rule_id = "123e4567-e89b-12d3-a456-426655440000"
-    security_rule.delete(rule_id, rulebase="pre")
-    print("Rule deleted successfully")
-
-except NotFoundError as e:
-    print(f"Rule not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Rule still in use: {e.message}")
+# Delete by ID
+rule_id = "123e4567-e89b-12d3-a456-426655440000"
+security_rules.delete(rule_id, rulebase="pre")
 ```
 
 </div>
 
-## Moving Security Rules
+## Managing Configuration Changes
 
-The `move()` method allows you to reposition rules within the rulebase.
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # Move rule to top of pre-rulebase
-    move_data = {
-        "destination": "top",
-        "rulebase": "pre"
-    }
-    security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated security rules",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-    # Move rule before another rule
-    move_data = {
-        "destination": "before",
-        "rulebase": "pre",
-        "destination_rule": "987fcdeb-51d3-a456-426655440000"
-    }
-    security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_data)
+# Commit the changes
+result = security_rules.commit(**commit_params)
 
-except InvalidObjectError as e:
-    print(f"Invalid move parameters: {e.message}")
-except NotFoundError as e:
-    print(f"Rule not found: {e.message}")
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Listing Security Rules
-
-The `list()` method retrieves multiple security rules with optional filtering. You can filter the results using the
-following kwargs:
-
-- `action`: List[str] - Filter by actions (e.g., ['allow', 'deny'])
-- `category`: List[str] - Filter by categories (e.g., ['trust', 'untrust'])
-- `service`: List[str] - Filter by services (e.g., ['application-default', 'service-http'])
-- `application`: List[str] - Filter by applications (e.g., ['web-browsing', 'ssl'])
-- `destination`: List[str] - Filter by destinations (e.g., ['any', '10.0.0.0/24'])
-- `to_`: List[str] - Filter by to zones (e.g., ['untrust', 'dmz'])
-- `source`: List[str] - Filter by sources (e.g., ['any', 'internal-subnet'])
-- `from_`: List[str] - Filter by from zones (e.g., ['trust', 'vpn'])
-- `tag`: List[str] - Filter by tags (e.g., ['Production', 'Development'])
-- `disabled`: bool - Filter by disabled status (True/False)
-- `profile_setting`: List[str] - Filter by profile setting groups (e.g., ['strict-security'])
-- `log_setting`: List[str] - Filter by log settings (e.g., ['default-logging'])
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all rules in a folder's pre-rulebase
-    rules = security_rule.list(
-        folder="Texas",
-        rulebase="pre"
-    )
+# Get status of specific job
+job_status = security_rules.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
 
-    # List only allow rules
-    allow_rules = security_rule.list(
-        folder="Texas",
-        rulebase="pre",
-        action=['allow']
-    )
-
-    # List rules with specific applications
-    web_rules = security_rule.list(
-        folder="Texas",
-        rulebase="pre",
-        application=['web-browsing', 'ssl']
-    )
-
-    # List rules with specific zones
-    zone_rules = security_rule.list(
-        folder="Texas",
-        rulebase="pre",
-        from_=['trust'],
-        to_=['untrust']
-    )
-
-    # List rules with security profiles
-    secure_rules = security_rule.list(
-        folder="Texas",
-        rulebase="pre",
-        profile_setting=['strict-security']
-    )
-
-    # Combine multiple filters
-    filtered_rules = security_rule.list(
-        folder="Texas",
-        rulebase="pre",
-        action=['allow'],
-        application=['web-browsing'],
-        tag=['Production']
-    )
-
-    # Print the results
-    for rule in rules:
-        print(f"Name: {rule.name}")
-        print(f"Action: {rule.action}")
-        print(f"Applications: {rule.application}")
-        print("---")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# List recent jobs
+recent_jobs = security_rules.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
 
-## Fetching Security Rules
-
-The `fetch()` method retrieves a single security rule by name from a specific container, returning a Pydantic model.
+## Error Handling
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    rule = security_rule.fetch(
-        name="allow-web",
-        folder="Texas",
-        rulebase="pre"
-    )
-
-    print(f"Found rule: {rule.name}")
-    print(f"Current applications: {rule.application}")
-
-except NotFoundError as e:
-    print(f"Rule not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
-```
-
-</div>
-
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of a security rule with proper error handling:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-from scm.config.security import SecurityRule
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create rule configuration
+    rule_config = {
+        "name": "test-rule",
+        "folder": "Texas",
+        "from_": ["trust"],
+        "to_": ["untrust"],
+        "source": ["internal-net"],
+        "destination": ["any"],
+        "application": ["web-browsing"],
+        "service": ["application-default"],
+        "action": "allow"
+    }
+
+    # Create the rule
+    new_rule = security_rules.create(rule_config, rulebase="pre")
+
+    # Move the rule
+    move_config = {
+        "destination": "top",
+        "rulebase": "pre"
+    }
+    security_rules.move(new_rule.id, move_config)
+
+    # Commit changes
+    result = security_rules.commit(
+        folders=["Texas"],
+        description="Added test rule",
+        sync=True
     )
 
-    # Initialize security rule object
-    security_rule = SecurityRule(client)
+    # Check job status
+    status = security_rules.get_job_status(result.job_id)
 
-    try:
-        # Create new rule
-        create_data = {
-            "name": "test-web-access",
-            "description": "Test web access rule",
-            "folder": "Texas",
-            "from_": ["trust"],
-            "to": ["untrust"],
-            "source": ["internal-net"],
-            "destination": ["any"],
-            "application": ["web-browsing", "ssl"],
-            "action": "allow",
-            "log_end": True
-        }
-
-        new_rule = security_rule.create(create_data, rulebase="pre")
-        print(f"Created rule: {new_rule.name}")
-
-        # Move rule to top
-        try:
-            move_data = {
-                "destination": "top",
-                "rulebase": "pre"
-            }
-            security_rule.move(new_rule.id, move_data)
-            print("Rule moved to top")
-        except InvalidObjectError as e:
-            print(f"Invalid move parameters: {e.message}")
-
-        # Fetch and update the rule
-        try:
-            fetched_rule = security_rule.fetch(
-                name="test-web-access",
-                folder="Texas",
-                rulebase="pre"
-            )
-            print(f"Found rule: {fetched_rule.name}")
-
-            # Update the rule using Pydantic model
-            fetched_rule.description = "Updated web access rule"
-            updated_rule = security_rule.update(fetched_rule, rulebase="pre")
-            print(f"Updated description: {updated_rule.description}")
-
-        except NotFoundError as e:
-            print(f"Rule not found: {e.message}")
-
-        # Clean up
-        try:
-            security_rule.delete(new_rule.id, rulebase="pre")
-            print("Rule deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete rule - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Rule name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid rule data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid rule data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Rule name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Rule not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Rule still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
+## Best Practices
+
+1. **Rule Organization**
+    - Use descriptive rule names
+    - Order rules by specificity
+    - Group related rules together
+    - Document rule purposes
+    - Use consistent naming conventions
+
+2. **Security Profiles**
+    - Apply appropriate security profiles
+    - Use profile groups when possible
+    - Monitor profile impacts
+    - Update profiles regularly
+    - Document profile choices
+
+3. **Logging and Monitoring**
+    - Enable appropriate logging
+    - Use log forwarding profiles
+    - Monitor rule hits
+    - Track rule changes
+    - Audit rule effectiveness
+
+4. **Performance**
+    - Optimize rule order
+    - Use specific sources/destinations
+    - Minimize rule count
+    - Monitor rule processing
+    - Clean up unused rules
+
+5. **Change Management**
+    - Test rules before deployment
+    - Document all changes
+    - Use proper commit messages
+    - Monitor commit status
+    - Maintain rule backups
+
+## Full Script Examples
+
+Refer to
+the [security_rule.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/security_rule.py).
+
 ## Related Models
 
-- [SecurityRuleRequestModel](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleCreateModel](../../models/security_services/security_rule_models.md#Overview)
 - [SecurityRuleUpdateModel](../../models/security_services/security_rule_models.md#Overview)
 - [SecurityRuleResponseModel](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleMoveModel](../../models/security_services/security_rule_models.md#Overview)

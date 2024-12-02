@@ -1,61 +1,73 @@
 # Anti-Spyware Profile Configuration Object
 
-The `AntiSpywareProfile` class provides functionality to manage anti-spyware profiles in Palo Alto Networks' Strata
-Cloud Manager. Anti-spyware profiles define threat detection and prevention settings for identifying and blocking
-spyware,
-command-and-control traffic, and other malicious activities.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Anti-Spyware Profile Model Attributes](#anti-spyware-profile-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Anti-Spyware Profiles](#creating-anti-spyware-profiles)
+    - [Retrieving Profiles](#retrieving-profiles)
+    - [Updating Profiles](#updating-profiles)
+    - [Listing Profiles](#listing-profiles)
+    - [Deleting Profiles](#deleting-profiles)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Anti-spyware profiles in Strata Cloud Manager allow you to:
+The `AntiSpywareProfile` class provides functionality to manage anti-spyware profiles in Palo Alto Networks' Strata
+Cloud Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and
+deleting profiles that define threat detection and prevention settings for spyware, command-and-control traffic, and
+other malicious activities.
 
-- Define rules for different threat severities and categories
-- Configure actions for detected threats (alert, block, reset connections)
-- Set up threat exceptions for specific cases
-- Enable cloud-based inline analysis
-- Configure MICA engine spyware detection
-- Organize profiles within folders, snippets, or devices
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during profile
-management.
+| Method     | Description                    | Parameters                               | Return Type                             |
+|------------|--------------------------------|------------------------------------------|-----------------------------------------|
+| `create()` | Creates a new profile          | `data: Dict[str, Any]`                   | `AntiSpywareProfileResponseModel`       |
+| `get()`    | Retrieves a profile by ID      | `object_id: str`                         | `AntiSpywareProfileResponseModel`       |
+| `update()` | Updates an existing profile    | `profile: AntiSpywareProfileUpdateModel` | `AntiSpywareProfileResponseModel`       |
+| `delete()` | Deletes a profile              | `object_id: str`                         | `None`                                  |
+| `list()`   | Lists profiles with filtering  | `folder: str`, `**filters`               | `List[AntiSpywareProfileResponseModel]` |
+| `fetch()`  | Gets profile by name/container | `name: str`, `folder: str`               | `AntiSpywareProfileResponseModel`       |
 
-## Methods
+## Anti-Spyware Profile Model Attributes
 
-| Method     | Description                                         |
-|------------|-----------------------------------------------------|
-| `create()` | Creates a new anti-spyware profile                  |
-| `get()`    | Retrieves an anti-spyware profile by ID             |
-| `update()` | Updates an existing anti-spyware profile            |
-| `delete()` | Deletes an anti-spyware profile                     |
-| `list()`   | Lists anti-spyware profiles with optional filtering |
-| `fetch()`  | Retrieves a single anti-spyware profile by name     |
+| Attribute                     | Type                  | Required | Description                                 |
+|-------------------------------|-----------------------|----------|---------------------------------------------|
+| `name`                        | str                   | Yes      | Profile name (max 63 chars)                 |
+| `id`                          | UUID                  | Yes*     | Unique identifier (*response only)          |
+| `description`                 | str                   | No       | Profile description                         |
+| `cloud_inline_analysis`       | bool                  | No       | Enable cloud inline analysis                |
+| `rules`                       | List[Rule]            | Yes      | List of anti-spyware rules                  |
+| `threat_exception`            | List[ThreatException] | No       | List of threat exceptions                   |
+| `mica_engine_spyware_enabled` | List[MicaEngine]      | No       | MICA engine spyware settings                |
+| `inline_exception_edl_url`    | List[str]             | No       | Inline exception EDL URLs                   |
+| `folder`                      | str                   | Yes**    | Folder location (**one container required)  |
+| `snippet`                     | str                   | Yes**    | Snippet location (**one container required) |
+| `device`                      | str                   | Yes**    | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                    |
+|------------------------------|-----------|--------------------------------|
+| `InvalidObjectError`         | 400       | Invalid profile data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters    |
+| `NameNotUniqueError`         | 409       | Profile name already exists    |
+| `ObjectNotPresentError`      | 404       | Profile not found              |
+| `ReferenceNotZeroError`      | 409       | Profile still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed          |
+| `ServerError`                | 500       | Internal server error          |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when profile data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a profile doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when profile names conflict
-- `NameNotUniqueError`: Raised when creating duplicate profile names
-- `ReferenceNotZeroError`: Raised when deleting profiles still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Anti-Spyware Profiles
-
-The `create()` method allows you to create new anti-spyware profiles with proper error handling.
-
-**Example: Basic Profile with Single Rule**
+## Basic Configuration
 
 <div class="termy">
 
@@ -64,336 +76,324 @@ The `create()` method allows you to create new anti-spyware profiles with proper
 ```python
 from scm.client import Scm
 from scm.config.security import AntiSpywareProfile
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize AntiSpywareProfile object
 profiles = AntiSpywareProfile(client)
-
-try:
-    profile_data = {
-        "name": "basic-profile",
-        "description": "Basic anti-spyware profile",
-        "folder": "Texas",
-        "rules": [
-            {
-                "name": "block-critical",
-                "severity": ["critical"],
-                "category": "spyware",
-                "action": {"block_ip": {"track_by": "source", "duration": 300}}
-            }
-        ]
-    }
-
-    new_profile = profiles.create(profile_data)
-    print(f"Created profile: {new_profile.name}")
-
-except NameNotUniqueError as e:
-    print(f"Profile name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid profile data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
 ```
 
 </div>
 
-**Example: Profile with Multiple Rules and MICA Engine**
+## Usage Examples
+
+### Creating Anti-Spyware Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile_data = {
-        "name": "advanced-profile",
-        "description": "Advanced anti-spyware profile",
-        "folder": "Texas",
-        "cloud_inline_analysis": True,
-        "mica_engine_spyware_enabled": [
-            {
-                "name": "HTTP Command and Control detector",
-                "inline_policy_action": "alert"
+# Basic profile configuration
+basic_profile = {
+    "name": "basic-profile",
+    "description": "Basic anti-spyware profile",
+    "folder": "Texas",
+    "rules": [
+        {
+            "name": "block-critical",
+            "severity": ["critical"],
+            "category": "spyware",
+            "action": {
+                "block_ip": {
+                    "track_by": "source",
+                    "duration": 300
+                }
             }
-        ],
+        }
+    ]
+}
+
+# Create basic profile
+basic_profile_obj = profiles.create(basic_profile)
+
+# Advanced profile with MICA engine
+advanced_profile = {
+    "name": "advanced-profile",
+    "description": "Advanced anti-spyware profile",
+    "folder": "Texas",
+    "cloud_inline_analysis": True,
+    "mica_engine_spyware_enabled": [
+        {
+            "name": "HTTP Command and Control detector",
+            "inline_policy_action": "alert"
+        }
+    ],
+    "rules": [
+        {
+            "name": "critical-threats",
+            "severity": ["critical", "high"],
+            "category": "command-and-control",
+            "action": {"reset_both": {}}
+        },
+        {
+            "name": "medium-threats",
+            "severity": ["medium"],
+            "category": "spyware",
+            "action": {"alert": {}}
+        }
+    ]
+}
+
+# Create advanced profile
+advanced_profile_obj = profiles.create(advanced_profile)
+```
+
+</div>
+
+### Retrieving Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch by name and folder
+profile = profiles.fetch(name="basic-profile", folder="Texas")
+print(f"Found profile: {profile.name}")
+
+# Get by ID
+profile_by_id = profiles.get(profile.id)
+print(f"Retrieved profile: {profile_by_id.name}")
+print(f"Number of rules: {len(profile_by_id.rules)}")
+```
+
+</div>
+
+### Updating Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch existing profile
+existing_profile = profiles.fetch(name="basic-profile", folder="Texas")
+
+# Update attributes
+existing_profile.description = "Updated basic profile"
+existing_profile.cloud_inline_analysis = True
+
+# Add new rule
+existing_profile.rules.append({
+    "name": "new-rule",
+    "severity": ["high"],
+    "category": "spyware",
+    "action": {"alert": {}}
+})
+
+# Perform update
+updated_profile = profiles.update(existing_profile)
+```
+
+</div>
+
+### Listing Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List with direct filter parameters
+filtered_profiles = profiles.list(
+    folder='Texas',
+    rules=['block-critical']
+)
+
+# Process results
+for profile in filtered_profiles:
+    print(f"Name: {profile.name}")
+    print(f"Rules: {len(profile.rules)}")
+    for rule in profile.rules:
+        print(f"  - {rule.name}: {rule.category}")
+
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "rules": ["critical-threats", "medium-threats"]
+}
+
+# List with filters as kwargs
+filtered_profiles = profiles.list(**list_params)
+```
+
+</div>
+
+### Deleting Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Delete by ID
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+profiles.delete(profile_id)
+```
+
+</div>
+
+## Managing Configuration Changes
+
+### Performing Commits
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated anti-spyware profiles",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes
+result = profiles.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
+```
+
+</div>
+
+### Monitoring Jobs
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get status of specific job
+job_status = profiles.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = profiles.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    NameNotUniqueError,
+    ObjectNotPresentError,
+    ReferenceNotZeroError
+)
+
+try:
+    # Create profile configuration
+    profile_config = {
+        "name": "test-profile",
+        "description": "Test anti-spyware profile",
+        "folder": "Texas",
         "rules": [
             {
-                "name": "critical-threats",
-                "severity": ["critical", "high"],
-                "category": "command-and-control",
-                "action": {"reset_both": {}}
-            },
-            {
-                "name": "medium-threats",
-                "severity": ["medium"],
+                "name": "test-rule",
+                "severity": ["critical"],
                 "category": "spyware",
                 "action": {"alert": {}}
             }
         ]
     }
 
-    new_profile = profiles.create(profile_data)
-    print(f"Created profile: {new_profile.name}")
+    # Create the profile
+    new_profile = profiles.create(profile_config)
+
+    # Commit changes
+    result = profiles.commit(
+        folders=["Texas"],
+        description="Added test profile",
+        sync=True
+    )
+
+    # Check job status
+    status = profiles.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid profile data: {e.message}")
-    print(f"Error code: {e.error_code}")
-    if e.details:
-        print(f"Details: {e.details}")
-```
-
-</div>
-
-## Getting Anti-Spyware Profiles
-
-Use the `get()` method to retrieve an anti-spyware profile by its ID.
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    profile_id = "123e4567-e89b-12d3-a456-426655440000"
-    profile = profiles.get(profile_id)
-    print(f"Profile Name: {profile.name}")
-    print(f"Number of Rules: {len(profile.rules)}")
-
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-```
-
-</div>
-
-## Updating Anti-Spyware Profiles
-
-> There is currently a requirement by the SCM API to have at least four characters for objects like `threat_name`, but
-> this unfortunately conflicts with defaults like `any`. The SDK will conform to the API, but note that this affects
-> methods like `update()` from being able to edit existing rules that have attributes with values of `any`. Sorry :'(
-
-The `update()` method allows you to modify existing anti-spyware profiles using Pydantic models.
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    fetched_profile = profiles.fetch(folder='Texas', name='advanced-profile')
-    fetched_profile.description = 'updated description'
-
-    updated_profile = profiles.update(fetched_profile)
-    print(f"Updated profile: {updated_profile.name}")
-
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
-```
-
-</div>
-
-## Deleting Anti-Spyware Profiles
-
-Use the `delete()` method to remove an anti-spyware profile.
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    profile_id = "123e4567-e89b-12d3-a456-426655440000"
-    profiles.delete(profile_id)
-    print("Profile deleted successfully")
-
-except NotFoundError as e:
+except NameNotUniqueError as e:
+    print(f"Profile name already exists: {e.message}")
+except ObjectNotPresentError as e:
     print(f"Profile not found: {e.message}")
 except ReferenceNotZeroError as e:
     print(f"Profile still in use: {e.message}")
-```
-
-</div>
-
-## Listing Anti-Spyware Profiles
-
-The `list()` method retrieves multiple anti-spyware profiles with optional filtering. You can filter the results using
-the following kwargs:
-
-- `rules`: List[str] - Filter by rule names (e.g., ['block-critical', 'medium-threats'])
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    # List all profiles in a folder
-    existing_profiles = profiles.list(folder="Texas")
-
-    # List profiles containing specific rules
-    critical_profiles = profiles.list(
-        folder="Texas",
-        rules=['block-critical']
-    )
-
-    # List profiles with multiple rule matches
-    filtered_profiles = profiles.list(
-        folder="Texas",
-        rules=['block-critical', 'medium-threats']
-    )
-
-    # Print the results
-    for profile in existing_profiles:
-        print(f"Name: {profile.name}")
-        print(f"Rules: {len(profile.rules)}")
-        for rule in profile.rules:
-            print(f"  - {rule.name}")
-        print("---")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
 except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Fetching Anti-Spyware Profiles
+## Best Practices
 
-The `fetch()` method retrieves a single anti-spyware profile by name from a specific container, returning a Pydantic
-model.
+1. **Rule Configuration**
+    - Use descriptive rule names
+    - Set appropriate severity levels
+    - Configure actions based on threat level
+    - Document rule purposes
+    - Review rule effectiveness
 
-<div class="termy">
+2. **Container Management**
+    - Always specify exactly one container
+    - Use consistent container names
+    - Validate container existence
+    - Group related profiles
 
-<!-- termynal -->
+3. **Exception Handling**
+    - Document threat exceptions
+    - Review exception lists regularly
+    - Validate IP addresses
+    - Monitor exception usage
+    - Update as needed
 
-```python
-try:
-    profile = profiles.fetch(
-        name="basic-profile",
-        folder="Texas"
-    )
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed profiles
+    - Monitor cloud analysis impact
+    - Implement proper retry logic
+    - Track job completion
 
-    print(f"Found profile: {profile.name}")
-    print(f"Current rules: {len(profile.rules)}")
+5. **Security**
+    - Follow least privilege principle
+    - Validate input data
+    - Monitor profile changes
+    - Review audit logs
+    - Document modifications
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
-```
+## Full Script Examples
 
-</div>
-
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of an anti-spyware profile with proper error handling:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-from scm.config.security import AntiSpywareProfile
-from scm.exceptions import (
-    InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
-    NameNotUniqueError,
-    ReferenceNotZeroError
-)
-
-try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
-    )
-
-    # Initialize anti-spyware profile object
-    profiles = AntiSpywareProfile(client)
-
-    try:
-        # Create new profile
-        create_data = {
-            "name": "test-profile",
-            "description": "Test anti-spyware profile",
-            "folder": "Texas",
-            "rules": [
-                {
-                    "name": "test-rule",
-                    "severity": ["critical"],
-                    "category": "spyware",
-                    "action": {"alert": {}}
-                }
-            ]
-        }
-
-        new_profile = profiles.create(create_data)
-        print(f"Created profile: {new_profile.name}")
-
-        # Fetch the profile by name
-        try:
-            fetched_profile = profiles.fetch(
-                name="test-profile",
-                folder="Texas"
-            )
-            print(f"Found profile: {fetched_profile.name}")
-
-            # Update the profile using Pydantic model
-            fetched_profile.description = "Updated test profile"
-            fetched_profile.rules.append({
-                "name": "additional-rule",
-                "severity": ["high"],
-                "category": "command-and-control",
-                "action": {"reset_both": {}}
-            })
-
-            updated_profile = profiles.update(fetched_profile)
-            print(f"Updated profile: {updated_profile.name}")
-            print(f"New description: {updated_profile.description}")
-
-        except NotFoundError as e:
-            print(f"Profile not found: {e.message}")
-
-        # Clean up
-        try:
-            profiles.delete(new_profile.id)
-            print("Profile deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete profile - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Profile name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid profile data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
-```
-
-</div>
-
-## Full script examples
-
-Refer to the [examples](../../../../examples/scm/config/security_services) directory.
+Refer to
+the [anti_spyware_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/anti_spyware_profile.py).
 
 ## Related Models
 
-- [AntiSpywareProfileRequestModel](../../models/security_services/anti_spyware_profile_models.md#Overview)
-- [AntiSpywareProfileUpdateModel](../../models/security_services/anti_spyware_profile_models.md#Overview)
-- [AntiSpywareProfileResponseModel](../../models/security_services/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileCreateModel](../../models/security/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileUpdateModel](../../models/security/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileResponseModel](../../models/security/anti_spyware_profile_models.md#Overview)

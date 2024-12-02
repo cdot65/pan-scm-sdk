@@ -1,57 +1,69 @@
 # URL Categories Configuration Object
 
-The `URLCategories` class provides functionality to manage URL category objects in Palo Alto Networks' Strata Cloud
-Manager.
-URL categories allow you to define custom lists of URLs and categories for use in security policies and profiles.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [URL Category Model Attributes](#url-category-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating URL Categories](#creating-url-categories)
+    - [Retrieving URL Categories](#retrieving-url-categories)
+    - [Updating URL Categories](#updating-url-categories)
+    - [Listing URL Categories](#listing-url-categories)
+    - [Deleting URL Categories](#deleting-url-categories)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-URL Categories in Strata Cloud Manager allow you to:
+The `URLCategories` class provides functionality to manage URL category objects in Palo Alto Networks' Strata Cloud
+Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting
+custom URL categories that can be used in security policies and profiles.
 
-- Create custom URL categories with lists of URLs
-- Define category match patterns
-- Organize categories within folders, snippets, or devices
-- Apply filtering and management capabilities
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during URL category
-management.
+| Method     | Description                     | Parameters                          | Return Type                        |
+|------------|---------------------------------|-------------------------------------|------------------------------------|
+| `create()` | Creates a new URL category      | `data: Dict[str, Any]`              | `URLCategoriesResponseModel`       |
+| `get()`    | Retrieves a category by ID      | `object_id: str`                    | `URLCategoriesResponseModel`       |
+| `update()` | Updates an existing category    | `profile: URLCategoriesUpdateModel` | `URLCategoriesResponseModel`       |
+| `delete()` | Deletes a category              | `object_id: str`                    | `None`                             |
+| `list()`   | Lists categories with filtering | `folder: str`, `**filters`          | `List[URLCategoriesResponseModel]` |
+| `fetch()`  | Gets category by name           | `name: str`, `folder: str`          | `URLCategoriesResponseModel`       |
 
-## Methods
+## URL Category Model Attributes
 
-| Method     | Description                                  |
-|------------|----------------------------------------------|
-| `create()` | Creates a new URL category                   |
-| `get()`    | Retrieves a URL category by ID               |
-| `update()` | Updates an existing URL category             |
-| `delete()` | Deletes a URL category                       |
-| `list()`   | Lists URL categories with optional filtering |
-| `fetch()`  | Retrieves a single URL category by name      |
+| Attribute     | Type      | Required | Description                                 |
+|---------------|-----------|----------|---------------------------------------------|
+| `name`        | str       | Yes      | Name of URL category                        |
+| `id`          | UUID      | Yes*     | Unique identifier (*response only)          |
+| `list`        | List[str] | Yes      | List of URLs or patterns                    |
+| `type`        | Enum      | No       | Category type (URL List/Category Match)     |
+| `description` | str       | No       | Category description                        |
+| `folder`      | str       | Yes**    | Folder location (**one container required)  |
+| `snippet`     | str       | Yes**    | Snippet location (**one container required) |
+| `device`      | str       | Yes**    | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                     |
+|------------------------------|-----------|---------------------------------|
+| `InvalidObjectError`         | 400       | Invalid category data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters     |
+| `NameNotUniqueError`         | 409       | Category name already exists    |
+| `ObjectNotPresentError`      | 404       | Category not found              |
+| `ReferenceNotZeroError`      | 409       | Category still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed           |
+| `ServerError`                | 500       | Internal server error           |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when URL category data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a URL category doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when URL category names conflict
-- `NameNotUniqueError`: Raised when creating duplicate category names
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating URL Categories
-
-The `create()` method allows you to define new URL categories with proper error handling.
-
-**Example: Creating a URL List Category**
+## Basic Configuration
 
 <div class="termy">
 
@@ -60,257 +72,273 @@ The `create()` method allows you to define new URL categories with proper error 
 ```python
 from scm.client import Scm
 from scm.config.security import URLCategories
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize URLCategories object
 url_categories = URLCategories(client)
-
-try:
-    category_data = {
-        "name": "blocked_sites",
-        "description": "Custom blocked URLs",
-        "type": "URL List",
-        "list": ["example.com", "test.com"],
-        "folder": "Texas"
-    }
-
-    new_category = url_categories.create(category_data)
-    print(f"Created category: {new_category.name}")
-
-except NameNotUniqueError as e:
-    print(f"Category name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid category data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
 ```
 
 </div>
 
-## Getting URL Categories
+## Usage Examples
 
-Use the `get()` method to retrieve a URL category by its ID.
+### Creating URL Categories
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    category_id = "123e4567-e89b-12d3-a456-426655440000"
-    category = url_categories.get(category_id)
-    print(f"Category Name: {category.name}")
+# URL List category configuration
+url_list_config = {
+    "name": "blocked_sites",
+    "type": "URL List",
+    "list": ["example.com", "test.com"],
+    "description": "Blocked websites list",
+    "folder": "Texas"
+}
+
+# Create URL List category
+url_list = url_categories.create(url_list_config)
+
+# Category Match configuration
+category_match_config = {
+    "name": "social_media",
+    "type": "Category Match",
+    "list": ["social-networking", "personal-sites-and-blogs"],
+    "description": "Social media categories",
+    "folder": "Texas"
+}
+
+# Create Category Match category
+category_match = url_categories.create(category_match_config)
+```
+
+</div>
+
+### Retrieving URL Categories
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch by name and folder
+category = url_categories.fetch(name="blocked_sites", folder="Texas")
+print(f"Found category: {category.name}")
+
+# Get by ID
+category_by_id = url_categories.get(category.id)
+print(f"Retrieved category: {category_by_id.name}")
+print(f"URL list: {category_by_id.list}")
+```
+
+</div>
+
+### Updating URL Categories
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch existing category
+existing_category = url_categories.fetch(name="blocked_sites", folder="Texas")
+
+# Update URL list
+existing_category.list.extend(["newsite.com", "anothersite.com"])
+existing_category.description = "Updated blocked websites list"
+
+# Perform update
+updated_category = url_categories.update(existing_category)
+```
+
+</div>
+
+### Listing URL Categories
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List with direct filter parameters
+filtered_categories = url_categories.list(
+    folder='Texas',
+    members=['example.com']
+)
+
+# Process results
+for category in filtered_categories:
+    print(f"Name: {category.name}")
     print(f"Type: {category.type}")
     print(f"URLs: {category.list}")
 
-except NotFoundError as e:
-    print(f"Category not found: {e.message}")
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "members": ["social-networking"]
+}
+
+# List with filters as kwargs
+filtered_categories = url_categories.list(**list_params)
 ```
 
 </div>
 
-## Updating URL Categories
-
-The `update()` method allows you to modify existing URL categories using Pydantic models.
+### Deleting URL Categories
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # Fetch existing category as a Pydantic model
-    blocked_sites = url_categories.fetch(folder='Texas', name='blocked_sites')
-
-    # Update the model's attributes
-    blocked_sites.description = "Updated blocked sites list"
-    blocked_sites.list.append("newsite.com")
-
-    # Push changes to the SCM API
-    updated_category = url_categories.update(blocked_sites)
-    print(f"Updated category: {updated_category.name}")
-    print(f"New URL list: {updated_category.list}")
-
-except NotFoundError as e:
-    print(f"Category not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Delete by ID
+category_id = "123e4567-e89b-12d3-a456-426655440000"
+url_categories.delete(category_id)
 ```
 
 </div>
 
-## Deleting URL Categories
+## Managing Configuration Changes
 
-Use the `delete()` method to remove a URL category.
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    category_id = "123e4567-e89b-12d3-a456-426655440000"
-    url_categories.delete(category_id)
-    print("Category deleted successfully")
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated URL categories",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-except NotFoundError as e:
-    print(f"Category not found: {e.message}")
+# Commit the changes
+result = url_categories.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Listing URL Categories
-
-The `list()` method retrieves multiple URL categories with optional filtering. You can filter the results using the
-following kwargs:
-
-- `members`: List[str] - Filter by entries within a URL category list
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all categories in a folder
-    categories = url_categories.list(folder="Texas")
+# Get status of specific job
+job_status = url_categories.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
 
-    # List categories containing specific URLs
-    filtered_categories = url_categories.list(
-        folder="Texas",
-        members=["example.com", "test.com"]
-    )
-
-    # Print the results
-    for category in categories:
-        print(f"Name: {category.name}")
-        print(f"Type: {category.type}")
-        print(f"URLs: {category.list}")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# List recent jobs
+recent_jobs = url_categories.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
 
-## Fetching URL Categories
-
-The `fetch()` method retrieves a single URL category by name from a specific container, returning a Pydantic model.
+## Error Handling
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # Fetch a category by name from a specific folder
-    category = url_categories.fetch(
-        name="blocked_sites",
-        folder="Texas"
-    )
-    print(f"Found category: {category.name}")
-    print(f"Current URL list: {category.list}")
-
-except NotFoundError as e:
-    print(f"Category not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
-```
-
-</div>
-
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of a URL category with proper error handling:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-from scm.client import Scm
-from scm.config.security import URLCategories
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
-    NameNotUniqueError
+    MissingQueryParameterError,
+    NameNotUniqueError,
+    ObjectNotPresentError,
+    ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"
+    # Create category configuration
+    category_config = {
+        "name": "test_category",
+        "type": "URL List",
+        "list": ["example.com", "test.com"],
+        "folder": "Texas",
+        "description": "Test URL category"
+    }
+
+    # Create the category
+    new_category = url_categories.create(category_config)
+
+    # Commit changes
+    result = url_categories.commit(
+        folders=["Texas"],
+        description="Added test category",
+        sync=True
     )
 
-    # Initialize URL categories object
-    url_categories = URLCategories(client)
+    # Check job status
+    status = url_categories.get_job_status(result.job_id)
 
-    try:
-        # Create new category
-        category_data = {
-            "name": "test_category",
-            "description": "Test URL category",
-            "type": "URL List",
-            "list": ["example.com", "test.com"],
-            "folder": "Texas"
-        }
-
-        new_category = url_categories.create(category_data)
-        print(f"Created category: {new_category.name}")
-
-        # Fetch and update the category
-        try:
-            fetched_category = url_categories.fetch(
-                name="test_category",
-                folder="Texas"
-            )
-            print(f"Found category: {fetched_category.name}")
-
-            # Update the category using Pydantic model
-            fetched_category.description = "Updated test category"
-            fetched_category.list.append("newsite.com")
-
-            updated_category = url_categories.update(fetched_category)
-            print(f"Updated category: {updated_category.name}")
-            print(f"New URL list: {updated_category.list}")
-
-        except NotFoundError as e:
-            print(f"Category not found: {e.message}")
-
-        # Clean up
-        url_categories.delete(new_category.id)
-        print("Category deleted successfully")
-
-    except NameNotUniqueError as e:
-        print(f"Category name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid category data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid category data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Category name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Category not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Category still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Full script examples
+## Best Practices
 
-Refer to the [examples](../../../../examples/scm/config/security) directory.
+1. **URL List Management**
+    - Use descriptive category names
+    - Group related URLs together
+    - Validate URL patterns before adding
+    - Keep lists manageable in size
+    - Document category purposes
+
+2. **Container Management**
+    - Always specify exactly one container (folder, snippet, or device)
+    - Use consistent container names
+    - Validate container existence
+    - Group related categories
+
+3. **Category Types**
+    - Choose appropriate type (URL List vs Category Match)
+    - Validate category match patterns
+    - Consider URL resolution impact
+    - Document type selection rationale
+
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed categories
+    - Implement proper retry logic
+    - Monitor URL resolution times
+
+5. **Security**
+    - Follow least privilege principle
+    - Validate input URLs
+    - Use secure connection settings
+    - Monitor category usage
+
+## Full Script Examples
+
+Refer to
+the [url_categories.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/url_categories.py).
 
 ## Related Models
 

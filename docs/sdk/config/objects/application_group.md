@@ -1,61 +1,67 @@
 # Application Group Configuration Object
 
-The `ApplicationGroup` class provides functionality to manage application groups in Palo Alto Networks' Strata Cloud
-Manager. Application groups allow you to organize and manage collections of applications for use in security policies
-and other
-configurations.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Application Group Model Attributes](#application-group-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Application Groups](#creating-application-groups)
+    - [Retrieving Application Groups](#retrieving-application-groups)
+    - [Updating Application Groups](#updating-application-groups)
+    - [Listing Application Groups](#listing-application-groups)
+    - [Deleting Application Groups](#deleting-application-groups)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Application groups in Strata Cloud Manager allow you to:
+The `ApplicationGroup` class provides functionality to manage application groups in Palo Alto Networks' Strata Cloud
+Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting
+application groups that organize collections of applications for use in security policies.
 
-- Group multiple applications together for easier management
-- Create static groups with explicit lists of applications
-- Organize application groups within folders, snippets, or devices
-- Reference groups in security policies and other configurations
-- Fetch and manage groups by name or ID
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during application
-group
-management.
+| Method     | Description                   | Parameters                               | Return Type                           |
+|------------|-------------------------------|------------------------------------------|---------------------------------------|
+| `create()` | Creates a new app group       | `data: Dict[str, Any]`                   | `ApplicationGroupResponseModel`       |
+| `get()`    | Retrieves a group by ID       | `object_id: str`                         | `ApplicationGroupResponseModel`       |
+| `update()` | Updates an existing group     | `app_group: ApplicationGroupUpdateModel` | `ApplicationGroupResponseModel`       |
+| `delete()` | Deletes a group               | `object_id: str`                         | `None`                                |
+| `list()`   | Lists groups with filtering   | `folder: str`, `**filters`               | `List[ApplicationGroupResponseModel]` |
+| `fetch()`  | Gets group by name and folder | `name: str`, `folder: str`               | `ApplicationGroupResponseModel`       |
 
-## Methods
+## Application Group Model Attributes
 
-| Method     | Description                                      |
-|------------|--------------------------------------------------|
-| `create()` | Creates a new application group                  |
-| `get()`    | Retrieves an application group by ID             |
-| `update()` | Updates an existing application group            |
-| `delete()` | Deletes an application group                     |
-| `list()`   | Lists application groups with optional filtering |
-| `fetch()`  | Retrieves a single application group by name     |
+| Attribute | Type      | Required | Description                                 |
+|-----------|-----------|----------|---------------------------------------------|
+| `name`    | str       | Yes      | Name of group (max 63 chars)                |
+| `id`      | UUID      | Yes*     | Unique identifier (*response only)          |
+| `members` | List[str] | Yes      | List of application names                   |
+| `folder`  | str       | Yes**    | Folder location (**one container required)  |
+| `snippet` | str       | Yes**    | Snippet location (**one container required) |
+| `device`  | str       | Yes**    | Device location (**one container required)  |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                        |
+|------------------------------|-----------|------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid group data or format       |
+| `MissingQueryParameterError` | 400       | Missing required parameters        |
+| `NameNotUniqueError`         | 409       | Group name already exists          |
+| `ObjectNotPresentError`      | 404       | Group not found                    |
+| `ReferenceNotZeroError`      | 409       | Group still referenced by policies |
+| `AuthenticationError`        | 401       | Authentication failed              |
+| `ServerError`                | 500       | Internal server error              |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when application group data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when an application group doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when application group names conflict
-- `NameNotUniqueError`: Raised when creating duplicate group names
-- `ReferenceNotZeroError`: Raised when deleting groups still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Application Groups
-
-The `create()` method allows you to create new application groups with proper error handling.
-
-**Example: Creating an Application Group**
+## Basic Configuration
 
 <div class="termy">
 
@@ -64,252 +70,271 @@ The `create()` method allows you to create new application groups with proper er
 ```python
 from scm.client import Scm
 from scm.config.objects import ApplicationGroup
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize ApplicationGroup object
 application_groups = ApplicationGroup(client)
-
-try:
-    group_data = {
-        "name": "web-apps",
-        "members": ["ssl", "web-browsing"],
-        "folder": "Texas",
-    }
-
-    new_group = application_groups.create(group_data)
-    print(f"Created group: {new_group.name}")
-
-except NameNotUniqueError as e:
-    print(f"Group name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid group data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
 ```
 
 </div>
 
-## Getting Application Groups
+## Usage Examples
 
-Use the `get()` method to retrieve an application group by its ID.
+### Creating Application Groups
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    group_id = "123e4567-e89b-12d3-a456-426655440000"
-    group = application_groups.get(group_id)
-    print(f"Group Name: {group.name}")
-    print(f"Members: {group.members}")
+# Basic application group configuration
+basic_group = {
+    "name": "web-apps",
+    "members": ["ssl", "web-browsing"],
+    "folder": "Texas"
+}
 
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
+# Create basic group
+basic_group_obj = application_groups.create(basic_group)
+
+# Microsoft 365 application group
+ms365_group = {
+    "name": "microsoft-365",
+    "members": [
+        "ms-office365",
+        "ms-exchange-online",
+        "ms-sharepoint-online"
+    ],
+    "folder": "Texas"
+}
+
+# Create Microsoft 365 group
+ms365_group_obj = application_groups.create(ms365_group)
 ```
 
 </div>
 
-## Updating Application Groups
-
-The `update()` method allows you to modify existing application groups using Pydantic models.
+### Retrieving Application Groups
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    web_apps = application_groups.fetch(folder='Texas', name='web-apps')
-    web_apps.members = ['ssl', 'web-browsing', 'dns-base']
+# Fetch by name and folder
+group = application_groups.fetch(name="web-apps", folder="Texas")
+print(f"Found group: {group.name}")
 
-    updated_group = application_groups.update(web_apps)
-    print(f"Updated group: {updated_group.name}")
-
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Get by ID
+group_by_id = application_groups.get(group.id)
+print(f"Retrieved group: {group_by_id.name}")
+print(f"Members: {', '.join(group_by_id.members)}")
 ```
 
 </div>
 
-## Deleting Application Groups
-
-Use the `delete()` method to remove an application group.
+### Updating Application Groups
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    group_id = "123e4567-e89b-12d3-a456-426655440000"
-    application_groups.delete(group_id)
-    print("Group deleted successfully")
+# Fetch existing group
+existing_group = application_groups.fetch(name="web-apps", folder="Texas")
 
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Group still in use: {e.message}")
+# Update members
+existing_group.members = ["ssl", "web-browsing", "dns"]
+
+# Perform update
+updated_group = application_groups.update(existing_group)
 ```
 
 </div>
 
-## Listing Application Groups
-
-The `list()` method retrieves multiple application groups with optional filtering. You can filter the results using the
-following kwargs:
-
-- `members`: List[str] - Filter by member applications (e.g., ['ssl', 'web-browsing'])
+### Listing Application Groups
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all groups in a folder
-    groups = application_groups.list(folder="Texas")
+# List with direct filter parameters
+filtered_groups = application_groups.list(
+    folder='Texas',
+    members=['ssl']
+)
 
-    # List groups containing specific members
-    ssl_groups = application_groups.list(
-        folder="Texas",
-        members=['ssl']
-    )
+# Process results
+for group in filtered_groups:
+    print(f"Name: {group.name}")
+    print(f"Members: {', '.join(group.members)}")
 
-    # List groups with multiple member matches
-    web_groups = application_groups.list(
-        folder="Texas",
-        members=['ssl', 'web-browsing']
-    )
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "members": ["ms-office365"]
+}
 
-    # Print the results
-    for group in groups:
-        print(f"Name: {group.name}, Members: {group.members}")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# List with filters as kwargs
+filtered_groups = application_groups.list(**list_params)
 ```
 
 </div>
 
-## Fetching Application Groups
-
-The `fetch()` method retrieves a single application group by name from a specific container, returning a Pydantic model.
+### Deleting Application Groups
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    group = application_groups.fetch(
-        name="web-apps",
-        folder="Texas"
-    )
-    print(f"Found group: {group.name}")
-    print(f"Current members: {group.members}")
-
-except NotFoundError as e:
-    print(f"Group not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Delete by ID
+group_id = "123e4567-e89b-12d3-a456-426655440000"
+application_groups.delete(group_id)
 ```
 
 </div>
 
-## Full Workflow Example
+## Managing Configuration Changes
 
-Here's a complete example demonstrating the full lifecycle of an application group with proper error handling:
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.config.objects import ApplicationGroup
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated application groups",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes
+result = application_groups.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
+```
+
+</div>
+
+### Monitoring Jobs
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get status of specific job
+job_status = application_groups.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = application_groups.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create group configuration
+    group_config = {
+        "name": "test_group",
+        "members": ["ssl", "web-browsing"],
+        "folder": "Texas"
+    }
+
+    # Create the group
+    new_group = application_groups.create(group_config)
+
+    # Commit changes
+    result = application_groups.commit(
+        folders=["Texas"],
+        description="Added test group",
+        sync=True
     )
 
-    # Initialize application group object
-    application_groups = ApplicationGroup(client)
+    # Check job status
+    status = application_groups.get_job_status(result.job_id)
 
-    try:
-        # Create new group
-        group_data = {
-            "name": "web-apps",
-            "members": ["ssl", "web-browsing"],
-            "folder": "Texas",
-        }
-
-        new_group = application_groups.create(group_data)
-        print(f"Created group: {new_group.name}")
-
-        # Fetch the group by name
-        try:
-            fetched_group = application_groups.fetch(
-                name="web-apps",
-                folder="Texas"
-            )
-            print(f"Found group: {fetched_group.name}")
-
-            # Update the group using Pydantic model
-            fetched_group.members = ['ssl', 'web-browsing', 'dns-base']
-            updated_group = application_groups.update(fetched_group)
-            print(f"Updated members: {updated_group.members}")
-
-        except NotFoundError as e:
-            print(f"Group not found: {e.message}")
-
-        # Clean up
-        try:
-            application_groups.delete(new_group.id)
-            print("Group deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete group - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Group name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid group data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid group data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Group name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Group not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Group still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
 
-## Full script examples
+## Best Practices
 
-Refer to the [examples](../../../../examples/scm/config/objects) directory.
+1. **Group Management**
+    - Use descriptive group names
+    - Organize related applications together
+    - Keep member lists current
+    - Document group purposes
+    - Review group memberships regularly
+
+2. **Container Management**
+    - Always specify exactly one container (folder, snippet, or device)
+    - Use consistent container names
+    - Validate container existence
+    - Group related configurations
+
+3. **Error Handling**
+    - Implement comprehensive error handling
+    - Check job status after commits
+    - Handle specific exceptions
+    - Log error details
+    - Monitor commit status
+
+4. **Performance**
+    - Use appropriate pagination
+    - Cache frequently accessed groups
+    - Implement proper retry logic
+    - Batch related changes
+
+5. **Security**
+    - Follow least privilege principle
+    - Validate input data
+    - Use secure connection settings
+    - Implement proper authentication
+    - Monitor policy references
+
+## Full Script Examples
+
+Refer to
+the [application_group.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/application_group.py).
 
 ## Related Models
 

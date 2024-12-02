@@ -1,61 +1,94 @@
 # Decryption Profile Configuration Object
 
-The `DecryptionProfile` class provides functionality to manage decryption profiles in Palo Alto Networks' Strata Cloud
-Manager. Decryption profiles define SSL/TLS inspection settings for both forward proxy and inbound proxy scenarios,
-allowing
-granular control over encryption protocols, algorithms, and certificate validation.
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Model Attributes](#model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Decryption Profiles](#creating-decryption-profiles)
+    - [Retrieving Profiles](#retrieving-profiles)
+    - [Updating Profiles](#updating-profiles)
+    - [Listing Profiles](#listing-profiles)
+    - [Deleting Profiles](#deleting-profiles)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
 
 ## Overview
 
-Decryption profiles in Strata Cloud Manager allow you to:
+The `DecryptionProfile` class provides functionality to manage decryption profiles in Palo Alto Networks' Strata Cloud
+Manager. This class inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting
+decryption profiles that control SSL/TLS inspection settings for both forward proxy and inbound proxy scenarios.
 
-- Configure SSL/TLS protocol versions and cipher suites
-- Define forward proxy settings for outbound traffic inspection
-- Set up inbound proxy settings for inbound traffic inspection
-- Specify certificate validation requirements
-- Control protocol downgrades and extensions
-- Organize profiles within folders, snippets, or devices
+## Core Methods
 
-The SDK provides comprehensive error handling and logging capabilities to help troubleshoot issues during profile
-management.
+| Method     | Description                        | Parameters                              | Return Type                            |
+|------------|------------------------------------|-----------------------------------------|----------------------------------------|
+| `create()` | Creates a new profile              | `data: Dict[str, Any]`                  | `DecryptionProfileResponseModel`       |
+| `get()`    | Retrieves a profile by ID          | `object_id: str`                        | `DecryptionProfileResponseModel`       |
+| `update()` | Updates an existing profile        | `profile: DecryptionProfileUpdateModel` | `DecryptionProfileResponseModel`       |
+| `delete()` | Deletes a profile                  | `object_id: str`                        | `None`                                 |
+| `list()`   | Lists profiles with filtering      | `folder: str`, `**filters`              | `List[DecryptionProfileResponseModel]` |
+| `fetch()`  | Gets profile by name and container | `name: str`, `folder: str`              | `DecryptionProfileResponseModel`       |
 
-## Methods
+## Model Attributes
 
-| Method     | Description                                     |
-|------------|-------------------------------------------------|
-| `create()` | Creates a new decryption profile                |
-| `get()`    | Retrieves a decryption profile by ID            |
-| `update()` | Updates an existing decryption profile          |
-| `delete()` | Deletes a decryption profile                    |
-| `list()`   | Lists decryption profiles with optional filters |
-| `fetch()`  | Retrieves a single decryption profile by name   |
+### Base Profile Attributes
+
+| Attribute | Type | Required | Description                                 |
+|-----------|------|----------|---------------------------------------------|
+| `name`    | str  | Yes      | Profile name (alphanumeric)                 |
+| `id`      | UUID | Yes*     | Unique identifier (*response only)          |
+| `folder`  | str  | Yes**    | Folder location (**one container required)  |
+| `snippet` | str  | Yes**    | Snippet location (**one container required) |
+| `device`  | str  | Yes**    | Device location (**one container required)  |
+
+### SSL Protocol Settings
+
+| Attribute              | Type | Required | Description                  |
+|------------------------|------|----------|------------------------------|
+| `min_version`          | str  | No       | Minimum SSL/TLS version      |
+| `max_version`          | str  | No       | Maximum SSL/TLS version      |
+| `auth_algo_md5`        | bool | No       | Allow MD5 authentication     |
+| `auth_algo_sha1`       | bool | No       | Allow SHA1 authentication    |
+| `auth_algo_sha256`     | bool | No       | Allow SHA256 authentication  |
+| `auth_algo_sha384`     | bool | No       | Allow SHA384 authentication  |
+| `enc_algo_3des`        | bool | No       | Allow 3DES encryption        |
+| `enc_algo_aes_128_cbc` | bool | No       | Allow AES-128-CBC encryption |
+| `enc_algo_aes_256_cbc` | bool | No       | Allow AES-256-CBC encryption |
+| `enc_algo_rc4`         | bool | No       | Allow RC4 encryption         |
+
+### Forward Proxy Settings
+
+| Attribute                   | Type | Required | Description                |
+|-----------------------------|------|----------|----------------------------|
+| `auto_include_altname`      | bool | No       | Include alternative names  |
+| `block_client_cert`         | bool | No       | Block client certificates  |
+| `block_expired_certificate` | bool | No       | Block expired certificates |
+| `block_untrusted_issuer`    | bool | No       | Block untrusted issuers    |
+| `block_unsupported_cipher`  | bool | No       | Block unsupported ciphers  |
+| `block_unsupported_version` | bool | No       | Block unsupported versions |
 
 ## Exceptions
 
-The SDK uses a hierarchical exception system for error handling:
+| Exception                    | HTTP Code | Description                    |
+|------------------------------|-----------|--------------------------------|
+| `InvalidObjectError`         | 400       | Invalid profile data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters    |
+| `NameNotUniqueError`         | 409       | Profile name already exists    |
+| `ObjectNotPresentError`      | 404       | Profile not found              |
+| `ReferenceNotZeroError`      | 409       | Profile still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed          |
+| `ServerError`                | 500       | Internal server error          |
 
-### Client Errors (4xx)
-
-- `InvalidObjectError`: Raised when profile data is invalid or for invalid response formats
-- `MissingQueryParameterError`: Raised when required parameters (folder, name) are empty
-- `NotFoundError`: Raised when a profile doesn't exist
-- `AuthenticationError`: Raised for authentication failures
-- `AuthorizationError`: Raised for permission issues
-- `ConflictError`: Raised when profile names conflict
-- `NameNotUniqueError`: Raised when creating duplicate profile names
-- `ReferenceNotZeroError`: Raised when deleting profiles still referenced by policies
-
-### Server Errors (5xx)
-
-- `ServerError`: Base class for server-side errors
-- `APINotImplementedError`: When API endpoint isn't implemented
-- `GatewayTimeoutError`: When request times out
-
-## Creating Decryption Profiles
-
-The `create()` method allows you to create new decryption profiles with proper error handling.
-
-**Example: Forward Proxy Profile**
+## Basic Configuration
 
 <div class="termy">
 
@@ -64,305 +97,302 @@ The `create()` method allows you to create new decryption profiles with proper e
 ```python
 from scm.client import Scm
 from scm.config.security import DecryptionProfile
-from scm.exceptions import InvalidObjectError, NameNotUniqueError
 
-# Initialize client with logging
+# Initialize client
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    log_level="DEBUG"  # Enable detailed logging
+    tsg_id="your_tsg_id"
 )
 
+# Initialize DecryptionProfile object
 decryption_profiles = DecryptionProfile(client)
+```
 
-try:
-    forward_proxy = {
-        "name": "forward-proxy",
-        "folder": "Texas",
-        "ssl_forward_proxy": {
-            "auto_include_altname": True,
-            "block_expired_certificate": True,
-            "block_untrusted_issuer": True,
-            "strip_alpn": False
-        },
-        "ssl_protocol_settings": {
-            "min_version": "tls1-2",
-            "max_version": "tls1-3"
-        }
+</div>
+
+## Usage Examples
+
+### Creating Decryption Profiles
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Forward proxy configuration
+forward_proxy_config = {
+    "name": "forward-proxy-profile",
+    "folder": "Texas",
+    "ssl_forward_proxy": {
+        "auto_include_altname": True,
+        "block_expired_certificate": True,
+        "block_untrusted_issuer": True
+    },
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3"
     }
+}
 
-    new_profile = decryption_profiles.create(forward_proxy)
-    print(f"Created profile: {new_profile.name}")
+# Create forward proxy profile
+forward_profile = decryption_profiles.create(forward_proxy_config)
 
-except NameNotUniqueError as e:
-    print(f"Profile name already exists: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid profile data: {e.message}")
-    if e.details:
-        print(f"Details: {e.details}")
-```
-
-</div>
-
-**Example: Inbound Proxy Profile**
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-try:
-    inbound_proxy = {
-        "name": "inbound-proxy",
-        "folder": "Texas",
-        "ssl_inbound_proxy": {
-            "block_if_no_resource": True,
-            "block_unsupported_cipher": True,
-            "block_unsupported_version": True
-        },
-        "ssl_protocol_settings": {
-            "min_version": "tls1-2",
-            "max_version": "tls1-3",
-            "auth_algo_sha256": True,
-            "auth_algo_sha384": True
-        }
+# Inbound proxy configuration
+inbound_proxy_config = {
+    "name": "inbound-proxy-profile",
+    "folder": "Texas",
+    "ssl_inbound_proxy": {
+        "block_if_no_resource": True,
+        "block_unsupported_cipher": True
+    },
+    "ssl_protocol_settings": {
+        "min_version": "tls1-2",
+        "max_version": "tls1-3",
+        "auth_algo_sha256": True,
+        "auth_algo_sha384": True
     }
+}
 
-    new_profile = decryption_profiles.create(inbound_proxy)
-    print(f"Created profile: {new_profile.name}")
-
-except InvalidObjectError as e:
-    print(f"Invalid profile data: {e.message}")
-    print(f"Error code: {e.error_code}")
-    if e.details:
-        print(f"Details: {e.details}")
+# Create inbound proxy profile
+inbound_profile = decryption_profiles.create(inbound_proxy_config)
 ```
 
 </div>
 
-## Getting Decryption Profiles
-
-Use the `get()` method to retrieve a decryption profile by its ID.
+### Retrieving Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile_id = "123e4567-e89b-12d3-a456-426655440000"
-    profile = decryption_profiles.get(profile_id)
-    print(f"Profile Name: {profile.name}")
+# Fetch by name and folder
+profile = decryption_profiles.fetch(name="forward-proxy-profile", folder="Texas")
+print(f"Found profile: {profile.name}")
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
+# Get by ID
+profile_by_id = decryption_profiles.get(profile.id)
+print(f"Retrieved profile: {profile_by_id.name}")
 ```
 
 </div>
 
-## Updating Decryption Profiles
-
-The `update()` method allows you to modify existing decryption profiles using Pydantic models.
+### Updating Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    fetched_profile = decryption_profiles.fetch(folder='Texas', name="forward-proxy")
-    fetched_profile.ssl_forward_proxy.auto_include_altname = False
+# Fetch existing profile
+existing_profile = decryption_profiles.fetch(
+    name="forward-proxy-profile",
+    folder="Texas"
+)
 
-    updated_profile = decryption_profiles.update(fetched_profile)
-    print(f"Updated profile: {updated_profile.name}")
+# Update SSL settings
+existing_profile.ssl_protocol_settings.min_version = "tls1-2"
+existing_profile.ssl_protocol_settings.max_version = "tls1-3"
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+# Update forward proxy settings
+existing_profile.ssl_forward_proxy.block_expired_certificate = True
+existing_profile.ssl_forward_proxy.block_untrusted_issuer = True
+
+# Perform update
+updated_profile = decryption_profiles.update(existing_profile)
 ```
 
 </div>
 
-## Deleting Decryption Profiles
-
-Use the `delete()` method to remove a decryption profile.
+### Listing Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile_id = "123e4567-e89b-12d3-a456-426655440000"
-    decryption_profiles.delete(profile_id)
-    print("Profile deleted successfully")
+# List with direct filter parameters
+filtered_profiles = decryption_profiles.list(
+    folder='Texas',
+    types=['forward']
+)
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Profile still in use: {e.message}")
+# Process results
+for profile in filtered_profiles:
+    print(f"Name: {profile.name}")
+    if profile.ssl_forward_proxy:
+        print("Type: Forward Proxy")
+    elif profile.ssl_inbound_proxy:
+        print("Type: Inbound Proxy")
+
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "types": ["forward", "inbound"]
+}
+
+# List with filters as kwargs
+filtered_profiles = decryption_profiles.list(**list_params)
 ```
 
 </div>
 
-## Listing Decryption Profiles
-
-The `list()` method retrieves multiple decryption profiles with optional filtering. You can filter the results using the
-following kwargs:
-
-- `types`: List[str] - Filter by proxy types (e.g., ['forward', 'inbound', 'no'])
+### Deleting Profiles
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    # List all profiles in a folder
-    profiles = decryption_profiles.list(folder="Texas")
-
-    # List only forward proxy profiles
-    forward_profiles = decryption_profiles.list(
-        folder="Texas",
-        types=['forward']
-    )
-
-    # List both forward and inbound proxy profiles
-    mixed_profiles = decryption_profiles.list(
-        folder="Texas",
-        types=['forward', 'inbound']
-    )
-
-    # Print the results
-    for profile in profiles:
-        print(f"Name: {profile.name}")
-        if profile.ssl_forward_proxy:
-            print("Type: Forward Proxy")
-        elif profile.ssl_inbound_proxy:
-            print("Type: Inbound Proxy")
-        else:
-            print("Type: No Proxy")
-
-except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Delete by ID
+profile_id = "123e4567-e89b-12d3-a456-426655440000"
+decryption_profiles.delete(profile_id)
 ```
 
 </div>
 
-## Fetching Decryption Profiles
+## Managing Configuration Changes
 
-The `fetch()` method retrieves a single decryption profile by name from a specific container, returning a Pydantic
-model.
+### Performing Commits
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-try:
-    profile = decryption_profiles.fetch(name="Oblivion", folder="Texas")
-    print(f"Found profile: {profile.name}")
-    print(f"Current settings: {profile.ssl_protocol_settings}")
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated decryption profiles",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-except NotFoundError as e:
-    print(f"Profile not found: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing required parameter: {e.message}")
+# Commit the changes
+result = decryption_profiles.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
 
-## Full Workflow Example
-
-Here's a complete example demonstrating the full lifecycle of a decryption profile with proper error handling:
+### Monitoring Jobs
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.config.security import DecryptionProfile
+# Get status of specific job
+job_status = decryption_profiles.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = decryption_profiles.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
 from scm.exceptions import (
     InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
+    MissingQueryParameterError,
     NameNotUniqueError,
+    ObjectNotPresentError,
     ReferenceNotZeroError
 )
 
 try:
-    # Initialize client with debug logging
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        log_level="DEBUG"  # Enable detailed logging
+    # Create profile configuration
+    profile_config = {
+        "name": "test-profile",
+        "folder": "Texas",
+        "ssl_protocol_settings": {
+            "min_version": "tls1-2",
+            "max_version": "tls1-3"
+        },
+        "ssl_forward_proxy": {
+            "block_expired_certificate": True
+        }
+    }
+
+    # Create the profile
+    new_profile = decryption_profiles.create(profile_config)
+
+    # Commit changes
+    result = decryption_profiles.commit(
+        folders=["Texas"],
+        description="Added test profile",
+        sync=True
     )
 
-    # Initialize decryption profile object
-    decryption_profiles = DecryptionProfile(client)
+    # Check job status
+    status = decryption_profiles.get_job_status(result.job_id)
 
-    try:
-        # Create new profile
-        forward_proxy = {
-            "name": "forward-proxy",
-            "folder": "Texas",
-            "ssl_forward_proxy": {
-                "auto_include_altname": True,
-                "block_expired_certificate": True,
-                "block_untrusted_issuer": True,
-                "strip_alpn": False
-            },
-            "ssl_protocol_settings": {
-                "min_version": "tls1-2",
-                "max_version": "tls1-3"
-            }
-        }
-
-        new_profile = decryption_profiles.create(forward_proxy)
-        print(f"Created profile: {new_profile.name}")
-
-        # Fetch the profile by name
-        try:
-            fetched_profile = decryption_profiles.fetch(
-                name="forward-proxy",
-                folder="Texas"
-            )
-            print(f"Found profile: {fetched_profile.name}")
-
-            # Update the profile using Pydantic model
-            fetched_profile.ssl_forward_proxy.auto_include_altname = False
-            updated_profile = decryption_profiles.update(fetched_profile)
-            print(f"Updated profile: {updated_profile.name}")
-
-        except NotFoundError as e:
-            print(f"Profile not found: {e.message}")
-
-        # Clean up
-        try:
-            decryption_profiles.delete(new_profile.id)
-            print("Profile deleted successfully")
-        except ReferenceNotZeroError as e:
-            print(f"Cannot delete profile - still in use: {e.message}")
-
-    except NameNotUniqueError as e:
-        print(f"Profile name conflict: {e.message}")
-    except InvalidObjectError as e:
-        print(f"Invalid profile data: {e.message}")
-        if e.details:
-            print(f"Details: {e.details}")
-
-except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
-    print(f"Status code: {e.http_status_code}")
+except InvalidObjectError as e:
+    print(f"Invalid profile data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Profile name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Profile not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Profile still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
+
+## Best Practices
+
+1. **SSL/TLS Configuration**
+    - Use modern protocol versions (TLS 1.2+)
+    - Enable strong cipher suites
+    - Regularly review security settings
+    - Monitor for deprecated algorithms
+    - Document protocol choices
+
+2. **Certificate Management**
+    - Validate certificate chains
+    - Handle expired certificates
+    - Monitor untrusted issuers
+    - Implement proper revocation
+    - Document certificate policies
+
+3. **Container Management**
+    - Use consistent container names
+    - Validate container existence
+    - Group related profiles
+    - Maintain clear hierarchy
+    - Document container structure
+
+4. **Performance**
+    - Monitor resource usage
+    - Implement caching
+    - Use appropriate timeouts
+    - Handle connection limits
+    - Track decryption load
+
+5. **Error Handling**
+    - Validate input data
+    - Handle specific exceptions
+    - Log error details
+    - Monitor commit status
+    - Track job completion
+
+## Full Script Examples
+
+Refer to
+the [decryption_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/decryption_profile.py).
 
 ## Related Models
 
