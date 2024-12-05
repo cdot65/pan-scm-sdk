@@ -23,9 +23,9 @@ from scm.models.objects import (
     TagUpdateModel,
     ApplicationResponseModel,
     ApplicationUpdateModel,
-    ApplicationFilterCreateModel,
-    ApplicationFilterUpdateModel,
-    ApplicationFilterResponseModel,
+    ApplicationFiltersCreateModel,
+    ApplicationFiltersUpdateModel,
+    ApplicationFiltersResponseModel,
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
@@ -898,21 +898,20 @@ class ApplicationUpdateModelFactory(factory.DictFactory):
 
 
 # ----------------------------------------------------------------------------
-# Application Filter object factories.
+# Application Filters object factories.
 # ----------------------------------------------------------------------------
 
 
 # SDK tests against SCM API
-class ApplicationFilterCreateApiFactory(factory.Factory):
-    """Factory for creating ApplicationFilterCreateModel instances."""
+class ApplicationFiltersCreateApiFactory(factory.Factory):
+    """Factory for creating ApplicationFiltersCreateModel instances."""
 
     class Meta:
-        model = ApplicationFilterCreateModel
+        model = ApplicationFiltersCreateModel
 
     name = factory.Sequence(lambda n: f"application_filters_{n}")
     folder = None
     snippet = None
-    device = None
 
     @classmethod
     def with_folder(cls, folder: str = "Texas", **kwargs):
@@ -924,49 +923,29 @@ class ApplicationFilterCreateApiFactory(factory.Factory):
         """Create an instance with snippet container."""
         return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
 
-
-class ApplicationFilterUpdateApiFactory(factory.Factory):
-    """Factory for creating ApplicationFilterUpdateModel instances."""
+class ApplicationFiltersUpdateApiFactory(factory.Factory):
+    """Factory for creating ApplicationFiltersUpdateModel instances."""
 
     class Meta:
-        model = ApplicationFilterUpdateModel
+        model = ApplicationFiltersUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
     folder = None
     snippet = None
-    device = None
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
         """Create an instance with snippet container."""
         return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
 
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-
-class ApplicationFilterResponseFactory(factory.Factory):
-    """Factory for creating ApplicationFilterResponseModel instances."""
+class ApplicationFiltersResponseFactory(factory.Factory):
+    """Factory for creating ApplicationFiltersResponseModel instances."""
 
     class Meta:
-        model = ApplicationFilterResponseModel
+        model = ApplicationFiltersResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"application_group_{n}")
@@ -976,7 +955,6 @@ class ApplicationFilterResponseFactory(factory.Factory):
     ]
     folder = "Texas"
     snippet = None
-    device = None
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -984,17 +962,7 @@ class ApplicationFilterResponseFactory(factory.Factory):
         return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: ApplicationFilterCreateModel, **kwargs):
+    def from_request(cls, request_model: ApplicationFiltersCreateModel, **kwargs):
         """Create a response model based on a request model."""
         data = request_model.model_dump()
         data["id"] = str(uuid.uuid4())
@@ -1003,8 +971,8 @@ class ApplicationFilterResponseFactory(factory.Factory):
 
 
 # Pydantic modeling tests
-class ApplicationFilterCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationFilterCreateModel validation testing."""
+class ApplicationFiltersCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationFiltersCreateModel validation testing."""
 
     name = factory.Sequence(lambda n: f"application_group_{n}")
     members = [
@@ -1013,7 +981,6 @@ class ApplicationFilterCreateModelFactory(factory.DictFactory):
     ]
     folder = "Texas"
     snippet = None
-    device = None
 
     @classmethod
     def build_valid(cls):
@@ -1070,8 +1037,8 @@ class ApplicationFilterCreateModelFactory(factory.DictFactory):
         )
 
 
-class ApplicationFilterUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationFilterUpdateModel validation testing."""
+class ApplicationFiltersUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationFiltersUpdateModel validation testing."""
 
     id = "123e4567-e89b-12d3-a456-426655440000"
     name = factory.Sequence(lambda n: f"application_group_{n}")
@@ -1081,7 +1048,6 @@ class ApplicationFilterUpdateModelFactory(factory.DictFactory):
     ]
     folder = None
     snippet = None
-    device = None
 
     @classmethod
     def build_valid(cls):
