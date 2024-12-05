@@ -20,5 +20,6 @@ For each configuration object, there are corresponding request and response mode
 - [Decryption Profile Models](decryption_profile_models.md)
 - [DNS Security Profile Models](dns_security_profile_models.md)
 - [Security Rule Models](security_rule_models.md)
+- [URL Categories Models](url_categories_models.md)
 - [Vulnerability Protection Profile Models](vulnerability_protection_profile_models.md)
 - [Wildfire Antivirus Security Profile Models](wildfire_antivirus_profile_models.md)

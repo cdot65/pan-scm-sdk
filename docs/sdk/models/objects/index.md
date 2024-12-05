@@ -19,6 +19,7 @@ For each configuration object, there are corresponding request and response mode
 - [Address Models](address_models.md)
 - [Address Group Models](address_group_models.md)
 - [Application Models](application_models.md)
+- [Application Filters Models](application_filters_models.md)
 - [Application Group Models](application_group_models.md)
 - [Service Models](service_models.md)
 - [Service Group Models](service_group_models.md)
