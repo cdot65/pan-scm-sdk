@@ -3,6 +3,7 @@
 from .address import Address
 from .address_group import AddressGroup
 from .application import Application
+from .application_filters import ApplicationFilters
 from .application_group import ApplicationGroup
 from .service import Service
 from .service_group import ServiceGroup

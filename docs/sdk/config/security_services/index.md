@@ -47,6 +47,12 @@ Configure DNS Security profiles to protect against:
 - Fast-flux DNS attacks
 - Known malicious domains
 
+### [URL Categories](url_categories.md)
+
+Manage URL Categories to:
+
+- Create custom URL categories
+
 ### [Vulnerability Protection Profile](vulnerability_protection_profile.md)
 
 Manage Vulnerability Protection profiles to:

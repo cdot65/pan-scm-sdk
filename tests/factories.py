@@ -23,6 +23,9 @@ from scm.models.objects import (
     TagUpdateModel,
     ApplicationResponseModel,
     ApplicationUpdateModel,
+    ApplicationFiltersCreateModel,
+    ApplicationFiltersUpdateModel,
+    ApplicationFiltersResponseModel,
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
@@ -891,6 +894,187 @@ class ApplicationUpdateModelFactory(factory.DictFactory):
             ports=["invalid-port"],
             folder="Invalid@Folder",
             **kwargs,
+        )
+
+
+# ----------------------------------------------------------------------------
+# Application Filters object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class ApplicationFiltersCreateApiFactory(factory.Factory):
+    """Factory for creating ApplicationFiltersCreateModel instances."""
+
+    class Meta:
+        model = ApplicationFiltersCreateModel
+
+    name = factory.Sequence(lambda n: f"application_filters_{n}")
+    folder = None
+    snippet = None
+
+    @classmethod
+    def with_folder(cls, folder: str = "Texas", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+
+class ApplicationFiltersUpdateApiFactory(factory.Factory):
+    """Factory for creating ApplicationFiltersUpdateModel instances."""
+
+    class Meta:
+        model = ApplicationFiltersUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    folder = None
+    snippet = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+
+class ApplicationFiltersResponseFactory(factory.Factory):
+    """Factory for creating ApplicationFiltersResponseModel instances."""
+
+    class Meta:
+        model = ApplicationFiltersResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Texas"
+    snippet = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: ApplicationFiltersCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class ApplicationFiltersCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationFiltersCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Texas"
+    snippet = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestApplicationFilter",
+            members=["app1", "app2"],
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            members=["app1"],
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_empty_members(cls):
+        """Return a data dict with empty members list."""
+        return cls(
+            name="TestGroup",
+            members=[],
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_invalid_folder(cls):
+        """Return a data dict with invalid folder pattern."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+            folder="Invalid@Folder#",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+            folder="Texas",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+        )
+
+
+class ApplicationFiltersUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationFiltersUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = None
+    snippet = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating an application group."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedGroup",
+            members=["updated-app1", "updated-app2"],
+            folder="UpdatedFolder",
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            members=[],
+            folder="Invalid@Folder",
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            members=["new-app"],
         )
 
 

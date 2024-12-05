@@ -5,6 +5,7 @@ This section covers the configuration objects provided by the `pan-scm-sdk`:
 - [Address](address.md)
 - [Address Group](address_group.md)
 - [Application](application.md)
+- [Application Filters](application_filters.md)
 - [Application Group](application_group.md)
 - [Service](service.md)
 
@@ -26,6 +27,10 @@ Manage groups of address objects, supporting both static and dynamic membership.
 ### [Application](application.md)
 
 Manage application definitions, including their characteristics and associated ports.
+
+### [Application Filters](application_filters.md)
+
+Manage application filters definitions, including their characteristics and associated members.
 
 ### [Application Group](application_group.md)
 
