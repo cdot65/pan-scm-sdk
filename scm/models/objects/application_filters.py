@@ -11,7 +11,7 @@ from pydantic import (
 )
 
 
-class ApplicationFilterBaseModel(BaseModel):
+class ApplicationFiltersBaseModel(BaseModel):
     """
     Base model for Application filter objects containing fields common to all CRUD operations.
 
@@ -140,14 +140,14 @@ class ApplicationFilterBaseModel(BaseModel):
     )
 
 
-class ApplicationFilterCreateModel(ApplicationFilterBaseModel):
+class ApplicationFiltersCreateModel(ApplicationFiltersBaseModel):
     """
     Model for creating a new application filter.
-    Inherits from ApplicationFilterBaseModel and adds container type validation.
+    Inherits from ApplicationFiltersBaseModel and adds container type validation.
     """
 
     @model_validator(mode="after")
-    def validate_container_type(self) -> "ApplicationFilterCreateModel":
+    def validate_container_type(self) -> "ApplicationFiltersCreateModel":
         container_fields = [
             "folder",
             "snippet",
@@ -160,7 +160,7 @@ class ApplicationFilterCreateModel(ApplicationFilterBaseModel):
         return self
 
 
-class ApplicationFilterUpdateModel(ApplicationFilterBaseModel):
+class ApplicationFiltersUpdateModel(ApplicationFiltersBaseModel):
     """
     Model for updating an existing application filter.
     All fields are optional to allow partial updates.
@@ -173,10 +173,10 @@ class ApplicationFilterUpdateModel(ApplicationFilterBaseModel):
     )
 
 
-class ApplicationFilterResponseModel(ApplicationFilterBaseModel):
+class ApplicationFiltersResponseModel(ApplicationFiltersBaseModel):
     """
     Model for application filter responses.
-    Includes all base fields plus the id field.
+    Includes all base fields plus the (optional!) id field.
     """
 
     id: Optional[UUID] = Field(

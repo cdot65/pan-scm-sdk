@@ -16,9 +16,9 @@ from .application import (
     ApplicationUpdateModel,
 )
 from .application_filters import (
-    ApplicationFilterCreateModel,
-    ApplicationFilterResponseModel,
-    ApplicationFilterUpdateModel,
+    ApplicationFiltersCreateModel,
+    ApplicationFiltersResponseModel,
+    ApplicationFiltersUpdateModel,
 )
 from .application_group import (
     ApplicationGroupCreateModel,
