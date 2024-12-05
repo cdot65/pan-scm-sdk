@@ -131,13 +131,6 @@ class ApplicationFilterBaseModel(BaseModel):
         pattern=r"^[a-zA-Z\d\-_. ]+$",
         examples=["predefined-snippet"],
     )
-    device: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The device in which the resource is defined",
-        examples=["My Device"],
-    )
 
     # Pydantic model configuration
     model_config = ConfigDict(
