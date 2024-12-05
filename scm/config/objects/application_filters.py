@@ -11,9 +11,9 @@ from scm.exceptions import (
     MissingQueryParameterError,
 )
 from scm.models.objects import (
-    ApplicationFilterCreateModel,
-    ApplicationFilterResponseModel,
-    ApplicationFilterUpdateModel,
+    ApplicationFiltersCreateModel,
+    ApplicationFiltersResponseModel,
+    ApplicationFiltersUpdateModel,
 )
 
 
@@ -35,15 +35,15 @@ class ApplicationFilters(BaseObject):
     def create(
         self,
         data: Dict[str, Any],
-    ) -> ApplicationFilterResponseModel:
+    ) -> ApplicationFiltersResponseModel:
         """
         Creates a new application filter object.
 
         Returns:
-            ApplicationFilterResponseModel
+            ApplicationFiltersResponseModel
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
-        application_filter = ApplicationFilterCreateModel(**data)
+        application_filter = ApplicationFiltersCreateModel(**data)
 
         # Convert back to a Python dictionary, removing any unset fields
         payload = application_filter.model_dump(exclude_unset=True)
@@ -55,37 +55,37 @@ class ApplicationFilters(BaseObject):
         )
 
         # Return the SCM API response as a new Pydantic object
-        return ApplicationFilterResponseModel(**response)
+        return ApplicationFiltersResponseModel(**response)
 
     def get(
         self,
         object_id: str,
-    ) -> ApplicationFilterResponseModel:
+    ) -> ApplicationFiltersResponseModel:
         """
         Gets an application filter object by ID.
 
         Returns:
-            ApplicationFilterResponseModel
+            ApplicationFiltersResponseModel
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
 
         # Return the SCM API response as a new Pydantic object
-        return ApplicationFilterResponseModel(**response)
+        return ApplicationFiltersResponseModel(**response)
 
     def update(
         self,
-        application: ApplicationFilterUpdateModel,
-    ) -> ApplicationFilterResponseModel:
+        application: ApplicationFiltersUpdateModel,
+    ) -> ApplicationFiltersResponseModel:
         """
         Updates an existing application filter object.
 
         Args:
-            application: ApplicationFilterUpdateModel instance containing the update data
+            application: ApplicationFiltersUpdateModel instance containing the update data
 
         Returns:
-            ApplicationFilterResponseModel
+            ApplicationFiltersResponseModel
         """
         # Convert to dict for API request, excluding unset fields
         payload = application.model_dump(exclude_unset=True)
@@ -102,13 +102,13 @@ class ApplicationFilters(BaseObject):
         )
 
         # Return the SCM API response as a new Pydantic model
-        return ApplicationFilterResponseModel(**response)
+        return ApplicationFiltersResponseModel(**response)
 
     @staticmethod
     def _apply_filters(
-        application_filters: List[ApplicationFilterResponseModel],
+        application_filters: List[ApplicationFiltersResponseModel],
         filters: Dict[str, Any],
-    ) -> List[ApplicationFilterResponseModel]:
+    ) -> List[ApplicationFiltersResponseModel]:
         """
         Apply client-side filtering to the list of application filters.
 
@@ -117,7 +117,7 @@ class ApplicationFilters(BaseObject):
             filters: Dictionary of filter criteria
 
         Returns:
-            List[ApplicationFilterResponseModel]: Filtered list of application filters
+            List[ApplicationFiltersResponseModel]: Filtered list of application filters
         """
         filter_criteria = application_filters
 
@@ -132,7 +132,10 @@ class ApplicationFilters(BaseObject):
                 )
             categories = filters["category"]
             filter_criteria = [
-                app for app in filter_criteria if app.category in categories
+                app
+                for app in filter_criteria
+                if app.category is not None
+                and any(cat in app.category for cat in categories)
             ]
 
         # Filter by subcategory
@@ -146,7 +149,10 @@ class ApplicationFilters(BaseObject):
                 )
             subcategories = filters["subcategory"]
             filter_criteria = [
-                app for app in filter_criteria if app.sub_category in subcategories
+                app
+                for app in filter_criteria
+                if app.sub_category is not None
+                and any(sub in app.sub_category for sub in subcategories)
             ]
 
         # Filter by technology
@@ -160,7 +166,10 @@ class ApplicationFilters(BaseObject):
                 )
             technologies = filters["technology"]
             filter_criteria = [
-                app for app in filter_criteria if app.technology in technologies
+                app
+                for app in filter_criteria
+                if app.technology is not None
+                and any(tech in app.technology for tech in technologies)
             ]
 
         # Filter by risk
@@ -173,7 +182,11 @@ class ApplicationFilters(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             risks = filters["risk"]
-            filter_criteria = [app for app in filter_criteria if app.risk in risks]
+            filter_criteria = [
+                app
+                for app in filter_criteria
+                if app.risk is not None and any(risk in app.risk for risk in risks)
+            ]
 
         return filter_criteria
 
@@ -196,7 +209,7 @@ class ApplicationFilters(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         **filters,
-    ) -> List[ApplicationFilterResponseModel]:
+    ) -> List[ApplicationFiltersResponseModel]:
         """
         Lists application objects with optional filtering.
 
@@ -275,7 +288,7 @@ class ApplicationFilters(BaseObject):
             )
 
         application_filters = [
-            ApplicationFilterResponseModel(**item) for item in response["data"]
+            ApplicationFiltersResponseModel(**item) for item in response["data"]
         ]
         return self._apply_filters(application_filters, filters)
 
@@ -285,7 +298,7 @@ class ApplicationFilters(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
-    ) -> ApplicationFilterResponseModel:
+    ) -> ApplicationFiltersResponseModel:
         """
         Fetches a single application filter by name.
 
@@ -296,7 +309,7 @@ class ApplicationFilters(BaseObject):
             device (str, optional): The device in which the resource is defined.
 
         Returns:
-            ApplicationFilterResponseModel: The fetched application filter object as a Pydantic model.
+            ApplicationFiltersResponseModel: The fetched application filter object as a Pydantic model.
         """
         if not name:
             raise MissingQueryParameterError(
@@ -355,7 +368,7 @@ class ApplicationFilters(BaseObject):
             )
 
         if "id" in response:
-            return ApplicationFilterResponseModel(**response)
+            return ApplicationFiltersResponseModel(**response)
         else:
             raise InvalidObjectError(
                 message="Invalid response format: missing 'id' field",
