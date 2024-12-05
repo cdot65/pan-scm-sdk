@@ -23,6 +23,9 @@ from scm.models.objects import (
     TagUpdateModel,
     ApplicationResponseModel,
     ApplicationUpdateModel,
+    ApplicationFilterCreateModel,
+    ApplicationFilterUpdateModel,
+    ApplicationFilterResponseModel,
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
@@ -891,6 +894,221 @@ class ApplicationUpdateModelFactory(factory.DictFactory):
             ports=["invalid-port"],
             folder="Invalid@Folder",
             **kwargs,
+        )
+
+
+# ----------------------------------------------------------------------------
+# Application Filter object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class ApplicationFilterCreateApiFactory(factory.Factory):
+    """Factory for creating ApplicationFilterCreateModel instances."""
+
+    class Meta:
+        model = ApplicationFilterCreateModel
+
+    name = factory.Sequence(lambda n: f"application_filters_{n}")
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_folder(cls, folder: str = "Texas", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+
+class ApplicationFilterUpdateApiFactory(factory.Factory):
+    """Factory for creating ApplicationFilterUpdateModel instances."""
+
+    class Meta:
+        model = ApplicationFilterUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_members(cls, members: list[str], **kwargs):
+        """Create an instance with specific members."""
+        return cls(members=members, **kwargs)
+
+
+class ApplicationFilterResponseFactory(factory.Factory):
+    """Factory for creating ApplicationFilterResponseModel instances."""
+
+    class Meta:
+        model = ApplicationFilterResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_members(cls, members: list[str], **kwargs):
+        """Create an instance with specific members."""
+        return cls(members=members, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: ApplicationFilterCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class ApplicationFilterCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationFilterCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestApplicationFilter",
+            members=["app1", "app2"],
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            members=["app1"],
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_empty_members(cls):
+        """Return a data dict with empty members list."""
+        return cls(
+            name="TestGroup",
+            members=[],
+            folder="Texas",
+        )
+
+    @classmethod
+    def build_with_invalid_folder(cls):
+        """Return a data dict with invalid folder pattern."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+            folder="Invalid@Folder#",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+            folder="Texas",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestGroup",
+            members=["app1"],
+        )
+
+
+class ApplicationFilterUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ApplicationFilterUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"application_group_{n}")
+    members = [
+        "office365-consumer-access",
+        "office365-enterprise-access",
+    ]
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating an application group."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedGroup",
+            members=["updated-app1", "updated-app2"],
+            folder="UpdatedFolder",
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            members=[],
+            folder="Invalid@Folder",
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            members=["new-app"],
         )
 
 
