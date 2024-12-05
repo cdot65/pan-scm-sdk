@@ -142,14 +142,14 @@ class ApplicationFilterBaseModel(BaseModel):
     )
 
 
-class ApplicationCreateModel(ApplicationBaseModel):
+class ApplicationFilterCreateModel(ApplicationFilterBaseModel):
     """
-    Model for creating a new Application.
-    Inherits from ApplicationBaseModel and adds container type validation.
+    Model for creating a new application filter.
+    Inherits from ApplicationFilterBaseModel and adds container type validation.
     """
 
     @model_validator(mode="after")
-    def validate_container_type(self) -> "ApplicationCreateModel":
+    def validate_container_type(self) -> "ApplicationFilterCreateModel":
         container_fields = [
             "folder",
             "snippet",
@@ -162,9 +162,9 @@ class ApplicationCreateModel(ApplicationBaseModel):
         return self
 
 
-class ApplicationUpdateModel(ApplicationBaseModel):
+class ApplicationFilterUpdateModel(ApplicationFilterBaseModel):
     """
-    Model for updating an existing Application.
+    Model for updating an existing application filter.
     All fields are optional to allow partial updates.
     """
 
@@ -175,13 +175,10 @@ class ApplicationUpdateModel(ApplicationBaseModel):
     )
 
 
-class ApplicationResponseModel(ApplicationBaseModel):
+class ApplicationFilterResponseModel(ApplicationFilterBaseModel):
     """
-    Model for Application responses.
+    Model for application filter responses.
     Includes all base fields plus the id field.
-    Updates the description field to have a length of 4096 characters. tsk tsk.
-    Updates the subcategory field to be optional to account for `unknown-tcp` app-id. tsk tsk.
-    Updates the technology field to be optional to account for `unknown-tcp` app-id. tsk tsk.
     """
 
     id: Optional[UUID] = Field(

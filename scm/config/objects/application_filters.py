@@ -11,6 +11,7 @@ from scm.exceptions import (
     MissingQueryParameterError,
 )
 from scm.models.objects import (
+    ApplicationFilterCreateModel,
     ApplicationFilterResponseModel,
     ApplicationFilterUpdateModel,
 )
@@ -145,7 +146,7 @@ class ApplicationFilters(BaseObject):
                 )
             subcategories = filters["subcategory"]
             filter_criteria = [
-                app for app in filter_criteria if app.subcategory in subcategories
+                app for app in filter_criteria if app.sub_category in subcategories
             ]
 
         # Filter by technology
