@@ -33,7 +33,12 @@ class ApplicationFilterBaseModel(BaseModel):
         None,
         max_length=128,
         description="List of the categories within the application filter.",
-        examples=[["tcp/3468,6346,11300"]],
+        examples=[
+            [
+                "business-systems",
+                "collaboration",
+            ]
+        ],
     )
 
     sub_category: Optional[List[str]] = Field(
