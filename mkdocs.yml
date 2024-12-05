@@ -40,6 +40,7 @@ nav:
               - Address: sdk/config/objects/address.md
               - Address Group: sdk/config/objects/address_group.md
               - Application: sdk/config/objects/application.md
+              - Application Filters: sdk/config/objects/application_filters.md
               - Application Group: sdk/config/objects/application_group.md
               - Service: sdk/config/objects/service.md
               - Service Group: sdk/config/objects/service_group.md
@@ -59,6 +60,7 @@ nav:
               - Address Models: sdk/models/objects/address_models.md
               - Address Group Models: sdk/models/objects/address_group_models.md
               - Application Models: sdk/models/objects/application_models.md
+              - Application Filter Models: sdk/models/objects/application_filters_models.md
               - Application Group Models: sdk/models/objects/application_group_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
