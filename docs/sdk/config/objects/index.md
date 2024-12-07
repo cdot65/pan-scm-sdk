@@ -36,6 +36,10 @@ Manage application filters definitions, including their characteristics and asso
 
 Manage application group definitions, including their characteristics and associated members.
 
+### [External Dynamic Lists](external_dynamic_lists.md)
+
+Manage EDLs.
+
 ### [Service](service.md)
 
 Manage service definitions, including their characteristics and associated protocols / ports.
