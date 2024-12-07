@@ -32,6 +32,9 @@ from scm.models.objects import (
     ServiceGroupCreateModel,
     ServiceGroupUpdateModel,
     ServiceGroupResponseModel,
+    ExternalDynamicListsCreateModel,
+    ExternalDynamicListsResponseModel,
+    ExternalDynamicListsUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -1300,6 +1303,311 @@ class ApplicationGroupUpdateModelFactory(factory.DictFactory):
             id="123e4567-e89b-12d3-a456-426655440000",
             members=["new-app"],
         )
+
+
+# ----------------------------------------------------------------------------
+# External Dynamic Lists
+# ----------------------------------------------------------------------------
+class ExternalDynamicListsCreateApiFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data for ExternalDynamicListsCreateModel.
+    Using DictFactory so we can manually construct the model in tests and catch ValidationError.
+    """
+
+    name = factory.Sequence(lambda n: f"edl_{n}")
+    folder = "My Folder"  # Default container
+    type = {
+        "ip": {
+            "url": "http://example.com/edl.txt",
+            "recurring": {"daily": {"at": "03"}},
+        }
+    }
+
+    @classmethod
+    def without_container(cls):
+        """Return data without any container (folder, snippet, device)."""
+        data = cls()
+        data.pop("folder", None)
+        return data
+
+    @classmethod
+    def multiple_containers(cls):
+        """Return data with multiple containers."""
+        data = cls()
+        data["snippet"] = "SnippetA"
+        return data
+
+    @classmethod
+    def without_type(cls):
+        """Return data without a type."""
+        data = cls()
+        data.pop("type", None)
+        return data
+
+    @classmethod
+    def predefined_snippet(cls):
+        """Return data with snippet='predefined' and no type."""
+        data = cls()
+        data["snippet"] = "predefined"
+        data.pop("folder", None)
+        data.pop("type", None)
+        return data
+
+    @classmethod
+    def valid(cls):
+        """Return valid data."""
+        return cls()
+
+
+class ExternalDynamicListsUpdateApiFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data for ExternalDynamicListsUpdateModel.
+    Using DictFactory so we can manually instantiate the model in tests.
+    """
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"edl_update_{n}")
+    folder = "My Folder"
+    type = {
+        "ip": {
+            "url": "http://example.com/updated-edl.txt",
+            "recurring": {"daily": {"at": "05"}},
+        }
+    }
+
+    @classmethod
+    def without_id(cls):
+        data = cls()
+        data.pop("id", None)
+        return data
+
+    @classmethod
+    def without_container(cls):
+        data = cls()
+        data.pop("folder", None)
+        return data
+
+    @classmethod
+    def multiple_containers(cls):
+        data = cls()
+        data["snippet"] = "SnippetA"
+        return data
+
+    @classmethod
+    def without_type(cls):
+        data = cls()
+        data.pop("type", None)
+        return data
+
+    @classmethod
+    def valid(cls):
+        return cls()
+
+
+class ExternalDynamicListsResponseFactory(factory.Factory):
+    """
+    Factory for creating ExternalDynamicListsResponseModel instances.
+    """
+
+    class Meta:
+        model = ExternalDynamicListsResponseModel
+
+    id = factory.LazyFunction(lambda: uuid.uuid4())
+    name = factory.Sequence(lambda n: f"edl_resp_{n}")
+    folder = "My Folder"
+    type = {
+        "ip": {
+            "url": "http://example.com/edl.txt",
+            "recurring": {"daily": {"at": "03"}},
+        }
+    }
+
+    @classmethod
+    def predefined(cls):
+        return cls(id=None, snippet="predefined", type=None)
+
+    @classmethod
+    def without_id_non_predefined(cls):
+        return cls(id=None, snippet="My Snippet")
+
+    @classmethod
+    def without_type_non_predefined(cls):
+        data = cls().__dict__.copy()
+        data["snippet"] = "My Snippet"
+        data["type"] = None
+        return cls(**data)
+
+    @classmethod
+    def valid(cls, **kwargs):
+        data = {
+            "name": "edl_resp_valid",
+            "folder": "My Folder",
+            "type": {
+                "ip": {
+                    "url": "http://example.com/edl.txt",
+                    "recurring": {"daily": {"at": "03"}},
+                }
+            },
+        }
+        data.update(kwargs)
+        return cls(**data)
+
+    @classmethod
+    def from_request(cls, request_model: ExternalDynamicListsCreateModel, **kwargs):
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+class ExternalDynamicListsCreateModelFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data for ExternalDynamicListsCreateModel.
+    """
+
+    name = factory.Sequence(lambda n: f"edl_{n}")
+    folder = "My Folder"  # Default to folder as the container
+    type = {
+        "ip": {
+            "url": "http://example.com/edl.txt",  # noqa
+            "recurring": {"daily": {"at": "03"}},
+        }
+    }
+
+    @classmethod
+    def build_without_container(cls):
+        """Return data without any container."""
+        return cls(
+            folder=None,
+            type={
+                "ip": {
+                    "url": "http://example.com/edl.txt",  # noqa
+                    "recurring": {"daily": {"at": "03"}},
+                }
+            },
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return data with multiple containers."""
+        return cls(
+            folder="FolderA",
+            snippet="SnippetA",
+            type={
+                "ip": {
+                    "url": "http://example.com/edl.txt",  # noqa
+                    "recurring": {"daily": {"at": "03"}},
+                }
+            },
+        )
+
+    @classmethod
+    def build_without_type(cls):
+        """Return data without a type."""
+        return cls(
+            type=None,
+        )
+
+    @classmethod
+    def build_valid(cls):
+        """Return valid data."""
+        return cls()
+
+
+class ExternalDynamicListsUpdateModelFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data for ExternalDynamicListsUpdateModel.
+    """
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"edl_{n}")
+    folder = "My Folder"
+    type = {
+        "ip": {
+            "url": "http://example.com/updated-edl.txt",  # noqa
+            "recurring": {"daily": {"at": "05"}},
+        }
+    }
+
+    @classmethod
+    def build_without_id(cls):
+        """Return data without id."""
+        data = cls()
+        data.pop("id")
+        return data
+
+    @classmethod
+    def build_without_type(cls):
+        """Return data without a type."""
+        return cls(
+            type=None,
+        )
+
+    @classmethod
+    def build_without_container(cls):
+        """Return data without any container."""
+        return cls(
+            folder=None,
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return data with multiple containers."""
+        return cls(
+            snippet="SnippetA",
+            device="DeviceA",
+        )
+
+    @classmethod
+    def build_valid(cls):
+        """Return valid data."""
+        return cls()
+
+
+class ExternalDynamicListsResponseModelFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data for ExternalDynamicListsResponseModel.
+    """
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"edl_{n}")
+    folder = "My Folder"
+    type = {
+        "ip": {
+            "url": "http://example.com/edl.txt",  # noqa
+            "recurring": {"daily": {"at": "03"}},
+        }
+    }
+
+    @classmethod
+    def build_predefined(cls):
+        """Return data with snippet='predefined' and no id/type required."""
+        return cls(
+            id=None,
+            snippet="predefined",
+            type=None,
+        )
+
+    @classmethod
+    def build_without_id_non_predefined(cls):
+        """Return data without id, snippet not 'predefined'."""
+        return cls(
+            id=None,
+            snippet="My Snippet",  # not 'predefined'
+        )
+
+    @classmethod
+    def build_without_type_non_predefined(cls):
+        """Return data without type, snippet not 'predefined'."""
+        data = cls()
+        data.pop("type", None)
+        data["snippet"] = "My Snippet"
+        return data
+
+    @classmethod
+    def build_valid(cls):
+        """Return valid data."""
+        return cls()
 
 
 # ----------------------------------------------------------------------------
@@ -3492,7 +3800,7 @@ class URLCategoriesUpdateApiFactory(factory.Factory):
         """Create an instance with category match."""
         return cls(
             type=URLCategoriesListTypeEnum.category_match,
-            list=cls.list.append(factory.Faker("word")),
+            list=cls.list.append(factory.Faker("word")),  # noqa
             **kwargs,
         )
 
