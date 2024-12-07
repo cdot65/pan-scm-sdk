@@ -1,3 +1,8 @@
+## Version 0.3.4
+
+- Added support for External Dynamic Lists
+- Added support for Auto Tag Actions (not yet supported by API)
+
 ## Version 0.3.3
 
 - Added support for URL Categories
