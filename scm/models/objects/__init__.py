@@ -40,3 +40,13 @@ from .tag import (
     TagResponseModel,
     TagUpdateModel,
 )
+
+"""
+# these are pydantic implementations created by not currently implemented in the API
+# these will all return a 403 status code until implemented
+from .auto_tag_actions import (
+    AutoTagActionCreateModel,
+    AutoTagActionResponseModel,
+    AutoTagActionUpdateModel,
+)
+"""
