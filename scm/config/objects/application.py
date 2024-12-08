@@ -42,19 +42,12 @@ class Application(BaseObject):
         Returns:
             ApplicationResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
         application = ApplicationCreateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields
         payload = application.model_dump(exclude_unset=True)
-
-        # Send the updated object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
             json=payload,
         )
-
-        # Return the SCM API response as a new Pydantic object
         return ApplicationResponseModel(**response)
 
     def get(
@@ -67,11 +60,8 @@ class Application(BaseObject):
         Returns:
             ApplicationResponseModel
         """
-        # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
-
-        # Return the SCM API response as a new Pydantic object
         return ApplicationResponseModel(**response)
 
     def update(
@@ -87,21 +77,15 @@ class Application(BaseObject):
         Returns:
             ApplicationResponseModel
         """
-        # Convert to dict for API request, excluding unset fields
         payload = application.model_dump(exclude_unset=True)
-
-        # Extract ID and remove from payload since it's in the URL
         object_id = str(application.id)
         payload.pop("id", None)
 
-        # Send the updated object to the remote API as JSON
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
-
-        # Return the SCM API response as a new Pydantic model
         return ApplicationResponseModel(**response)
 
     @staticmethod
@@ -195,6 +179,10 @@ class Application(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
+        exact_match: bool = False,
+        exclude_folders: Optional[List[str]] = None,
+        exclude_snippets: Optional[List[str]] = None,
+        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationResponseModel]:
         """
@@ -204,6 +192,11 @@ class Application(BaseObject):
             folder: Optional folder name
             snippet: Optional snippet name
             device: Optional device name
+            exact_match (bool): If True, only return objects whose container
+                                exactly matches the provided container parameter.
+            exclude_folders (List[str], optional): List of folder names to exclude from results.
+            exclude_snippets (List[str], optional): List of snippet values to exclude from results.
+            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - category: List[str] - Filter by category
                 - subcategory: List[str] - Filter by subcategory
@@ -222,12 +215,7 @@ class Application(BaseObject):
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
-
-        container_parameters = self._build_container_params(
-            folder,
-            snippet,
-            device,
-        )
+        container_parameters = self._build_container_params(folder, snippet, device)
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
@@ -275,7 +263,40 @@ class Application(BaseObject):
             )
 
         applications = [ApplicationResponseModel(**item) for item in response["data"]]
-        return self._apply_filters(applications, filters)
+
+        # Apply existing filters first
+        applications = self._apply_filters(applications, filters)
+
+        # Determine which container key and value we are filtering on
+        container_key, container_value = next(iter(container_parameters.items()))
+
+        # If exact_match is True, filter out applications that don't match exactly
+        if exact_match:
+            applications = [
+                app
+                for app in applications
+                if getattr(app, container_key) == container_value
+            ]
+
+        # Exclude folders if provided
+        if exclude_folders and isinstance(exclude_folders, list):
+            applications = [
+                app for app in applications if app.folder not in exclude_folders
+            ]
+
+        # Exclude snippets if provided
+        if exclude_snippets and isinstance(exclude_snippets, list):
+            applications = [
+                app for app in applications if app.snippet not in exclude_snippets
+            ]
+
+        # Exclude devices if provided
+        if exclude_devices and isinstance(exclude_devices, list):
+            applications = [
+                app for app in applications if app.device not in exclude_devices
+            ]
+
+        return applications
 
     def fetch(
         self,
