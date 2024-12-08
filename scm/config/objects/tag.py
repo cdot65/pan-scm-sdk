@@ -27,59 +27,37 @@ class Tag(BaseObject):
     ENDPOINT = "/config/objects/v1/tags"
     DEFAULT_LIMIT = 10000
 
-    def __init__(
-        self,
-        api_client,
-    ):
+    def __init__(self, api_client):
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
-    def create(
-        self,
-        data: Dict[str, Any],
-    ) -> TagResponseModel:
+    def create(self, data: Dict[str, Any]) -> TagResponseModel:
         """
         Creates a new tag object.
 
         Returns:
             TagResponseModel
         """
-        # Use the dictionary "data" to pass into Pydantic and return a modeled object
         tag = TagCreateModel(**data)
-
-        # Convert back to a Python dictionary, removing any unset fields
         payload = tag.model_dump(exclude_unset=True)
-
-        # Send the updated object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
             json=payload,
         )
-
-        # Return the SCM API response as a new Pydantic object
         return TagResponseModel(**response)
 
-    def get(
-        self,
-        object_id: str,
-    ) -> TagResponseModel:
+    def get(self, object_id: str) -> TagResponseModel:
         """
         Gets a tag object by ID.
 
         Returns:
             TagResponseModel
         """
-        # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
-
-        # Return the SCM API response as a new Pydantic object
         return TagResponseModel(**response)
 
-    def update(
-        self,
-        tag: TagUpdateModel,
-    ) -> TagResponseModel:
+    def update(self, tag: TagUpdateModel) -> TagResponseModel:
         """
         Updates an existing tag object.
 
@@ -89,21 +67,15 @@ class Tag(BaseObject):
         Returns:
             TagResponseModel
         """
-        # Convert to dict for API request, excluding unset fields
         payload = tag.model_dump(exclude_unset=True)
-
-        # Extract ID and remove from payload since it's in the URL
         object_id = str(tag.id)
         payload.pop("id", None)
 
-        # Send the updated object to the remote API as JSON
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
-
-        # Return the SCM API response as a new Pydantic model
         return TagResponseModel(**response)
 
     @staticmethod
@@ -123,18 +95,17 @@ class Tag(BaseObject):
         """
         filter_criteria = tags
 
-        # Filter by colors
+        # Filter by colors if provided
         if "colors" in filters:
-            if not isinstance(filters["colors"], list):
+            colors = filters["colors"]
+            if not isinstance(colors, list):
                 raise InvalidObjectError(
                     message="'colors' filter must be a list",
                     error_code="E003",
                     http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
-            colors = filters["colors"]
 
-            # Normalize and validate the filter colors
             normalized_filter_colors = set()
             for color_name in colors:
                 normalized_name = normalize_color_name(color_name)
@@ -147,10 +118,8 @@ class Tag(BaseObject):
                         http_status_code=400,
                         details={"errorType": "Invalid Color"},
                     )
-                # Add the standard color name to the set
                 normalized_filter_colors.add(standard_color_name)
 
-            # Now filter the tags
             filter_criteria = [
                 tag for tag in filter_criteria if tag.color in normalized_filter_colors
             ]
@@ -175,6 +144,10 @@ class Tag(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
+        exact_match: bool = False,
+        exclude_folders: Optional[List[str]] = None,
+        exclude_snippets: Optional[List[str]] = None,
+        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[TagResponseModel]:
         """
@@ -184,8 +157,16 @@ class Tag(BaseObject):
             folder: Optional folder name
             snippet: Optional snippet name
             device: Optional device name
+            exact_match (bool): If True, only return objects whose container (folder/snippet/device)
+                                exactly matches the provided container parameter.
+            exclude_folders (List[str], optional): List of folder names to exclude from results.
+            exclude_snippets (List[str], optional): List of snippet values to exclude from results.
+            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - colors: List[str] - Filter by tag colors
+
+        Returns:
+            List[TagResponseModel]: A list of tag objects
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -199,12 +180,7 @@ class Tag(BaseObject):
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
-
-        container_parameters = self._build_container_params(
-            folder,
-            snippet,
-            device,
-        )
+        container_parameters = self._build_container_params(folder, snippet, device)
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
@@ -216,10 +192,7 @@ class Tag(BaseObject):
 
         params.update(container_parameters)
 
-        response = self.api_client.get(
-            self.ENDPOINT,
-            params=params,
-        )
+        response = self.api_client.get(self.ENDPOINT, params=params)
 
         if not isinstance(response, dict):
             raise InvalidObjectError(
@@ -245,18 +218,35 @@ class Tag(BaseObject):
                 message="Invalid response format: 'data' field must be a list",
                 error_code="E003",
                 http_status_code=500,
-                details={
-                    "field": "data",
-                    "error": '"data" field must be a list',
-                },
+                details={"field": "data", "error": '"data" field must be a list'},
             )
 
         tags = [TagResponseModel(**item) for item in response["data"]]
 
-        return self._apply_filters(
-            tags,
-            filters,
-        )
+        # Apply standard filters first
+        tags = self._apply_filters(tags, filters)
+
+        # Determine which container key we are matching exactly, if exact_match is True
+        # We know exactly one of folder/snippet/device is provided
+        container_key, container_value = next(iter(container_parameters.items()))
+
+        # If exact_match is True, filter out tags that don't match exactly
+        if exact_match:
+            tags = [t for t in tags if getattr(t, container_key) == container_value]
+
+        # Exclude folders if provided
+        if exclude_folders and isinstance(exclude_folders, list):
+            tags = [t for t in tags if t.folder not in exclude_folders]
+
+        # Exclude snippets if provided
+        if exclude_snippets and isinstance(exclude_snippets, list):
+            tags = [t for t in tags if t.snippet not in exclude_snippets]
+
+        # Exclude devices if provided
+        if exclude_devices and isinstance(exclude_devices, list):
+            tags = [t for t in tags if t.device not in exclude_devices]
+
+        return tags
 
     def fetch(
         self,
@@ -282,10 +272,7 @@ class Tag(BaseObject):
                 message="Field 'name' cannot be empty",
                 error_code="E003",
                 http_status_code=400,
-                details={
-                    "field": "name",
-                    "error": '"name" is not allowed to be empty',
-                },
+                details={"field": "name", "error": '"name" is not allowed to be empty'},
             )
 
         if folder == "":
@@ -300,12 +287,7 @@ class Tag(BaseObject):
             )
 
         params = {}
-
-        container_parameters = self._build_container_params(
-            folder,
-            snippet,
-            device,
-        )
+        container_parameters = self._build_container_params(folder, snippet, device)
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
@@ -320,10 +302,7 @@ class Tag(BaseObject):
         params.update(container_parameters)
         params["name"] = name
 
-        response = self.api_client.get(
-            self.ENDPOINT,
-            params=params,
-        )
+        response = self.api_client.get(self.ENDPOINT, params=params)
 
         if not isinstance(response, dict):
             raise InvalidObjectError(
@@ -343,10 +322,7 @@ class Tag(BaseObject):
                 details={"error": "Response missing 'id' field"},
             )
 
-    def delete(
-        self,
-        object_id: str,
-    ) -> None:
+    def delete(self, object_id: str) -> None:
         """
         Deletes a tag object.
 
