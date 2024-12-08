@@ -132,6 +132,10 @@ class Address(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             types = filters["types"]
+            # This logic checks if the address has a matching field for any of the specified types.
+            # Fields that can be present: ip_netmask, ip_range, ip_wildcard, fqdn.
+            # For example, a type might be 'netmask', and we check if ip_netmask is set.
+            # Similarly, for 'range', we check ip_range, etc.
             filter_criteria = [
                 addr
                 for addr in filter_criteria
@@ -198,6 +202,10 @@ class Address(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
+        exact_match: bool = False,
+        exclude_folders: Optional[List[str]] = None,
+        exclude_snippets: Optional[List[str]] = None,
+        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AddressResponseModel]:
         """
@@ -207,6 +215,11 @@ class Address(BaseObject):
             folder: Optional folder name
             snippet: Optional snippet name
             device: Optional device name
+            exact_match (bool): If True, only return objects whose container
+                                exactly matches the provided container parameter.
+            exclude_folders (List[str], optional): List of folder names to exclude from results.
+            exclude_snippets (List[str], optional): List of snippet values to exclude from results.
+            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - types: List[str] - Filter by address types (e.g., ['netmask', 'range'])
                 - values: List[str] - Filter by address values (e.g., ['10.0.0.0/24'])
@@ -279,10 +292,34 @@ class Address(BaseObject):
 
         addresses = [AddressResponseModel(**item) for item in response["data"]]
 
-        return self._apply_filters(
+        # Apply existing filters first
+        addresses = self._apply_filters(
             addresses,
             filters,
         )
+
+        # Determine which container key and value we are filtering on
+        container_key, container_value = next(iter(container_parameters.items()))
+
+        # If exact_match is True, filter out addresses that don't match exactly
+        if exact_match:
+            addresses = [
+                a for a in addresses if getattr(a, container_key) == container_value
+            ]
+
+        # Exclude folders if provided
+        if exclude_folders and isinstance(exclude_folders, list):
+            addresses = [a for a in addresses if a.folder not in exclude_folders]
+
+        # Exclude snippets if provided
+        if exclude_snippets and isinstance(exclude_snippets, list):
+            addresses = [a for a in addresses if a.snippet not in exclude_snippets]
+
+        # Exclude devices if provided
+        if exclude_devices and isinstance(exclude_devices, list):
+            addresses = [a for a in addresses if a.device not in exclude_devices]
+
+        return addresses
 
     def fetch(
         self,
@@ -295,7 +332,7 @@ class Address(BaseObject):
         Fetches a single object by name.
 
         Args:
-            name (str): The name of the address group to fetch.
+            name (str): The name of the address to fetch.
             folder (str, optional): The folder in which the resource is defined.
             snippet (str, optional): The snippet in which the resource is defined.
             device (str, optional): The device in which the resource is defined.
