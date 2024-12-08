@@ -195,6 +195,10 @@ class AddressGroup(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
+        exact_match: bool = False,
+        exclude_folders: Optional[List[str]] = None,
+        exclude_snippets: Optional[List[str]] = None,
+        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AddressGroupResponseModel]:
         """
@@ -204,6 +208,11 @@ class AddressGroup(BaseObject):
             folder: Optional folder name
             snippet: Optional snippet name
             device: Optional device name
+            exact_match (bool): If True, only return objects whose container
+                                exactly matches the provided container parameter.
+            exclude_folders (List[str], optional): List of folder names to exclude from results.
+            exclude_snippets (List[str], optional): List of snippet values to exclude from results.
+            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - types: List[str] - Filter by group types (e.g., ['static', 'dynamic'])
                 - values: List[str] - Filter by group values
@@ -276,10 +285,43 @@ class AddressGroup(BaseObject):
         address_groups = [
             AddressGroupResponseModel(**item) for item in response["data"]
         ]
-        return self._apply_filters(
+
+        # Apply existing filters first
+        address_groups = self._apply_filters(
             address_groups,
             filters,
         )
+
+        # Determine which container key and value we are filtering on
+        container_key, container_value = next(iter(container_parameters.items()))
+
+        # If exact_match is True, filter out address groups that don't match exactly
+        if exact_match:
+            address_groups = [
+                g
+                for g in address_groups
+                if getattr(g, container_key) == container_value
+            ]
+
+        # Exclude folders if provided
+        if exclude_folders and isinstance(exclude_folders, list):
+            address_groups = [
+                g for g in address_groups if g.folder not in exclude_folders
+            ]
+
+        # Exclude snippets if provided
+        if exclude_snippets and isinstance(exclude_snippets, list):
+            address_groups = [
+                g for g in address_groups if g.snippet not in exclude_snippets
+            ]
+
+        # Exclude devices if provided
+        if exclude_devices and isinstance(exclude_devices, list):
+            address_groups = [
+                g for g in address_groups if g.device not in exclude_devices
+            ]
+
+        return address_groups
 
     def fetch(
         self,
