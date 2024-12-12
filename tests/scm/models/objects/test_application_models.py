@@ -256,11 +256,11 @@ class TestApplicationResponseModel:
             "subcategory": "instant-messaging",
             "technology": "client-server",
             "risk": 2,
-            "description": "x" * 4000,  # Test with a long description
+            "description": "x" * 4096,  # Test with a long description
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationResponseModel(**data)
-        assert "String should have at most 1023 characters" in str(exc_info.value)
+        assert "String should have at most 4094 characters" in str(exc_info.value)
 
 
 # -------------------- End of Test Classes --------------------
