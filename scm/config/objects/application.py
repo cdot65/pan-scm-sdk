@@ -42,12 +42,19 @@ class Application(BaseObject):
         Returns:
             ApplicationResponseModel
         """
+        # Use the dictionary "data" to pass into Pydantic and return a modeled object
         application = ApplicationCreateModel(**data)
+
+        # Convert back to a Python dictionary, removing any unset fields
         payload = application.model_dump(exclude_unset=True)
+
+        # Send the updated object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
             json=payload,
         )
+
+        # Return the SCM API response as a new Pydantic object
         return ApplicationResponseModel(**response)
 
     def get(
@@ -60,8 +67,11 @@ class Application(BaseObject):
         Returns:
             ApplicationResponseModel
         """
+        # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
+
+        # Return the SCM API response as a new Pydantic object
         return ApplicationResponseModel(**response)
 
     def update(
@@ -77,15 +87,21 @@ class Application(BaseObject):
         Returns:
             ApplicationResponseModel
         """
+        # Convert to dict for API request, excluding unset fields
         payload = application.model_dump(exclude_unset=True)
+
+        # Extract ID and remove from payload since it's in the URL
         object_id = str(application.id)
         payload.pop("id", None)
 
+        # Send the updated object to the remote API as JSON
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
+
+        # Return the SCM API response as a new Pydantic model
         return ApplicationResponseModel(**response)
 
     @staticmethod
@@ -215,7 +231,12 @@ class Application(BaseObject):
             )
 
         params = {"limit": self.DEFAULT_LIMIT}
-        container_parameters = self._build_container_params(folder, snippet, device)
+
+        container_parameters = self._build_container_params(
+            folder,
+            snippet,
+            device,
+        )
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
