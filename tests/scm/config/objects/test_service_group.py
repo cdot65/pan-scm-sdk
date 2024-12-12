@@ -403,6 +403,137 @@ class TestServiceGroupList(TestServiceGroupBase):
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only objects that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                ServiceGroupResponseFactory(
+                    name="addr_in_texas",
+                    folder="Texas",
+                    members=["Test123UDP"],
+                ).model_dump(),
+                ServiceGroupResponseFactory(
+                    name="addr_in_all",
+                    folder="All",
+                    members=["Test123UDP"],
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # exact_match should exclude the one from "All"
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "addr_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes objects from those folders.
+        """
+        mock_response = {
+            "data": [
+                ServiceGroupResponseFactory(
+                    name="addr_in_texas",
+                    folder="Texas",
+                    members=["Test123UDP"],
+                ).model_dump(),
+                ServiceGroupResponseFactory(
+                    name="addr_in_all",
+                    folder="All",
+                    members=["Test123UDP"],
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(a.folder != "All" for a in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes objects with those snippets.
+        """
+        mock_response = {
+            "data": [
+                ServiceGroupResponseFactory.with_members(
+                    name="addr_with_default_snippet",
+                    snippet="default",
+                ).model_dump(),
+                ServiceGroupResponseFactory.with_members(
+                    name="addr_with_special_snippet",
+                    snippet="special",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(a.snippet != "default" for a in filtered)
+
+    def test_list_exclude_devices(self):
+        """
+        Test that exclude_devices removes objects with those devices.
+        """
+        mock_response = {
+            "data": [
+                ServiceGroupResponseFactory.with_members(
+                    name="addr_with_default_snippet",
+                    snippet="default",
+                    device="DeviceA",
+                ).model_dump(),
+                ServiceGroupResponseFactory.with_members(
+                    name="addr_with_special_snippet",
+                    snippet="special",
+                    device="DeviceB",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
+        assert len(filtered) == 1
+        assert all(a.device != "DeviceA" for a in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        """
+        mock_response = {
+            "data": [
+                ServiceGroupResponseFactory.with_members(
+                    name="addr_with_default_snippet",
+                    snippet="default",
+                ).model_dump(),
+                ServiceGroupResponseFactory.with_members(
+                    name="addr_with_special_snippet",
+                    snippet="special",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+            exclude_devices=["DeviceA"],
+        )
+        # Only addr_in_texas_special should remain
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+        assert obj.device != "DeviceA"
+
 
 class TestServiceGroupCreate(TestServiceGroupBase):
     """Tests for creating Service objects."""

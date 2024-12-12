@@ -337,6 +337,138 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only address groups that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                ApplicationGroupResponseFactory(
+                    name="group_in_texas", folder="Texas", static=["address1"]
+                ).model_dump(),
+                ApplicationGroupResponseFactory(
+                    name="group_in_all", folder="All", static=["address2"]
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        # exact_match should exclude the one from "All"
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "group_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes address groups from those folders.
+        """
+        mock_response = {
+            "data": [
+                ApplicationGroupResponseFactory(
+                    name="group_in_texas", folder="Texas", static=["address1"]
+                ).model_dump(),
+                ApplicationGroupResponseFactory(
+                    name="group_in_all", folder="All", static=["address2"]
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(g.folder != "All" for g in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes address groups with those snippets.
+        """
+        mock_response = {
+            "data": [
+                ApplicationGroupResponseFactory.with_snippet(
+                    name="group_default_snippet",
+                    snippet="default",
+                ).model_dump(),
+                ApplicationGroupResponseFactory.with_snippet(
+                    name="group_special_snippet",
+                    snippet="special",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(g.snippet != "default" for g in filtered)
+
+    def test_list_exclude_devices(self):
+        """
+        Test that exclude_devices removes address groups from those devices.
+        """
+        mock_response = {
+            "data": [
+                ApplicationGroupResponseFactory(
+                    name="group_deviceA",
+                    folder="Texas",
+                    device="DeviceA",
+                ).model_dump(),
+                ApplicationGroupResponseFactory(
+                    name="group_deviceB",
+                    folder="Texas",
+                    device="DeviceB",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
+        assert len(filtered) == 1
+        assert all(g.device != "DeviceA" for g in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        """
+        mock_response = {
+            "data": [
+                ApplicationGroupResponseFactory(
+                    name="group_texas_default_deviceA",
+                    snippet="default",
+                    device="DeviceA",
+                ).model_dump(),
+                ApplicationGroupResponseFactory(
+                    name="group_texas_special_deviceB",
+                    snippet="special",
+                    device="DeviceB",
+                ).model_dump(),
+                ApplicationGroupResponseFactory(
+                    name="group_all_default_deviceA",
+                    folder="All",
+                    snippet="default",
+                    device="DeviceA",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+            exclude_devices=["DeviceA"],
+        )
+
+        # Only group_texas_special_deviceB should remain after all filters
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+        assert obj.device != "DeviceA"
+
 
 class TestApplicationGroupCreate(TestApplicationGroupBase):
     """Tests for creating Application Group objects."""

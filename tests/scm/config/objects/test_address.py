@@ -121,7 +121,6 @@ class TestAddressList(TestAddressBase):
         """
         Test that InvalidObjectError is raised when no container parameter is provided.
         """
-        # Use the utility function to create the mock HTTP error
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
@@ -136,7 +135,6 @@ class TestAddressList(TestAddressBase):
 
     def test_list_container_multiple_error(self):
         """Test validation of container parameters."""
-        # Use the utility function to create the mock HTTP error
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
@@ -186,7 +184,7 @@ class TestAddressList(TestAddressBase):
         }
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        # Empty lists should result in no matches
+        # Empty lists should result in no matches (since filters remove results)
         filtered_objects = self.client.list(
             folder="Texas",
             types=[],
@@ -420,7 +418,6 @@ class TestAddressList(TestAddressBase):
         """
         Test that InvalidObjectError is raised when the response is not a dictionary.
         """
-        # Mock the API client to return a non-dictionary response
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -433,11 +430,7 @@ class TestAddressList(TestAddressBase):
     def test_list_response_invalid_data_field_missing(self):
         """
         Test that InvalidObjectError is raised when API returns response with missing data field.
-
-        This tests the case where the API response is a dictionary but missing the required 'data' field,
-        expecting an InvalidObjectError with specific error details.
         """
-        # Mock the API to return a dictionary without 'data' field
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -447,16 +440,12 @@ class TestAddressList(TestAddressBase):
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
         assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
+        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
     def test_list_response_invalid_data_field_type(self):
         """
         Test that InvalidObjectError is raised when API returns non-list data field.
-
-        This tests the case where the API response's 'data' field is not a list,
-        expecting an InvalidObjectError with specific error details.
         """
-        # Mock the API to return a response where 'data' is not a list
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -493,6 +482,161 @@ class TestAddressList(TestAddressBase):
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
+
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only objects that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                AddressResponseFactory.with_ip_netmask(
+                    name="addr_in_texas",
+                    folder="Texas",
+                    ip_netmask="192.168.1.0/24",
+                ).model_dump(),
+                AddressResponseFactory.with_ip_netmask(
+                    name="addr_in_all",
+                    folder="All",
+                    ip_netmask="10.0.0.0/24",
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # exact_match should exclude the one from "All"
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "addr_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes objects from those folders.
+        """
+        mock_response = {
+            "data": [
+                AddressResponseFactory.with_ip_netmask(
+                    name="addr_in_texas",
+                    folder="Texas",
+                    ip_netmask="192.168.1.0/24",
+                ).model_dump(),
+                AddressResponseFactory.with_ip_netmask(
+                    name="addr_in_all",
+                    folder="All",
+                    ip_netmask="10.0.0.0/24",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(a.folder != "All" for a in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes objects with those snippets.
+        """
+        mock_response = {
+            "data": [
+                AddressResponseFactory.with_fqdn(
+                    name="addr_with_default_snippet",
+                    folder="Texas",
+                    snippet="default",
+                    fqdn="example.com",
+                ).model_dump(),
+                AddressResponseFactory.with_ip_netmask(
+                    name="addr_with_special_snippet",
+                    folder="Texas",
+                    snippet="special",
+                    ip_netmask="10.0.1.0/24",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(a.snippet != "default" for a in filtered)
+
+    def test_list_exclude_devices(self):
+        """
+        Test that exclude_devices removes objects with those devices.
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "223e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_deviceA",
+                    "folder": "Texas",
+                    "device": "DeviceA",
+                    "ip_netmask": "192.168.1.0/24",
+                },
+                {
+                    "id": "334e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_deviceB",
+                    "folder": "Texas",
+                    "device": "DeviceB",
+                    "ip_netmask": "10.0.0.0/24",
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
+        assert len(filtered) == 1
+        assert all(a.device != "DeviceA" for a in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "223e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_in_texas_default",
+                    "folder": "Texas",
+                    "snippet": "default",
+                    "device": "DeviceA",
+                    "ip_netmask": "192.168.1.0/24",
+                },
+                {
+                    "id": "334e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_in_texas_special",
+                    "folder": "Texas",
+                    "snippet": "special",
+                    "device": "DeviceB",
+                    "ip_netmask": "192.168.2.0/24",
+                },
+                {
+                    "id": "434e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_in_all",
+                    "folder": "All",
+                    "snippet": "default",
+                    "device": "DeviceA",
+                    "ip_netmask": "10.0.0.0/24",
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+            exclude_devices=["DeviceA"],
+        )
+        # Only addr_in_texas_special should remain
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+        assert obj.device != "DeviceA"
 
 
 class TestAddressCreate(TestAddressBase):
@@ -568,15 +712,10 @@ class TestAddressCreate(TestAddressBase):
 
     def test_create_http_error_no_response_content(self):
         """Test create method when HTTP error has no response content."""
-        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
-
-        # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
-
-        # Set the side effect of the post method to raise the HTTPError
         self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
@@ -592,7 +731,6 @@ class TestAddressCreate(TestAddressBase):
             "ip_netmask": "10.0.0.0/24",
         }
 
-        # Use the utility function to create the mock HTTP error
         self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="API_I00013",
@@ -680,7 +818,7 @@ class TestAddressGet(TestAddressBase):
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
         mock_response = MagicMock()
-        mock_response.content = None  # Simulate no content
+        mock_response.content = None
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
@@ -712,7 +850,6 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_valid_object(self):
         """Test updating an object with valid data."""
-        # Create update data using factory
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="TestAddress",
@@ -722,23 +859,15 @@ class TestAddressUpdate(TestAddressBase):
             folder="Texas",
         )
 
-        # Create mock response
         mock_response = AddressResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        # Perform update with the Pydantic model directly
         updated_object = self.client.update(update_data)
 
-        # Verify call was made once
         self.mock_scm.put.assert_called_once()  # noqa
-
-        # Get the actual call arguments
         call_args = self.mock_scm.put.call_args  # noqa
-
-        # Check endpoint
         assert call_args[0][0] == f"/config/objects/v1/addresses/{update_data.id}"
 
-        # Check important payload fields
         payload = call_args[1]["json"]
         assert payload["name"] == "TestAddress"
         assert payload["ip_netmask"] == "10.0.0.0/24"
@@ -746,7 +875,6 @@ class TestAddressUpdate(TestAddressBase):
         assert payload["tag"] == ["tag1", "tag2"]
         assert payload["folder"] == "Texas"
 
-        # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressResponseModel)
         assert str(updated_object.id) == str(mock_response.id)
         assert updated_object.name == mock_response.name
@@ -757,7 +885,6 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
-        # Create test data using factory as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
@@ -765,7 +892,6 @@ class TestAddressUpdate(TestAddressBase):
             ip_netmask="10.0.0.0/24",
         )
 
-        # Use utility function to create mock HTTP error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="API_I00013",
@@ -783,7 +909,6 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
-        # Create test data as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
@@ -791,7 +916,6 @@ class TestAddressUpdate(TestAddressBase):
             ip_netmask="10.0.0.0/24",
         )
 
-        # Use utility function to simulate object not present error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
             error_code="API_I00013",
@@ -809,19 +933,16 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
-        # Create test data as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
             ip_netmask="10.0.0.0/24",
         )
 
-        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
-        # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
@@ -830,7 +951,6 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_generic_exception_handling(self):
         """Test handling of a generic exception during update."""
-        # Create test data as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
@@ -845,7 +965,6 @@ class TestAddressUpdate(TestAddressBase):
 
     def test_update_server_error(self):
         """Test handling of server errors during update."""
-        # Create test data as Pydantic model
         update_data = AddressUpdateApiFactory.with_ip_netmask(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-address",
@@ -853,7 +972,6 @@ class TestAddressUpdate(TestAddressBase):
             ip_netmask="10.0.0.0/24",
         )
 
-        # Use utility function to simulate server error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=500,
             error_code="E003",
@@ -880,7 +998,6 @@ class TestAddressDelete(TestAddressBase):
         # Should not raise any exception
         self.client.delete(object_id)
 
-        # Verify the delete call
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/objects/v1/addresses/{object_id}"
         )
@@ -889,7 +1006,6 @@ class TestAddressDelete(TestAddressBase):
         """Test deleting an object that is referenced elsewhere."""
         object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
 
-        # Configure mock to raise HTTPError with our custom error response
         self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
             status_code=409,
             error_code="E009",
@@ -983,16 +1099,13 @@ class TestAddressFetch(TestAddressBase):
         )
         mock_response_data = mock_response_model.model_dump()
 
-        # Set the mock to return the response data directly
         self.mock_scm.get.return_value = mock_response_data  # noqa
 
-        # Call the fetch method
         fetched_object = self.client.fetch(
             name=mock_response_model.name,
             folder=mock_response_model.folder,
         )
 
-        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
             params={
@@ -1001,10 +1114,7 @@ class TestAddressFetch(TestAddressBase):
             },
         )
 
-        # Validate the returned object is a Pydantic model
         assert isinstance(fetched_object, AddressResponseModel)
-
-        # Validate the object attributes match the mock response
         assert str(fetched_object.id) == str(mock_response_model.id)
         assert fetched_object.name == mock_response_model.name
         assert fetched_object.description == mock_response_model.description
@@ -1089,15 +1199,10 @@ class TestAddressFetch(TestAddressBase):
 
     def test_fetch_http_error_no_response_content(self):
         """Test that an HTTPError without response content in fetch() re-raises the exception."""
-        # Create a mock response object without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
-
-        # Create an HTTPError with the mock response
         mock_http_error = HTTPError(response=mock_response)
-
-        # Set the side effect of the get method to raise the HTTPError
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
@@ -1120,7 +1225,6 @@ class TestAddressFetch(TestAddressBase):
 
     def test_fetch_missing_id_field_error(self):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""
-        # Mock response without 'id' field
         mock_response = {
             "name": "test-address",
             "folder": "Texas",
@@ -1163,7 +1267,6 @@ class TestAddressFetch(TestAddressBase):
 
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
-        # Mock the API client to return a non-dictionary response
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:

@@ -228,33 +228,25 @@ class TestApplicationList(TestApplicationBase):
         invalid_filters = {"category": "category1"}
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client._apply_filters(mock_applications, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
+        assert isinstance(exc_info.value, InvalidObjectError)
 
         # Test with string instead of list for subcategory
         invalid_filters = {"subcategory": "subcategory1"}
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client._apply_filters(mock_applications, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
+        assert isinstance(exc_info.value, InvalidObjectError)
 
         # Test with string instead of list for technology
         invalid_filters = {"technology": "technology1"}
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client._apply_filters(mock_applications, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
+        assert isinstance(exc_info.value, InvalidObjectError)
 
         # Test with integer instead of list for risk
         invalid_filters = {"risk": 5}
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client._apply_filters(mock_applications, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
+        assert isinstance(exc_info.value, InvalidObjectError)
 
     def test_list_response_invalid_format(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
@@ -305,12 +297,138 @@ class TestApplicationList(TestApplicationBase):
         with pytest.raises(HTTPError):
             self.client.list(folder="Texas")
 
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only applications that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                ApplicationResponseFactory(
+                    name="app_in_texas",
+                    folder="Texas",
+                    category="general-internet",
+                ).model_dump(),
+                ApplicationResponseFactory(
+                    name="app_in_all",
+                    folder="All",
+                    category="general-internet",
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        # exact_match should exclude the one from "All"
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "app_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes applications from those folders.
+        """
+        mock_response = {
+            "data": [
+                ApplicationResponseFactory(
+                    name="app_in_texas",
+                    folder="Texas",
+                    category="general-internet",
+                ).model_dump(),
+                ApplicationResponseFactory(
+                    name="app_in_all",
+                    folder="All",
+                    category="general-internet",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(a.folder != "All" for a in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes applications from those snippets.
+        Assume snippet is supported by ApplicationResponseModel and ApplicationResponseFactory.
+        """
+        mock_response = {
+            "data": [
+                ApplicationResponseFactory(
+                    name="app_default_snippet",
+                    folder="Texas",
+                    snippet="default",
+                    category="general-internet",
+                ).model_dump(),
+                ApplicationResponseFactory(
+                    name="app_special_snippet",
+                    folder="Texas",
+                    snippet="special",
+                    category="general-internet",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(a.snippet != "default" for a in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        Assume snippet and device are supported by ApplicationResponseModel.
+        """
+        mock_response = {
+            "data": [
+                ApplicationResponseFactory(
+                    name="app_texas_default_deviceA",
+                    folder="Texas",
+                    snippet="default",
+                    device="DeviceA",
+                    category="general-internet",
+                ).model_dump(),
+                ApplicationResponseFactory(
+                    name="app_texas_special_deviceB",
+                    folder="Texas",
+                    snippet="special",
+                    device="DeviceB",
+                    category="general-internet",
+                ).model_dump(),
+                ApplicationResponseFactory(
+                    name="app_all_default_deviceA",
+                    folder="All",
+                    snippet="default",
+                    device="DeviceA",
+                    category="general-internet",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+            exclude_devices=["DeviceA"],
+        )
+
+        # Only app_texas_special_deviceB should remain after all filters
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+
 
 class TestApplicationCreate(TestApplicationBase):
     """Tests for creating Application objects."""
 
     def test_create_valid_object(self):
-        """Test creating an object with ip_netmask."""
+        """Test creating an object."""
         test_object = ApplicationCreateApiFactory()
         mock_response = ApplicationResponseFactory(**test_object.model_dump())
 
@@ -432,7 +550,6 @@ class TestApplicationUpdate(TestApplicationBase):
 
     def test_update_valid_object(self):
         """Test updating an application with valid data."""
-        # Create update data using factory
         update_data = ApplicationUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-app",
@@ -443,23 +560,15 @@ class TestApplicationUpdate(TestApplicationBase):
             risk=2,
         )
 
-        # Create mock response
         mock_response = ApplicationResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        # Perform update with Pydantic model directly
         updated_object = self.client.update(update_data)
 
-        # Verify call was made once
         self.mock_scm.put.assert_called_once()  # noqa
-
-        # Get the actual call arguments
         call_args = self.mock_scm.put.call_args  # noqa
-
-        # Check endpoint
         assert call_args[0][0] == f"/config/objects/v1/applications/{update_data.id}"
 
-        # Check important payload fields
         payload = call_args[1]["json"]
         assert payload["name"] == "updated-app"
         assert payload["description"] == "Updated description"
@@ -468,7 +577,6 @@ class TestApplicationUpdate(TestApplicationBase):
         assert payload["technology"] == "client-server"
         assert payload["risk"] == 2
 
-        # Assert the updated object matches the mock response
         assert isinstance(updated_object, ApplicationResponseModel)
         assert str(updated_object.id) == str(mock_response.id)
         assert updated_object.name == mock_response.name
@@ -480,7 +588,6 @@ class TestApplicationUpdate(TestApplicationBase):
 
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
-        # Create update data using factory
         update_data = ApplicationUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-app",
@@ -508,7 +615,6 @@ class TestApplicationUpdate(TestApplicationBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
-        # Create test data using factory
         update_data = ApplicationUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
@@ -518,16 +624,13 @@ class TestApplicationUpdate(TestApplicationBase):
             risk=2,
         )
 
-        # Create mock response without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
-        # Create HTTPError with mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
-        # Test with Pydantic model
         with pytest.raises(HTTPError):
             self.client.update(update_data)
 
@@ -695,7 +798,6 @@ class TestApplicationFetch(TestApplicationBase):
 
     def test_fetch_error_handler(self):
         """Test error handler behavior in fetch method with properly formatted error response."""
-        # Create a mock response with properly formatted error content
         mock_error_response = MagicMock()
         mock_error_response.json.return_value = {
             "_errors": [
@@ -709,7 +811,6 @@ class TestApplicationFetch(TestApplicationBase):
         mock_error_response.status_code = 404
         mock_error_response.content = b"Error content"
 
-        # Create HTTPError with our mock response
         mock_http_error = HTTPError(response=mock_error_response)
         mock_http_error.response = mock_error_response
 
