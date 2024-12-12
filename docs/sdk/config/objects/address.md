@@ -12,6 +12,7 @@
     - [Retrieving Addresses](#retrieving-addresses)
     - [Updating Addresses](#updating-addresses)
     - [Listing Addresses](#listing-addresses)
+    - [Filtering Responses](#filtering-responses)
     - [Deleting Addresses](#deleting-addresses)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -204,6 +205,79 @@ filtered_addresses = addresses.list(**list_params)
 # Process results
 for addr in filtered_addresses:
     print(f"Name: {addr.name}, Value: {addr.ip_netmask}")
+```
+
+</div>
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `types`, `values`, and `tags`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Only return addresses defined exactly in 'Texas'
+exact_addresses = addresses.list(
+  folder='Texas',
+  exact_match=True
+)
+
+for addr in exact_addresses:
+  print(f"Exact match: {addr.name} in {addr.folder}")
+
+# Exclude all addresses from the 'All' folder
+no_all_addresses = addresses.list(
+  folder='Texas',
+  exclude_folders=['All']
+)
+
+for addr in no_all_addresses:
+  assert addr.folder != 'All'
+  print(f"Filtered out 'All': {addr.name}")
+
+# Exclude addresses that come from 'default' snippet
+no_default_snippet = addresses.list(
+  folder='Texas',
+  exclude_snippets=['default']
+)
+
+for addr in no_default_snippet:
+  assert addr.snippet != 'default'
+  print(f"Filtered out 'default' snippet: {addr.name}")
+
+# Exclude addresses associated with 'DeviceA'
+no_deviceA = addresses.list(
+  folder='Texas',
+  exclude_devices=['DeviceA']
+)
+
+for addr in no_deviceA:
+  assert addr.device != 'DeviceA'
+  print(f"Filtered out 'DeviceA': {addr.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = addresses.list(
+  folder='Texas',
+  exact_match=True,
+  exclude_folders=['All'],
+  exclude_snippets=['default'],
+  exclude_devices=['DeviceA']
+)
+
+for addr in combined_filters:
+  print(f"Combined filters result: {addr.name} in {addr.folder}")
 ```
 
 </div>

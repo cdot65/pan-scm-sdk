@@ -12,6 +12,7 @@
     - [Retrieving Profiles](#retrieving-profiles)
     - [Updating Profiles](#updating-profiles)
     - [Listing Profiles](#listing-profiles)
+    - [Filtering Responses](#filtering-responses)
     - [Deleting Profiles](#deleting-profiles)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -244,6 +245,78 @@ filtered_profiles = wildfire_profiles.list(**list_params)
 ```
 
 </div>
+
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `types`, `values`, and `tags`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Only return wildfire_antivirus defined exactly in 'Texas'
+exact_wildfire_antivirus = wildfire_antivirus.list(
+  folder='Texas',
+  exact_match=True
+)
+
+for app in exact_wildfire_antivirus:
+  print(f"Exact match: {app.name} in {app.folder}")
+
+# Exclude all wildfire_antivirus from the 'All' folder
+no_all_wildfire_antivirus = wildfire_antivirus.list(
+  folder='Texas',
+  exclude_folders=['All']
+)
+
+for app in no_all_wildfire_antivirus:
+  assert app.folder != 'All'
+  print(f"Filtered out 'All': {app.name}")
+
+# Exclude wildfire_antivirus that come from 'default' snippet
+no_default_snippet = wildfire_antivirus.list(
+  folder='Texas',
+  exclude_snippets=['default']
+)
+
+for app in no_default_snippet:
+  assert app.snippet != 'default'
+  print(f"Filtered out 'default' snippet: {app.name}")
+
+# Exclude wildfire_antivirus associated with 'DeviceA'
+no_deviceA = wildfire_antivirus.list(
+  folder='Texas',
+  exclude_devices=['DeviceA']
+)
+
+for app in no_deviceA:
+  assert app.device != 'DeviceA'
+  print(f"Filtered out 'DeviceA': {app.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = wildfire_antivirus.list(
+  folder='Texas',
+  exact_match=True,
+  exclude_folders=['All'],
+  exclude_snippets=['default'],
+  exclude_devices=['DeviceA']
+)
+
+for app in combined_filters:
+  print(f"Combined filters result: {app.name} in {app.folder}")
+```
 
 ### Deleting Profiles
 
