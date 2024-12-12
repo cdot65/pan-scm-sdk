@@ -380,6 +380,10 @@ class SecurityRule(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
         rulebase: str = "pre",
+        exact_match: bool = False,
+        exclude_folders: Optional[List[str]] = None,
+        exclude_snippets: Optional[List[str]] = None,
+        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SecurityRuleResponseModel]:
         """
@@ -390,6 +394,11 @@ class SecurityRule(BaseObject):
             snippet: Optional snippet name
             device: Optional device name
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+            exact_match (bool): If True, only return objects whose container
+                                exactly matches the provided container parameter.
+            exclude_folders (List[str], optional): List of folder names to exclude from results.
+            exclude_snippets (List[str], optional): List of snippet values to exclude from results.
+            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - action: List[str] - Filter by actions
                 - category: List[str] - Filter by categories
@@ -484,10 +493,32 @@ class SecurityRule(BaseObject):
 
         rules = [SecurityRuleResponseModel(**item) for item in response["data"]]
 
-        return self._apply_filters(
+        # Apply existing filters first
+        rules = self._apply_filters(
             rules,
             filters,
         )
+
+        # Determine which container key and value we are filtering on
+        container_key, container_value = next(iter(container_parameters.items()))
+
+        # If exact_match is True, filter out rules that don't match exactly
+        if exact_match:
+            rules = [a for a in rules if getattr(a, container_key) == container_value]
+
+        # Exclude folders if provided
+        if exclude_folders and isinstance(exclude_folders, list):
+            rules = [a for a in rules if a.folder not in exclude_folders]
+
+        # Exclude snippets if provided
+        if exclude_snippets and isinstance(exclude_snippets, list):
+            rules = [a for a in rules if a.snippet not in exclude_snippets]
+
+        # Exclude devices if provided
+        if exclude_devices and isinstance(exclude_devices, list):
+            rules = [a for a in rules if a.device not in exclude_devices]
+
+        return rules
 
     def fetch(
         self,
