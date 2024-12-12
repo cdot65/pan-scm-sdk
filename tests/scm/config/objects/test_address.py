@@ -78,8 +78,9 @@ class TestAddressList(TestAddressBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
             params={
-                "limit": 10000,
                 "folder": "All",
+                "limit": 5000,
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -164,8 +165,9 @@ class TestAddressList(TestAddressBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/addresses",
             params={
-                "limit": 10000,
                 "folder": "Texas",
+                "limit": 5000,
+                "offset": 0,
             },
         )
 
@@ -482,6 +484,68 @@ class TestAddressList(TestAddressBase):
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
+
+    def test_list_pagination_multiple_pages(self):
+        """
+        Test that the list method correctly aggregates data from multiple pages when
+        more than 5000 objects are returned.
+
+        We will create a scenario with 12,345 objects:
+        - First API call returns 5000 objects.
+        - Second API call returns another 5000 objects.
+        - Third API call returns the remaining 2345 objects.
+        """
+        total_objects = 12345
+        first_batch_count = 5000
+        second_batch_count = 5000
+        third_batch_count = (
+            total_objects - first_batch_count - second_batch_count
+        )  # 2345
+
+        # Create batches using the factory in a similar manner to existing tests
+        first_batch = [
+            AddressResponseFactory.with_ip_netmask(ip_netmask=f"10.0.0.{i % 254}/32")
+            for i in range(first_batch_count)
+        ]
+        second_batch = [
+            AddressResponseFactory.with_ip_netmask(ip_netmask=f"10.0.1.{i % 254}/32")
+            for i in range(second_batch_count)
+        ]
+        third_batch = [
+            AddressResponseFactory.with_ip_netmask(ip_netmask=f"10.0.2.{i % 254}/32")
+            for i in range(third_batch_count)
+        ]
+        # Convert them to dicts for the mock responses
+        first_page = {"data": [obj.model_dump() for obj in first_batch]}
+        second_page = {"data": [obj.model_dump() for obj in second_batch]}
+        third_page = {"data": [obj.model_dump() for obj in third_batch]}
+
+        def mock_get(endpoint, params):
+            offset = params.get("offset", 0)
+            if offset == 0:
+                return first_page
+            elif offset == 5000:
+                return second_page
+            elif offset == 10000:
+                return third_page
+            else:
+                # No more data
+                return {"data": []}
+
+        # Set our mock to the new side_effect
+        self.mock_scm.get.side_effect = mock_get
+
+        # Invoke the list method; it should loop through all pages
+        results = self.client.list(folder="Texas")
+
+        # Validate that we received all objects
+        assert len(results) == total_objects
+        assert all(isinstance(r, AddressResponseModel) for r in results)
+
+        # Optional: check first and last objects to ensure correct ordering/consistency
+        # Since factories usually increment sequences, verify at least that the fields are present
+        assert hasattr(results[0], "name")
+        assert hasattr(results[-1], "name")
 
     # -------------------- New Tests for exact_match and Exclusions --------------------
 

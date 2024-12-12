@@ -23,7 +23,9 @@ class Address(BaseObject):
     """
 
     ENDPOINT = "/config/objects/v1/addresses"
-    DEFAULT_LIMIT = 10000
+    MAX_LIMIT = (
+        5000  # The maximum number of objects returned by the API in a single request
+    )
 
     def __init__(
         self,
@@ -237,8 +239,6 @@ class Address(BaseObject):
                 },
             )
 
-        params = {"limit": self.DEFAULT_LIMIT}
-
         container_parameters = self._build_container_params(
             folder,
             snippet,
@@ -253,48 +253,64 @@ class Address(BaseObject):
                 details={"error": "Invalid container parameters"},
             )
 
-        params.update(container_parameters)
+        # Pagination logic
+        limit = self.MAX_LIMIT
+        offset = 0
+        all_addresses = []
 
-        response = self.api_client.get(
-            self.ENDPOINT,
-            params=params,
-        )
+        while True:
+            params = container_parameters.copy()
+            params["limit"] = limit
+            params["offset"] = offset
 
-        if not isinstance(response, dict):
-            raise InvalidObjectError(
-                message="Invalid response format: expected dictionary",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response is not a dictionary"},
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
             )
 
-        if "data" not in response:
-            raise InvalidObjectError(
-                message="Invalid response format: missing 'data' field",
-                error_code="E003",
-                http_status_code=500,
-                details={
-                    "field": "data",
-                    "error": '"data" field missing in the response',
-                },
-            )
+            if not isinstance(response, dict):
+                raise InvalidObjectError(
+                    message="Invalid response format: expected dictionary",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"error": "Response is not a dictionary"},
+                )
 
-        if not isinstance(response["data"], list):
-            raise InvalidObjectError(
-                message="Invalid response format: 'data' field must be a list",
-                error_code="E003",
-                http_status_code=500,
-                details={
-                    "field": "data",
-                    "error": '"data" field must be a list',
-                },
-            )
+            if "data" not in response:
+                raise InvalidObjectError(
+                    message="Invalid response format: missing 'data' field",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={
+                        "field": "data",
+                        "error": '"data" field missing in the response',
+                    },
+                )
 
-        addresses = [AddressResponseModel(**item) for item in response["data"]]
+            if not isinstance(response["data"], list):
+                raise InvalidObjectError(
+                    message="Invalid response format: 'data' field must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={
+                        "field": "data",
+                        "error": '"data" field must be a list',
+                    },
+                )
+
+            data = response["data"]
+            addresses_chunk = [AddressResponseModel(**item) for item in data]
+            all_addresses.extend(addresses_chunk)
+
+            # If we got fewer than 'limit' objects, we've reached the end
+            if len(data) < limit:
+                break
+
+            offset += limit
 
         # Apply existing filters first
         addresses = self._apply_filters(
-            addresses,
+            all_addresses,
             filters,
         )
 
