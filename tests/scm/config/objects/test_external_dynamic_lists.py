@@ -110,6 +110,180 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
             self.client.list(folder="All")
         assert '"data" field must be a list' in str(exc_info.value)
 
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only objects that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                ExternalDynamicListsResponseFactory(
+                    name="addr_in_texas",
+                    folder="Texas",
+                ).model_dump(),
+                ExternalDynamicListsResponseFactory(
+                    name="addr_in_all",
+                    folder="All",
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        # exact_match should exclude the one from "All"
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "addr_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes objects from those folders.
+        """
+        mock_response = {
+            "data": [
+                ExternalDynamicListsResponseFactory(
+                    name="addr_in_texas",
+                    folder="Texas",
+                ).model_dump(),
+                ExternalDynamicListsResponseFactory(
+                    name="addr_in_all",
+                    folder="All",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(a.folder != "All" for a in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes objects with those snippets.
+        """
+        mock_response = {
+            "data": [
+                ExternalDynamicListsResponseFactory(
+                    name="addr_with_default_snippet",
+                    folder="Texas",
+                    snippet="default",
+                ).model_dump(),
+                ExternalDynamicListsResponseFactory(
+                    name="addr_with_special_snippet",
+                    folder="Texas",
+                    snippet="special",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(a.snippet != "default" for a in filtered)
+
+    def test_list_exclude_devices(self):
+        """
+        Test that exclude_devices removes objects with those devices.
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "12345678-1234-5678-1234-567812345678",
+                    "name": "edl_resp_valid1",
+                    "folder": "My Folder",
+                    "device": "DeviceA",
+                    "type": {
+                        "ip": {
+                            "url": "http://example.com/edl.txt",
+                            "recurring": {"daily": {"at": "03"}},
+                        }
+                    },
+                },
+                {
+                    "id": "87654321-1234-5678-1234-567812345678",
+                    "name": "edl_resp_valid1",
+                    "folder": "My Folder",
+                    "device": "DeviceB",
+                    "type": {
+                        "ip": {
+                            "url": "http://example.com/edl.txt",
+                            "recurring": {"daily": {"at": "03"}},
+                        }
+                    },
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
+        assert len(filtered) == 1
+        assert all(a.device != "DeviceA" for a in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        """
+        mock_response = {
+            "data": [
+                {
+                    "id": "223e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_in_texas_default",
+                    "folder": "Texas",
+                    "snippet": "default",
+                    "device": "DeviceA",
+                    "type": {
+                        "ip": {
+                            "url": "http://example.com/edl.txt",
+                            "recurring": {"daily": {"at": "03"}},
+                        }
+                    },
+                },
+                {
+                    "id": "334e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_in_texas_special",
+                    "folder": "Texas",
+                    "snippet": "special",
+                    "device": "DeviceB",
+                    "type": {
+                        "ip": {
+                            "url": "http://example.com/edl.txt",
+                            "recurring": {"daily": {"at": "03"}},
+                        }
+                    },
+                },
+                {
+                    "id": "434e4567-e89b-12d3-a456-426655440000",
+                    "name": "addr_in_all",
+                    "folder": "All",
+                    "snippet": "default",
+                    "device": "DeviceA",
+                    "type": {
+                        "ip": {
+                            "url": "http://example.com/edl.txt",
+                            "recurring": {"daily": {"at": "03"}},
+                        }
+                    },
+                },
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+            exclude_devices=["DeviceA"],
+        )
+        # Only addr_in_texas_special should remain
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+        assert obj.device != "DeviceA"
+
 
 class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
     def test_create_valid(self):

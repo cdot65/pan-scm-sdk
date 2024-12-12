@@ -1,3 +1,7 @@
+## Version 0.3.5
+
+- Added support performing advanced filtering capabilities
+
 ## Version 0.3.4
 
 - Added support for External Dynamic Lists

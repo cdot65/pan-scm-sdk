@@ -12,6 +12,7 @@
     - [Retrieving Security Rules](#retrieving-security-rules)
     - [Updating Security Rules](#updating-security-rules)
     - [Listing Security Rules](#listing-security-rules)
+    - [Filtering Responses](#filtering-responses)
     - [Moving Security Rules](#moving-security-rules)
     - [Deleting Security Rules](#deleting-security-rules)
 7. [Managing Configuration Changes](#managing-configuration-changes)
@@ -234,6 +235,78 @@ filtered_rules = security_rules.list(**list_params)
 ```
 
 </div>
+
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `types`, `values`, and `tags`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Only return security_rules defined exactly in 'Texas'
+exact_security_rules = security_rules.list(
+  folder='Texas',
+  exact_match=True
+)
+
+for app in exact_security_rules:
+  print(f"Exact match: {app.name} in {app.folder}")
+
+# Exclude all security_rules from the 'All' folder
+no_all_security_rules = security_rules.list(
+  folder='Texas',
+  exclude_folders=['All']
+)
+
+for app in no_all_security_rules:
+  assert app.folder != 'All'
+  print(f"Filtered out 'All': {app.name}")
+
+# Exclude security_rules that come from 'default' snippet
+no_default_snippet = security_rules.list(
+  folder='Texas',
+  exclude_snippets=['default']
+)
+
+for app in no_default_snippet:
+  assert app.snippet != 'default'
+  print(f"Filtered out 'default' snippet: {app.name}")
+
+# Exclude security_rules associated with 'DeviceA'
+no_deviceA = security_rules.list(
+  folder='Texas',
+  exclude_devices=['DeviceA']
+)
+
+for app in no_deviceA:
+  assert app.device != 'DeviceA'
+  print(f"Filtered out 'DeviceA': {app.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = security_rules.list(
+  folder='Texas',
+  exact_match=True,
+  exclude_folders=['All'],
+  exclude_snippets=['default'],
+  exclude_devices=['DeviceA']
+)
+
+for app in combined_filters:
+  print(f"Combined filters result: {app.name} in {app.folder}")
+```
 
 ### Moving Security Rules
 

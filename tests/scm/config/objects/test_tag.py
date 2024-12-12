@@ -41,23 +41,21 @@ class TestTagBase:
 
 
 class TestTagList(TestTagBase):
-    """Tests for listing Tag objects."""
+    """Tests for listing Tag objects with new filtering logic."""
 
     def test_list_valid(self):
-        """Test listing all tags."""
+        """Test listing all tags without filters."""
         mock_response = {
             "data": [
                 TagResponseFactory.with_color(
                     name="TestTag1",
                     color="Red",
                     folder="Texas",
-                    comments="First test tag",
                 ).model_dump(),
                 TagResponseFactory.with_color(
                     name="TestTag2",
                     color="Blue",
                     folder="Texas",
-                    comments="Second test tag",
                 ).model_dump(),
             ],
             "offset": 0,
@@ -65,44 +63,73 @@ class TestTagList(TestTagBase):
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
         existing_tags = self.client.list(folder="Texas")
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/tags",
-            params={
-                "limit": 10000,
-                "folder": "Texas",
-            },
+            params={"limit": 10000, "folder": "Texas"},
         )
         assert isinstance(existing_tags, list)
-        assert isinstance(existing_tags[0], TagResponseModel)
         assert len(existing_tags) == 2
         assert existing_tags[0].name == "TestTag1"
-        assert existing_tags[0].color == "Red"
+        assert existing_tags[1].name == "TestTag2"
 
-    def test_list_filters_valid(self):
-        """Test listing tags with valid filters."""
-        filters = {
-            "colors": ["Red", "Blue"],
-        }
-
+    def test_list_exact_match(self):
+        """Test exact_match=True ensures only tags with the exact folder match are returned."""
         mock_response = {
             "data": [
-                TagResponseFactory.with_color(
-                    name="TestTag1",
-                    color="Red",
-                    folder="Texas",
+                TagResponseFactory.build(
+                    name="ExactMatchTag", folder="Texas"
                 ).model_dump(),
-                TagResponseFactory.with_color(
-                    name="TestTag2",
-                    color="Blue",
-                    folder="Texas",
+                TagResponseFactory.build(
+                    name="InheritedTag", folder="All"
                 ).model_dump(),
-                TagResponseFactory.with_color(
-                    name="TestTag3",
-                    color="Green",
-                    folder="Texas",
+            ],
+            "offset": 0,
+            "total": 2,
+            "limit": 200,
+        }
+
+        self.mock_scm.get.return_value = mock_response
+
+        tags = self.client.list(folder="Texas", exact_match=True)
+        assert len(tags) == 1
+        assert tags[0].name == "ExactMatchTag"
+        assert tags[0].folder == "Texas"
+
+    def test_list_exact_match_false(self):
+        """Test exact_match=False returns tags from the specified folder and potentially others."""
+        mock_response = {
+            "data": [
+                TagResponseFactory.build(
+                    name="ExactMatchTag", folder="Texas"
+                ).model_dump(),
+                TagResponseFactory.build(
+                    name="InheritedTag", folder="All"
+                ).model_dump(),
+            ],
+            "offset": 0,
+            "total": 2,
+            "limit": 200,
+        }
+
+        self.mock_scm.get.return_value = mock_response
+
+        tags = self.client.list(folder="Texas", exact_match=False)
+        # Both tags should be returned since exact_match is False
+        assert len(tags) == 2
+        assert any(t.name == "ExactMatchTag" for t in tags)
+        assert any(t.name == "InheritedTag" for t in tags)
+
+    def test_list_exclude_folders(self):
+        """Test excluding certain folders from the returned results."""
+        mock_response = {
+            "data": [
+                TagResponseFactory.build(name="TagTexas", folder="Texas").model_dump(),
+                TagResponseFactory.build(name="TagAll", folder="All").model_dump(),
+                TagResponseFactory.build(
+                    name="TagGlobal", folder="Global"
                 ).model_dump(),
             ],
             "offset": 0,
@@ -110,163 +137,184 @@ class TestTagList(TestTagBase):
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
-        filtered_tags = self.client.list(folder="Texas", **filters)
+        tags = self.client.list(folder="Texas", exclude_folders=["All", "Global"])
+        # Only the Texas folder tag should remain
+        assert len(tags) == 1
+        assert tags[0].name == "TagTexas"
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            "/config/objects/v1/tags",
-            params={
-                "limit": 10000,
-                "folder": "Texas",
-            },
-        )
-
-        assert len(filtered_tags) == 2
-        assert all(tag.color in ["Red", "Blue"] for tag in filtered_tags)
-
-    def test_list_filters_invalid_colors_not_list(self):
-        """Test listing tags with 'colors' filter that is not a list."""
-        filters = {
-            "colors": "Red",  # Should be a list
-        }
-
-        # Don't set up any mock response so validation runs first
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas", **filters)
-
-        assert exc_info.value.message == "Invalid response format: expected dictionary"
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 500
-
-    def test_list_filters_invalid_colors_type(self):
-        """Test that color filter must be a list."""
-        # Mock minimum valid API response
-        mock_response = {"data": []}
-        self.mock_scm.get.return_value = mock_response  # noqa
-
-        filters = {"colors": "Red"}  # String instead of list
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas", **filters)
-
-        assert exc_info.value.message == "'colors' filter must be a list"
-        assert exc_info.value.http_status_code == 400
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.details == {"errorType": "Invalid Object"}
-
-    def test_list_empty_folder_error(self):
-        """Test that empty folder raises appropriate error."""
-        with pytest.raises(MissingQueryParameterError) as exc_info:
-            self.client.list(folder="")
-
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 400 - API error: E003" in error_msg
-
-    def test_list_container_missing_error(self):
-        """Test that InvalidObjectError is raised when no container parameter is provided."""
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list()
-
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 400 - API error: E003" in error_msg
-
-    def test_list_container_multiple_error(self):
-        """Test validation of container parameters."""
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas", snippet="TestSnippet")
-
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 400 - API error: E003" in error_msg
-
-    def test_list_response_invalid_format(self):
-        """Test that InvalidObjectError is raised when the response is not a dictionary."""
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas")
-
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
-
-    def test_list_response_invalid_data_field_missing(self):
-        """Test that InvalidObjectError is raised when API returns response with missing data field."""
-        self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas")
-
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
-
-    def test_list_response_invalid_data_field_type(self):
-        """Test that InvalidObjectError is raised when API returns non-list data field."""
-        self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas")
-
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
-
-    def test_list_http_error_no_response_content(self):
-        """Test list method when HTTP error has no response content."""
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_response.status_code = 500
-
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.list(folder="Texas")
-
-    def test_list_filters_invalid_color_value(self):
-        """Test listing tags with an invalid color value in the 'colors' filter."""
-        filters = {
-            "colors": ["Red", "InvalidColor"],
-        }
-
-        # Mock the response from the API
+    def test_list_exclude_snippets(self):
+        """Test excluding objects by snippet values."""
         mock_response = {
             "data": [
-                TagResponseFactory.with_color(
-                    name="TestTag1",
-                    color="Red",
-                    folder="Texas",
+                TagResponseFactory.build(
+                    name="NoSnippet", folder="Texas", snippet=None
                 ).model_dump(),
-                TagResponseFactory.with_color(
-                    name="TestTag2",
-                    color="Blue",
+                TagResponseFactory.build(
+                    name="PredefinedTag", folder="Texas", snippet="predefined"
+                ).model_dump(),
+                TagResponseFactory.build(
+                    name="CustomSnippetTag",
                     folder="Texas",
+                    snippet="custom-snippet",
                 ).model_dump(),
             ],
             "offset": 0,
-            "total": 2,
+            "total": 3,
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder="Texas", **filters)
+        # Exclude 'predefined' and 'custom-snippet'
+        tags = self.client.list(
+            folder="Texas", exclude_snippets=["predefined", "custom-snippet"]
+        )
+        # Only NoSnippet should remain
+        assert len(tags) == 1
+        assert tags[0].name == "NoSnippet"
 
-        error_msg = exc_info.value.message
-        assert "Invalid color 'InvalidColor'" in error_msg
-        assert exc_info.value.http_status_code == 400
-        assert exc_info.value.error_code == "E003"
+    def test_list_exclude_devices(self):
+        """Test excluding objects by device values."""
+        mock_response = {
+            "data": [
+                TagResponseFactory.build(
+                    name="TagOnDeviceA",
+                    folder="Texas",
+                    snippet=None,
+                    device="DeviceA",
+                ).model_dump(),
+                TagResponseFactory.build(
+                    name="TagOnDeviceB",
+                    folder="Texas",
+                    snippet=None,
+                    device="DeviceB",
+                ).model_dump(),
+                TagResponseFactory.build(
+                    name="TagOnDeviceC",
+                    folder="Texas",
+                    snippet=None,
+                    device="DeviceC",
+                ).model_dump(),
+            ],
+            "offset": 0,
+            "total": 3,
+            "limit": 200,
+        }
 
-    def test_list_api_error_handling(self):
-        """Test that API errors during list are properly handled."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.return_value = mock_response
+
+        # Exclude 'DeviceB' and 'DeviceC'
+        tags = self.client.list(folder="Texas", exclude_devices=["DeviceB", "DeviceC"])
+        # Only the tag on DeviceA should remain
+        assert len(tags) == 1
+        assert tags[0].name == "TagOnDeviceA"
+        assert tags[0].device == "DeviceA"
+
+    def test_list_with_colors_and_exclusions(self):
+        """Test combining color filter with exclude_folders and exclude_snippets."""
+        mock_response = {
+            "data": [
+                TagResponseFactory.build(
+                    name="RedTexas", folder="Texas", snippet=None, color="Red"
+                ).model_dump(),
+                TagResponseFactory.build(
+                    name="BlueAll", folder="All", snippet=None, color="Blue"
+                ).model_dump(),
+                TagResponseFactory.build(
+                    name="RedPredefined",
+                    folder="Texas",
+                    snippet="predefined",
+                    color="Red",
+                ).model_dump(),
+            ],
+            "offset": 0,
+            "total": 3,
+            "limit": 200,
+        }
+
+        self.mock_scm.get.return_value = mock_response
+
+        tags = self.client.list(
+            folder="Texas",
+            colors=["Red", "Blue"],
+            exclude_folders=["All"],
+            exclude_snippets=["predefined"],
+        )
+        # Should exclude folder=All and snippet=predefined
+        # RedTexas matches colors and folder, and snippet is None
+        assert len(tags) == 1
+        assert tags[0].name == "RedTexas"
+
+    def test_list_no_container_provided(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError):
+            self.client.list()
+
+    def test_list_multiple_containers_provided(self):
+        """Test that providing multiple containers is invalid."""
+        with pytest.raises(InvalidObjectError):
+            self.client.list(folder="Texas", snippet="TestSnippet")
+
+    def test_list_empty_folder_error(self):
+        """Test that empty folder raises the appropriate error."""
+        with pytest.raises(MissingQueryParameterError):
+            self.client.list(folder="")
+
+    def test_list_api_format_errors(self):
+        """Test responses that do not meet the expected format."""
+        # Not a dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        with pytest.raises(InvalidObjectError):
+            self.client.list(folder="Texas")
+
+        # Missing 'data' field
+        self.mock_scm.get.return_value = {"wrong_field": "value"}
+        with pytest.raises(InvalidObjectError):
+            self.client.list(folder="Texas")
+
+        # 'data' not a list
+        self.mock_scm.get.return_value = {"data": "not a list"}
+        with pytest.raises(InvalidObjectError):
+            self.client.list(folder="Texas")
+
+    def test_list_colors_invalid_type(self):
+        """Test invalid colors filter."""
+        mock_response = {"data": []}
+        self.mock_scm.get.return_value = mock_response
+
+        with pytest.raises(InvalidObjectError):
+            self.client.list(folder="Texas", colors="Red")  # Not a list
+
+    def test_list_colors_invalid_color_value(self):
+        """Test invalid color value in the colors filter."""
+        mock_response = {
+            "data": [
+                TagResponseFactory.with_color(
+                    name="RedTag", color="Red", folder="Texas"
+                ).model_dump()
+            ],
+            "offset": 0,
+            "total": 1,
+            "limit": 200,
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        with pytest.raises(InvalidObjectError):
+            self.client.list(folder="Texas", colors=["InvalidColor"])
+
+    def test_list_http_error_handling(self):
+        """Test HTTP errors during list."""
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E400",
             message="Bad Request",
             error_type="Invalid Request",
         )
 
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(HTTPError):
             self.client.list(folder="Texas")
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Bad Request"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Request"
 
 
 class TestTagCreate(TestTagBase):

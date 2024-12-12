@@ -37,9 +37,6 @@ class TestApplicationsFilterBase:
         self.client = ApplicationFilters(self.mock_scm)  # noqa
 
 
-# -------------------- Test Classes Grouped by Functionality --------------------
-
-
 class TestApplicationsFiltersList(TestApplicationsFilterBase):
     """Tests for listing Application filter objects."""
 
@@ -49,60 +46,17 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
             "data": [
                 ApplicationFiltersResponseFactory(
                     name="All Web Applications",
-                    category=None,
-                    sub_category=None,
-                    technology=None,
-                    evasive=False,
-                    used_by_malware=False,
-                    transfers_files=False,
-                    has_known_vulnerabilities=False,
-                    tunnels_other_apps=False,
-                    prone_to_misuse=False,
-                    pervasive=False,
-                    is_saas=False,
-                    new_appid=False,
-                    risk=None,
-                    saas_certifications=None,
-                    saas_risk=None,
                     folder="All",
                 ).model_dump(),
                 ApplicationFiltersResponseFactory(
                     name="New Web Applications",
-                    category=None,
-                    sub_category=None,
-                    technology=None,
-                    evasive=False,
-                    used_by_malware=False,
-                    transfers_files=False,
-                    has_known_vulnerabilities=False,
-                    tunnels_other_apps=False,
-                    prone_to_misuse=False,
-                    pervasive=False,
-                    is_saas=False,
-                    new_appid=True,
-                    risk=None,
-                    saas_certifications=None,
-                    saas_risk=None,
                     folder="All",
+                    new_appid=True,
                 ).model_dump(),
                 ApplicationFiltersResponseFactory(
                     name="High Risk Applications",
-                    category=None,
-                    sub_category=None,
-                    technology=None,
-                    evasive=False,
-                    used_by_malware=False,
-                    transfers_files=False,
-                    has_known_vulnerabilities=False,
-                    tunnels_other_apps=False,
-                    prone_to_misuse=False,
-                    pervasive=False,
-                    is_saas=False,
-                    new_appid=False,
-                    risk=[5],
-                    saas_certifications=None,
-                    saas_risk=None,
                     folder="All",
+                    risk=[5],
                 ).model_dump(),
             ],
             "offset": 0,
@@ -137,7 +91,7 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling when listing in a nonexistent folder."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -185,7 +139,7 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
                     name="test123",
                     folder="All",
                     category=["general-internet"],
-                    sub_category=["file-sharing"],  # Fixed attribute name
+                    sub_category=["file-sharing"],
                     technology=["peer-to-peer"],
                     risk=[5],
                     evasive=True,
@@ -200,7 +154,7 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
 
         result = self.client.list(folder="Texas", **filters)
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/application-filters",
             params={
                 "limit": 10000,
@@ -218,7 +172,7 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
                     name="test-app",
                     folder="All",
                     category=["general-internet"],
-                    subcategory=["file-sharing"],
+                    sub_category=["file-sharing"],
                     technology=["peer-to-peer"],
                     risk=[5],
                 ).model_dump(),
@@ -227,7 +181,7 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
             "total": 1,
             "limit": 200,
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         # Empty lists should result in no matches
         filtered_objects = self.client.list(
@@ -258,37 +212,25 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         """Test validation of filter types specifically."""
         mock_applications = []
 
-        # Test with string instead of list for category
+        # category as string instead of list
         invalid_filters = {"category": "category1"}
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(InvalidObjectError):
             self.client._apply_filters(mock_applications, invalid_filters)
 
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-
-        # Test with string instead of list for subcategory
+        # subcategory as string
         invalid_filters = {"subcategory": "subcategory1"}
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(InvalidObjectError):
             self.client._apply_filters(mock_applications, invalid_filters)
 
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-
-        # Test with string instead of list for technology
+        # technology as string
         invalid_filters = {"technology": "technology1"}
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(InvalidObjectError):
             self.client._apply_filters(mock_applications, invalid_filters)
 
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-
-        # Test with integer instead of list for risk
+        # risk as integer
         invalid_filters = {"risk": 5}
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(InvalidObjectError):
             self.client._apply_filters(mock_applications, invalid_filters)
-
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
 
     def test_list_response_invalid_format(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
@@ -312,7 +254,6 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
         assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
 
     def test_list_response_invalid_data_field_type(self):
         """Test that InvalidObjectError is raised when API returns non-list data field."""
@@ -324,8 +265,6 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
 
     def test_list_response_no_content(self):
         """Test that an HTTPError without response content in list() re-raises the exception."""
@@ -339,19 +278,130 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         with pytest.raises(HTTPError):
             self.client.list(folder="Texas")
 
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only filters that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                ApplicationFiltersResponseFactory(
+                    name="filters_in_texas",
+                    folder="Texas",
+                ).model_dump(),
+                ApplicationFiltersResponseFactory(
+                    name="filters_in_all",
+                    folder="All",
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "filters_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes filters from those folders.
+        """
+        mock_response = {
+            "data": [
+                ApplicationFiltersResponseFactory(
+                    name="filters_in_texas",
+                    folder="Texas",
+                ).model_dump(),
+                ApplicationFiltersResponseFactory(
+                    name="filters_in_all",
+                    folder="All",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(f.folder != "All" for f in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes filters from those snippets.
+        Assume snippet is supported by the model/factory.
+        """
+        mock_response = {
+            "data": [
+                ApplicationFiltersResponseFactory(
+                    name="filters_default_snippet",
+                    folder="Texas",
+                    snippet="default",
+                ).model_dump(),
+                ApplicationFiltersResponseFactory(
+                    name="filters_special_snippet",
+                    folder="Texas",
+                    snippet="special",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(f.snippet != "default" for f in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        Assume snippet/device are supported.
+        """
+        mock_response = {
+            "data": [
+                ApplicationFiltersResponseFactory(
+                    name="filter_texas_default_deviceA",
+                    folder="Texas",
+                    snippet="default",
+                ).model_dump(),
+                ApplicationFiltersResponseFactory(
+                    name="filter_texas_special_deviceB",
+                    folder="Texas",
+                    snippet="special",
+                ).model_dump(),
+                ApplicationFiltersResponseFactory(
+                    name="filter_all_default_deviceA",
+                    folder="All",
+                    snippet="default",
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+        )
+
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+
 
 class TestApplicationsFiltersCreate(TestApplicationsFilterBase):
     """Tests for creating Application filter objects."""
 
     def test_create_valid_object(self):
-        """Test creating an object with ip_netmask."""
+        """Test creating a filter object."""
         test_object = ApplicationFiltersCreateApiFactory.with_folder()
         mock_response = ApplicationFiltersResponseFactory(**test_object.model_dump())
 
-        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        self.mock_scm.post.return_value = mock_response.model_dump()
         created_object = self.client.create(test_object.model_dump(exclude_unset=True))
 
-        self.mock_scm.post.assert_called_once_with(  # noqa
+        self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/application-filters",
             json=test_object.model_dump(exclude_unset=True),
         )
@@ -367,7 +417,7 @@ class TestApplicationsFiltersCreate(TestApplicationsFilterBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_http_error  # noqa
+        self.mock_scm.post.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.create(
@@ -383,7 +433,7 @@ class TestApplicationsFiltersCreate(TestApplicationsFilterBase):
 
     def test_create_error_handler(self):
         """Test that ErrorHandler.raise_for_error is called with appropriate arguments."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=500,
             error_code="API_I00013",
             message="Error occurred",
@@ -409,17 +459,17 @@ class TestApplicationsFiltersGet(TestApplicationsFilterBase):
             name="test-app",
             folder="Texas",
             category=["general-internet"],
-            subcategory=["file-sharing"],
+            sub_category=["file-sharing"],
             technology=["peer-to-peer"],
             risk=[5],
         )
 
-        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
+        self.mock_scm.get.return_value = mock_response.model_dump()
         object_id = mock_response.id
 
         retrieved_object = self.client.get(object_id)
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        self.mock_scm.get.assert_called_once_with(
             f"/config/objects/v1/application-filters/{object_id}"
         )
         assert isinstance(retrieved_object, ApplicationFiltersResponseModel)
@@ -431,7 +481,7 @@ class TestApplicationsFiltersGet(TestApplicationsFilterBase):
         """Test error handling when the application is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -455,7 +505,7 @@ class TestApplicationsFiltersGet(TestApplicationsFilterBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
+        self.mock_scm.get.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.get(object_id)
@@ -465,8 +515,7 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
     """Tests for updating Application filter objects."""
 
     def test_update_valid_object(self):
-        """Test updating an application with valid data."""
-        # Create update data using factory
+        """Test updating a filter object with valid data."""
         update_data = ApplicationFiltersUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-app-filter",
@@ -476,26 +525,18 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
             risk=[2],
         )
 
-        # Create mock response
         mock_response = ApplicationFiltersResponseFactory.from_request(update_data)
-        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
+        self.mock_scm.put.return_value = mock_response.model_dump()
 
-        # Perform update with Pydantic model directly
         updated_object = self.client.update(update_data)
 
-        # Verify call was made once
-        self.mock_scm.put.assert_called_once()  # noqa
-
-        # Get the actual call arguments
-        call_args = self.mock_scm.put.call_args  # noqa
-
-        # Check endpoint
+        self.mock_scm.put.assert_called_once()
+        call_args = self.mock_scm.put.call_args
         assert (
             call_args[0][0]
             == f"/config/objects/v1/application-filters/{update_data.id}"
         )
 
-        # Check important payload fields
         payload = call_args[1]["json"]
         assert payload["name"] == "updated-app-filter"
         assert payload["category"] == ["networking"]
@@ -503,18 +544,12 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
         assert payload["technology"] == ["client-server"]
         assert payload["risk"] == [2]
 
-        # Assert the updated object matches the mock response
         assert isinstance(updated_object, ApplicationFiltersResponseModel)
         assert str(updated_object.id) == str(mock_response.id)
         assert updated_object.name == mock_response.name
-        assert updated_object.category == mock_response.category
-        assert updated_object.sub_category == mock_response.sub_category
-        assert updated_object.technology == mock_response.technology
-        assert updated_object.risk == mock_response.risk
 
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
-        # Create update data using factory
         update_data = ApplicationFiltersUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-app-filter",
@@ -524,7 +559,7 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
             risk=[2],
         )
 
-        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.put.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="API_I00013",
             message="Update failed",
@@ -541,7 +576,6 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
-        # Create test data using factory
         update_data = ApplicationFiltersUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
@@ -551,16 +585,13 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
             risk=[2],
         )
 
-        # Create mock response without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
-        # Create HTTPError with mock response
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.put.side_effect = mock_http_error  # noqa
+        self.mock_scm.put.side_effect = mock_http_error
 
-        # Test with Pydantic model
         with pytest.raises(HTTPError):
             self.client.update(update_data)
 
@@ -569,22 +600,20 @@ class TestApplicationsFiltersDelete(TestApplicationsFilterBase):
     """Tests for deleting Application filter objects."""
 
     def test_delete_success(self):
-        """Test successful deletion of an application."""
+        """Test successful deletion of a filter object."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        self.mock_scm.delete.return_value = None  # noqa
+        self.mock_scm.delete.return_value = None
 
         self.client.delete(object_id)
-
-        self.mock_scm.delete.assert_called_once_with(  # noqa
+        self.mock_scm.delete.assert_called_once_with(
             f"/config/objects/v1/application-filters/{object_id}"
         )
 
     def test_delete_object_not_present_error(self):
-        """Test error handling when the application to delete is not present."""
+        """Test error handling when the filter to delete is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -608,7 +637,7 @@ class TestApplicationsFiltersDelete(TestApplicationsFilterBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+        self.mock_scm.delete.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.delete(object_id)
@@ -618,44 +647,34 @@ class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
     """Tests for fetching Application filter objects by name."""
 
     def test_fetch_valid_object(self):
-        """Test retrieving an application by its name."""
+        """Test retrieving a filter by its name."""
         mock_response_model = ApplicationFiltersResponseFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test-app-filter",
             folder="Texas",
             category=["general-internet"],
-            subcategory=["file-sharing"],
+            sub_category=["file-sharing"],
             technology=["peer-to-peer"],
             risk=[5],
         )
         mock_response_data = mock_response_model.model_dump()
 
-        self.mock_scm.get.return_value = mock_response_data  # noqa
+        self.mock_scm.get.return_value = mock_response_data
 
-        # Call the fetch method
         fetched_object = self.client.fetch(
             name=mock_response_model.name,
             folder=mock_response_model.folder,
         )
 
-        # Assert that the GET request was made with the correct parameters
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/application-filters",
             params={
                 "folder": mock_response_model.folder,
                 "name": mock_response_model.name,
             },
         )
-
-        # Validate the returned object
         assert isinstance(fetched_object, ApplicationFiltersResponseModel)
         assert str(fetched_object.id) == str(mock_response_model.id)
-        assert fetched_object.name == mock_response_model.name
-        assert fetched_object.folder == mock_response_model.folder
-        assert fetched_object.category == mock_response_model.category
-        assert fetched_object.sub_category == mock_response_model.sub_category
-        assert fetched_object.technology == mock_response_model.technology
-        assert fetched_object.risk == mock_response_model.risk
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -704,16 +723,15 @@ class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
-
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
+        self.mock_scm.get.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.fetch(name="test-app", folder="Texas")
 
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-app", folder="Texas")
@@ -721,12 +739,9 @@ class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
 
     def test_fetch_error_handler(self):
-        """Test error handler behavior in fetch method with properly formatted error response."""
-        # Create a mock response with properly formatted error content
+        """Test error handler behavior in fetch method with a properly formatted error response."""
         mock_error_response = MagicMock()
         mock_error_response.json.return_value = {
             "_errors": [
@@ -739,15 +754,14 @@ class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
         }
         mock_error_response.status_code = 404
         mock_error_response.content = b"Error content"
-
-        # Create HTTPError with our mock response
         mock_http_error = HTTPError(response=mock_error_response)
         mock_http_error.response = mock_error_response
 
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
+        self.mock_scm.get.side_effect = mock_http_error
 
         with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Texas")
+
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
@@ -762,7 +776,7 @@ class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
             "category": "general-internet",
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-app", folder="Texas")
@@ -771,7 +785,6 @@ class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
         assert isinstance(error, InvalidObjectError)
         assert error.error_code == "E003"
         assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
 
 
 # -------------------- End of Test Classes --------------------

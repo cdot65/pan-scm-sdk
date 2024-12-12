@@ -8,14 +8,15 @@
 4. [Exceptions](#exceptions)
 5. [Basic Configuration](#basic-configuration)
 6. [Usage Examples](#usage-examples)
-    - [Creating Tags](#creating-tags)
-    - [Retrieving Tags](#retrieving-tags)
-    - [Updating Tags](#updating-tags)
-    - [Listing Tags](#listing-tags)
-    - [Deleting Tags](#deleting-tags)
+   - [Creating Tags](#creating-tags)
+   - [Retrieving Tags](#retrieving-tags)
+   - [Updating Tags](#updating-tags)
+   - [Listing Tags](#listing-tags)
+   - [Filtering Responses](#filtering-responses)
+   - [Deleting Tags](#deleting-tags)
 7. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
+   - [Performing Commits](#performing-commits)
+   - [Monitoring Jobs](#monitoring-jobs)
 8. [Error Handling](#error-handling)
 9. [Best Practices](#best-practices)
 10. [Full Script Examples](#full-script-examples)
@@ -25,30 +26,32 @@
 
 The `Tag` class provides functionality to manage tag objects in Palo Alto Networks' Strata Cloud Manager. This class
 inherits from `BaseObject` and provides methods for creating, retrieving, updating, and deleting tags with specific
-colors and attributes for resource organization and policy application.
+colors and attributes. In addition, it offers flexible filtering capabilities when listing tags, enabling you to
+apply color-based filters, limit results to exact matches of a configuration container, and exclude certain folders,
+snippets, or devices as needed.
 
 ## Core Methods
 
-| Method     | Description                    | Parameters                 | Return Type              |
-|------------|--------------------------------|----------------------------|--------------------------|
-| `create()` | Creates a new tag              | `data: Dict[str, Any]`     | `TagResponseModel`       |
-| `get()`    | Retrieves a tag by ID          | `object_id: str`           | `TagResponseModel`       |
-| `update()` | Updates an existing tag        | `tag: TagUpdateModel`      | `TagResponseModel`       |
-| `delete()` | Deletes a tag                  | `object_id: str`           | `None`                   |
-| `list()`   | Lists tags with filtering      | `folder: str`, `**filters` | `List[TagResponseModel]` |
-| `fetch()`  | Gets tag by name and container | `name: str`, `folder: str` | `TagResponseModel`       |
+| Method     | Description                                     | Parameters                                                                                                              | Return Type              |
+|------------|-------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| `create()` | Creates a new tag                               | `data: Dict[str, Any]`                                                                                                  | `TagResponseModel`       |
+| `get()`    | Retrieves a tag by ID                           | `object_id: str`                                                                                                        | `TagResponseModel`       |
+| `update()` | Updates an existing tag                         | `tag: TagUpdateModel`                                                                                                   | `TagResponseModel`       |
+| `delete()` | Deletes a tag                                   | `object_id: str`                                                                                                        | `None`                   |
+| `list()`   | Lists tags with comprehensive filtering options | `folder` or `snippet` or `device`, `exact_match`, `exclude_folders`, `exclude_snippets`, `exclude_devices`, `**filters` | `List[TagResponseModel]` |
+| `fetch()`  | Gets tag by name and container                  | `name: str` and one container (`folder`, `snippet`, or `device`)                                                        | `TagResponseModel`       |
 
 ## Tag Model Attributes
 
-| Attribute  | Type | Required | Description                                 |
-|------------|------|----------|---------------------------------------------|
-| `name`     | str  | Yes      | Name of tag (max 63 chars)                  |
-| `id`       | UUID | Yes*     | Unique identifier (*response only)          |
-| `color`    | str  | No       | Color from predefined list                  |
-| `comments` | str  | No       | Comments (max 1023 chars)                   |
-| `folder`   | str  | Yes**    | Folder location (**one container required)  |
-| `snippet`  | str  | Yes**    | Snippet location (**one container required) |
-| `device`   | str  | Yes**    | Device location (**one container required)  |
+| Attribute  | Type | Required | Description                                   |
+|------------|------|----------|-----------------------------------------------|
+| `name`     | str  | Yes      | Name of the tag object (max 63 chars)         |
+| `id`       | UUID | Yes*     | Unique identifier (*response only)            |
+| `color`    | str  | No       | Color from a predefined list                  |
+| `comments` | str  | No       | Comments (max 1023 chars)                     |
+| `folder`   | str  | Yes**    | Folder location (**one container required**)  |
+| `snippet`  | str  | Yes**    | Snippet location (**one container required**) |
+| `device`   | str  | Yes**    | Device location (**one container required**)  |
 
 ## Exceptions
 
@@ -74,9 +77,9 @@ from scm.config.objects import Tag
 
 # Initialize client
 client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+  client_id="your_client_id",
+  client_secret="your_client_secret",
+  tsg_id="your_tsg_id"
 )
 
 # Initialize Tag object
@@ -96,10 +99,10 @@ tags = Tag(client)
 ```python
 # Basic tag configuration
 basic_tag = {
-    "name": "Production",
-    "color": "Red",
-    "comments": "Production environment resources",
-    "folder": "Texas"
+  "name": "Production",
+  "color": "Red",
+  "comments": "Production environment resources",
+  "folder": "Texas"
 }
 
 # Create basic tag
@@ -107,24 +110,22 @@ basic_tag_obj = tags.create(basic_tag)
 
 # Tag with different color
 dev_tag = {
-    "name": "Development",
-    "color": "Blue",
-    "comments": "Development environment resources",
-    "folder": "Texas"
+  "name": "Development",
+  "color": "Blue",
+  "comments": "Development environment resources",
+  "folder": "Texas"
 }
 
-# Create development tag
 dev_tag_obj = tags.create(dev_tag)
 
-# Tag for specific application
+# Tag for a specific application
 app_tag = {
-    "name": "Web-Servers",
-    "color": "Green",
-    "comments": "Web server resources",
-    "folder": "Texas"
+  "name": "Web-Servers",
+  "color": "Green",
+  "comments": "Web server resources",
+  "folder": "Texas"
 }
 
-# Create application tag
 app_tag_obj = tags.create(app_tag)
 ```
 
@@ -176,28 +177,137 @@ updated_tag = tags.update(existing_tag)
 <!-- termynal -->
 
 ```python
-# List with direct filter parameters
+# List tags from a specific folder
 filtered_tags = tags.list(
-    folder='Texas',
-    colors=['Red', 'Blue']
+  folder='Texas'
 )
 
-# Process results
+# Apply color filters
+filtered_tags = tags.list(
+  folder='Texas',
+  colors=['Red', 'Blue']
+)
+
 for tag in filtered_tags:
-    print(f"Name: {tag.name}")
-    print(f"Color: {tag.color}")
-
-# Define filter parameters as dictionary
-list_params = {
-    "folder": "Texas",
-    "colors": ["Green", "Yellow"]
-}
-
-# List with filters as kwargs
-filtered_tags = tags.list(**list_params)
+  print(f"Name: {tag.name}, Color: {tag.color}")
 ```
 
 </div>
+
+#### Applying Filters and Exclusions
+
+When calling the `list()` method, you can apply various filters as keyword arguments:
+
+- **colors**: Provide a list of color names to include. Only tags with these colors will be returned.
+- **exact_match**: Set this to `True` to ensure only tags that exactly match the provided container (folder, snippet, or device) are returned. By default, `exact_match=False`, allowing inherited objects from other containers.
+- **exclude_folders**, **exclude_snippets**, **exclude_devices**: Provide a list of values to exclude from the results. For example, `exclude_folders=["All"]` will remove any tag residing in the `All` folder.
+
+#### Exact Match
+
+```python
+# Return only tags that exactly match the provided folder
+exact_tags = tags.list(folder="Texas", exact_match=True)
+# This excludes tags inherited from 'All', 'Global', or other containers
+```
+
+#### Excluding Specific Folders, Snippets, or Devices
+
+```python
+# Exclude tags from certain folders
+no_all_tags = tags.list(folder="Texas", exclude_folders=["All", "Global"])
+
+# Exclude tags with certain snippet values
+no_predefined_snippet = tags.list(folder="Texas", exclude_snippets=["predefined"])
+
+# Exclude tags associated with certain devices
+no_device_tags = tags.list(folder="Texas", exclude_devices=["DeviceA", "DeviceB"])
+```
+
+You can combine these filters:
+
+```python
+# Combine exact_match with exclusion filters and colors
+refined_tags = tags.list(
+  folder="Texas",
+  exact_match=True,
+  exclude_folders=["All"],
+  exclude_snippets=["predefined-snippet"],
+  exclude_devices=["LegacyDevice"],
+  colors=["Red", "Blue"]
+)
+```
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `types`, `values`, and `tags`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Only return tags defined exactly in 'Texas'
+exact_tags = tags.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for app in exact_tags:
+   print(f"Exact match: {app.name} in {app.folder}")
+
+# Exclude all tags from the 'All' folder
+no_all_tags = tags.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for app in no_all_tags:
+   assert app.folder != 'All'
+   print(f"Filtered out 'All': {app.name}")
+
+# Exclude tags that come from 'default' snippet
+no_default_snippet = tags.list(
+   folder='Texas',
+   exclude_snippets=['default']
+)
+
+for app in no_default_snippet:
+   assert app.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {app.name}")
+
+# Exclude tags associated with 'DeviceA'
+no_deviceA = tags.list(
+   folder='Texas',
+   exclude_devices=['DeviceA']
+)
+
+for app in no_deviceA:
+   assert app.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {app.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = tags.list(
+   folder='Texas',
+   exact_match=True,
+   exclude_folders=['All'],
+   exclude_snippets=['default'],
+   exclude_devices=['DeviceA']
+)
+
+for app in combined_filters:
+   print(f"Combined filters result: {app.name} in {app.folder}")
+```
+
 
 ### Deleting Tags
 
@@ -224,15 +334,14 @@ tags.delete(tag_id)
 ```python
 # Prepare commit parameters
 commit_params = {
-    "folders": ["Texas"],
-    "description": "Updated tag definitions",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
+  "folders": ["Texas"],
+  "description": "Updated tag definitions",
+  "sync": True,
+  "timeout": 300  # 5 minute timeout
 }
 
 # Commit the changes
 result = tags.commit(**commit_params)
-
 print(f"Commit job ID: {result.job_id}")
 ```
 
@@ -252,7 +361,7 @@ print(f"Job status: {job_status.data[0].status_str}")
 # List recent jobs
 recent_jobs = tags.list_jobs(limit=10)
 for job in recent_jobs.data:
-    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+  print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -265,45 +374,45 @@ for job in recent_jobs.data:
 
 ```python
 from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-    NameNotUniqueError,
-    ObjectNotPresentError,
-    ReferenceNotZeroError
+  InvalidObjectError,
+  MissingQueryParameterError,
+  NameNotUniqueError,
+  ObjectNotPresentError,
+  ReferenceNotZeroError
 )
 
 try:
-    # Create tag configuration
-    tag_config = {
-        "name": "test_tag",
-        "color": "Red",
-        "folder": "Texas",
-        "comments": "Test tag"
-    }
+  # Create tag configuration
+  tag_config = {
+      "name": "test_tag",
+      "color": "Red",
+      "folder": "Texas",
+      "comments": "Test tag"
+  }
 
-    # Create the tag
-    new_tag = tags.create(tag_config)
+  # Create the tag
+  new_tag = tags.create(tag_config)
 
-    # Commit changes
-    result = tags.commit(
-        folders=["Texas"],
-        description="Added test tag",
-        sync=True
-    )
+  # Commit changes
+  result = tags.commit(
+      folders=["Texas"],
+      description="Added test tag",
+      sync=True
+  )
 
-    # Check job status
-    status = tags.get_job_status(result.job_id)
+  # Check job status
+  status = tags.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
-    print(f"Invalid tag data: {e.message}")
+  print(f"Invalid tag data: {e.message}")
 except NameNotUniqueError as e:
-    print(f"Tag name already exists: {e.message}")
+  print(f"Tag name already exists: {e.message}")
 except ObjectNotPresentError as e:
-    print(f"Tag not found: {e.message}")
+  print(f"Tag not found: {e.message}")
 except ReferenceNotZeroError as e:
-    print(f"Tag still in use: {e.message}")
+  print(f"Tag still in use: {e.message}")
 except MissingQueryParameterError as e:
-    print(f"Missing parameter: {e.message}")
+  print(f"Missing parameter: {e.message}")
 ```
 
 </div>
@@ -311,43 +420,42 @@ except MissingQueryParameterError as e:
 ## Best Practices
 
 1. **Color Management**
-    - Use standard color names from predefined list
-    - Maintain consistent color schemes
-    - Document color meanings
-    - Validate colors before creation
-    - Consider color visibility
+   - Use standard color names from predefined list
+   - Maintain consistent color schemes
+   - Document color meanings
+   - Validate colors before creation
+   - Consider color visibility
 
 2. **Container Management**
-    - Always specify exactly one container (folder, snippet, or device)
-    - Use consistent container names
-    - Validate container existence
-    - Group related tags
+   - Always specify exactly one container (folder, snippet, or device)
+   - Use consistent container names
+   - Validate container existence
+   - Group related tags
 
 3. **Naming Conventions**
-    - Use descriptive names
-    - Follow consistent patterns
-    - Avoid special characters
-    - Document naming standards
-    - Consider hierarchical naming
+   - Use descriptive names
+   - Follow consistent patterns
+   - Avoid special characters
+   - Document naming standards
+   - Consider hierarchical naming
 
 4. **Performance**
-    - Cache frequently used tags
-    - Use appropriate pagination
-    - Implement proper retry logic
-    - Monitor API limits
-    - Batch operations when possible
+   - Cache frequently used tags
+   - Use appropriate pagination
+   - Implement proper retry logic
+   - Monitor API limits
+   - Batch operations when possible
 
 5. **Error Handling**
-    - Validate input data
-    - Handle specific exceptions
-    - Log error details
-    - Monitor commit status
-    - Track job completion
+   - Validate input data
+   - Handle specific exceptions
+   - Log error details
+   - Monitor commit status
+   - Track job completion
 
 ## Full Script Examples
 
-Refer to
-the [tag.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/tag.py).
+Refer to the [tag.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/tag.py).
 
 ## Related Models
 

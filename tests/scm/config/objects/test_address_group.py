@@ -275,6 +275,149 @@ class TestAddressGroupList(TestAddressGroupBase):
         with pytest.raises(HTTPError):
             self.client.list(folder="Texas")
 
+    # -------------------- New Tests for exact_match and Exclusions --------------------
+
+    def test_list_exact_match(self):
+        """
+        Test that exact_match=True returns only address groups that match the container exactly.
+        """
+        mock_response = {
+            "data": [
+                AddressGroupResponseFactory.with_static(
+                    name="group_in_texas", folder="Texas", static=["address1"]
+                ).model_dump(),
+                AddressGroupResponseFactory.with_static(
+                    name="group_in_all", folder="All", static=["address2"]
+                ).model_dump(),
+            ]
+        }
+
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        filtered = self.client.list(folder="Texas", exact_match=True)
+        # exact_match should exclude the one from "All"
+        assert len(filtered) == 1
+        assert filtered[0].folder == "Texas"
+        assert filtered[0].name == "group_in_texas"
+
+    def test_list_exclude_folders(self):
+        """
+        Test that exclude_folders removes address groups from those folders.
+        """
+        mock_response = {
+            "data": [
+                AddressGroupResponseFactory.with_static(
+                    name="group_in_texas", folder="Texas", static=["address1"]
+                ).model_dump(),
+                AddressGroupResponseFactory.with_static(
+                    name="group_in_all", folder="All", static=["address2"]
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_folders=["All"])
+        assert len(filtered) == 1
+        assert all(g.folder != "All" for g in filtered)
+
+    def test_list_exclude_snippets(self):
+        """
+        Test that exclude_snippets removes address groups with those snippets.
+        """
+        mock_response = {
+            "data": [
+                AddressGroupResponseFactory.with_static(
+                    name="group_default_snippet",
+                    folder="Texas",
+                    snippet="default",
+                    static=["address1"],
+                ).model_dump(),
+                AddressGroupResponseFactory.with_static(
+                    name="group_special_snippet",
+                    folder="Texas",
+                    snippet="special",
+                    static=["address2"],
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert all(g.snippet != "default" for g in filtered)
+
+    def test_list_exclude_devices(self):
+        """
+        Test that exclude_devices removes address groups from those devices.
+        """
+        mock_response = {
+            "data": [
+                AddressGroupResponseFactory.with_static(
+                    name="group_deviceA",
+                    folder="Texas",
+                    device="DeviceA",
+                    static=["address1"],
+                ).model_dump(),
+                AddressGroupResponseFactory.with_static(
+                    name="group_deviceB",
+                    folder="Texas",
+                    device="DeviceB",
+                    static=["address2"],
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
+        assert len(filtered) == 1
+        assert all(g.device != "DeviceA" for g in filtered)
+
+    def test_list_exact_match_and_exclusions(self):
+        """
+        Test combining exact_match with exclusions.
+        """
+        mock_response = {
+            "data": [
+                AddressGroupResponseFactory.with_static(
+                    name="group_texas_default_deviceA",
+                    folder="Texas",
+                    snippet="default",
+                    device="DeviceA",
+                    static=["addr1"],
+                ).model_dump(),
+                AddressGroupResponseFactory.with_static(
+                    name="group_texas_special_deviceB",
+                    folder="Texas",
+                    snippet="special",
+                    device="DeviceB",
+                    static=["addr2"],
+                ).model_dump(),
+                AddressGroupResponseFactory.with_static(
+                    name="group_all_default_deviceA",
+                    folder="All",
+                    snippet="default",
+                    device="DeviceA",
+                    static=["addr3"],
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        filtered = self.client.list(
+            folder="Texas",
+            exact_match=True,
+            exclude_folders=["All"],
+            exclude_snippets=["default"],
+            exclude_devices=["DeviceA"],
+        )
+
+        # Only group_texas_special_deviceB should remain after all filters
+        assert len(filtered) == 1
+        obj = filtered[0]
+        assert obj.folder == "Texas"
+        assert obj.snippet != "default"
+        assert obj.device != "DeviceA"
+
 
 class TestAddressGroupCreate(TestAddressGroupBase):
     """Tests for creating Address Group objects."""
@@ -416,7 +559,6 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
 
     def test_update_valid_object(self):
         """Test updating an address group with valid data."""
-        # Create update data using factory
         update_data = AddressGroupUpdateApiFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-group",
@@ -425,30 +567,21 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
             folder="Texas",
         )
 
-        # Create mock response
         mock_response = AddressGroupResponseFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
 
-        # Perform update with Pydantic model directly
         updated_object = self.client.update(update_data)
 
-        # Verify call was made once
         self.mock_scm.put.assert_called_once()  # noqa
-
-        # Get the actual call arguments
         call_args = self.mock_scm.put.call_args  # noqa
-
-        # Check endpoint
         assert call_args[0][0] == f"/config/objects/v1/address-groups/{update_data.id}"
 
-        # Check important payload fields
         payload = call_args[1]["json"]
         assert payload["name"] == "updated-group"
         assert payload["static"] == ["address3", "address4"]
         assert payload["description"] == "Updated description"
         assert payload["folder"] == "Texas"
 
-        # Assert the updated object matches the mock response
         assert isinstance(updated_object, AddressGroupResponseModel)
         assert str(updated_object.id) == str(mock_response.id)
         assert updated_object.name == mock_response.name
@@ -483,23 +616,19 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
-        # Create test data using factory
         update_data = AddressGroupUpdateApiFactory.with_static(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
             static=["address1", "address2"],
         )
 
-        # Create mock response without content
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
 
-        # Create HTTPError with mock response
         mock_http_error = HTTPError(response=mock_response)
         self.mock_scm.put.side_effect = mock_http_error  # noqa
 
-        # Test with Pydantic model
         with pytest.raises(HTTPError):
             self.client.update(update_data)
 
@@ -569,13 +698,11 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 
         self.mock_scm.get.return_value = mock_response_data  # noqa
 
-        # Call the fetch method
         fetched_object = self.client.fetch(
             name=mock_response_model.name,
             folder=mock_response_model.folder,
         )
 
-        # Assert that the GET request was made with the correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
@@ -584,7 +711,6 @@ class TestAddressGroupFetch(TestAddressGroupBase):
             },
         )
 
-        # Validate the returned object
         assert isinstance(fetched_object, AddressGroupResponseModel)
         assert str(fetched_object.id) == str(mock_response_model.id)
         assert fetched_object.name == mock_response_model.name
@@ -648,7 +774,6 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
-        # Mock the API client to return a non-dictionary response
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -662,7 +787,6 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 
     def test_fetch_missing_id_field_error(self):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""
-        # Mock response without 'id' field
         mock_response = {
             "name": "test-group",
             "folder": "Texas",

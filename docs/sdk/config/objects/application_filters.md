@@ -12,6 +12,7 @@
     - [Retrieving Application Filters](#retrieving-application-filters)
     - [Updating Application Filters](#updating-application-filters)
     - [Listing Application Filters](#listing-application-filters)
+    - [Filtering Responses](#filtering-responses)
     - [Deleting Application Filters](#deleting-application-filters)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -210,6 +211,80 @@ filtered_results = app_filters.list(**list_params)
 ```
 
 </div>
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `category`, `subcategory`, `technology`, and `risk`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Only return filters defined exactly in 'Texas'
+exact_filters = app_filters.list(
+    folder='Texas',
+    exact_match=True
+)
+
+for f in exact_filters:
+    print(f"Exact match: {f.name} in {f.folder}")
+
+# Exclude all filters from the 'All' folder
+no_all_filters = app_filters.list(
+    folder='Texas',
+    exclude_folders=['All']
+)
+
+for f in no_all_filters:
+    assert f.folder != 'All'
+    print(f"Filtered out 'All': {f.name}")
+
+# Exclude filters that come from 'default' snippet
+no_default_snippet = app_filters.list(
+    folder='Texas',
+    exclude_snippets=['default']
+)
+
+for f in no_default_snippet:
+    assert f.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {f.name}")
+
+# Exclude filters associated with 'DeviceA'
+no_deviceA = app_filters.list(
+    folder='Texas',
+    exclude_devices=['DeviceA']
+)
+
+for f in no_deviceA:
+    assert f.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {f.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = app_filters.list(
+    folder='Texas',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default'],
+    exclude_devices=['DeviceA']
+)
+
+for f in combined_filters:
+    print(f"Combined filters result: {f.name} in {f.folder}")
+```
+
+</div>
+
 
 ### Deleting Application Filters
 

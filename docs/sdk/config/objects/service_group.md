@@ -12,6 +12,7 @@
     - [Retrieving Service Groups](#retrieving-service-groups)
     - [Updating Service Groups](#updating-service-groups)
     - [Listing Service Groups](#listing-service-groups)
+    - [Filtering Responses](#filtering-responses)
     - [Deleting Service Groups](#deleting-service-groups)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -190,6 +191,77 @@ filtered_groups = service_groups.list(**list_params)
 ```
 
 </div>
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `types`, `values`, and `tags`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Only return service_groups defined exactly in 'Texas'
+exact_service_groups = service_groups.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for app in exact_service_groups:
+   print(f"Exact match: {app.name} in {app.folder}")
+
+# Exclude all service_groups from the 'All' folder
+no_all_service_groups = service_groups.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for app in no_all_service_groups:
+   assert app.folder != 'All'
+   print(f"Filtered out 'All': {app.name}")
+
+# Exclude service_groups that come from 'default' snippet
+no_default_snippet = service_groups.list(
+   folder='Texas',
+   exclude_snippets=['default']
+)
+
+for app in no_default_snippet:
+   assert app.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {app.name}")
+
+# Exclude service_groups associated with 'DeviceA'
+no_deviceA = service_groups.list(
+   folder='Texas',
+   exclude_devices=['DeviceA']
+)
+
+for app in no_deviceA:
+   assert app.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {app.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = service_groups.list(
+   folder='Texas',
+   exact_match=True,
+   exclude_folders=['All'],
+   exclude_snippets=['default'],
+   exclude_devices=['DeviceA']
+)
+
+for app in combined_filters:
+   print(f"Combined filters result: {app.name} in {app.folder}")
+```
 
 ### Deleting Service Groups
 
