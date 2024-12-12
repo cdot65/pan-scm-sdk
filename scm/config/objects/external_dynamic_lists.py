@@ -192,6 +192,10 @@ class ExternalDynamicLists(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
         device: Optional[str] = None,
+        exact_match: bool = False,
+        exclude_folders: Optional[List[str]] = None,
+        exclude_snippets: Optional[List[str]] = None,
+        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ExternalDynamicListsResponseModel]:
         """
@@ -201,6 +205,11 @@ class ExternalDynamicLists(BaseObject):
             folder: Optional folder name
             snippet: Optional snippet name
             device: Optional device name
+            exact_match (bool): If True, only return objects whose container
+                                exactly matches the provided container parameter.
+            exclude_folders (List[str], optional): List of folder names to exclude from results.
+            exclude_snippets (List[str], optional): List of snippet values to exclude from results.
+            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - types: List[str] - Filter by address types (e.g., ['netmask', 'range'])
                 - values: List[str] - Filter by address values (e.g., ['10.0.0.0/24'])
@@ -273,10 +282,32 @@ class ExternalDynamicLists(BaseObject):
 
         edls = [ExternalDynamicListsResponseModel(**item) for item in response["data"]]
 
-        return self._apply_filters(
+        # Apply existing filters first
+        edls = self._apply_filters(
             edls,
             filters,
         )
+
+        # Determine which container key and value we are filtering on
+        container_key, container_value = next(iter(container_parameters.items()))
+
+        # If exact_match is True, filter out edls that don't match exactly
+        if exact_match:
+            edls = [a for a in edls if getattr(a, container_key) == container_value]
+
+        # Exclude folders if provided
+        if exclude_folders and isinstance(exclude_folders, list):
+            edls = [a for a in edls if a.folder not in exclude_folders]
+
+        # Exclude snippets if provided
+        if exclude_snippets and isinstance(exclude_snippets, list):
+            edls = [a for a in edls if a.snippet not in exclude_snippets]
+
+        # Exclude devices if provided
+        if exclude_devices and isinstance(exclude_devices, list):
+            edls = [a for a in edls if a.device not in exclude_devices]
+
+        return edls
 
     def fetch(
         self,
