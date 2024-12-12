@@ -198,7 +198,6 @@ class Application(BaseObject):
         exact_match: bool = False,
         exclude_folders: Optional[List[str]] = None,
         exclude_snippets: Optional[List[str]] = None,
-        exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationResponseModel]:
         """
@@ -212,7 +211,6 @@ class Application(BaseObject):
                                 exactly matches the provided container parameter.
             exclude_folders (List[str], optional): List of folder names to exclude from results.
             exclude_snippets (List[str], optional): List of snippet values to exclude from results.
-            exclude_devices (List[str], optional): List of device values to exclude from results.
             **filters: Additional filters including:
                 - category: List[str] - Filter by category
                 - subcategory: List[str] - Filter by subcategory
@@ -309,12 +307,6 @@ class Application(BaseObject):
         if exclude_snippets and isinstance(exclude_snippets, list):
             applications = [
                 app for app in applications if app.snippet not in exclude_snippets
-            ]
-
-        # Exclude devices if provided
-        if exclude_devices and isinstance(exclude_devices, list):
-            applications = [
-                app for app in applications if app.device not in exclude_devices
             ]
 
         return applications
