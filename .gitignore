@@ -255,5 +255,5 @@ poetry.lock
 .idea/modules.xml
 .DS_Store
 
-# Ignore dynaconf secret files
-examples/scm/config/objects/.secrets.yaml
+# ignore local developer test files
+_test_*.py
