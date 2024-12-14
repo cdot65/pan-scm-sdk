@@ -46,10 +46,55 @@ class TestSecurityRuleBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = SecurityRule(self.mock_scm)  # noqa
+        self.client = SecurityRule(self.mock_scm, max_limit=5000)  # noqa
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestSecurityRuleMaxLimit(TestSecurityRuleBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = SecurityRule(self.mock_scm)  # noqa
+        assert client.max_limit == SecurityRule.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = SecurityRule(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = SecurityRule(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            SecurityRule(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            SecurityRule(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            SecurityRule(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
 class TestSecurityRuleList(TestSecurityRuleBase):
@@ -81,9 +126,9 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
             params={
-                "limit": 10000,
                 "folder": "Texas",
-                "position": "pre",
+                "limit": 5000,
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -633,6 +678,105 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
         assert obj.device != "DeviceA"
+
+    def test_list_pagination_multiple_pages(self):
+        """
+        Test that the list method correctly aggregates data from multiple pages.
+        Using a custom client with max_limit=2500 to test pagination.
+        """
+        client = SecurityRule(self.mock_scm, max_limit=2500)  # noqa
+
+        # Create test data for three pages
+        first_page = [
+            SecurityRuleResponseFactory(
+                name=f"allow-rule-page1-{i}",
+                folder="Texas",
+                action=SecurityRuleAction.allow,
+                source=["10.0.0.0/24"],
+                destination=["any"],
+                from_=["trust"],
+                to_=["untrust"],
+            ).model_dump(by_alias=True)
+            for i in range(2500)
+        ]
+
+        second_page = [
+            SecurityRuleResponseFactory(
+                name=f"deny-rule-page2-{i}",
+                folder="Texas",
+                action=SecurityRuleAction.deny,
+                source=["any"],
+                destination=["10.1.0.0/24"],
+                from_=["untrust"],
+                to_=["trust"],
+            ).model_dump(by_alias=True)
+            for i in range(2500)
+        ]
+
+        third_page = [
+            SecurityRuleResponseFactory(
+                name=f"drop-rule-page3-{i}",
+                folder="Texas",
+                action=SecurityRuleAction.drop,
+                source=["192.168.1.0/24"],
+                destination=["any"],
+                from_=["dmz"],
+                to_=["trust"],
+            ).model_dump(by_alias=True)
+            for i in range(2500)
+        ]
+
+        # Mock API responses for pagination
+        mock_responses = [
+            {"data": first_page},
+            {"data": second_page},
+            {"data": third_page},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
+
+        # Get results
+        results = client.list(folder="Texas")
+
+        # Verify results
+        assert len(results) == 7500  # Total objects across all pages
+        assert isinstance(results[0], SecurityRuleResponseModel)
+        assert all(isinstance(obj, SecurityRuleResponseModel) for obj in results)
+
+        # Verify API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify API calls were made with correct offset values
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/security-rules",
+            params={"folder": "Texas", "limit": 2500, "offset": 0},
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/security-rules",
+            params={"folder": "Texas", "limit": 2500, "offset": 2500},
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/security-rules",
+            params={"folder": "Texas", "limit": 2500, "offset": 5000},
+        )
+
+        # Verify content ordering and rule-specific attributes
+        assert results[0].name == "allow-rule-page1-0"
+        assert results[0].action == SecurityRuleAction.allow
+        assert results[0].source == ["10.0.0.0/24"]
+        assert results[0].from_ == ["trust"]
+
+        assert results[2500].name == "deny-rule-page2-0"
+        assert results[2500].action == SecurityRuleAction.deny
+        assert results[2500].destination == ["10.1.0.0/24"]
+        assert results[2500].to_ == ["trust"]
+
+        assert results[5000].name == "drop-rule-page3-0"
+        assert results[5000].action == SecurityRuleAction.drop
+        assert results[5000].source == ["192.168.1.0/24"]
+        assert results[5000].from_ == ["dmz"]
 
 
 class TestSecurityRuleCreate(TestSecurityRuleBase):

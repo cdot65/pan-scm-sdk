@@ -36,10 +36,55 @@ class TestAddressBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = Address(self.mock_scm)  # noqa
+        self.client = Address(self.mock_scm, max_limit=5000)  # noqa
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestAddressMaxLimit(TestAddressBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = Address(self.mock_scm)  # noqa
+        assert client.max_limit == Address.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = Address(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = Address(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            Address(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            Address(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            Address(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
 class TestAddressList(TestAddressBase):
@@ -487,65 +532,55 @@ class TestAddressList(TestAddressBase):
 
     def test_list_pagination_multiple_pages(self):
         """
-        Test that the list method correctly aggregates data from multiple pages when
-        more than 5000 objects are returned.
-
-        We will create a scenario with 12,345 objects:
-        - First API call returns 5000 objects.
-        - Second API call returns another 5000 objects.
-        - Third API call returns the remaining 2345 objects.
+        Test that the list method correctly aggregates data from multiple pages.
+        Using a custom client with max_limit=2500 to test pagination.
         """
-        total_objects = 12345
-        first_batch_count = 5000
-        second_batch_count = 5000
-        third_batch_count = (
-            total_objects - first_batch_count - second_batch_count
-        )  # 2345
+        client = Address(self.mock_scm, max_limit=2500)  # noqa
 
-        # Create batches using the factory in a similar manner to existing tests
+        # Create test data
+        total_objects = 7500  # Three pages worth
         first_batch = [
             AddressResponseFactory.with_ip_netmask(ip_netmask=f"10.0.0.{i % 254}/32")
-            for i in range(first_batch_count)
+            for i in range(2500)
         ]
         second_batch = [
             AddressResponseFactory.with_ip_netmask(ip_netmask=f"10.0.1.{i % 254}/32")
-            for i in range(second_batch_count)
+            for i in range(2500)
         ]
         third_batch = [
             AddressResponseFactory.with_ip_netmask(ip_netmask=f"10.0.2.{i % 254}/32")
-            for i in range(third_batch_count)
+            for i in range(2500)
         ]
-        # Convert them to dicts for the mock responses
-        first_page = {"data": [obj.model_dump() for obj in first_batch]}
-        second_page = {"data": [obj.model_dump() for obj in second_batch]}
-        third_page = {"data": [obj.model_dump() for obj in third_batch]}
 
-        def mock_get(endpoint, params):
-            offset = params.get("offset", 0)
-            if offset == 0:
-                return first_page
-            elif offset == 5000:
-                return second_page
-            elif offset == 10000:
-                return third_page
-            else:
-                # No more data
-                return {"data": []}
+        # Set up mock responses
+        mock_responses = [
+            {"data": [obj.model_dump() for obj in first_batch]},
+            {"data": [obj.model_dump() for obj in second_batch]},
+            {"data": [obj.model_dump() for obj in third_batch]},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
 
-        # Set our mock to the new side_effect
-        self.mock_scm.get.side_effect = mock_get
+        # Get results
+        results = client.list(folder="Texas")
 
-        # Invoke the list method; it should loop through all pages
-        results = self.client.list(folder="Texas")
-
-        # Validate that we received all objects
+        # Verify results
         assert len(results) == total_objects
+        assert isinstance(results[0], AddressResponseModel)
         assert all(isinstance(r, AddressResponseModel) for r in results)
 
-        # Optional: check first and last objects to ensure correct ordering/consistency
-        # Since factories usually increment sequences, verify at least that the fields are present
-        assert hasattr(results[0], "name")
-        assert hasattr(results[-1], "name")
+        # Verify the number of API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify first API call used correct parameters
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/addresses",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 0,
+            },
+        )
 
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
@@ -594,7 +629,7 @@ class TestAddressList(TestAddressBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filtered = self.client.list(folder="Texas", exclude_folders=["All"])
         assert len(filtered) == 1
@@ -620,7 +655,7 @@ class TestAddressList(TestAddressBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
         assert len(filtered) == 1
@@ -648,7 +683,7 @@ class TestAddressList(TestAddressBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
         assert len(filtered) == 1
@@ -686,7 +721,7 @@ class TestAddressList(TestAddressBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response
+        self.mock_scm.get.return_value = mock_response  # noqa
 
         filtered = self.client.list(
             folder="Texas",

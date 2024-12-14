@@ -34,10 +34,55 @@ class TestApplicationBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = Application(self.mock_scm)  # noqa
+        self.client = Application(self.mock_scm, max_limit=5000)  # noqa
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestApplicationMaxLimit(TestApplicationBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = Application(self.mock_scm)  # noqa
+        assert client.max_limit == Application.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = Application(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = Application(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            Application(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            Application(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            Application(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
 class TestApplicationList(TestApplicationBase):
@@ -81,8 +126,9 @@ class TestApplicationList(TestApplicationBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/applications",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -169,8 +215,9 @@ class TestApplicationList(TestApplicationBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/applications",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert len(result) == 1
@@ -422,6 +469,115 @@ class TestApplicationList(TestApplicationBase):
         obj = filtered[0]
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
+
+    def test_list_pagination_multiple_pages(self):
+        """
+        Test that the list method correctly aggregates data from multiple pages.
+        Using a custom client with max_limit=2500 to test pagination.
+        """
+        client = Application(self.mock_scm, max_limit=2500)  # noqa
+
+        # Create test data for three pages
+        first_page = [
+            ApplicationResponseFactory(
+                name=f"p2p-app-page1-{i}",
+                folder="Texas",
+                category="general-internet",
+                subcategory="file-sharing",
+                technology="peer-to-peer",
+                risk=5,
+                evasive=True,
+                pervasive=True,
+                ports=["tcp/3468,6346,11300"],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        second_page = [
+            ApplicationResponseFactory(
+                name=f"business-app-page2-{i}",
+                folder="Texas",
+                category="business-systems",
+                subcategory="ics-protocols",
+                technology="client-server",
+                risk=2,
+                ports=["tcp/2404"],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        third_page = [
+            ApplicationResponseFactory(
+                name=f"web-app-page3-{i}",
+                folder="Texas",
+                category="web-applications",
+                subcategory="social-networking",
+                technology="browser-based",
+                risk=3,
+                ports=["tcp/443,80"],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        # Mock API responses for pagination
+        mock_responses = [
+            {"data": first_page},
+            {"data": second_page},
+            {"data": third_page},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
+
+        # Get results
+        results = client.list(folder="Texas")
+
+        # Verify results
+        assert len(results) == 7500  # Total objects across all pages
+        assert isinstance(results[0], ApplicationResponseModel)
+        assert all(isinstance(obj, ApplicationResponseModel) for obj in results)
+
+        # Verify API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify API calls were made with correct offset values
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/applications",
+            params={"folder": "Texas", "limit": 2500, "offset": 0},
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/applications",
+            params={"folder": "Texas", "limit": 2500, "offset": 2500},
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/applications",
+            params={"folder": "Texas", "limit": 2500, "offset": 5000},
+        )
+
+        # Verify content ordering and application-specific attributes
+        # First page - P2P applications
+        assert results[0].name == "p2p-app-page1-0"
+        assert results[0].category == "general-internet"
+        assert results[0].subcategory == "file-sharing"
+        assert results[0].technology == "peer-to-peer"
+        assert results[0].risk == 5
+        assert results[0].evasive is True
+        assert results[0].pervasive is True
+
+        # Second page - Business applications
+        assert results[2500].name == "business-app-page2-0"
+        assert results[2500].category == "business-systems"
+        assert results[2500].subcategory == "ics-protocols"
+        assert results[2500].technology == "client-server"
+        assert results[2500].risk == 2
+
+        # Third page - Web applications
+        assert results[5000].name == "web-app-page3-0"
+        assert results[5000].category == "web-applications"
+        assert results[5000].subcategory == "social-networking"
+        assert results[5000].technology == "browser-based"
+        assert results[5000].risk == 3
 
 
 class TestApplicationCreate(TestApplicationBase):
