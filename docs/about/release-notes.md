@@ -1,3 +1,8 @@
+## Version 0.3.6
+
+- Auto-paginiation when using the `list()` method
+- Support for controlling the maximum amount of objects returned in a request (default: 2500, max: 5000)
+
 ## Version 0.3.5
 
 - Added support performing advanced filtering capabilities
