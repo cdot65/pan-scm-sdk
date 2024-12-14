@@ -202,6 +202,7 @@ The `list()` method supports additional parameters to refine your query results 
 parameters to control which objects are included or excluded after the initial API response is fetched.
 
 **Parameters:**
+
 - `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned.
 - `exclude_folders (List[str])`: List of folders to exclude.
 - `exclude_snippets (List[str])`: List of snippets to exclude.

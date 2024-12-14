@@ -226,6 +226,7 @@ The `list()` method supports additional parameters to refine your query results 
 parameters to control which objects are included or excluded after the initial API response is fetched.
 
 **Parameters:**
+
 - `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder` or `snippet`) are returned. Inherited or propagated objects are filtered out.
 - `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
 - `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
