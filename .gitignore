@@ -236,7 +236,7 @@ atlassian-ide-plugin.xml
 .idea/scm-sdk.iml
 
 # Exclude secrets.yaml files
-.secrets.yaml
+examples/scm/config/objects/.secrets.yaml
 secrets.yaml
 
 # Exclude poetry lock
@@ -253,5 +253,7 @@ poetry.lock
 /dataSources.local.xml
 /.idea/pan-scm-sdk.iml
 .idea/modules.xml
-openapi
 .DS_Store
+
+# ignore local developer test files
+_test_*.py

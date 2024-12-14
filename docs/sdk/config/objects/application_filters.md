@@ -13,6 +13,7 @@
     - [Updating Application Filters](#updating-application-filters)
     - [Listing Application Filters](#listing-application-filters)
     - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Application Filters](#deleting-application-filters)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -85,18 +86,18 @@ and behaviors.
 <!-- termynal -->
 
 ```python
-from scm.client import Scm
-from scm.config.objects import ApplicationFilters
+    from scm.client import Scm
+    from scm.config.objects import ApplicationFilters
 
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
+    # Initialize client
+    client = Scm(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id"
+    )
 
-# Initialize ApplicationFilters object
-app_filters = ApplicationFilters(client)
+    # Initialize ApplicationFilters object
+    app_filters = ApplicationFilters(client)
 ```
 
 </div>
@@ -110,30 +111,30 @@ app_filters = ApplicationFilters(client)
 <!-- termynal -->
 
 ```python
-# High-risk applications filter
-high_risk_filter = {
-    "name": "high-risk-apps",
-    "category": ["business-systems", "collaboration"],
-    "risk": [4, 5],
-    "folder": "Texas",
-    "has_known_vulnerabilities": True,
-    "used_by_malware": True
-}
+    # High-risk applications filter
+    high_risk_filter = {
+        "name": "high-risk-apps",
+        "category": ["business-systems", "collaboration"],
+        "risk": [4, 5],
+        "folder": "Texas",
+        "has_known_vulnerabilities": True,
+        "used_by_malware": True
+    }
 
-# Create high-risk filter
-high_risk = app_filters.create(high_risk_filter)
+    # Create high-risk filter
+    high_risk = app_filters.create(high_risk_filter)
 
-# SaaS applications filter
-saas_filter = {
-    "name": "saas-apps",
-    "folder": "Texas",
-    "is_saas": True,
-    "saas_risk": ["high", "medium"],
-    "saas_certifications": ["soc2", "iso27001"]
-}
+    # SaaS applications filter
+    saas_filter = {
+        "name": "saas-apps",
+        "folder": "Texas",
+        "is_saas": True,
+        "saas_risk": ["high", "medium"],
+        "saas_certifications": ["soc2", "iso27001"]
+    }
 
-# Create SaaS filter
-saas = app_filters.create(saas_filter)
+    # Create SaaS filter
+    saas = app_filters.create(saas_filter)
 ```
 
 </div>
@@ -145,14 +146,14 @@ saas = app_filters.create(saas_filter)
 <!-- termynal -->
 
 ```python
-# Fetch by name and folder
-filter_obj = app_filters.fetch(name="high-risk-apps", folder="Texas")
-print(f"Found filter: {filter_obj.name}")
+    # Fetch by name and folder
+    filter_obj = app_filters.fetch(name="high-risk-apps", folder="Texas")
+    print(f"Found filter: {filter_obj.name}")
 
-# Get by ID
-filter_by_id = app_filters.get(filter_obj.id)
-print(f"Retrieved filter: {filter_by_id.name}")
-print(f"Risk levels: {filter_by_id.risk}")
+    # Get by ID
+    filter_by_id = app_filters.get(filter_obj.id)
+    print(f"Retrieved filter: {filter_by_id.name}")
+    print(f"Risk levels: {filter_by_id.risk}")
 ```
 
 </div>
@@ -164,17 +165,17 @@ print(f"Risk levels: {filter_by_id.risk}")
 <!-- termynal -->
 
 ```python
-# Fetch existing filter
-existing_filter = app_filters.fetch(name="high-risk-apps", folder="Texas")
+    # Fetch existing filter
+    existing_filter = app_filters.fetch(name="high-risk-apps", folder="Texas")
 
-# Update filter criteria
-existing_filter.risk = [3, 4, 5]
-existing_filter.category.append("networking")
-existing_filter.prone_to_misuse = True
-existing_filter.tunnels_other_apps = True
+    # Update filter criteria
+    existing_filter.risk = [3, 4, 5]
+    existing_filter.category.append("networking")
+    existing_filter.prone_to_misuse = True
+    existing_filter.tunnels_other_apps = True
 
-# Perform update
-updated_filter = app_filters.update(existing_filter)
+    # Perform update
+    updated_filter = app_filters.update(existing_filter)
 ```
 
 </div>
@@ -186,105 +187,114 @@ updated_filter = app_filters.update(existing_filter)
 <!-- termynal -->
 
 ```python
-# List with direct filter parameters
-filtered_results = app_filters.list(
-    folder='Texas',
-    category=['business-systems'],
-    risk=[4, 5]
-)
+    # List with direct filter parameters
+    filtered_results = app_filters.list(
+        folder='Texas',
+        category=['business-systems'],
+        risk=[4, 5]
+    )
 
-# Process results
-for filter_obj in filtered_results:
-    print(f"Name: {filter_obj.name}")
-    print(f"Categories: {filter_obj.category}")
-    print(f"Risk levels: {filter_obj.risk}")
+    # Process results
+    for filter_obj in filtered_results:
+        print(f"Name: {filter_obj.name}")
+        print(f"Categories: {filter_obj.category}")
+        print(f"Risk levels: {filter_obj.risk}")
 
-# Define filter parameters as dictionary
-list_params = {
-    "folder": "Texas",
-    "technology": ["client-server"],
-    "subcategory": ["database"]
-}
+    # Define filter parameters as dictionary
+    list_params = {
+        "folder": "Texas",
+        "technology": ["client-server"],
+        "subcategory": ["database"]
+    }
 
-# List with filters as kwargs
-filtered_results = app_filters.list(**list_params)
+    # List with filters as kwargs
+    filtered_results = app_filters.list(**list_params)
 ```
 
 </div>
 
 ### Filtering Responses
 
-The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
-(like `category`, `subcategory`, `technology`, and `risk`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
-`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+<div class="termy">
 
-**Parameters:**
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+<!-- termynal -->
 
-**Examples:**
+```python
+    # Only return filters defined exactly in 'Texas'
+    exact_filters = app_filters.list(
+        folder='Texas',
+        exact_match=True
+    )
+
+    for f in exact_filters:
+        print(f"Exact match: {f.name} in {f.folder}")
+
+    # Exclude all filters from the 'All' folder
+    no_all_filters = app_filters.list(
+        folder='Texas',
+        exclude_folders=['All']
+    )
+
+    for f in no_all_filters:
+        assert f.folder != 'All'
+        print(f"Filtered out 'All': {f.name}")
+
+    # Exclude filters that come from 'default' snippet
+    no_default_snippet = app_filters.list(
+        folder='Texas',
+        exclude_snippets=['default']
+    )
+
+    for f in no_default_snippet:
+        assert f.snippet != 'default'
+        print(f"Filtered out 'default' snippet: {f.name}")
+
+    # Exclude filters associated with 'DeviceA'
+    no_deviceA = app_filters.list(
+        folder='Texas',
+        exclude_devices=['DeviceA']
+    )
+
+    for f in no_deviceA:
+        assert f.device != 'DeviceA'
+        print(f"Filtered out 'DeviceA': {f.name}")
+
+    # Combine exact_match with multiple exclusions
+    combined_filters = app_filters.list(
+        folder='Texas',
+        exact_match=True,
+        exclude_folders=['All'],
+        exclude_snippets=['default'],
+        exclude_devices=['DeviceA']
+    )
+
+    for f in combined_filters:
+        print(f"Combined filters result: {f.name} in {f.folder}")
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Only return filters defined exactly in 'Texas'
-exact_filters = app_filters.list(
-    folder='Texas',
-    exact_match=True
-)
+    # Initialize the ApplicationFilters object with a custom max_limit
+    # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+    app_filters_client = ApplicationFilters(api_client=client, max_limit=4321)
 
-for f in exact_filters:
-    print(f"Exact match: {f.name} in {f.folder}")
+    # Now when we call list(), it will use the specified max_limit for each request
+    # while auto-paginating through all available objects.
+    all_filters = app_filters_client.list(folder='Texas')
 
-# Exclude all filters from the 'All' folder
-no_all_filters = app_filters.list(
-    folder='Texas',
-    exclude_folders=['All']
-)
-
-for f in no_all_filters:
-    assert f.folder != 'All'
-    print(f"Filtered out 'All': {f.name}")
-
-# Exclude filters that come from 'default' snippet
-no_default_snippet = app_filters.list(
-    folder='Texas',
-    exclude_snippets=['default']
-)
-
-for f in no_default_snippet:
-    assert f.snippet != 'default'
-    print(f"Filtered out 'default' snippet: {f.name}")
-
-# Exclude filters associated with 'DeviceA'
-no_deviceA = app_filters.list(
-    folder='Texas',
-    exclude_devices=['DeviceA']
-)
-
-for f in no_deviceA:
-    assert f.device != 'DeviceA'
-    print(f"Filtered out 'DeviceA': {f.name}")
-
-# Combine exact_match with multiple exclusions
-combined_filters = app_filters.list(
-    folder='Texas',
-    exact_match=True,
-    exclude_folders=['All'],
-    exclude_snippets=['default'],
-    exclude_devices=['DeviceA']
-)
-
-for f in combined_filters:
-    print(f"Combined filters result: {f.name} in {f.folder}")
+    # 'all_filters' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
 </div>
-
 
 ### Deleting Application Filters
 
@@ -293,9 +303,9 @@ for f in combined_filters:
 <!-- termynal -->
 
 ```python
-# Delete by ID
-filter_id = "123e4567-e89b-12d3-a456-426655440000"
-app_filters.delete(filter_id)
+    # Delete by ID
+    filter_id = "123e4567-e89b-12d3-a456-426655440000"
+    app_filters.delete(filter_id)
 ```
 
 </div>
@@ -309,18 +319,18 @@ app_filters.delete(filter_id)
 <!-- termynal -->
 
 ```python
-# Prepare commit parameters
-commit_params = {
-    "folders": ["Texas"],
-    "description": "Updated application filters",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
-}
+    # Prepare commit parameters
+    commit_params = {
+        "folders": ["Texas"],
+        "description": "Updated application filters",
+        "sync": True,
+        "timeout": 300  # 5 minute timeout
+    }
 
-# Commit the changes
-result = app_filters.commit(**commit_params)
+    # Commit the changes
+    result = app_filters.commit(**commit_params)
 
-print(f"Commit job ID: {result.job_id}")
+    print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
@@ -332,14 +342,14 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = app_filters.get_job_status(result.job_id)
-print(f"Job status: {job_status.data[0].status_str}")
+    # Get status of specific job
+    job_status = app_filters.get_job_status(result.job_id)
+    print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = app_filters.list_jobs(limit=10)
-for job in recent_jobs.data:
-    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+    # List recent jobs
+    recent_jobs = app_filters.list_jobs(limit=10)
+    for job in recent_jobs.data:
+        print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -351,47 +361,47 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-    NameNotUniqueError,
-    ObjectNotPresentError,
-    ReferenceNotZeroError
-)
-
-try:
-    # Create filter configuration
-    filter_config = {
-        "name": "test-filter",
-        "category": ["business-systems"],
-        "risk": [4, 5],
-        "folder": "Texas",
-        "has_known_vulnerabilities": True
-    }
-
-    # Create the filter
-    new_filter = app_filters.create(filter_config)
-
-    # Commit changes
-    result = app_filters.commit(
-        folders=["Texas"],
-        description="Added test filter",
-        sync=True
+    from scm.exceptions import (
+        InvalidObjectError,
+        MissingQueryParameterError,
+        NameNotUniqueError,
+        ObjectNotPresentError,
+        ReferenceNotZeroError
     )
 
-    # Check job status
-    status = app_filters.get_job_status(result.job_id)
+    try:
+        # Create filter configuration
+        filter_config = {
+            "name": "test-filter",
+            "category": ["business-systems"],
+            "risk": [4, 5],
+            "folder": "Texas",
+            "has_known_vulnerabilities": True
+        }
 
-except InvalidObjectError as e:
-    print(f"Invalid filter data: {e.message}")
-except NameNotUniqueError as e:
-    print(f"Filter name already exists: {e.message}")
-except ObjectNotPresentError as e:
-    print(f"Filter not found: {e.message}")
-except ReferenceNotZeroError as e:
-    print(f"Filter still in use: {e.message}")
-except MissingQueryParameterError as e:
-    print(f"Missing parameter: {e.message}")
+        # Create the filter
+        new_filter = app_filters.create(filter_config)
+
+        # Commit changes
+        result = app_filters.commit(
+            folders=["Texas"],
+            description="Added test filter",
+            sync=True
+        )
+
+        # Check job status
+        status = app_filters.get_job_status(result.job_id)
+
+    except InvalidObjectError as e:
+        print(f"Invalid filter data: {e.message}")
+    except NameNotUniqueError as e:
+        print(f"Filter name already exists: {e.message}")
+    except ObjectNotPresentError as e:
+        print(f"Filter not found: {e.message}")
+    except ReferenceNotZeroError as e:
+        print(f"Filter still in use: {e.message}")
+    except MissingQueryParameterError as e:
+        print(f"Missing parameter: {e.message}")
 ```
 
 </div>

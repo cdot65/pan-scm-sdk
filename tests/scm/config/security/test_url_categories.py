@@ -36,10 +36,55 @@ class TestURLCategoriesBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = URLCategories(self.mock_scm)  # noqa
+        self.client = URLCategories(self.mock_scm, max_limit=5000)  # noqa
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestURLCategoriesMaxLimit(TestURLCategoriesBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = URLCategories(self.mock_scm)  # noqa
+        assert client.max_limit == URLCategories.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = URLCategories(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = URLCategories(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            URLCategories(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            URLCategories(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            URLCategories(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
 class TestURLCategoriesList(TestURLCategoriesBase):
@@ -63,8 +108,9 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         self.mock_scm.get.assert_called_once_with(
             "/config/security/v1/url-categories",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -127,8 +173,9 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/url-categories",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
 
@@ -395,6 +442,112 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
         assert obj.device != "DeviceA"
+
+    def test_list_pagination_multiple_pages(self):
+        """
+        Test that the list method correctly aggregates data from multiple pages.
+        Using a custom client with max_limit=2500 to test pagination.
+        """
+        client = URLCategories(self.mock_scm, max_limit=2500)  # noqa
+
+        # Create test data for three pages with different URL categories
+        first_page = [
+            URLCategoriesResponseFactory(
+                name=f"custom-block-page1-{i}",
+                folder="Texas",
+                type="URL List",
+                list=[
+                    f"example{i}.com",
+                    f"test{i}.com",
+                ],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        second_page = [
+            URLCategoriesResponseFactory(
+                name=f"custom-alert-page2-{i}",
+                folder="Texas",
+                type="URL List",
+                list=[
+                    f"site{i}.com",
+                    f"domain{i}.com",
+                ],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        third_page = [
+            URLCategoriesResponseFactory(
+                name=f"custom-allow-page3-{i}",
+                folder="Texas",
+                type="URL List",
+                list=[
+                    f"permit{i}.com",
+                    f"access{i}.com",
+                ],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        # Mock API responses for pagination
+        mock_responses = [
+            {"data": first_page},
+            {"data": second_page},
+            {"data": third_page},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
+
+        # Get results
+        results = client.list(folder="Texas")
+
+        # Verify results
+        assert len(results) == 7500  # Total objects across all pages
+        assert isinstance(results[0], URLCategoriesResponseModel)
+        assert all(isinstance(obj, URLCategoriesResponseModel) for obj in results)
+
+        # Verify API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify API calls were made with correct offset values
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/url-categories",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 0,
+            },
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/url-categories",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 2500,
+            },
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/url-categories",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 5000,
+            },
+        )
+
+        # Verify content ordering and category-specific attributes
+        assert results[0].name == "custom-block-page1-0"
+        assert results[0].type == "URL List"
+        assert "example0.com" in results[0].list
+
+        assert results[2500].name == "custom-alert-page2-0"
+        assert "site0.com" in results[2500].list
+
+        assert results[5000].name == "custom-allow-page3-0"
+        assert "permit0.com" in results[5000].list
 
 
 class TestURLCategoriesCreate(TestURLCategoriesBase):

@@ -148,7 +148,7 @@
 #                 },
 #             )
 #
-#         params = {"limit": self.DEFAULT_LIMIT}
+#
 #
 #         container_parameters = self._build_container_params(
 #             folder,
@@ -164,7 +164,7 @@
 #                 details={"error": "Invalid container parameters"},
 #             )
 #
-#         params.update(container_parameters)
+#
 #
 #         response = self.api_client.get(
 #             self.ENDPOINT,

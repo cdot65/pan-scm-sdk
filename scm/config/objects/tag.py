@@ -22,42 +22,127 @@ from scm.utils.tag_colors import normalize_color_name
 class Tag(BaseObject):
     """
     Manages Tag objects in Palo Alto Networks' Strata Cloud Manager.
+    Args:
+        api_client: The API client instance
+        max_limit (Optional[int]): Maximum number of objects to return in a single API request.
+            Defaults to 5000. Must be between 1 and 10000.
     """
 
     ENDPOINT = "/config/objects/v1/tags"
-    DEFAULT_LIMIT = 10000
+    DEFAULT_MAX_LIMIT = 2500
+    ABSOLUTE_MAX_LIMIT = 5000  # Maximum allowed by the API
 
-    def __init__(self, api_client):
+    def __init__(
+        self,
+        api_client,
+        max_limit: Optional[int] = None,
+    ):
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
-    def create(self, data: Dict[str, Any]) -> TagResponseModel:
+        # Validate and set max_limit
+        self._max_limit = self._validate_max_limit(max_limit)
+
+    @property
+    def max_limit(self) -> int:
+        """Get the current maximum limit for API requests."""
+        return self._max_limit
+
+    @max_limit.setter
+    def max_limit(self, value: int) -> None:
+        """Set a new maximum limit for API requests."""
+        self._max_limit = self._validate_max_limit(value)
+
+    def _validate_max_limit(self, limit: Optional[int]) -> int:
+        """
+        Validates the max_limit parameter.
+
+        Args:
+            limit: The limit to validate
+
+        Returns:
+            int: The validated limit
+
+        Raises:
+            InvalidObjectError: If the limit is invalid
+        """
+        if limit is None:
+            return self.DEFAULT_MAX_LIMIT
+
+        try:
+            limit_int = int(limit)
+        except (TypeError, ValueError):
+            raise InvalidObjectError(
+                message="max_limit must be an integer",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit type"},
+            )
+
+        if limit_int < 1:
+            raise InvalidObjectError(
+                message="max_limit must be greater than 0",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit value"},
+            )
+
+        if limit_int > self.ABSOLUTE_MAX_LIMIT:
+            raise InvalidObjectError(
+                message=f"max_limit cannot exceed {self.ABSOLUTE_MAX_LIMIT}",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "max_limit exceeds maximum allowed value"},
+            )
+
+        return limit_int
+
+    def create(
+        self,
+        data: Dict[str, Any],
+    ) -> TagResponseModel:
         """
         Creates a new tag object.
 
         Returns:
             TagResponseModel
         """
+        # Use the dictionary "data" to pass into Pydantic and return a modeled object
         tag = TagCreateModel(**data)
+
+        # Convert back to a Python dictionary, removing any unset fields
         payload = tag.model_dump(exclude_unset=True)
+
+        # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
             json=payload,
         )
+
+        # Return the SCM API response as a new Pydantic object
         return TagResponseModel(**response)
 
-    def get(self, object_id: str) -> TagResponseModel:
+    def get(
+        self,
+        object_id: str,
+    ) -> TagResponseModel:
         """
         Gets a tag object by ID.
 
         Returns:
             TagResponseModel
         """
+        # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
+
+        # Return the SCM API response as a new Pydantic object
         return TagResponseModel(**response)
 
-    def update(self, tag: TagUpdateModel) -> TagResponseModel:
+    def update(
+        self,
+        tag: TagUpdateModel,
+    ) -> TagResponseModel:
         """
         Updates an existing tag object.
 
@@ -67,15 +152,21 @@ class Tag(BaseObject):
         Returns:
             TagResponseModel
         """
+        # Convert to dict for API request, excluding unset fields
         payload = tag.model_dump(exclude_unset=True)
+
+        # Extract ID and remove from payload since it's in the URL
         object_id = str(tag.id)
         payload.pop("id", None)
 
+        # Send the updated object to the remote API as JSON
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
         )
+
+        # Return the SCM API response as a new Pydantic object
         return TagResponseModel(**response)
 
     @staticmethod
@@ -107,6 +198,7 @@ class Tag(BaseObject):
                 )
 
             normalized_filter_colors = set()
+            # This logic checks if the tag has an appropriate color name selected.
             for color_name in colors:
                 normalized_name = normalize_color_name(color_name)
                 standard_color_name = Colors.from_normalized_name(normalized_name)
@@ -179,8 +271,11 @@ class Tag(BaseObject):
                 },
             )
 
-        params = {"limit": self.DEFAULT_LIMIT}
-        container_parameters = self._build_container_params(folder, snippet, device)
+        container_parameters = self._build_container_params(
+            folder,
+            snippet,
+            device,
+        )
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
@@ -190,63 +285,99 @@ class Tag(BaseObject):
                 details={"error": "Invalid container parameters"},
             )
 
-        params.update(container_parameters)
+        # Pagination logic using instance max_limit
+        limit = self._max_limit
+        offset = 0
+        all_objects = []
 
-        response = self.api_client.get(self.ENDPOINT, params=params)
+        while True:
+            params = container_parameters.copy()
+            params["limit"] = limit
+            params["offset"] = offset
 
-        if not isinstance(response, dict):
-            raise InvalidObjectError(
-                message="Invalid response format: expected dictionary",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response is not a dictionary"},
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
             )
 
-        if "data" not in response:
-            raise InvalidObjectError(
-                message="Invalid response format: missing 'data' field",
-                error_code="E003",
-                http_status_code=500,
-                details={
-                    "field": "data",
-                    "error": '"data" field missing in the response',
-                },
-            )
+            if not isinstance(response, dict):
+                raise InvalidObjectError(
+                    message="Invalid response format: expected dictionary",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"error": "Response is not a dictionary"},
+                )
 
-        if not isinstance(response["data"], list):
-            raise InvalidObjectError(
-                message="Invalid response format: 'data' field must be a list",
-                error_code="E003",
-                http_status_code=500,
-                details={"field": "data", "error": '"data" field must be a list'},
-            )
+            if "data" not in response:
+                raise InvalidObjectError(
+                    message="Invalid response format: missing 'data' field",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={
+                        "field": "data",
+                        "error": '"data" field missing in the response',
+                    },
+                )
 
-        tags = [TagResponseModel(**item) for item in response["data"]]
+            if not isinstance(response["data"], list):
+                raise InvalidObjectError(
+                    message="Invalid response format: 'data' field must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={
+                        "field": "data",
+                        "error": '"data" field must be a list',
+                    },
+                )
 
-        # Apply standard filters first
-        tags = self._apply_filters(tags, filters)
+            data = response["data"]
+            object_instances = [TagResponseModel(**item) for item in data]
+            all_objects.extend(object_instances)
 
-        # Determine which container key we are matching exactly, if exact_match is True
-        # We know exactly one of folder/snippet/device is provided
+            # If we got fewer than 'limit' objects, we've reached the end
+            if len(data) < limit:
+                break
+
+            offset += limit
+
+        # Apply existing filters first
+        filtered_objects = self._apply_filters(
+            all_objects,
+            filters,
+        )
+
+        # Determine which container key and value we are filtering on
         container_key, container_value = next(iter(container_parameters.items()))
 
-        # If exact_match is True, filter out tags that don't match exactly
+        # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
-            tags = [t for t in tags if getattr(t, container_key) == container_value]
+            filtered_objects = [
+                each
+                for each in filtered_objects
+                if getattr(each, container_key) == container_value
+            ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
-            tags = [t for t in tags if t.folder not in exclude_folders]
+            filtered_objects = [
+                each for each in filtered_objects if each.folder not in exclude_folders
+            ]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
-            tags = [t for t in tags if t.snippet not in exclude_snippets]
+            filtered_objects = [
+                each
+                for each in filtered_objects
+                if each.snippet not in exclude_snippets
+            ]
 
         # Exclude devices if provided
         if exclude_devices and isinstance(exclude_devices, list):
-            tags = [t for t in tags if t.device not in exclude_devices]
+            filtered_objects = [
+                each for each in filtered_objects if each.device not in exclude_devices
+            ]
 
-        return tags
+        return filtered_objects
 
     def fetch(
         self,

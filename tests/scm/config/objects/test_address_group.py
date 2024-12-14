@@ -34,10 +34,55 @@ class TestAddressGroupBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = AddressGroup(self.mock_scm)  # noqa
+        self.client = AddressGroup(self.mock_scm, max_limit=5000)  # noqa
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestAddressGroupMaxLimit(TestAddressGroupBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = AddressGroup(self.mock_scm)  # noqa
+        assert client.max_limit == AddressGroup.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = AddressGroup(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = AddressGroup(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            AddressGroup(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            AddressGroup(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            AddressGroup(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
 class TestAddressGroupList(TestAddressGroupBase):
@@ -61,8 +106,9 @@ class TestAddressGroupList(TestAddressGroupBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -144,8 +190,9 @@ class TestAddressGroupList(TestAddressGroupBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/address-groups",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert len(result) == 1
@@ -417,6 +464,75 @@ class TestAddressGroupList(TestAddressGroupBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
         assert obj.device != "DeviceA"
+
+    def test_list_pagination_multiple_pages(self):
+        """Test pagination with multiple pages of results."""
+        client = AddressGroup(self.mock_scm, max_limit=2500)  # noqa
+
+        # Create test data for three pages
+        first_page = [
+            AddressGroupResponseFactory.with_static(
+                name=f"group-page1-{i}", folder="Texas", static=[f"address{i}"]
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        second_page = [
+            AddressGroupResponseFactory.with_static(
+                name=f"group-page2-{i}", folder="Texas", static=[f"address{i}"]
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        third_page = [
+            AddressGroupResponseFactory.with_static(
+                name=f"group-page3-{i}", folder="Texas", static=[f"address{i}"]
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        # Mock API responses for pagination
+        mock_responses = [
+            {"data": first_page},
+            {"data": second_page},
+            {"data": third_page},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
+
+        # Get results
+        results = client.list(folder="Texas")
+
+        # Verify results
+        assert len(results) == 7500  # Total objects across all pages
+        assert isinstance(results[0], AddressGroupResponseModel)
+        assert all(isinstance(obj, AddressGroupResponseModel) for obj in results)
+
+        # Verify the number of API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify first API call parameters
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/address-groups",
+            params={"folder": "Texas", "limit": 2500, "offset": 0},
+        )
+
+        # Verify second API call parameters (offset should be 2500)
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/address-groups",
+            params={"folder": "Texas", "limit": 2500, "offset": 2500},
+        )
+
+        # Verify third API call parameters (offset should be 5000)
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/address-groups",
+            params={"folder": "Texas", "limit": 2500, "offset": 5000},
+        )
+
+        # Verify content from each page is present
+        assert results[0].name == "group-page1-0"
+        assert results[2500].name == "group-page2-0"
+        assert results[5000].name == "group-page3-0"
 
 
 class TestAddressGroupCreate(TestAddressGroupBase):

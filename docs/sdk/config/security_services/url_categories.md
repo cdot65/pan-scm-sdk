@@ -13,6 +13,7 @@
     - [Updating URL Categories](#updating-url-categories)
     - [Listing URL Categories](#listing-url-categories)
     - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting URL Categories](#deleting-url-categories)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -193,7 +194,6 @@ filtered_categories = url_categories.list(**list_params)
 
 </div>
 
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
@@ -201,10 +201,10 @@ The `list()` method supports additional parameters to refine your query results 
 `exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
 
 **Parameters:**
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned.
+- `exclude_folders (List[str])`: Provide a list of folder names to exclude.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude.
 
 **Examples:**
 
@@ -215,55 +215,79 @@ The `list()` method supports additional parameters to refine your query results 
 ```python
 # Only return url_categories defined exactly in 'Texas'
 exact_url_categories = url_categories.list(
-  folder='Texas',
-  exact_match=True
+    folder='Texas',
+    exact_match=True
 )
 
 for app in exact_url_categories:
-  print(f"Exact match: {app.name} in {app.folder}")
+    print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all url_categories from the 'All' folder
 no_all_url_categories = url_categories.list(
-  folder='Texas',
-  exclude_folders=['All']
+    folder='Texas',
+    exclude_folders=['All']
 )
 
 for app in no_all_url_categories:
-  assert app.folder != 'All'
-  print(f"Filtered out 'All': {app.name}")
+    assert app.folder != 'All'
+    print(f"Filtered out 'All': {app.name}")
 
 # Exclude url_categories that come from 'default' snippet
 no_default_snippet = url_categories.list(
-  folder='Texas',
-  exclude_snippets=['default']
+    folder='Texas',
+    exclude_snippets=['default']
 )
 
 for app in no_default_snippet:
-  assert app.snippet != 'default'
-  print(f"Filtered out 'default' snippet: {app.name}")
+    assert app.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude url_categories associated with 'DeviceA'
 no_deviceA = url_categories.list(
-  folder='Texas',
-  exclude_devices=['DeviceA']
+    folder='Texas',
+    exclude_devices=['DeviceA']
 )
 
 for app in no_deviceA:
-  assert app.device != 'DeviceA'
-  print(f"Filtered out 'DeviceA': {app.name}")
+    assert app.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
 combined_filters = url_categories.list(
-  folder='Texas',
-  exact_match=True,
-  exclude_folders=['All'],
-  exclude_snippets=['default'],
-  exclude_devices=['DeviceA']
+    folder='Texas',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default'],
+    exclude_devices=['DeviceA']
 )
 
 for app in combined_filters:
-  print(f"Combined filters result: {app.name} in {app.folder}")
+    print(f"Combined filters result: {app.name} in {app.folder}")
 ```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Initialize the URLCategories object with a custom max_limit
+# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+category_client = URLCategories(api_client=client, max_limit=4321)
+
+# Now when we call list(), it will use the specified max_limit for each request
+# while auto-paginating through all available objects.
+all_categories = category_client.list(folder='Texas')
+
+# 'all_categories' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+```
+
+</div>
 
 ### Deleting URL Categories
 

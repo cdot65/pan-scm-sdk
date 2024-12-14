@@ -20,17 +20,80 @@ from scm.models.objects import (
 class Application(BaseObject):
     """
     Manages Application objects in Palo Alto Networks' Strata Cloud Manager.
+    Args:
+        api_client: The API client instance
+        max_limit (Optional[int]): Maximum number of objects to return in a single API request.
+            Defaults to 5000. Must be between 1 and 10000.
     """
 
     ENDPOINT = "/config/objects/v1/applications"
-    DEFAULT_LIMIT = 10000
+    DEFAULT_MAX_LIMIT = 2500
+    ABSOLUTE_MAX_LIMIT = 5000  # Maximum allowed by the API
 
     def __init__(
         self,
         api_client,
+        max_limit: Optional[int] = None,
     ):
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
+
+        # Validate and set max_limit
+        self._max_limit = self._validate_max_limit(max_limit)
+
+    @property
+    def max_limit(self) -> int:
+        """Get the current maximum limit for API requests."""
+        return self._max_limit
+
+    @max_limit.setter
+    def max_limit(self, value: int) -> None:
+        """Set a new maximum limit for API requests."""
+        self._max_limit = self._validate_max_limit(value)
+
+    def _validate_max_limit(self, limit: Optional[int]) -> int:
+        """
+        Validates the max_limit parameter.
+
+        Args:
+            limit: The limit to validate
+
+        Returns:
+            int: The validated limit
+
+        Raises:
+            InvalidObjectError: If the limit is invalid
+        """
+        if limit is None:
+            return self.DEFAULT_MAX_LIMIT
+
+        try:
+            limit_int = int(limit)
+        except (TypeError, ValueError):
+            raise InvalidObjectError(
+                message="max_limit must be an integer",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit type"},
+            )
+
+        if limit_int < 1:
+            raise InvalidObjectError(
+                message="max_limit must be greater than 0",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit value"},
+            )
+
+        if limit_int > self.ABSOLUTE_MAX_LIMIT:
+            raise InvalidObjectError(
+                message=f"max_limit cannot exceed {self.ABSOLUTE_MAX_LIMIT}",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "max_limit exceeds maximum allowed value"},
+            )
+
+        return limit_int
 
     def create(
         self,
@@ -181,12 +244,11 @@ class Application(BaseObject):
     def _build_container_params(
         folder: Optional[str],
         snippet: Optional[str],
-        device: Optional[str],
     ) -> dict:
         """Builds container parameters dictionary."""
         return {
             k: v
-            for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
+            for k, v in {"folder": folder, "snippet": snippet}.items()
             if v is not None
         }
 
@@ -194,7 +256,6 @@ class Application(BaseObject):
         self,
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
-        device: Optional[str] = None,
         exact_match: bool = False,
         exclude_folders: Optional[List[str]] = None,
         exclude_snippets: Optional[List[str]] = None,
@@ -206,7 +267,6 @@ class Application(BaseObject):
         Args:
             folder: Optional folder name
             snippet: Optional snippet name
-            device: Optional device name
             exact_match (bool): If True, only return objects whose container
                                 exactly matches the provided container parameter.
             exclude_folders (List[str], optional): List of folder names to exclude from results.
@@ -216,6 +276,9 @@ class Application(BaseObject):
                 - subcategory: List[str] - Filter by subcategory
                 - technology: List[str] - Filter by technology
                 - risk: List[int] - Filter by risk level
+
+        Returns:
+            List[ApplicationResponseModel]: A list of application objects
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -228,95 +291,112 @@ class Application(BaseObject):
                 },
             )
 
-        params = {"limit": self.DEFAULT_LIMIT}
-
         container_parameters = self._build_container_params(
             folder,
             snippet,
-            device,
         )
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
-                message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                message="Exactly one of 'folder' or 'snippet' must be provided.",
                 error_code="E003",
                 http_status_code=400,
                 details={"error": "Invalid container parameters"},
             )
 
-        params.update(container_parameters)
+        # Pagination logic using instance max_limit
+        limit = self._max_limit
+        offset = 0
+        all_objects = []
 
-        response = self.api_client.get(
-            self.ENDPOINT,
-            params=params,
-        )
+        while True:
+            params = container_parameters.copy()
+            params["limit"] = limit
+            params["offset"] = offset
 
-        if not isinstance(response, dict):
-            raise InvalidObjectError(
-                message="Invalid response format: expected dictionary",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response is not a dictionary"},
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
             )
 
-        if "data" not in response:
-            raise InvalidObjectError(
-                message="Invalid response format: missing 'data' field",
-                error_code="E003",
-                http_status_code=500,
-                details={
-                    "field": "data",
-                    "error": '"data" field missing in the response',
-                },
-            )
+            if not isinstance(response, dict):
+                raise InvalidObjectError(
+                    message="Invalid response format: expected dictionary",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"error": "Response is not a dictionary"},
+                )
 
-        if not isinstance(response["data"], list):
-            raise InvalidObjectError(
-                message="Invalid response format: 'data' field must be a list",
-                error_code="E003",
-                http_status_code=500,
-                details={
-                    "field": "data",
-                    "error": '"data" field must be a list',
-                },
-            )
+            if "data" not in response:
+                raise InvalidObjectError(
+                    message="Invalid response format: missing 'data' field",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={
+                        "field": "data",
+                        "error": '"data" field missing in the response',
+                    },
+                )
 
-        applications = [ApplicationResponseModel(**item) for item in response["data"]]
+            if not isinstance(response["data"], list):
+                raise InvalidObjectError(
+                    message="Invalid response format: 'data' field must be a list",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={
+                        "field": "data",
+                        "error": '"data" field must be a list',
+                    },
+                )
+
+            data = response["data"]
+            object_instances = [ApplicationResponseModel(**item) for item in data]
+            all_objects.extend(object_instances)
+
+            # If we got fewer than 'limit' objects, we've reached the end
+            if len(data) < limit:
+                break
+
+            offset += limit
 
         # Apply existing filters first
-        applications = self._apply_filters(applications, filters)
+        filtered_objects = self._apply_filters(
+            all_objects,
+            filters,
+        )
 
         # Determine which container key and value we are filtering on
         container_key, container_value = next(iter(container_parameters.items()))
 
-        # If exact_match is True, filter out applications that don't match exactly
+        # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
-            applications = [
-                app
-                for app in applications
-                if getattr(app, container_key) == container_value
+            filtered_objects = [
+                each
+                for each in filtered_objects
+                if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
-            applications = [
-                app for app in applications if app.folder not in exclude_folders
+            filtered_objects = [
+                each for each in filtered_objects if each.folder not in exclude_folders
             ]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
-            applications = [
-                app for app in applications if app.snippet not in exclude_snippets
+            filtered_objects = [
+                each
+                for each in filtered_objects
+                if each.snippet not in exclude_snippets
             ]
 
-        return applications
+        return filtered_objects
 
     def fetch(
         self,
         name: str,
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
-        device: Optional[str] = None,
     ) -> ApplicationResponseModel:
         """
         Fetches a single application by name.
@@ -325,7 +405,6 @@ class Application(BaseObject):
             name (str): The name of the application to fetch.
             folder (str, optional): The folder in which the resource is defined.
             snippet (str, optional): The snippet in which the resource is defined.
-            device (str, optional): The device in which the resource is defined.
 
         Returns:
             ApplicationResponseModel: The fetched application object as a Pydantic model.
@@ -357,16 +436,15 @@ class Application(BaseObject):
         container_parameters = self._build_container_params(
             folder,
             snippet,
-            device,
         )
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
-                message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                message="Exactly one of 'folder' or 'snippet' must be provided.",
                 error_code="E003",
                 http_status_code=400,
                 details={
-                    "error": "Exactly one of 'folder', 'snippet', or 'device' must be provided."
+                    "error": "Exactly one of 'folder' or 'snippet' must be provided."
                 },
             )
 

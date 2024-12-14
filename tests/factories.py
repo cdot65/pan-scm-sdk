@@ -231,38 +231,97 @@ class AddressResponseFactory(factory.Factory):
     tag = ["response-tag"]
     folder = "Texas"
 
-    # Address types default to None
+    # No defaults for ip_netmask, ip_range, ip_wildcard, fqdn here
     ip_netmask = None
     ip_range = None
     ip_wildcard = None
     fqdn = None
 
     @classmethod
-    def with_ip_netmask(cls, ip_netmask="192.168.1.1/32", **kwargs):
-        return cls(ip_netmask=ip_netmask, **kwargs)
+    def with_ip_netmask(
+        cls,
+        ip_netmask="192.168.1.1/32",
+        **kwargs,
+    ):
+        # Clears out other fields to ensure only one type is set
+        return cls(
+            ip_netmask=ip_netmask,
+            ip_range=None,
+            ip_wildcard=None,
+            fqdn=None,
+            **kwargs,
+        )
 
     @classmethod
-    def with_fqdn(cls, fqdn="example.com", **kwargs):
-        return cls(fqdn=fqdn, **kwargs)
+    def with_fqdn(
+        cls,
+        fqdn="example.com",
+        **kwargs,
+    ):
+        return cls(
+            fqdn=fqdn,
+            ip_netmask=None,
+            ip_range=None,
+            ip_wildcard=None,
+            **kwargs,
+        )
 
     @classmethod
-    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
-        return cls(ip_range=ip_range, **kwargs)
+    def with_ip_range(
+        cls,
+        ip_range="192.168.0.1-192.168.0.10",
+        **kwargs,
+    ):
+        return cls(
+            ip_range=ip_range,
+            ip_netmask=None,
+            ip_wildcard=None,
+            fqdn=None,
+            **kwargs,
+        )
 
     @classmethod
-    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
-        return cls(ip_wildcard=ip_wildcard, **kwargs)
+    def with_ip_wildcard(
+        cls,
+        ip_wildcard="10.20.1.0/0.0.248.255",
+        **kwargs,
+    ):
+        return cls(
+            ip_wildcard=ip_wildcard,
+            ip_netmask=None,
+            ip_range=None,
+            fqdn=None,
+            **kwargs,
+        )
 
     @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
+    def with_snippet(
+        cls,
+        **kwargs,
+    ):
+        return cls(
+            folder=None,
+            snippet="TestSnippet",
+            **kwargs,
+        )
 
     @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
+    def with_device(
+        cls,
+        **kwargs,
+    ):
+        return cls(
+            folder=None,
+            device="TestDevice",
+            **kwargs,
+        )
 
     @classmethod
-    def from_request(cls, request_model: AddressCreateModel, **kwargs):
+    def from_request(
+        cls,
+        request_model: AddressCreateModel,
+        **kwargs,
+    ):
         """Create a response model based on a request model."""
         data = request_model.model_dump()
         data["id"] = str(uuid.uuid4())

@@ -12,6 +12,8 @@
     - [Retrieving Address Groups](#retrieving-address-groups)
     - [Updating Address Groups](#updating-address-groups)
     - [Listing Address Groups](#listing-address-groups)
+    - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Address Groups](#deleting-address-groups)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -77,9 +79,9 @@ from scm.config.objects import AddressGroup
 
 # Initialize client
 client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
 )
 
 # Initialize AddressGroup object
@@ -99,11 +101,11 @@ address_groups = AddressGroup(client)
 ```python
 # Static group configuration
 static_config = {
-    "name": "web_servers",
-    "static": ["web-server1", "web-server2"],
-    "description": "Web server group",
-    "folder": "Texas",
-    "tag": ["Production", "Web"]
+   "name": "web_servers",
+   "static": ["web-server1", "web-server2"],
+   "description": "Web server group",
+   "folder": "Texas",
+   "tag": ["Production", "Web"]
 }
 
 # Create static group
@@ -111,13 +113,13 @@ static_group = address_groups.create(static_config)
 
 # Dynamic group configuration
 dynamic_config = {
-    "name": "python_servers",
-    "dynamic": {
-        "filter": "'Python' and 'Production'"
-    },
-    "description": "Python production servers",
-    "folder": "Texas",
-    "tag": ["Automation"]
+   "name": "python_servers",
+   "dynamic": {
+      "filter": "'Python' and 'Production'"
+   },
+   "description": "Python production servers",
+   "folder": "Texas",
+   "tag": ["Automation"]
 }
 
 # Create dynamic group
@@ -174,24 +176,24 @@ updated_group = address_groups.update(existing_group)
 ```python
 # List with direct filter parameters
 filtered_groups = address_groups.list(
-    folder='Texas',
-    types=['static'],
-    tags=['Production']
+   folder='Texas',
+   types=['static'],
+   tags=['Production']
 )
 
 # Process results
 for group in filtered_groups:
-    print(f"Name: {group.name}")
-    if group.static:
-        print(f"Members: {', '.join(group.static)}")
-    elif group.dynamic:
-        print(f"Filter: {group.dynamic.filter}")
+   print(f"Name: {group.name}")
+   if group.static:
+      print(f"Members: {', '.join(group.static)}")
+   elif group.dynamic:
+      print(f"Filter: {group.dynamic.filter}")
 
 # Define filter parameters as dictionary
 list_params = {
-    "folder": "Texas",
-    "types": ["dynamic"],
-    "tags": ["Automation"]
+   "folder": "Texas",
+   "types": ["dynamic"],
+   "tags": ["Automation"]
 }
 
 # List with filters as kwargs
@@ -199,7 +201,6 @@ filtered_groups = address_groups.list(**list_params)
 ```
 
 </div>
-
 
 ### Filtering Responses
 
@@ -222,54 +223,78 @@ The `list()` method supports additional parameters to refine your query results 
 ```python
 # Only return address groups defined exactly in 'Texas'
 exact_address_groups = address_groups.list(
-  folder='Texas',
-  exact_match=True
+   folder='Texas',
+   exact_match=True
 )
 
 for each in exact_address_groups:
-  print(f"Exact match: {each.name} in {each.folder}")
+   print(f"Exact match: {each.name} in {each.folder}")
 
 # Exclude all address groups from the 'All' folder
 no_all_address_groups = address_groups.list(
-  folder='Texas',
-  exclude_folders=['All']
+   folder='Texas',
+   exclude_folders=['All']
 )
 
 for each in no_all_address_groups:
-  assert each.folder != 'All'
-  print(f"Filtered out 'All': {each.name}")
+   assert each.folder != 'All'
+   print(f"Filtered out 'All': {each.name}")
 
 # Exclude address groups that come from 'default' snippet
 no_default_snippet = address_groups.list(
-  folder='Texas',
-  exclude_snippets=['default']
+   folder='Texas',
+   exclude_snippets=['default']
 )
 
 for addr in no_default_snippet:
-  assert addr.snippet != 'default'
-  print(f"Filtered out 'default' snippet: {addr.name}")
+   assert addr.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {addr.name}")
 
 # Exclude address groups associated with 'DeviceA'
 no_deviceA = address_groups.list(
-  folder='Texas',
-  exclude_devices=['DeviceA']
+   folder='Texas',
+   exclude_devices=['DeviceA']
 )
 
 for each in no_deviceA:
-  assert each.device != 'DeviceA'
-  print(f"Filtered out 'DeviceA': {each.name}")
+   assert each.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {each.name}")
 
 # Combine exact_match with multiple exclusions
 combined_filters = address_groups.list(
-  folder='Texas',
-  exact_match=True,
-  exclude_folders=['All'],
-  exclude_snippets=['default'],
-  exclude_devices=['DeviceA']
+   folder='Texas',
+   exact_match=True,
+   exclude_folders=['All'],
+   exclude_snippets=['default'],
+   exclude_devices=['DeviceA']
 )
 
 for each in combined_filters:
-  print(f"Combined filters result: {each.name} in {each.folder}")
+   print(f"Combined filters result: {each.name} in {each.folder}")
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Initialize the AddressGroup object with a custom max_limit
+# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+address_group_client = AddressGroup(api_client=client, max_limit=4321)
+
+# Now when we call list(), it will use the specified max_limit for each request
+# while auto-paginating through all available objects.
+all_groups = address_group_client.list(folder='Texas')
+
+# 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
 </div>
@@ -299,10 +324,10 @@ address_groups.delete(group_id)
 ```python
 # Prepare commit parameters
 commit_params = {
-    "folders": ["Texas"],
-    "description": "Updated address groups",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
+   "folders": ["Texas"],
+   "description": "Updated address groups",
+   "sync": True,
+   "timeout": 300  # 5 minute timeout
 }
 
 # Commit the changes
@@ -327,7 +352,7 @@ print(f"Job status: {job_status.data[0].status_str}")
 # List recent jobs
 recent_jobs = address_groups.list_jobs(limit=10)
 for job in recent_jobs.data:
-    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+   print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -340,46 +365,46 @@ for job in recent_jobs.data:
 
 ```python
 from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-    NameNotUniqueError,
-    ObjectNotPresentError,
-    ReferenceNotZeroError
+   InvalidObjectError,
+   MissingQueryParameterError,
+   NameNotUniqueError,
+   ObjectNotPresentError,
+   ReferenceNotZeroError
 )
 
 try:
-    # Create group configuration
-    group_config = {
-        "name": "test_group",
-        "static": ["server1", "server2"],
-        "folder": "Texas",
-        "description": "Test server group",
-        "tag": ["Test"]
-    }
-
-    # Create the group
-    new_group = address_groups.create(group_config)
-
-    # Commit changes
-    result = address_groups.commit(
-        folders=["Texas"],
-        description="Added test group",
-        sync=True
-    )
-
-    # Check job status
-    status = address_groups.get_job_status(result.job_id)
+   # Create group configuration
+   group_config = {
+      "name": "test_group",
+      "static": ["server1", "server2"],
+      "folder": "Texas",
+      "description": "Test server group",
+      "tag": ["Test"]
+   }
+   
+   # Create the group
+   new_group = address_groups.create(group_config)
+   
+   # Commit changes
+   result = address_groups.commit(
+      folders=["Texas"],
+      description="Added test group",
+      sync=True
+   )
+   
+   # Check job status
+   status = address_groups.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
-    print(f"Invalid group data: {e.message}")
+   print(f"Invalid group data: {e.message}")
 except NameNotUniqueError as e:
-    print(f"Group name already exists: {e.message}")
+   print(f"Group name already exists: {e.message}")
 except ObjectNotPresentError as e:
-    print(f"Group not found: {e.message}")
+   print(f"Group not found: {e.message}")
 except ReferenceNotZeroError as e:
-    print(f"Group still in use: {e.message}")
+   print(f"Group still in use: {e.message}")
 except MissingQueryParameterError as e:
-    print(f"Missing parameter: {e.message}")
+   print(f"Missing parameter: {e.message}")
 ```
 
 </div>
@@ -415,7 +440,7 @@ except MissingQueryParameterError as e:
     - Use secure connection settings
     - Implement proper authentication handling
 
-## Full script examples
+## Full Script Examples
 
 Refer to
 the [address_group.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/address_group.py).

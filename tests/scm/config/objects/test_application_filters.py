@@ -34,10 +34,55 @@ class TestApplicationsFilterBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = ApplicationFilters(self.mock_scm)  # noqa
+        self.client = ApplicationFilters(self.mock_scm, max_limit=5000)  # noqa
 
 
-class TestApplicationsFiltersList(TestApplicationsFilterBase):
+class TestApplicationFiltersMaxLimit(TestApplicationsFilterBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = ApplicationFilters(self.mock_scm)  # noqa
+        assert client.max_limit == ApplicationFilters.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = ApplicationFilters(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = ApplicationFilters(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            ApplicationFilters(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            ApplicationFilters(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            ApplicationFilters(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
+
+
+class TestApplicationFiltersList(TestApplicationsFilterBase):
     """Tests for listing Application filter objects."""
 
     def test_list_valid(self):
@@ -70,8 +115,9 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/application-filters",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -157,8 +203,9 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/application-filters",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert len(result) == 1
@@ -389,8 +436,97 @@ class TestApplicationsFiltersList(TestApplicationsFilterBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
 
+    def test_list_pagination_multiple_pages(self):
+        """
+        Test that the list method correctly aggregates data from multiple pages.
+        Using a custom client with max_limit=2500 to test pagination.
+        """
+        client = ApplicationFilters(self.mock_scm, max_limit=2500)  # noqa
 
-class TestApplicationsFiltersCreate(TestApplicationsFilterBase):
+        # Create test data for three pages with different filter types
+        first_page = [
+            ApplicationFiltersResponseFactory(
+                name=f"web-filter-page1-{i}",
+                folder="Texas",
+                category=["business-systems"],
+                risk=[4, 5],
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        second_page = [
+            ApplicationFiltersResponseFactory(
+                name=f"saas-filter-page2-{i}",
+                folder="Texas",
+                sub_category=["saas-applications"],
+                new_appid=True,
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        third_page = [
+            ApplicationFiltersResponseFactory(
+                name=f"risk-filter-page3-{i}",
+                folder="Texas",
+                risk=[5],
+                evasive=True,
+                pervasive=True,
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        # Mock API responses for pagination
+        mock_responses = [
+            {"data": first_page},
+            {"data": second_page},
+            {"data": third_page},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
+
+        # Get results
+        results = client.list(folder="Texas")
+
+        # Verify results
+        assert len(results) == 7500  # Total objects across all pages
+        assert isinstance(results[0], ApplicationFiltersResponseModel)
+        assert all(isinstance(obj, ApplicationFiltersResponseModel) for obj in results)
+
+        # Verify API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify API calls were made with correct offset values
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/application-filters",
+            params={"folder": "Texas", "limit": 2500, "offset": 0},
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/application-filters",
+            params={"folder": "Texas", "limit": 2500, "offset": 2500},
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/objects/v1/application-filters",
+            params={"folder": "Texas", "limit": 2500, "offset": 5000},
+        )
+
+        # Verify content ordering and specific attributes
+        assert results[0].name == "web-filter-page1-0"
+        assert "business-systems" in results[0].category
+        assert 4 in results[0].risk
+
+        assert results[2500].name == "saas-filter-page2-0"
+        assert "saas-applications" in results[2500].sub_category
+        assert results[2500].new_appid is True
+
+        assert results[5000].name == "risk-filter-page3-0"
+        assert 5 in results[5000].risk
+        assert results[5000].evasive is True
+        assert results[5000].pervasive is True
+
+
+class TestApplicationFiltersCreate(TestApplicationsFilterBase):
     """Tests for creating Application filter objects."""
 
     def test_create_valid_object(self):
@@ -449,7 +585,7 @@ class TestApplicationsFiltersCreate(TestApplicationsFilterBase):
         )
 
 
-class TestApplicationsFiltersGet(TestApplicationsFilterBase):
+class TestApplicationFiltersGet(TestApplicationsFilterBase):
     """Tests for retrieving a specific Application filter object."""
 
     def test_get_valid_object(self):
@@ -511,7 +647,7 @@ class TestApplicationsFiltersGet(TestApplicationsFilterBase):
             self.client.get(object_id)
 
 
-class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
+class TestApplicationFiltersUpdate(TestApplicationsFilterBase):
     """Tests for updating Application filter objects."""
 
     def test_update_valid_object(self):
@@ -596,7 +732,7 @@ class TestApplicationsFiltersUpdate(TestApplicationsFilterBase):
             self.client.update(update_data)
 
 
-class TestApplicationsFiltersDelete(TestApplicationsFilterBase):
+class TestApplicationFiltersDelete(TestApplicationsFilterBase):
     """Tests for deleting Application filter objects."""
 
     def test_delete_success(self):
@@ -643,7 +779,7 @@ class TestApplicationsFiltersDelete(TestApplicationsFilterBase):
             self.client.delete(object_id)
 
 
-class TestApplicationsFiltersFetch(TestApplicationsFilterBase):
+class TestApplicationFiltersFetch(TestApplicationsFilterBase):
     """Tests for fetching Application filter objects by name."""
 
     def test_fetch_valid_object(self):

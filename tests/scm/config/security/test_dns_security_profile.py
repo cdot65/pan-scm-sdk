@@ -41,10 +41,55 @@ class TestDNSSecurityProfileBase:
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = DNSSecurityProfile(self.mock_scm)  # noqa
+        self.client = DNSSecurityProfile(self.mock_scm, max_limit=5000)  # noqa
 
 
 # -------------------- Test Classes Grouped by Functionality --------------------
+
+
+class TestDNSSecurityProfileMaxLimit(TestDNSSecurityProfileBase):
+    """Tests for max_limit functionality."""
+
+    def test_default_max_limit(self):
+        """Test that default max_limit is set correctly."""
+        client = DNSSecurityProfile(self.mock_scm)  # noqa
+        assert client.max_limit == DNSSecurityProfile.DEFAULT_MAX_LIMIT
+        assert client.max_limit == 2500
+
+    def test_custom_max_limit(self):
+        """Test setting a custom max_limit."""
+        client = DNSSecurityProfile(self.mock_scm, max_limit=1000)  # noqa
+        assert client.max_limit == 1000
+
+    def test_max_limit_setter(self):
+        """Test the max_limit property setter."""
+        client = DNSSecurityProfile(self.mock_scm)  # noqa
+        client.max_limit = 3000
+        assert client.max_limit == 3000
+
+    def test_invalid_max_limit_type(self):
+        """Test that invalid max_limit type raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            DNSSecurityProfile(self.mock_scm, max_limit="invalid")  # noqa
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_low(self):
+        """Test that max_limit below 1 raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            DNSSecurityProfile(self.mock_scm, max_limit=0)  # noqa
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
+        )
+
+    def test_max_limit_too_high(self):
+        """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            DNSSecurityProfile(self.mock_scm, max_limit=6000)  # noqa
+        assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
 class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
@@ -76,8 +121,9 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
         assert isinstance(existing_objects, list)
@@ -138,8 +184,9 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/security/v1/dns-security-profiles",
             params={
-                "limit": 10000,
+                "limit": 5000,
                 "folder": "Texas",
+                "offset": 0,
             },
         )
 
@@ -403,6 +450,94 @@ class TestDNSSecurityProfileList(TestDNSSecurityProfileBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
         assert obj.device != "DeviceA"
+
+    def test_list_pagination_multiple_pages(self):
+        """
+        Test that the list method correctly aggregates data from multiple pages.
+        Using a custom client with max_limit=2500 to test pagination.
+        """
+        client = DNSSecurityProfile(self.mock_scm, max_limit=2500)  # noqa
+
+        # Create test data for three pages with different DNS security settings
+        first_page = [
+            DNSSecurityProfileResponseFactory(
+                name=f"botnet-block-page1-{i}",
+                folder="Texas",
+                botnet_domains=BotnetDomainsFactory(),
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        second_page = [
+            DNSSecurityProfileResponseFactory(
+                name=f"botnet-alert-page2-{i}",
+                folder="Texas",
+                botnet_domains=BotnetDomainsFactory(),
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        third_page = [
+            DNSSecurityProfileResponseFactory(
+                name=f"botnet-sinkhole-page3-{i}",
+                folder="Texas",
+                botnet_domains=BotnetDomainsFactory(),
+            ).model_dump()
+            for i in range(2500)
+        ]
+
+        # Mock API responses for pagination
+        mock_responses = [
+            {"data": first_page},
+            {"data": second_page},
+            {"data": third_page},
+            {"data": []},  # Empty response to end pagination
+        ]
+        self.mock_scm.get.side_effect = mock_responses  # noqa
+
+        # Get results
+        results = client.list(folder="Texas")
+
+        # Verify results
+        assert len(results) == 7500  # Total objects across all pages
+        assert isinstance(results[0], DNSSecurityProfileResponseModel)
+        assert all(isinstance(obj, DNSSecurityProfileResponseModel) for obj in results)
+
+        # Verify API calls
+        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+
+        # Verify API calls were made with correct offset values
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 0,
+            },
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 2500,
+            },
+        )
+
+        self.mock_scm.get.assert_any_call(  # noqa
+            "/config/security/v1/dns-security-profiles",
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 5000,
+            },
+        )
+
+        # Verify content ordering and profile-specific attributes
+        assert results[0].name == "botnet-block-page1-0"
+        assert results[2500].name == "botnet-alert-page2-0"
+        assert results[5000].name == "botnet-sinkhole-page3-0"
 
 
 class TestDNSSecurityProfileCreate(TestDNSSecurityProfileBase):
