@@ -13,6 +13,7 @@
     - [Updating Service Groups](#updating-service-groups)
     - [Listing Service Groups](#listing-service-groups)
     - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Service Groups](#deleting-service-groups)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -262,6 +263,30 @@ combined_filters = service_groups.list(
 for app in combined_filters:
    print(f"Combined filters result: {app.name} in {app.folder}")
 ```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Initialize the ServiceGroup object with a custom max_limit
+# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+service_group_client = ServiceGroup(api_client=client, max_limit=4321)
+
+# Now when we call list(), it will use the specified max_limit for each request
+# while auto-paginating through all available objects.
+all_groups = service_group_client.list(folder='Texas')
+
+# 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+```
+
+</div>
 
 ### Deleting Service Groups
 

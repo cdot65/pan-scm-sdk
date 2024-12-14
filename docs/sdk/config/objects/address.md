@@ -13,6 +13,7 @@
     - [Updating Addresses](#updating-addresses)
     - [Listing Addresses](#listing-addresses)
     - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Addresses](#deleting-addresses)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -101,11 +102,11 @@ addresses = Address(client)
 ```python
 # Prepare IP/Netmask address configuration
 netmask_config = {
-    "name": "internal_network",
-    "ip_netmask": "192.168.1.0/24",
-    "description": "Internal network segment",
-    "folder": "Texas",
-    "tag": ["Python", "Automation"]
+   "name": "internal_network",
+   "ip_netmask": "192.168.1.0/24",
+   "description": "Internal network segment",
+   "folder": "Texas",
+   "tag": ["Python", "Automation"]
 }
 
 # Create the address object
@@ -113,10 +114,10 @@ netmask_address = addresses.create(netmask_config)
 
 # Prepare FQDN address configuration
 fqdn_config = {
-    "name": "example_site",
-    "fqdn": "example.com",
-    "folder": "Texas",
-    "description": "Example website"
+   "name": "example_site",
+   "fqdn": "example.com",
+   "folder": "Texas",
+   "description": "Example website"
 }
 
 # Create the FQDN address object
@@ -124,10 +125,10 @@ fqdn_address = addresses.create(fqdn_config)
 
 # Prepare IP Range address configuration
 range_config = {
-    "name": "dhcp_pool",
-    "ip_range": "192.168.1.100-192.168.1.200",
-    "folder": "Texas",
-    "description": "DHCP address pool"
+   "name": "dhcp_pool",
+   "ip_range": "192.168.1.100-192.168.1.200",
+   "folder": "Texas",
+   "description": "DHCP address pool"
 }
 
 # Create the IP Range address object
@@ -183,20 +184,20 @@ updated_address = addresses.update(existing_address)
 ```python
 # Pass filters directly into the list method
 filtered_addresses = addresses.list(
-    folder='Texas',
-    types=['fqdn'],
-    tags=['Automation']
+     folder='Texas',
+     types=['fqdn'],
+     tags=['Automation']
 )
 
 # Process results
 for addr in filtered_addresses:
-    print(f"Name: {addr.name}, Value: {addr.fqdn}")
+   print(f"Name: {addr.name}, Value: {addr.fqdn}")
 
 # Define filter parameters as a dictionary
 list_params = {
-    "folder": "Texas",
-    "types": ["netmask"],
-    "tags": ["Production"]
+   "folder": "Texas",
+   "types": ["netmask"],
+   "tags": ["Production"]
 }
 
 # List addresses with filters as kwargs
@@ -204,7 +205,7 @@ filtered_addresses = addresses.list(**list_params)
 
 # Process results
 for addr in filtered_addresses:
-    print(f"Name: {addr.name}, Value: {addr.ip_netmask}")
+   print(f"Name: {addr.name}, Value: {addr.ip_netmask}")
 ```
 
 </div>
@@ -230,54 +231,78 @@ The `list()` method supports additional parameters to refine your query results 
 ```python
 # Only return addresses defined exactly in 'Texas'
 exact_addresses = addresses.list(
-  folder='Texas',
-  exact_match=True
+   folder='Texas',
+   exact_match=True
 )
 
 for addr in exact_addresses:
-  print(f"Exact match: {addr.name} in {addr.folder}")
+   print(f"Exact match: {addr.name} in {addr.folder}")
 
 # Exclude all addresses from the 'All' folder
 no_all_addresses = addresses.list(
-  folder='Texas',
-  exclude_folders=['All']
+   folder='Texas',
+   exclude_folders=['All']
 )
 
 for addr in no_all_addresses:
-  assert addr.folder != 'All'
-  print(f"Filtered out 'All': {addr.name}")
+   assert addr.folder != 'All'
+   print(f"Filtered out 'All': {addr.name}")
 
 # Exclude addresses that come from 'default' snippet
-no_default_snippet = addresses.list(
-  folder='Texas',
-  exclude_snippets=['default']
+   no_default_snippet = addresses.list(
+   folder='Texas',
+   exclude_snippets=['default']
 )
 
 for addr in no_default_snippet:
-  assert addr.snippet != 'default'
-  print(f"Filtered out 'default' snippet: {addr.name}")
+   assert addr.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {addr.name}")
 
 # Exclude addresses associated with 'DeviceA'
 no_deviceA = addresses.list(
-  folder='Texas',
-  exclude_devices=['DeviceA']
+   folder='Texas',
+   exclude_devices=['DeviceA']
 )
 
 for addr in no_deviceA:
-  assert addr.device != 'DeviceA'
-  print(f"Filtered out 'DeviceA': {addr.name}")
+   assert addr.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {addr.name}")
 
 # Combine exact_match with multiple exclusions
 combined_filters = addresses.list(
-  folder='Texas',
-  exact_match=True,
-  exclude_folders=['All'],
-  exclude_snippets=['default'],
-  exclude_devices=['DeviceA']
+   folder='Texas',
+   exact_match=True,
+   exclude_folders=['All'],
+   exclude_snippets=['default'],
+   exclude_devices=['DeviceA']
 )
 
 for addr in combined_filters:
-  print(f"Combined filters result: {addr.name} in {addr.folder}")
+   print(f"Combined filters result: {addr.name} in {addr.folder}")
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Initialize the Address object with a custom max_limit
+# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+address_client = Address(api_client=client, max_limit=4321)
+
+# Now when we call list(), it will use the specified max_limit for each request
+# while auto-paginating through all available objects.
+all_addresses = address_client.list(folder='Texas')
+
+# 'all_addresses' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
 </div>
@@ -307,10 +332,10 @@ addresses.delete(address_id)
 ```python
 # Prepare commit parameters
 commit_params = {
-    "folders": ["Texas"],
-    "description": "Added new network addresses",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
+   "folders": ["Texas"],
+   "description": "Added new network addresses",
+   "sync": True,
+   "timeout": 300  # 5 minute timeout
 }
 
 # Commit the changes
@@ -335,7 +360,7 @@ print(f"Job status: {job_status.data[0].status_str}")
 # List recent jobs
 recent_jobs = addresses.list_jobs(limit=10)
 for job in recent_jobs.data:
-    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -348,43 +373,43 @@ for job in recent_jobs.data:
 
 ```python
 from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-    NameNotUniqueError,
-    ObjectNotPresentError
+   InvalidObjectError,
+   MissingQueryParameterError,
+   NameNotUniqueError,
+   ObjectNotPresentError
 )
 
 try:
-    # Create address configuration
-    address_config = {
-        "name": "test_address",
-        "ip_netmask": "192.168.1.0/24",
-        "folder": "Texas",
-        "description": "Test network segment",
-        "tag": ["Test"]
-    }
-
-    # Create the address
-    new_address = addresses.create(address_config)
-
-    # Commit changes
-    result = addresses.commit(
-        folders=["Texas"],
-        description="Added test address",
-        sync=True
-    )
-
-    # Check job status
-    status = addresses.get_job_status(result.job_id)
+   # Create address configuration
+   address_config = {
+      "name": "test_address",
+      "ip_netmask": "192.168.1.0/24",
+      "folder": "Texas",
+      "description": "Test network segment",
+      "tag": ["Test"]
+   }
+   
+   # Create the address
+   new_address = addresses.create(address_config)
+   
+   # Commit changes
+   result = addresses.commit(
+      folders=["Texas"],
+      description="Added test address",
+      sync=True
+   )
+   
+   # Check job status
+   status = addresses.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
-    print(f"Invalid address data: {e.message}")
+   print(f"Invalid address data: {e.message}")
 except NameNotUniqueError as e:
-    print(f"Address name already exists: {e.message}")
+   print(f"Address name already exists: {e.message}")
 except ObjectNotPresentError as e:
-    print(f"Address not found: {e.message}")
+   print(f"Address not found: {e.message}")
 except MissingQueryParameterError as e:
-    print(f"Missing parameter: {e.message}")
+   print(f"Missing parameter: {e.message}")
 ```
 
 </div>
@@ -415,12 +440,12 @@ except MissingQueryParameterError as e:
     - Cache frequently accessed objects
 
 5. **Security**
-    - Follow least privilege principle
+    - Follow the least privilege principle
     - Validate input data
     - Use secure connection settings
     - Implement proper authentication handling
 
-## Full script examples
+## Full Script Examples
 
 Refer to
 the [address.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/address.py).

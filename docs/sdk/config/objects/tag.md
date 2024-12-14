@@ -13,6 +13,7 @@
    - [Updating Tags](#updating-tags)
    - [Listing Tags](#listing-tags)
    - [Filtering Responses](#filtering-responses)
+   - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
    - [Deleting Tags](#deleting-tags)
 7. [Managing Configuration Changes](#managing-configuration-changes)
    - [Performing Commits](#performing-commits)
@@ -77,9 +78,9 @@ from scm.config.objects import Tag
 
 # Initialize client
 client = Scm(
-  client_id="your_client_id",
-  client_secret="your_client_secret",
-  tsg_id="your_tsg_id"
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 # Initialize Tag object
@@ -99,10 +100,10 @@ tags = Tag(client)
 ```python
 # Basic tag configuration
 basic_tag = {
-  "name": "Production",
-  "color": "Red",
-  "comments": "Production environment resources",
-  "folder": "Texas"
+    "name": "Production",
+    "color": "Red",
+    "comments": "Production environment resources",
+    "folder": "Texas"
 }
 
 # Create basic tag
@@ -110,20 +111,20 @@ basic_tag_obj = tags.create(basic_tag)
 
 # Tag with different color
 dev_tag = {
-  "name": "Development",
-  "color": "Blue",
-  "comments": "Development environment resources",
-  "folder": "Texas"
+    "name": "Development",
+    "color": "Blue",
+    "comments": "Development environment resources",
+    "folder": "Texas"
 }
 
 dev_tag_obj = tags.create(dev_tag)
 
 # Tag for a specific application
 app_tag = {
-  "name": "Web-Servers",
-  "color": "Green",
-  "comments": "Web server resources",
-  "folder": "Texas"
+    "name": "Web-Servers",
+    "color": "Green",
+    "comments": "Web server resources",
+    "folder": "Texas"
 }
 
 app_tag_obj = tags.create(app_tag)
@@ -179,75 +180,33 @@ updated_tag = tags.update(existing_tag)
 ```python
 # List tags from a specific folder
 filtered_tags = tags.list(
-  folder='Texas'
+    folder='Texas'
 )
 
 # Apply color filters
 filtered_tags = tags.list(
-  folder='Texas',
-  colors=['Red', 'Blue']
+    folder='Texas',
+    colors=['Red', 'Blue']
 )
 
 for tag in filtered_tags:
-  print(f"Name: {tag.name}, Color: {tag.color}")
+    print(f"Name: {tag.name}, Color: {tag.color}")
 ```
 
 </div>
 
-#### Applying Filters and Exclusions
-
-When calling the `list()` method, you can apply various filters as keyword arguments:
-
-- **colors**: Provide a list of color names to include. Only tags with these colors will be returned.
-- **exact_match**: Set this to `True` to ensure only tags that exactly match the provided container (folder, snippet, or device) are returned. By default, `exact_match=False`, allowing inherited objects from other containers.
-- **exclude_folders**, **exclude_snippets**, **exclude_devices**: Provide a list of values to exclude from the results. For example, `exclude_folders=["All"]` will remove any tag residing in the `All` folder.
-
-#### Exact Match
-
-```python
-# Return only tags that exactly match the provided folder
-exact_tags = tags.list(folder="Texas", exact_match=True)
-# This excludes tags inherited from 'All', 'Global', or other containers
-```
-
-#### Excluding Specific Folders, Snippets, or Devices
-
-```python
-# Exclude tags from certain folders
-no_all_tags = tags.list(folder="Texas", exclude_folders=["All", "Global"])
-
-# Exclude tags with certain snippet values
-no_predefined_snippet = tags.list(folder="Texas", exclude_snippets=["predefined"])
-
-# Exclude tags associated with certain devices
-no_device_tags = tags.list(folder="Texas", exclude_devices=["DeviceA", "DeviceB"])
-```
-
-You can combine these filters:
-
-```python
-# Combine exact_match with exclusion filters and colors
-refined_tags = tags.list(
-  folder="Texas",
-  exact_match=True,
-  exclude_folders=["All"],
-  exclude_snippets=["predefined-snippet"],
-  exclude_devices=["LegacyDevice"],
-  colors=["Red", "Blue"]
-)
-```
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
-(like `types`, `values`, and `tags`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
-`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+(like `colors`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices`
+parameters to control which objects are included or excluded after the initial API response is fetched.
 
 **Parameters:**
-- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
-- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
-- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
-- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned.
+- `exclude_folders (List[str])`: List of folders to exclude.
+- `exclude_snippets (List[str])`: List of snippets to exclude.
+- `exclude_devices (List[str])`: List of devices to exclude.
+- `colors (List[str])`: Filter tags by specified colors.
 
 **Examples:**
 
@@ -258,56 +217,80 @@ The `list()` method supports additional parameters to refine your query results 
 ```python
 # Only return tags defined exactly in 'Texas'
 exact_tags = tags.list(
-   folder='Texas',
-   exact_match=True
+    folder='Texas',
+    exact_match=True
 )
 
 for app in exact_tags:
-   print(f"Exact match: {app.name} in {app.folder}")
+    print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all tags from the 'All' folder
 no_all_tags = tags.list(
-   folder='Texas',
-   exclude_folders=['All']
+    folder='Texas',
+    exclude_folders=['All']
 )
 
 for app in no_all_tags:
-   assert app.folder != 'All'
-   print(f"Filtered out 'All': {app.name}")
+    assert app.folder != 'All'
+    print(f"Filtered out 'All': {app.name}")
 
 # Exclude tags that come from 'default' snippet
 no_default_snippet = tags.list(
-   folder='Texas',
-   exclude_snippets=['default']
+    folder='Texas',
+    exclude_snippets=['default']
 )
 
 for app in no_default_snippet:
-   assert app.snippet != 'default'
-   print(f"Filtered out 'default' snippet: {app.name}")
+    assert app.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude tags associated with 'DeviceA'
 no_deviceA = tags.list(
-   folder='Texas',
-   exclude_devices=['DeviceA']
+    folder='Texas',
+    exclude_devices=['DeviceA']
 )
 
 for app in no_deviceA:
-   assert app.device != 'DeviceA'
-   print(f"Filtered out 'DeviceA': {app.name}")
+    assert app.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {app.name}")
 
-# Combine exact_match with multiple exclusions
-combined_filters = tags.list(
-   folder='Texas',
-   exact_match=True,
-   exclude_folders=['All'],
-   exclude_snippets=['default'],
-   exclude_devices=['DeviceA']
+# Combine exact_match with multiple exclusions and colors
+refined_tags = tags.list(
+    folder="Texas",
+    exact_match=True,
+    exclude_folders=["All"],
+    exclude_snippets=["default"],
+    exclude_devices=["DeviceA"],
+    colors=["Red", "Blue"]
 )
 
-for app in combined_filters:
-   print(f"Combined filters result: {app.name} in {app.folder}")
+for app in refined_tags:
+    print(f"Refined filter result: {app.name} in {app.folder}, Color: {app.color}")
 ```
 
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Initialize the Tag object with a custom max_limit
+# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+tag_client = Tag(api_client=client, max_limit=4321)
+
+# Now when we call list(), it will use the specified max_limit for each request
+# while auto-paginating through all available objects.
+all_tags = tag_client.list(folder='Texas')
+
+# 'all_tags' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+```
+
+</div>
 
 ### Deleting Tags
 
@@ -334,10 +317,10 @@ tags.delete(tag_id)
 ```python
 # Prepare commit parameters
 commit_params = {
-  "folders": ["Texas"],
-  "description": "Updated tag definitions",
-  "sync": True,
-  "timeout": 300  # 5 minute timeout
+    "folders": ["Texas"],
+    "description": "Updated tag definitions",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
 }
 
 # Commit the changes
@@ -361,7 +344,7 @@ print(f"Job status: {job_status.data[0].status_str}")
 # List recent jobs
 recent_jobs = tags.list_jobs(limit=10)
 for job in recent_jobs.data:
-  print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -374,45 +357,45 @@ for job in recent_jobs.data:
 
 ```python
 from scm.exceptions import (
-  InvalidObjectError,
-  MissingQueryParameterError,
-  NameNotUniqueError,
-  ObjectNotPresentError,
-  ReferenceNotZeroError
+    InvalidObjectError,
+    MissingQueryParameterError,
+    NameNotUniqueError,
+    ObjectNotPresentError,
+    ReferenceNotZeroError
 )
 
 try:
-  # Create tag configuration
-  tag_config = {
-      "name": "test_tag",
-      "color": "Red",
-      "folder": "Texas",
-      "comments": "Test tag"
-  }
+    # Create tag configuration
+    tag_config = {
+        "name": "test_tag",
+        "color": "Red",
+        "folder": "Texas",
+        "comments": "Test tag"
+    }
 
-  # Create the tag
-  new_tag = tags.create(tag_config)
+    # Create the tag
+    new_tag = tags.create(tag_config)
 
-  # Commit changes
-  result = tags.commit(
-      folders=["Texas"],
-      description="Added test tag",
-      sync=True
-  )
+    # Commit changes
+    result = tags.commit(
+        folders=["Texas"],
+        description="Added test tag",
+        sync=True
+    )
 
-  # Check job status
-  status = tags.get_job_status(result.job_id)
+    # Check job status
+    status = tags.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
-  print(f"Invalid tag data: {e.message}")
+    print(f"Invalid tag data: {e.message}")
 except NameNotUniqueError as e:
-  print(f"Tag name already exists: {e.message}")
+    print(f"Tag name already exists: {e.message}")
 except ObjectNotPresentError as e:
-  print(f"Tag not found: {e.message}")
+    print(f"Tag not found: {e.message}")
 except ReferenceNotZeroError as e:
-  print(f"Tag still in use: {e.message}")
+    print(f"Tag still in use: {e.message}")
 except MissingQueryParameterError as e:
-  print(f"Missing parameter: {e.message}")
+    print(f"Missing parameter: {e.message}")
 ```
 
 </div>
