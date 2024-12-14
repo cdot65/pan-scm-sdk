@@ -20,19 +20,80 @@ from scm.models.objects import (
 class Address(BaseObject):
     """
     Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
+    Args:
+        api_client: The API client instance
+        max_limit (Optional[int]): Maximum number of objects to return in a single API request.
+            Defaults to 5000. Must be between 1 and 10000.
     """
 
     ENDPOINT = "/config/objects/v1/addresses"
-    MAX_LIMIT = (
-        5000  # The maximum number of objects returned by the API in a single request
-    )
+    DEFAULT_MAX_LIMIT = 2500
+    ABSOLUTE_MAX_LIMIT = 5000  # Maximum allowed by the API
 
     def __init__(
         self,
         api_client,
+        max_limit: Optional[int] = None,
     ):
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
+
+        # Validate and set max_limit
+        self._max_limit = self._validate_max_limit(max_limit)
+
+    @property
+    def max_limit(self) -> int:
+        """Get the current maximum limit for API requests."""
+        return self._max_limit
+
+    @max_limit.setter
+    def max_limit(self, value: int) -> None:
+        """Set a new maximum limit for API requests."""
+        self._max_limit = self._validate_max_limit(value)
+
+    def _validate_max_limit(self, limit: Optional[int]) -> int:
+        """
+        Validates the max_limit parameter.
+
+        Args:
+            limit: The limit to validate
+
+        Returns:
+            int: The validated limit
+
+        Raises:
+            InvalidObjectError: If the limit is invalid
+        """
+        if limit is None:
+            return self.DEFAULT_MAX_LIMIT
+
+        try:
+            limit_int = int(limit)
+        except (TypeError, ValueError):
+            raise InvalidObjectError(
+                message="max_limit must be an integer",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit type"},
+            )
+
+        if limit_int < 1:
+            raise InvalidObjectError(
+                message="max_limit must be greater than 0",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit value"},
+            )
+
+        if limit_int > self.ABSOLUTE_MAX_LIMIT:
+            raise InvalidObjectError(
+                message=f"max_limit cannot exceed {self.ABSOLUTE_MAX_LIMIT}",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "max_limit exceeds maximum allowed value"},
+            )
+
+        return limit_int
 
     def create(
         self,
@@ -134,10 +195,8 @@ class Address(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             types = filters["types"]
-            # This logic checks if the address has a matching field for any of the specified types.
+            # This logic checks if the object has a matching field for any of the specified types.
             # Fields that can be present: ip_netmask, ip_range, ip_wildcard, fqdn.
-            # For example, a type might be 'netmask', and we check if ip_netmask is set.
-            # Similarly, for 'range', we check ip_range, etc.
             filter_criteria = [
                 addr
                 for addr in filter_criteria
@@ -227,6 +286,8 @@ class Address(BaseObject):
                 - values: List[str] - Filter by address values (e.g., ['10.0.0.0/24'])
                 - tags: List[str] - Filter by tags (e.g., ['Automation'])
 
+        Returns:
+            List[AddressResponseModel]: A list of address objects
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -253,10 +314,10 @@ class Address(BaseObject):
                 details={"error": "Invalid container parameters"},
             )
 
-        # Pagination logic
-        limit = self.MAX_LIMIT
+        # Pagination logic using instance max_limit
+        limit = self._max_limit
         offset = 0
-        all_addresses = []
+        all_objects = []
 
         while True:
             params = container_parameters.copy()
@@ -299,8 +360,8 @@ class Address(BaseObject):
                 )
 
             data = response["data"]
-            addresses_chunk = [AddressResponseModel(**item) for item in data]
-            all_addresses.extend(addresses_chunk)
+            object_instances = [AddressResponseModel(**item) for item in data]
+            all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
             if len(data) < limit:
@@ -309,33 +370,43 @@ class Address(BaseObject):
             offset += limit
 
         # Apply existing filters first
-        addresses = self._apply_filters(
-            all_addresses,
+        filtered_objects = self._apply_filters(
+            all_objects,
             filters,
         )
 
         # Determine which container key and value we are filtering on
         container_key, container_value = next(iter(container_parameters.items()))
 
-        # If exact_match is True, filter out addresses that don't match exactly
+        # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
-            addresses = [
-                a for a in addresses if getattr(a, container_key) == container_value
+            filtered_objects = [
+                each
+                for each in filtered_objects
+                if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
-            addresses = [a for a in addresses if a.folder not in exclude_folders]
+            filtered_objects = [
+                each for each in filtered_objects if each.folder not in exclude_folders
+            ]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
-            addresses = [a for a in addresses if a.snippet not in exclude_snippets]
+            filtered_objects = [
+                each
+                for each in filtered_objects
+                if each.snippet not in exclude_snippets
+            ]
 
         # Exclude devices if provided
         if exclude_devices and isinstance(exclude_devices, list):
-            addresses = [a for a in addresses if a.device not in exclude_devices]
+            filtered_objects = [
+                each for each in filtered_objects if each.device not in exclude_devices
+            ]
 
-        return addresses
+        return filtered_objects
 
     def fetch(
         self,
