@@ -6,6 +6,7 @@ from .application import Application
 from .application_filters import ApplicationFilters
 from .application_group import ApplicationGroup
 from .external_dynamic_lists import ExternalDynamicLists
+from .hip_object import HIPObject
 from .service import Service
 from .service_group import ServiceGroup
 from .tag import Tag

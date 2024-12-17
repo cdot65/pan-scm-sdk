@@ -30,6 +30,11 @@ from .external_dynamic_lists import (
     ExternalDynamicListsResponseModel,
     ExternalDynamicListsUpdateModel,
 )
+from .hip_object import (
+    HIPObjectCreateModel,
+    HIPObjectResponseModel,
+    HIPObjectUpdateModel,
+)
 from .service import (
     ServiceCreateModel,
     ServiceResponseModel,
