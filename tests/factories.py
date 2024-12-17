@@ -34,11 +34,18 @@ from scm.models.objects import (
     ServiceGroupResponseModel,
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
-    ExternalDynamicListsUpdateModel,
+    HIPObjectCreateModel,
+    HIPObjectResponseModel,
+    HIPObjectUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
     AddressGroupUpdateModel,
+)
+from scm.models.objects.hip_object import (
+    EncryptionLocationModel,
+    EncryptionStateIsNot,
+    EncryptionStateIs,
 )
 from scm.models.objects.service import UDPProtocol, TCPProtocol, Override
 from scm.models.security import (
@@ -1377,7 +1384,7 @@ class ExternalDynamicListsCreateApiFactory(factory.DictFactory):
     folder = "My Folder"  # Default container
     type = {
         "ip": {
-            "url": "http://example.com/edl.txt",
+            "url": "http://example.com/edl.txt",  # noqa
             "recurring": {"daily": {"at": "03"}},
         }
     }
@@ -1429,7 +1436,7 @@ class ExternalDynamicListsUpdateApiFactory(factory.DictFactory):
     folder = "My Folder"
     type = {
         "ip": {
-            "url": "http://example.com/updated-edl.txt",
+            "url": "http://example.com/updated-edl.txt",  # noqa
             "recurring": {"daily": {"at": "05"}},
         }
     }
@@ -1476,7 +1483,7 @@ class ExternalDynamicListsResponseFactory(factory.Factory):
     folder = "My Folder"
     type = {
         "ip": {
-            "url": "http://example.com/edl.txt",
+            "url": "http://example.com/edl.txt",  # noqa
             "recurring": {"daily": {"at": "03"}},
         }
     }
@@ -1503,7 +1510,7 @@ class ExternalDynamicListsResponseFactory(factory.Factory):
             "folder": "My Folder",
             "type": {
                 "ip": {
-                    "url": "http://example.com/edl.txt",
+                    "url": "http://example.com/edl.txt",  # noqa
                     "recurring": {"daily": {"at": "03"}},
                 }
             },
@@ -1667,6 +1674,252 @@ class ExternalDynamicListsResponseModelFactory(factory.DictFactory):
     def build_valid(cls):
         """Return valid data."""
         return cls()
+
+
+# ----------------------------------------------------------------------------
+# HIP object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class EncryptionStateIsFactory(factory.Factory):
+    """Factory for creating EncryptionStateIs instances."""
+
+    class Meta:
+        model = EncryptionStateIs
+
+    is_ = "encrypted"
+
+
+class EncryptionStateIsNotFactory(factory.Factory):
+    """Factory for creating EncryptionStateIsNot instances."""
+
+    class Meta:
+        model = EncryptionStateIsNot
+
+    is_not = "encrypted"
+
+
+class EncryptionLocationFactory(factory.Factory):
+    """Factory for creating EncryptionLocation instances."""
+
+    class Meta:
+        model = EncryptionLocationModel
+
+    name = "C:"
+    encryption_state = {"is": "encrypted"}
+
+
+# SDK tests against SCM API
+class HIPObjectCreateApiFactory(factory.Factory):
+    """Factory for creating HIPObjectCreateModel instances."""
+
+    class Meta:
+        model = HIPObjectCreateModel
+
+    name = factory.Sequence(lambda n: f"hip_object_{n}")
+    description = factory.Faker("sentence")
+    folder = "All"
+    disk_encryption = {
+        "criteria": {
+            "is_installed": True,
+            "encrypted_locations": [
+                {"name": "C:", "encryption_state": {"is": "encrypted"}}
+            ],
+        },
+        "exclude_vendor": False,
+    }
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_host_info(cls, os_type: str = "Windows 10", **kwargs):
+        """Create an instance with host info criteria."""
+        return cls(
+            host_info={"criteria": {"os": {"contains": {"Microsoft": os_type}}}},
+            **kwargs,
+        )
+
+
+class HIPObjectUpdateApiFactory(factory.Factory):
+    """Factory for creating HIPObjectUpdateModel instances."""
+
+    class Meta:
+        model = HIPObjectUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"hip_object_{n}")
+    description = factory.Faker("sentence")
+    disk_encryption = {
+        "criteria": {
+            "is_installed": True,
+            "encrypted_locations": [
+                {"name": "C:", "encryption_state": {"is": "encrypted"}}
+            ],
+        },
+        "exclude_vendor": False,
+    }
+
+    @classmethod
+    def with_additional_encryption_location(cls, location: str = "D:", **kwargs):
+        """Create an instance with an additional encryption location."""
+        base_instance = cls(**kwargs)
+        base_instance.disk_encryption["criteria"]["encrypted_locations"].append(
+            {"name": location, "encryption_state": {"is": "encrypted"}}
+        )
+        return base_instance
+
+
+class HIPObjectResponseFactory(factory.Factory):
+    """Factory for creating HIPObjectResponseModel instances."""
+
+    class Meta:
+        model = HIPObjectResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"hip_object_{n}")
+    description = factory.Faker("sentence")
+    folder = "All"
+    disk_encryption = {
+        "criteria": {
+            "is_installed": True,
+            "encrypted_locations": [
+                {"name": "C:", "encryption_state": {"is": "encrypted"}}
+            ],
+        },
+        "exclude_vendor": False,
+    }
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: HIPObjectCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class HIPObjectCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for HIPObjectCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"hip_object_{n}")
+    description = factory.Faker("sentence")
+    folder = "All"
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestHIPObject",
+            folder="All",
+            disk_encryption={
+                "criteria": {
+                    "is_installed": True,
+                    "encrypted_locations": [
+                        {"name": "C:", "encryption_state": {"is": "encrypted"}}
+                    ],
+                }
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="All",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestHIPObject",
+            folder="All",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_invalid_encryption_state(cls):
+        """Return a data dict with invalid encryption state."""
+        return cls(
+            name="TestHIPObject",
+            folder="All",
+            disk_encryption={
+                "criteria": {
+                    "is_installed": True,
+                    "encrypted_locations": [
+                        {"name": "C:", "encryption_state": "invalid"}
+                    ],
+                }
+            },
+        )
+
+
+class HIPObjectUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for HIPObjectUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"hip_object_{n}")
+    description = factory.Faker("sentence")
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a HIP object."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedHIPObject",
+            disk_encryption={
+                "criteria": {
+                    "is_installed": True,
+                    "encrypted_locations": [
+                        {"name": "C:", "encryption_state": {"is": "encrypted"}}
+                    ],
+                }
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            disk_encryption={
+                "criteria": {
+                    "encrypted_locations": [
+                        {"name": "C:", "encryption_state": "invalid"}
+                    ]
+                }
+            },
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
+        )
 
 
 # ----------------------------------------------------------------------------
