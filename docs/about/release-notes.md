@@ -1,3 +1,7 @@
+## Version 0.3.7
+
+- Added support HIP objects
+
 ## Version 0.3.6
 
 - Auto-paginiation when using the `list()` method
