@@ -482,7 +482,7 @@ class SecurityRule(BaseObject):
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
             try:
-                SecurityRuleRulebase(rulebase.lower())
+                rulebase = SecurityRuleRulebase(rulebase.lower())
             except ValueError:
                 raise InvalidObjectError(
                     message="rulebase must be either 'pre' or 'post'",
@@ -523,6 +523,7 @@ class SecurityRule(BaseObject):
 
         while True:
             params = container_parameters.copy()
+            params["position"] = rulebase.value
             params["limit"] = limit
             params["offset"] = offset
 
