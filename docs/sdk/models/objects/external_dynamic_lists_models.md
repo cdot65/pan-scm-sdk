@@ -8,21 +8,21 @@ configurable update intervals and authentication options.
 
 ## Attributes
 
-| Attribute            | Type          | Required | Default    | Description                                                           |
-|---------------------|---------------|----------|------------|-----------------------------------------------------------------------|
-| name                | str           | Yes      | None       | Name of the list. Max length: 63 chars. Must match pattern: ^[ a-zA-Z\d.\-_]+$ |
-| type                | TypeUnion     | Yes*     | None       | Type of dynamic list (predefined_ip, predefined_url, ip, domain, url, imsi, imei) |
-| folder              | str           | No**     | None       | Folder where list is defined. Max length: 64 chars                     |
-| snippet             | str           | No**     | None       | Snippet where list is defined. Max length: 64 chars                    |
-| device              | str           | No**     | None       | Device where list is defined. Max length: 64 chars                     |
-| id                  | UUID          | Yes***   | None       | UUID of the list (response only)                                       |
-| description         | str           | No       | None       | Description of the list. Max length: 255 chars                         |
-| url                 | str           | Yes      | "http://"  | URL for fetching list content                                         |
-| exception_list      | List[str]     | No       | None       | List of exceptions                                                     |
-| certificate_profile | str           | No       | None       | Client certificate profile name                                        |
-| auth                | AuthModel     | No       | None       | Username/password authentication                                       |
-| recurring           | RecurringUnion | Yes      | None       | Update interval configuration                                          |
-| expand_domain       | bool          | No       | False      | Enable domain expansion (domain type only)                             |
+| Attribute           | Type           | Required | Default   | Description                                                                       |
+|---------------------|----------------|----------|-----------|-----------------------------------------------------------------------------------|
+| name                | str            | Yes      | None      | Name of the list. Max length: 63 chars. Must match pattern: ^[ a-zA-Z\d.\-_]+$    |
+| type                | TypeUnion      | Yes*     | None      | Type of dynamic list (predefined_ip, predefined_url, ip, domain, url, imsi, imei) |
+| folder              | str            | No**     | None      | Folder where list is defined. Max length: 64 chars                                |
+| snippet             | str            | No**     | None      | Snippet where list is defined. Max length: 64 chars                               |
+| device              | str            | No**     | None      | Device where list is defined. Max length: 64 chars                                |
+| id                  | UUID           | Yes***   | None      | UUID of the list (response only)                                                  |
+| description         | str            | No       | None      | Description of the list. Max length: 255 chars                                    |
+| url                 | str            | Yes      | "http://" | URL for fetching list content                                                     |
+| exception_list      | List[str]      | No       | None      | List of exceptions                                                                |
+| certificate_profile | str            | No       | None      | Client certificate profile name                                                   |
+| auth                | AuthModel      | No       | None      | Username/password authentication                                                  |
+| recurring           | RecurringUnion | Yes      | None      | Update interval configuration                                                     |
+| expand_domain       | bool           | No       | False     | Enable domain expansion (domain type only)                                        |
 
 \* Required for non-predefined lists
 \** Exactly one container type (folder/snippet/device) must be provided for create operations
