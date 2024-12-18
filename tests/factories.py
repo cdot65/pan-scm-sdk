@@ -46,6 +46,8 @@ from scm.models.objects.hip_object import (
     EncryptionLocationModel,
     EncryptionStateIsNot,
     EncryptionStateIs,
+    DiskEncryptionCriteriaModel,
+    DiskEncryptionModel,
 )
 from scm.models.objects.service import UDPProtocol, TCPProtocol, Override
 from scm.models.security import (
@@ -1772,9 +1774,32 @@ class HIPObjectUpdateApiFactory(factory.Factory):
     def with_additional_encryption_location(cls, location: str = "D:", **kwargs):
         """Create an instance with an additional encryption location."""
         base_instance = cls(**kwargs)
-        base_instance.disk_encryption["criteria"]["encrypted_locations"].append(
-            {"name": location, "encryption_state": {"is": "encrypted"}}
+
+        # Create a new disk encryption model if it doesn't exist
+        if base_instance.disk_encryption is None:
+            # Create location model
+            initial_location = EncryptionLocationModel(
+                name="C:", encryption_state={"is": "encrypted"}
+            )
+
+            # Create criteria model
+            criteria = DiskEncryptionCriteriaModel(
+                is_installed=True, encrypted_locations=[initial_location]
+            )
+
+            # Create disk encryption model
+            base_instance.disk_encryption = DiskEncryptionModel(
+                criteria=criteria, exclude_vendor=False
+            )
+
+        # Create and add new location
+        new_location = EncryptionLocationModel(
+            name=location, encryption_state={"is": "encrypted"}
         )
+
+        # Access via model attributes
+        base_instance.disk_encryption.criteria.encrypted_locations.append(new_location)
+
         return base_instance
 
 
