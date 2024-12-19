@@ -129,6 +129,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                 "folder": "Texas",
                 "limit": 5000,
                 "offset": 0,
+                "position": "pre",
             },
         )
         assert isinstance(existing_objects, list)
@@ -536,6 +537,40 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         with pytest.raises(InvalidObjectError):
             self.client.list(folder=folder, rulebase=invalid_rulebase)
 
+    @pytest.mark.parametrize(
+        "rulebase",
+        [
+            "pre",
+            "post",
+        ],
+    )
+    def test_list_rulebase(self, rulebase):
+        """Test that list method is called with correct rulebase value."""
+        folder = "Texas"
+
+        mock_response = {
+            "data": [
+                SecurityRuleResponseFactory().model_dump(by_alias=True),
+            ],
+            "offset": 0,
+            "total": 1,
+            "limit": 200,
+            "rulebase": rulebase,
+        }
+
+        self.mock_scm.get.return_value = mock_response
+        self.client.list(folder=folder, rulebase=rulebase)
+
+        self.mock_scm.get.assert_called_once_with(
+            "/config/security/v1/security-rules",
+            params={
+                "folder": folder,
+                "limit": 5000,
+                "offset": 0,
+                "position": rulebase,
+            },
+        )
+
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
@@ -749,17 +784,27 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         # Verify API calls were made with correct offset values
         self.mock_scm.get.assert_any_call(  # noqa
             "/config/security/v1/security-rules",
-            params={"folder": "Texas", "limit": 2500, "offset": 0},
+            params={"folder": "Texas", "limit": 2500, "offset": 0, "position": "pre"},
         )
 
         self.mock_scm.get.assert_any_call(  # noqa
             "/config/security/v1/security-rules",
-            params={"folder": "Texas", "limit": 2500, "offset": 2500},
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 2500,
+                "position": "pre",
+            },
         )
 
         self.mock_scm.get.assert_any_call(  # noqa
             "/config/security/v1/security-rules",
-            params={"folder": "Texas", "limit": 2500, "offset": 5000},
+            params={
+                "folder": "Texas",
+                "limit": 2500,
+                "offset": 5000,
+                "position": "pre",
+            },
         )
 
         # Verify content ordering and rule-specific attributes
