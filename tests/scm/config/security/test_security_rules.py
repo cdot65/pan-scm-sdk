@@ -839,6 +839,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/security/v1/security-rules",
+            params={"position": "pre"},
             json=test_object.model_dump(by_alias=True),
         )
         assert isinstance(created_object, SecurityRuleResponseModel)
@@ -933,6 +934,27 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
 
         with pytest.raises(InvalidObjectError):
             self.client.create(data, rulebase=invalid_rulebase)
+
+    @pytest.mark.parametrize(
+        "rulebase",
+        [
+            "pre",
+            "post",
+        ],
+    )
+    def test_create_rulebase(self, rulebase):
+        """Test that create method is called with correct rulebase value."""
+        test_object = SecurityRuleCreateApiFactory.build()
+        mock_response = SecurityRuleResponseFactory.from_request(test_object)
+
+        self.mock_scm.post.return_value = mock_response.model_dump(by_alias=True)
+        self.client.create(test_object.model_dump(by_alias=True), rulebase=rulebase)
+
+        self.mock_scm.post.assert_called_once_with(
+            "/config/security/v1/security-rules",
+            params={"position": rulebase},
+            json=test_object.model_dump(by_alias=True),
+        )
 
 
 class TestSecurityRuleGet(TestSecurityRuleBase):

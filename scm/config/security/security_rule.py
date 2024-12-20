@@ -112,7 +112,7 @@ class SecurityRule(BaseObject):
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
             try:
-                SecurityRuleRulebase(rulebase.lower())
+                rulebase = SecurityRuleRulebase(rulebase.lower())
             except ValueError:
                 raise InvalidObjectError(
                     message="rulebase must be either 'pre' or 'post'",
@@ -124,6 +124,9 @@ class SecurityRule(BaseObject):
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         profile = SecurityRuleCreateModel(**data)
 
+        # Create params dict to pass rulebase
+        params = {"position": rulebase.value}
+
         # Convert back to a Python dictionary, removing any unset fields and using aliases
         payload = profile.model_dump(
             exclude_unset=True,
@@ -133,6 +136,7 @@ class SecurityRule(BaseObject):
         # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
+            params=params,
             json=payload,
         )
 
