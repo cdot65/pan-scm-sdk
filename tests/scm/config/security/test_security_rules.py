@@ -956,6 +956,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             json=test_object.model_dump(by_alias=True),
         )
 
+
 class TestSecurityRuleGet(TestSecurityRuleBase):
     """Tests for retrieving a specific Security Rule object."""
 
