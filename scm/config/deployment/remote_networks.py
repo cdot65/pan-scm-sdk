@@ -161,29 +161,158 @@ class RemoteNetworks(BaseObject):
         """
         Apply client-side filtering to the list of remote networks.
 
+        For each recognized filter key, we do:
+          - If the filter value is an empty list, return [] immediately (no matches).
+          - If the filter value is a list with items, keep objects that match at least one of those items.
+          - If the filter value is a single string, keep objects that match that string exactly.
+
+        Recognized filters:
+            - region
+            - license_type
+            - subnets
+            - spn_name
+            - ecmp_load_balancing
+            - ipsec_tunnel
+            - protocol
+
         Args:
             remote_networks: List of RemoteNetworkResponseModel objects
             filters: Dictionary of filter criteria
 
         Returns:
-            List[RemoteNetworkResponseModel]: Filtered list of remote networks
+            Filtered list of RemoteNetworkResponseModel
         """
-        # Implement filtering logic if needed, similar to address_group.
-        # For now, we assume no advanced filtering is required.
-        return remote_networks
+
+        def match_field(obj_value, filter_value) -> bool:
+            """
+            Returns True if `obj_value` matches the given `filter_value`.
+            - If filter_value is an empty list, we interpret that as returning False overall
+              (the calling code can short-circuit the entire result to []).
+            - If filter_value is a list, match if obj_value is in that list.
+            - If filter_value is a single string, match if obj_value == filter_value.
+            """
+            if isinstance(filter_value, list):
+                # If it's empty => no results for this filter
+                if not filter_value:
+                    return False
+                return obj_value in filter_value
+            else:
+                # Single string
+                return obj_value == filter_value
+
+        # If any recognized filter is an empty list => immediate empty result
+        # to match your pattern for "empty lists => no matches."
+        recognized_filters = [
+            "regions",
+            "license_type",
+            "subnets",
+            "spn_name",
+            "ecmp_load_balancing",
+            "ipsec_tunnel",
+            "protocol",
+        ]
+        for key in recognized_filters:
+            if key in filters and isinstance(filters[key], list) and not filters[key]:
+                # For your "empty list => no matches" logic:
+                return []
+
+        # Now we chain filters one by one
+        filtered = remote_networks
+
+        # region
+        if "regions" in filters:
+            region_value = filters["regions"]
+            filtered = [rn for rn in filtered if match_field(rn.region, region_value)]
+
+        # license_type
+        if "license_types" in filters:
+            license_value = filters["license_types"]
+            filtered = [
+                rn for rn in filtered if match_field(rn.license_type, license_value)
+            ]
+
+        # subnets
+        # For subnets, let's assume an object is a match if ANY of the filter's subnets appear in `rn.subnets`.
+        # (Adjust if you'd prefer all subnets or some other logic.)
+        if "subnets" in filters:
+            subnets_value = filters["subnets"]
+
+            def has_subnet_overlap(rn_subnets, f_subnets) -> bool:
+                if not rn_subnets:
+                    return False
+                return any(s in rn_subnets for s in f_subnets)
+
+            if isinstance(subnets_value, list):
+                # If subnets_value is empty, we returned [] above
+                filtered = [
+                    rn
+                    for rn in filtered
+                    if has_subnet_overlap(rn.subnets or [], subnets_value)
+                ]
+            else:
+                # Single string => require that exact string is in the rn.subnets list
+                filtered = [
+                    rn for rn in filtered if rn.subnets and subnets_value in rn.subnets
+                ]
+
+        # spn_name
+        if "spn_names" in filters:
+            spn_value = filters["spn_names"]
+            filtered = [rn for rn in filtered if match_field(rn.spn_name, spn_value)]
+
+        # ecmp_load_balancing
+        if "ecmp_load_balancing" in filters:
+            ecmp_value = filters["ecmp_load_balancing"]
+            # ecmp_load_balancing is an enum, but .value is a string
+            filtered = [
+                rn
+                for rn in filtered
+                if match_field(rn.ecmp_load_balancing.value, ecmp_value)
+            ]
+
+        # ipsec_tunnel
+        if "ipsec_tunnels" in filters:
+            ipsec_value = filters["ipsec_tunnels"]
+            filtered = [
+                rn for rn in filtered if match_field(rn.ipsec_tunnel, ipsec_value)
+            ]
+
+        # protocol
+        if "protocol" in filters:
+            protocol_value = filters["protocol"]
+            if isinstance(protocol_value, list):
+                # If empty => no results (already handled above)
+                # We interpret multi-value => if rn.protocol is in that list of strings
+                filtered = [
+                    rn
+                    for rn in filtered
+                    if rn.protocol
+                    and rn.protocol.bgp
+                    and rn.protocol.bgp.enable
+                    and "bgp" in protocol_value
+                ]
+            else:
+                # Single string => we do the same idea. This is just an example:
+                if protocol_value == "bgp":
+                    filtered = [
+                        rn
+                        for rn in filtered
+                        if rn.protocol and rn.protocol.bgp and rn.protocol.bgp.enable
+                    ]
+                else:
+                    # Or if protocol_value is "None" => ...
+                    filtered = [rn for rn in filtered if not rn.protocol]
+
+        return filtered
 
     @staticmethod
     def _build_container_params(
         folder: Optional[str],
-        snippet: Optional[str],
-        device: Optional[str],
+        # snippet: Optional[str],
+        # device: Optional[str],
     ) -> dict:
         """Builds container parameters dictionary."""
-        return {
-            k: v
-            for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
-            if v is not None
-        }
+        return {k: v for k, v in {"folder": folder}.items() if v is not None}
 
     def list(
         self,
@@ -192,8 +321,8 @@ class RemoteNetworks(BaseObject):
         device: Optional[str] = None,
         exact_match: bool = False,
         exclude_folders: Optional[List[str]] = None,
-        exclude_snippets: Optional[List[str]] = None,
-        exclude_devices: Optional[List[str]] = None,
+        # exclude_snippets: Optional[List[str]] = None,
+        # exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[RemoteNetworkResponseModel]:
         """
@@ -206,8 +335,6 @@ class RemoteNetworks(BaseObject):
             exact_match (bool): If True, only return objects whose container
                                 exactly matches the provided container parameter.
             exclude_folders (List[str], optional): List of folder names to exclude.
-            exclude_snippets (List[str], optional): List of snippet values to exclude.
-            exclude_devices (List[str], optional): List of device values to exclude.
             **filters: Additional filters if needed
 
         Returns:
@@ -226,13 +353,11 @@ class RemoteNetworks(BaseObject):
 
         container_parameters = self._build_container_params(
             folder,
-            snippet,
-            device,
         )
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
-                message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                message="Exactly one of 'folder' must be provided.",
                 error_code="E003",
                 http_status_code=400,
                 details={"error": "Invalid container parameters"},
@@ -311,17 +436,17 @@ class RemoteNetworks(BaseObject):
                 each for each in filtered_objects if each.folder not in exclude_folders
             ]
 
-        if exclude_snippets and isinstance(exclude_snippets, list):
-            filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
-            ]
-
-        if exclude_devices and isinstance(exclude_devices, list):
-            filtered_objects = [
-                each for each in filtered_objects if each.device not in exclude_devices
-            ]
+        # if exclude_snippets and isinstance(exclude_snippets, list):
+        #     filtered_objects = [
+        #         each
+        #         for each in filtered_objects
+        #         if each.snippet not in exclude_snippets
+        #     ]
+        #
+        # if exclude_devices and isinstance(exclude_devices, list):
+        #     filtered_objects = [
+        #         each for each in filtered_objects if each.device not in exclude_devices
+        #     ]
 
         return filtered_objects
 
@@ -329,8 +454,8 @@ class RemoteNetworks(BaseObject):
         self,
         name: str,
         folder: Optional[str] = None,
-        snippet: Optional[str] = None,
-        device: Optional[str] = None,
+        # snippet: Optional[str] = None,
+        # device: Optional[str] = None,
     ) -> RemoteNetworkResponseModel:
         """
         Fetches a single remote network by name.
@@ -338,8 +463,6 @@ class RemoteNetworks(BaseObject):
         Args:
             name (str): The name of the remote network to fetch.
             folder (str, optional): The folder in which the resource is defined.
-            snippet (str, optional): The snippet in which the resource is defined.
-            device (str, optional): The device in which the resource is defined.
 
         Returns:
             RemoteNetworkResponseModel: The fetched remote network object.
@@ -368,18 +491,16 @@ class RemoteNetworks(BaseObject):
 
         container_parameters = self._build_container_params(
             folder,
-            snippet,
-            device,
+            # snippet,
+            # device,
         )
 
         if len(container_parameters) != 1:
             raise InvalidObjectError(
-                message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
+                message="Exactly one of 'folder' must be provided.",
                 error_code="E003",
                 http_status_code=400,
-                details={
-                    "error": "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-                },
+                details={"error": "Exactly one of 'folder' must be provided."},
             )
 
         params = container_parameters.copy()

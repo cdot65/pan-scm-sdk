@@ -78,7 +78,10 @@ class RemoteNetworkBaseModel(BaseModel):
         description="Alphanumeric string begin with letter: [0-9a-zA-Z._-]",
         pattern=r"^[A-Za-z][0-9A-Za-z._-]*$",
     )
-    region: str = Field(..., min_length=1)
+    region: str = Field(
+        ...,
+        min_length=1,
+    )
     license_type: str = Field(
         default="FWAAS-AGGREGATE",
         min_length=1,
@@ -86,7 +89,10 @@ class RemoteNetworkBaseModel(BaseModel):
     )
 
     # Optional fields
-    description: Optional[str] = Field(None, max_length=1023)
+    description: Optional[str] = Field(
+        None,
+        max_length=1023,
+    )
     subnets: Optional[List[str]] = None
     spn_name: Optional[str] = Field(
         None,
@@ -165,9 +171,7 @@ class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
         container_fields = ["folder", "snippet", "device"]
         provided = [f for f in container_fields if getattr(self, f) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder' must be provided.")
         return self
 
 
