@@ -36,7 +36,7 @@ nav:
       - Configuration:
           - BaseObject: sdk/config/base_object.md
           - Deployment:
-              - Overview: sdk/config/objects/index.md
+              - Overview: sdk/config/deployment/index.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
           - Objects:
               - Overview: sdk/config/objects/index.md
