@@ -35,6 +35,9 @@ nav:
       - Client: sdk/client.md
       - Configuration:
           - BaseObject: sdk/config/base_object.md
+          - Deployment:
+              - Overview: sdk/config/objects/index.md
+              - Remote Networks: sdk/config/deployment/remote_networks.md
           - Objects:
               - Overview: sdk/config/objects/index.md
               - Address: sdk/config/objects/address.md
@@ -43,6 +46,7 @@ nav:
               - Application Filters: sdk/config/objects/application_filters.md
               - Application Group: sdk/config/objects/application_group.md
               - External Dynamic Lists: sdk/config/objects/external_dynamic_lists.md
+              - HIP Object: sdk/config/objects/hip_object.md
               - Service: sdk/config/objects/service.md
               - Service Group: sdk/config/objects/service_group.md
               - Tag: sdk/config/objects/tag.md
@@ -56,6 +60,9 @@ nav:
               - Vulnerability Protection Security Profile: sdk/config/security_services/vulnerability_protection_profile.md
               - Wildfire Anti Virus Security Profile: sdk/config/security_services/wildfire_antivirus.md
       - Data Models:
+          - Deployment:
+              - Overview: sdk/models/deployment/index.md
+              - Remote Networks Models: sdk/models/deployment/remote_networks_models.md
           - Objects:
               - Overview: sdk/models/objects/index.md
               - Address Models: sdk/models/objects/address_models.md
