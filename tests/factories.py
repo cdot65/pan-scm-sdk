@@ -7,6 +7,16 @@ from typing import List
 # External libraries
 import factory
 
+from scm.models.deployment import RemoteNetworkCreateModel
+from scm.models.deployment.remote_networks import (
+    EcmpLoadBalancingEnum,
+    RemoteNetworkUpdateModel,
+    RemoteNetworkResponseModel,
+    EcmpTunnelModel,
+    PeeringTypeEnum,
+    ProtocolModel,
+)
+
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,
@@ -4869,4 +4879,476 @@ class WildfireAvProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             description="Updated description",
+        )
+
+
+# ----------------------------------------------------------------------------
+# Remote Network object factories for SDK usage (model-based)
+# ----------------------------------------------------------------------------
+
+
+class RemoteNetworkCreateApiFactory(factory.Factory):
+    """
+    Factory for creating RemoteNetworkCreateModel instances with
+    the structure used by the Python SDK calls.
+    """
+
+    class Meta:
+        model = RemoteNetworkCreateModel
+
+    # Required Fields
+    name = factory.Sequence(lambda n: f"remote_network_{n}")
+    region = "us-east-1"
+    license_type = "FWAAS-AGGREGATE"  # Default from schema
+    spn_name = "spn-test"
+
+    # Because ecmp_load_balancing=disable by default in the model,
+    # we must provide `ipsec_tunnel`.
+    ecmp_load_balancing = EcmpLoadBalancingEnum.disable
+    ipsec_tunnel = "ipsec-tunnel-default"
+    ecmp_tunnels = None
+
+    # Optional fields
+    description = factory.Faker("sentence")
+    subnets: List[str] = []
+    secondary_ipsec_tunnel = None
+    protocol = None
+
+    # Container fields
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(
+        cls,
+        snippet="TestSnippet",
+        **kwargs,
+    ):
+        """Create a RemoteNetworkCreateModel with snippet container."""
+        return cls(
+            folder=None,
+            snippet=snippet,
+            device=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def with_device(
+        cls,
+        device="TestDevice",
+        **kwargs,
+    ):
+        """Create a RemoteNetworkCreateModel with device container."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=device,
+            **kwargs,
+        )
+
+    @classmethod
+    def with_ecmp_enabled(
+        cls,
+        ecmp_tunnel_count=2,
+        **kwargs,
+    ):
+        """
+        Create a RemoteNetworkCreateModel with ecmp_load_balancing=enable and
+        the required ecmp_tunnels list.
+        """
+        # Generate sample EcmpTunnelModel entries
+        tunnels = []
+        for i in range(ecmp_tunnel_count):
+            tunnels.append(
+                {
+                    "name": f"ecmp_tunnel_{i}",
+                    "ipsec_tunnel": f"ipsec-tunnel-ecmp-{i}",
+                }
+            )
+
+        return cls(
+            ecmp_load_balancing=EcmpLoadBalancingEnum.enable,
+            ecmp_tunnels=tunnels,
+            ipsec_tunnel=None,  # must be None if ecmp is enabled
+            **kwargs,
+        )
+
+    @classmethod
+    def without_spn_name(
+        cls,
+        **kwargs,
+    ):
+        """
+        Create a RemoteNetworkCreateModel with license_type=FWAAS-AGGREGATE
+        but missing spn_name (which will raise validation error).
+        """
+        return cls(
+            spn_name=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def with_protocol_bgp(
+        cls,
+        **kwargs,
+    ):
+        """
+        Create a RemoteNetworkCreateModel with protocol containing a BgpModel.
+        """
+        protocol_data = {
+            "bgp": {
+                "enable": True,
+                "local_ip_address": "192.0.2.1",
+                "peer_ip_address": "203.0.113.5",
+                "peer_as": "65001",
+                "peering_type": "exchange-v4-over-v4",
+            }
+        }
+        return cls(
+            protocol=protocol_data,
+            **kwargs,
+        )
+
+
+class RemoteNetworkUpdateApiFactory(factory.Factory):
+    """
+    Factory for creating RemoteNetworkUpdateModel instances with
+    the structure used by the Python SDK calls.
+    """
+
+    class Meta:
+        model = RemoteNetworkUpdateModel
+
+    # From the schema, id is required for update
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"remote_network_{n}")
+    region = "us-east-1"
+    license_type = "FWAAS-AGGREGATE"
+    spn_name = "spn-test"
+
+    # ecmp_load_balancing=disable => ipsec_tunnel required
+    ecmp_load_balancing = EcmpLoadBalancingEnum.disable
+    ipsec_tunnel = "update-tunnel"
+    ecmp_tunnels = None
+
+    description = factory.Faker("sentence")
+    subnets: List[str] = []
+    secondary_ipsec_tunnel = None
+    protocol = None
+
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_ecmp_enabled(
+        cls,
+        ecmp_tunnel_count=2,
+        **kwargs,
+    ):
+        """Enable ecmp_load_balancing and provide ecmp_tunnels."""
+        tunnels = []
+        for i in range(ecmp_tunnel_count):
+            tunnels.append(
+                {
+                    "name": f"ecmp_tunnel_{i}",
+                    "ipsec_tunnel": f"ipsec-tunnel-ecmp-{i}",
+                }
+            )
+        return cls(
+            ecmp_load_balancing=EcmpLoadBalancingEnum.enable,
+            ecmp_tunnels=tunnels,
+            ipsec_tunnel=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def without_spn_name(
+        cls,
+        **kwargs,
+    ):
+        """
+        Create a RemoteNetworkUpdateModel with license_type=FWAAS-AGGREGATE
+        but missing spn_name (will raise validation error).
+        """
+        return cls(
+            spn_name=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def with_protocol_bgp(
+        cls,
+        **kwargs,
+    ):
+        """
+        Create a RemoteNetworkUpdateModel with protocol containing a BgpModel.
+        """
+        protocol_data = {
+            "bgp": {
+                "enable": True,
+                "local_ip_address": "192.0.2.99",
+                "peer_ip_address": "198.51.100.5",
+                "peer_as": "65055",
+                "peering_type": "exchange-v4-over-v4-v6-over-v6",
+            }
+        }
+        return cls(
+            protocol=protocol_data,
+            **kwargs,
+        )
+
+
+class RemoteNetworkResponseFactory(factory.Factory):
+    """
+    Factory for creating RemoteNetworkResponseModel instances
+    to mimic the actual data returned by the SCM API.
+    """
+
+    class Meta:
+        model = RemoteNetworkResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"remote_network_{n}")
+    region = "us-east-1"
+    license_type = "FWAAS-AGGREGATE"
+    spn_name = "spn-response"
+    ecmp_load_balancing = EcmpLoadBalancingEnum.disable
+    ipsec_tunnel = "ipsec-tunnel-response"
+    ecmp_tunnels = None
+
+    description = factory.Faker("sentence")
+    subnets: List[str] = []
+    secondary_ipsec_tunnel = None
+    protocol = None
+
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_protocol_bgp(cls, **kwargs):
+        """Create an instance with BGP protocol enabled."""
+        protocol_data = {
+            "bgp": {
+                "enable": True,
+                "peer_ip_address": "10.11.0.254",
+                "peer_as": "65515",
+                "local_ip_address": "192.168.11.11",
+                "peering_type": PeeringTypeEnum.exchange_v4_over_v4,
+            }
+        }
+        return cls(protocol=ProtocolModel(**protocol_data), **kwargs)
+
+    @classmethod
+    def with_ecmp_enabled(
+        cls,
+        ecmp_tunnel_count=2,
+        **kwargs,
+    ):
+        """Return a response with ecmp enabled and ecmp_tunnels data."""
+        tunnels = []
+        for i in range(ecmp_tunnel_count):
+            tunnels.append(
+                EcmpTunnelModel(
+                    name=f"ecmp_tunnel_{i}",
+                    ipsec_tunnel=f"ipsec-tunnel-ecmp-{i}",
+                )
+            )
+        return cls(
+            ecmp_load_balancing=EcmpLoadBalancingEnum.enable,
+            ipsec_tunnel=None,
+            ecmp_tunnels=tunnels,
+            **kwargs,
+        )
+
+    @classmethod
+    def from_request(
+        cls,
+        request_model: RemoteNetworkCreateModel,
+        **kwargs,
+    ):
+        """
+        Create a response model based on a create request model,
+        adding a newly generated id and any overridden kwargs.
+        """
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# ----------------------------------------------------------------------------
+# Dict-based factories for direct Pydantic testing
+# ----------------------------------------------------------------------------
+
+
+class RemoteNetworkCreateModelDictFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data suitable for instantiating RemoteNetworkCreateModel.
+    Useful for direct Pydantic validation tests.
+    """
+
+    name = factory.Sequence(lambda n: f"remote_network_{n}")
+    region = "us-west-2"
+    license_type = "FWAAS-AGGREGATE"
+    spn_name = "spn-test"
+
+    # ecmp_load_balancing defaults to disable => ipsec_tunnel is required
+    ecmp_load_balancing = "disable"
+    ipsec_tunnel = "ipsec-tunnel-default"
+    ecmp_tunnels = None
+
+    folder = "Remote Networks"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(
+        cls,
+        **kwargs,
+    ):
+        """Return a valid data dict with minimal required fields."""
+        return cls(**kwargs)
+
+    @classmethod
+    def build_ecmp_enabled(
+        cls,
+        ecmp_count=2,
+        **kwargs,
+    ):
+        """Return a data dict with ecmp enabled and ecmp_tunnels."""
+        tunnels = []
+        for i in range(ecmp_count):
+            tunnels.append(
+                {
+                    "name": f"ecmp_tunnel_{i}",
+                    "ipsec_tunnel": f"ipsec-tunnel-ecmp-{i}",
+                }
+            )
+        return cls(
+            ecmp_load_balancing="enable",
+            ecmp_tunnels=tunnels,
+            ipsec_tunnel=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def without_spn_name(
+        cls,
+        **kwargs,
+    ):
+        """Return a data dict with FWAAS-AGGREGATE license but missing spn_name."""
+        return cls(
+            spn_name=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_multiple_containers(
+        cls,
+        **kwargs,
+    ):
+        """Return a data dict with multiple containers (folder + snippet)."""
+        return cls(
+            folder="Texas",
+            snippet="TestSnippet",
+            **kwargs,
+        )
+
+    @classmethod
+    def build_no_container(
+        cls,
+        **kwargs,
+    ):
+        """Return a data dict without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            **kwargs,
+        )
+
+
+class RemoteNetworkUpdateModelDictFactory(factory.DictFactory):
+    """
+    Factory for creating dictionary data suitable for instantiating RemoteNetworkUpdateModel.
+    Useful for direct Pydantic validation tests.
+    """
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"remote_network_{n}")
+    region = "us-west-2"
+    license_type = "FWAAS-AGGREGATE"
+    spn_name = "spn-update"
+    ecmp_load_balancing = "disable"
+    ipsec_tunnel = "ipsec-tunnel-update"
+    ecmp_tunnels = None
+
+    folder = None
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls, **kwargs):
+        """Return a valid data dict with minimal required fields."""
+        return cls(**kwargs)
+
+    @classmethod
+    def build_ecmp_enabled(
+        cls,
+        ecmp_count=2,
+        **kwargs,
+    ):
+        """Return a data dict with ecmp enabled and ecmp_tunnels."""
+        tunnels = []
+        for i in range(ecmp_count):
+            tunnels.append(
+                {
+                    "name": f"ecmp_tunnel_{i}",
+                    "ipsec_tunnel": f"ipsec-tunnel-ecmp-{i}",
+                }
+            )
+        return cls(
+            ecmp_load_balancing="enable",
+            ecmp_tunnels=tunnels,
+            ipsec_tunnel=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def without_spn_name(
+        cls,
+        **kwargs,
+    ):
+        """Return a data dict with FWAAS-AGGREGATE license but missing spn_name."""
+        return cls(
+            spn_name=None,
+            **kwargs,
+        )
+
+    @classmethod
+    def build_multiple_containers(
+        cls,
+        **kwargs,
+    ):
+        """Return a data dict with multiple containers (folder + snippet)."""
+        return cls(
+            folder="Texas",
+            snippet="TestSnippet",
+            **kwargs,
+        )
+
+    @classmethod
+    def build_no_container(
+        cls,
+        **kwargs,
+    ):
+        """Return a data dict without any containers."""
+        return cls(
+            folder=None,
+            snippet=None,
+            device=None,
+            **kwargs,
         )
