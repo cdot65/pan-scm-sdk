@@ -257,5 +257,17 @@ class TestNatRuleResponseModel:
         assert isinstance(model.source_translation, SourceTranslation)
         assert model.source_translation.translated_address == ["10.0.0.1"]
 
+#
+# class TestNatRuleBaseModel:
+#     """Tests for NatRuleBaseModel validation."""
+#
+#     def test_ensure_list_of_strings_with_non_string_items(self):
+#         """Test validation when list contains non-string items."""
+#         data = NatRuleCreateModelFactory.build_valid()
+#         data["tag"] = ["valid", 123, "also-valid"]  # Include a non-string item
+#         with pytest.raises(ValueError) as exc_info:
+#             NatRuleCreateModelFactory(**data)
+#         assert "All items must be strings" in str(exc_info.value)
+#
 
 # -------------------- End of Test Classes --------------------
