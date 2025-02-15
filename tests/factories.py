@@ -4977,6 +4977,16 @@ class NatRuleCreateApiFactory(factory.Factory):
         """Create an instance with custom zones."""
         return cls(from_=from_zones, to_=to_zones, **kwargs)
 
+    @classmethod
+    def build_with_no_containers(cls, **kwargs):
+        """Return an instance without any containers."""
+        return cls(folder=None, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def build_with_multiple_containers(cls, **kwargs):
+        """Return an instance with multiple containers (should fail validation)."""
+        return cls(folder="Texas", snippet="TestSnippet", device=None, **kwargs)
+
 
 class NatRuleUpdateApiFactory(factory.Factory):
     """Factory for creating NatRuleUpdateModel instances."""
