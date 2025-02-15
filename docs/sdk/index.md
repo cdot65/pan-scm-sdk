@@ -11,6 +11,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - [BaseObject](config/base_object.md)
     - Deployment
         - [Remote Networks](config/deployment/remote_networks.md)
+    - Network
+        - [NAT Rules](config/network/nat_rules.md)
     - Objects
         - [Address](config/objects/address.md)
         - [Address Group](config/objects/address_group.md)
@@ -33,6 +35,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
 - Data Models
     - Deployment
         - [Remote Networks](models/deployment/remote_networks_models.md)
+    - Network
+        - [NAT Rules](models/network/nat_rule_models.md)
     - Objects
         - [Address Models](models/objects/address_models.md)
         - [Address Group Models](models/objects/address_group_models.md)
