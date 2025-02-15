@@ -1,3 +1,8 @@
+## Version 0.3.9
+
+- Added support remote networks
+- First time to leverage SASE APIs until Remote Network endpoints for SCM API are working properly
+
 ## Version 0.3.8
 
 - Added support remote networks
