@@ -68,7 +68,7 @@ nav:
               - Remote Networks Models: sdk/models/deployment/remote_networks_models.md
           - NAT Rules:
               - Overview: sdk/models/network/index.md
-              - Remote Networks Models: sdk/models/network/nat_rule_models.md
+              - NAT Rule Models: sdk/models/network/nat_rule_models.md
           - Objects:
               - Overview: sdk/models/objects/index.md
               - Address Models: sdk/models/objects/address_models.md
