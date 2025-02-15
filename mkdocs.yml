@@ -38,6 +38,9 @@ nav:
           - Deployment:
               - Overview: sdk/config/deployment/index.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
+          - Network:
+              - Overview: sdk/config/network/index.md
+              - NAT Rules: sdk/config/network/nat_rules.md
           - Objects:
               - Overview: sdk/config/objects/index.md
               - Address: sdk/config/objects/address.md
@@ -63,6 +66,9 @@ nav:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
               - Remote Networks Models: sdk/models/deployment/remote_networks_models.md
+          - NAT Rules:
+              - Overview: sdk/models/network/index.md
+              - Remote Networks Models: sdk/models/network/nat_rule_models.md
           - Objects:
               - Overview: sdk/models/objects/index.md
               - Address Models: sdk/models/objects/address_models.md
