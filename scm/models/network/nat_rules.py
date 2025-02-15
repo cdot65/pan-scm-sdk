@@ -111,6 +111,26 @@ class NatRuleBaseModel(BaseModel):
     )
     source_translation: Optional[SourceTranslation] = None
 
+    # Container fields
+    folder: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The folder in which the resource is defined",
+    )
+    snippet: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The snippet in which the resource is defined",
+    )
+    device: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The device in which the resource is defined",
+    )
+
     @field_validator(
         "from_",
         "to_",
@@ -143,25 +163,6 @@ class NatRuleBaseModel(BaseModel):
 
 class NatRuleCreateModel(NatRuleBaseModel):
     """Model for creating new NAT Rules."""
-
-    folder: Optional[str] = Field(
-        None,
-        description="Folder",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        description="Snippet",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-    )
-    device: Optional[str] = Field(
-        None,
-        description="Device",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-    )
 
     @model_validator(mode="after")
     def validate_container(self) -> "NatRuleCreateModel":
