@@ -119,6 +119,14 @@ class TestNatRuleCreateModel:
             in str(exc_info.value)
         )
 
+    def test_nat_rule_create_model_non_string_list_items(self):
+        """Test that a list field with non-string items raises a ValueError."""
+        data = NatRuleCreateModelFactory.build_valid()
+        data["source"] = ["any", 123]  # 123 is not a string
+        with pytest.raises(ValueError) as exc_info:
+            NatRuleCreateModel(**data)
+        assert "All items must be strings" in str(exc_info.value)
+
 
 class TestNatRuleUpdateModel:
     """Tests for NatRuleUpdateModel validation."""
