@@ -146,11 +146,9 @@ class SecurityRuleBaseModel(BaseModel):
         max_length=64,
         pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
-    device: Optional[str] = Field(
+    device: Optional[dict] = Field(
         None,
         description="Device",
-        max_length=64,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
     )
 
     # Common validators
