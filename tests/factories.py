@@ -2,7 +2,7 @@
 
 # Standard library imports
 import uuid
-from typing import List
+from typing import List, Union, Dict
 
 # External libraries
 import factory
@@ -27,8 +27,6 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     InterfaceAddress,
 )
-
-
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,
@@ -3615,15 +3613,41 @@ class SecurityRuleResponseFactory(factory.Factory):
     log_setting = "default-logging"
     schedule = None
 
+    # Set device to None by default (will be overridden by with_device)
+    device = None
+
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
         """Create an instance with snippet container."""
         return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
+    def with_device(cls, device: Union[str, Dict] = "TestDevice", **kwargs):
+        """
+        Create an instance with device container.
+
+        Args:
+            device: Either a string device name or an empty dictionary
+            **kwargs: Additional fields to override
+
+        Returns:
+            An instance of SecurityRuleResponseModel
+        """
+        # Validate the device parameter
+        if isinstance(device, dict) and device != {}:
+            raise ValueError("If device is a dictionary, it must be empty")
+
         return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_empty_dict_device(cls, **kwargs):
+        """
+        Create an instance with an empty dictionary as device.
+
+        Returns:
+            An instance of SecurityRuleResponseModel with device={}
+        """
+        return cls(folder=None, snippet=None, device={}, **kwargs)
 
     @classmethod
     def from_request(cls, request_model: SecurityRuleCreateModel, **kwargs):

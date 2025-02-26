@@ -1,5 +1,5 @@
 # tests/scm/models/security/test_security_rules_models.py
-
+import uuid
 from uuid import UUID
 
 # External libraries
@@ -250,13 +250,33 @@ class TestSecurityRuleResponseModel:
         assert model.folder is None
         assert model.device is None
 
-    def test_security_rule_response_model_with_device(self):
-        """Test response model with device container."""
-        data = SecurityRuleResponseFactory.with_device()
+    def test_security_rule_response_model_with_device_string(self):
+        """Test response model with device container as string."""
+        data = SecurityRuleResponseFactory.with_device("TestDevice")
         model = SecurityRuleResponseModel(**data.model_dump())
         assert model.device == "TestDevice"
         assert model.folder is None
         assert model.snippet is None
+
+    def test_security_rule_response_model_with_device_empty_dict(self):
+        """Test response model with device container as empty dictionary."""
+        data = SecurityRuleResponseFactory.with_empty_dict_device()
+        model = SecurityRuleResponseModel(**data.model_dump())
+        assert model.device == {}
+        assert model.folder is None
+        assert model.snippet is None
+
+    def test_security_rule_response_model_device_validation(self):
+        """Test that device validation rejects non-empty dictionaries."""
+        with pytest.raises(
+            ValueError,
+            match="If device is a dictionary, it must be empty",
+        ):
+            SecurityRuleResponseModel(
+                id=uuid.uuid4(),
+                name="test_rule",
+                device={"some_key": "some_value"},
+            )
 
 
 class TestSecurityRuleProfileSetting:
