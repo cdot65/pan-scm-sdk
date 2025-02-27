@@ -138,10 +138,10 @@ secure_rule = {
     "application": ["web-browsing", "ssl"],
     "service": ["application-default"],
     "profile_setting": {
-        "group": ["strict-security"]
+        "group": ["best-practice"]
     },
     "action": "allow",
-    "log_setting": "default-logging",
+    "log_start": False,
     "log_end": True
 }
 
