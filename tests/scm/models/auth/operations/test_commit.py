@@ -174,3 +174,29 @@ class TestCandidatePushRequestModel:
             else:
                 with pytest.raises(ValidationError):
                     CandidatePushRequestModel(**case["data"])
+
+    def test_admin_string_all(self):
+        """Test validation when 'all' is passed as a string directly."""
+        invalid_data = {
+            "folders": ["folder1"],
+            "admin": "all",  # Invalid string value
+            "description": "Test invalid admin string",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            CandidatePushRequestModel(**invalid_data)
+
+        error = exc_info.value
+        assert "Input should be a valid list" in str(error)
+
+    def test_admin_normalized_values(self):
+        """Test that 'all' values are properly normalized in mixed lists."""
+        # Test mixed case normalization
+        valid_data = {
+            "folders": ["folder1"],
+            "admin": ["ALL", "aLl", "all", "admin@example.com"],
+            "description": "Test case normalization",
+        }
+        model = CandidatePushRequestModel(**valid_data)
+
+        # All 'all' variants should be lowercase, email should remain unchanged
+        assert model.admin == ["all", "all", "all", "admin@example.com"]

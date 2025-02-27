@@ -56,12 +56,16 @@ class CandidatePushRequestModel(BaseModel):
 
     @field_validator("admin")
     def validate_admin(cls, v):
-        """Ensure admin list is not empty and contains valid email addresses."""
         if not v:
             raise ValueError("At least one admin must be specified")
-        if not all(isinstance(admin, str) and "@" in admin for admin in v):
-            raise ValueError("All admin entries must be valid email addresses")
-        return v
+
+        if not all(
+            isinstance(admin, str) and (admin.lower() == "all" or "@" in admin)
+            for admin in v
+        ):
+            raise ValueError("All admin entries must be 'all' or valid email addresses")
+
+        return [admin.lower() if admin.lower() == "all" else admin for admin in v]
 
 
 class CandidatePushResponseModel(BaseModel):

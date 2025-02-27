@@ -1,7 +1,7 @@
 # scm/models/security/security_rules.py
 
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union, Dict
 from uuid import UUID
 
 from pydantic import (
@@ -237,6 +237,30 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
         description="The UUID of the security rule",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
+
+    # Override the device field to accept None, a string, or an empty dict
+    device: Optional[Union[str, Dict]] = Field(
+        None,
+        description="Device (optional: can be None, a string, or an empty dictionary)",
+    )
+
+    @field_validator("device")
+    def validate_device(cls, v):
+        """
+        Validate that the device field is None, a string, or an empty dictionary.
+
+        Args:
+            v: The value of the device field to be validated.
+
+        Raises:
+            ValueError: If the device is a dictionary but not empty.
+
+        Returns:
+            The validated value of the device field.
+        """
+        if isinstance(v, dict) and v != {}:
+            raise ValueError("If device is a dictionary, it must be empty")
+        return v
 
 
 class SecurityRuleMoveModel(BaseModel):
