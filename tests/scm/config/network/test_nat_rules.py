@@ -86,6 +86,7 @@ class TestNatRuleMaxLimit(TestNatRuleBase):
 
 # -------------------- List Method Tests --------------------
 
+
 class TestNatRuleList(TestNatRuleBase):
     """Tests for listing NAT Rule objects."""
 
@@ -94,8 +95,12 @@ class TestNatRuleList(TestNatRuleBase):
         # Create a mock response with two NAT rule objects
         mock_response = {
             "data": [
-                NatRuleResponseFactory(name="nat_rule_1", folder="Shared").model_dump(by_alias=True),
-                NatRuleResponseFactory(name="nat_rule_2", folder="Shared").model_dump(by_alias=True),
+                NatRuleResponseFactory(name="nat_rule_1", folder="Shared").model_dump(
+                    by_alias=True
+                ),
+                NatRuleResponseFactory(name="nat_rule_2", folder="Shared").model_dump(
+                    by_alias=True
+                ),
             ],
             "offset": 0,
             "total": 2,
@@ -167,7 +172,9 @@ class TestNatRuleList(TestNatRuleBase):
         filters = {
             "nat_type": ["ipv4"],
             "service": ["http"],
-            "source": ["10.0.0.0/24"],  # Note: adjust if your filter logic expects list of strings
+            "source": [
+                "10.0.0.0/24"
+            ],  # Note: adjust if your filter logic expects list of strings
             "tag": ["prod"],
             "disabled": False,
         }
@@ -185,9 +192,24 @@ class TestNatRuleList(TestNatRuleBase):
         """Test that pagination aggregates all objects."""
         # Simulate three pages of responses
         client = NatRule(self.mock_scm, max_limit=2500)  # Use 2500 as the page size
-        first_page = [NatRuleResponseFactory(name=f"nat_rule_page1_{i}", folder="Shared").model_dump(by_alias=True) for i in range(2500)]
-        second_page = [NatRuleResponseFactory(name=f"nat_rule_page2_{i}", folder="Shared").model_dump(by_alias=True) for i in range(2500)]
-        third_page = [NatRuleResponseFactory(name=f"nat_rule_page3_{i}", folder="Shared").model_dump(by_alias=True) for i in range(100)]
+        first_page = [
+            NatRuleResponseFactory(
+                name=f"nat_rule_page1_{i}", folder="Shared"
+            ).model_dump(by_alias=True)
+            for i in range(2500)
+        ]
+        second_page = [
+            NatRuleResponseFactory(
+                name=f"nat_rule_page2_{i}", folder="Shared"
+            ).model_dump(by_alias=True)
+            for i in range(2500)
+        ]
+        third_page = [
+            NatRuleResponseFactory(
+                name=f"nat_rule_page3_{i}", folder="Shared"
+            ).model_dump(by_alias=True)
+            for i in range(100)
+        ]
         mock_responses = [
             {"data": first_page},
             {"data": second_page},
@@ -227,7 +249,6 @@ class TestNatRuleList(TestNatRuleBase):
         error_msg = str(exc_info.value)
         assert "field missing in the response" in error_msg
 
-
     def test_list_response_invalid_data_field_type(self):
         """
         Test that InvalidObjectError is raised when the API response's
@@ -251,7 +272,9 @@ class TestNatRuleList(TestNatRuleBase):
         is missing the 'id' field.
         """
         # Create test data using a factory that produces a valid container (using device)
-        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(by_alias=True)
+        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(
+            by_alias=True
+        )
         # Simulate a response that is missing the "id" field.
         response_data = test_data.copy()
         response_data.pop("id", None)
@@ -267,13 +290,18 @@ class TestNatRuleList(TestNatRuleBase):
 
 # -------------------- Create Method Tests --------------------
 
+
 class TestNatRuleCreate(TestNatRuleBase):
     """Tests for creating NAT Rule objects."""
 
     def test_create_valid_object(self):
         """Test creating a NAT rule with valid data."""
-        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(by_alias=True)
-        mock_response = NatRuleResponseFactory.from_request(NatRuleCreateModel(**test_data))
+        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(
+            by_alias=True
+        )
+        mock_response = NatRuleResponseFactory.from_request(
+            NatRuleCreateModel(**test_data)
+        )
         self.mock_scm.post.return_value = mock_response.model_dump(by_alias=True)
 
         created_rule = self.client.create(test_data)
@@ -291,17 +319,25 @@ class TestNatRuleCreate(TestNatRuleBase):
         with pytest.raises(ValidationError) as exc_info:
             NatRuleCreateApiFactory.build_with_no_containers()
         errors = exc_info.value.errors()
-        assert any("Exactly one of 'folder', 'snippet', or 'device'" in err["msg"] for err in errors)
+        assert any(
+            "Exactly one of 'folder', 'snippet', or 'device'" in err["msg"]
+            for err in errors
+        )
 
         # Multiple containers provided
         with pytest.raises(ValidationError) as exc_info:
             NatRuleCreateApiFactory.build_with_multiple_containers()
         errors = exc_info.value.errors()
-        assert any("Exactly one of 'folder', 'snippet', or 'device'" in err["msg"] for err in errors)
+        assert any(
+            "Exactly one of 'folder', 'snippet', or 'device'" in err["msg"]
+            for err in errors
+        )
 
     def test_create_http_error_no_content(self):
         """Test creation when HTTPError with no response content is raised."""
-        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(by_alias=True)
+        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(
+            by_alias=True
+        )
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
@@ -313,7 +349,9 @@ class TestNatRuleCreate(TestNatRuleBase):
 
     def test_create_generic_exception_handling(self):
         """Test that a generic exception during create is propagated."""
-        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(by_alias=True)
+        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(
+            by_alias=True
+        )
         self.mock_scm.post.side_effect = Exception("Generic error")
         with pytest.raises(Exception) as exc_info:
             self.client.create(test_data)
@@ -322,18 +360,23 @@ class TestNatRuleCreate(TestNatRuleBase):
 
 # -------------------- Get Method Tests --------------------
 
+
 class TestNatRuleGet(TestNatRuleBase):
     """Tests for retrieving a NAT rule by ID."""
 
     def test_get_valid_object(self):
         """Test that get returns a valid NAT rule object."""
         rule_id = "123e4567-e89b-12d3-a456-426655440000"
-        mock_response = NatRuleResponseFactory(name="TestNatRule", folder="Shared").model_dump(by_alias=True)
+        mock_response = NatRuleResponseFactory(
+            name="TestNatRule", folder="Shared"
+        ).model_dump(by_alias=True)
         mock_response["id"] = rule_id
         self.mock_scm.get.return_value = mock_response
 
         retrieved = self.client.get(rule_id)
-        self.mock_scm.get.assert_called_once_with(f"/config/network/v1/nat-rules/{rule_id}")
+        self.mock_scm.get.assert_called_once_with(
+            f"/config/network/v1/nat-rules/{rule_id}"
+        )
         assert isinstance(retrieved, NatRuleResponseModel)
         assert retrieved.id == UUID4(rule_id)
 
@@ -359,6 +402,7 @@ class TestNatRuleGet(TestNatRuleBase):
 
 # -------------------- Update Method Tests --------------------
 
+
 class TestNatRuleUpdate(TestNatRuleBase):
     """Tests for updating NAT rule objects."""
 
@@ -366,7 +410,7 @@ class TestNatRuleUpdate(TestNatRuleBase):
         """Test updating a NAT rule with valid data."""
         update_model = NatRuleUpdateApiFactory.with_source_translation()
         update_dict = update_model.model_dump(by_alias=True)
-        update_dict['folder'] = 'Shared'
+        update_dict["folder"] = "Shared"
         # Prepare a mock response which will generate a new id
         mock_response = NatRuleResponseFactory.from_request(
             NatRuleCreateModel(**update_dict)
@@ -416,6 +460,7 @@ class TestNatRuleUpdate(TestNatRuleBase):
 
 # -------------------- Delete Method Tests --------------------
 
+
 class TestNatRuleDelete(TestNatRuleBase):
     """Tests for deleting NAT rule objects."""
 
@@ -424,7 +469,9 @@ class TestNatRuleDelete(TestNatRuleBase):
         rule_id = "123e4567-e89b-12d3-a456-426655440000"
         self.mock_scm.delete.return_value = None
         self.client.delete(rule_id)
-        self.mock_scm.delete.assert_called_once_with(f"/config/network/v1/nat-rules/{rule_id}")
+        self.mock_scm.delete.assert_called_once_with(
+            f"/config/network/v1/nat-rules/{rule_id}"
+        )
 
     def test_delete_http_error_no_content(self):
         """Test that delete raises HTTPError when response content is missing."""
@@ -446,24 +493,33 @@ class TestNatRuleDelete(TestNatRuleBase):
 
 # -------------------- Fetch Method Tests --------------------
 
+
 class TestNatRuleFetch(TestNatRuleBase):
     """Tests for fetching a NAT rule by name."""
 
     def test_fetch_valid_object(self):
         """Test that fetch returns a valid NAT rule object."""
-        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(by_alias=True)
+        test_data = NatRuleCreateApiFactory.with_device(device="TestDevice").model_dump(
+            by_alias=True
+        )
         # Create a request model and a response from that request
         request_model = NatRuleCreateModel(**test_data)
-        response_data = NatRuleResponseFactory.from_request(request_model).model_dump(by_alias=True)
+        response_data = NatRuleResponseFactory.from_request(request_model).model_dump(
+            by_alias=True
+        )
         self.mock_scm.get.return_value = response_data
 
-        fetched_rule = self.client.fetch(name=request_model.name, folder=test_data.get("device"))
+        fetched_rule = self.client.fetch(
+            name=request_model.name, folder=test_data.get("device")
+        )
         params_expected = {
             "folder": test_data.get("device"),
             "name": request_model.name,
             "position": "pre",
         }
-        self.mock_scm.get.assert_called_once_with("/config/network/v1/nat-rules", params=params_expected)
+        self.mock_scm.get.assert_called_once_with(
+            "/config/network/v1/nat-rules", params=params_expected
+        )
         assert isinstance(fetched_rule, NatRuleResponseModel)
         assert fetched_rule.name == request_model.name
 
@@ -482,7 +538,9 @@ class TestNatRuleFetch(TestNatRuleBase):
     def test_fetch_container_multiple_error(self):
         """Test that fetch with multiple container parameters raises InvalidObjectError."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="TestNatRule", folder="Shared", snippet="TestSnippet")
+            self.client.fetch(
+                name="TestNatRule", folder="Shared", snippet="TestSnippet"
+            )
         assert "Exactly one of 'folder', 'snippet', or 'device'" in str(exc_info.value)
 
     def test_fetch_http_error_no_response_content(self):
@@ -501,6 +559,7 @@ class TestNatRuleFetch(TestNatRuleBase):
             self.client.fetch(name="TestNatRule", folder="Shared")
         assert "Response is not a dictionary" in str(exc_info.value)
 
+
 class TestNatRuleApplyFilters:
     @pytest.fixture(autouse=True)
     def setup(self):
@@ -512,7 +571,7 @@ class TestNatRuleApplyFilters:
             destination=["10.0.0.1"],
             source=["any"],
             tag=["test"],
-            disabled=False
+            disabled=False,
         )
         self.rule2 = NatRuleResponseFactory(
             name="rule2",
@@ -521,7 +580,7 @@ class TestNatRuleApplyFilters:
             destination=["20.0.0.1"],
             source=["any"],
             tag=["prod"],
-            disabled=True
+            disabled=True,
         )
         self.rules = [self.rule1, self.rule2]
 
@@ -684,6 +743,7 @@ class TestNatRuleListFiltering:
             NatRule._apply_filters(self.rules, {"disabled": "False"})
         assert exc_info.value.message == "'disabled' filter must be a boolean"
 
+
 class TestNatRuleContainerFiltering(TestNatRuleBase):
     def test_exact_match_filter(self):
         """
@@ -692,8 +752,12 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         """
         # Simulate API response with two NAT rule objects:
         # one with folder "Shared" (matching) and one with folder "Other" (non-matching)
-        rule_shared = NatRuleResponseFactory(folder="Shared", name="rule_shared").model_dump(by_alias=True)
-        rule_other = NatRuleResponseFactory(folder="Other", name="rule_other").model_dump(by_alias=True)
+        rule_shared = NatRuleResponseFactory(
+            folder="Shared", name="rule_shared"
+        ).model_dump(by_alias=True)
+        rule_other = NatRuleResponseFactory(
+            folder="Other", name="rule_other"
+        ).model_dump(by_alias=True)
         response_data = {
             "data": [rule_shared, rule_other],
             "offset": 0,
@@ -715,8 +779,12 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects: one with folder "Shared" and one with folder "All"
-        rule_shared = NatRuleResponseFactory(folder="Shared", name="rule_shared").model_dump(by_alias=True)
-        rule_all = NatRuleResponseFactory(folder="All", name="rule_all").model_dump(by_alias=True)
+        rule_shared = NatRuleResponseFactory(
+            folder="Shared", name="rule_shared"
+        ).model_dump(by_alias=True)
+        rule_all = NatRuleResponseFactory(folder="All", name="rule_all").model_dump(
+            by_alias=True
+        )
         response_data = {
             "data": [rule_shared, rule_all],
             "offset": 0,
@@ -738,8 +806,12 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects having different snippet values.
-        rule_snippet = NatRuleResponseFactory(snippet="TestSnippet", name="rule_snippet").model_dump(by_alias=True)
-        rule_other_snippet = NatRuleResponseFactory(snippet="OtherSnippet", name="rule_other_snippet").model_dump(by_alias=True)
+        rule_snippet = NatRuleResponseFactory(
+            snippet="TestSnippet", name="rule_snippet"
+        ).model_dump(by_alias=True)
+        rule_other_snippet = NatRuleResponseFactory(
+            snippet="OtherSnippet", name="rule_other_snippet"
+        ).model_dump(by_alias=True)
         response_data = {
             "data": [rule_snippet, rule_other_snippet],
             "offset": 0,
@@ -750,7 +822,9 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
 
         # Call list with snippet="TestSnippet" and exclude_snippets=["OtherSnippet"].
         # Only the object with snippet "TestSnippet" should remain.
-        results = self.client.list(snippet="TestSnippet", exclude_snippets=["OtherSnippet"])
+        results = self.client.list(
+            snippet="TestSnippet", exclude_snippets=["OtherSnippet"]
+        )
         assert len(results) == 1
         assert results[0].snippet == "TestSnippet"
         assert results[0].name == "rule_snippet"
@@ -761,8 +835,12 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects having different device values.
-        rule_device = NatRuleResponseFactory(device="TestDevice", name="rule_device").model_dump(by_alias=True)
-        rule_other_device = NatRuleResponseFactory(device="OtherDevice", name="rule_other_device").model_dump(by_alias=True)
+        rule_device = NatRuleResponseFactory(
+            device="TestDevice", name="rule_device"
+        ).model_dump(by_alias=True)
+        rule_other_device = NatRuleResponseFactory(
+            device="OtherDevice", name="rule_other_device"
+        ).model_dump(by_alias=True)
         response_data = {
             "data": [rule_device, rule_other_device],
             "offset": 0,

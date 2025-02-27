@@ -12,6 +12,7 @@ from scm.models.objects.dynamic_user_group import (
     DynamicUserGroupResponseModel,
 )
 
+
 class TestDynamicUserGroupCreateModel:
     """Tests for DynamicUserGroupCreateModel validation."""
 
@@ -22,9 +23,9 @@ class TestDynamicUserGroupCreateModel:
             "filter": "'tag.User.Developer'",
             "description": "Test dynamic user group",
             "folder": "Shared",
-            "tag": ["test-tag"]
+            "tag": ["test-tag"],
         }
-        
+
         model = DynamicUserGroupCreateModel(**data)
         assert model.name == data["name"]
         assert model.filter == data["filter"]
@@ -34,11 +35,8 @@ class TestDynamicUserGroupCreateModel:
 
     def test_name_required(self):
         """Test that name is required."""
-        data = {
-            "filter": "'tag.User.Developer'",
-            "folder": "Shared"
-        }
-        
+        data = {"filter": "'tag.User.Developer'", "folder": "Shared"}
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
         assert "name" in str(exc_info.value)
@@ -46,11 +44,8 @@ class TestDynamicUserGroupCreateModel:
 
     def test_filter_required(self):
         """Test that filter is required."""
-        data = {
-            "name": "test-group",
-            "folder": "Shared"
-        }
-        
+        data = {"name": "test-group", "folder": "Shared"}
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
         assert "filter" in str(exc_info.value)
@@ -58,14 +53,14 @@ class TestDynamicUserGroupCreateModel:
 
     def test_container_required(self):
         """Test that exactly one container type is required."""
-        data = {
-            "name": "test-group",
-            "filter": "'tag.User.Developer'"
-        }
-        
+        data = {"name": "test-group", "filter": "'tag.User.Developer'"}
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
+            in str(exc_info.value)
+        )
 
     def test_multiple_containers_not_allowed(self):
         """Test that multiple container types are not allowed."""
@@ -73,12 +68,15 @@ class TestDynamicUserGroupCreateModel:
             "name": "test-group",
             "filter": "'tag.User.Developer'",
             "folder": "Shared",
-            "snippet": "Test Snippet"
+            "snippet": "Test Snippet",
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
+            in str(exc_info.value)
+        )
 
     def test_tag_accepts_string(self):
         """Test that the tag field accepts a single string."""
@@ -86,9 +84,9 @@ class TestDynamicUserGroupCreateModel:
             "name": "test-group",
             "filter": "'tag.User.Developer'",
             "folder": "Shared",
-            "tag": "single-tag"
+            "tag": "single-tag",
         }
-        
+
         model = DynamicUserGroupCreateModel(**data)
         assert model.tag == ["single-tag"]
 
@@ -98,9 +96,9 @@ class TestDynamicUserGroupCreateModel:
             "name": "test-group",
             "filter": "'tag.User.Developer'",
             "folder": "Shared",
-            "tag": ["tag1", "tag2"]
+            "tag": ["tag1", "tag2"],
         }
-        
+
         model = DynamicUserGroupCreateModel(**data)
         assert model.tag == ["tag1", "tag2"]
 
@@ -110,9 +108,9 @@ class TestDynamicUserGroupCreateModel:
             "name": "test-group",
             "filter": "'tag.User.Developer'",
             "folder": "Shared",
-            "tag": {"invalid": "type"}
+            "tag": {"invalid": "type"},
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
         assert "Tag must be a string or a list of strings" in str(exc_info.value)
@@ -123,9 +121,9 @@ class TestDynamicUserGroupCreateModel:
             "name": "test-group",
             "filter": "'tag.User.Developer'",
             "folder": "Shared",
-            "tag": ["tag1", "tag1"]
+            "tag": ["tag1", "tag1"],
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
         assert "List items must be unique" in str(exc_info.value)
@@ -135,9 +133,9 @@ class TestDynamicUserGroupCreateModel:
         data = {
             "name": "invalid@name",
             "filter": "'tag.User.Developer'",
-            "folder": "Shared"
+            "folder": "Shared",
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
         assert "String should match pattern" in str(exc_info.value)
@@ -154,9 +152,9 @@ class TestDynamicUserGroupUpdateModel:
             "filter": "'tag.User.Admin'",
             "description": "Updated dynamic user group",
             "folder": "Shared",
-            "tag": ["updated-tag"]
+            "tag": ["updated-tag"],
         }
-        
+
         model = DynamicUserGroupUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -170,9 +168,9 @@ class TestDynamicUserGroupUpdateModel:
         data = {
             "name": "updated-group",
             "filter": "'tag.User.Admin'",
-            "folder": "Shared"
+            "folder": "Shared",
         }
-        
+
         model = DynamicUserGroupUpdateModel(**data)
         assert model.id is None
 
@@ -182,9 +180,9 @@ class TestDynamicUserGroupUpdateModel:
             "name": "updated-group",
             "filter": "'tag.User.Admin'",
             "folder": "Shared",
-            "tag": "single-tag"
+            "tag": "single-tag",
         }
-        
+
         model = DynamicUserGroupUpdateModel(**data)
         assert model.tag == ["single-tag"]
 
@@ -194,9 +192,9 @@ class TestDynamicUserGroupUpdateModel:
             "name": "updated-group",
             "filter": "'tag.User.Admin'",
             "folder": "Shared",
-            "tag": ["tag1", "tag2"]
+            "tag": ["tag1", "tag2"],
         }
-        
+
         model = DynamicUserGroupUpdateModel(**data)
         assert model.tag == ["tag1", "tag2"]
 
@@ -206,9 +204,9 @@ class TestDynamicUserGroupUpdateModel:
             "name": "updated-group",
             "filter": "'tag.User.Admin'",
             "folder": "Shared",
-            "tag": {"invalid": "type"}
+            "tag": {"invalid": "type"},
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupUpdateModel(**data)
         assert "Tag must be a string or a list of strings" in str(exc_info.value)
@@ -219,9 +217,9 @@ class TestDynamicUserGroupUpdateModel:
             "name": "updated-group",
             "filter": "'tag.User.Admin'",
             "folder": "Shared",
-            "tag": ["tag1", "tag1"]
+            "tag": ["tag1", "tag1"],
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupUpdateModel(**data)
         assert "List items must be unique" in str(exc_info.value)
@@ -238,9 +236,9 @@ class TestDynamicUserGroupResponseModel:
             "filter": "'tag.User.Manager'",
             "description": "Response dynamic user group",
             "folder": "Shared",
-            "tag": ["response-tag"]
+            "tag": ["response-tag"],
         }
-        
+
         model = DynamicUserGroupResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -254,9 +252,9 @@ class TestDynamicUserGroupResponseModel:
         data = {
             "name": "response-group",
             "filter": "'tag.User.Manager'",
-            "folder": "Shared"
+            "folder": "Shared",
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupResponseModel(**data)
         assert "id" in str(exc_info.value)
@@ -269,9 +267,9 @@ class TestDynamicUserGroupResponseModel:
             "name": "response-group",
             "filter": "'tag.User.Manager'",
             "folder": "Shared",
-            "tag": "single-tag"
+            "tag": "single-tag",
         }
-        
+
         model = DynamicUserGroupResponseModel(**data)
         assert model.tag == ["single-tag"]
 
@@ -282,9 +280,9 @@ class TestDynamicUserGroupResponseModel:
             "name": "response-group",
             "filter": "'tag.User.Manager'",
             "folder": "Shared",
-            "tag": ["tag1", "tag2"]
+            "tag": ["tag1", "tag2"],
         }
-        
+
         model = DynamicUserGroupResponseModel(**data)
         assert model.tag == ["tag1", "tag2"]
 
@@ -295,9 +293,9 @@ class TestDynamicUserGroupResponseModel:
             "name": "response-group",
             "filter": "'tag.User.Manager'",
             "folder": "Shared",
-            "tag": {"invalid": "type"}
+            "tag": {"invalid": "type"},
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupResponseModel(**data)
         assert "Tag must be a string or a list of strings" in str(exc_info.value)
@@ -309,9 +307,9 @@ class TestDynamicUserGroupResponseModel:
             "name": "response-group",
             "filter": "'tag.User.Manager'",
             "folder": "Shared",
-            "tag": ["tag1", "tag1"]
+            "tag": ["tag1", "tag1"],
         }
-        
+
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupResponseModel(**data)
         assert "List items must be unique" in str(exc_info.value)

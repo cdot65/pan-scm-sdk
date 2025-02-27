@@ -27,6 +27,7 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     InterfaceAddress,
 )
+
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,

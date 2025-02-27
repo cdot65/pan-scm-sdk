@@ -63,7 +63,9 @@ class DynamicUserGroupUpdateApiFactory:
     """Factory for creating dynamic user group update data for API tests."""
 
     @staticmethod
-    def with_folder(group_id="123e4567-e89b-12d3-a456-426655440000", name="updated_group", **kwargs):
+    def with_folder(
+        group_id="123e4567-e89b-12d3-a456-426655440000", name="updated_group", **kwargs
+    ):
         """Create update data for a dynamic user group."""
         # Create a Pydantic model instead of a dict
         data = {
@@ -83,7 +85,7 @@ class DynamicUserGroupResponseFactory:
         group_id="123e4567-e89b-12d3-a456-426655440000",
         name="test_group",
         folder="Texas",
-        **kwargs
+        **kwargs,
     ):
         """Create a response model with folder container."""
         data = {
@@ -100,7 +102,7 @@ class DynamicUserGroupResponseFactory:
         group_id="123e4567-e89b-12d3-a456-426655440000",
         name="test_group",
         snippet="TestSnippet",
-        **kwargs
+        **kwargs,
     ):
         """Create a response model with snippet container."""
         data = {
@@ -117,7 +119,7 @@ class DynamicUserGroupResponseFactory:
         group_id="123e4567-e89b-12d3-a456-426655440000",
         name="test_group",
         device="TestDevice",
-        **kwargs
+        **kwargs,
     ):
         """Create a response model with device container."""
         data = {
@@ -137,7 +139,7 @@ class DynamicUserGroupResponseFactory:
             data = request_data.model_dump()
         else:
             data = request_data.copy()
-            
+
         if "id" not in data:
             data["id"] = "123e4567-e89b-12d3-a456-426655440000"
         return data
@@ -431,7 +433,9 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
         mock_response = {
             "data": [
                 DynamicUserGroupResponseFactory.with_folder(
-                    name="group_in_texas", folder="Texas", filter="'tag.criticality.high'"
+                    name="group_in_texas",
+                    folder="Texas",
+                    filter="'tag.criticality.high'",
                 ),
                 DynamicUserGroupResponseFactory.with_folder(
                     name="group_in_all", folder="All", filter="'tag.criticality.medium'"
@@ -454,7 +458,9 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
         mock_response = {
             "data": [
                 DynamicUserGroupResponseFactory.with_folder(
-                    name="group_in_texas", folder="Texas", filter="'tag.criticality.high'"
+                    name="group_in_texas",
+                    folder="Texas",
+                    filter="'tag.criticality.high'",
                 ),
                 DynamicUserGroupResponseFactory.with_folder(
                     name="group_in_all", folder="All", filter="'tag.criticality.medium'"
@@ -765,14 +771,19 @@ class TestDynamicUserGroupUpdate(TestDynamicUserGroupBase):
 
         self.mock_scm.put.assert_called_once()  # noqa
         call_args = self.mock_scm.put.call_args  # noqa
-        assert call_args[0][0] == f"/config/objects/v1/dynamic-user-groups/{update_data.id}"
+        assert (
+            call_args[0][0]
+            == f"/config/objects/v1/dynamic-user-groups/{update_data.id}"
+        )
 
         payload = call_args[1]["json"]
         assert payload["name"] == "updated_group"
         assert payload["filter"] == "'tag.criticality.medium'"
 
         assert isinstance(updated_object, DynamicUserGroupResponseModel)
-        assert str(updated_object.id) == str(mock_response["id"])  # Convert both to string for comparison
+        assert str(updated_object.id) == str(
+            mock_response["id"]
+        )  # Convert both to string for comparison
         assert updated_object.name == mock_response["name"]
         assert updated_object.filter == mock_response["filter"]
         assert updated_object.tag == ["test-tag"]
