@@ -14,6 +14,7 @@ Read, Update, Delete) operations.
 - [Application](application.md)
 - [Application Filters](application_filters.md)
 - [Application Group](application_group.md)
+- [Dynamic User Group](dynamic_user_group.md)
 - [External Dynamic Lists](external_dynamic_lists.md)
 - [HIP Object](hip_object.md)
 - [Service](service.md)
