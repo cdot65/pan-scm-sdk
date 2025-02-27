@@ -48,6 +48,7 @@ nav:
               - Application: sdk/config/objects/application.md
               - Application Filters: sdk/config/objects/application_filters.md
               - Application Group: sdk/config/objects/application_group.md
+              - Dynamic User Group: sdk/config/objects/dynamic_user_group.md
               - External Dynamic Lists: sdk/config/objects/external_dynamic_lists.md
               - HIP Object: sdk/config/objects/hip_object.md
               - Service: sdk/config/objects/service.md
@@ -76,6 +77,7 @@ nav:
               - Application Models: sdk/models/objects/application_models.md
               - Application Filter Models: sdk/models/objects/application_filters_models.md
               - Application Group Models: sdk/models/objects/application_group_models.md
+              - Dynamic User Group Models: sdk/models/objects/dynamic_user_group_models.md
               - External Dynamic Lists Models: sdk/models/objects/external_dynamic_lists_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md

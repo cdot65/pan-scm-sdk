@@ -1,3 +1,7 @@
+## Version 0.3.12
+
+- Added support for dynamic user groups.
+
 ## Version 0.3.11
 
 - Added support for passing the string value of "all" to a commit to specify all admin users.
