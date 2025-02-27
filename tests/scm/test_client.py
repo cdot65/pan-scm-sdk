@@ -886,3 +886,61 @@ class TestClientCommitMethods(TestClientBase):
         assert "List should have at least 1 item after validation" in str(
             exc_info.value
         )
+
+    def test_commit_with_all_admin(self):
+        """Test commit using 'all' as admin value."""
+        # Mock the client_id to return a string
+        self.client.oauth_client.auth_request.client_id = "test@example.com"
+
+        mock_response = {
+            "success": True,
+            "job_id": "1587",
+            "message": "CommitAndPush job enqueued with jobid 1587",
+        }
+        self.session.request.return_value.json.return_value = mock_response
+
+        # Test with 'all' as a string
+        result = self.client.commit(
+            folders=["folder1"],
+            description="Test commit with 'all' admin",
+            admin=["all"],
+        )
+
+        assert isinstance(result, CandidatePushResponseModel)
+        assert result.success is True
+        assert result.job_id == "1587"
+
+        # Verify the admin field was processed correctly
+        self.session.request.assert_called_with(
+            "POST",
+            "https://api.strata.paloaltonetworks.com/config/operations/v1/config-versions/candidate:push",
+            json={
+                "folders": ["folder1"],
+                "description": "Test commit with 'all' admin",
+                "admin": ["all"],
+            },
+        )
+
+        # Reset mock for the next test
+        self.session.request.reset_mock()
+
+        # Test with 'all' in a list
+        result = self.client.commit(
+            folders=["folder1"],
+            description="Test commit with 'all' admin in list",
+            admin=["all"],
+        )
+
+        assert isinstance(result, CandidatePushResponseModel)
+        assert result.success is True
+
+        # Verify the admin field was processed correctly
+        self.session.request.assert_called_with(
+            "POST",
+            "https://api.strata.paloaltonetworks.com/config/operations/v1/config-versions/candidate:push",
+            json={
+                "folders": ["folder1"],
+                "description": "Test commit with 'all' admin in list",
+                "admin": ["all"],
+            },
+        )

@@ -1,7 +1,14 @@
+## Version 0.3.11
+
+- Added support for passing the string value of "all" to a commit to specify all admin users.
+
+## Version 0.3.10
+
+- Added support for new security rule types of SWG by allowing the `device` field to be either string or dictionary
+
 ## Version 0.3.9
 
-- Added support remote networks
-- First time to leverage SASE APIs until Remote Network endpoints for SCM API are working properly
+- Added support for NAT rules
 
 ## Version 0.3.8
 

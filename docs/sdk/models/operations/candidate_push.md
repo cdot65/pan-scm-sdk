@@ -103,6 +103,8 @@ except ValueError as e:
 
 </div>
 
+> **Note**: use the string value of "all" if you intend to commit the changes for all admin users.
+
 ## Usage Examples
 
 ### Creating a Commit Request
@@ -117,7 +119,7 @@ from scm.config.operations import CandidatePush
 
 commit_dict = {
     "folders": ["Texas", "Production"],
-    "admin": ["admin@example.com"],
+    "admin": ["admin@example.com", "all"],
     "description": "Updating security policies"
 }
 

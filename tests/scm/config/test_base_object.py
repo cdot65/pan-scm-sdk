@@ -365,3 +365,20 @@ class TestBaseObject:
             sync=True,
             timeout=600,
         )
+
+        # Test with username of "all" passed in admins
+        response = self.test_object.commit(
+            folders=["folder1", "folder2"],
+            description="Test commit with all params",
+            admin=["all"],
+            sync=True,
+            timeout=600,
+        )
+        assert isinstance(response, CandidatePushResponseModel)
+        self.mock_scm.commit.assert_called_with(
+            folders=["folder1", "folder2"],
+            description="Test commit with all params",
+            admin=["all"],
+            sync=True,
+            timeout=600,
+        )
