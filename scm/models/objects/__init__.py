@@ -25,6 +25,11 @@ from .application_group import (
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
 )
+from .dynamic_user_group import (
+    DynamicUserGroupCreateModel,
+    DynamicUserGroupResponseModel,
+    DynamicUserGroupUpdateModel,
+)
 from .external_dynamic_lists import (
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
