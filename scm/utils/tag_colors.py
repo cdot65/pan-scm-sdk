@@ -1,5 +1,6 @@
 # scm/utils/tag_colors.py
 
+
 def normalize_color_name(color_name: str) -> str:
     """
     Normalize the color name by converting it to lowercase,
@@ -11,4 +12,4 @@ def normalize_color_name(color_name: str) -> str:
     Returns:
         str: The normalized color name.
     """
-    return color_name.lower().replace('-', ' ').strip()
+    return color_name.lower().replace("-", " ").strip()

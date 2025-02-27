@@ -265,6 +265,7 @@ class TestNatRuleResponseModel:
         assert isinstance(model.source_translation, SourceTranslation)
         assert model.source_translation.translated_address == ["10.0.0.1"]
 
+
 #
 # class TestNatRuleBaseModel:
 #     """Tests for NatRuleBaseModel validation."""
