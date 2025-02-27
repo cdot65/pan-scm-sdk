@@ -239,6 +239,7 @@ status = client.wait_for_job("job-id", timeout=600)
 # Commit changes synchronously
 result = client.commit(
     folders=["Texas"],
+    admin=["all"],
     description="Update network configuration",
     sync=True,
     timeout=300
@@ -265,6 +266,7 @@ from scm.exceptions import APIError, AuthenticationError, TimeoutError
 try:
     result = client.commit(
         folders=["Texas"],
+        admin=["automation@scm-tenant.example.com"],
         description="Update configuration",
         sync=True
     )
