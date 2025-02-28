@@ -1,3 +1,7 @@
+## Version 0.3.13
+
+- Added support for HTTP server profiles.
+
 ## Version 0.3.12
 
 - Added support for dynamic user groups.
