@@ -45,6 +45,12 @@ from .hip_profile import (
     HIPProfileResponseModel,
     HIPProfileUpdateModel,
 )
+from .http_server_profiles import (
+    HTTPServerProfileCreateModel,
+    HTTPServerProfileResponseModel,
+    HTTPServerProfileUpdateModel,
+    ServerModel,
+)
 from .service import (
     ServiceCreateModel,
     ServiceResponseModel,
