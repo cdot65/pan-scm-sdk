@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any, Literal
 from uuid import UUID
 from pydantic import (
     BaseModel,
@@ -35,6 +35,23 @@ class NatRulebase(str, Enum):
     POST = "post"
 
 
+class DistributionMethod(str, Enum):
+    """Distribution methods for dynamic destination translation."""
+    
+    ROUND_ROBIN = "round-robin"
+    SOURCE_IP_HASH = "source-ip-hash"
+    IP_MODULO = "ip-modulo"
+    IP_HASH = "ip-hash"
+    LEAST_SESSIONS = "least-sessions"
+
+
+class DnsRewriteDirection(str, Enum):
+    """DNS rewrite direction options."""
+    
+    REVERSE = "reverse"
+    FORWARD = "forward"
+
+
 class InterfaceAddress(BaseModel):
     """Interface address configuration."""
 
@@ -43,19 +60,148 @@ class InterfaceAddress(BaseModel):
     floating_ip: Optional[str] = Field(None, description="Floating IP address")
 
 
+class DynamicIpAndPortTranslatedAddress(BaseModel):
+    """Dynamic IP and port translated address configuration."""
+    
+    translated_address: List[str] = Field(
+        ..., description="Translated source IP addresses"
+    )
+
+
+class DynamicIpAndPortInterfaceAddress(BaseModel):
+    """Dynamic IP and port interface address configuration."""
+    
+    interface: str = Field(..., description="Interface name")
+    ip: Optional[str] = Field(None, description="Translated source IP address")
+    floating_ip: Optional[str] = Field(None, description="Floating IP address")
+
+
+class DynamicIp(BaseModel):
+    """Dynamic IP translation configuration."""
+    
+    translated_address: List[str] = Field(
+        ..., description="Translated IP addresses"
+    )
+    fallback_type: Optional[str] = Field(
+        None, description="Type of fallback configuration (translated_address or interface_address)"
+    )
+    fallback_address: Optional[List[str]] = Field(
+        None, description="Fallback IP addresses (when fallback_type is translated_address)"
+    )
+    fallback_interface: Optional[str] = Field(
+        None, description="Fallback interface name (when fallback_type is interface_address)"
+    )
+    fallback_ip: Optional[str] = Field(
+        None, description="Fallback IP address (when fallback_type is interface_address)"
+    )
+
+
+class StaticIp(BaseModel):
+    """Static IP translation configuration."""
+    
+    translated_address: str = Field(
+        ..., description="Translated IP address"
+    )
+    bi_directional: Optional[str] = Field(
+        None, description="Enable bi-directional translation (yes/no)",
+        pattern="^(yes|no)$"
+    )
+    
+    @field_validator("bi_directional")
+    def ensure_string_yes_no(cls, v):
+        """Ensure bi_directional is a string 'yes' or 'no', not a boolean."""
+        if v is None:
+            return v
+        
+        if isinstance(v, bool):
+            return "yes" if v else "no"
+            
+        if v not in ("yes", "no"):
+            raise ValueError("bi_directional must be 'yes' or 'no'")
+            
+        return v
+
+
+class DynamicIpAndPort(BaseModel):
+    """Dynamic IP and port translation configuration."""
+    
+    # This class uses discriminated union pattern
+    # Either translated_address or interface_address should be provided
+    type: Literal["dynamic_ip_and_port"] = "dynamic_ip_and_port"
+    translated_address: Optional[List[str]] = Field(
+        None, description="Translated source IP addresses"
+    )
+    interface_address: Optional[InterfaceAddress] = Field(
+        None, description="Translated source interface"
+    )
+    
+    @model_validator(mode="after")
+    def validate_dynamic_ip_and_port(self) -> "DynamicIpAndPort":
+        """Validate that either translated_address or interface_address is provided, but not both."""
+        if bool(self.translated_address) == bool(self.interface_address):
+            raise ValueError(
+                "Either translated_address or interface_address must be provided, but not both"
+            )
+        return self
+
+
 class SourceTranslation(BaseModel):
     """Source translation configuration."""
 
     model_config = ConfigDict(validate_assignment=True)
+    
+    # Using discriminated union pattern for different source translation types
+    dynamic_ip_and_port: Optional[DynamicIpAndPort] = Field(
+        None, description="Dynamic IP and port translation configuration"
+    )
+    dynamic_ip: Optional[DynamicIp] = Field(
+        None, description="Dynamic IP translation configuration"
+    )
+    static_ip: Optional[StaticIp] = Field(
+        None, description="Static IP translation configuration"
+    )
+    
+    @model_validator(mode="after")
+    def validate_source_translation(self) -> "SourceTranslation":
+        """Validate that exactly one source translation type is provided."""
+        translation_types = [
+            self.dynamic_ip_and_port,
+            self.dynamic_ip,
+            self.static_ip
+        ]
+        provided_types = [t for t in translation_types if t is not None]
+        
+        if len(provided_types) != 1:
+            raise ValueError(
+                "Exactly one of dynamic_ip_and_port, dynamic_ip, or static_ip must be provided"
+            )
+        return self
 
-    translated_address: Optional[List[str]] = Field(
-        None, description="Translated addresses"
+
+class DnsRewrite(BaseModel):
+    """DNS rewrite configuration."""
+    
+    direction: DnsRewriteDirection = Field(
+        ..., description="DNS rewrite direction"
     )
-    bi_directional: Optional[bool] = Field(
-        None, description="Enable bi-directional translation"
+
+
+class DestinationTranslation(BaseModel):
+    """Destination translation configuration."""
+    
+    model_config = ConfigDict(validate_assignment=True)
+    
+    translated_address: Optional[str] = Field(
+        None, description="Translated destination IP address"
     )
-    interface: Optional[InterfaceAddress] = None
-    fallback: Optional[dict] = None
+    translated_port: Optional[int] = Field(
+        None, description="Translated destination port", ge=1, le=65535
+    )
+    dns_rewrite: Optional[DnsRewrite] = Field(
+        None, description="DNS rewrite configuration"
+    )
+    # The API doesn't accept 'distribution' directly in the destination_translation object
+    # Distribution settings should be configured separately
 
 
 class NatRuleBaseModel(BaseModel):
@@ -97,6 +243,10 @@ class NatRuleBaseModel(BaseModel):
         description="Destination zone(s)",
         alias="to",
     )
+    to_interface: Optional[str] = Field(
+        None,
+        description="Destination interface of the original packet",
+    )
     source: List[str] = Field(
         default_factory=lambda: ["any"],
         description="Source address(es)",
@@ -106,10 +256,19 @@ class NatRuleBaseModel(BaseModel):
         description="Destination address(es)",
     )
     service: Optional[str] = Field(
-        None,
+        "any",
         description="The TCP/UDP service",
     )
-    source_translation: Optional[SourceTranslation] = None
+    source_translation: Optional[SourceTranslation] = Field(
+        None, description="Source translation configuration"
+    )
+    destination_translation: Optional[DestinationTranslation] = Field(
+        None, description="Destination translation configuration"
+    )
+    # Distribution configuration should be added at the top level for load balancing
+    active_active_device_binding: Optional[str] = Field(
+        None, description="Active/Active device binding"
+    )
 
     # Container fields
     folder: Optional[str] = Field(
@@ -159,6 +318,34 @@ class NatRuleBaseModel(BaseModel):
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
         return v
+        
+    @field_validator("tag")
+    def validate_tags(cls, v):
+        """Validate that only allowed tags are used."""
+        allowed_tags = ["Automation", "Decrypted"]
+        invalid_tags = [tag for tag in v if tag not in allowed_tags]
+        if invalid_tags:
+            raise ValueError(f"Invalid tags: {', '.join(invalid_tags)}. Only 'Automation' and 'Decrypted' tags are allowed.")
+        return v
+    
+    @model_validator(mode="after")
+    def validate_nat64_dns_rewrite_compatibility(self) -> "NatRuleBaseModel":
+        """Validate that DNS rewrite is not used with NAT64 type rules."""
+        if (self.nat_type == NatType.nat64 and 
+            self.destination_translation and 
+            self.destination_translation.dns_rewrite):
+            raise ValueError("DNS rewrite is not available with NAT64 rules")
+        return self
+    
+    @model_validator(mode="after")
+    def validate_bidirectional_nat_compatibility(self) -> "NatRuleBaseModel":
+        """Validate that bi-directional static NAT is not used with destination translation."""
+        if (self.source_translation and 
+            self.source_translation.static_ip and 
+            self.source_translation.static_ip.bi_directional == "yes" and 
+            self.destination_translation):
+            raise ValueError("Bi-directional static NAT cannot be used with destination translation in the same rule")
+        return self
 
 
 class NatRuleCreateModel(NatRuleBaseModel):
