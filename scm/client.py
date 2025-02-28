@@ -1,6 +1,7 @@
 # scm/client.py
 
 # Standard library imports
+import importlib
 import logging
 import sys
 import time
@@ -73,6 +74,9 @@ class Scm:
         self.oauth_client = OAuth2Client(auth_request)
         self.session = self.oauth_client.session
         self.logger.debug(f"Session created: {self.session.headers}")
+        
+        # Initialize service cache for unified client access
+        self._services = {}
 
     def request(
         self,
@@ -323,3 +327,84 @@ class Scm:
                 raise
 
         return commit_response
+        
+    def __getattr__(self, name: str) -> Any:
+        """
+        Dynamic attribute access to support unified client access pattern (api_client.service).
+        
+        This method allows accessing service objects as attributes like:
+        api_client.address, api_client.tag, etc.
+        
+        Args:
+            name: The name of the service to access
+            
+        Returns:
+            An instance of the service object
+            
+        Raises:
+            AttributeError: If the service doesn't exist
+        """
+        # If we already have an instance of this service, return it from cache
+        if name in self._services:
+            return self._services[name]
+            
+        # Registry of available services with their module and class names
+        service_imports = {
+            # Objects
+            'address': ('scm.config.objects.address', 'Address'),
+            'address_group': ('scm.config.objects.address_group', 'AddressGroup'),
+            'application': ('scm.config.objects.application', 'Application'),
+            'application_filters': ('scm.config.objects.application_filters', 'ApplicationFilters'),
+            'application_group': ('scm.config.objects.application_group', 'ApplicationGroup'),
+            'dynamic_user_group': ('scm.config.objects.dynamic_user_group', 'DynamicUserGroup'),
+            'external_dynamic_lists': ('scm.config.objects.external_dynamic_lists', 'ExternalDynamicLists'),
+            'hip_object': ('scm.config.objects.hip_object', 'HIPObject'),
+            'hip_profile': ('scm.config.objects.hip_profile', 'HIPProfile'),
+            'http_server_profiles': ('scm.config.objects.http_server_profiles', 'HTTPServerProfiles'),
+            'service': ('scm.config.objects.service', 'Service'),
+            'service_group': ('scm.config.objects.service_group', 'ServiceGroup'),
+            'tag': ('scm.config.objects.tag', 'Tag'),
+            
+            # Network
+            'nat_rules': ('scm.config.network.nat_rules', 'NATRules'),
+            
+            # Deployment
+            'remote_networks': ('scm.config.deployment.remote_networks', 'RemoteNetworks'),
+            
+            # Security
+            'security_rule': ('scm.config.security.security_rule', 'SecurityRule'),
+            'anti_spyware_profile': ('scm.config.security.anti_spyware_profile', 'AntiSpywareProfile'),
+            'decryption_profile': ('scm.config.security.decryption_profile', 'DecryptionProfile'),
+            'dns_security_profile': ('scm.config.security.dns_security_profile', 'DNSSecurityProfile'),
+            'url_categories': ('scm.config.security.url_categories', 'URLCategories'),
+            'vulnerability_protection_profile': ('scm.config.security.vulnerability_protection_profile', 'VulnerabilityProtectionProfile'),
+            'wildfire_antivirus_profile': ('scm.config.security.wildfire_antivirus_profile', 'WildfireAntivirusProfile'),
+        }
+        
+        # Check if the requested service exists in our registry
+        if name not in service_imports:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        
+        try:
+            # Import the module and class dynamically
+            module_name, class_name = service_imports[name]
+            module = importlib.import_module(module_name)
+            service_class = getattr(module, class_name)
+            
+            # Create an instance of the service class, passing self as the API client
+            service_instance = service_class(self)
+            
+            # Cache the instance for future use
+            self._services[name] = service_instance
+            
+            return service_instance
+        except (ImportError, AttributeError) as e:
+            raise AttributeError(f"Failed to load service '{name}': {str(e)}")
+
+
+class ScmClient(Scm):
+    """
+    Alias for the Scm class to provide a more explicit naming option.
+    This class provides all the same functionality as Scm.
+    """
+    pass

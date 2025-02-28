@@ -66,12 +66,49 @@ api_client = Scm(
 # The SCM client is now ready to use
 ```
 
-### Managing Address Objects
+### Managing Objects
 
 > **NOTE**: Please refer to the [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/) for all
 > examples
 
-#### Listing Addresses
+#### Unified Client Access Pattern (Recommended)
+
+Starting with version 0.3.13, you can use a unified client access pattern to work with resources:
+
+```python
+from scm.client import Scm
+
+# Create an authenticated session with SCM
+api_client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access services directly through the client object
+# No need to create separate service instances
+
+# List addresses in a specific folder
+addresses = api_client.address.list(folder='Prisma Access')
+
+# Create a new address
+address_data = {
+    "name": "example-hostname",
+    "fqdn": "example.domain.com",
+    "description": "Created via unified client",
+    "folder": "Texas",
+}
+new_address = api_client.address.create(address_data)
+print(f"Created address with ID: {new_address.id}")
+
+# Work with other services
+tags = api_client.tag.list(folder='Texas')
+nat_rules = api_client.nat_rules.list(folder='Texas')
+```
+
+#### Traditional Access Pattern (Legacy Support)
+
+You can also use the traditional pattern where you explicitly create service instances:
 
 ```python
 from scm.client import Scm
@@ -106,8 +143,13 @@ address_data = {
     "folder": "Texas",
 }
 
-# Create the address in Strata Cloud Manager
-new_address = address.create(address_data)
+# Create the address in Strata Cloud Manager (unified client approach)
+new_address = api_client.address.create(address_data)
+print(f"Created address with ID: {new_address.id}")
+
+# Or using the traditional approach
+address_service = Address(api_client)
+new_address = address_service.create(address_data)
 print(f"Created address with ID: {new_address.id}")
 ```
 
