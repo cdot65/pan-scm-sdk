@@ -51,6 +51,7 @@ nav:
               - Dynamic User Group: sdk/config/objects/dynamic_user_group.md
               - External Dynamic Lists: sdk/config/objects/external_dynamic_lists.md
               - HIP Object: sdk/config/objects/hip_object.md
+              - HIP Profile: sdk/config/objects/hip_profile.md
               - Service: sdk/config/objects/service.md
               - Service Group: sdk/config/objects/service_group.md
               - Tag: sdk/config/objects/tag.md
@@ -79,6 +80,8 @@ nav:
               - Application Group Models: sdk/models/objects/application_group_models.md
               - Dynamic User Group Models: sdk/models/objects/dynamic_user_group_models.md
               - External Dynamic Lists Models: sdk/models/objects/external_dynamic_lists_models.md
+              - HIP Object Models: sdk/models/objects/hip_object_models.md
+              - HIP Profile Models: sdk/models/objects/hip_profile_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
               - Tag Models: sdk/models/objects/tag_models.md
