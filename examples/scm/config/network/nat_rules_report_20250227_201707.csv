@@ -1,0 +1,28 @@
+Rule ID,Name,Type,Description,Source Zone,Destination Zone,Source,Destination,Source Translation,Destination Translation,Tags,Report Generation Time
+e8562d20-68d1-420d-8c90-38d3c7e49573,source-nat-example-64971f,ipv4,Updated description for source-nat-example-64971f,local,internet,10.0.0.0/24,any,"Dynamic IP and Port (192.168.1.100, 192.168.1.101, 192.168.1.200)",None,"Automation, Decrypted",2025-02-27 20:17:07
+13078c9a-afe2-492d-8a37-4434e0411d51,source-nat-interface-496ef8,ipv4,Example source NAT rule with interface address,local,internet,10.0.0.0/24,any,Dynamic IP and Port (Interface: $eth-internet),None,Automation,2025-02-27 20:17:07
+240463dc-5e0a-46ae-b031-7a5a3f871ca9,static-nat-1e103c,ipv4,Example static NAT rule,local,internet,10.0.0.5/32,any,"Static IP (192.168.1.5, Bi-directional)",None,"Automation, Decrypted",2025-02-27 20:17:07
+3909e45b-7cc9-437f-a523-25da41213563,dynamic-ip-fallback-c0ef9c,ipv4,Example dynamic IP NAT rule with fallback,local,internet,10.0.1.0/24,any,"Dynamic IP (192.168.2.100, 192.168.2.101, 192.168.2.102)",None,Automation,2025-02-27 20:17:07
+f64e5aee-f122-4b11-a475-a7a9526ba2cd,dest-nat-6e17e1,ipv4,Example destination NAT rule,internet,local,any,203.0.113.10/32,None,Address (10.0.0.100) and Port (80),"Automation, Decrypted",2025-02-27 20:17:08
+39f47f59-4fd2-4d51-9679-269309f02188,lb-nat-fe5465,ipv4,Example load balancing NAT rule,internet,local,any,203.0.113.20/32,None,Address (10.0.0.200) and Port (8080),Automation,2025-02-27 20:17:08
+a10aa020-af90-4478-8bb8-0acf4ac3c0f8,dns64-nat-e797e5,nat64,Example DNS64 NAT rule,local,internet,any,any,None,Address (2001:db8::1),"Automation, Decrypted",2025-02-27 20:17:08
+6b38e9fd-32f6-487d-96fe-8ddde513200f,nptv6-4b04dc,nptv6,NPTv6 prefix translation,local,internet,2001:db8:1::/64,any,Static IP (2001:db8:2::/64),None,"Automation, Decrypted",2025-02-27 20:17:08
+e1cdca48-dcfd-434c-96f6-9e7415ec5347,bidir-nat-61107a,ipv4,Bi-directional NAT rule,local,internet,203.0.113.50/32,any,"Static IP (192.168.10.100, Bi-directional)",None,"Automation, Decrypted",2025-02-27 20:17:08
+52893814-22a6-487d-9639-6e0e4875d57a,multi-port-nat-792326,ipv4,Multi-port forwarding NAT rule,internet,local,any,203.0.113.100/32,None,Address (10.10.20.150),Automation,2025-02-27 20:17:08
+21cc0af4-7b0b-45c3-a91f-d657b23e6b42,port-forward-59b797,ipv4,Port forwarding NAT rule,internet,local,any,203.0.113.50/32,None,Address (10.10.10.100) and Port (8443),"Automation, Decrypted",2025-02-27 20:17:09
+444852cb-0450-4726-a61b-c931af9063ec,outbound-primary-c99ca3,ipv4,Outbound NAT using primary internet connection,local,internet,10.1.0.0/16,any,Dynamic IP and Port (Interface: $eth-internet),None,"Automation, Decrypted",2025-02-27 20:17:09
+53931f49-d559-4eea-80c3-5cd3ba3742e1,post-nat-4876f9,ipv4,Post-rulebase NAT rule example,local,internet,10.5.0.0/24,any,Dynamic IP and Port (192.168.5.100),None,Automation,2025-02-27 20:17:09
+173e1a12-6534-4c83-8da1-0c8449f2aef2,dnat-http-a65a86,ipv4,Port forwarding for HTTP service,internet,local,any,203.0.113.200/32,None,Address (10.50.10.100) and Port (80),"Automation, Decrypted",2025-02-27 20:17:09
+a9abc87d-0ec0-4222-8c61-9c492f0fb0af,dnat-https-e4a525,ipv4,Port forwarding for HTTPS service,internet,local,any,203.0.113.200/32,None,Address (10.50.10.100) and Port (443),"Automation, Decrypted",2025-02-27 20:17:09
+299a0cbe-acfa-4663-8da4-8ac7588d0bf9,dnat-ssh-8f2ff2,ipv4,Port forwarding for SSH service,internet,local,any,203.0.113.200/32,None,Address (10.50.10.100) and Port (22),"Automation, Decrypted",2025-02-27 20:17:09
+e9bc6e35-1017-47b8-b2e6-5c87d99d1920,dnat-ftp-1ecf72,ipv4,Port forwarding for FTP service,internet,local,any,203.0.113.200/32,None,Address (10.50.10.100) and Port (21),"Automation, Decrypted",2025-02-27 20:17:10
+676ff6bf-dfb2-46ba-82f4-b9f0c20fbfb2,outbound-new-york-00b0b8,ipv4,Outbound NAT for New York branch,local,internet,10.100.1.0/24,any,Dynamic IP and Port (203.0.113.10),None,Automation,2025-02-27 20:17:10
+3a800e91-c156-4bcc-8af2-20ed73c83cc0,outbound-chicago-17ff64,ipv4,Outbound NAT for Chicago branch,local,internet,10.100.2.0/24,any,Dynamic IP and Port (203.0.113.11),None,Automation,2025-02-27 20:17:10
+2dd50db0-f338-4553-92b5-92475088a5e5,outbound-los-angeles-626aa6,ipv4,Outbound NAT for Los Angeles branch,local,internet,10.100.3.0/24,any,Dynamic IP and Port (203.0.113.12),None,Automation,2025-02-27 20:17:10
+
+SUMMARY
+Total Rules Processed,20
+Successfully Retrieved,20
+Failed to Retrieve,0
+Execution Time (so far),8.52 seconds
+Report Generated On,2025-02-27 20:17:10
