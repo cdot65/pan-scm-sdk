@@ -4947,9 +4947,18 @@ class SourceTranslationFactory(factory.Factory):
     class Meta:
         model = SourceTranslation
 
-    translated_address = ["10.0.0.1"]
+    # Need to explicitly set one of the three source translation types
+    dynamic_ip_and_port = {
+        "type": "dynamic_ip_and_port",
+        "translated_address": ["10.0.0.1"]
+    }
+    dynamic_ip = None
+    static_ip = None
+    
+    # These fields aren't direct attributes of SourceTranslation
+    # but can be used in other contexts
     bi_directional = False
-    interface = factory.SubFactory(InterfaceAddressFactory)
+    translated_address = ["10.0.0.1"]  # Used by specific translation types
     fallback = None
     disabled = False
     nat_type = "ipv4"
@@ -4957,9 +4966,36 @@ class SourceTranslationFactory(factory.Factory):
     destination = ["any"]
 
     @classmethod
+    def with_static_ip(cls, **kwargs):
+        """Create an instance with static IP translation."""
+        static_ip = {
+            "translated_address": "192.168.1.100",
+            "bi_directional": "yes" if kwargs.pop("bi_directional", False) else "no"
+        }
+        return cls(dynamic_ip_and_port=None, dynamic_ip=None, static_ip=static_ip, **kwargs)
+        
+    @classmethod
+    def with_dynamic_ip(cls, **kwargs):
+        """Create an instance with dynamic IP translation."""
+        dynamic_ip = {
+            "translated_address": ["192.168.1.100", "192.168.1.101"],
+            "fallback_type": None
+        }
+        return cls(dynamic_ip_and_port=None, dynamic_ip=dynamic_ip, static_ip=None, **kwargs)
+        
+    @classmethod
+    def with_dynamic_ip_and_port(cls, **kwargs):
+        """Create an instance with dynamic IP and port translation."""
+        dynamic_ip_and_port = {
+            "type": "dynamic_ip_and_port",
+            "translated_address": kwargs.pop("translated_address", ["192.168.1.100"])
+        }
+        return cls(dynamic_ip_and_port=dynamic_ip_and_port, dynamic_ip=None, static_ip=None, **kwargs)
+        
+    @classmethod
     def with_bi_directional(cls, **kwargs):
         """Create an instance with bi-directional translation enabled."""
-        return cls(bi_directional=True, **kwargs)
+        return cls.with_static_ip(bi_directional=True, **kwargs)
 
 
 # SDK tests against SCM API
@@ -4971,7 +5007,7 @@ class NatRuleCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
-    tag = ["test-tag", "environment-prod"]
+    tag = ["Automation", "Decrypted"]  # Only these tags are allowed
     disabled = False
     nat_type = NatType.ipv4
     from_ = ["any"]
@@ -4995,7 +5031,7 @@ class NatRuleCreateApiFactory(factory.Factory):
     @classmethod
     def with_source_translation(cls, **kwargs):
         """Create an instance with source translation."""
-        return cls(source_translation=SourceTranslationFactory(), **kwargs)
+        return cls(source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(), **kwargs)
 
     @classmethod
     def with_custom_zones(cls, from_zones: List[str], to_zones: List[str], **kwargs):
@@ -5022,7 +5058,7 @@ class NatRuleUpdateApiFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
-    tag = ["updated-tag"]
+    tag = ["Automation"]  # Only allowed tags
     disabled = False
     nat_type = NatType.ipv4
     from_ = ["any"]
@@ -5035,7 +5071,7 @@ class NatRuleUpdateApiFactory(factory.Factory):
     @classmethod
     def with_source_translation(cls, **kwargs):
         """Create an instance with source translation."""
-        return cls(source_translation=SourceTranslationFactory(), **kwargs)
+        return cls(source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(), **kwargs)
 
     @classmethod
     def with_zones_update(cls, from_zones: List[str], to_zones: List[str], **kwargs):
@@ -5052,7 +5088,7 @@ class NatRuleResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
-    tag = ["response-tag"]
+    tag = ["Automation", "Decrypted"]  # Only allowed tags
     disabled = False
     nat_type = NatType.ipv4
     from_ = ["any"]
@@ -5065,7 +5101,7 @@ class NatRuleResponseFactory(factory.Factory):
     @classmethod
     def with_source_translation(cls, **kwargs):
         """Create an instance with source translation."""
-        return cls(source_translation=SourceTranslationFactory(), **kwargs)
+        return cls(source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(), **kwargs)
 
     @classmethod
     def from_request(cls, request_model: NatRuleCreateModel, **kwargs):
@@ -5116,7 +5152,7 @@ class NatRuleCreateModelFactory(factory.DictFactory):
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
     folder = "Shared"
-    tag = ["test-tag"]
+    tag = ["Automation"]  # Only allowed tags
     nat_type = NatType.ipv4
 
     @classmethod

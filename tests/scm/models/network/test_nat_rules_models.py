@@ -17,6 +17,8 @@ from scm.models.network.nat_rules import (
     NatRulebase,
     InterfaceAddress,
     SourceTranslation,
+    StaticIp,
+    DynamicIpAndPort,
 )
 from tests.factories import (
     NatRuleCreateModelFactory,
@@ -81,7 +83,9 @@ class TestNatRuleCreateModel:
         model = NatRuleCreateApiFactory.with_source_translation()
         assert model.source_translation is not None
         assert isinstance(model.source_translation, SourceTranslation)
-        assert model.source_translation.translated_address == ["10.0.0.1"]
+        # In the new model structure, translated_address is inside dynamic_ip_and_port
+        assert model.source_translation.dynamic_ip_and_port is not None
+        assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
 
     def test_nat_rule_create_model_string_to_list_conversion(self):
         """Test that string values are converted to lists for list fields."""
@@ -160,7 +164,9 @@ class TestNatRuleUpdateModel:
         model = NatRuleUpdateApiFactory.with_source_translation()
         assert model.source_translation is not None
         assert isinstance(model.source_translation, SourceTranslation)
-        assert model.source_translation.translated_address == ["10.0.0.1"]
+        # In the new model structure, translated_address is inside dynamic_ip_and_port
+        assert model.source_translation.dynamic_ip_and_port is not None
+        assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
 
     def test_nat_rule_update_model_with_zones_update(self):
         """Test update with modified zones."""
@@ -218,21 +224,118 @@ class TestSourceTranslation:
     def test_source_translation_valid(self):
         """Test validation with valid source translation data."""
         model = SourceTranslationFactory()
-        assert model.translated_address == ["10.0.0.1"]
-        assert model.bi_directional is False
-        assert isinstance(model.interface, InterfaceAddress)
+        # Check dynamic_ip_and_port attributes in the new structure
+        assert model.dynamic_ip_and_port is not None
+        assert model.dynamic_ip_and_port.translated_address == ["10.0.0.1"]
+        # These are no longer direct attributes of SourceTranslation
+        assert model.dynamic_ip is None
+        assert model.static_ip is None
+        
+    def test_source_translation_validation_error(self):
+        """Test that providing no translation type raises a validation error."""
+        with pytest.raises(ValueError) as exc_info:
+            SourceTranslation(
+                dynamic_ip_and_port=None,
+                dynamic_ip=None,
+                static_ip=None
+            )
+        assert "Exactly one of dynamic_ip_and_port, dynamic_ip, or static_ip must be provided" in str(exc_info.value)
 
     def test_source_translation_with_bi_directional(self):
         """Test validation with bi-directional translation enabled."""
         model = SourceTranslationFactory.with_bi_directional()
-        assert model.bi_directional is True
+        # In the updated structure, bi_directional is an attribute of static_ip
+        assert model.static_ip is not None
+        assert model.static_ip.bi_directional == "yes"  # String value not boolean
+        assert model.dynamic_ip_and_port is None
+        assert model.dynamic_ip is None
+        
+    def test_static_ip_bi_directional_validation(self):
+        """Test that bi_directional validation works correctly."""
+        # Test with "yes" value
+        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional="yes")
+        assert static_ip.bi_directional == "yes"
+        
+        # Test with "no" value
+        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional="no")
+        assert static_ip.bi_directional == "no"
+        
+        # Test with invalid value
+        with pytest.raises(Exception) as exc_info:
+            StaticIp(translated_address="192.168.1.100", bi_directional="invalid")
+        # Any validation error is fine
+        
+        # Test with None value
+        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional=None)
+        assert static_ip.bi_directional is None
+        
+    def test_static_ip_bi_directional_boolean_conversion(self):
+        """Create tests specifically for checking the lines that handle boolean conversion.
+        
+        This test is a bit unusual because we need to directly test the validator function
+        rather than through the model, since Pydantic will validate the types before our
+        field validator runs.
+        """
+        # Directly test the validator function
+        from scm.models.network.nat_rules import StaticIp
+        
+        # Test with None (line 114)
+        result = StaticIp.ensure_string_yes_no(None)
+        assert result is None
+        
+        # Test with boolean True (line 117)
+        result = StaticIp.ensure_string_yes_no(True)
+        assert result == "yes"
+        
+        # Test with boolean False (line 117)
+        result = StaticIp.ensure_string_yes_no(False)
+        assert result == "no"
+        
+        # Test with invalid string (line 120)
+        with pytest.raises(ValueError) as exc_info:
+            StaticIp.ensure_string_yes_no("invalid")
+        assert "bi_directional must be 'yes' or 'no'" in str(exc_info.value)
 
     def test_source_translation_with_interface(self):
         """Test validation with interface configuration."""
+        # Need to update how interface is incorporated into source translation
         interface_data = InterfaceAddressFactory.with_floating_ip()
-        model = SourceTranslationFactory(interface=interface_data)
-        assert model.interface.interface == "ethernet1/1"
-        assert model.interface.floating_ip == "192.168.1.100"
+        
+        # Create a dynamic_ip_and_port with interface_address
+        dynamic_ip_and_port = {
+            "type": "dynamic_ip_and_port",
+            "interface_address": interface_data.model_dump()
+        }
+        
+        model = SourceTranslationFactory(
+            dynamic_ip_and_port=dynamic_ip_and_port,
+            dynamic_ip=None,
+            static_ip=None
+        )
+        
+        assert model.dynamic_ip_and_port is not None
+        assert model.dynamic_ip_and_port.interface_address is not None
+        assert model.dynamic_ip_and_port.interface_address.interface == "ethernet1/1"
+        assert model.dynamic_ip_and_port.interface_address.floating_ip == "192.168.1.100"
+        
+    def test_dynamic_ip_and_port_validation_error(self):
+        """Test that providing neither translated_address nor interface_address raises an error."""
+        # Create a dynamic_ip_and_port with neither translated_address nor interface_address
+        dynamic_ip_and_port = {
+            "type": "dynamic_ip_and_port",
+            "translated_address": None,
+            "interface_address": None
+        }
+        
+        # This should trigger the validation error in line 142
+        with pytest.raises(ValueError) as exc_info:
+            SourceTranslationFactory(
+                dynamic_ip_and_port=dynamic_ip_and_port,
+                dynamic_ip=None,
+                static_ip=None
+            )
+        
+        assert "Either translated_address or interface_address must be provided, but not both" in str(exc_info.value)
 
 
 class TestNatRuleResponseModel:
@@ -263,7 +366,62 @@ class TestNatRuleResponseModel:
         model = NatRuleResponseModel(**data.model_dump())
         assert model.source_translation is not None
         assert isinstance(model.source_translation, SourceTranslation)
-        assert model.source_translation.translated_address == ["10.0.0.1"]
+        # In the new model structure, translated_address is inside dynamic_ip_and_port
+        assert model.source_translation.dynamic_ip_and_port is not None
+        assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
+        
+    def test_nat_rule_invalid_tag_validation(self):
+        """Test that using invalid tags raises a validation error."""
+        data = NatRuleResponseFactory().model_dump()
+        data["tag"] = ["invalid-tag"]  # Use invalid tag
+        
+        with pytest.raises(ValueError) as exc_info:
+            NatRuleResponseModel(**data)
+        
+        error_msg = str(exc_info.value)
+        assert "Invalid tags: invalid-tag. Only 'Automation' and 'Decrypted' tags are allowed" in error_msg
+        
+    def test_nat64_dns_rewrite_compatibility(self):
+        """Test that using DNS rewrite with NAT64 raises a validation error."""
+        # Create a NAT64 rule with DNS rewrite to trigger the validation error
+        data = NatRuleResponseFactory().model_dump()
+        data["nat_type"] = NatType.nat64
+        data["destination_translation"] = {
+            "translated_address": "2001:db8::1",
+            "dns_rewrite": {
+                "direction": "forward"
+            }
+        }
+        
+        with pytest.raises(ValueError) as exc_info:
+            NatRuleResponseModel(**data)
+        
+        assert "DNS rewrite is not available with NAT64 rules" in str(exc_info.value)
+        
+    def test_bidirectional_nat_destination_translation_incompatibility(self):
+        """Test that bi-directional static NAT with destination translation raises an error."""
+        # Create a rule with both bi-directional static NAT and destination translation
+        data = NatRuleResponseFactory().model_dump()
+        
+        # Add static IP with bi-directional enabled
+        data["source_translation"] = {
+            "static_ip": {
+                "translated_address": "192.168.1.100",
+                "bi_directional": "yes"
+            },
+            "dynamic_ip": None,
+            "dynamic_ip_and_port": None
+        }
+        
+        # Add destination translation
+        data["destination_translation"] = {
+            "translated_address": "10.10.10.10"
+        }
+        
+        with pytest.raises(ValueError) as exc_info:
+            NatRuleResponseModel(**data)
+        
+        assert "Bi-directional static NAT cannot be used with destination translation in the same rule" in str(exc_info.value)
 
 
 #
