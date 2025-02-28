@@ -1,6 +1,7 @@
 ## Version 0.3.12
 
 - Added support for dynamic user groups.
+- Added support for HIP Profiles.
 
 ## Version 0.3.11
 

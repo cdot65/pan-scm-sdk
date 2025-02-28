@@ -40,6 +40,11 @@ from .hip_object import (
     HIPObjectResponseModel,
     HIPObjectUpdateModel,
 )
+from .hip_profile import (
+    HIPProfileCreateModel,
+    HIPProfileResponseModel,
+    HIPProfileUpdateModel,
+)
 from .service import (
     ServiceCreateModel,
     ServiceResponseModel,

@@ -58,6 +58,9 @@ from scm.models.objects import (
     HIPObjectCreateModel,
     HIPObjectResponseModel,
     HIPObjectUpdateModel,
+    HIPProfileCreateModel,
+    HIPProfileResponseModel,
+    HIPProfileUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -5273,6 +5276,177 @@ class NatRuleMoveModelFactory(factory.DictFactory):
             source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination=NatMoveDestination.BEFORE,
             rulebase=NatRulebase.PRE,
+        )
+
+
+# ----------------------------------------------------------------------------
+# HIP Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class HIPProfileCreateApiFactory(factory.Factory):
+    """Factory for creating HIPProfileCreateModel instances."""
+
+    class Meta:
+        model = HIPProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"hip_profile_{n}")
+    description = factory.Faker("sentence")
+    match = "Any of the members of (hipobject1)"
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_complex_match(cls, match: str = "All of the members of (hipobject1 or hipobject2)", **kwargs):
+        """Create an instance with a complex match expression."""
+        return cls(match=match, **kwargs)
+
+
+class HIPProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating HIPProfileUpdateModel instances."""
+
+    class Meta:
+        model = HIPProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"hip_profile_{n}")
+    description = factory.Faker("sentence")
+    match = "Any of the members of (hipobject1)"
+
+    @classmethod
+    def with_updated_match(cls, match: str = "All of the members of (hipobject2)", **kwargs):
+        """Create an instance with an updated match expression."""
+        return cls(match=match, **kwargs)
+
+
+class HIPProfileResponseFactory(factory.Factory):
+    """Factory for creating HIPProfileResponseModel instances."""
+
+    class Meta:
+        model = HIPProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"hip_profile_{n}")
+    description = factory.Faker("sentence")
+    match = "Any of the members of (hipobject1)"
+    folder = "Texas"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: HIPProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class HIPProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for HIPProfileCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"hip_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    match = "Any of the members of (hipobject1)"
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestHIPProfile",
+            folder="Texas",
+            match="Any of the members of (hipobject1)",
+            description="Test HIP profile",
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Texas",
+            match="Any of the members of (hipobject1)",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestHIPProfile",
+            folder="Texas",
+            snippet="TestSnippet",
+            match="Any of the members of (hipobject1)",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestHIPProfile",
+            match="Any of the members of (hipobject1)",
+            folder=None,
+            snippet=None,
+            device=None,
+        )
+
+
+class HIPProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for HIPProfileUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"hip_profile_{n}")
+    description = factory.Faker("sentence")
+    match = "Any of the members of (hipobject1)"
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a HIP profile."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedHIPProfile",
+            match="All of the members of (hipobject2)",
+            description="Updated HIP profile description",
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            match=None,  # match is required
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
         )
 
 

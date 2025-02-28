@@ -17,6 +17,7 @@ Read, Update, Delete) operations.
 - [Dynamic User Group](dynamic_user_group.md)
 - [External Dynamic Lists](external_dynamic_lists.md)
 - [HIP Object](hip_object.md)
+- [HIP Profile](hip_profile.md)
 - [Service](service.md)
 - [Service Group](service_group.md)
 - [Tag](tag.md)
