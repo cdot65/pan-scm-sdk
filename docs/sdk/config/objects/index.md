@@ -18,6 +18,7 @@ Read, Update, Delete) operations.
 - [External Dynamic Lists](external_dynamic_lists.md)
 - [HIP Object](hip_object.md)
 - [HIP Profile](hip_profile.md)
+- [HTTP Server Profiles](http_server_profiles.md)
 - [Service](service.md)
 - [Service Group](service_group.md)
 - [Tag](tag.md)

@@ -61,6 +61,9 @@ from scm.models.objects import (
     HIPProfileCreateModel,
     HIPProfileResponseModel,
     HIPProfileUpdateModel,
+    HTTPServerProfileCreateModel,
+    HTTPServerProfileResponseModel,
+    HTTPServerProfileUpdateModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -5447,6 +5450,330 @@ class HIPProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             description="Updated description",
+        )
+
+
+# ----------------------------------------------------------------------------
+# HTTP Server Profiles object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class HTTPServerProfileCreateApiFactory(factory.Factory):
+    """Factory for creating HTTPServerProfileCreateModel instances."""
+
+    class Meta:
+        model = HTTPServerProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"http_server_profile_{n}")
+    server = factory.List([
+        {
+            "name": "test-server",
+            "address": "192.168.1.100",
+            "protocol": "HTTP",
+            "port": 80
+        }
+    ])
+    tag_registration = True
+    format = {
+        "traffic": {},
+        "threat": {},
+        "url": {},
+    }
+    folder = "Security Profiles"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_folder(cls, folder="Security Profiles", **kwargs):
+        """Create a HTTP server profile with a specific folder."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create a HTTP server profile with a snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create a HTTP server profile with a device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_https_server(cls, **kwargs):
+        """Create a HTTP server profile with an HTTPS server."""
+        https_server = {
+            "name": "test-https-server",
+            "address": "secure.example.com",
+            "protocol": "HTTPS",
+            "port": 443,
+            "tls_version": "1.2",
+            "certificate_profile": "default",
+            "http_method": "POST"
+        }
+        return cls(server=[https_server], **kwargs)
+
+
+class HTTPServerProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating HTTPServerProfileUpdateModel instances."""
+
+    class Meta:
+        model = HTTPServerProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"http_server_profile_{n}")
+    server = factory.List([
+        {
+            "name": "updated-server",
+            "address": "192.168.1.200",
+            "protocol": "HTTP",
+            "port": 8080
+        }
+    ])
+    tag_registration = True
+    format = {
+        "traffic": {},
+        "threat": {},
+    }
+
+    @classmethod
+    def with_https_server(cls, **kwargs):
+        """Create an updated profile with an HTTPS server."""
+        https_server = {
+            "name": "updated-https-server",
+            "address": "secure.example.com",
+            "protocol": "HTTPS",
+            "port": 443,
+            "tls_version": "1.3",
+            "certificate_profile": "updated-cert",
+            "http_method": "GET"
+        }
+        return cls(server=[https_server], **kwargs)
+
+
+class HTTPServerProfileResponseFactory(factory.Factory):
+    """Factory for creating HTTPServerProfileResponseModel instances."""
+
+    class Meta:
+        model = HTTPServerProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"http_server_profile_{n}")
+    server = factory.List([
+        {
+            "name": "test-server",
+            "address": "192.168.1.100",
+            "protocol": "HTTP",
+            "port": 80
+        }
+    ])
+    tag_registration = True
+    format = {
+        "traffic": {},
+        "threat": {},
+        "url": {},
+    }
+    folder = "Security Profiles"
+    snippet = None
+    device = None
+
+    @classmethod
+    def with_folder(cls, folder="Security Profiles", **kwargs):
+        """Create a response model with a specific folder."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create a response model with a snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create a response model with a device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+    
+    @classmethod
+    def from_request(cls, request_model: HTTPServerProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class HTTPServerProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for HTTPServerProfileCreateModel."""
+
+    name = factory.Sequence(lambda n: f"http_server_profile_{n}")
+    server = [
+        {
+            "name": "test-server",
+            "address": "192.168.1.100",
+            "protocol": "HTTP",
+            "port": 80
+        }
+    ]
+    tag_registration = True
+    format = {
+        "traffic": {},
+        "threat": {},
+        "url": {},
+    }
+    folder = "Security Profiles"
+    snippet = None
+    device = None
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestHTTPServerProfile",
+            server=[
+                {
+                    "name": "test-server",
+                    "address": "192.168.1.100",
+                    "protocol": "HTTP",
+                    "port": 80
+                },
+                {
+                    "name": "test-https-server",
+                    "address": "secure.example.com",
+                    "protocol": "HTTPS",
+                    "port": 443,
+                    "tls_version": "1.2",
+                    "certificate_profile": "default",
+                    "http_method": "POST"
+                }
+            ],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers (should fail validation)."""
+        return cls(
+            name="TestHTTPServerProfile",
+            server=[
+                {
+                    "name": "test-server",
+                    "address": "192.168.1.100",
+                    "protocol": "HTTP",
+                    "port": 80
+                }
+            ],
+            folder="Security Profiles",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any containers (should fail validation)."""
+        return cls(
+            name="TestHTTPServerProfile",
+            server=[
+                {
+                    "name": "test-server",
+                    "address": "192.168.1.100",
+                    "protocol": "HTTP",
+                    "port": 80
+                }
+            ],
+            folder=None,
+            snippet=None,
+            device=None,
+        )
+
+    @classmethod
+    def build_with_invalid_server(cls):
+        """Return a data dict with an invalid server configuration."""
+        return cls(
+            name="TestHTTPServerProfile",
+            server=[
+                {
+                    "name": "test-server",
+                    "protocol": "INVALID",  # Invalid protocol
+                    "port": 80
+                }
+            ],
+            folder="Security Profiles",
+        )
+
+
+class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for HTTPServerProfileUpdateModel."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"http_server_profile_{n}")
+    server = [
+        {
+            "name": "updated-server",
+            "address": "192.168.1.200",
+            "protocol": "HTTP",
+            "port": 8080
+        }
+    ]
+    tag_registration = True
+    format = {
+        "traffic": {},
+        "threat": {},
+    }
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a HTTP server profile."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedHTTPServerProfile",
+            server=[
+                {
+                    "name": "updated-server",
+                    "address": "192.168.1.200",
+                    "protocol": "HTTP",
+                    "port": 8080
+                }
+            ],
+            tag_registration=False,
+            format={
+                "traffic": {},
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="valid-name",
+            server=[
+                {
+                    "name": "test-server",
+                    "protocol": "INVALID",
+                    "port": 80
+                }
+            ],
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="MinimalUpdate",
+            server=[
+                {
+                    "name": "minimal-server",
+                    "address": "10.0.0.1",
+                    "protocol": "HTTP",
+                    "port": 80
+                }
+            ],
         )
 
 
