@@ -5,17 +5,18 @@
 1. [Overview](#overview)
 2. [Core Methods](#core-methods)
 3. [NAT Rule Model Attributes](#nat-rule-model-attributes)
-4. [Exceptions](#exceptions)
-5. [Basic Configuration](#basic-configuration)
-6. [Usage Examples](#usage-examples)
+4. [Source Translation Types](#source-translation-types)
+5. [Exceptions](#exceptions)
+6. [Basic Configuration](#basic-configuration)
+7. [Usage Examples](#usage-examples)
     - [Creating NAT Rules](#creating-nat-rules)
     - [Retrieving NAT Rules](#retrieving-nat-rules)
     - [Updating NAT Rules](#updating-nat-rules)
     - [Listing NAT Rules](#listing-nat-rules)
     - [Deleting NAT Rules](#deleting-nat-rules)
-7. [Best Practices](#best-practices)
-8. [Full Script Examples](#full-script-examples)
-9. [Related Models](#related-models)
+8. [Best Practices](#best-practices)
+9. [Full Script Examples](#full-script-examples)
+10. [Related Models](#related-models)
 
 ## Overview
 
@@ -34,21 +35,98 @@ The `NatRule` class manages NAT rule objects in Palo Alto Networks' Strata Cloud
 
 ## NAT Rule Model Attributes
 
-| Attribute     | Type      | Required | Description                                           |
-|---------------|-----------|----------|-------------------------------------------------------|
-| `name`        | str       | Yes      | The name of the NAT rule.                             |
-| `id`          | UUID      | Yes*     | Unique identifier (response only).                    |
-| `nat_type`    | str       | Yes      | The type of NAT rule (e.g., static, dynamic).         |
-| `service`     | str       | Yes      | The service associated with the NAT translation.      |
-| `destination` | List[str] | Yes      | Destination addresses or subnets for the NAT rule.    |
-| `source`      | List[str] | Yes      | Source addresses or subnets for the NAT rule.         |
-| `tag`         | List[str] | No       | Tags associated with the NAT rule for categorization. |
-| `disabled`    | bool      | No       | Indicates whether the NAT rule is disabled.           |
-| `folder`      | str       | Yes      | The folder container where the NAT rule is defined.   |
-| `snippet`     | str       | No       | The snippet container (if applicable).                |
-| `device`      | str       | No       | The device container (if applicable).                 |
+| Attribute                   | Type                 | Required      | Description                                                |
+|-----------------------------|--------------------- |---------------|------------------------------------------------------------|
+| `name`                      | str                  | Yes           | The name of the NAT rule.                                  |
+| `id`                        | UUID                 | Yes*          | Unique identifier (response only).                         |
+| `nat_type`                  | NatType              | No            | The type of NAT rule (`ipv4`, `nat64`, `nptv6`).          |
+| `service`                   | str                  | No            | The service associated with the NAT translation.           |
+| `destination`               | List[str]            | No            | Destination addresses or subnets for the NAT rule.         |
+| `source`                    | List[str]            | No            | Source addresses or subnets for the NAT rule.              |
+| `tag`                       | List[str]            | No            | Tags associated with the NAT rule (only 'Automation' and 'Decrypted' allowed). |
+| `disabled`                  | bool                 | No            | Indicates whether the NAT rule is disabled.                |
+| `source_translation`        | SourceTranslation    | No            | Source translation configuration.                          |
+| `destination_translation`   | DestinationTranslation | No          | Destination translation configuration.                     |
+| `folder`                    | str                  | Conditionally | The folder container where the NAT rule is defined.        |
+| `snippet`                   | str                  | Conditionally | The snippet container (if applicable).                     |
+| `device`                    | str                  | Conditionally | The device container (if applicable).                      |
 
 *Note: The `id` field is assigned by the system and is only present in response objects.
+
+## Source Translation Types
+
+The NAT rules model supports three different types of source translation methods, following a discriminated union pattern where exactly one type must be provided:
+
+### 1. Dynamic IP and Port (PAT)
+
+This is the most common NAT type, where multiple internal IP addresses are translated to use a single external IP with dynamic ports.
+
+```python
+nat_rule_data = {
+    "name": "dynamic-ip-port-rule",
+    "source_translation": {
+        "dynamic_ip_and_port": {
+            "type": "dynamic_ip_and_port",
+            "translated_address": ["192.168.1.100"]  # Single or multiple IP addresses
+        }
+    },
+    "folder": "NAT Rules"
+}
+```
+
+Alternatively, you can use an interface for translation:
+
+```python
+nat_rule_data = {
+    "name": "interface-translation-rule",
+    "source_translation": {
+        "dynamic_ip_and_port": {
+            "type": "dynamic_ip_and_port",
+            "interface_address": {
+                "interface": "ethernet1/1",
+                "ip": "192.168.1.1",
+                "floating_ip": "192.168.1.100"  # Optional
+            }
+        }
+    },
+    "folder": "NAT Rules"
+}
+```
+
+### 2. Dynamic IP (NAT)
+
+Dynamic IP NAT allows multiple internal IPs to be translated to a pool of external IPs without port translation.
+
+```python
+nat_rule_data = {
+    "name": "dynamic-ip-rule",
+    "source_translation": {
+        "dynamic_ip": {
+            "translated_address": ["192.168.1.100", "192.168.1.101"],
+            "fallback_type": "translated_address",  # Optional
+            "fallback_address": ["10.0.0.100"]  # Optional
+        }
+    },
+    "folder": "NAT Rules"
+}
+```
+
+### 3. Static IP
+
+This provides a one-to-one mapping between internal and external IPs, optionally with bi-directional support.
+
+```python
+nat_rule_data = {
+    "name": "static-ip-rule",
+    "source_translation": {
+        "static_ip": {
+            "translated_address": "192.168.1.100",
+            "bi_directional": "yes"  # Optional, must be string "yes" or "no"
+        }
+    },
+    "folder": "NAT Rules"
+}
+```
 
 ## Exceptions
 
@@ -56,6 +134,14 @@ The `NatRule` class manages NAT rule objects in Palo Alto Networks' Strata Cloud
 |------------------------------|-----------|-------------------------------------------------------------------------------|
 | `InvalidObjectError`         | 400       | Thrown when provided data or parameters are invalid.                          |
 | `MissingQueryParameterError` | 400       | Thrown when required query parameters (e.g., `name` or `folder`) are missing. |
+
+In addition to these HTTP exceptions, the model validation may raise `ValueError` for various validation issues, such as:
+
+- Using tags other than 'Automation' and 'Decrypted'
+- Using DNS rewrite with NAT64 rule type
+- Using bi-directional static NAT with destination translation
+- Providing invalid source translation configurations
+- Violating the container requirements
 
 ## Basic Configuration
 
@@ -87,23 +173,44 @@ nat_rule = NatRule(client, max_limit=2500)
 
 <!-- termynal -->
 ```python
-# Define NAT rule configuration data
+# Define NAT rule configuration data with dynamic IP and port translation
 nat_rule_data = {
     "name": "nat-rule-1",
-    "nat_type": "static",
-    "service": "tcp-80",
-    "destination": ["192.168.1.100"],
+    "nat_type": "ipv4",
+    "service": "any",
+    "destination": ["any"],
     "source": ["10.0.0.0/24"],
-    "tag": ["web", "prod"],
+    "tag": ["Automation"],  # Only "Automation" and "Decrypted" tags allowed
     "disabled": False,
+    "source_translation": {
+        "dynamic_ip_and_port": {
+            "type": "dynamic_ip_and_port",
+            "translated_address": ["192.168.1.100"]
+        }
+    },
     "folder": "NAT Rules"
 }
 
 # Create a new NAT rule (default position is 'pre')
 new_nat_rule = nat_rule.create(nat_rule_data)
 
-# Optionally, specify a different rule position (e.g., 'post')
-# new_nat_rule = nat_rule.create(nat_rule_data, position="post")
+# Create a static NAT rule with bi-directional translation
+static_nat_data = {
+    "name": "static-nat-rule",
+    "nat_type": "ipv4",
+    "service": "any",
+    "destination": ["any"],
+    "source": ["10.0.0.10"],
+    "source_translation": {
+        "static_ip": {
+            "translated_address": "192.168.1.100",
+            "bi_directional": "yes"
+        }
+    },
+    "folder": "NAT Rules"
+}
+
+static_nat_rule = nat_rule.create(static_nat_data)
 ```
 
 </div>
@@ -134,7 +241,7 @@ print(f"NAT Rule ID: {rule_by_id.id}, Name: {rule_by_id.name}")
 
 <!-- termynal -->
 ```python
-from scm.models.network import NatRuleUpdateModel
+from scm.models.network import NatRuleUpdateModel, SourceTranslation, DynamicIp
 
 # Assume we have fetched the existing NAT rule
 existing_rule = nat_rule.fetch(
@@ -142,17 +249,26 @@ existing_rule = nat_rule.fetch(
     folder="NAT Rules"
 )
 
-# Update attributes (e.g., disable the rule and change destination)
+# Change from dynamic IP and port to just dynamic IP translation
+source_translation = SourceTranslation(
+    dynamic_ip=DynamicIp(
+        translated_address=["192.168.1.100", "192.168.1.101"]
+    ),
+    dynamic_ip_and_port=None,
+    static_ip=None
+)
+
+# Update with new source translation configuration
 updated_data = {
     "id": existing_rule.id,
     "disabled": True,
-    "destination": ["192.168.1.200"]
+    "source_translation": source_translation
 }
 rule_update = NatRuleUpdateModel(**updated_data)
 
 # Update the NAT rule (default position is 'pre')
 updated_rule = nat_rule.update(rule_update)
-print(f"Updated NAT Rule Disabled Status: {updated_rule.disabled}")
+print(f"Updated NAT Rule translation type to dynamic IP")
 ```
 
 </div>
@@ -167,13 +283,25 @@ print(f"Updated NAT Rule Disabled Status: {updated_rule.disabled}")
 nat_rules_list = nat_rule.list(
     folder="NAT Rules",
     position="pre",
-    nat_type=["static"],
-    disabled=False
+    nat_type=["ipv4"],
+    disabled=False,
+    tag=["Automation"]
 )
 
 # Iterate and process each NAT rule
 for rule in nat_rules_list:
     print(f"Name: {rule.name}, Service: {rule.service}, Destination: {rule.destination}")
+    
+    # Check source translation type
+    if rule.source_translation:
+        if rule.source_translation.dynamic_ip_and_port:
+            print("  Translation: Dynamic IP and Port (PAT)")
+        elif rule.source_translation.dynamic_ip:
+            print("  Translation: Dynamic IP (NAT)")
+        elif rule.source_translation.static_ip:
+            print("  Translation: Static IP")
+            if rule.source_translation.static_ip.bi_directional == "yes":
+                print("  Bi-directional: Yes")
 ```
 
 </div>
@@ -197,18 +325,27 @@ print(f"NAT Rule {rule_id_to_delete} deleted successfully.")
 1. **NAT Rule Configuration**
     - Use clear and descriptive names for NAT rules.
     - Validate IP addresses and subnets for both source and destination.
-    - Clearly document the intended use (e.g., static vs. dynamic NAT).
+    - Use the appropriate source translation type for your use case.
+    - Remember that only 'Automation' and 'Decrypted' tags are allowed.
+    - Be aware that bi-directional static NAT cannot be used with destination translation.
 
-2. **Filtering and Container Parameters**
+2. **Source Translation Selection**
+    - Use **Dynamic IP and Port** for most outbound traffic to the internet.
+    - Use **Dynamic IP** when preserving the source port is important.
+    - Use **Static IP** for one-to-one mapping, especially for inbound connections.
+    - Enable bi-directional mode for static NAT when two-way connections are needed.
+
+3. **Filtering and Container Parameters**
     - Always provide exactly one container parameter: `folder`, `snippet`, or `device`.
     - Use the `exact_match` parameter if strict container matching is required.
     - Leverage additional filters (e.g., `nat_type`, `service`) for precise listings.
 
-3. **Error Handling**
+4. **Error Handling**
     - Implement comprehensive error handling for invalid data and missing parameters.
+    - Handle model validation errors for source translation configurations.
     - Log responses and exceptions to troubleshoot API issues effectively.
 
-4. **Performance**
+5. **Performance**
     - Adjust the `max_limit` based on your environment and API rate limits.
     - Utilize pagination effectively when working with large numbers of NAT rules.
 
@@ -218,6 +355,14 @@ Refer to the [nat_rule.py example](https://github.com/cdot65/pan-scm-sdk/blob/ma
 
 ## Related Models
 
-- [NatRuleCreateModel](../../models/network/nat_rule_models.md#natrulecreatemodel)
-- [NatRuleUpdateModel](../../models/network/nat_rule_models.md#natruleupdatemodel)
-- [NatRuleResponseModel](../../models/network/nat_rule_models.md#natruleresponsemodel)
+The NAT rule configuration uses several nested models for comprehensive validation:
+
+- [NatRuleCreateModel](../../models/network/nat_rule_models.md#natrulecreatemodel) - For creating new NAT rules
+- [NatRuleUpdateModel](../../models/network/nat_rule_models.md#natruleupdatemodel) - For updating existing NAT rules
+- [NatRuleResponseModel](../../models/network/nat_rule_models.md#natruleresponsemodel) - For representing API responses
+- [SourceTranslation](../../models/network/nat_rule_models.md#sourcetranslation) - Main container for source translation configurations
+- [DynamicIpAndPort](../../models/network/nat_rule_models.md#dynamicipandport) - For dynamic IP and port translation
+- [DynamicIp](../../models/network/nat_rule_models.md#dynamicip) - For dynamic IP translation 
+- [StaticIp](../../models/network/nat_rule_models.md#staticip) - For static IP translation
+- [DestinationTranslation](../../models/network/nat_rule_models.md#destinationtranslation) - For destination translation configuration
+- [NatRuleMoveModel](../../models/network/nat_rule_models.md#natrrulemovemodel) - For moving NAT rules
