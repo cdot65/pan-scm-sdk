@@ -363,7 +363,7 @@ class Scm:
                 "scm.config.objects.application",
                 "Application",
             ),
-            "application_filters": (
+            "application_filter": (
                 "scm.config.objects.application_filters",
                 "ApplicationFilters",
             ),
@@ -375,7 +375,7 @@ class Scm:
                 "scm.config.objects.dynamic_user_group",
                 "DynamicUserGroup",
             ),
-            "external_dynamic_lists": (
+            "external_dynamic_list": (
                 "scm.config.objects.external_dynamic_lists",
                 "ExternalDynamicLists",
             ),
@@ -387,7 +387,7 @@ class Scm:
                 "scm.config.objects.hip_profile",
                 "HIPProfile",
             ),
-            "http_server_profiles": (
+            "http_server_profile": (
                 "scm.config.objects.http_server_profiles",
                 "HTTPServerProfile",
             ),
@@ -404,12 +404,12 @@ class Scm:
                 "Tag",
             ),
             # Network
-            "nat_rules": (
+            "nat_rule": (
                 "scm.config.network.nat_rules",
                 "NATRule",
             ),
             # Deployment
-            "remote_networks": (
+            "remote_network": (
                 "scm.config.deployment.remote_networks",
                 "RemoteNetworks",
             ),
@@ -430,7 +430,7 @@ class Scm:
                 "scm.config.security.dns_security_profile",
                 "DNSSecurityProfile",
             ),
-            "url_categories": (
+            "url_category": (
                 "scm.config.security.url_categories",
                 "URLCategories",
             ),

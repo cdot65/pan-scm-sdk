@@ -74,6 +74,25 @@ HIP objects that define security posture requirements for endpoints.
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    hip_object_max_limit=5000  # Optional: set custom max_limit
+)
+
+# Access the hip_object module directly through the client
+# client.hip_object is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.objects import HIPObject
 
@@ -87,8 +106,6 @@ client = Scm(
 # Initialize HIPObject with custom max_limit
 hip_objects = HIPObject(client, max_limit=5000)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -117,7 +134,7 @@ host_info_config = {
 }
 
 # Create host info HIP object
-host_info_hip = hip_objects.create(host_info_config)
+host_info_hip = client.hip_object.create(host_info_config)
 
 # Disk encryption based HIP object
 disk_encryption_config = {
@@ -138,7 +155,7 @@ disk_encryption_config = {
 }
 
 # Create disk encryption HIP object
-disk_encryption_hip = hip_objects.create(disk_encryption_config)
+disk_encryption_hip = client.hip_object.create(disk_encryption_config)
 ```
 
 </div>
@@ -151,11 +168,11 @@ disk_encryption_hip = hip_objects.create(disk_encryption_config)
 
 ```python
 # Fetch by name and folder
-hip_object = hip_objects.fetch(name="windows-workstation", folder="Shared")
+hip_object = client.hip_object.fetch(name="windows-workstation", folder="Shared")
 print(f"Found HIP object: {hip_object.name}")
 
 # Get by ID
-hip_by_id = hip_objects.get(hip_object.id)
+hip_by_id = client.hip_object.get(hip_object.id)
 print(f"Retrieved HIP object: {hip_by_id.name}")
 ```
 
@@ -169,7 +186,7 @@ print(f"Retrieved HIP object: {hip_by_id.name}")
 
 ```python
 # Fetch existing HIP object
-existing_hip = hip_objects.fetch(name="encrypted-endpoints", folder="Shared")
+existing_hip = client.hip_object.fetch(name="encrypted-endpoints", folder="Shared")
 
 # Add additional encryption location
 if existing_hip.disk_encryption and existing_hip.disk_encryption.criteria:
@@ -182,7 +199,7 @@ if existing_hip.disk_encryption and existing_hip.disk_encryption.criteria:
 existing_hip.description = "Updated disk encryption requirements"
 
 # Perform update
-updated_hip = hip_objects.update(existing_hip)
+updated_hip = client.hip_object.update(existing_hip)
 ```
 
 </div>
@@ -195,7 +212,7 @@ updated_hip = hip_objects.update(existing_hip)
 
 ```python
 # List with direct filter parameters
-filtered_hips = hip_objects.list(
+filtered_hips = client.hip_object.list(
     folder='Shared',
     criteria_types=['host_info', 'disk_encryption'],
     exact_match=True
@@ -217,7 +234,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_hips = hip_objects.list(**list_params)
+filtered_hips = client.hip_object.list(**list_params)
 ```
 
 </div>
@@ -231,7 +248,7 @@ filtered_hips = hip_objects.list(**list_params)
 ```python
 # Delete by ID
 hip_id = "123e4567-e89b-12d3-a456-426655440000"
-hip_objects.delete(hip_id)
+client.hip_object.delete(hip_id)
 ```
 
 </div>
@@ -254,7 +271,7 @@ commit_params = {
 }
 
 # Commit the changes
-result = hip_objects.commit(**commit_params)
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -269,11 +286,11 @@ print(f"Commit job ID: {result.job_id}")
 
 ```python
 # Get status of specific job
-job_status = hip_objects.get_job_status(result.job_id)
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
 # List recent jobs
-recent_jobs = hip_objects.list_jobs(limit=10)
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -287,12 +304,20 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     NameNotUniqueError,
     ObjectNotPresentError,
     ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -308,18 +333,18 @@ try:
         }
     }
 
-    # Create the HIP object
-    new_hip = hip_objects.create(hip_config)
+    # Create the HIP object using the unified client
+    new_hip = client.hip_object.create(hip_config)
 
-    # Commit changes
-    result = hip_objects.commit(
+    # Commit changes directly on the client
+    result = client.commit(
         folders=["Shared"],
         description="Added test HIP object",
         sync=True
     )
 
-    # Check job status
-    status = hip_objects.get_job_status(result.job_id)
+    # Check job status on the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid HIP object data: {e.message}")
@@ -337,14 +362,21 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **HIP Object Design**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access HIP object operations via `client.hip_object` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `hip_object_max_limit`
+
+2. **HIP Object Design**
     - Use descriptive names for clarity
     - Define specific criteria for each type
     - Combine criteria types logically
     - Document requirements clearly
     - Keep criteria focused and minimal
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container
     - Use consistent container names
     - Validate container existence

@@ -149,6 +149,25 @@ In addition to these HTTP exceptions, the model validation may raise `ValueError
 
 <!-- termynal -->
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    nat_rule_max_limit=2500  # Optional: set custom max_limit for NAT rules
+)
+
+# Access the nat_rule module directly through the client
+# client.nat_rule is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.network import NatRule
 
@@ -162,8 +181,6 @@ client = Scm(
 # Initialize NatRule object with a custom max_limit (optional)
 nat_rule = NatRule(client, max_limit=2500)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -192,7 +209,7 @@ nat_rule_data = {
 }
 
 # Create a new NAT rule (default position is 'pre')
-new_nat_rule = nat_rule.create(nat_rule_data)
+new_nat_rule = client.nat_rule.create(nat_rule_data)
 
 # Create a static NAT rule with bi-directional translation
 static_nat_data = {
@@ -210,7 +227,7 @@ static_nat_data = {
     "folder": "NAT Rules"
 }
 
-static_nat_rule = nat_rule.create(static_nat_data)
+static_nat_rule = client.nat_rule.create(static_nat_data)
 ```
 
 </div>
@@ -222,14 +239,14 @@ static_nat_rule = nat_rule.create(static_nat_data)
 <!-- termynal -->
 ```python
 # Retrieve a NAT rule by name using fetch()
-fetched_rule = nat_rule.fetch(
+fetched_rule = client.nat_rule.fetch(
     name="nat-rule-1",
     folder="NAT Rules"
 )
 print(f"Fetched NAT Rule: {fetched_rule.name}")
 
 # Retrieve a NAT rule by its unique ID using get()
-rule_by_id = nat_rule.get(fetched_rule.id)
+rule_by_id = client.nat_rule.get(fetched_rule.id)
 print(f"NAT Rule ID: {rule_by_id.id}, Name: {rule_by_id.name}")
 ```
 
@@ -244,7 +261,7 @@ print(f"NAT Rule ID: {rule_by_id.id}, Name: {rule_by_id.name}")
 from scm.models.network import NatRuleUpdateModel, SourceTranslation, DynamicIp
 
 # Assume we have fetched the existing NAT rule
-existing_rule = nat_rule.fetch(
+existing_rule = client.nat_rule.fetch(
     name="nat-rule-1",
     folder="NAT Rules"
 )
@@ -267,7 +284,7 @@ updated_data = {
 rule_update = NatRuleUpdateModel(**updated_data)
 
 # Update the NAT rule (default position is 'pre')
-updated_rule = nat_rule.update(rule_update)
+updated_rule = client.nat_rule.update(rule_update)
 print(f"Updated NAT Rule translation type to dynamic IP")
 ```
 
@@ -280,7 +297,7 @@ print(f"Updated NAT Rule translation type to dynamic IP")
 <!-- termynal -->
 ```python
 # List NAT rules in the "NAT Rules" folder with additional filtering
-nat_rules_list = nat_rule.list(
+nat_rules_list = client.nat_rule.list(
     folder="NAT Rules",
     position="pre",
     nat_type=["ipv4"],
@@ -314,7 +331,7 @@ for rule in nat_rules_list:
 ```python
 # Delete a NAT rule by its unique ID
 rule_id_to_delete = "123e4567-e89b-12d3-a456-426655440000"
-nat_rule.delete(rule_id_to_delete)
+client.nat_rule.delete(rule_id_to_delete)
 print(f"NAT Rule {rule_id_to_delete} deleted successfully.")
 ```
 
@@ -322,30 +339,37 @@ print(f"NAT Rule {rule_id_to_delete} deleted successfully.")
 
 ## Best Practices
 
-1. **NAT Rule Configuration**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access NAT rule operations via `client.nat_rule` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `nat_rule_max_limit`
+
+2. **NAT Rule Configuration**
     - Use clear and descriptive names for NAT rules.
     - Validate IP addresses and subnets for both source and destination.
     - Use the appropriate source translation type for your use case.
     - Remember that only 'Automation' and 'Decrypted' tags are allowed.
     - Be aware that bi-directional static NAT cannot be used with destination translation.
 
-2. **Source Translation Selection**
+3. **Source Translation Selection**
     - Use **Dynamic IP and Port** for most outbound traffic to the internet.
     - Use **Dynamic IP** when preserving the source port is important.
     - Use **Static IP** for one-to-one mapping, especially for inbound connections.
     - Enable bi-directional mode for static NAT when two-way connections are needed.
 
-3. **Filtering and Container Parameters**
+4. **Filtering and Container Parameters**
     - Always provide exactly one container parameter: `folder`, `snippet`, or `device`.
     - Use the `exact_match` parameter if strict container matching is required.
     - Leverage additional filters (e.g., `nat_type`, `service`) for precise listings.
 
-4. **Error Handling**
+5. **Error Handling**
     - Implement comprehensive error handling for invalid data and missing parameters.
     - Handle model validation errors for source translation configurations.
     - Log responses and exceptions to troubleshoot API issues effectively.
 
-5. **Performance**
+6. **Performance**
     - Adjust the `max_limit` based on your environment and API rate limits.
     - Utilize pagination effectively when working with large numbers of NAT rules.
 

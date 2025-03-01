@@ -71,6 +71,25 @@ The `RemoteNetworks` class provides functionality to manage remote network confi
 
 <!-- termynal -->
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    remote_networks_max_limit=5000  # Optional: set custom max_limit
+)
+
+# Access the remote_networks module directly through the client
+# client.remote_networks is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.deployment import RemoteNetworks
 
@@ -84,8 +103,6 @@ client = Scm(
 # Initialize RemoteNetworks object with custom max_limit
 remote_networks = RemoteNetworks(client, max_limit=5000)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -109,7 +126,7 @@ standard_config = {
 }
 
 # Create standard remote network
-standard_network = remote_networks.create(standard_config)
+standard_network = client.remote_networks.create(standard_config)
 
 # ECMP-enabled remote network configuration
 ecmp_config = {
@@ -140,7 +157,7 @@ ecmp_config = {
 }
 
 # Create ECMP-enabled remote network
-ecmp_network = remote_networks.create(ecmp_config)
+ecmp_network = client.remote_networks.create(ecmp_config)
 ```
 
 </div>
@@ -152,14 +169,14 @@ ecmp_network = remote_networks.create(ecmp_config)
 <!-- termynal -->
 ```python
 # Fetch by name and folder
-network = remote_networks.fetch(
+network = client.remote_networks.fetch(
     name="branch-office-1", 
     folder="Remote Networks"
 )
 print(f"Found network: {network.name}")
 
 # Get by ID
-network_by_id = remote_networks.get(network.id)
+network_by_id = client.remote_networks.get(network.id)
 print(f"Retrieved network: {network_by_id.name}")
 print(f"Subnets: {', '.join(network_by_id.subnets)}")
 ```
@@ -173,7 +190,7 @@ print(f"Subnets: {', '.join(network_by_id.subnets)}")
 <!-- termynal -->
 ```python
 # Fetch existing network
-existing_network = remote_networks.fetch(
+existing_network = client.remote_networks.fetch(
     name="branch-office-1",
     folder="Remote Networks"
 )
@@ -193,7 +210,7 @@ existing_network.protocol = {
 }
 
 # Perform update
-updated_network = remote_networks.update(existing_network)
+updated_network = client.remote_networks.update(existing_network)
 ```
 
 </div>
@@ -205,7 +222,7 @@ updated_network = remote_networks.update(existing_network)
 <!-- termynal -->
 ```python
 # List with direct filter parameters
-filtered_networks = remote_networks.list(
+filtered_networks = client.remote_networks.list(
     folder='Remote Networks',
     regions=['us-east-1'],
     license_types=['FWAAS-AGGREGATE']
@@ -225,7 +242,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_networks = remote_networks.list(**list_params)
+filtered_networks = client.remote_networks.list(**list_params)
 ```
 
 </div>
@@ -238,7 +255,7 @@ filtered_networks = remote_networks.list(**list_params)
 ```python
 # Delete by ID
 network_id = "123e4567-e89b-12d3-a456-426655440000"
-remote_networks.delete(network_id)
+client.remote_networks.delete(network_id)
 ```
 
 </div>
@@ -259,8 +276,9 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = remote_networks.commit(**commit_params)
+# Commit the changes directly on the client
+# Note: All commit operations should be performed on the client directly
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -273,12 +291,12 @@ print(f"Commit job ID: {result.job_id}")
 
 <!-- termynal -->
 ```python
-# Get status of specific job
-job_status = remote_networks.get_job_status(result.job_id)
+# Get status of specific job directly on the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = remote_networks.list_jobs(limit=10)
+# List recent jobs directly on the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -291,12 +309,20 @@ for job in recent_jobs.data:
 
 <!-- termynal -->
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     NameNotUniqueError,
     ObjectNotPresentError,
     ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -312,18 +338,18 @@ try:
         "subnets": ["10.0.0.0/24"]
     }
 
-    # Create the network
-    new_network = remote_networks.create(network_config)
+    # Create the network using the unified client
+    new_network = client.remote_networks.create(network_config)
 
-    # Commit changes
-    result = remote_networks.commit(
+    # Commit changes directly on the client
+    result = client.commit(
         folders=["Remote Networks"],
         description="Added test network",
         sync=True
     )
 
-    # Check job status
-    status = remote_networks.get_job_status(result.job_id)
+    # Check job status on the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid network data: {e.message}")
@@ -341,35 +367,42 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Network Configuration**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access remote networks operations via `client.remote_networks` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `remote_networks_max_limit`
+
+2. **Network Configuration**
     - Use descriptive names for networks and tunnels
     - Document subnet allocations
     - Consider ECMP for high availability
     - Validate BGP configurations
     - Use consistent naming conventions
 
-2. **ECMP Management**
+3. **ECMP Management**
     - Plan tunnel configurations carefully
     - Balance traffic across tunnels
     - Monitor tunnel health
     - Configure appropriate timeouts
     - Document failover scenarios
 
-3. **Performance**
+4. **Performance**
     - Use appropriate max_limit settings
     - Implement pagination for large lists
     - Cache frequently accessed data
     - Monitor API rate limits
     - Use efficient filtering
 
-4. **Security**
+5. **Security**
     - Follow least privilege principle
     - Validate input data
     - Secure tunnel configurations
     - Monitor authentication
     - Audit configuration changes
 
-5. **Error Handling**
+6. **Error Handling**
     - Implement comprehensive error handling
     - Log configuration changes
     - Monitor commit status

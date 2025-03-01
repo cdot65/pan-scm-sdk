@@ -79,7 +79,7 @@ Starting with version 0.3.13, you can use a unified client access pattern to wor
 from scm.client import Scm
 
 # Create an authenticated session with SCM
-api_client = Scm(
+client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -88,23 +88,86 @@ api_client = Scm(
 # Access services directly through the client object
 # No need to create separate service instances
 
+# === ADDRESS OBJECTS ===
+
 # List addresses in a specific folder
-addresses = api_client.address.list(folder='Prisma Access')
+addresses = client.address.list(folder='Texas')
+for addr in addresses:
+    print(f"Found address: {addr.name}, Type: {'IP' if addr.ip_netmask else 'FQDN'}")
 
-# Create a new address
-address_data = {
-    "name": "example-hostname",
-    "fqdn": "example.domain.com",
-    "description": "Created via unified client",
-    "folder": "Texas",
-}
-new_address = api_client.address.create(address_data)
-print(f"Created address with ID: {new_address.id}")
+# Fetch a specific address
+web_server = client.address.fetch(name="web-server", folder="Texas")
+print(f"Web server details: {web_server.name}, {web_server.ip_netmask}")
 
-# Work with other services
-tags = api_client.tag.list(folder='Texas')
-nat_rules = api_client.nat_rules.list(folder='Texas')
+# Update an address
+web_server.description = "Updated via SDK"
+updated_addr = client.address.update(web_server)
+print(f"Updated address description: {updated_addr.description}")
+
+# === SECURITY RULES ===
+
+# Fetch a security rule by name
+security_rule = client.security_rule.fetch(name="allow-outbound", folder="Texas")
+print(f"Security rule: {security_rule.name}")
+print(f"  Action: {security_rule.action}")
+print(f"  Source zones: {security_rule.source_zone}")
+print(f"  Destination zones: {security_rule.destination_zone}")
+
+# === NAT RULES ===
+
+# List NAT rules with source zone filtering
+nat_rules = client.nat_rule.list(
+    folder="Texas",
+    source_zone=["trust"]
+)
+print(f"Found {len(nat_rules)} NAT rules with source zone 'trust'")
+
+# Delete a NAT rule
+if nat_rules:
+    client.nat_rule.delete(nat_rules[0].id)
+    print(f"Deleted NAT rule: {nat_rules[0].name}")
+    
+    # Commit the changes
+    commit_job = client.commit(
+        folders=["Texas"], 
+        description="Deleted NAT rule",
+        sync=True
+    )
+    print(f"Commit job status: {client.get_job_status(commit_job.job_id).data[0].status_str}")
 ```
+
+### Available Client Services
+
+The unified client provides access to the following services through attribute-based access:
+
+| Client Property | Class | Description |
+|----------------|-------|-------------|
+| **Objects** | | |
+| `address` | `Address` | Manages IP and FQDN address objects |
+| `address_group` | `AddressGroup` | Manages address group objects |
+| `application` | `Application` | Manages custom application objects |
+| `application_filter` | `ApplicationFilters` | Manages application filter objects |
+| `application_group` | `ApplicationGroup` | Manages application group objects |
+| `dynamic_user_group` | `DynamicUserGroup` | Manages dynamic user group objects |
+| `external_dynamic_list` | `ExternalDynamicLists` | Manages external dynamic list objects |
+| `hip_object` | `HIPObject` | Manages host information profile objects |
+| `hip_profile` | `HIPProfile` | Manages host information profile group objects |
+| `http_server_profile` | `HTTPServerProfile` | Manages HTTP server profile objects |
+| `service` | `Service` | Manages service objects |
+| `service_group` | `ServiceGroup` | Manages service group objects |
+| `tag` | `Tag` | Manages tag objects |
+| **Network** | | |
+| `nat_rule` | `NATRule` | Manages network address translation rules |
+| **Deployment** | | |
+| `remote_network` | `RemoteNetworks` | Manages remote network connections |
+| **Security** | | |
+| `security_rule` | `SecurityRule` | Manages security policy rules |
+| `anti_spyware_profile` | `AntiSpywareProfile` | Manages anti-spyware security profiles |
+| `decryption_profile` | `DecryptionProfile` | Manages SSL decryption profiles |
+| `dns_security_profile` | `DNSSecurityProfile` | Manages DNS security profiles |
+| `url_category` | `URLCategories` | Manages custom URL categories |
+| `vulnerability_protection_profile` | `VulnerabilityProtectionProfile` | Manages vulnerability protection profiles |
+| `wildfire_antivirus_profile` | `WildfireAntivirusProfile` | Manages WildFire anti-virus profiles |
 
 #### Traditional Access Pattern (Legacy Support)
 

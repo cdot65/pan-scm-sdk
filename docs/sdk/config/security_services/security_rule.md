@@ -85,6 +85,24 @@ that control traffic flow between zones, applications, and users.
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the security_rule module directly through the client
+# client.security_rule is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.security import SecurityRule
 
@@ -98,8 +116,6 @@ client = Scm(
 # Initialize SecurityRule object
 security_rules = SecurityRule(client)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -125,7 +141,7 @@ allow_rule = {
 }
 
 # Create basic allow rule
-basic_rule = security_rules.create(allow_rule, rulebase="pre")
+basic_rule = client.security_rule.create(allow_rule, rulebase="pre")
 
 # Security profile rule configuration
 secure_rule = {
@@ -146,7 +162,7 @@ secure_rule = {
 }
 
 # Create rule with security profiles
-profile_rule = security_rules.create(secure_rule, rulebase="pre")
+profile_rule = client.security_rule.create(secure_rule, rulebase="pre")
 ```
 
 </div>
@@ -159,7 +175,7 @@ profile_rule = security_rules.create(secure_rule, rulebase="pre")
 
 ```python
 # Fetch by name and folder
-rule = security_rules.fetch(
+rule = client.security_rule.fetch(
     name="allow-web",
     folder="Texas",
     rulebase="pre"
@@ -167,7 +183,7 @@ rule = security_rules.fetch(
 print(f"Found rule: {rule.name}")
 
 # Get by ID
-rule_by_id = security_rules.get(rule.id, rulebase="pre")
+rule_by_id = client.security_rule.get(rule.id, rulebase="pre")
 print(f"Retrieved rule: {rule_by_id.name}")
 print(f"Applications: {rule_by_id.application}")
 ```
@@ -182,7 +198,7 @@ print(f"Applications: {rule_by_id.application}")
 
 ```python
 # Fetch existing rule
-existing_rule = security_rules.fetch(
+existing_rule = client.security_rule.fetch(
     name="allow-web",
     folder="Texas",
     rulebase="pre"
@@ -196,7 +212,7 @@ existing_rule.profile_setting = {
 }
 
 # Perform update
-updated_rule = security_rules.update(existing_rule, rulebase="pre")
+updated_rule = client.security_rule.update(existing_rule, rulebase="pre")
 ```
 
 </div>
@@ -209,7 +225,7 @@ updated_rule = security_rules.update(existing_rule, rulebase="pre")
 
 ```python
 # List with direct filter parameters
-filtered_rules = security_rules.list(
+filtered_rules = client.security_rule.list(
     folder='Texas',
     rulebase='pre',
     action=['allow'],
@@ -232,7 +248,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_rules = security_rules.list(**list_params)
+filtered_rules = client.security_rule.list(**list_params)
 ```
 
 </div>
@@ -258,7 +274,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return security_rules defined exactly in 'Texas'
-exact_security_rules = security_rules.list(
+exact_security_rules = client.security_rule.list(
     folder='Texas',
     exact_match=True
 )
@@ -267,7 +283,7 @@ for app in exact_security_rules:
     print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all security_rules from the 'All' folder
-no_all_security_rules = security_rules.list(
+no_all_security_rules = client.security_rule.list(
     folder='Texas',
     exclude_folders=['All']
 )
@@ -277,7 +293,7 @@ for app in no_all_security_rules:
     print(f"Filtered out 'All': {app.name}")
 
 # Exclude security_rules that come from 'default' snippet
-no_default_snippet = security_rules.list(
+no_default_snippet = client.security_rule.list(
     folder='Texas',
     exclude_snippets=['default']
 )
@@ -287,7 +303,7 @@ for app in no_default_snippet:
     print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude security_rules associated with 'DeviceA'
-no_deviceA = security_rules.list(
+no_deviceA = client.security_rule.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
@@ -297,7 +313,7 @@ for app in no_deviceA:
     print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = security_rules.list(
+combined_filters = client.security_rule.list(
     folder='Texas',
     exact_match=True,
     exclude_folders=['All'],
@@ -320,13 +336,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the SecurityRule object with a custom max_limit
+# Initialize the ScmClient with a custom max_limit for security rule objects
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-rule_client = SecurityRule(api_client=client, max_limit=4321)
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    security_rule_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_rules = rule_client.list(folder='Texas', rulebase='pre')
+all_rules = client.security_rule.list(folder='Texas', rulebase='pre')
 
 # 'all_rules' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -345,7 +366,7 @@ top_move = {
     "destination": "top",
     "rulebase": "pre"
 }
-security_rules.move(rule.id, top_move)
+client.security_rule.move(rule.id, top_move)
 
 # Move rule before another rule
 before_move = {
@@ -353,7 +374,7 @@ before_move = {
     "rulebase": "pre",
     "destination_rule": "987fcdeb-54ba-3210-9876-fedcba098765"
 }
-security_rules.move(rule.id, before_move)
+client.security_rule.move(rule.id, before_move)
 
 # Move rule after another rule
 after_move = {
@@ -361,7 +382,7 @@ after_move = {
     "rulebase": "pre",
     "destination_rule": "987fcdeb-54ba-3210-9876-fedcba098765"
 }
-security_rules.move(rule.id, after_move)
+client.security_rule.move(rule.id, after_move)
 ```
 
 </div>
@@ -375,7 +396,7 @@ security_rules.move(rule.id, after_move)
 ```python
 # Delete by ID
 rule_id = "123e4567-e89b-12d3-a456-426655440000"
-security_rules.delete(rule_id, rulebase="pre")
+client.security_rule.delete(rule_id, rulebase="pre")
 ```
 
 </div>
@@ -397,8 +418,9 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = security_rules.commit(**commit_params)
+# Commit the changes directly on the client
+# Note: All commit operations should be performed on the client directly
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -412,12 +434,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = security_rules.get_job_status(result.job_id)
+# Get status of specific job directly on the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = security_rules.list_jobs(limit=10)
+# List recent jobs directly on the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -431,12 +453,20 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     NameNotUniqueError,
     ObjectNotPresentError,
     ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -453,25 +483,25 @@ try:
         "action": "allow"
     }
 
-    # Create the rule
-    new_rule = security_rules.create(rule_config, rulebase="pre")
+    # Create the rule using the unified client
+    new_rule = client.security_rule.create(rule_config, rulebase="pre")
 
     # Move the rule
     move_config = {
         "destination": "top",
         "rulebase": "pre"
     }
-    security_rules.move(new_rule.id, move_config)
+    client.security_rule.move(new_rule.id, move_config)
 
-    # Commit changes
-    result = security_rules.commit(
+    # Commit changes directly on the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test rule",
         sync=True
     )
 
-    # Check job status
-    status = security_rules.get_job_status(result.job_id)
+    # Check job status on the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid rule data: {e.message}")
@@ -489,35 +519,42 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Rule Organization**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access security rule operations via `client.security_rule` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets
+
+2. **Rule Organization**
     - Use descriptive rule names
     - Order rules by specificity
     - Group related rules together
     - Document rule purposes
     - Use consistent naming conventions
 
-2. **Security Profiles**
+3. **Security Profiles**
     - Apply appropriate security profiles
     - Use profile groups when possible
     - Monitor profile impacts
     - Update profiles regularly
     - Document profile choices
 
-3. **Logging and Monitoring**
+4. **Logging and Monitoring**
     - Enable appropriate logging
     - Use log forwarding profiles
     - Monitor rule hits
     - Track rule changes
     - Audit rule effectiveness
 
-4. **Performance**
+5. **Performance**
     - Optimize rule order
     - Use specific sources/destinations
     - Minimize rule count
     - Monitor rule processing
     - Clean up unused rules
 
-5. **Change Management**
+6. **Change Management**
     - Test rules before deployment
     - Document all changes
     - Use proper commit messages

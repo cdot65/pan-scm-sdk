@@ -70,6 +70,24 @@ application groups that organize collections of applications for use in security
 <!-- termynal -->
 
 ```python
+    from scm.client import ScmClient
+
+    # Initialize client using the unified client approach
+    client = ScmClient(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id"
+    )
+
+    # Access the application_group module directly through the client
+    # client.application_group is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
     from scm.client import Scm
     from scm.config.objects import ApplicationGroup
 
@@ -83,8 +101,6 @@ application groups that organize collections of applications for use in security
     # Initialize ApplicationGroup object
     application_groups = ApplicationGroup(client)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -103,7 +119,7 @@ application groups that organize collections of applications for use in security
     }
 
     # Create basic group
-    basic_group_obj = application_groups.create(basic_group)
+    basic_group_obj = client.application_group.create(basic_group)
 
     # Microsoft 365 application group
     ms365_group = {
@@ -117,7 +133,7 @@ application groups that organize collections of applications for use in security
     }
 
     # Create Microsoft 365 group
-    ms365_group_obj = application_groups.create(ms365_group)
+    ms365_group_obj = client.application_group.create(ms365_group)
 ```
 
 </div>
@@ -130,11 +146,11 @@ application groups that organize collections of applications for use in security
 
 ```python
     # Fetch by name and folder
-    group = application_groups.fetch(name="web-apps", folder="Texas")
+    group = client.application_group.fetch(name="web-apps", folder="Texas")
     print(f"Found group: {group.name}")
 
     # Get by ID
-    group_by_id = application_groups.get(group.id)
+    group_by_id = client.application_group.get(group.id)
     print(f"Retrieved group: {group_by_id.name}")
     print(f"Members: {', '.join(group_by_id.members)}")
 ```
@@ -149,13 +165,13 @@ application groups that organize collections of applications for use in security
 
 ```python
     # Fetch existing group
-    existing_group = application_groups.fetch(name="web-apps", folder="Texas")
+    existing_group = client.application_group.fetch(name="web-apps", folder="Texas")
 
     # Update members
     existing_group.members = ["ssl", "web-browsing", "dns"]
 
     # Perform update
-    updated_group = application_groups.update(existing_group)
+    updated_group = client.application_group.update(existing_group)
 ```
 
 </div>
@@ -168,7 +184,7 @@ application groups that organize collections of applications for use in security
 
 ```python
     # List with direct filter parameters
-    filtered_groups = application_groups.list(
+    filtered_groups = client.application_group.list(
         folder='Texas',
         members=['ssl']
     )
@@ -185,7 +201,7 @@ application groups that organize collections of applications for use in security
     }
 
     # List with filters as kwargs
-    filtered_groups = application_groups.list(**list_params)
+    filtered_groups = client.application_group.list(**list_params)
 ```
 
 </div>
@@ -198,7 +214,7 @@ application groups that organize collections of applications for use in security
 
 ```python
     # Only return application groups defined exactly in 'Texas'
-    exact_application_groups = application_groups.list(
+    exact_application_groups = client.application_group.list(
       folder='Texas',
       exact_match=True
     )
@@ -207,7 +223,7 @@ application groups that organize collections of applications for use in security
         print(f"Exact match: {app.name} in {app.folder}")
 
     # Exclude all application groups from the 'All' folder
-    no_all_application_groups = application_groups.list(
+    no_all_application_groups = client.application_group.list(
       folder='Texas',
       exclude_folders=['All']
     )
@@ -217,7 +233,7 @@ application groups that organize collections of applications for use in security
         print(f"Filtered out 'All': {app.name}")
 
     # Exclude application groups that come from 'default' snippet
-    no_default_snippet = application_groups.list(
+    no_default_snippet = client.application_group.list(
       folder='Texas',
       exclude_snippets=['default']
     )
@@ -227,7 +243,7 @@ application groups that organize collections of applications for use in security
         print(f"Filtered out 'default' snippet: {app.name}")
 
     # Exclude application groups associated with 'DeviceA'
-    no_deviceA = application_groups.list(
+    no_deviceA = client.application_group.list(
       folder='Texas',
       exclude_devices=['DeviceA']
     )
@@ -237,7 +253,7 @@ application groups that organize collections of applications for use in security
         print(f"Filtered out 'DeviceA': {app.name}")
 
     # Combine exact_match with multiple exclusions
-    combined_filters = application_groups.list(
+    combined_filters = client.application_group.list(
       folder='Texas',
       exact_match=True,
       exclude_folders=['All'],
@@ -260,13 +276,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Initialize the ApplicationGroup object with a custom max_limit
+    # Initialize the ScmClient with a custom max_limit for application groups
     # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-    application_group_client = ApplicationGroup(api_client=client, max_limit=4321)
+    client = ScmClient(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id",
+        application_group_max_limit=4321
+    )
 
     # Now when we call list(), it will use the specified max_limit for each request
     # while auto-paginating through all available objects.
-    all_groups = application_group_client.list(folder='Texas')
+    all_groups = client.application_group.list(folder='Texas')
 
     # 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -282,7 +303,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 ```python
     # Delete by ID
     group_id = "123e4567-e89b-12d3-a456-426655440000"
-    application_groups.delete(group_id)
+    client.application_group.delete(group_id)
 ```
 
 </div>
@@ -304,8 +325,9 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
         "timeout": 300  # 5 minute timeout
     }
 
-    # Commit the changes
-    result = application_groups.commit(**commit_params)
+    # Commit the changes directly on the client
+    # Note: All commit operations should be performed on the client directly
+    result = client.commit(**commit_params)
 
     print(f"Commit job ID: {result.job_id}")
 ```
@@ -319,12 +341,12 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Get status of specific job
-    job_status = application_groups.get_job_status(result.job_id)
+    # Get status of specific job directly on the client
+    job_status = client.get_job_status(result.job_id)
     print(f"Job status: {job_status.data[0].status_str}")
 
-    # List recent jobs
-    recent_jobs = application_groups.list_jobs(limit=10)
+    # List recent jobs directly on the client
+    recent_jobs = client.list_jobs(limit=10)
     for job in recent_jobs.data:
         print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -338,12 +360,20 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
+    from scm.client import ScmClient
     from scm.exceptions import (
         InvalidObjectError,
         MissingQueryParameterError,
         NameNotUniqueError,
         ObjectNotPresentError,
         ReferenceNotZeroError
+    )
+
+    # Initialize client
+    client = ScmClient(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id"
     )
 
     try:
@@ -354,18 +384,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
             "folder": "Texas"
         }
 
-        # Create the group
-        new_group = application_groups.create(group_config)
+        # Create the group using the unified client
+        new_group = client.application_group.create(group_config)
 
-        # Commit changes
-        result = application_groups.commit(
+        # Commit changes directly on the client
+        result = client.commit(
             folders=["Texas"],
             description="Added test group",
             sync=True
         )
 
-        # Check job status
-        status = application_groups.get_job_status(result.job_id)
+        # Check job status on the client
+        status = client.get_job_status(result.job_id)
 
     except InvalidObjectError as e:
         print(f"Invalid group data: {e.message}")
@@ -383,27 +413,34 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ## Best Practices
 
-1. **Group Management**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access application group operations via `client.application_group` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `application_group_max_limit`
+
+2. **Group Management**
     - Use descriptive group names
     - Organize related applications together
     - Keep member lists current
     - Document group purposes
     - Review group memberships regularly
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container (folder, snippet, or device)
     - Use consistent container names
     - Validate container existence
     - Group related configurations
 
-3. **Error Handling**
+4. **Error Handling**
     - Implement comprehensive error handling
     - Check job status after commits
     - Handle specific exceptions
     - Log error details
     - Monitor commit status
 
-4. **Performance**
+5. **Performance**
     - Use appropriate pagination
     - Cache frequently accessed groups
     - Implement proper retry logic

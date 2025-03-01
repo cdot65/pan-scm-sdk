@@ -78,26 +78,56 @@ deleting custom applications with specific characteristics, risk levels, and beh
 
 ## Basic Configuration
 
+The Application service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-    from scm.client import Scm
-    from scm.config.objects import Application
+from scm.client import ScmClient
 
-    # Initialize client
-    client = Scm(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id"
-    )
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-    # Initialize Application object
-    applications = Application(client)
+# Access the Application service directly through the client
+# No need to create a separate Application instance
+applications = client.application
 ```
 
 </div>
+
+### Traditional Service Instantiation (Legacy)
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import Scm
+from scm.config.objects import Application
+
+# Initialize client
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Initialize Application object explicitly
+applications = Application(client)
+```
+
+</div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -108,39 +138,48 @@ deleting custom applications with specific characteristics, risk levels, and beh
 <!-- termynal -->
 
 ```python
-    # Basic application configuration
-    basic_app = {
-        "name": "custom-database",
-        "category": "business-systems",
-        "subcategory": "database",
-        "technology": "client-server",
-        "risk": 3,
-        "description": "Custom database application",
-        "ports": ["tcp/1521"],
-        "folder": "Texas"
-    }
+from scm.client import ScmClient
 
-    # Create basic application
-    basic_app_obj = applications.create(basic_app)
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-    # Advanced application with security attributes
-    secure_app = {
-        "name": "secure-chat",
-        "category": "collaboration",
-        "subcategory": "instant-messaging",
-        "technology": "client-server",
-        "risk": 2,
-        "description": "Secure internal chat application",
-        "ports": ["tcp/8443"],
-        "folder": "Texas",
-        "transfers_files": True,
-        "has_known_vulnerabilities": False,
-        "evasive": False,
-        "pervasive": True
-    }
+# Basic application configuration
+basic_app = {
+    "name": "custom-database",
+    "category": "business-systems",
+    "subcategory": "database",
+    "technology": "client-server",
+    "risk": 3,
+    "description": "Custom database application",
+    "ports": ["tcp/1521"],
+    "folder": "Texas"
+}
 
-    # Create secure application
-    secure_app_obj = applications.create(secure_app)
+# Create basic application using the unified client interface
+basic_app_obj = client.application.create(basic_app)
+
+# Advanced application with security attributes
+secure_app = {
+    "name": "secure-chat",
+    "category": "collaboration",
+    "subcategory": "instant-messaging",
+    "technology": "client-server",
+    "risk": 2,
+    "description": "Secure internal chat application",
+    "ports": ["tcp/8443"],
+    "folder": "Texas",
+    "transfers_files": True,
+    "has_known_vulnerabilities": False,
+    "evasive": False,
+    "pervasive": True
+}
+
+# Create secure application using the unified client interface
+secure_app_obj = client.application.create(secure_app)
 ```
 
 </div>
@@ -152,14 +191,14 @@ deleting custom applications with specific characteristics, risk levels, and beh
 <!-- termynal -->
 
 ```python
-    # Fetch by name and folder
-    app = applications.fetch(name="custom-database", folder="Texas")
-    print(f"Found application: {app.name}")
+# Fetch by name and folder using the unified client interface
+app = client.application.fetch(name="custom-database", folder="Texas")
+print(f"Found application: {app.name}")
 
-    # Get by ID
-    app_by_id = applications.get(app.id)
-    print(f"Retrieved application: {app_by_id.name}")
-    print(f"Risk level: {app_by_id.risk}")
+# Get by ID using the unified client interface
+app_by_id = client.application.get(app.id)
+print(f"Retrieved application: {app_by_id.name}")
+print(f"Risk level: {app_by_id.risk}")
 ```
 
 </div>
@@ -171,17 +210,17 @@ deleting custom applications with specific characteristics, risk levels, and beh
 <!-- termynal -->
 
 ```python
-    # Fetch existing application
-    existing_app = applications.fetch(name="custom-database", folder="Texas")
+# Fetch existing application using the unified client interface
+existing_app = client.application.fetch(name="custom-database", folder="Texas")
 
-    # Update attributes
-    existing_app.description = "Updated database application"
-    existing_app.risk = 4
-    existing_app.has_known_vulnerabilities = True
-    existing_app.ports = ["tcp/1521", "tcp/1522"]
+# Update attributes
+existing_app.description = "Updated database application"
+existing_app.risk = 4
+existing_app.has_known_vulnerabilities = True
+existing_app.ports = ["tcp/1521", "tcp/1522"]
 
-    # Perform update
-    updated_app = applications.update(existing_app)
+# Perform update using the unified client interface
+updated_app = client.application.update(existing_app)
 ```
 
 </div>
@@ -193,28 +232,28 @@ deleting custom applications with specific characteristics, risk levels, and beh
 <!-- termynal -->
 
 ```python
-    # List with direct filter parameters
-    filtered_apps = applications.list(
-        folder='Texas',
-        category=['business-systems'],
-        risk=[3, 4, 5]
-    )
+# List with direct filter parameters using the unified client interface
+filtered_apps = client.application.list(
+    folder='Texas',
+    category=['business-systems'],
+    risk=[3, 4, 5]
+)
 
-    # Process results
-    for app in filtered_apps:
-        print(f"Name: {app.name}")
-        print(f"Category: {app.category}")
-        print(f"Risk: {app.risk}")
+# Process results
+for app in filtered_apps:
+    print(f"Name: {app.name}")
+    print(f"Category: {app.category}")
+    print(f"Risk: {app.risk}")
 
-    # Define filter parameters as dictionary
-    list_params = {
-        "folder": "Texas",
-        "technology": ["client-server"],
-        "subcategory": ["database"]
-    }
+# Define filter parameters as dictionary
+list_params = {
+    "folder": "Texas",
+    "technology": ["client-server"],
+    "subcategory": ["database"]
+}
 
-    # List with filters as kwargs
-    filtered_apps = applications.list(**list_params)
+# List with filters as kwargs using the unified client interface
+filtered_apps = client.application.list(**list_params)
 ```
 
 </div>
@@ -238,46 +277,54 @@ parameters to control which objects are included or excluded after the initial A
 <!-- termynal -->
 
 ```python
-    # Only return applications defined exactly in 'Texas'
-    exact_applications = applications.list(
-      folder='Texas',
-      exact_match=True
-    )
+from scm.client import ScmClient
 
-    for app in exact_applications:
-      print(f"Exact match: {app.name} in {app.folder}")
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-    # Exclude all applications from the 'All' folder
-    no_all_applications = applications.list(
-      folder='Texas',
-      exclude_folders=['All']
-    )
+# Only return applications defined exactly in 'Texas' using the unified client interface
+exact_applications = client.application.list(
+    folder='Texas',
+    exact_match=True
+)
 
-    for app in no_all_applications:
-      assert app.folder != 'All'
-      print(f"Filtered out 'All': {app.name}")
+for app in exact_applications:
+    print(f"Exact match: {app.name} in {app.folder}")
 
-    # Exclude applications that come from 'default' snippet
-    no_default_snippet = applications.list(
-      folder='Texas',
-      exclude_snippets=['default']
-    )
+# Exclude all applications from the 'All' folder using the unified client interface
+no_all_applications = client.application.list(
+    folder='Texas',
+    exclude_folders=['All']
+)
 
-    for app in no_default_snippet:
-      assert app.snippet != 'default'
-      print(f"Filtered out 'default' snippet: {app.name}")
+for app in no_all_applications:
+    assert app.folder != 'All'
+    print(f"Filtered out 'All': {app.name}")
 
+# Exclude applications that come from 'default' snippet using the unified client interface
+no_default_snippet = client.application.list(
+    folder='Texas',
+    exclude_snippets=['default']
+)
 
-    # Combine exact_match with multiple exclusions
-    combined_filters = applications.list(
-      folder='Texas',
-      exact_match=True,
-      exclude_folders=['All'],
-      exclude_snippets=['default'],
-    )
+for app in no_default_snippet:
+    assert app.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {app.name}")
 
-    for app in combined_filters:
-      print(f"Combined filters result: {app.name} in {app.folder}")
+# Combine exact_match with multiple exclusions using the unified client interface
+combined_filters = client.application.list(
+    folder='Texas',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default']
+)
+
+for app in combined_filters:
+    print(f"Combined filters result: {app.name} in {app.folder}")
 ```
 
 </div>
@@ -291,15 +338,28 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Initialize the Application object with a custom max_limit
-    # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-    application_client = Application(api_client=client, max_limit=4321)
+from scm.client import ScmClient
+from scm.config.objects import Application
 
-    # When calling list(), it will use the specified max_limit for each request,
-    # auto-paginating through all available objects.
-    all_apps = application_client.list(folder='Texas')
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-    # 'all_apps' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Two options for setting max_limit:
+
+# Option 1: Use the unified client interface but create a custom Application instance with max_limit
+app_service = Application(client, max_limit=4321)
+all_apps1 = app_service.list(folder='Texas')
+
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_apps2 = client.application.list(folder='Texas')
+
+# Both options will auto-paginate through all available objects.
+# The applications are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -311,9 +371,9 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Delete by ID
-    app_id = "123e4567-e89b-12d3-a456-426655440000"
-    applications.delete(app_id)
+# Delete by ID using the unified client interface
+app_id = "123e4567-e89b-12d3-a456-426655440000"
+client.application.delete(app_id)
 ```
 
 </div>
@@ -327,18 +387,19 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Prepare commit parameters
-    commit_params = {
-        "folders": ["Texas"],
-        "description": "Updated application definitions",
-        "sync": True,
-        "timeout": 300  # 5 minute timeout
-    }
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Texas"],
+    "description": "Updated application definitions",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
 
-    # Commit the changes
-    result = applications.commit(**commit_params)
+# Commit the changes directly using the client
+# Note: Commits should always be performed on the client object directly, not on service objects
+result = client.commit(**commit_params)
 
-    print(f"Commit job ID: {result.job_id}")
+print(f"Commit job ID: {result.job_id}")
 ```
 
 </div>
@@ -350,14 +411,14 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Get status of specific job
-    job_status = applications.get_job_status(result.job_id)
-    print(f"Job status: {job_status.data[0].status_str}")
+# Get status of specific job directly from the client
+job_status = client.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
 
-    # List recent jobs
-    recent_jobs = applications.list_jobs(limit=10)
-    for job in recent_jobs.data:
-        print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+# List recent jobs directly from the client
+recent_jobs = client.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -368,84 +429,99 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 <!-- termynal -->
 
- ```python
-    from scm.exceptions import (
-        InvalidObjectError,
-        MissingQueryParameterError,
-        NameNotUniqueError,
-        ObjectNotPresentError,
-        ReferenceNotZeroError
+```python
+from scm.client import ScmClient
+from scm.exceptions import (
+    InvalidObjectError,
+    MissingQueryParameterError,
+    NameNotUniqueError,
+    ObjectNotPresentError,
+    ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+try:
+    # Create application configuration
+    app_config = {
+        "name": "test-app",
+        "category": "business-systems",
+        "subcategory": "database",
+        "technology": "client-server",
+        "risk": 3,
+        "folder": "Texas",
+        "description": "Test application",
+        "ports": ["tcp/1521"]
+    }
+
+    # Create the application using the unified client interface
+    new_app = client.application.create(app_config)
+
+    # Commit changes directly from the client
+    result = client.commit(
+        folders=["Texas"],
+        description="Added test application",
+        sync=True
     )
 
-    try:
-        # Create application configuration
-        app_config = {
-            "name": "test-app",
-            "category": "business-systems",
-            "subcategory": "database",
-            "technology": "client-server",
-            "risk": 3,
-            "folder": "Texas",
-            "description": "Test application",
-            "ports": ["tcp/1521"]
-        }
+    # Check job status directly from the client
+    status = client.get_job_status(result.job_id)
 
-        # Create the application
-        new_app = applications.create(app_config)
-
-        # Commit changes
-        result = applications.commit(
-            folders=["Texas"],
-            description="Added test application",
-            sync=True
-        )
-
-        # Check job status
-        status = applications.get_job_status(result.job_id)
-
-    except InvalidObjectError as e:
-        print(f"Invalid application data: {e.message}")
-    except NameNotUniqueError as e:
-        print(f"Application name already exists: {e.message}")
-    except ObjectNotPresentError as e:
-        print(f"Application not found: {e.message}")
-    except ReferenceNotZeroError as e:
-        print(f"Application still in use: {e.message}")
-    except MissingQueryParameterError as e:
-        print(f"Missing parameter: {e.message}")
- ```
+except InvalidObjectError as e:
+    print(f"Invalid application data: {e.message}")
+except NameNotUniqueError as e:
+    print(f"Application name already exists: {e.message}")
+except ObjectNotPresentError as e:
+    print(f"Application not found: {e.message}")
+except ReferenceNotZeroError as e:
+    print(f"Application still in use: {e.message}")
+except MissingQueryParameterError as e:
+    print(f"Missing parameter: {e.message}")
+```
 
 </div>
 
 ## Best Practices
 
-1. **Application Definition**
+1. **Client Usage**
+    - Use the unified client interface (`client.application`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
+
+2. **Application Definition**
     - Use descriptive names and categories
     - Set appropriate risk levels
     - Document security characteristics
     - Specify all relevant ports
     - Keep descriptions current
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container (folder or snippet)
     - Use consistent container names
     - Validate container existence
     - Group related applications
 
-3. **Security Attributes**
+4. **Security Attributes**
     - Accurately flag security concerns
     - Update vulnerability status
     - Document evasive behaviors
     - Track certification status
     - Monitor risk levels
 
-4. **Performance**
+5. **Performance**
+    - Create a single client instance and reuse it
     - Use appropriate pagination
     - Cache frequently accessed apps
     - Implement proper retry logic
     - Monitor bandwidth flags
 
-5. **Error Handling**
+6. **Error Handling**
     - Validate input data
     - Handle specific exceptions
     - Log error details

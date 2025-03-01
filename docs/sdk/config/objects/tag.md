@@ -68,6 +68,33 @@ snippets, or devices as needed.
 
 ## Basic Configuration
 
+The Tag service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the Tag service directly through the client
+# No need to create a separate Tag instance
+tags = client.tag
+```
+
+</div>
+
+### Traditional Service Instantiation (Legacy)
+
 <div class="termy">
 
 <!-- termynal -->
@@ -83,11 +110,14 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize Tag object
+# Initialize Tag object explicitly
 tags = Tag(client)
 ```
 
 </div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -98,6 +128,15 @@ tags = Tag(client)
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
 # Basic tag configuration
 basic_tag = {
     "name": "Production",
@@ -106,8 +145,8 @@ basic_tag = {
     "folder": "Texas"
 }
 
-# Create basic tag
-basic_tag_obj = tags.create(basic_tag)
+# Create basic tag using the unified client interface
+basic_tag_obj = client.tag.create(basic_tag)
 
 # Tag with different color
 dev_tag = {
@@ -117,7 +156,7 @@ dev_tag = {
     "folder": "Texas"
 }
 
-dev_tag_obj = tags.create(dev_tag)
+dev_tag_obj = client.tag.create(dev_tag)
 
 # Tag for a specific application
 app_tag = {
@@ -127,7 +166,7 @@ app_tag = {
     "folder": "Texas"
 }
 
-app_tag_obj = tags.create(app_tag)
+app_tag_obj = client.tag.create(app_tag)
 ```
 
 </div>
@@ -139,13 +178,13 @@ app_tag_obj = tags.create(app_tag)
 <!-- termynal -->
 
 ```python
-# Fetch by name and folder
-tag = tags.fetch(name="Production", folder="Texas")
+# Fetch by name and folder using the unified client interface
+tag = client.tag.fetch(name="Production", folder="Texas")
 print(f"Found tag: {tag.name}")
 print(f"Color: {tag.color}")
 
-# Get by ID
-tag_by_id = tags.get(tag.id)
+# Get by ID using the unified client interface
+tag_by_id = client.tag.get(tag.id)
 print(f"Retrieved tag: {tag_by_id.name}")
 ```
 
@@ -158,15 +197,15 @@ print(f"Retrieved tag: {tag_by_id.name}")
 <!-- termynal -->
 
 ```python
-# Fetch existing tag
-existing_tag = tags.fetch(name="Production", folder="Texas")
+# Fetch existing tag using the unified client interface
+existing_tag = client.tag.fetch(name="Production", folder="Texas")
 
 # Update attributes
 existing_tag.color = "Azure Blue"
 existing_tag.comments = "Updated production environment tag"
 
-# Perform update
-updated_tag = tags.update(existing_tag)
+# Perform update using the unified client interface
+updated_tag = client.tag.update(existing_tag)
 ```
 
 </div>
@@ -178,13 +217,13 @@ updated_tag = tags.update(existing_tag)
 <!-- termynal -->
 
 ```python
-# List tags from a specific folder
-filtered_tags = tags.list(
+# List tags from a specific folder using the unified client interface
+filtered_tags = client.tag.list(
     folder='Texas'
 )
 
-# Apply color filters
-filtered_tags = tags.list(
+# Apply color filters using the unified client interface
+filtered_tags = client.tag.list(
     folder='Texas',
     colors=['Red', 'Blue']
 )
@@ -216,47 +255,56 @@ parameters to control which objects are included or excluded after the initial A
 <!-- termynal -->
 
 ```python
-# Only return tags defined exactly in 'Texas'
-exact_tags = tags.list(
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Only return tags defined exactly in 'Texas' using the unified client interface
+exact_tags = client.tag.list(
     folder='Texas',
     exact_match=True
 )
 
-for app in exact_tags:
-    print(f"Exact match: {app.name} in {app.folder}")
+for tag in exact_tags:
+    print(f"Exact match: {tag.name} in {tag.folder}")
 
-# Exclude all tags from the 'All' folder
-no_all_tags = tags.list(
+# Exclude all tags from the 'All' folder using the unified client interface
+no_all_tags = client.tag.list(
     folder='Texas',
     exclude_folders=['All']
 )
 
-for app in no_all_tags:
-    assert app.folder != 'All'
-    print(f"Filtered out 'All': {app.name}")
+for tag in no_all_tags:
+    assert tag.folder != 'All'
+    print(f"Filtered out 'All': {tag.name}")
 
-# Exclude tags that come from 'default' snippet
-no_default_snippet = tags.list(
+# Exclude tags that come from 'default' snippet using the unified client interface
+no_default_snippet = client.tag.list(
     folder='Texas',
     exclude_snippets=['default']
 )
 
-for app in no_default_snippet:
-    assert app.snippet != 'default'
-    print(f"Filtered out 'default' snippet: {app.name}")
+for tag in no_default_snippet:
+    assert tag.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {tag.name}")
 
-# Exclude tags associated with 'DeviceA'
-no_deviceA = tags.list(
+# Exclude tags associated with 'DeviceA' using the unified client interface
+no_deviceA = client.tag.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
 
-for app in no_deviceA:
-    assert app.device != 'DeviceA'
-    print(f"Filtered out 'DeviceA': {app.name}")
+for tag in no_deviceA:
+    assert tag.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {tag.name}")
 
-# Combine exact_match with multiple exclusions and colors
-refined_tags = tags.list(
+# Combine exact_match with multiple exclusions and colors using the unified client interface
+refined_tags = client.tag.list(
     folder="Texas",
     exact_match=True,
     exclude_folders=["All"],
@@ -265,8 +313,8 @@ refined_tags = tags.list(
     colors=["Red", "Blue"]
 )
 
-for app in refined_tags:
-    print(f"Refined filter result: {app.name} in {app.folder}, Color: {app.color}")
+for tag in refined_tags:
+    print(f"Refined filter result: {tag.name} in {tag.folder}, Color: {tag.color}")
 ```
 
 </div>
@@ -280,15 +328,28 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the Tag object with a custom max_limit
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-tag_client = Tag(api_client=client, max_limit=4321)
+from scm.client import ScmClient
+from scm.config.objects import Tag
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
-all_tags = tag_client.list(folder='Texas')
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-# 'all_tags' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Two options for setting max_limit:
+
+# Option 1: Use the unified client interface but create a custom Tag instance with max_limit
+tag_service = Tag(client, max_limit=4321)
+all_tags1 = tag_service.list(folder='Texas')
+
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_tags2 = client.tag.list(folder='Texas')
+
+# Both options will auto-paginate through all available objects.
+# The tags are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -300,9 +361,9 @@ all_tags = tag_client.list(folder='Texas')
 <!-- termynal -->
 
 ```python
-# Delete by ID
+# Delete by ID using the unified client interface
 tag_id = "123e4567-e89b-12d3-a456-426655440000"
-tags.delete(tag_id)
+client.tag.delete(tag_id)
 ```
 
 </div>
@@ -324,8 +385,10 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = tags.commit(**commit_params)
+# Commit the changes directly using the client
+# Note: Commits should always be performed on the client object directly, not on service objects
+result = client.commit(**commit_params)
+
 print(f"Commit job ID: {result.job_id}")
 ```
 
@@ -338,12 +401,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = tags.get_job_status(result.job_id)
+# Get status of specific job directly from the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = tags.list_jobs(limit=10)
+# List recent jobs directly from the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -357,12 +420,20 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     NameNotUniqueError,
     ObjectNotPresentError,
     ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -374,18 +445,18 @@ try:
         "comments": "Test tag"
     }
 
-    # Create the tag
-    new_tag = tags.create(tag_config)
+    # Create the tag using the unified client interface
+    new_tag = client.tag.create(tag_config)
 
-    # Commit changes
-    result = tags.commit(
+    # Commit changes directly from the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test tag",
         sync=True
     )
 
-    # Check job status
-    status = tags.get_job_status(result.job_id)
+    # Check job status directly from the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid tag data: {e.message}")
@@ -403,34 +474,40 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Color Management**
+1. **Client Usage**
+    - Use the unified client interface (`client.tag`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
+
+2. **Color Management**
    - Use standard color names from predefined list
    - Maintain consistent color schemes
    - Document color meanings
    - Validate colors before creation
    - Consider color visibility
 
-2. **Container Management**
+3. **Container Management**
    - Always specify exactly one container (folder, snippet, or device)
    - Use consistent container names
    - Validate container existence
    - Group related tags
 
-3. **Naming Conventions**
+4. **Naming Conventions**
    - Use descriptive names
    - Follow consistent patterns
    - Avoid special characters
    - Document naming standards
    - Consider hierarchical naming
 
-4. **Performance**
-   - Cache frequently used tags
+5. **Performance**
+   - Create a single client instance and reuse it
    - Use appropriate pagination
    - Implement proper retry logic
    - Monitor API limits
    - Batch operations when possible
 
-5. **Error Handling**
+6. **Error Handling**
    - Validate input data
    - Handle specific exceptions
    - Log error details

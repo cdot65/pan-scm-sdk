@@ -76,7 +76,6 @@ deleting profiles that protect against DNS-based threats including botnet domain
 
 ```python
 from scm.client import Scm
-from scm.config.security import DNSSecurityProfile
 
 # Initialize client
 client = Scm(
@@ -85,8 +84,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize DNS Security Profile object
-dns_security_profiles = DNSSecurityProfile(client)
+# Access DNS security profiles directly through the client
+# No need to initialize a separate DNSSecurityProfile object
 ```
 
 </div>
@@ -117,8 +116,8 @@ basic_profile = {
     'folder': 'Texas'
 }
 
-# Create basic profile
-basic_profile_obj = dns_security_profiles.create(basic_profile)
+# Create basic profile using the client
+basic_profile_obj = client.dns_security_profile.create(basic_profile)
 
 # Advanced profile with sinkhole and whitelist
 advanced_profile = {
@@ -152,7 +151,7 @@ advanced_profile = {
 }
 
 # Create advanced profile
-advanced_profile_obj = dns_security_profiles.create(advanced_profile)
+advanced_profile_obj = client.dns_security_profile.create(advanced_profile)
 ```
 
 </div>
@@ -165,11 +164,11 @@ advanced_profile_obj = dns_security_profiles.create(advanced_profile)
 
 ```python
 # Fetch by name and folder
-profile = dns_security_profiles.fetch(name="basic-profile", folder="Texas")
+profile = client.dns_security_profile.fetch(name="basic-profile", folder="Texas")
 print(f"Found profile: {profile.name}")
 
 # Get by ID
-profile_by_id = dns_security_profiles.get(profile.id)
+profile_by_id = client.dns_security_profile.get(profile.id)
 print(f"Retrieved profile: {profile_by_id.name}")
 print(f"Categories: {profile_by_id.botnet_domains.dns_security_categories}")
 ```
@@ -184,7 +183,7 @@ print(f"Categories: {profile_by_id.botnet_domains.dns_security_categories}")
 
 ```python
 # Fetch existing profile
-existing_profile = dns_security_profiles.fetch(name="basic-profile", folder="Texas")
+existing_profile = client.dns_security_profile.fetch(name="basic-profile", folder="Texas")
 
 # Update description and categories
 existing_profile.description = "Updated DNS security profile"
@@ -195,7 +194,7 @@ existing_profile.botnet_domains.dns_security_categories.append({
 })
 
 # Perform update
-updated_profile = dns_security_profiles.update(existing_profile)
+updated_profile = client.dns_security_profile.update(existing_profile)
 ```
 
 </div>
@@ -208,7 +207,7 @@ updated_profile = dns_security_profiles.update(existing_profile)
 
 ```python
 # List with direct filter parameters
-filtered_profiles = dns_security_profiles.list(
+filtered_profiles = client.dns_security_profile.list(
     folder='Texas',
     dns_security_categories=['pan-dns-sec-malware']
 )
@@ -227,7 +226,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_profiles = dns_security_profiles.list(**list_params)
+filtered_profiles = client.dns_security_profile.list(**list_params)
 ```
 
 </div>
@@ -315,13 +314,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the DNSSecurityProfile object with a custom max_limit
+# Initialize the client with a custom max_limit for DNS security profiles
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-profile_client = DNSSecurityProfile(api_client=client, max_limit=4321)
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    dns_security_profile_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_profiles = profile_client.list(folder='Texas')
+all_profiles = client.dns_security_profile.list(folder='Texas')
 
 # 'all_profiles' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -337,7 +341,7 @@ all_profiles = profile_client.list(folder='Texas')
 ```python
 # Delete by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-dns_security_profiles.delete(profile_id)
+client.dns_security_profile.delete(profile_id)
 ```
 
 </div>
@@ -359,8 +363,8 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = dns_security_profiles.commit(**commit_params)
+# Commit the changes directly using the client
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -374,12 +378,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = dns_security_profiles.get_job_status(result.job_id)
+# Get status of specific job using the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = dns_security_profiles.list_jobs(limit=10)
+# List recent jobs using the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -418,18 +422,18 @@ try:
         "folder": "Texas"
     }
 
-    # Create the profile
-    new_profile = dns_security_profiles.create(profile_config)
+    # Create the profile using the client
+    new_profile = client.dns_security_profile.create(profile_config)
 
-    # Commit changes
-    result = dns_security_profiles.commit(
+    # Commit changes using the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test profile",
         sync=True
     )
 
-    # Check job status
-    status = dns_security_profiles.get_job_status(result.job_id)
+    # Check job status using the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid profile data: {e.message}")
@@ -460,12 +464,11 @@ except MissingQueryParameterError as e:
     - Validate container existence
     - Group related profiles
 
-3. **Security Categories**
-    - Configure all relevant categories
-    - Set appropriate log levels
-    - Enable packet capture selectively
-    - Review category actions regularly
-    - Document exceptions
+3. **Client Usage**
+    - Use the unified client interface (`client.dns_security_profile`) for simpler code
+    - Perform commits directly on the client (`client.commit()`)
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
+    - Initialize the client once and reuse across different object types
 
 4. **Performance**
     - Use appropriate pagination

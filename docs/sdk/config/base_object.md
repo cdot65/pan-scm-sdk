@@ -77,13 +77,15 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
+# Unified Client Approach
+# Most objects can be accessed directly through the client
+# Example: client.address, client.service_group, client.security_rule, etc.
 
-# Create custom object class
+# For custom or extended objects, you can still use the BaseObject approach
 class CustomObject(BaseObject):
     ENDPOINT = "/config/objects/v1/custom"
 
-
-# Initialize object
+# Initialize custom object
 custom_obj = CustomObject(client)
 ```
 
@@ -295,33 +297,40 @@ except ServerError as e:
 
 ## Best Practices
 
-1. **Object Initialization**
+1. **Client Usage**
+    - Prefer the unified client interface (`client.object_name`) for standard objects
+    - Only use the BaseObject approach for custom extensions or advanced use cases
+    - Perform commits directly on the client (`client.commit()`)
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
+    - Initialize the client once and reuse across different object types
+
+2. **Object Initialization** (when using BaseObject directly)
     - Define ENDPOINT in all subclasses
     - Validate api_client type
     - Use proper error handling
     - Initialize logging appropriately
 
-2. **CRUD Operations**
+3. **CRUD Operations**
     - Validate input data before operations
     - Handle response data consistently
     - Implement proper error handling
     - Use appropriate timeouts
 
-3. **Job Management**
+4. **Job Management**
     - Monitor commit job status
     - Handle job failures appropriately
     - Use sync mode judiciously
     - Implement proper timeout handling
 
-4. **Error Handling**
+5. **Error Handling**
     - Catch specific exceptions first
     - Log error details
     - Provide meaningful error messages
     - Implement proper retry logic
 
-5. **Performance**
+6. **Performance**
     - Reuse object instances
-    - Use appropriate pagination
+    - Configure appropriate pagination limits during client initialization
     - Batch operations when possible
     - Cache frequently accessed data
 
