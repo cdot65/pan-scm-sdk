@@ -119,34 +119,34 @@ client.commit(
 
 The unified client provides access to the following services through its attribute-based interface:
 
-| Client Property | Class | Description |
-|----------------|-------|-------------|
-| **Objects** | | |
-| `address` | `Address` | Manages IP and FQDN address objects |
-| `address_group` | `AddressGroup` | Manages address group objects |
-| `application` | `Application` | Manages custom application objects |
-| `application_filter` | `ApplicationFilters` | Manages application filter objects |
-| `application_group` | `ApplicationGroup` | Manages application group objects |
-| `dynamic_user_group` | `DynamicUserGroup` | Manages dynamic user group objects |
-| `external_dynamic_list` | `ExternalDynamicLists` | Manages external dynamic list objects |
-| `hip_object` | `HIPObject` | Manages host information profile objects |
-| `hip_profile` | `HIPProfile` | Manages host information profile group objects |
-| `http_server_profile` | `HTTPServerProfile` | Manages HTTP server profile objects |
-| `service` | `Service` | Manages service objects |
-| `service_group` | `ServiceGroup` | Manages service group objects |
-| `tag` | `Tag` | Manages tag objects |
-| **Network** | | |
-| `nat_rule` | `NATRule` | Manages network address translation rules |
-| **Deployment** | | |
-| `remote_network` | `RemoteNetworks` | Manages remote network connections |
-| **Security** | | |
-| `security_rule` | `SecurityRule` | Manages security policy rules |
-| `anti_spyware_profile` | `AntiSpywareProfile` | Manages anti-spyware security profiles |
-| `decryption_profile` | `DecryptionProfile` | Manages SSL decryption profiles |
-| `dns_security_profile` | `DNSSecurityProfile` | Manages DNS security profiles |
-| `url_category` | `URLCategories` | Manages custom URL categories |
-| `vulnerability_protection_profile` | `VulnerabilityProtectionProfile` | Manages vulnerability protection profiles |
-| `wildfire_antivirus_profile` | `WildfireAntivirusProfile` | Manages WildFire anti-virus profiles |
+| Client Property                    | Class                            | Description                                    |
+|------------------------------------|----------------------------------|------------------------------------------------|
+| **Objects**                        |                                  |                                                |
+| `address`                          | `Address`                        | Manages IP and FQDN address objects            |
+| `address_group`                    | `AddressGroup`                   | Manages address group objects                  |
+| `application`                      | `Application`                    | Manages custom application objects             |
+| `application_filter`               | `ApplicationFilters`             | Manages application filter objects             |
+| `application_group`                | `ApplicationGroup`               | Manages application group objects              |
+| `dynamic_user_group`               | `DynamicUserGroup`               | Manages dynamic user group objects             |
+| `external_dynamic_list`            | `ExternalDynamicLists`           | Manages external dynamic list objects          |
+| `hip_object`                       | `HIPObject`                      | Manages host information profile objects       |
+| `hip_profile`                      | `HIPProfile`                     | Manages host information profile group objects |
+| `http_server_profile`              | `HTTPServerProfile`              | Manages HTTP server profile objects            |
+| `service`                          | `Service`                        | Manages service objects                        |
+| `service_group`                    | `ServiceGroup`                   | Manages service group objects                  |
+| `tag`                              | `Tag`                            | Manages tag objects                            |
+| **Network**                        |                                  |                                                |
+| `nat_rule`                         | `NATRule`                        | Manages network address translation rules      |
+| **Deployment**                     |                                  |                                                |
+| `remote_network`                   | `RemoteNetworks`                 | Manages remote network connections             |
+| **Security**                       |                                  |                                                |
+| `security_rule`                    | `SecurityRule`                   | Manages security policy rules                  |
+| `anti_spyware_profile`             | `AntiSpywareProfile`             | Manages anti-spyware security profiles         |
+| `decryption_profile`               | `DecryptionProfile`              | Manages SSL decryption profiles                |
+| `dns_security_profile`             | `DNSSecurityProfile`             | Manages DNS security profiles                  |
+| `url_category`                     | `URLCategories`                  | Manages custom URL categories                  |
+| `vulnerability_protection_profile` | `VulnerabilityProtectionProfile` | Manages vulnerability protection profiles      |
+| `wildfire_antivirus_profile`       | `WildfireAntivirusProfile`       | Manages WildFire anti-virus profiles           |
 
 For more detailed usage instructions and examples, refer to the [User Guide](about/introduction.md).
 

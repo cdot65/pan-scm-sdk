@@ -106,7 +106,7 @@ url_list_config = {
 }
 
 # Create URL List category using the client
-url_list = client.url_categories.create(url_list_config)
+url_list = client.url_category.create(url_list_config)
 
 # Category Match configuration
 category_match_config = {
@@ -118,7 +118,7 @@ category_match_config = {
 }
 
 # Create Category Match category
-category_match = client.url_categories.create(category_match_config)
+category_match = client.url_category.create(category_match_config)
 ```
 
 </div>
@@ -131,11 +131,11 @@ category_match = client.url_categories.create(category_match_config)
 
 ```python
 # Fetch by name and folder
-category = client.url_categories.fetch(name="blocked_sites", folder="Texas")
+category = client.url_category.fetch(name="blocked_sites", folder="Texas")
 print(f"Found category: {category.name}")
 
 # Get by ID
-category_by_id = client.url_categories.get(category.id)
+category_by_id = client.url_category.get(category.id)
 print(f"Retrieved category: {category_by_id.name}")
 print(f"URL list: {category_by_id.list}")
 ```
@@ -150,14 +150,14 @@ print(f"URL list: {category_by_id.list}")
 
 ```python
 # Fetch existing category
-existing_category = client.url_categories.fetch(name="blocked_sites", folder="Texas")
+existing_category = client.url_category.fetch(name="blocked_sites", folder="Texas")
 
 # Update URL list
 existing_category.list.extend(["newsite.com", "anothersite.com"])
 existing_category.description = "Updated blocked websites list"
 
 # Perform update
-updated_category = client.url_categories.update(existing_category)
+updated_category = client.url_category.update(existing_category)
 ```
 
 </div>
@@ -170,7 +170,7 @@ updated_category = client.url_categories.update(existing_category)
 
 ```python
 # List with direct filter parameters
-filtered_categories = client.url_categories.list(
+filtered_categories = client.url_category.list(
     folder='Texas',
     members=['example.com']
 )
@@ -188,7 +188,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_categories = client.url_categories.list(**list_params)
+filtered_categories = client.url_category.list(**list_params)
 ```
 
 </div>
@@ -213,8 +213,8 @@ The `list()` method supports additional parameters to refine your query results 
 <!-- termynal -->
 
 ```python
-# Only return url_categories defined exactly in 'Texas'
-exact_url_categories = client.url_categories.list(
+# Only return url_category defined exactly in 'Texas'
+exact_url_categories = client.url_category.list(
     folder='Texas',
     exact_match=True
 )
@@ -223,7 +223,7 @@ for app in exact_url_categories:
     print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all url_categories from the 'All' folder
-no_all_url_categories = client.url_categories.list(
+no_all_url_categories = client.url_category.list(
     folder='Texas',
     exclude_folders=['All']
 )
@@ -233,7 +233,7 @@ for app in no_all_url_categories:
     print(f"Filtered out 'All': {app.name}")
 
 # Exclude url_categories that come from 'default' snippet
-no_default_snippet = client.url_categories.list(
+no_default_snippet = client.url_category.list(
     folder='Texas',
     exclude_snippets=['default']
 )
@@ -243,7 +243,7 @@ for app in no_default_snippet:
     print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude url_categories associated with 'DeviceA'
-no_deviceA = client.url_categories.list(
+no_deviceA = client.url_category.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
@@ -253,7 +253,7 @@ for app in no_deviceA:
     print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = client.url_categories.list(
+combined_filters = client.url_category.list(
     folder='Texas',
     exact_match=True,
     exclude_folders=['All'],
@@ -287,7 +287,7 @@ client = Scm(
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_categories = client.url_categories.list(folder='Texas')
+all_categories = client.url_category.list(folder='Texas')
 
 # 'all_categories' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -303,7 +303,7 @@ all_categories = client.url_categories.list(folder='Texas')
 ```python
 # Delete by ID
 category_id = "123e4567-e89b-12d3-a456-426655440000"
-client.url_categories.delete(category_id)
+client.url_category.delete(category_id)
 ```
 
 </div>
@@ -378,7 +378,7 @@ try:
     }
 
     # Create the category using the client
-    new_category = client.url_categories.create(category_config)
+    new_category = client.url_category.create(category_config)
 
     # Commit changes using the client
     result = client.commit(
@@ -420,7 +420,7 @@ except MissingQueryParameterError as e:
     - Group related categories
 
 3. **Client Usage**
-    - Use the unified client interface (`client.url_categories`) for simpler code
+    - Use the unified client interface (`client.url_category`) for simpler code
     - Perform commits directly on the client (`client.commit()`)
     - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`) 
     - Initialize the client once and reuse across different object types
