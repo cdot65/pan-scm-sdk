@@ -27,43 +27,43 @@ The `RemoteNetworks` class provides functionality to manage remote network confi
 
 ## Core Methods
 
-| Method     | Description                           | Parameters                               | Return Type                       |
-|------------|---------------------------------------|------------------------------------------|-----------------------------------|
-| `create()` | Creates a new remote network          | `data: Dict[str, Any]`                   | `RemoteNetworkResponseModel`      |
-| `get()`    | Retrieves a network by ID             | `object_id: str`                         | `RemoteNetworkResponseModel`      |
-| `update()` | Updates an existing network           | `remote_network: RemoteNetworkUpdateModel`| `RemoteNetworkResponseModel`      |
-| `delete()` | Deletes a network                     | `object_id: str`                         | `None`                            |
-| `list()`   | Lists networks with filtering         | `folder: str`, `**filters`               | `List[RemoteNetworkResponseModel]`|
-| `fetch()`  | Gets network by name and container    | `name: str`, `folder: str`               | `RemoteNetworkResponseModel`      |
+| Method     | Description                        | Parameters                                 | Return Type                        |
+|------------|------------------------------------|--------------------------------------------|------------------------------------|
+| `create()` | Creates a new remote network       | `data: Dict[str, Any]`                     | `RemoteNetworkResponseModel`       |
+| `get()`    | Retrieves a network by ID          | `object_id: str`                           | `RemoteNetworkResponseModel`       |
+| `update()` | Updates an existing network        | `remote_network: RemoteNetworkUpdateModel` | `RemoteNetworkResponseModel`       |
+| `delete()` | Deletes a network                  | `object_id: str`                           | `None`                             |
+| `list()`   | Lists networks with filtering      | `folder: str`, `**filters`                 | `List[RemoteNetworkResponseModel]` |
+| `fetch()`  | Gets network by name and container | `name: str`, `folder: str`                 | `RemoteNetworkResponseModel`       |
 
 ## Remote Network Model Attributes
 
-| Attribute            | Type           | Required | Description                                  |
-|---------------------|----------------|----------|----------------------------------------------|
-| `name`              | str            | Yes      | Name of network (max 63 chars)               |
-| `id`                | UUID           | Yes*     | Unique identifier (*response only)           |
-| `region`            | str            | Yes      | AWS region for deployment                    |
-| `license_type`      | str            | Yes      | License type (default: FWAAS-AGGREGATE)      |
-| `spn_name`          | str            | Yes**    | Service Provider Name (**required for FWAAS) |
-| `description`       | str            | No       | Description (max 1023 chars)                 |
-| `subnets`           | List[str]      | No       | List of network subnets                      |
-| `ecmp_load_balancing`| str           | Yes      | ECMP mode (enable/disable)                   |
-| `ecmp_tunnels`      | List[Dict]     | Yes***   | ECMP tunnel configs (***if ECMP enabled)     |
-| `ipsec_tunnel`      | str            | Yes***   | IPSec tunnel name (***if ECMP disabled)      |
-| `protocol`          | ProtocolModel  | No       | BGP protocol configuration                   |
-| `folder`            | str            | Yes      | Folder location                              |
+| Attribute             | Type          | Required | Description                                  |
+|-----------------------|---------------|----------|----------------------------------------------|
+| `name`                | str           | Yes      | Name of network (max 63 chars)               |
+| `id`                  | UUID          | Yes*     | Unique identifier (*response only)           |
+| `region`              | str           | Yes      | AWS region for deployment                    |
+| `license_type`        | str           | Yes      | License type (default: FWAAS-AGGREGATE)      |
+| `spn_name`            | str           | Yes**    | Service Provider Name (**required for FWAAS) |
+| `description`         | str           | No       | Description (max 1023 chars)                 |
+| `subnets`             | List[str]     | No       | List of network subnets                      |
+| `ecmp_load_balancing` | str           | Yes      | ECMP mode (enable/disable)                   |
+| `ecmp_tunnels`        | List[Dict]    | Yes***   | ECMP tunnel configs (***if ECMP enabled)     |
+| `ipsec_tunnel`        | str           | Yes***   | IPSec tunnel name (***if ECMP disabled)      |
+| `protocol`            | ProtocolModel | No       | BGP protocol configuration                   |
+| `folder`              | str           | Yes      | Folder location                              |
 
 ## Exceptions
 
-| Exception                    | HTTP Code | Description                           |
-|----------------------------|-----------|---------------------------------------|
-| `InvalidObjectError`         | 400       | Invalid network data or format        |
-| `MissingQueryParameterError` | 400       | Missing required parameters           |
-| `NameNotUniqueError`         | 409       | Network name already exists           |
-| `ObjectNotPresentError`      | 404       | Network not found                     |
-| `ReferenceNotZeroError`      | 409       | Network still referenced              |
-| `AuthenticationError`        | 401       | Authentication failed                 |
-| `ServerError`                | 500       | Internal server error                 |
+| Exception                    | HTTP Code | Description                    |
+|------------------------------|-----------|--------------------------------|
+| `InvalidObjectError`         | 400       | Invalid network data or format |
+| `MissingQueryParameterError` | 400       | Missing required parameters    |
+| `NameNotUniqueError`         | 409       | Network name already exists    |
+| `ObjectNotPresentError`      | 404       | Network not found              |
+| `ReferenceNotZeroError`      | 409       | Network still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed          |
+| `ServerError`                | 500       | Internal server error          |
 
 ## Basic Configuration
 

@@ -64,6 +64,10 @@ from scm.models.objects import (
     HTTPServerProfileCreateModel,
     HTTPServerProfileResponseModel,
     HTTPServerProfileUpdateModel,
+    LogForwardingProfileCreateModel,
+    LogForwardingProfileResponseModel,
+    LogForwardingProfileUpdateModel,
+    MatchListItem,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -5774,6 +5778,290 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
                     "port": 80
                 }
             ],
+        )
+
+
+# ----------------------------------------------------------------------------
+# Log Forwarding Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# SDK tests against SCM API
+class LogForwardingProfileCreateApiFactory(factory.Factory):
+    """Factory for creating LogForwardingProfileCreateModel instances."""
+
+    class Meta:
+        model = LogForwardingProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    match_list = factory.List([
+        {
+            "name": "test-match",
+            "log_type": "traffic",
+            "filter": "addr.src in 192.168.0.0/24",
+            "send_http": ["test-http-profile"]
+        }
+    ])
+
+    @classmethod
+    def with_folder(cls, folder="Shared", **kwargs):
+        """Create a log forwarding profile with a specific folder."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create a log forwarding profile with a snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create a log forwarding profile with a device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def with_multiple_match_items(cls, **kwargs):
+        """Create a log forwarding profile with multiple match list items."""
+        matches = [
+            {
+                "name": "traffic-match",
+                "log_type": "traffic",
+                "filter": "addr.src in 192.168.0.0/24",
+                "send_http": ["traffic-http-profile"]
+            },
+            {
+                "name": "threat-match",
+                "log_type": "threat",
+                "filter": "addr.dst in 10.0.0.0/8",
+                "send_syslog": ["threat-syslog-profile"]
+            }
+        ]
+        return cls(match_list=matches, **kwargs)
+
+
+class LogForwardingProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating LogForwardingProfileUpdateModel instances."""
+
+    class Meta:
+        model = LogForwardingProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
+    description = factory.Faker("sentence")
+    match_list = factory.List([
+        {
+            "name": "updated-match",
+            "log_type": "traffic",
+            "filter": "addr.src in 10.0.0.0/8",
+            "send_http": ["updated-http-profile"]
+        }
+    ])
+
+    @classmethod
+    def with_multiple_match_items(cls, **kwargs):
+        """Create an update with multiple match list items."""
+        matches = [
+            {
+                "name": "updated-traffic-match",
+                "log_type": "traffic",
+                "filter": "addr.src in 172.16.0.0/16",
+                "send_http": ["updated-http-profile"]
+            },
+            {
+                "name": "updated-url-match",
+                "log_type": "url",
+                "filter": "category eq social-networking",
+                "send_syslog": ["updated-syslog-profile"]
+            }
+        ]
+        return cls(match_list=matches, **kwargs)
+
+
+class LogForwardingProfileResponseFactory(factory.Factory):
+    """Factory for creating LogForwardingProfileResponseModel instances."""
+
+    class Meta:
+        model = LogForwardingProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    match_list = factory.List([
+        {
+            "name": "test-match",
+            "log_type": "traffic", 
+            "filter": "addr.src in 192.168.0.0/24",
+            "send_http": ["test-http-profile"]
+        }
+    ])
+
+    @classmethod
+    def with_folder(cls, folder="Shared", **kwargs):
+        """Create a response model with a specific folder."""
+        return cls(folder=folder, snippet=None, device=None, **kwargs)
+
+    @classmethod
+    def with_snippet(cls, snippet="TestSnippet", **kwargs):
+        """Create a response model with a snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device="TestDevice", **kwargs):
+        """Create a response model with a device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+    
+    @classmethod
+    def from_request(cls, request_model: LogForwardingProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class LogForwardingProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for LogForwardingProfileCreateModel."""
+
+    name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Shared"
+    match_list = [
+        {
+            "name": "test-match",
+            "log_type": "traffic",
+            "filter": "addr.src in 192.168.0.0/24",
+            "send_http": ["test-http-profile"]
+        }
+    ]
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestLogForwardingProfile",
+            description="Test log forwarding profile description",
+            folder="Shared",
+            match_list=[
+                {
+                    "name": "traffic-match",
+                    "log_type": "traffic",
+                    "filter": "addr.src in 192.168.0.0/24",
+                    "send_http": ["traffic-http-profile"]
+                },
+                {
+                    "name": "threat-match",
+                    "log_type": "threat",
+                    "filter": "severity eq critical",
+                    "send_syslog": ["threat-syslog-profile"]
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers (should fail validation)."""
+        return cls(
+            name="TestLogForwardingProfile",
+            folder="Shared",
+            snippet="TestSnippet",
+            match_list=[
+                {
+                    "name": "test-match",
+                    "log_type": "traffic",
+                    "filter": "addr.src in 192.168.0.0/24",
+                    "send_http": ["test-http-profile"]
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any containers (should fail validation)."""
+        return cls(
+            name="TestLogForwardingProfile",
+            match_list=[
+                {
+                    "name": "test-match",
+                    "log_type": "traffic",
+                    "filter": "addr.src in 192.168.0.0/24",
+                    "send_http": ["test-http-profile"]
+                }
+            ],
+            folder=None,
+            snippet=None,
+            device=None,
+        )
+
+    @classmethod
+    def build_with_invalid_match_list(cls):
+        """Return a data dict with an invalid match list configuration."""
+        return cls(
+            name="TestLogForwardingProfile",
+            folder="Shared",
+            match_list=[
+                {
+                    "name": "invalid-match",
+                    "log_type": "invalid-type",  # Invalid log type
+                }
+            ],
+        )
+
+
+class LogForwardingProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for LogForwardingProfileUpdateModel."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
+    description = factory.Faker("sentence")
+    match_list = [
+        {
+            "name": "updated-match",
+            "log_type": "traffic",
+            "filter": "addr.src in 10.0.0.0/8",
+            "send_http": ["updated-http-profile"]
+        }
+    ]
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a log forwarding profile."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedLogForwardingProfile",
+            description="Updated log forwarding profile description",
+            match_list=[
+                {
+                    "name": "updated-match",
+                    "log_type": "url",
+                    "filter": "category eq social-networking",
+                    "send_syslog": ["url-syslog-profile"]
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="valid-name",
+            match_list=[
+                {
+                    "name": "invalid-match",
+                    "log_type": "invalid",  # Invalid log type
+                }
+            ],
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="MinimalUpdate",
         )
 
 

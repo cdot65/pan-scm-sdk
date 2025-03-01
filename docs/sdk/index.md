@@ -159,6 +159,7 @@ The following table shows all services available through the unified client inte
 | `hip_object`                       | `HIPObject`                      | Manages host information profile objects       |
 | `hip_profile`                      | `HIPProfile`                     | Manages host information profile group objects |
 | `http_server_profile`              | `HTTPServerProfile`              | Manages HTTP server profile objects            |
+| `log_forwarding_profile`           | `LogForwardingProfile`           | Manages Log Forwarding profile objects         |
 | `service`                          | `Service`                        | Manages service objects                        |
 | `service_group`                    | `ServiceGroup`                   | Manages service group objects                  |
 | `tag`                              | `Tag`                            | Manages tag objects                            |

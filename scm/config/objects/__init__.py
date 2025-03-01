@@ -10,6 +10,7 @@ from .external_dynamic_lists import ExternalDynamicLists
 from .hip_object import HIPObject
 from .hip_profile import HIPProfile
 from .http_server_profiles import HTTPServerProfile
+from .log_forwarding_profile import LogForwardingProfile
 from .service import Service
 from .service_group import ServiceGroup
 from .tag import Tag
