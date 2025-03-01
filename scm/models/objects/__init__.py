@@ -72,6 +72,11 @@ from .tag import (
     TagResponseModel,
     TagUpdateModel,
 )
+from .quarantined_devices import (
+    QuarantinedDevicesCreateModel,
+    QuarantinedDevicesResponseModel,
+    QuarantinedDevicesListParamsModel,
+)
 
 """
 # these are pydantic implementations created by not currently implemented in the API
