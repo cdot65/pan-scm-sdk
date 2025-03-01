@@ -26,6 +26,7 @@ For each configuration object, there are corresponding request and response mode
 - [HIP Object Models](hip_object_models.md)
 - [HIP Profile Models](hip_profile_models.md)
 - [HTTP Server Profiles Models](http_server_profiles_models.md)
+- [Log Forwarding Profile Models](log_forwarding_profile_models.md)
 - [Service Models](service_models.md)
 - [Service Group Models](service_group_models.md)
 - [Tag Models](tag_models.md)

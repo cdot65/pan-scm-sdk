@@ -19,6 +19,7 @@ Read, Update, Delete) operations.
 - [HIP Object](hip_object.md)
 - [HIP Profile](hip_profile.md)
 - [HTTP Server Profiles](http_server_profiles.md)
+- [Log Forwarding Profile](log_forwarding_profile.md)
 - [Service](service.md)
 - [Service Group](service_group.md)
 - [Tag](tag.md)

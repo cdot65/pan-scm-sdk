@@ -53,6 +53,7 @@ nav:
               - HIP Object: sdk/config/objects/hip_object.md
               - HIP Profile: sdk/config/objects/hip_profile.md
               - HTTP Server Profile: sdk/config/objects/http_server_profiles.md
+              - Log Forwarding Profile: sdk/config/objects/log_forwarding_profile.md
               - Service: sdk/config/objects/service.md
               - Service Group: sdk/config/objects/service_group.md
               - Tag: sdk/config/objects/tag.md
@@ -84,6 +85,7 @@ nav:
               - HIP Object Models: sdk/models/objects/hip_object_models.md
               - HIP Profile Models: sdk/models/objects/hip_profile_models.md
               - HIP Profile Models: sdk/models/objects/http_server_profiles_models.md
+              - Log Forwarding Profile Models: sdk/models/objects/log_forwarding_profile_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
               - Tag Models: sdk/models/objects/tag_models.md
