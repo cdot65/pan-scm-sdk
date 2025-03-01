@@ -51,6 +51,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [HIP Object Models](models/objects/hip_object_models.md)
         - [HIP Profile Models](models/objects/hip_profile_models.md)
         - [HTTP Server Profile Models](models/objects/http_server_profiles_models.md)
+        - [Log Forwarding Profile Models](models/objects/log_forwarding_profile_models.md)
+        - [Region Models](models/objects/region_models.md)
         - [Service Models](models/objects/service_models.md)
         - [Service Group Models](models/objects/service_group_models.md)
         - [Tag Models](models/objects/tag_models.md)
@@ -160,6 +162,7 @@ The following table shows all services available through the unified client inte
 | `hip_profile`                      | `HIPProfile`                     | Manages host information profile group objects |
 | `http_server_profile`              | `HTTPServerProfile`              | Manages HTTP server profile objects            |
 | `log_forwarding_profile`           | `LogForwardingProfile`           | Manages Log Forwarding profile objects         |
+| `region`                           | `Region`                         | Manages geographic region objects              |
 | `service`                          | `Service`                        | Manages service objects                        |
 | `service_group`                    | `ServiceGroup`                   | Manages service group objects                  |
 | `tag`                              | `Tag`                            | Manages tag objects                            |

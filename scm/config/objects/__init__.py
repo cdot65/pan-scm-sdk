@@ -11,6 +11,8 @@ from .hip_object import HIPObject
 from .hip_profile import HIPProfile
 from .http_server_profiles import HTTPServerProfile
 from .log_forwarding_profile import LogForwardingProfile
+from .quarantined_devices import QuarantinedDevices
+from .region import Region
 from .service import Service
 from .service_group import ServiceGroup
 from .tag import Tag

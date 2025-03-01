@@ -263,3 +263,5 @@ openapi
 
 # ignore all .idea files
 .idea
+/docs/sdk/config/objects/failure.json
+/tests/sandbox_verification.py
