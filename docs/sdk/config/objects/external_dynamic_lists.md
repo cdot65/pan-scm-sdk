@@ -85,7 +85,7 @@ client = ScmClient(
 )
 
 # Access the external_dynamic_lists module directly through the client
-# client.external_dynamic_lists is automatically initialized for you
+# client.external_dynamic_list is automatically initialized for you
 ```
 
 </div>
@@ -138,7 +138,7 @@ ip_edl_config = {
 }
 
 # Create IP EDL
-ip_edl = client.external_dynamic_lists.create(ip_edl_config)
+ip_edl = client.external_dynamic_list.create(ip_edl_config)
 
 # Domain-based EDL with hourly updates
 domain_edl_config = {
@@ -157,7 +157,7 @@ domain_edl_config = {
 }
 
 # Create domain EDL
-domain_edl = client.external_dynamic_lists.create(domain_edl_config)
+domain_edl = client.external_dynamic_list.create(domain_edl_config)
 ```
 
 </div>
@@ -170,11 +170,11 @@ domain_edl = client.external_dynamic_lists.create(domain_edl_config)
 
 ```python
 # Fetch by name and folder
-edl = client.external_dynamic_lists.fetch(name="malicious-ips", folder="Texas")
+edl = client.external_dynamic_list.fetch(name="malicious-ips", folder="Texas")
 print(f"Found EDL: {edl.name}")
 
 # Get by ID
-edl_by_id = client.external_dynamic_lists.get(edl.id)
+edl_by_id = client.external_dynamic_list.get(edl.id)
 print(f"Retrieved EDL: {edl_by_id.name}")
 ```
 
@@ -188,7 +188,7 @@ print(f"Retrieved EDL: {edl_by_id.name}")
 
 ```python
 # Fetch existing EDL
-existing_edl = client.external_dynamic_lists.fetch(name="malicious-ips", folder="Texas")
+existing_edl = client.external_dynamic_list.fetch(name="malicious-ips", folder="Texas")
 
 # Update attributes
 existing_edl.description = "Updated malicious IP list"
@@ -197,7 +197,7 @@ existing_edl.type.ip.recurring = {
 }
 
 # Perform update
-updated_edl = client.external_dynamic_lists.update(existing_edl)
+updated_edl = client.external_dynamic_list.update(existing_edl)
 ```
 
 </div>
@@ -210,7 +210,7 @@ updated_edl = client.external_dynamic_lists.update(existing_edl)
 
 ```python
 # List with direct filter parameters
-filtered_edls = client.external_dynamic_lists.list(
+filtered_edls = client.external_dynamic_list.list(
    folder='Texas',
    types=['ip', 'domain']
 )
@@ -230,7 +230,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_edls = client.external_dynamic_lists.list(**list_params)
+filtered_edls = client.external_dynamic_list.list(**list_params)
 ```
 
 </div>
@@ -243,7 +243,7 @@ filtered_edls = client.external_dynamic_lists.list(**list_params)
 
 ```python
 # Only return edls defined exactly in 'Texas'
-exact_edls = client.external_dynamic_lists.list(
+exact_edls = client.external_dynamic_list.list(
    folder='Texas',
    exact_match=True
 )
@@ -252,7 +252,7 @@ for app in exact_edls:
    print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all edls from the 'All' folder
-no_all_edls = client.external_dynamic_lists.list(
+no_all_edls = client.external_dynamic_list.list(
    folder='Texas',
    exclude_folders=['All']
 )
@@ -262,7 +262,7 @@ for app in no_all_edls:
    print(f"Filtered out 'All': {app.name}")
 
 # Exclude edls that come from 'default' snippet
-no_default_snippet = client.external_dynamic_lists.list(
+no_default_snippet = client.external_dynamic_list.list(
    folder='Texas',
    exclude_snippets=['default']
 )
@@ -272,7 +272,7 @@ for app in no_default_snippet:
    print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude edls associated with 'DeviceA'
-no_deviceA = client.external_dynamic_lists.list(
+no_deviceA = client.external_dynamic_list.list(
    folder='Texas',
    exclude_devices=['DeviceA']
 )
@@ -282,7 +282,7 @@ for app in no_deviceA:
    print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = client.external_dynamic_lists.list(
+combined_filters = client.external_dynamic_list.list(
    folder='Texas',
    exact_match=True,
    exclude_folders=['All'],
@@ -316,7 +316,7 @@ client = ScmClient(
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_edls = client.external_dynamic_lists.list(folder='Texas')
+all_edls = client.external_dynamic_list.list(folder='Texas')
 
 # 'all_edls' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -332,7 +332,7 @@ all_edls = client.external_dynamic_lists.list(folder='Texas')
 ```python
 # Delete by ID
 edl_id = "123e4567-e89b-12d3-a456-426655440000"
-client.external_dynamic_lists.delete(edl_id)
+client.external_dynamic_list.delete(edl_id)
 ```
 
 </div>
@@ -424,7 +424,7 @@ edl_config = {
 }
 
 # Create the EDL using the unified client
-new_edl = client.external_dynamic_lists.create(edl_config)
+new_edl = client.external_dynamic_list.create(edl_config)
 
 # Commit changes directly on the client
 result = client.commit(
@@ -454,7 +454,7 @@ except MissingQueryParameterError as e:
 
 1. **Client Usage**
     - Use the unified `ScmClient` approach for simpler code
-    - Access EDL operations via `client.external_dynamic_lists` property
+    - Access EDL operations via `client.external_dynamic_list` property
     - Perform commit operations directly on the client
     - Monitor jobs directly on the client
     - Set appropriate max_limit parameters for large datasets using `external_dynamic_lists_max_limit`

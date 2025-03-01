@@ -116,19 +116,19 @@ The unified client provides access to all service objects in the SDK through att
 - `client.address` - Address objects
 - `client.address_group` - Address Group objects
 - `client.application` - Application objects
-- `client.application_filters` - Application Filters
+- `client.application_filter` - Application Filters
 - `client.application_group` - Application Group objects
 - `client.dynamic_user_group` - Dynamic User Group objects
-- `client.external_dynamic_lists` - External Dynamic Lists
+- `client.external_dynamic_list` - External Dynamic Lists
 - `client.hip_object` - HIP Objects
 - `client.hip_profile` - HIP Profiles
-- `client.http_server_profiles` - HTTP Server Profiles
+- `client.http_server_profile` - HTTP Server Profiles
 - `client.service` - Service objects
 - `client.service_group` - Service Group objects
 - `client.tag` - Tag objects
 
 **Network**
-- `client.nat_rules` - NAT Rules
+- `client.nat_rule` - NAT Rules
 
 **Deployment**
 - `client.remote_networks` - Remote Networks
@@ -138,7 +138,7 @@ The unified client provides access to all service objects in the SDK through att
 - `client.anti_spyware_profile` - Anti-Spyware Profiles
 - `client.decryption_profile` - Decryption Profiles
 - `client.dns_security_profile` - DNS Security Profiles
-- `client.url_categories` - URL Categories
+- `client.url_category` - URL Categories
 - `client.vulnerability_protection_profile` - Vulnerability Protection Profiles
 - `client.wildfire_antivirus_profile` - WildFire Antivirus Profiles
 

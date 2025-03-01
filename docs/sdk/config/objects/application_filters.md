@@ -96,7 +96,7 @@ and behaviors.
     )
 
     # Access the application_filters module directly through the client
-    # client.application_filters is automatically initialized for you
+    # client.application_filter is automatically initialized for you
 ```
 
 </div>
@@ -138,7 +138,7 @@ You can also use the traditional approach if preferred:
     }
 
     # Create high-risk filter
-    high_risk = client.application_filters.create(high_risk_filter)
+    high_risk = client.application_filter.create(high_risk_filter)
 
     # SaaS applications filter
     saas_filter = {
@@ -150,7 +150,7 @@ You can also use the traditional approach if preferred:
     }
 
     # Create SaaS filter
-    saas = client.application_filters.create(saas_filter)
+    saas = client.application_filter.create(saas_filter)
 ```
 
 </div>
@@ -163,11 +163,11 @@ You can also use the traditional approach if preferred:
 
 ```python
     # Fetch by name and folder
-    filter_obj = client.application_filters.fetch(name="high-risk-apps", folder="Texas")
+    filter_obj = client.application_filter.fetch(name="high-risk-apps", folder="Texas")
     print(f"Found filter: {filter_obj.name}")
 
     # Get by ID
-    filter_by_id = client.application_filters.get(filter_obj.id)
+    filter_by_id = client.application_filter.get(filter_obj.id)
     print(f"Retrieved filter: {filter_by_id.name}")
     print(f"Risk levels: {filter_by_id.risk}")
 ```
@@ -182,7 +182,7 @@ You can also use the traditional approach if preferred:
 
 ```python
     # Fetch existing filter
-    existing_filter = client.application_filters.fetch(name="high-risk-apps", folder="Texas")
+    existing_filter = client.application_filter.fetch(name="high-risk-apps", folder="Texas")
 
     # Update filter criteria
     existing_filter.risk = [3, 4, 5]
@@ -191,7 +191,7 @@ You can also use the traditional approach if preferred:
     existing_filter.tunnels_other_apps = True
 
     # Perform update
-    updated_filter = client.application_filters.update(existing_filter)
+    updated_filter = client.application_filter.update(existing_filter)
 ```
 
 </div>
@@ -204,7 +204,7 @@ You can also use the traditional approach if preferred:
 
 ```python
     # List with direct filter parameters
-    filtered_results = client.application_filters.list(
+    filtered_results = client.application_filter.list(
         folder='Texas',
         category=['business-systems'],
         risk=[4, 5]
@@ -224,7 +224,7 @@ You can also use the traditional approach if preferred:
     }
 
     # List with filters as kwargs
-    filtered_results = client.application_filters.list(**list_params)
+    filtered_results = client.application_filter.list(**list_params)
 ```
 
 </div>
@@ -237,7 +237,7 @@ You can also use the traditional approach if preferred:
 
 ```python
     # Only return filters defined exactly in 'Texas'
-    exact_filters = client.application_filters.list(
+    exact_filters = client.application_filter.list(
         folder='Texas',
         exact_match=True
     )
@@ -246,7 +246,7 @@ You can also use the traditional approach if preferred:
         print(f"Exact match: {f.name} in {f.folder}")
 
     # Exclude all filters from the 'All' folder
-    no_all_filters = client.application_filters.list(
+    no_all_filters = client.application_filter.list(
         folder='Texas',
         exclude_folders=['All']
     )
@@ -256,7 +256,7 @@ You can also use the traditional approach if preferred:
         print(f"Filtered out 'All': {f.name}")
 
     # Exclude filters that come from 'default' snippet
-    no_default_snippet = client.application_filters.list(
+    no_default_snippet = client.application_filter.list(
         folder='Texas',
         exclude_snippets=['default']
     )
@@ -266,7 +266,7 @@ You can also use the traditional approach if preferred:
         print(f"Filtered out 'default' snippet: {f.name}")
 
     # Exclude filters associated with 'DeviceA'
-    no_deviceA = client.application_filters.list(
+    no_deviceA = client.application_filter.list(
         folder='Texas',
         exclude_devices=['DeviceA']
     )
@@ -276,7 +276,7 @@ You can also use the traditional approach if preferred:
         print(f"Filtered out 'DeviceA': {f.name}")
 
     # Combine exact_match with multiple exclusions
-    combined_filters = client.application_filters.list(
+    combined_filters = client.application_filter.list(
         folder='Texas',
         exact_match=True,
         exclude_folders=['All'],
@@ -310,7 +310,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
     # Now when we call list(), it will use the specified max_limit for each request
     # while auto-paginating through all available objects.
-    all_filters = client.application_filters.list(folder='Texas')
+    all_filters = client.application_filter.list(folder='Texas')
 
     # 'all_filters' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -326,7 +326,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 ```python
     # Delete by ID
     filter_id = "123e4567-e89b-12d3-a456-426655440000"
-    client.application_filters.delete(filter_id)
+    client.application_filter.delete(filter_id)
 ```
 
 </div>
@@ -410,7 +410,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
         }
 
         # Create the filter using the unified client
-        new_filter = client.application_filters.create(filter_config)
+        new_filter = client.application_filter.create(filter_config)
 
         # Commit changes directly on the client
         result = client.commit(
@@ -440,7 +440,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 1. **Client Usage**
     - Use the unified `ScmClient` approach for simpler code
-    - Access application filters operations via `client.application_filters` property
+    - Access application filters operations via `client.application_filter` property
     - Perform commit operations directly on the client
     - Monitor jobs directly on the client
     - Set appropriate max_limit parameters for large datasets using `application_filters_max_limit`
