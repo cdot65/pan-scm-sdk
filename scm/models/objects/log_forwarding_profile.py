@@ -25,6 +25,8 @@ class MatchListItem(BaseModel):
         filter (Optional[str]): Filter match criteria.
         send_http (Optional[List[str]]): A list of HTTP server profiles.
         send_syslog (Optional[List[str]]): A list of syslog server profiles.
+        send_to_panorama (Optional[bool]): Flag to send logs to Panorama.
+        quarantine (Optional[bool]): Flag to quarantine matching logs.
     """
 
     name: str = Field(..., description="Name of the match profile", max_length=63)
@@ -43,6 +45,12 @@ class MatchListItem(BaseModel):
     send_syslog: Optional[List[str]] = Field(
         None, description="A list of syslog server profiles"
     )
+    send_to_panorama: Optional[bool] = Field(
+        None, description="Flag to send logs to Panorama"
+    )
+    quarantine: Optional[bool] = Field(
+        None, description="Flag to quarantine matching logs"
+    )
 
 
 class LogForwardingProfileBaseModel(BaseModel):
@@ -56,6 +64,7 @@ class LogForwardingProfileBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+        enhanced_application_logging (Optional[bool]): Flag for enhanced application logging.
     """
 
     # Required fields
@@ -76,6 +85,11 @@ class LogForwardingProfileBaseModel(BaseModel):
         None,
         description="List of match profile configurations",
     )
+    
+    enhanced_application_logging: Optional[bool] = Field(
+        None,
+        description="Flag for enhanced application logging",
+    )
 
     # Container Types
     folder: Optional[str] = Field(
@@ -87,10 +101,8 @@ class LogForwardingProfileBaseModel(BaseModel):
     )
     snippet: Optional[str] = Field(
         None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
         description="The snippet in which the resource is defined",
-        examples=["My Snippet"],
+        examples=["My Snippet", "predefined-snippet"],
     )
     device: Optional[str] = Field(
         None,
@@ -168,11 +180,24 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
     id field.
 
     Attributes:
-        id (UUID): The UUID of the log forwarding profile.
+        id (Optional[UUID]): The UUID of the log forwarding profile. Not required for predefined snippets.
     """
 
-    id: UUID = Field(
-        ...,
-        description="The UUID of the log forwarding profile",
+    id: Optional[UUID] = Field(
+        None,
+        description="The UUID of the log forwarding profile. Not required for predefined snippets.",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
+    
+    @model_validator(mode="after")
+    def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
+        """Validates that non-predefined profiles have an ID."""
+        # Skip validation if snippet is "predefined-snippet"
+        if self.snippet == "predefined-snippet":
+            return self
+            
+        # For normal profiles, ensure ID is present
+        if not self.id and self.snippet != "predefined-snippet":
+            raise ValueError("ID is required for non-predefined profiles")
+            
+        return self

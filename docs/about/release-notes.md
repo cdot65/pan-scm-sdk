@@ -1,3 +1,11 @@
+## Version 0.3.15
+
+Released: March 1, 2025
+
+### Added
+- **Log Forwarding Profile**: Support for managing Log Forwarding Profiles
+- **HTTP Server Profile**: Support for managing HTTP Server Profiles
+
 ## Version 0.3.14
 
 Released: February 28, 2025

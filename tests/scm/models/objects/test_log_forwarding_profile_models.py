@@ -227,6 +227,53 @@ class TestLogForwardingProfileResponseModel:
         assert model.folder is None
         assert model.snippet is None
 
+    def test_predefined_snippet_without_id(self):
+        """Test with predefined-snippet doesn't require ID."""
+        data = {
+            "name": "Predefined Profile",
+            "snippet": "predefined-snippet",
+            "enhanced_application_logging": True,
+            "match_list": [
+                {
+                    "name": "traffic-match",
+                    "log_type": "traffic",
+                    "filter": "All Logs",
+                    "send_to_panorama": True,
+                    "quarantine": False
+                }
+            ]
+        }
+        
+        model = LogForwardingProfileResponseModel(**data)
+        assert model.id is None
+        assert model.name == "Predefined Profile"
+        assert model.snippet == "predefined-snippet"
+        assert model.enhanced_application_logging is True
+        assert len(model.match_list) == 1
+        assert model.match_list[0].send_to_panorama is True
+        assert model.match_list[0].quarantine is False
+    
+    def test_non_predefined_missing_id_error(self):
+        """Test that non-predefined profiles require ID."""
+        data = create_valid_profile_data()
+        
+        with pytest.raises(ValueError) as exc_info:
+            LogForwardingProfileResponseModel(**data)
+        assert "ID is required for non-predefined profiles" in str(exc_info.value)
+    
+    def test_with_enhanced_application_logging(self):
+        """Test with enhanced_application_logging field."""
+        data = create_valid_profile_data()
+        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        data["enhanced_application_logging"] = True
+        data["match_list"][0]["send_to_panorama"] = True
+        data["match_list"][0]["quarantine"] = False
+        
+        model = LogForwardingProfileResponseModel(**data)
+        assert model.enhanced_application_logging is True
+        assert model.match_list[0].send_to_panorama is True
+        assert model.match_list[0].quarantine is False
+
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
         data = {
