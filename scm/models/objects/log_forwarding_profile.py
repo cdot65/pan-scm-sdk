@@ -103,6 +103,10 @@ class LogForwardingProfileBaseModel(BaseModel):
         None,
         description="The snippet in which the resource is defined",
         examples=["My Snippet", "predefined-snippet"],
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The snippet in which the resource is defined",
+        examples=["My Snippet"],
     )
     device: Optional[str] = Field(
         None,
@@ -201,3 +205,11 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
             raise ValueError("ID is required for non-predefined profiles")
             
         return self
+        id (UUID): The UUID of the log forwarding profile.
+    """
+
+    id: UUID = Field(
+        ...,
+        description="The UUID of the log forwarding profile",
+        examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )

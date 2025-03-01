@@ -88,6 +88,8 @@ nav:
               - HTTP Server Profiles Models: sdk/models/objects/http_server_profiles_models.md
               - Log Forwarding Profile Models: sdk/models/objects/log_forwarding_profile_models.md
               - Region Models: sdk/models/objects/region_models.md
+              - HIP Profile Models: sdk/models/objects/http_server_profiles_models.md
+              - Log Forwarding Profile Models: sdk/models/objects/log_forwarding_profile_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
               - Tag Models: sdk/models/objects/tag_models.md
