@@ -1,7 +1,7 @@
 # scm/models/objects/log_forwarding_profile.py
 
 # Standard library imports
-from typing import Optional, List, Literal, Union
+from typing import Optional, List, Literal
 from uuid import UUID
 
 # External libraries
@@ -10,7 +10,6 @@ from pydantic import (
     Field,
     model_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -34,7 +33,14 @@ class MatchListItem(BaseModel):
         None, description="Match profile description", max_length=255
     )
     log_type: Literal[
-        "traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption"
+        "traffic",
+        "threat",
+        "wildfire",
+        "url",
+        "data",
+        "tunnel",
+        "auth",
+        "decryption",
     ] = Field(..., description="Log type")
     filter: Optional[str] = Field(
         None, description="Filter match criteria", max_length=65535
@@ -73,19 +79,19 @@ class LogForwardingProfileBaseModel(BaseModel):
         max_length=63,
         description="The name of the log forwarding profile",
     )
-    
+
     # Optional fields
     description: Optional[str] = Field(
         None,
         description="Log forwarding profile description",
         max_length=255,
     )
-    
+
     match_list: Optional[List[MatchListItem]] = Field(
         None,
         description="List of match profile configurations",
     )
-    
+
     enhanced_application_logging: Optional[bool] = Field(
         None,
         description="Flag for enhanced application logging",
@@ -105,8 +111,6 @@ class LogForwardingProfileBaseModel(BaseModel):
         examples=["My Snippet", "predefined-snippet"],
         pattern=r"^[a-zA-Z\d\-_. ]+$",
         max_length=64,
-        description="The snippet in which the resource is defined",
-        examples=["My Snippet"],
     )
     device: Optional[str] = Field(
         None,
@@ -163,7 +167,7 @@ class LogForwardingProfileUpdateModel(LogForwardingProfileBaseModel):
     Represents the update of an existing Log Forwarding Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a LogForwardingProfileUpdateModel object.
-    
+
     Attributes:
         id (UUID): The UUID of the log forwarding profile.
     """
@@ -192,24 +196,16 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
         description="The UUID of the log forwarding profile. Not required for predefined snippets.",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-    
+
     @model_validator(mode="after")
     def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
         """Validates that non-predefined profiles have an ID."""
         # Skip validation if snippet is "predefined-snippet"
         if self.snippet == "predefined-snippet":
             return self
-            
+
         # For normal profiles, ensure ID is present
         if not self.id and self.snippet != "predefined-snippet":
             raise ValueError("ID is required for non-predefined profiles")
-            
-        return self
-        id (UUID): The UUID of the log forwarding profile.
-    """
 
-    id: UUID = Field(
-        ...,
-        description="The UUID of the log forwarding profile",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
+        return self
