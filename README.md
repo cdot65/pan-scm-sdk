@@ -29,8 +29,8 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 
 - **OAuth2 Authentication**: Securely authenticate with the Strata Cloud Manager API using OAuth2 client credentials
   flow.
-- **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups, and
-  applications.
+- **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups, 
+  applications, regions, and more.
 - **Data Validation**: Utilize Pydantic models for data validation and serialization.
 - **Exception Handling**: Comprehensive error handling with custom exceptions for API errors.
 - **Extensibility**: Designed for easy extension to support additional resources and endpoints.
