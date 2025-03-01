@@ -71,6 +71,9 @@ from scm.models.objects import (
     RegionCreateModel,
     RegionUpdateModel,
     RegionResponseModel,
+    ScheduleCreateModel,
+    ScheduleUpdateModel,
+    ScheduleResponseModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -6730,4 +6733,408 @@ class RemoteNetworkUpdateModelDictFactory(factory.DictFactory):
             snippet=None,
             device=None,
             **kwargs,
+        )
+
+# ----------------------------------------------------------------------------
+# Schedule factories for SDK usage (model-based)
+# ----------------------------------------------------------------------------
+
+# SDK tests against SCM API
+class ScheduleCreateApiFactory(factory.Factory):
+    """Factory for creating ScheduleCreateModel instances."""
+
+    class Meta:
+        model = ScheduleCreateModel
+
+    name = factory.Sequence(lambda n: f"schedule_{n}")
+    folder = "Shared"
+    schedule_type = {
+        "recurring": {
+            "weekly": {
+                "monday": ["09:00-17:00"],
+                "wednesday": ["09:00-17:00"],
+                "friday": ["09:00-17:00"],
+            }
+        }
+    }
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+    
+    @classmethod
+    def with_daily_schedule(cls, **kwargs):
+        """Create an instance with daily schedule."""
+        schedule_type = {
+            "recurring": {
+                "daily": ["09:00-17:00", "18:00-20:00"]
+            }
+        }
+        return cls(schedule_type=schedule_type, **kwargs)
+    
+    @classmethod
+    def with_non_recurring_schedule(cls, **kwargs):
+        """Create an instance with non-recurring schedule."""
+        schedule_type = {
+            "non_recurring": [
+                "2025/01/01@09:00-2025/01/01@17:00",
+                "2025/02/01@09:00-2025/02/01@17:00"
+            ]
+        }
+        return cls(schedule_type=schedule_type, **kwargs)
+
+
+class ScheduleUpdateApiFactory(factory.Factory):
+    """Factory for creating ScheduleUpdateModel instances."""
+
+    class Meta:
+        model = ScheduleUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"schedule_{n}")
+    schedule_type = {
+        "recurring": {
+            "weekly": {
+                "monday": ["10:00-18:00"],  # Updated time range
+                "wednesday": ["10:00-18:00"],
+                "friday": ["10:00-18:00"],
+            }
+        }
+    }
+
+    @classmethod
+    def with_daily_schedule(cls, **kwargs):
+        """Create an instance with daily schedule."""
+        schedule_type = {
+            "recurring": {
+                "daily": ["10:00-18:00"]  # Updated time range
+            }
+        }
+        return cls(schedule_type=schedule_type, **kwargs)
+    
+    @classmethod
+    def with_non_recurring_schedule(cls, **kwargs):
+        """Create an instance with non-recurring schedule."""
+        schedule_type = {
+            "non_recurring": [
+                "2025/03/01@09:00-2025/03/01@17:00",  # Updated date range
+            ]
+        }
+        return cls(schedule_type=schedule_type, **kwargs)
+
+
+class ScheduleResponseFactory(factory.Factory):
+    """Factory for creating ScheduleResponseModel instances."""
+
+    class Meta:
+        model = ScheduleResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"schedule_{n}")
+    folder = "Shared"
+    schedule_type = {
+        "recurring": {
+            "weekly": {
+                "monday": ["09:00-17:00"],
+                "wednesday": ["09:00-17:00"],
+                "friday": ["09:00-17:00"],
+            }
+        }
+    }
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+    
+    @classmethod
+    def with_daily_schedule(cls, **kwargs):
+        """Create an instance with daily schedule."""
+        schedule_type = {
+            "recurring": {
+                "daily": ["09:00-17:00", "18:00-20:00"]
+            }
+        }
+        return cls(schedule_type=schedule_type, **kwargs)
+    
+    @classmethod
+    def with_non_recurring_schedule(cls, **kwargs):
+        """Create an instance with non-recurring schedule."""
+        schedule_type = {
+            "non_recurring": [
+                "2025/01/01@09:00-2025/01/01@17:00",
+                "2025/02/01@09:00-2025/02/01@17:00"
+            ]
+        }
+        return cls(schedule_type=schedule_type, **kwargs)
+    
+    @classmethod
+    def from_request(cls, request_model: ScheduleCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class ScheduleCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ScheduleCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"schedule_{n}")
+    folder = "Shared"
+    schedule_type = {
+        "recurring": {
+            "weekly": {
+                "monday": ["09:00-17:00"],
+                "wednesday": ["09:00-17:00"],
+                "friday": ["09:00-17:00"],
+            }
+        }
+    }
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"],
+                        "wednesday": ["09:00-17:00"],
+                        "friday": ["09:00-17:00"],
+                    }
+                }
+            },
+        )
+    
+    @classmethod
+    def build_valid_daily(cls):
+        """Return a valid data dict with daily schedule."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared", 
+            schedule_type={
+                "recurring": {
+                    "daily": ["09:00-17:00", "18:00-20:00"]
+                }
+            },
+        )
+    
+    @classmethod
+    def build_valid_non_recurring(cls):
+        """Return a valid data dict with non-recurring schedule."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={
+                "non_recurring": [
+                    "2025/01/01@09:00-2025/01/01@17:00",
+                    "2025/02/01@09:00-2025/02/01@17:00"
+                ]
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Shared",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"],
+                    }
+                }
+            },
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            snippet="TestSnippet",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"],
+                    }
+                }
+            },
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestSchedule",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"],
+                    }
+                }
+            },
+            folder=None,
+            snippet=None,
+            device=None,
+        )
+    
+    @classmethod
+    def build_with_invalid_time_format(cls):
+        """Return a data dict with invalid time format."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["9:00-17:00"],  # Missing leading zero
+                    }
+                }
+            },
+        )
+    
+    @classmethod
+    def build_with_invalid_date_format(cls):
+        """Return a data dict with invalid date format."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={
+                "non_recurring": [
+                    "2025/1/1@09:00-2025/01/01@17:00",  # Missing leading zeros
+                ]
+            },
+        )
+    
+    @classmethod
+    def build_with_both_recurring_types(cls):
+        """Return a data dict with both weekly and daily schedules."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"],
+                    },
+                    "daily": ["09:00-17:00"],
+                }
+            },
+        )
+    
+    @classmethod
+    def build_with_both_schedule_types(cls):
+        """Return a data dict with both recurring and non-recurring schedules."""
+        return cls(
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"],
+                    }
+                },
+                "non_recurring": [
+                    "2025/01/01@09:00-2025/01/01@17:00",
+                ]
+            },
+        )
+
+
+class ScheduleUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for ScheduleUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"schedule_{n}")
+    schedule_type = {
+        "recurring": {
+            "weekly": {
+                "monday": ["10:00-18:00"],  # Updated time range
+                "wednesday": ["10:00-18:00"],
+                "friday": ["10:00-18:00"],
+            }
+        }
+    }
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a schedule."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedSchedule",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["10:00-18:00"],
+                        "tuesday": ["10:00-18:00"],  # Added tuesday
+                    }
+                }
+            },
+        )
+    
+    @classmethod
+    def build_valid_daily(cls):
+        """Return a valid data dict with daily schedule."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedSchedule",
+            schedule_type={
+                "recurring": {
+                    "daily": ["10:00-18:00"]
+                }
+            },
+        )
+    
+    @classmethod
+    def build_valid_non_recurring(cls):
+        """Return a valid data dict with non-recurring schedule."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedSchedule",
+            schedule_type={
+                "non_recurring": [
+                    "2025/03/01@09:00-2025/03/01@17:00",
+                ]
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            schedule_type={
+                "recurring": {
+                    "weekly": {
+                        "monday": ["9:00-17:00"],  # Missing leading zero
+                    }
+                }
+            },
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="MinimalUpdate",
         )
