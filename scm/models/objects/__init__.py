@@ -51,6 +51,12 @@ from .http_server_profiles import (
     HTTPServerProfileUpdateModel,
     ServerModel,
 )
+from .log_forwarding_profile import (
+    LogForwardingProfileCreateModel,
+    LogForwardingProfileResponseModel,
+    LogForwardingProfileUpdateModel,
+    MatchListItem,
+)
 from .service import (
     ServiceCreateModel,
     ServiceResponseModel,
