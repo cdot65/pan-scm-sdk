@@ -57,6 +57,12 @@ from .log_forwarding_profile import (
     LogForwardingProfileUpdateModel,
     MatchListItem,
 )
+from .regions import (
+    RegionCreateModel,
+    RegionResponseModel,
+    RegionUpdateModel,
+    GeoLocation,
+)
 from .service import (
     ServiceCreateModel,
     ServiceResponseModel,

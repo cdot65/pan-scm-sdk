@@ -68,6 +68,9 @@ from scm.models.objects import (
     LogForwardingProfileResponseModel,
     LogForwardingProfileUpdateModel,
     MatchListItem,
+    RegionCreateModel,
+    RegionUpdateModel,
+    RegionResponseModel,
 )
 from scm.models.objects.address_group import (
     DynamicFilter,
@@ -6063,6 +6066,199 @@ class LogForwardingProfileUpdateModelFactory(factory.DictFactory):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="MinimalUpdate",
         )
+
+
+# ----------------------------------------------------------------------------
+# Region object factories.
+# ----------------------------------------------------------------------------
+
+# SDK tests against SCM API
+class RegionCreateApiFactory(factory.Factory):
+    """Factory for creating RegionCreateModel instances."""
+
+    class Meta:
+        model = RegionCreateModel
+
+    name = factory.Sequence(lambda n: f"region_{n}")
+    folder = "Global"
+    geo_location = {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+    }
+    address = ["192.168.1.0/24", "10.0.0.0/8"]
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+
+class RegionUpdateApiFactory(factory.Factory):
+    """Factory for creating RegionUpdateModel instances."""
+
+    class Meta:
+        model = RegionUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"region_{n}")
+    geo_location = {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+    }
+    address = ["192.168.1.0/24", "10.0.0.0/8"]
+
+    @classmethod
+    def with_updated_geo_location(cls, lat: float = 40.7128, long: float = -74.0060, **kwargs):
+        """Create an instance with updated geo_location."""
+        return cls(geo_location={"latitude": lat, "longitude": long}, **kwargs)
+
+
+class RegionResponseFactory(factory.Factory):
+    """Factory for creating RegionResponseModel instances."""
+
+    class Meta:
+        model = RegionResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"region_{n}")
+    folder = "Global"
+    geo_location = {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+    }
+    address = ["192.168.1.0/24", "10.0.0.0/8"]
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, device=None, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, snippet=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: RegionCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class RegionCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for RegionCreateModel."""
+
+    name = factory.Sequence(lambda n: f"region_{n}")
+    folder = "Global"
+    geo_location = {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+    }
+    address = ["192.168.1.0/24", "10.0.0.0/8"]
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestRegion",
+            folder="Global",
+            geo_location={
+                "latitude": 37.7749,
+                "longitude": -122.4194,
+            },
+            address=["192.168.1.0/24", "10.0.0.0/8"],
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name!",
+            folder="Global",
+        )
+
+    @classmethod
+    def build_with_invalid_latitude(cls):
+        """Return a data dict with invalid latitude value."""
+        return cls(
+            name="TestRegion",
+            folder="Global",
+            geo_location={
+                "latitude": 100,  # Invalid, must be between -90 and 90
+                "longitude": -122.4194,
+            },
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestRegion",
+            folder="Global",
+            snippet="TestSnippet",
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestRegion",
+            folder=None,
+            snippet=None,
+            device=None,
+        )
+
+
+class RegionUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for RegionUpdateModel."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"region_{n}")
+    geo_location = {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+    }
+    folder = "Global"
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a region."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedRegion",
+            geo_location={
+                "latitude": 40.7128,
+                "longitude": -74.0060,
+            },
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name!",
+            geo_location={
+                "latitude": 100,  # Invalid, must be between -90 and 90
+                "longitude": -200,  # Invalid, must be between -180 and 180
+            },
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "MinimalUpdateRegion",
+        }
 
 
 # ----------------------------------------------------------------------------
