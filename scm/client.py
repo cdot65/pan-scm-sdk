@@ -391,6 +391,10 @@ class Scm:
                 "scm.config.objects.http_server_profiles",
                 "HTTPServerProfile",
             ),
+            "log_forwarding_profile": (
+                "scm.config.objects.log_forwarding_profile",
+                "LogForwardingProfile",
+            ),
             "service": (
                 "scm.config.objects.service",
                 "Service",
