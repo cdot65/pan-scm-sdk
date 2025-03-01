@@ -98,7 +98,6 @@ decryption profiles that control SSL/TLS inspection settings for both forward pr
 
 ```python
 from scm.client import Scm
-from scm.config.security import DecryptionProfile
 
 # Initialize client
 client = Scm(
@@ -107,8 +106,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize DecryptionProfile object
-decryption_profiles = DecryptionProfile(client)
+# Access decryption profiles directly through the client
+# No need to initialize a separate DecryptionProfile object
 ```
 
 </div>
@@ -137,8 +136,8 @@ forward_proxy_config = {
     }
 }
 
-# Create forward proxy profile
-forward_profile = decryption_profiles.create(forward_proxy_config)
+# Create forward proxy profile using the client
+forward_profile = client.decryption_profile.create(forward_proxy_config)
 
 # Inbound proxy configuration
 inbound_proxy_config = {
@@ -157,7 +156,7 @@ inbound_proxy_config = {
 }
 
 # Create inbound proxy profile
-inbound_profile = decryption_profiles.create(inbound_proxy_config)
+inbound_profile = client.decryption_profile.create(inbound_proxy_config)
 ```
 
 </div>
@@ -170,11 +169,11 @@ inbound_profile = decryption_profiles.create(inbound_proxy_config)
 
 ```python
 # Fetch by name and folder
-profile = decryption_profiles.fetch(name="forward-proxy-profile", folder="Texas")
+profile = client.decryption_profile.fetch(name="forward-proxy-profile", folder="Texas")
 print(f"Found profile: {profile.name}")
 
 # Get by ID
-profile_by_id = decryption_profiles.get(profile.id)
+profile_by_id = client.decryption_profile.get(profile.id)
 print(f"Retrieved profile: {profile_by_id.name}")
 ```
 
@@ -188,7 +187,7 @@ print(f"Retrieved profile: {profile_by_id.name}")
 
 ```python
 # Fetch existing profile
-existing_profile = decryption_profiles.fetch(
+existing_profile = client.decryption_profile.fetch(
     name="forward-proxy-profile",
     folder="Texas"
 )
@@ -202,7 +201,7 @@ existing_profile.ssl_forward_proxy.block_expired_certificate = True
 existing_profile.ssl_forward_proxy.block_untrusted_issuer = True
 
 # Perform update
-updated_profile = decryption_profiles.update(existing_profile)
+updated_profile = client.decryption_profile.update(existing_profile)
 ```
 
 </div>
@@ -215,7 +214,7 @@ updated_profile = decryption_profiles.update(existing_profile)
 
 ```python
 # List with direct filter parameters
-filtered_profiles = decryption_profiles.list(
+filtered_profiles = client.decryption_profile.list(
     folder='Texas',
     types=['forward']
 )
@@ -235,7 +234,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_profiles = decryption_profiles.list(**list_params)
+filtered_profiles = client.decryption_profile.list(**list_params)
 ```
 
 </div>
@@ -323,13 +322,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the DecryptionProfile object with a custom max_limit
+# Initialize the client with a custom max_limit for decryption profiles
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-profile_client = DecryptionProfile(api_client=client, max_limit=4321)
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    decryption_profile_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_profiles = profile_client.list(folder='Texas')
+all_profiles = client.decryption_profile.list(folder='Texas')
 
 # 'all_profiles' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -345,7 +349,7 @@ all_profiles = profile_client.list(folder='Texas')
 ```python
 # Delete by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-decryption_profiles.delete(profile_id)
+client.decryption_profile.delete(profile_id)
 ```
 
 </div>
@@ -367,8 +371,8 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = decryption_profiles.commit(**commit_params)
+# Commit the changes directly using the client
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -382,12 +386,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = decryption_profiles.get_job_status(result.job_id)
+# Get status of specific job using the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = decryption_profiles.list_jobs(limit=10)
+# List recent jobs using the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -423,18 +427,18 @@ try:
         }
     }
 
-    # Create the profile
-    new_profile = decryption_profiles.create(profile_config)
+    # Create the profile using the client
+    new_profile = client.decryption_profile.create(profile_config)
 
-    # Commit changes
-    result = decryption_profiles.commit(
+    # Commit changes using the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test profile",
         sync=True
     )
 
-    # Check job status
-    status = decryption_profiles.get_job_status(result.job_id)
+    # Check job status using the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid profile data: {e.message}")
@@ -466,12 +470,11 @@ except MissingQueryParameterError as e:
     - Implement proper revocation
     - Document certificate policies
 
-3. **Container Management**
-    - Use consistent container names
-    - Validate container existence
-    - Group related profiles
-    - Maintain clear hierarchy
-    - Document container structure
+3. **Client Usage**
+    - Use the unified client interface (`client.decryption_profile`) for simpler code
+    - Perform commits directly on the client (`client.commit()`)
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
+    - Initialize the client once and reuse across different object types
 
 4. **Performance**
     - Monitor resource usage

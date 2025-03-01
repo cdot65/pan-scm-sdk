@@ -75,6 +75,24 @@ EDLs of various types including IP, Domain, URL, IMSI, and IMEI lists with confi
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Access the external_dynamic_lists module directly through the client
+# client.external_dynamic_lists is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.objects import ExternalDynamicLists
 
@@ -88,8 +106,6 @@ client = Scm(
 # Initialize EDL object
 edls = ExternalDynamicLists(client)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -122,7 +138,7 @@ ip_edl_config = {
 }
 
 # Create IP EDL
-ip_edl = edls.create(ip_edl_config)
+ip_edl = client.external_dynamic_lists.create(ip_edl_config)
 
 # Domain-based EDL with hourly updates
 domain_edl_config = {
@@ -141,7 +157,7 @@ domain_edl_config = {
 }
 
 # Create domain EDL
-domain_edl = edls.create(domain_edl_config)
+domain_edl = client.external_dynamic_lists.create(domain_edl_config)
 ```
 
 </div>
@@ -154,11 +170,11 @@ domain_edl = edls.create(domain_edl_config)
 
 ```python
 # Fetch by name and folder
-edl = edls.fetch(name="malicious-ips", folder="Texas")
+edl = client.external_dynamic_lists.fetch(name="malicious-ips", folder="Texas")
 print(f"Found EDL: {edl.name}")
 
 # Get by ID
-edl_by_id = edls.get(edl.id)
+edl_by_id = client.external_dynamic_lists.get(edl.id)
 print(f"Retrieved EDL: {edl_by_id.name}")
 ```
 
@@ -172,7 +188,7 @@ print(f"Retrieved EDL: {edl_by_id.name}")
 
 ```python
 # Fetch existing EDL
-existing_edl = edls.fetch(name="malicious-ips", folder="Texas")
+existing_edl = client.external_dynamic_lists.fetch(name="malicious-ips", folder="Texas")
 
 # Update attributes
 existing_edl.description = "Updated malicious IP list"
@@ -181,7 +197,7 @@ existing_edl.type.ip.recurring = {
 }
 
 # Perform update
-updated_edl = edls.update(existing_edl)
+updated_edl = client.external_dynamic_lists.update(existing_edl)
 ```
 
 </div>
@@ -194,7 +210,7 @@ updated_edl = edls.update(existing_edl)
 
 ```python
 # List with direct filter parameters
-filtered_edls = edls.list(
+filtered_edls = client.external_dynamic_lists.list(
    folder='Texas',
    types=['ip', 'domain']
 )
@@ -214,7 +230,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_edls = edls.list(**list_params)
+filtered_edls = client.external_dynamic_lists.list(**list_params)
 ```
 
 </div>
@@ -227,7 +243,7 @@ filtered_edls = edls.list(**list_params)
 
 ```python
 # Only return edls defined exactly in 'Texas'
-exact_edls = edls.list(
+exact_edls = client.external_dynamic_lists.list(
    folder='Texas',
    exact_match=True
 )
@@ -236,7 +252,7 @@ for app in exact_edls:
    print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all edls from the 'All' folder
-no_all_edls = edls.list(
+no_all_edls = client.external_dynamic_lists.list(
    folder='Texas',
    exclude_folders=['All']
 )
@@ -246,7 +262,7 @@ for app in no_all_edls:
    print(f"Filtered out 'All': {app.name}")
 
 # Exclude edls that come from 'default' snippet
-no_default_snippet = edls.list(
+no_default_snippet = client.external_dynamic_lists.list(
    folder='Texas',
    exclude_snippets=['default']
 )
@@ -256,7 +272,7 @@ for app in no_default_snippet:
    print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude edls associated with 'DeviceA'
-no_deviceA = edls.list(
+no_deviceA = client.external_dynamic_lists.list(
    folder='Texas',
    exclude_devices=['DeviceA']
 )
@@ -266,7 +282,7 @@ for app in no_deviceA:
    print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = edls.list(
+combined_filters = client.external_dynamic_lists.list(
    folder='Texas',
    exact_match=True,
    exclude_folders=['All'],
@@ -289,13 +305,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the ExternalDynamicLists object with a custom max_limit
+# Initialize the ScmClient with a custom max_limit for EDLs
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-edls_client = ExternalDynamicLists(api_client=client, max_limit=4321)
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    external_dynamic_lists_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_edls = edls_client.list(folder='Texas')
+all_edls = client.external_dynamic_lists.list(folder='Texas')
 
 # 'all_edls' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -311,7 +332,7 @@ all_edls = edls_client.list(folder='Texas')
 ```python
 # Delete by ID
 edl_id = "123e4567-e89b-12d3-a456-426655440000"
-edls.delete(edl_id)
+client.external_dynamic_lists.delete(edl_id)
 ```
 
 </div>
@@ -333,8 +354,9 @@ commit_params = {
    "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = edls.commit(**commit_params)
+# Commit the changes directly on the client
+# Note: All commit operations should be performed on the client directly
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -348,12 +370,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = edls.get_job_status(result.job_id)
+# Get status of specific job directly on the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = edls.list_jobs(limit=10)
+# List recent jobs directly on the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -367,12 +389,20 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
    InvalidObjectError,
    MissingQueryParameterError,
    NameNotUniqueError,
    ObjectNotPresentError,
    ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -393,18 +423,18 @@ edl_config = {
    }
 }
 
-# Create the EDL
-new_edl = edls.create(edl_config)
+# Create the EDL using the unified client
+new_edl = client.external_dynamic_lists.create(edl_config)
 
-# Commit changes
-result = edls.commit(
+# Commit changes directly on the client
+result = client.commit(
    folders=["Texas"],
    description="Added test EDL",
    sync=True
 )
 
-# Check job status
-status = edls.get_job_status(result.job_id)
+# Check job status on the client
+status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
    print(f"Invalid EDL data: {e.message}")
@@ -422,34 +452,41 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **EDL Configuration**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access EDL operations via `client.external_dynamic_lists` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `external_dynamic_lists_max_limit`
+
+2. **EDL Configuration**
     - Use descriptive names
     - Set appropriate update intervals
     - Configure authentication when needed
     - Validate source URLs
     - Monitor update status
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container
     - Use consistent container names
     - Validate container existence
     - Group related EDLs
 
-3. **Update Scheduling**
+4. **Update Scheduling**
     - Choose appropriate intervals
     - Consider source update frequency
     - Stagger updates for multiple EDLs
     - Monitor update success
     - Handle failures gracefully
 
-4. **Performance**
+5. **Performance**
     - Use appropriate pagination
     - Cache frequently accessed EDLs
     - Monitor EDL sizes
     - Consider update impact
     - Implement retry logic
 
-5. **Security**
+6. **Security**
     - Validate source URLs
     - Use HTTPS where possible
     - Secure credentials

@@ -82,6 +82,24 @@ definitions that specify network protocols and ports for use in security policie
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the service module directly through the client
+# client.service is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.objects import Service
 
@@ -95,8 +113,6 @@ client = Scm(
 # Initialize Service object
 services = Service(client)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -125,7 +141,7 @@ tcp_service = {
 }
 
 # Create TCP service
-tcp_service_obj = services.create(tcp_service)
+tcp_service_obj = client.service.create(tcp_service)
 
 # UDP service configuration
 udp_service = {
@@ -144,7 +160,7 @@ udp_service = {
 }
 
 # Create UDP service
-udp_service_obj = services.create(udp_service)
+udp_service_obj = client.service.create(udp_service)
 ```
 
 </div>
@@ -157,11 +173,11 @@ udp_service_obj = services.create(udp_service)
 
 ```python
 # Fetch by name and folder
-service = services.fetch(name="web-service", folder="Texas")
+service = client.service.fetch(name="web-service", folder="Texas")
 print(f"Found service: {service.name}")
 
 # Get by ID
-service_by_id = services.get(service.id)
+service_by_id = client.service.get(service.id)
 print(f"Protocol: {'TCP' if service_by_id.protocol.tcp else 'UDP'}")
 if service_by_id.protocol.tcp:
     print(f"Ports: {service_by_id.protocol.tcp.port}")
@@ -177,7 +193,7 @@ if service_by_id.protocol.tcp:
 
 ```python
 # Fetch existing service
-existing_service = services.fetch(name="web-service", folder="Texas")
+existing_service = client.service.fetch(name="web-service", folder="Texas")
 
 # Update ports and timeouts
 if existing_service.protocol.tcp:
@@ -189,7 +205,7 @@ existing_service.description = "Updated web service ports"
 existing_service.tag = ["Web", "Production", "Updated"]
 
 # Perform update
-updated_service = services.update(existing_service)
+updated_service = client.service.update(existing_service)
 ```
 
 </div>
@@ -202,7 +218,7 @@ updated_service = services.update(existing_service)
 
 ```python
 # List with direct filter parameters
-filtered_services = services.list(
+filtered_services = client.service.list(
     folder='Texas',
     protocols=['tcp'],
     tags=['Production']
@@ -224,7 +240,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_services = services.list(**list_params)
+filtered_services = client.service.list(**list_params)
 ```
 
 </div>
@@ -250,7 +266,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return services defined exactly in 'Texas'
-exact_services = services.list(
+exact_services = client.service.list(
    folder='Texas',
    exact_match=True
 )
@@ -259,7 +275,7 @@ for app in exact_services:
    print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all services from the 'All' folder
-no_all_services = services.list(
+no_all_services = client.service.list(
    folder='Texas',
    exclude_folders=['All']
 )
@@ -269,7 +285,7 @@ for app in no_all_services:
    print(f"Filtered out 'All': {app.name}")
 
 # Exclude services that come from 'default' snippet
-no_default_snippet = services.list(
+no_default_snippet = client.service.list(
    folder='Texas',
    exclude_snippets=['default']
 )
@@ -279,7 +295,7 @@ for app in no_default_snippet:
    print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude services associated with 'DeviceA'
-no_deviceA = services.list(
+no_deviceA = client.service.list(
    folder='Texas',
    exclude_devices=['DeviceA']
 )
@@ -289,7 +305,7 @@ for app in no_deviceA:
    print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = services.list(
+combined_filters = client.service.list(
    folder='Texas',
    exact_match=True,
    exclude_folders=['All'],
@@ -312,13 +328,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the Service object with a custom max_limit
+# Initialize the ScmClient with a custom max_limit for service objects
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-service_client = Service(api_client=client, max_limit=4321)
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    service_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_services = service_client.list(folder='Texas')
+all_services = client.service.list(folder='Texas')
 
 # 'all_services' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -334,7 +355,7 @@ all_services = service_client.list(folder='Texas')
 ```python
 # Delete by ID
 service_id = "123e4567-e89b-12d3-a456-426655440000"
-services.delete(service_id)
+client.service.delete(service_id)
 ```
 
 </div>
@@ -356,8 +377,9 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = services.commit(**commit_params)
+# Commit the changes directly on the client
+# Note: All commit operations should be performed on the client directly
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -371,12 +393,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = services.get_job_status(result.job_id)
+# Get status of specific job directly on the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = services.list_jobs(limit=10)
+# List recent jobs directly on the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -390,12 +412,20 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     NameNotUniqueError,
     ObjectNotPresentError,
     ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -415,18 +445,18 @@ try:
         "tag": ["Test"]
     }
 
-    # Create the service
-    new_service = services.create(service_config)
+    # Create the service using the unified client
+    new_service = client.service.create(service_config)
 
-    # Commit changes
-    result = services.commit(
+    # Commit changes directly on the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test service",
         sync=True
     )
 
-    # Check job status
-    status = services.get_job_status(result.job_id)
+    # Check job status on the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid service data: {e.message}")
@@ -444,33 +474,40 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Protocol Configuration**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access service operations via `client.service` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets
+
+2. **Protocol Configuration**
     - Define clear port ranges
     - Use appropriate timeouts
     - Document protocol choices
     - Consider service dependencies
     - Validate port conflicts
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container
     - Use consistent container names
     - Validate container existence
     - Group related services
 
-3. **Error Handling**
+4. **Error Handling**
     - Validate input data
     - Handle specific exceptions
     - Log error details
     - Monitor commit status
     - Track job completion
 
-4. **Performance**
+5. **Performance**
     - Use appropriate pagination
     - Cache frequently accessed services
     - Implement proper retry logic
     - Monitor timeout settings
 
-5. **Security**
+6. **Security**
     - Follow least privilege principle
     - Validate port ranges
     - Document security implications

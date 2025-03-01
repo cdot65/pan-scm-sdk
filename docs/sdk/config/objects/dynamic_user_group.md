@@ -69,6 +69,24 @@ The `DynamicUserGroup` class provides functionality to manage dynamic user group
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the dynamic_user_group module directly through the client
+# client.dynamic_user_group is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.objects import DynamicUserGroup
 
@@ -82,8 +100,6 @@ client = Scm(
 # Initialize DynamicUserGroup object
 dynamic_user_groups = DynamicUserGroup(client)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -104,7 +120,7 @@ dug_config = {
 }
 
 # Create the dynamic user group object
-dug = dynamic_user_groups.create(dug_config)
+dug = client.dynamic_user_group.create(dug_config)
 print(f"Created dynamic user group: {dug.name} with ID: {dug.id}")
 
 # Create another dynamic user group with different filter
@@ -116,7 +132,7 @@ another_dug_config = {
 }
 
 # Create the dynamic user group object
-another_dug = dynamic_user_groups.create(another_dug_config)
+another_dug = client.dynamic_user_group.create(another_dug_config)
 ```
 
 </div>
@@ -129,11 +145,11 @@ another_dug = dynamic_user_groups.create(another_dug_config)
 
 ```python
 # Fetch by name and folder
-dug = dynamic_user_groups.fetch(name="high_risk_users", folder="Security")
+dug = client.dynamic_user_group.fetch(name="high_risk_users", folder="Security")
 print(f"Found dynamic user group: {dug.name}")
 
 # Get by ID
-dug_by_id = dynamic_user_groups.get(dug.id)
+dug_by_id = client.dynamic_user_group.get(dug.id)
 print(f"Retrieved dynamic user group: {dug_by_id.name}")
 ```
 
@@ -147,7 +163,7 @@ print(f"Retrieved dynamic user group: {dug_by_id.name}")
 
 ```python
 # Fetch existing dynamic user group
-existing_dug = dynamic_user_groups.fetch(name="high_risk_users", folder="Security")
+existing_dug = client.dynamic_user_group.fetch(name="high_risk_users", folder="Security")
 
 # Update specific attributes
 existing_dug.description = "Users with high risk assessment score"
@@ -155,7 +171,7 @@ existing_dug.filter = "tag.criticality.high or tag.risk_score.gt.80"
 existing_dug.tag = ["RiskManagement", "Automation", "HighPriority"]
 
 # Perform update
-updated_dug = dynamic_user_groups.update(existing_dug)
+updated_dug = client.dynamic_user_group.update(existing_dug)
 ```
 
 </div>
@@ -168,14 +184,14 @@ updated_dug = dynamic_user_groups.update(existing_dug)
 
 ```python
 # List dynamic user groups in the Security folder
-all_dugs = dynamic_user_groups.list(folder='Security')
+all_dugs = client.dynamic_user_group.list(folder='Security')
 
 # Process results
 for dug in all_dugs:
    print(f"Name: {dug.name}, Filter: {dug.filter}")
 
 # Pass filters directly into the list method
-filtered_dugs = dynamic_user_groups.list(
+filtered_dugs = client.dynamic_user_group.list(
      folder='Security',
      tags=['Automation']
 )
@@ -191,7 +207,7 @@ list_params = {
 }
 
 # List dynamic user groups with filters as kwargs
-filtered_dugs = dynamic_user_groups.list(**list_params)
+filtered_dugs = client.dynamic_user_group.list(**list_params)
 
 # Process results
 for dug in filtered_dugs:
@@ -221,7 +237,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return dynamic user groups defined exactly in 'Security'
-exact_dugs = dynamic_user_groups.list(
+exact_dugs = client.dynamic_user_group.list(
    folder='Security',
    exact_match=True
 )
@@ -230,7 +246,7 @@ for dug in exact_dugs:
    print(f"Exact match: {dug.name} in {dug.folder}")
 
 # Exclude all dynamic user groups from the 'All' folder
-no_all_dugs = dynamic_user_groups.list(
+no_all_dugs = client.dynamic_user_group.list(
    folder='Security',
    exclude_folders=['All']
 )
@@ -240,7 +256,7 @@ for dug in no_all_dugs:
    print(f"Filtered out 'All': {dug.name}")
 
 # Exclude dynamic user groups that come from 'default' snippet
-no_default_snippet = dynamic_user_groups.list(
+no_default_snippet = client.dynamic_user_group.list(
    folder='Security',
    exclude_snippets=['default']
 )
@@ -250,7 +266,7 @@ for dug in no_default_snippet:
    print(f"Filtered out 'default' snippet: {dug.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = dynamic_user_groups.list(
+combined_filters = client.dynamic_user_group.list(
    folder='Security',
    exact_match=True,
    exclude_folders=['All'],
@@ -275,13 +291,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the DynamicUserGroup object with a custom max_limit
+# Initialize the ScmClient with a custom max_limit for dynamic user groups
 # This will retrieve up to 4000 objects per API call, up to the API limit of 5000.
-dug_client = DynamicUserGroup(api_client=client, max_limit=4000)
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    dynamic_user_group_max_limit=4000
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_dugs = dug_client.list(folder='Security')
+all_dugs = client.dynamic_user_group.list(folder='Security')
 
 # 'all_dugs' contains all objects from 'Security', fetched in chunks of up to 4000 at a time.
 ```
@@ -297,7 +318,7 @@ all_dugs = dug_client.list(folder='Security')
 ```python
 # Delete by ID
 dug_id = "123e4567-e89b-12d3-a456-426655440000"
-dynamic_user_groups.delete(dug_id)
+client.dynamic_user_group.delete(dug_id)
 ```
 
 </div>
@@ -319,8 +340,9 @@ commit_params = {
    "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = dynamic_user_groups.commit(**commit_params)
+# Commit the changes directly on the client
+# Note: All commit operations should be performed on the client directly
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -334,12 +356,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = dynamic_user_groups.get_job_status(result.job_id)
+# Get status of specific job directly on the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = dynamic_user_groups.list_jobs(limit=10)
+# List recent jobs directly on the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -353,11 +375,19 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
    InvalidObjectError,
    MissingQueryParameterError,
    NameNotUniqueError,
    ObjectNotPresentError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -370,18 +400,18 @@ try:
       "tag": ["Test"]
    }
    
-   # Create the dynamic user group
-   new_dug = dynamic_user_groups.create(dug_config)
+   # Create the dynamic user group using the unified client
+   new_dug = client.dynamic_user_group.create(dug_config)
    
-   # Commit changes
-   result = dynamic_user_groups.commit(
+   # Commit changes directly on the client
+   result = client.commit(
       folders=["Security"],
       description="Added test dynamic user group",
       sync=True
    )
    
-   # Check job status
-   status = dynamic_user_groups.get_job_status(result.job_id)
+   # Check job status on the client
+   status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
    print(f"Invalid dynamic user group data: {e.message}")
@@ -397,30 +427,37 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Container Management**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access dynamic user group operations via `client.dynamic_user_group` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `dynamic_user_group_max_limit`
+
+2. **Container Management**
     - Always specify exactly one container (folder, snippet, or device)
     - Use consistent container names across operations
     - Validate container existence before operations
 
-2. **Error Handling**
+3. **Error Handling**
     - Implement comprehensive error handling for all operations
     - Check job status after commits
     - Handle specific exceptions before generic ones
     - Log error details for troubleshooting
 
-3. **Filter Expressions**
+4. **Filter Expressions**
     - Ensure filter expressions follow the required syntax
     - Test filter expressions before implementing in production
     - Document filter expressions for future maintenance
     - Use consistent naming conventions for tags referenced in filters
 
-4. **Performance**
+5. **Performance**
     - Reuse client instances
     - Use appropriate pagination for list operations
     - Implement proper retry mechanisms
     - Cache frequently accessed objects
 
-5. **Security**
+6. **Security**
     - Follow the least privilege principle
     - Validate input data
     - Use secure connection settings

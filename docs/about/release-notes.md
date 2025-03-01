@@ -1,5 +1,22 @@
+## Version 0.3.14
+
+Released: February 28, 2025
+
+### Added
+- **Unified Client Interface**: New attribute-based access pattern for services (e.g., `client.address.create()` instead of creating separate service instances)
+- **ScmClient Class**: Added as an alias for the Scm class with identical functionality but more descriptive name
+- **Comprehensive Tests**: Added test suite for the unified client functionality
+- **Enhanced Documentation**: Updated documentation to showcase both traditional and unified client patterns
+
+### Improved
+- **Developer Experience**: Streamlined API usage with fewer imports and less code
+- **Token Refresh Handling**: Unified token refresh across all service operations
+
 ## Version 0.3.13
 
+Released: February 22, 2025
+
+### Added
 - Added support for HTTP server profiles.
 
 ## Version 0.3.12

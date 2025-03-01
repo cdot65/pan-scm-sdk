@@ -73,7 +73,6 @@ that can be used to organize and manage collections of services for security pol
 
 ```python
 from scm.client import Scm
-from scm.config.objects import ServiceGroup
 
 # Initialize client
 client = Scm(
@@ -82,8 +81,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize ServiceGroup object
-service_groups = ServiceGroup(client)
+# Access service groups directly through the client
+# No need to initialize a separate ServiceGroup object
 ```
 
 </div>
@@ -105,8 +104,8 @@ basic_group = {
     "tag": ["Web"]
 }
 
-# Create basic group
-basic_group_obj = service_groups.create(basic_group)
+# Create basic group using the client
+basic_group_obj = client.service_group.create(basic_group)
 
 # Extended service group configuration
 extended_group = {
@@ -117,7 +116,7 @@ extended_group = {
 }
 
 # Create extended group
-extended_group_obj = service_groups.create(extended_group)
+extended_group_obj = client.service_group.create(extended_group)
 ```
 
 </div>
@@ -130,11 +129,11 @@ extended_group_obj = service_groups.create(extended_group)
 
 ```python
 # Fetch by name and folder
-group = service_groups.fetch(name="web-services", folder="Texas")
+group = client.service_group.fetch(name="web-services", folder="Texas")
 print(f"Found group: {group.name}")
 
 # Get by ID
-group_by_id = service_groups.get(group.id)
+group_by_id = client.service_group.get(group.id)
 print(f"Retrieved group: {group_by_id.name}")
 print(f"Members: {', '.join(group_by_id.members)}")
 ```
@@ -149,14 +148,14 @@ print(f"Members: {', '.join(group_by_id.members)}")
 
 ```python
 # Fetch existing group
-existing_group = service_groups.fetch(name="web-services", folder="Texas")
+existing_group = client.service_group.fetch(name="web-services", folder="Texas")
 
 # Update members
 existing_group.members = ["HTTP", "HTTPS", "HTTP-8080"]
 existing_group.tag = ["Web", "Updated"]
 
 # Perform update
-updated_group = service_groups.update(existing_group)
+updated_group = client.service_group.update(existing_group)
 ```
 
 </div>
@@ -169,7 +168,7 @@ updated_group = service_groups.update(existing_group)
 
 ```python
 # List with direct filter parameters
-filtered_groups = service_groups.list(
+filtered_groups = client.service_group.list(
     folder='Texas',
     values=['HTTP', 'HTTPS'],
     tags=['Production']
@@ -188,7 +187,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_groups = service_groups.list(**list_params)
+filtered_groups = client.service_group.list(**list_params)
 ```
 
 </div>
@@ -276,13 +275,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the ServiceGroup object with a custom max_limit
+# Initialize the client with a custom max_limit for service groups
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-service_group_client = ServiceGroup(api_client=client, max_limit=4321)
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    service_group_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_groups = service_group_client.list(folder='Texas')
+all_groups = client.service_group.list(folder='Texas')
 
 # 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -298,7 +302,7 @@ all_groups = service_group_client.list(folder='Texas')
 ```python
 # Delete by ID
 group_id = "123e4567-e89b-12d3-a456-426655440000"
-service_groups.delete(group_id)
+client.service_group.delete(group_id)
 ```
 
 </div>
@@ -320,8 +324,8 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = service_groups.commit(**commit_params)
+# Commit the changes directly using the client
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -335,12 +339,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = service_groups.get_job_status(result.job_id)
+# Get status of specific job using the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = service_groups.list_jobs(limit=10)
+# List recent jobs using the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -371,18 +375,18 @@ try:
         "tag": ["Test"]
     }
 
-    # Create the group
-    new_group = service_groups.create(group_config)
+    # Create the group using the client
+    new_group = client.service_group.create(group_config)
 
-    # Commit changes
-    result = service_groups.commit(
+    # Commit changes using the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test group",
         sync=True
     )
 
-    # Check job status
-    status = service_groups.get_job_status(result.job_id)
+    # Check job status using the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid group data: {e.message}")
@@ -413,12 +417,11 @@ except MissingQueryParameterError as e:
     - Validate container existence
     - Group related service groups
 
-3. **Error Handling**
-    - Implement comprehensive error handling
-    - Check job status after commits
-    - Handle specific exceptions
-    - Log error details
-    - Monitor commit status
+3. **Client Usage**
+    - Use the unified client interface (`client.service_group`) for simpler code
+    - Perform commits directly on the client (`client.commit()`)
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
+    - Initialize the client once and reuse across different object types
 
 4. **Performance**
     - Use appropriate pagination

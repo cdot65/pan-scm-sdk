@@ -86,23 +86,26 @@ The `HTTPServerProfile` class inherits from the `BaseObject` class and provides 
 <div class="termy">
 
 ```python
-# Import the client and HTTP server profile class
-from scm.client import Client
-from scm.config.objects import HTTPServerProfile
+# Import the client
+from scm.client import Scm
 
 # Create API client instance
-client = Client(
+client = Scm(
     client_id="your-client-id",
     client_secret="your-client-secret",
-    refresh_token="your-refresh-token",
-    scope="tsg_id:your-tenant-id",
+    tsg_id="your-tenant-id",
 )
 
-# Initialize HTTPServerProfile object with the client
-http_profiles = HTTPServerProfile(client)
+# Access HTTP server profiles directly through the client
+# No need to initialize a separate HTTPServerProfile object
 
-# Default max_limit is 2500, but you can customize it (1-5000)
-http_profiles = HTTPServerProfile(client, max_limit=1000)
+# You can customize max_limit for HTTP server profiles when initializing the client
+client = Scm(
+    client_id="your-client-id",
+    client_secret="your-client-secret",
+    tsg_id="your-tenant-id",
+    http_server_profile_max_limit=1000  # Default max_limit is 2500 (1-5000)
+)
 ```
 
 </div>
@@ -115,7 +118,7 @@ http_profiles = HTTPServerProfile(client, max_limit=1000)
 
 ```python
 # Create a basic HTTP server profile with a single HTTP server
-http_profile = http_profiles.create({
+http_profile = client.http_server_profile.create({
     "name": "my-http-profile",
     "server": [
         {
@@ -129,7 +132,7 @@ http_profile = http_profiles.create({
 })
 
 # Create a profile with HTTPS server and tag registration
-https_profile = http_profiles.create({
+https_profile = client.http_server_profile.create({
     "name": "secure-logging-profile",
     "description": "HTTPS logging server with TLS 1.2",
     "server": [
@@ -160,7 +163,7 @@ print(f"Created profile with ID: {https_profile.id}")
 ```python
 # Get profile by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-http_profile = http_profiles.get(profile_id)
+http_profile = client.http_server_profile.get(profile_id)
 
 # Access profile attributes
 print(f"Profile Name: {http_profile.name}")
@@ -169,7 +172,7 @@ for server in http_profile.server:
     print(f"  - {server.name}: {server.protocol}://{server.address}:{server.port}")
 
 # Fetch profile by name (requires exactly one container parameter)
-profile_by_name = http_profiles.fetch(
+profile_by_name = client.http_server_profile.fetch(
     name="secure-logging-profile",
     folder="Prisma Access"
 )
@@ -185,7 +188,7 @@ profile_by_name = http_profiles.fetch(
 from scm.models.objects import HTTPServerProfileUpdateModel, ServerModel
 
 # First, get the current profile
-existing_profile = http_profiles.get("123e4567-e89b-12d3-a456-426655440000")
+existing_profile = client.http_server_profile.get("123e4567-e89b-12d3-a456-426655440000")
 
 # Create an update model with modified fields
 update_data = HTTPServerProfileUpdateModel(
@@ -210,7 +213,7 @@ update_data = HTTPServerProfileUpdateModel(
 )
 
 # Update the profile
-updated_profile = http_profiles.update(update_data)
+updated_profile = client.http_server_profile.update(update_data)
 ```
 
 </div>
@@ -221,28 +224,28 @@ updated_profile = http_profiles.update(update_data)
 
 ```python
 # List all profiles in a folder
-all_profiles = http_profiles.list(folder="Prisma Access")
+all_profiles = client.http_server_profile.list(folder="Prisma Access")
 
 # List profiles with exact container match
-exact_profiles = http_profiles.list(
+exact_profiles = client.http_server_profile.list(
     folder="Prisma Access",
     exact_match=True
 )
 
 # List profiles with filtering
-http_only_profiles = http_profiles.list(
+http_only_profiles = client.http_server_profile.list(
     folder="Prisma Access",
     protocol=["HTTP"]  # Only profiles with HTTP servers
 )
 
 # List profiles with tag registration enabled
-tagged_profiles = http_profiles.list(
+tagged_profiles = client.http_server_profile.list(
     folder="Prisma Access",
     tag_registration=True
 )
 
 # List profiles with exclusions
-filtered_profiles = http_profiles.list(
+filtered_profiles = client.http_server_profile.list(
     folder="Prisma Access",
     exclude_folders=["Temporary", "Test"]
 )
@@ -261,18 +264,19 @@ for profile in filtered_profiles:
 <div class="termy">
 
 ```python
-# Update the maximum limit for pagination
-http_profiles.max_limit = 1000
+# Create client with custom pagination limit for HTTP server profiles
+client = Scm(
+    client_id="your-client-id",
+    client_secret="your-client-secret",
+    tsg_id="your-tenant-id",
+    http_server_profile_max_limit=1000
+)
 
-# List profiles with the new pagination limit
-profiles = http_profiles.list(folder="Prisma Access")
-print(f"Retrieved {len(profiles)} profiles with max_limit={http_profiles.max_limit}")
+# List profiles with the custom pagination limit
+profiles = client.http_server_profile.list(folder="Prisma Access")
+print(f"Retrieved {len(profiles)} profiles")
 
-# Try to set an invalid limit (will raise InvalidObjectError)
-try:
-    http_profiles.max_limit = 10000  # Exceeds ABSOLUTE_MAX_LIMIT of 5000
-except Exception as e:
-    print(f"Error: {str(e)}")
+# The max_limit is automatically capped at 5000 (the API's maximum)
 ```
 
 </div>
@@ -284,7 +288,7 @@ except Exception as e:
 ```python
 # Delete a profile by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-http_profiles.delete(profile_id)
+client.http_server_profile.delete(profile_id)
 print(f"Profile {profile_id} deleted successfully")
 ```
 
@@ -299,7 +303,7 @@ from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 
 try:
     # Attempt to list profiles with invalid container parameters
-    profiles = http_profiles.list()  # No container specified
+    profiles = client.http_server_profile.list()  # No container specified
 except InvalidObjectError as e:
     print(f"Invalid object error: {e.message}")
     print(f"Error code: {e.error_code}")
@@ -308,13 +312,13 @@ except InvalidObjectError as e:
 
 try:
     # Attempt to fetch a profile with an empty folder name
-    profile = http_profiles.fetch(name="my-profile", folder="")
+    profile = client.http_server_profile.fetch(name="my-profile", folder="")
 except MissingQueryParameterError as e:
     print(f"Missing parameter error: {e.message}")
 
 try:
     # Attempt to filter by tag_registration with invalid type
-    profiles = http_profiles.list(
+    profiles = client.http_server_profile.list(
         folder="Prisma Access",
         tag_registration="yes"  # Should be boolean
     )
@@ -326,6 +330,12 @@ except InvalidObjectError as e:
 
 ## Best Practices
 
+### Client Usage
+
+- Use the unified client interface (`client.http_server_profile`) for simpler code
+- Initialize the client once and reuse across different object types
+- Set appropriate max_limit parameters during client initialization
+
 ### Container Management
 
 - Always specify exactly one container type (folder, snippet, or device) in operations
@@ -334,7 +344,7 @@ except InvalidObjectError as e:
 
 ### Performance
 
-- Set an appropriate `max_limit` based on your environment size and API response time
+- Set an appropriate `http_server_profile_max_limit` when initializing the client
 - Use specific filters to reduce the number of results when listing profiles
 - Use `exact_match=True` when you know the exact container path
 - Consider pagination for large datasets

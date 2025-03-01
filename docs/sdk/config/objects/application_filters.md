@@ -86,6 +86,24 @@ and behaviors.
 <!-- termynal -->
 
 ```python
+    from scm.client import ScmClient
+
+    # Initialize client using the unified client approach
+    client = ScmClient(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id"
+    )
+
+    # Access the application_filters module directly through the client
+    # client.application_filters is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
     from scm.client import Scm
     from scm.config.objects import ApplicationFilters
 
@@ -99,8 +117,6 @@ and behaviors.
     # Initialize ApplicationFilters object
     app_filters = ApplicationFilters(client)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -122,7 +138,7 @@ and behaviors.
     }
 
     # Create high-risk filter
-    high_risk = app_filters.create(high_risk_filter)
+    high_risk = client.application_filters.create(high_risk_filter)
 
     # SaaS applications filter
     saas_filter = {
@@ -134,7 +150,7 @@ and behaviors.
     }
 
     # Create SaaS filter
-    saas = app_filters.create(saas_filter)
+    saas = client.application_filters.create(saas_filter)
 ```
 
 </div>
@@ -147,11 +163,11 @@ and behaviors.
 
 ```python
     # Fetch by name and folder
-    filter_obj = app_filters.fetch(name="high-risk-apps", folder="Texas")
+    filter_obj = client.application_filters.fetch(name="high-risk-apps", folder="Texas")
     print(f"Found filter: {filter_obj.name}")
 
     # Get by ID
-    filter_by_id = app_filters.get(filter_obj.id)
+    filter_by_id = client.application_filters.get(filter_obj.id)
     print(f"Retrieved filter: {filter_by_id.name}")
     print(f"Risk levels: {filter_by_id.risk}")
 ```
@@ -166,7 +182,7 @@ and behaviors.
 
 ```python
     # Fetch existing filter
-    existing_filter = app_filters.fetch(name="high-risk-apps", folder="Texas")
+    existing_filter = client.application_filters.fetch(name="high-risk-apps", folder="Texas")
 
     # Update filter criteria
     existing_filter.risk = [3, 4, 5]
@@ -175,7 +191,7 @@ and behaviors.
     existing_filter.tunnels_other_apps = True
 
     # Perform update
-    updated_filter = app_filters.update(existing_filter)
+    updated_filter = client.application_filters.update(existing_filter)
 ```
 
 </div>
@@ -188,7 +204,7 @@ and behaviors.
 
 ```python
     # List with direct filter parameters
-    filtered_results = app_filters.list(
+    filtered_results = client.application_filters.list(
         folder='Texas',
         category=['business-systems'],
         risk=[4, 5]
@@ -208,7 +224,7 @@ and behaviors.
     }
 
     # List with filters as kwargs
-    filtered_results = app_filters.list(**list_params)
+    filtered_results = client.application_filters.list(**list_params)
 ```
 
 </div>
@@ -221,7 +237,7 @@ and behaviors.
 
 ```python
     # Only return filters defined exactly in 'Texas'
-    exact_filters = app_filters.list(
+    exact_filters = client.application_filters.list(
         folder='Texas',
         exact_match=True
     )
@@ -230,7 +246,7 @@ and behaviors.
         print(f"Exact match: {f.name} in {f.folder}")
 
     # Exclude all filters from the 'All' folder
-    no_all_filters = app_filters.list(
+    no_all_filters = client.application_filters.list(
         folder='Texas',
         exclude_folders=['All']
     )
@@ -240,7 +256,7 @@ and behaviors.
         print(f"Filtered out 'All': {f.name}")
 
     # Exclude filters that come from 'default' snippet
-    no_default_snippet = app_filters.list(
+    no_default_snippet = client.application_filters.list(
         folder='Texas',
         exclude_snippets=['default']
     )
@@ -250,7 +266,7 @@ and behaviors.
         print(f"Filtered out 'default' snippet: {f.name}")
 
     # Exclude filters associated with 'DeviceA'
-    no_deviceA = app_filters.list(
+    no_deviceA = client.application_filters.list(
         folder='Texas',
         exclude_devices=['DeviceA']
     )
@@ -260,7 +276,7 @@ and behaviors.
         print(f"Filtered out 'DeviceA': {f.name}")
 
     # Combine exact_match with multiple exclusions
-    combined_filters = app_filters.list(
+    combined_filters = client.application_filters.list(
         folder='Texas',
         exact_match=True,
         exclude_folders=['All'],
@@ -283,13 +299,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Initialize the ApplicationFilters object with a custom max_limit
+    # Initialize the ScmClient with a custom max_limit for application filters
     # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-    app_filters_client = ApplicationFilters(api_client=client, max_limit=4321)
+    client = ScmClient(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id",
+        application_filters_max_limit=4321
+    )
 
     # Now when we call list(), it will use the specified max_limit for each request
     # while auto-paginating through all available objects.
-    all_filters = app_filters_client.list(folder='Texas')
+    all_filters = client.application_filters.list(folder='Texas')
 
     # 'all_filters' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -305,7 +326,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 ```python
     # Delete by ID
     filter_id = "123e4567-e89b-12d3-a456-426655440000"
-    app_filters.delete(filter_id)
+    client.application_filters.delete(filter_id)
 ```
 
 </div>
@@ -327,8 +348,9 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
         "timeout": 300  # 5 minute timeout
     }
 
-    # Commit the changes
-    result = app_filters.commit(**commit_params)
+    # Commit the changes directly on the client
+    # Note: All commit operations should be performed on the client directly
+    result = client.commit(**commit_params)
 
     print(f"Commit job ID: {result.job_id}")
 ```
@@ -342,12 +364,12 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-    # Get status of specific job
-    job_status = app_filters.get_job_status(result.job_id)
+    # Get status of specific job directly on the client
+    job_status = client.get_job_status(result.job_id)
     print(f"Job status: {job_status.data[0].status_str}")
 
-    # List recent jobs
-    recent_jobs = app_filters.list_jobs(limit=10)
+    # List recent jobs directly on the client
+    recent_jobs = client.list_jobs(limit=10)
     for job in recent_jobs.data:
         print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -361,12 +383,20 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
+    from scm.client import ScmClient
     from scm.exceptions import (
         InvalidObjectError,
         MissingQueryParameterError,
         NameNotUniqueError,
         ObjectNotPresentError,
         ReferenceNotZeroError
+    )
+
+    # Initialize client
+    client = ScmClient(
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        tsg_id="your_tsg_id"
     )
 
     try:
@@ -379,18 +409,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
             "has_known_vulnerabilities": True
         }
 
-        # Create the filter
-        new_filter = app_filters.create(filter_config)
+        # Create the filter using the unified client
+        new_filter = client.application_filters.create(filter_config)
 
-        # Commit changes
-        result = app_filters.commit(
+        # Commit changes directly on the client
+        result = client.commit(
             folders=["Texas"],
             description="Added test filter",
             sync=True
         )
 
-        # Check job status
-        status = app_filters.get_job_status(result.job_id)
+        # Check job status on the client
+        status = client.get_job_status(result.job_id)
 
     except InvalidObjectError as e:
         print(f"Invalid filter data: {e.message}")
@@ -408,34 +438,41 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ## Best Practices
 
-1. **Filter Definition**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access application filters operations via `client.application_filters` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `application_filters_max_limit`
+
+2. **Filter Definition**
     - Use descriptive filter names
     - Combine multiple criteria effectively
     - Keep filters focused and specific
     - Document filter purposes
     - Review and update regularly
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container (folder or snippet)
     - Use consistent container names
     - Validate container existence
     - Group related filters
 
-3. **Performance**
+4. **Performance**
     - Avoid overly broad filters
     - Use specific criteria combinations
     - Consider filter evaluation impact
     - Cache frequently used filters
     - Monitor filter match counts
 
-4. **Security**
+5. **Security**
     - Regularly review risk criteria
     - Update vulnerability flags
     - Monitor malware associations
     - Track certification status
     - Validate SaaS risks
 
-5. **Maintenance**
+6. **Maintenance**
     - Review filter effectiveness
     - Update criteria as needed
     - Remove unused filters

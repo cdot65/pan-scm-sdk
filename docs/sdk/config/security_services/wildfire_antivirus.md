@@ -85,7 +85,6 @@ deleting profiles that define malware analysis settings, file inspection rules, 
 
 ```python
 from scm.client import Scm
-from scm.config.security import WildfireAntivirusProfile
 
 # Initialize client
 client = Scm(
@@ -94,8 +93,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize WildFire Profile object
-wildfire_profiles = WildfireAntivirusProfile(client)
+# Access WildFire profiles directly through the client
+# No need to initialize a separate WildfireAntivirusProfile object
 ```
 
 </div>
@@ -125,8 +124,8 @@ basic_profile = {
     ]
 }
 
-# Create basic profile
-basic_profile_obj = wildfire_profiles.create(basic_profile)
+# Create basic profile using the client
+basic_profile_obj = client.wildfire_antivirus_profile.create(basic_profile)
 
 # Advanced profile with exceptions
 advanced_profile = {
@@ -160,7 +159,7 @@ advanced_profile = {
 }
 
 # Create advanced profile
-advanced_profile_obj = wildfire_profiles.create(advanced_profile)
+advanced_profile_obj = client.wildfire_antivirus_profile.create(advanced_profile)
 ```
 
 </div>
@@ -173,11 +172,11 @@ advanced_profile_obj = wildfire_profiles.create(advanced_profile)
 
 ```python
 # Fetch by name and folder
-profile = wildfire_profiles.fetch(name="basic-profile", folder="Texas")
+profile = client.wildfire_antivirus_profile.fetch(name="basic-profile", folder="Texas")
 print(f"Found profile: {profile.name}")
 
 # Get by ID
-profile_by_id = wildfire_profiles.get(profile.id)
+profile_by_id = client.wildfire_antivirus_profile.get(profile.id)
 print(f"Retrieved profile: {profile_by_id.name}")
 print(f"Number of rules: {len(profile_by_id.rules)}")
 ```
@@ -192,7 +191,7 @@ print(f"Number of rules: {len(profile_by_id.rules)}")
 
 ```python
 # Fetch existing profile
-existing_profile = wildfire_profiles.fetch(name="basic-profile", folder="Texas")
+existing_profile = client.wildfire_antivirus_profile.fetch(name="basic-profile", folder="Texas")
 
 # Update attributes
 existing_profile.description = "Updated profile description"
@@ -209,7 +208,7 @@ new_rule = {
 existing_profile.rules.append(new_rule)
 
 # Perform update
-updated_profile = wildfire_profiles.update(existing_profile)
+updated_profile = client.wildfire_antivirus_profile.update(existing_profile)
 ```
 
 </div>
@@ -222,7 +221,7 @@ updated_profile = wildfire_profiles.update(existing_profile)
 
 ```python
 # List with direct filter parameters
-filtered_profiles = wildfire_profiles.list(
+filtered_profiles = client.wildfire_antivirus_profile.list(
     folder='Texas',
     rules=['basic-rule', 'upload-rule']
 )
@@ -242,7 +241,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_profiles = wildfire_profiles.list(**list_params)
+filtered_profiles = client.wildfire_antivirus_profile.list(**list_params)
 ```
 
 </div>
@@ -268,7 +267,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return wildfire_antivirus defined exactly in 'Texas'
-exact_wildfire_antivirus = wildfire_profiles.list(
+exact_wildfire_antivirus = client.wildfire_antivirus_profile.list(
     folder='Texas',
     exact_match=True
 )
@@ -277,7 +276,7 @@ for app in exact_wildfire_antivirus:
     print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all wildfire_antivirus from the 'All' folder
-no_all_wildfire_antivirus = wildfire_profiles.list(
+no_all_wildfire_antivirus = client.wildfire_antivirus_profile.list(
     folder='Texas',
     exclude_folders=['All']
 )
@@ -287,7 +286,7 @@ for app in no_all_wildfire_antivirus:
     print(f"Filtered out 'All': {app.name}")
 
 # Exclude wildfire_antivirus that come from 'default' snippet
-no_default_snippet = wildfire_profiles.list(
+no_default_snippet = client.wildfire_antivirus_profile.list(
     folder='Texas',
     exclude_snippets=['default']
 )
@@ -297,7 +296,7 @@ for app in no_default_snippet:
     print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude wildfire_antivirus associated with 'DeviceA'
-no_deviceA = wildfire_profiles.list(
+no_deviceA = client.wildfire_antivirus_profile.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
@@ -307,7 +306,7 @@ for app in no_deviceA:
     print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = wildfire_profiles.list(
+combined_filters = client.wildfire_antivirus_profile.list(
     folder='Texas',
     exact_match=True,
     exclude_folders=['All'],
@@ -330,13 +329,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the WildfireAntivirusProfile object with a custom max_limit
+# Initialize the client with a custom max_limit for WildFire profiles
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-profile_client = WildfireAntivirusProfile(api_client=client, max_limit=4321)
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    wildfire_antivirus_profile_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_profiles = profile_client.list(folder='Texas')
+all_profiles = client.wildfire_antivirus_profile.list(folder='Texas')
 
 # 'all_profiles' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -352,7 +356,7 @@ all_profiles = profile_client.list(folder='Texas')
 ```python
 # Delete by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-wildfire_profiles.delete(profile_id)
+client.wildfire_antivirus_profile.delete(profile_id)
 ```
 
 </div>
@@ -374,8 +378,8 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = wildfire_profiles.commit(**commit_params)
+# Commit the changes directly using the client
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -389,12 +393,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = wildfire_profiles.get_job_status(result.job_id)
+# Get status of specific job using the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = wildfire_profiles.list_jobs(limit=10)
+# List recent jobs using the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -433,18 +437,18 @@ try:
         ]
     }
 
-    # Create the profile
-    new_profile = wildfire_profiles.create(profile_config)
+    # Create the profile using the client
+    new_profile = client.wildfire_antivirus_profile.create(profile_config)
 
-    # Commit changes
-    result = wildfire_profiles.commit(
+    # Commit changes using the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test profile",
         sync=True
     )
 
-    # Check job status
-    status = wildfire_profiles.get_job_status(result.job_id)
+    # Check job status using the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid profile data: {e.message}")
@@ -475,21 +479,27 @@ except MissingQueryParameterError as e:
     - Validate container existence
     - Group related profiles
 
-3. **Exception Handling**
+3. **Client Usage**
+    - Use the unified client interface (`client.wildfire_antivirus_profile`) for simpler code
+    - Perform commits directly on the client (`client.commit()`)
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
+    - Initialize the client once and reuse across different object types
+
+4. **Exception Handling**
     - Document all exceptions
     - Review MLAV exceptions regularly
     - Monitor threat exceptions
     - Update exception documentation
     - Implement proper logging
 
-4. **Performance**
+5. **Performance**
     - Minimize rule complexity
     - Use appropriate file types
     - Monitor packet capture impact
     - Implement caching
     - Consider analysis location
 
-5. **Security**
+6. **Security**
     - Follow least privilege
     - Document all changes
     - Review profile access

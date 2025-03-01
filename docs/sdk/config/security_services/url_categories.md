@@ -73,7 +73,6 @@ custom URL categories that can be used in security policies and profiles.
 
 ```python
 from scm.client import Scm
-from scm.config.security import URLCategories
 
 # Initialize client
 client = Scm(
@@ -82,8 +81,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize URLCategories object
-url_categories = URLCategories(client)
+# Access URL categories directly through the client
+# No need to initialize a separate URLCategories object
 ```
 
 </div>
@@ -106,8 +105,8 @@ url_list_config = {
     "folder": "Texas"
 }
 
-# Create URL List category
-url_list = url_categories.create(url_list_config)
+# Create URL List category using the client
+url_list = client.url_categories.create(url_list_config)
 
 # Category Match configuration
 category_match_config = {
@@ -119,7 +118,7 @@ category_match_config = {
 }
 
 # Create Category Match category
-category_match = url_categories.create(category_match_config)
+category_match = client.url_categories.create(category_match_config)
 ```
 
 </div>
@@ -132,11 +131,11 @@ category_match = url_categories.create(category_match_config)
 
 ```python
 # Fetch by name and folder
-category = url_categories.fetch(name="blocked_sites", folder="Texas")
+category = client.url_categories.fetch(name="blocked_sites", folder="Texas")
 print(f"Found category: {category.name}")
 
 # Get by ID
-category_by_id = url_categories.get(category.id)
+category_by_id = client.url_categories.get(category.id)
 print(f"Retrieved category: {category_by_id.name}")
 print(f"URL list: {category_by_id.list}")
 ```
@@ -151,14 +150,14 @@ print(f"URL list: {category_by_id.list}")
 
 ```python
 # Fetch existing category
-existing_category = url_categories.fetch(name="blocked_sites", folder="Texas")
+existing_category = client.url_categories.fetch(name="blocked_sites", folder="Texas")
 
 # Update URL list
 existing_category.list.extend(["newsite.com", "anothersite.com"])
 existing_category.description = "Updated blocked websites list"
 
 # Perform update
-updated_category = url_categories.update(existing_category)
+updated_category = client.url_categories.update(existing_category)
 ```
 
 </div>
@@ -171,7 +170,7 @@ updated_category = url_categories.update(existing_category)
 
 ```python
 # List with direct filter parameters
-filtered_categories = url_categories.list(
+filtered_categories = client.url_categories.list(
     folder='Texas',
     members=['example.com']
 )
@@ -189,7 +188,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_categories = url_categories.list(**list_params)
+filtered_categories = client.url_categories.list(**list_params)
 ```
 
 </div>
@@ -215,7 +214,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return url_categories defined exactly in 'Texas'
-exact_url_categories = url_categories.list(
+exact_url_categories = client.url_categories.list(
     folder='Texas',
     exact_match=True
 )
@@ -224,7 +223,7 @@ for app in exact_url_categories:
     print(f"Exact match: {app.name} in {app.folder}")
 
 # Exclude all url_categories from the 'All' folder
-no_all_url_categories = url_categories.list(
+no_all_url_categories = client.url_categories.list(
     folder='Texas',
     exclude_folders=['All']
 )
@@ -234,7 +233,7 @@ for app in no_all_url_categories:
     print(f"Filtered out 'All': {app.name}")
 
 # Exclude url_categories that come from 'default' snippet
-no_default_snippet = url_categories.list(
+no_default_snippet = client.url_categories.list(
     folder='Texas',
     exclude_snippets=['default']
 )
@@ -244,7 +243,7 @@ for app in no_default_snippet:
     print(f"Filtered out 'default' snippet: {app.name}")
 
 # Exclude url_categories associated with 'DeviceA'
-no_deviceA = url_categories.list(
+no_deviceA = client.url_categories.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
@@ -254,7 +253,7 @@ for app in no_deviceA:
     print(f"Filtered out 'DeviceA': {app.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = url_categories.list(
+combined_filters = client.url_categories.list(
     folder='Texas',
     exact_match=True,
     exclude_folders=['All'],
@@ -277,13 +276,18 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the URLCategories object with a custom max_limit
+# Initialize the client with a custom max_limit for URL categories
 # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-category_client = URLCategories(api_client=client, max_limit=4321)
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    url_categories_max_limit=4321
+)
 
 # Now when we call list(), it will use the specified max_limit for each request
 # while auto-paginating through all available objects.
-all_categories = category_client.list(folder='Texas')
+all_categories = client.url_categories.list(folder='Texas')
 
 # 'all_categories' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
@@ -299,7 +303,7 @@ all_categories = category_client.list(folder='Texas')
 ```python
 # Delete by ID
 category_id = "123e4567-e89b-12d3-a456-426655440000"
-url_categories.delete(category_id)
+client.url_categories.delete(category_id)
 ```
 
 </div>
@@ -321,8 +325,8 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-result = url_categories.commit(**commit_params)
+# Commit the changes directly using the client
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -336,12 +340,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = url_categories.get_job_status(result.job_id)
+# Get status of specific job using the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = url_categories.list_jobs(limit=10)
+# List recent jobs using the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -373,18 +377,18 @@ try:
         "description": "Test URL category"
     }
 
-    # Create the category
-    new_category = url_categories.create(category_config)
+    # Create the category using the client
+    new_category = client.url_categories.create(category_config)
 
-    # Commit changes
-    result = url_categories.commit(
+    # Commit changes using the client
+    result = client.commit(
         folders=["Texas"],
         description="Added test category",
         sync=True
     )
 
-    # Check job status
-    status = url_categories.get_job_status(result.job_id)
+    # Check job status using the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid category data: {e.message}")
@@ -415,19 +419,25 @@ except MissingQueryParameterError as e:
     - Validate container existence
     - Group related categories
 
-3. **Category Types**
+3. **Client Usage**
+    - Use the unified client interface (`client.url_categories`) for simpler code
+    - Perform commits directly on the client (`client.commit()`)
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`) 
+    - Initialize the client once and reuse across different object types
+
+4. **Category Types**
     - Choose appropriate type (URL List vs Category Match)
     - Validate category match patterns
     - Consider URL resolution impact
     - Document type selection rationale
 
-4. **Performance**
+5. **Performance**
     - Use appropriate pagination
     - Cache frequently accessed categories
     - Implement proper retry logic
     - Monitor URL resolution times
 
-5. **Security**
+6. **Security**
     - Follow least privilege principle
     - Validate input URLs
     - Use secure connection settings

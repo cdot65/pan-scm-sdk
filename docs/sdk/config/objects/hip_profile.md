@@ -69,6 +69,25 @@ HIP profiles. HIP profiles define security posture matching criteria that can be
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    hip_profile_max_limit=5000  # Optional: set custom max_limit
+)
+
+# Access the hip_profile module directly through the client
+# client.hip_profile is automatically initialized for you
+```
+
+</div>
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
 from scm.config.objects import HIPProfile
 
@@ -82,8 +101,6 @@ client = Scm(
 # Initialize HIPProfile with custom max_limit
 hip_profiles = HIPProfile(client, max_limit=5000)
 ```
-
-</div>
 
 ## Usage Examples
 
@@ -103,7 +120,7 @@ basic_profile_config = {
 }
 
 # Create basic HIP profile
-basic_profile = hip_profiles.create(basic_profile_config)
+basic_profile = client.hip_profile.create(basic_profile_config)
 
 # HIP profile with complex match expression using AND/OR logic
 complex_profile_config = {
@@ -114,7 +131,7 @@ complex_profile_config = {
 }
 
 # Create complex HIP profile
-complex_profile = hip_profiles.create(complex_profile_config)
+complex_profile = client.hip_profile.create(complex_profile_config)
 
 # HIP profile with negative match expression
 negative_profile_config = {
@@ -125,7 +142,7 @@ negative_profile_config = {
 }
 
 # Create negative match HIP profile
-negative_profile = hip_profiles.create(negative_profile_config)
+negative_profile = client.hip_profile.create(negative_profile_config)
 ```
 
 </div>
@@ -138,11 +155,11 @@ negative_profile = hip_profiles.create(negative_profile_config)
 
 ```python
 # Fetch by name and folder
-hip_profile = hip_profiles.fetch(name="windows-workstations", folder="Shared")
+hip_profile = client.hip_profile.fetch(name="windows-workstations", folder="Shared")
 print(f"Found HIP profile: {hip_profile.name}")
 
 # Get by ID
-hip_by_id = hip_profiles.get(hip_profile.id)
+hip_by_id = client.hip_profile.get(hip_profile.id)
 print(f"Retrieved HIP profile: {hip_by_id.name}")
 print(f"Match expression: {hip_by_id.match}")
 ```
@@ -157,7 +174,7 @@ print(f"Match expression: {hip_by_id.match}")
 
 ```python
 # Fetch existing HIP profile
-existing_profile = hip_profiles.fetch(name="secure-workstations", folder="Shared")
+existing_profile = client.hip_profile.fetch(name="secure-workstations", folder="Shared")
 
 # Create update model with modified match expression
 from scm.models.objects import HIPProfileUpdateModel
@@ -170,7 +187,7 @@ update_model = HIPProfileUpdateModel(
 )
 
 # Perform update
-updated_profile = hip_profiles.update(update_model)
+updated_profile = client.hip_profile.update(update_model)
 print(f"Updated match expression: {updated_profile.match}")
 ```
 
@@ -184,7 +201,7 @@ print(f"Updated match expression: {updated_profile.match}")
 
 ```python
 # List with direct filter parameters
-filtered_profiles = hip_profiles.list(
+filtered_profiles = client.hip_profile.list(
     folder='Shared',
     exact_match=True
 )
@@ -201,7 +218,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_profiles = hip_profiles.list(**list_params)
+filtered_profiles = client.hip_profile.list(**list_params)
 ```
 
 </div>
@@ -215,7 +232,7 @@ filtered_profiles = hip_profiles.list(**list_params)
 ```python
 # Delete by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
-hip_profiles.delete(profile_id)
+client.hip_profile.delete(profile_id)
 ```
 
 </div>
@@ -238,7 +255,7 @@ commit_params = {
 }
 
 # Commit the changes
-result = hip_profiles.commit(**commit_params)
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -253,11 +270,11 @@ print(f"Commit job ID: {result.job_id}")
 
 ```python
 # Get status of specific job
-job_status = hip_profiles.get_job_status(result.job_id)
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
 # List recent jobs
-recent_jobs = hip_profiles.list_jobs(limit=10)
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -271,12 +288,20 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
     NameNotUniqueError,
     ObjectNotPresentError,
     ReferenceNotZeroError
+)
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 try:
@@ -288,18 +313,18 @@ try:
         "match": '"is-win" or "is-mac"'
     }
 
-    # Create the HIP profile
-    new_profile = hip_profiles.create(hip_config)
+    # Create the HIP profile using the unified client
+    new_profile = client.hip_profile.create(hip_config)
 
-    # Commit changes
-    result = hip_profiles.commit(
+    # Commit changes directly on the client
+    result = client.commit(
         folders=["Shared"],
         description="Added test HIP profile",
         sync=True
     )
 
-    # Check job status
-    status = hip_profiles.get_job_status(result.job_id)
+    # Check job status on the client
+    status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
     print(f"Invalid HIP profile data: {e.message}")
@@ -317,35 +342,42 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Match Expression Syntax**
+1. **Client Usage**
+    - Use the unified `ScmClient` approach for simpler code
+    - Access HIP profile operations via `client.hip_profile` property
+    - Perform commit operations directly on the client
+    - Monitor jobs directly on the client
+    - Set appropriate max_limit parameters for large datasets using `hip_profile_max_limit`
+
+2. **Match Expression Syntax**
     - Use quoted object names in match expressions (e.g., `"is-win"`)
     - Combine expressions with boolean operators (`and`, `or`, `not`)
     - Group complex expressions with parentheses
     - Verify HIP objects exist before referencing them
     - Keep expressions simple and maintainable
 
-2. **Container Management**
+3. **Container Management**
     - Always specify exactly one container (folder, snippet, or device)
     - Use consistent container names
     - Validate container existence
     - Group related HIP profiles
     - Consider inheritance patterns
 
-3. **Performance**
+4. **Performance**
     - Set appropriate max_limit values
     - Use pagination for large lists
     - Cache frequently accessed profiles
     - Implement proper retry logic
     - Monitor API response times
 
-4. **Security**
+5. **Security**
     - Follow least privilege principle
     - Validate input data
     - Use secure connection settings
     - Implement proper authentication
     - Monitor security posture changes
 
-5. **Error Handling**
+6. **Error Handling**
     - Implement comprehensive error handling
     - Check job status after commits
     - Log error details

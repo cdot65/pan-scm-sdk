@@ -70,6 +70,33 @@ of various types including IP/Netmask, IP Range, IP Wildcard, and FQDN (Fully Qu
 
 ## Basic Configuration
 
+The Address service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the Address service directly through the client
+# No need to create a separate Address instance
+addresses = client.address
+```
+
+</div>
+
+### Traditional Service Instantiation (Legacy)
+
 <div class="termy">
 
 <!-- termynal -->
@@ -85,11 +112,14 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize Address object
+# Initialize Address object explicitly
 addresses = Address(client)
 ```
 
 </div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -100,6 +130,15 @@ addresses = Address(client)
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
 # Prepare IP/Netmask address configuration
 netmask_config = {
    "name": "internal_network",
@@ -109,8 +148,8 @@ netmask_config = {
    "tag": ["Python", "Automation"]
 }
 
-# Create the address object
-netmask_address = addresses.create(netmask_config)
+# Create the address object using the unified client interface
+netmask_address = client.address.create(netmask_config)
 
 # Prepare FQDN address configuration
 fqdn_config = {
@@ -121,7 +160,7 @@ fqdn_config = {
 }
 
 # Create the FQDN address object
-fqdn_address = addresses.create(fqdn_config)
+fqdn_address = client.address.create(fqdn_config)
 
 # Prepare IP Range address configuration
 range_config = {
@@ -132,7 +171,7 @@ range_config = {
 }
 
 # Create the IP Range address object
-range_address = addresses.create(range_config)
+range_address = client.address.create(range_config)
 ```
 
 </div>
@@ -145,11 +184,11 @@ range_address = addresses.create(range_config)
 
 ```python
 # Fetch by name and folder
-address = addresses.fetch(name="internal_network", folder="Texas")
+address = client.address.fetch(name="internal_network", folder="Texas")
 print(f"Found address: {address.name}")
 
 # Get by ID
-address_by_id = addresses.get(address.id)
+address_by_id = client.address.get(address.id)
 print(f"Retrieved address: {address_by_id.name}")
 ```
 
@@ -163,14 +202,14 @@ print(f"Retrieved address: {address_by_id.name}")
 
 ```python
 # Fetch existing address
-existing_address = addresses.fetch(name="internal_network", folder="Texas")
+existing_address = client.address.fetch(name="internal_network", folder="Texas")
 
 # Update specific attributes
 existing_address.description = "Updated network segment"
 existing_address.tag = ["Network", "Internal", "Updated"]
 
 # Perform update
-updated_address = addresses.update(existing_address)
+updated_address = client.address.update(existing_address)
 ```
 
 </div>
@@ -183,7 +222,7 @@ updated_address = addresses.update(existing_address)
 
 ```python
 # Pass filters directly into the list method
-filtered_addresses = addresses.list(
+filtered_addresses = client.address.list(
      folder='Texas',
      types=['fqdn'],
      tags=['Automation']
@@ -201,7 +240,7 @@ list_params = {
 }
 
 # List addresses with filters as kwargs
-filtered_addresses = addresses.list(**list_params)
+filtered_addresses = client.address.list(**list_params)
 
 # Process results
 for addr in filtered_addresses:
@@ -231,7 +270,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return addresses defined exactly in 'Texas'
-exact_addresses = addresses.list(
+exact_addresses = client.address.list(
    folder='Texas',
    exact_match=True
 )
@@ -240,7 +279,7 @@ for addr in exact_addresses:
    print(f"Exact match: {addr.name} in {addr.folder}")
 
 # Exclude all addresses from the 'All' folder
-no_all_addresses = addresses.list(
+no_all_addresses = client.address.list(
    folder='Texas',
    exclude_folders=['All']
 )
@@ -250,7 +289,7 @@ for addr in no_all_addresses:
    print(f"Filtered out 'All': {addr.name}")
 
 # Exclude addresses that come from 'default' snippet
-   no_default_snippet = addresses.list(
+   no_default_snippet = client.address.list(
    folder='Texas',
    exclude_snippets=['default']
 )
@@ -260,7 +299,7 @@ for addr in no_default_snippet:
    print(f"Filtered out 'default' snippet: {addr.name}")
 
 # Exclude addresses associated with 'DeviceA'
-no_deviceA = addresses.list(
+no_deviceA = client.address.list(
    folder='Texas',
    exclude_devices=['DeviceA']
 )
@@ -270,7 +309,7 @@ for addr in no_deviceA:
    print(f"Filtered out 'DeviceA': {addr.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = addresses.list(
+combined_filters = client.address.list(
    folder='Texas',
    exact_match=True,
    exclude_folders=['All'],
@@ -295,15 +334,28 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 <!-- termynal -->
 
 ```python
-# Initialize the Address object with a custom max_limit
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-address_client = Address(api_client=client, max_limit=4321)
+from scm.client import ScmClient
+from scm.config.objects import Address
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
-all_addresses = address_client.list(folder='Texas')
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
 
-# 'all_addresses' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Two options for setting max_limit:
+
+# Option 1: Use the unified client interface but create a custom Address instance with max_limit
+address_service = Address(client, max_limit=4321)
+all_addresses1 = address_service.list(folder='Texas')
+
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_addresses2 = client.address.list(folder='Texas')
+
+# Both options will auto-paginate through all available objects.
+# The addresses are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -317,7 +369,7 @@ all_addresses = address_client.list(folder='Texas')
 ```python
 # Delete by ID
 address_id = "123e4567-e89b-12d3-a456-426655440000"
-addresses.delete(address_id)
+client.address.delete(address_id)
 ```
 
 </div>
@@ -340,7 +392,7 @@ commit_params = {
 }
 
 # Commit the changes
-result = addresses.commit(**commit_params)
+result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
 ```
@@ -354,12 +406,12 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job
-job_status = addresses.get_job_status(result.job_id)
+# Get status of specific job directly from the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = addresses.list_jobs(limit=10)
+# List recent jobs directly from the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
@@ -373,11 +425,19 @@ for job in recent_jobs.data:
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
 from scm.exceptions import (
    InvalidObjectError,
    MissingQueryParameterError,
    NameNotUniqueError,
    ObjectNotPresentError
+)
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
 )
 
 try:
@@ -390,18 +450,18 @@ try:
       "tag": ["Test"]
    }
    
-   # Create the address
-   new_address = addresses.create(address_config)
+   # Create the address using the unified client interface
+   new_address = client.address.create(address_config)
    
-   # Commit changes
-   result = addresses.commit(
+   # Commit changes directly from the client
+   result = client.commit(
       folders=["Texas"],
       description="Added test address",
       sync=True
    )
    
-   # Check job status
-   status = addresses.get_job_status(result.job_id)
+   # Check job status directly from the client
+   status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
    print(f"Invalid address data: {e.message}")
@@ -417,30 +477,36 @@ except MissingQueryParameterError as e:
 
 ## Best Practices
 
-1. **Container Management**
+1. **Client Usage**
+    - Use the unified client interface (`client.address`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
+
+2. **Container Management**
     - Always specify exactly one container (folder, snippet, or device)
     - Use consistent container names across operations
     - Validate container existence before operations
 
-2. **Error Handling**
+3. **Error Handling**
     - Implement comprehensive error handling for all operations
     - Check job status after commits
     - Handle specific exceptions before generic ones
     - Log error details for troubleshooting
 
-3. **Address Types**
+4. **Address Types**
     - Specify exactly one address type per object
     - Use appropriate address format for each type
     - Validate address formats before creation
     - Consider FQDN resolution time in automation scripts
 
-4. **Performance**
+5. **Performance**
     - Reuse client instances
     - Use appropriate pagination for list operations
     - Implement proper retry mechanisms
     - Cache frequently accessed objects
 
-5. **Security**
+6. **Security**
     - Follow the least privilege principle
     - Validate input data
     - Use secure connection settings
