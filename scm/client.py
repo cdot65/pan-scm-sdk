@@ -349,6 +349,9 @@ class Scm:
             return self._services[name]
 
         # Registry of available services with their module and class names
+        # IMPORTANT: All keys must be in singular form for consistent client usage
+        # Even if the module or class has a plural name, the attribute should be singular
+        # Example: "nat_rule" for NATRule in nat_rules.py
         service_imports = {
             # Objects
             "address": (
@@ -377,7 +380,7 @@ class Scm:
             ),
             "external_dynamic_list": (
                 "scm.config.objects.external_dynamic_lists",
-                "ExternalDynamicLists",
+                "ExternalDynamicLists", 
             ),
             "hip_object": (
                 "scm.config.objects.hip_object",
@@ -395,6 +398,18 @@ class Scm:
                 "scm.config.objects.log_forwarding_profile",
                 "LogForwardingProfile",
             ),
+            "quarantined_device": (
+                "scm.config.objects.quarantined_devices",
+                "QuarantinedDevices",
+            ),
+            "region": (
+                "scm.config.objects.region",
+                "Region",
+            ),
+            "schedule": (
+                "scm.config.objects.schedules",
+                "Schedule",
+            ),
             "service": (
                 "scm.config.objects.service",
                 "Service",
@@ -402,6 +417,10 @@ class Scm:
             "service_group": (
                 "scm.config.objects.service_group",
                 "ServiceGroup",
+            ),
+            "syslog_server_profile": (
+                "scm.config.objects.syslog_server_profiles",
+                "SyslogServerProfile",
             ),
             "tag": (
                 "scm.config.objects.tag",
@@ -436,7 +455,7 @@ class Scm:
             ),
             "url_category": (
                 "scm.config.security.url_categories",
-                "URLCategories",
+                "URLCategories", 
             ),
             "vulnerability_protection_profile": (
                 "scm.config.security.vulnerability_protection_profile",
