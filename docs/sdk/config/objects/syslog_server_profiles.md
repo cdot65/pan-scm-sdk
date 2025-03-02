@@ -10,73 +10,73 @@ The `SyslogServerProfile` class inherits from the `BaseObject` class and provide
 
 ## Core Methods
 
-| Method | Description | Parameters | Return Type |
-|--------|-------------|------------|-------------|
-| `create` | Creates a new syslog server profile | `data` (Dict[str, Any]): Profile data | SyslogServerProfileResponseModel |
-| `get` | Retrieves a syslog server profile by ID | `object_id` (str): Profile ID | SyslogServerProfileResponseModel |
-| `update` | Updates an existing syslog server profile | `syslog_server_profile` (SyslogServerProfileUpdateModel): Update data | SyslogServerProfileResponseModel |
-| `delete` | Deletes a syslog server profile | `object_id` (str): Profile ID | None |
-| `list` | Lists syslog server profiles with optional filtering | See [list parameters](#list-method-parameters) | List[SyslogServerProfileResponseModel] |
-| `fetch` | Retrieves a single syslog server profile by name | See [fetch parameters](#fetch-method-parameters) | SyslogServerProfileResponseModel |
+| Method   | Description                                          | Parameters                                                            | Return Type                            |
+|----------|------------------------------------------------------|-----------------------------------------------------------------------|----------------------------------------|
+| `create` | Creates a new syslog server profile                  | `data` (Dict[str, Any]): Profile data                                 | SyslogServerProfileResponseModel       |
+| `get`    | Retrieves a syslog server profile by ID              | `object_id` (str): Profile ID                                         | SyslogServerProfileResponseModel       |
+| `update` | Updates an existing syslog server profile            | `syslog_server_profile` (SyslogServerProfileUpdateModel): Update data | SyslogServerProfileResponseModel       |
+| `delete` | Deletes a syslog server profile                      | `object_id` (str): Profile ID                                         | None                                   |
+| `list`   | Lists syslog server profiles with optional filtering | See [list parameters](#list-method-parameters)                        | List[SyslogServerProfileResponseModel] |
+| `fetch`  | Retrieves a single syslog server profile by name     | See [fetch parameters](#fetch-method-parameters)                      | SyslogServerProfileResponseModel       |
 
 ### List Method Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `folder` | Optional[str] | No* | None | Folder in which the profiles are defined |
-| `snippet` | Optional[str] | No* | None | Snippet in which the profiles are defined |
-| `device` | Optional[str] | No* | None | Device in which the profiles are defined |
-| `exact_match` | bool | No | False | If True, only return profiles whose container exactly matches |
-| `exclude_folders` | Optional[List[str]] | No | None | List of folder names to exclude |
-| `exclude_snippets` | Optional[List[str]] | No | None | List of snippet values to exclude |
-| `exclude_devices` | Optional[List[str]] | No | None | List of device values to exclude |
-| `**filters` | Any | No | None | Additional filters including `transport` (List[str]) and `format` (List[str]) |
+| Parameter          | Type                | Required | Default | Description                                                                   |
+|--------------------|---------------------|----------|---------|-------------------------------------------------------------------------------|
+| `folder`           | Optional[str]       | No*      | None    | Folder in which the profiles are defined                                      |
+| `snippet`          | Optional[str]       | No*      | None    | Snippet in which the profiles are defined                                     |
+| `device`           | Optional[str]       | No*      | None    | Device in which the profiles are defined                                      |
+| `exact_match`      | bool                | No       | False   | If True, only return profiles whose container exactly matches                 |
+| `exclude_folders`  | Optional[List[str]] | No       | None    | List of folder names to exclude                                               |
+| `exclude_snippets` | Optional[List[str]] | No       | None    | List of snippet values to exclude                                             |
+| `exclude_devices`  | Optional[List[str]] | No       | None    | List of device values to exclude                                              |
+| `**filters`        | Any                 | No       | None    | Additional filters including `transport` (List[str]) and `format` (List[str]) |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ### Fetch Method Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `name` | str | Yes | - | The name of the syslog server profile |
-| `folder` | Optional[str] | No* | None | Folder in which the profile is defined |
-| `snippet` | Optional[str] | No* | None | Snippet in which the profile is defined |
-| `device` | Optional[str] | No* | None | Device in which the profile is defined |
+| Parameter | Type          | Required | Default | Description                             |
+|-----------|---------------|----------|---------|-----------------------------------------|
+| `name`    | str           | Yes      | -       | The name of the syslog server profile   |
+| `folder`  | Optional[str] | No*      | None    | Folder in which the profile is defined  |
+| `snippet` | Optional[str] | No*      | None    | Snippet in which the profile is defined |
+| `device`  | Optional[str] | No*      | None    | Device in which the profile is defined  |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ## Syslog Server Profile Attributes
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | str | Yes | The name of the syslog server profile (max length: 31) |
-| `servers` | Dict[str, Any] | Yes | Dictionary of server configurations |
-| `format` | Optional[FormatModel] | No | Format settings for different log types |
-| `folder` | str | No* | The folder in which the resource is defined |
-| `snippet` | str | No* | The snippet in which the resource is defined |
-| `device` | str | No* | The device in which the resource is defined |
-| `id` | UUID | Response only | The UUID of the syslog server profile (response only) |
+| Attribute | Type                  | Required      | Description                                            |
+|-----------|-----------------------|---------------|--------------------------------------------------------|
+| `name`    | str                   | Yes           | The name of the syslog server profile (max length: 31) |
+| `servers` | Dict[str, Any]        | Yes           | Dictionary of server configurations                    |
+| `format`  | Optional[FormatModel] | No            | Format settings for different log types                |
+| `folder`  | str                   | No*           | The folder in which the resource is defined            |
+| `snippet` | str                   | No*           | The snippet in which the resource is defined           |
+| `device`  | str                   | No*           | The device in which the resource is defined            |
+| `id`      | UUID                  | Response only | The UUID of the syslog server profile (response only)  |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ### Server Configuration Attributes
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | str | Yes | Syslog server name |
-| `server` | str | Yes | Syslog server address |
-| `transport` | Literal["UDP", "TCP"] | Yes | Transport protocol for the syslog server |
-| `port` | int | Yes | Syslog server port (1-65535) |
-| `format` | Literal["BSD", "IETF"] | Yes | Syslog format |
-| `facility` | Literal["LOG_USER", "LOG_LOCAL0", ...] | Yes | Syslog facility |
+| Attribute   | Type                                   | Required | Description                              |
+|-------------|----------------------------------------|----------|------------------------------------------|
+| `name`      | str                                    | Yes      | Syslog server name                       |
+| `server`    | str                                    | Yes      | Syslog server address                    |
+| `transport` | Literal["UDP", "TCP"]                  | Yes      | Transport protocol for the syslog server |
+| `port`      | int                                    | Yes      | Syslog server port (1-65535)             |
+| `format`    | Literal["BSD", "IETF"]                 | Yes      | Syslog format                            |
+| `facility`  | Literal["LOG_USER", "LOG_LOCAL0", ...] | Yes      | Syslog facility                          |
 
 ## Exceptions
 
-| Exception | HTTP Code | Description |
-|-----------|-----------|-------------|
-| `InvalidObjectError` | 400 | Invalid input data (e.g., invalid max_limit, invalid container parameters) |
-| `MissingQueryParameterError` | 400 | Required parameter is missing or empty (e.g., empty folder name) |
-| `InvalidObjectError` | 500 | Invalid response format from the API |
+| Exception                    | HTTP Code | Description                                                                |
+|------------------------------|-----------|----------------------------------------------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid input data (e.g., invalid max_limit, invalid container parameters) |
+| `MissingQueryParameterError` | 400       | Required parameter is missing or empty (e.g., empty folder name)           |
+| `InvalidObjectError`         | 500       | Invalid response format from the API                                       |
 
 ## Basic Configuration
 

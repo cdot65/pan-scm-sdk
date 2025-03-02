@@ -40,14 +40,14 @@ The `Schedule` class provides functionality to manage schedule objects in Palo A
 
 ## Schedule Model Attributes
 
-| Attribute       | Type            | Required | Description                                               |
-|-----------------|-----------------|----------|-----------------------------------------------------------|
-| `name`          | str             | Yes      | Name of the schedule object (max 31 chars)                |
-| `id`            | UUID            | Yes*     | Unique identifier (*response only)                        |
-| `schedule_type` | ScheduleTypeModel | Yes      | The type of schedule (recurring or non-recurring)         |
-| `folder`        | str             | Yes**    | Folder location (**one container required**)              |
-| `snippet`       | str             | Yes**    | Snippet location (**one container required**)             |
-| `device`        | str             | Yes**    | Device location (**one container required**)              |
+| Attribute       | Type              | Required | Description                                       |
+|-----------------|-------------------|----------|---------------------------------------------------|
+| `name`          | str               | Yes      | Name of the schedule object (max 31 chars)        |
+| `id`            | UUID              | Yes*     | Unique identifier (*response only)                |
+| `schedule_type` | ScheduleTypeModel | Yes      | The type of schedule (recurring or non-recurring) |
+| `folder`        | str               | Yes**    | Folder location (**one container required**)      |
+| `snippet`       | str               | Yes**    | Snippet location (**one container required**)     |
+| `device`        | str               | Yes**    | Device location (**one container required**)      |
 
 ## Exceptions
 
