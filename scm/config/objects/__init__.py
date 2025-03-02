@@ -13,6 +13,7 @@ from .http_server_profiles import HTTPServerProfile
 from .log_forwarding_profile import LogForwardingProfile
 from .quarantined_devices import QuarantinedDevices
 from .region import Region
+from .schedules import Schedule
 from .service import Service
 from .service_group import ServiceGroup
 from .tag import Tag

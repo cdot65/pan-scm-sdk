@@ -63,6 +63,11 @@ from .regions import (
     RegionUpdateModel,
     GeoLocation,
 )
+from .schedules import (
+    ScheduleCreateModel,
+    ScheduleResponseModel,
+    ScheduleUpdateModel,
+)
 from .service import (
     ServiceCreateModel,
     ServiceResponseModel,
