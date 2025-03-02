@@ -134,6 +134,7 @@ The unified client provides access to the following services through its attribu
 | `http_server_profile`              | `HTTPServerProfile`              | Manages HTTP server profile objects            |
 | `log_forwarding_profile`           | `LogForwardingProfile`           | Manages Log Forwarding profile objects         |
 | `quarantined_devices`              | `QuarantinedDevices`             | Manages Quarantined Devices                    |
+| `syslog_server_profile`            | `SyslogServerProfile`            | Manages Syslog Server Profile objects          |
 | `region`                           | `Region`                         | Manages geographic region objects              |
 | `schedules`                        | `Schedule`                       | Manages schedule objects                       |
 | `service`                          | `Service`                        | Manages service objects                        |

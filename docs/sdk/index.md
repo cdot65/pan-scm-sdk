@@ -26,6 +26,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [HTTP Server Profiles](config/objects/http_server_profiles.md)
         - [Log Forwarding Profiles](config/objects/log_forwarding_profile.md)
         - [Quarantined Devices](config/objects/quarantined_devices.md)
+        - [Syslog Server Profiles](config/objects/syslog_server_profiles.md)
         - [Region](config/objects/region.md)
         - [Schedules](config/objects/schedules.md)
         - [Service](config/objects/service.md)

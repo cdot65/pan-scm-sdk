@@ -5,6 +5,7 @@ from .address_group import AddressGroup
 from .application import Application
 from .application_filters import ApplicationFilters
 from .application_group import ApplicationGroup
+from .syslog_server_profiles import SyslogServerProfile
 from .dynamic_user_group import DynamicUserGroup
 from .external_dynamic_lists import ExternalDynamicLists
 from .hip_object import HIPObject
