@@ -82,6 +82,8 @@ The `SyslogServerProfile` class inherits from the `BaseObject` class and provide
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 # Import the client
 from scm.client import Scm
@@ -112,6 +114,8 @@ client = Scm(
 ### Creating a Syslog Server Profile
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 # Create a basic syslog server profile with a single UDP server
@@ -169,6 +173,8 @@ print(f"Created profile with ID: {tcp_profile.id}")
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 # Get profile by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -192,6 +198,8 @@ profile_by_name = client.syslog_server_profile.fetch(
 ### Updating a Syslog Server Profile
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.models.objects import SyslogServerProfileUpdateModel
@@ -238,6 +246,8 @@ updated_profile = client.syslog_server_profile.update(update_model)
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 # List all profiles in a folder
 all_profiles = client.syslog_server_profile.list(folder="Prisma Access")
@@ -279,6 +289,8 @@ for profile in filtered_profiles:
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 # Create client with custom pagination limit for syslog server profiles
 client = Scm(
@@ -301,6 +313,8 @@ print(f"Retrieved {len(profiles)} profiles")
 
 <div class="termy">
 
+<!-- termynal -->
+
 ```python
 # Delete a profile by ID
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -313,6 +327,8 @@ print(f"Profile {profile_id} deleted successfully")
 ## Error Handling
 
 <div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
