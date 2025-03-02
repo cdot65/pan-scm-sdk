@@ -24,6 +24,10 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [HIP Object](config/objects/hip_object.md)
         - [HIP Profile](config/objects/hip_profile.md)
         - [HTTP Server Profiles](config/objects/http_server_profiles.md)
+        - [Log Forwarding Profiles](config/objects/log_forwarding_profile.md)
+        - [Quarantined Devices](config/objects/quarantined_devices.md)
+        - [Region](config/objects/region.md)
+        - [Schedules](config/objects/schedules.md)
         - [Service](config/objects/service.md)
         - [Service Group](config/objects/service_group.md)
         - [Tag](config/objects/tag.md)
@@ -162,7 +166,9 @@ The following table shows all services available through the unified client inte
 | `hip_profile`                      | `HIPProfile`                     | Manages host information profile group objects |
 | `http_server_profile`              | `HTTPServerProfile`              | Manages HTTP server profile objects            |
 | `log_forwarding_profile`           | `LogForwardingProfile`           | Manages Log Forwarding profile objects         |
+| `quarantined_devices`              | `QuarantinedDevices`             | Manages Quarantined Devices                    |
 | `region`                           | `Region`                         | Manages geographic region objects              |
+| `schedules`                        | `Schedule`                       | Manages schedule objects                       |
 | `service`                          | `Service`                        | Manages service objects                        |
 | `service_group`                    | `ServiceGroup`                   | Manages service group objects                  |
 | `tag`                              | `Tag`                            | Manages tag objects                            |

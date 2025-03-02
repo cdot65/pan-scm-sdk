@@ -54,6 +54,7 @@ nav:
               - HIP Profile: sdk/config/objects/hip_profile.md
               - HTTP Server Profile: sdk/config/objects/http_server_profiles.md
               - Log Forwarding Profile: sdk/config/objects/log_forwarding_profile.md
+              - Quarantined Devices: sdk/config/objects/quarantined_devices.md
               - Region: sdk/config/objects/region.md
               - Schedules: sdk/config/objects/schedules.md
               - Service: sdk/config/objects/service.md
@@ -88,6 +89,7 @@ nav:
               - HIP Profile Models: sdk/models/objects/hip_profile_models.md
               - HTTP Server Profiles Models: sdk/models/objects/http_server_profiles_models.md
               - Log Forwarding Profile Models: sdk/models/objects/log_forwarding_profile_models.md
+              - Quarantined Devices Models: sdk/models/objects/quarantined_devices_models.md
               - Region Models: sdk/models/objects/region_models.md
               - Schedules Models: sdk/models/objects/schedules_models.md
               - Service Models: sdk/models/objects/service_models.md
