@@ -140,39 +140,39 @@ if nat_rules:
 
 The unified client provides access to the following services through attribute-based access:
 
-| Client Property                    | Description                                    |
-|------------------------------------|------------------------------------------------|
-| **Objects**                        |                                                |
-| `address`                          | Manages IP and FQDN address objects            |
-| `address_group`                    | Manages address group objects                  |
-| `application`                      | Manages custom application objects             |
-| `application_filter`               | Manages application filter objects             |
-| `application_group`                | Manages application group objects              |
-| `dynamic_user_group`               | Manages dynamic user group objects             |
-| `external_dynamic_list`            | Manages external dynamic list objects          |
-| `hip_object`                       | Manages host information profile objects       |
-| `hip_profile`                      | Manages host information profile group objects |
-| `http_server_profile`              | Manages HTTP server profile objects            |
-| `log_forwarding_profile`           | Manages Log Forwarding profile objects         |
-| `quarantined_devices`              | Manages Quarantined Devices                    |
-| `region`                           | Manages geographic region objects              |
-| `schedules`                        | Manages schedule objects                       |
-| `service`                          | Manages service objects                        |
-| `service_group`                    | Manages service group objects                  |
-| `syslog_server_profile`            | Manages SYSLOG server profiles                 |
-| `tag`                              | Manages tag objects                            |
-| **Network**                        |                                                |
-| `nat_rule`                         | Manages network address translation rules      |
-| **Deployment**                     |                                                |
-| `remote_network`                   | Manages remote network connections             |
-| **Security**                       |                                                |
-| `security_rule`                    | Manages security policy rules                  |
-| `anti_spyware_profile`             | Manages anti-spyware security profiles         |
-| `decryption_profile`               | Manages SSL decryption profiles                |
-| `dns_security_profile`             | Manages DNS security profiles                  |
-| `url_category`                     | Manages custom URL categories                  |
-| `vulnerability_protection_profile` | Manages vulnerability protection profiles      |
-| `wildfire_antivirus_profile`       | Manages WildFire anti-virus profiles           |
+| Client Property                    | Description                                                     |
+|------------------------------------|-----------------------------------------------------------------|
+| **Objects**                        |                                                                 |
+| `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies      |
+| `address_group`                    | Static or dynamic collections of address objects                |
+| `application`                      | Custom application definitions and signatures                   |
+| `application_filter`               | Filters for identifying applications by characteristics         |
+| `application_group`                | Logical groups of applications for policy application           |
+| `dynamic_user_group`               | User groups with dynamic membership criteria                    |
+| `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains               |
+| `hip_object`                       | Host information profile match criteria                         |
+| `hip_profile`                      | Endpoint security compliance profiles                           |
+| `http_server_profile`              | HTTP server configurations for logging and monitoring           |
+| `log_forwarding_profile`           | Configurations for forwarding logs to external systems          |
+| `quarantined_device`               | Management of devices blocked from network access               |
+| `region`                           | Geographic regions for policy control                           |
+| `schedule`                         | Time-based policies and access control                          |
+| `service`                          | Protocol and port definitions for network services              |
+| `service_group`                    | Collections of services for simplified policy management        |
+| `syslog_server_profile`            | Syslog server configurations for centralized logging            |
+| `tag`                              | Resource classification and organization labels                 |
+| **Network**                        |                                                                 |
+| `nat_rule`                         | Network address translation policies for traffic routing        |
+| **Deployment**                     |                                                                 |
+| `remote_network`                   | Secure branch and remote site connectivity configurations       |
+| **Security**                       |                                                                 |
+| `security_rule`                    | Core security policies controlling network traffic              |
+| `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration   |
+| `decryption_profile`               | SSL/TLS traffic inspection configurations                       |
+| `dns_security_profile`             | Protection against DNS-based threats and tunneling              |
+| `url_category`                     | Custom URL categorization for web filtering                     |
+| `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts                 |
+| `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection            |
 
 #### Traditional Access Pattern (Legacy Support)
 

@@ -17,18 +17,18 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Address](config/objects/address.md)
         - [Address Group](config/objects/address_group.md)
         - [Application](config/objects/application.md)
-        - [Application Filters](config/objects/application_filters.md)
+        - [Application Filter](config/objects/application_filters.md)
         - [Application Group](config/objects/application_group.md)
         - [Dynamic User Group](config/objects/dynamic_user_group.md)
-        - [External Dynamic Lists](config/objects/external_dynamic_lists.md)
+        - [External Dynamic List](config/objects/external_dynamic_lists.md)
         - [HIP Object](config/objects/hip_object.md)
         - [HIP Profile](config/objects/hip_profile.md)
-        - [HTTP Server Profiles](config/objects/http_server_profiles.md)
-        - [Log Forwarding Profiles](config/objects/log_forwarding_profile.md)
-        - [Quarantined Devices](config/objects/quarantined_devices.md)
-        - [Syslog Server Profiles](config/objects/syslog_server_profiles.md)
+        - [HTTP Server Profile](config/objects/http_server_profiles.md)
+        - [Log Forwarding Profile](config/objects/log_forwarding_profile.md)
+        - [Quarantined Device](config/objects/quarantined_devices.md)
         - [Region](config/objects/region.md)
-        - [Schedules](config/objects/schedules.md)
+        - [Schedule](config/objects/schedules.md)
+        - [Syslog Server Profile](config/objects/syslog_server_profiles.md)
         - [Service](config/objects/service.md)
         - [Service Group](config/objects/service_group.md)
         - [Tag](config/objects/tag.md)
@@ -49,16 +49,19 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Address Models](models/objects/address_models.md)
         - [Address Group Models](models/objects/address_group_models.md)
         - [Application Models](models/objects/application_models.md)
-        - [Application Filters Models](models/objects/application_filters_models.md)
+        - [Application Filter Models](models/objects/application_filters_models.md)
         - [Application Group Models](models/objects/application_group_models.md)
         - [Dynamic User Group Models](models/objects/dynamic_user_group_models.md)
-        - [External Dynamic Lists Models](models/objects/external_dynamic_lists_models.md)
+        - [External Dynamic List Models](models/objects/external_dynamic_lists_models.md)
         - [HIP Object Models](models/objects/hip_object_models.md)
         - [HIP Profile Models](models/objects/hip_profile_models.md)
         - [HTTP Server Profile Models](models/objects/http_server_profiles_models.md)
         - [Log Forwarding Profile Models](models/objects/log_forwarding_profile_models.md)
+        - [Quarantined Device Models](models/objects/quarantined_devices_models.md)
         - [Region Models](models/objects/region_models.md)
+        - [Schedule Models](models/objects/schedules_models.md)
         - [Service Models](models/objects/service_models.md)
+        - [Syslog Server Profile Models](models/objects/syslog_server_profiles_models.md)
         - [Service Group Models](models/objects/service_group_models.md)
         - [Tag Models](models/objects/tag_models.md)
     - Operations
@@ -153,39 +156,39 @@ print(f"Commit job status: {job_status.data[0].status_str}")
 
 The following table shows all services available through the unified client interface:
 
-| Client Property                    | Description                                    |
-|------------------------------------|------------------------------------------------|
-| **Objects**                        |                                                |
-| `address`                          | Manages IP and FQDN address objects            |
-| `address_group`                    | Manages address group objects                  |
-| `application`                      | Manages custom application objects             |
-| `application_filter`               | Manages application filter objects             |
-| `application_group`                | Manages application group objects              |
-| `dynamic_user_group`               | Manages dynamic user group objects             |
-| `external_dynamic_list`            | Manages external dynamic list objects          |
-| `hip_object`                       | Manages host information profile objects       |
-| `hip_profile`                      | Manages host information profile group objects |
-| `http_server_profile`              | Manages HTTP server profile objects            |
-| `log_forwarding_profile`           | Manages Log Forwarding profile objects         |
-| `quarantined_devices`              | Manages Quarantined Devices                    |
-| `region`                           | Manages geographic region objects              |
-| `schedules`                        | Manages schedule objects                       |
-| `service`                          | Manages service objects                        |
-| `service_group`                    | Manages service group objects                  |
-| `syslog_server_profile`            | Manages SYSLOG server profiles                 |
-| `tag`                              | Manages tag objects                            |
-| **Network**                        |                                                |
-| `nat_rule`                         | Manages network address translation rules      |
-| **Deployment**                     |                                                |
-| `remote_network`                   | Manages remote network connections             |
-| **Security**                       |                                                |
-| `security_rule`                    | Manages security policy rules                  |
-| `anti_spyware_profile`             | Manages anti-spyware security profiles         |
-| `decryption_profile`               | Manages SSL decryption profiles                |
-| `dns_security_profile`             | Manages DNS security profiles                  |
-| `url_category`                     | Manages custom URL categories                  |
-| `vulnerability_protection_profile` | Manages vulnerability protection profiles      |
-| `wildfire_antivirus_profile`       | Manages WildFire anti-virus profiles           |
+| Client Property                    | Description                                                     |
+|------------------------------------|-----------------------------------------------------------------|
+| **Objects**                        |                                                                 |
+| `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies      |
+| `address_group`                    | Static or dynamic collections of address objects                |
+| `application`                      | Custom application definitions and signatures                   |
+| `application_filter`               | Filters for identifying applications by characteristics         |
+| `application_group`                | Logical groups of applications for policy application           |
+| `dynamic_user_group`               | User groups with dynamic membership criteria                    |
+| `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains               |
+| `hip_object`                       | Host information profile match criteria                         |
+| `hip_profile`                      | Endpoint security compliance profiles                           |
+| `http_server_profile`              | HTTP server configurations for logging and monitoring           |
+| `log_forwarding_profile`           | Configurations for forwarding logs to external systems          |
+| `quarantined_device`               | Management of devices blocked from network access               |
+| `region`                           | Geographic regions for policy control                           |
+| `schedule`                         | Time-based policies and access control                          |
+| `service`                          | Protocol and port definitions for network services              |
+| `service_group`                    | Collections of services for simplified policy management        |
+| `syslog_server_profile`            | Syslog server configurations for centralized logging            |
+| `tag`                              | Resource classification and organization labels                 |
+| **Network**                        |                                                                 |
+| `nat_rule`                         | Network address translation policies for traffic routing        |
+| **Deployment**                     |                                                                 |
+| `remote_network`                   | Secure branch and remote site connectivity configurations       |
+| **Security**                       |                                                                 |
+| `security_rule`                    | Core security policies controlling network traffic              |
+| `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration   |
+| `decryption_profile`               | SSL/TLS traffic inspection configurations                       |
+| `dns_security_profile`             | Protection against DNS-based threats and tunneling              |
+| `url_category`                     | Custom URL categorization for web filtering                     |
+| `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts                 |
+| `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection            |
 
 Check out the [Client Module](client.md) documentation for more information on the unified client interface and the available
 services.

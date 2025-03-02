@@ -115,44 +115,6 @@ client.commit(
 
 </div>
 
-## Available Services
-
-The unified client provides access to the following services through its attribute-based interface:
-
-| Client Property                    | Description                                    |
-|------------------------------------|------------------------------------------------|
-| **Objects**                        |                                                |
-| `address`                          | Manages IP and FQDN address objects            |
-| `address_group`                    | Manages address group objects                  |
-| `application`                      | Manages custom application objects             |
-| `application_filter`               | Manages application filter objects             |
-| `application_group`                | Manages application group objects              |
-| `dynamic_user_group`               | Manages dynamic user group objects             |
-| `external_dynamic_list`            | Manages external dynamic list objects          |
-| `hip_object`                       | Manages host information profile objects       |
-| `hip_profile`                      | Manages host information profile group objects |
-| `http_server_profile`              | Manages HTTP server profile objects            |
-| `log_forwarding_profile`           | Manages Log Forwarding profile objects         |
-| `quarantined_devices`              | Manages Quarantined Devices                    |
-| `region`                           | Manages geographic region objects              |
-| `schedules`                        | Manages schedule objects                       |
-| `service`                          | Manages service objects                        |
-| `service_group`                    | Manages service group objects                  |
-| `syslog_server_profile`            | Manages SYSLOG server profiles                 |
-| `tag`                              | Manages tag objects                            |
-| **Network**                        |                                                |
-| `nat_rule`                         | Manages network address translation rules      |
-| **Deployment**                     |                                                |
-| `remote_network`                   | Manages remote network connections             |
-| **Security**                       |                                                |
-| `security_rule`                    | Manages security policy rules                  |
-| `anti_spyware_profile`             | Manages anti-spyware security profiles         |
-| `decryption_profile`               | Manages SSL decryption profiles                |
-| `dns_security_profile`             | Manages DNS security profiles                  |
-| `url_category`                     | Manages custom URL categories                  |
-| `vulnerability_protection_profile` | Manages vulnerability protection profiles      |
-| `wildfire_antivirus_profile`       | Manages WildFire anti-virus profiles           |
-
 For more detailed usage instructions and examples, refer to the [User Guide](about/introduction.md).
 
 ---

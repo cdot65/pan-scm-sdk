@@ -46,34 +46,34 @@ nav:
               - Address: sdk/config/objects/address.md
               - Address Group: sdk/config/objects/address_group.md
               - Application: sdk/config/objects/application.md
-              - Application Filters: sdk/config/objects/application_filters.md
+              - Application Filter: sdk/config/objects/application_filters.md
               - Application Group: sdk/config/objects/application_group.md
               - Dynamic User Group: sdk/config/objects/dynamic_user_group.md
-              - External Dynamic Lists: sdk/config/objects/external_dynamic_lists.md
+              - External Dynamic List: sdk/config/objects/external_dynamic_lists.md
               - HIP Object: sdk/config/objects/hip_object.md
               - HIP Profile: sdk/config/objects/hip_profile.md
               - HTTP Server Profile: sdk/config/objects/http_server_profiles.md
               - Log Forwarding Profile: sdk/config/objects/log_forwarding_profile.md
-              - Quarantined Devices: sdk/config/objects/quarantined_devices.md
-              - Syslog Server Profile: sdk/config/objects/syslog_server_profiles.md
+              - Quarantined Device: sdk/config/objects/quarantined_devices.md
               - Region: sdk/config/objects/region.md
-              - Schedules: sdk/config/objects/schedules.md
+              - Schedule: sdk/config/objects/schedules.md
+              - Syslog Server Profile: sdk/config/objects/syslog_server_profiles.md
               - Service: sdk/config/objects/service.md
               - Service Group: sdk/config/objects/service_group.md
               - Tag: sdk/config/objects/tag.md
           - Security Services:
               - Overview: sdk/config/security_services/index.md
-              - Anti Spyware Security Profile: sdk/config/security_services/anti_spyware_profile.md
+              - Anti-Spyware Profile: sdk/config/security_services/anti_spyware_profile.md
               - Decryption Profile: sdk/config/security_services/decryption_profile.md
               - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
               - Security Rule: sdk/config/security_services/security_rule.md
-              - URL Categories: sdk/config/security_services/url_categories.md
-              - Vulnerability Protection Security Profile: sdk/config/security_services/vulnerability_protection_profile.md
-              - Wildfire Anti Virus Security Profile: sdk/config/security_services/wildfire_antivirus.md
+              - URL Category: sdk/config/security_services/url_categories.md
+              - Vulnerability Protection Profile: sdk/config/security_services/vulnerability_protection_profile.md
+              - WildFire Antivirus Profile: sdk/config/security_services/wildfire_antivirus.md
       - Data Models:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
-              - Remote Networks Models: sdk/models/deployment/remote_networks_models.md
+              - Remote Network Models: sdk/models/deployment/remote_networks_models.md
           - Network:
               - Overview: sdk/models/network/index.md
               - NAT Rule Models: sdk/models/network/nat_rule_models.md
@@ -85,30 +85,30 @@ nav:
               - Application Filter Models: sdk/models/objects/application_filters_models.md
               - Application Group Models: sdk/models/objects/application_group_models.md
               - Dynamic User Group Models: sdk/models/objects/dynamic_user_group_models.md
-              - External Dynamic Lists Models: sdk/models/objects/external_dynamic_lists_models.md
+              - External Dynamic List Models: sdk/models/objects/external_dynamic_lists_models.md
               - HIP Object Models: sdk/models/objects/hip_object_models.md
               - HIP Profile Models: sdk/models/objects/hip_profile_models.md
-              - HTTP Server Profiles Models: sdk/models/objects/http_server_profiles_models.md
+              - HTTP Server Profile Models: sdk/models/objects/http_server_profiles_models.md
               - Log Forwarding Profile Models: sdk/models/objects/log_forwarding_profile_models.md
-              - Quarantined Devices Models: sdk/models/objects/quarantined_devices_models.md
-              - Syslog Server Profiles Models: sdk/models/objects/syslog_server_profiles_models.md
+              - Quarantined Device Models: sdk/models/objects/quarantined_devices_models.md
               - Region Models: sdk/models/objects/region_models.md
-              - Schedules Models: sdk/models/objects/schedules_models.md
+              - Schedule Models: sdk/models/objects/schedules_models.md
+              - Syslog Server Profile Models: sdk/models/objects/syslog_server_profiles_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
               - Tag Models: sdk/models/objects/tag_models.md
           - Operations:
-              - Candidate Push (commit config): sdk/models/operations/candidate_push.md
-              - Jobs: sdk/models/operations/jobs.md
+              - Candidate Push Models: sdk/models/operations/candidate_push.md
+              - Job Models: sdk/models/operations/jobs.md
           - Security Services:
               - Overview: sdk/models/security_services/index.md
-              - Anti Spyware Security Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
+              - Anti-Spyware Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
               - Decryption Profile Models: sdk/models/security_services/decryption_profile_models.md
               - DNS Security Profile Models: sdk/models/security_services/dns_security_profile_models.md
               - Security Rule Models: sdk/models/security_services/security_rule_models.md
-              - URL Categories Models: sdk/models/security_services/url_categories_models.md
-              - Vulnerability Protection Security Profile Models: sdk/config/security_services/vulnerability_protection_profile_models.md
-              - Wildfire Anti Virus Security Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
+              - URL Category Models: sdk/models/security_services/url_categories_models.md
+              - Vulnerability Protection Profile Models: sdk/models/security_services/vulnerability_protection_profile_models.md
+              - WildFire Antivirus Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
       - Exceptions: sdk/exceptions.md
 extra_css:
   - css/termynal.css
