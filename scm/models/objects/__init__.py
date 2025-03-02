@@ -10,6 +10,11 @@ from .address_group import (
     AddressGroupCreateModel,
     AddressGroupUpdateModel,
 )
+from .syslog_server_profiles import (
+    SyslogServerProfileCreateModel,
+    SyslogServerProfileUpdateModel,
+    SyslogServerProfileResponseModel,
+)
 from .application import (
     ApplicationCreateModel,
     ApplicationResponseModel,
@@ -87,6 +92,14 @@ from .quarantined_devices import (
     QuarantinedDevicesCreateModel,
     QuarantinedDevicesResponseModel,
     QuarantinedDevicesListParamsModel,
+)
+from .syslog_server_profiles import (
+    SyslogServerProfileCreateModel,
+    SyslogServerProfileResponseModel,
+    SyslogServerProfileUpdateModel,
+    SyslogServerModel,
+    FormatModel,
+    EscapingModel,
 )
 
 """
