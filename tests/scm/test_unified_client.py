@@ -39,13 +39,25 @@ class TestUnifiedClient:
             # Create mock service classes
             mock_address = MagicMock()
             mock_tag = MagicMock()
+            mock_syslog = MagicMock()
+            mock_region = MagicMock()
+            mock_schedule = MagicMock()
             
-            # Configure the mock module to return mock service classes
+            # Configure the mock modules to return mock service classes
             mock_module1 = MagicMock()
             mock_module1.Address = mock_address
             
             mock_module2 = MagicMock()
             mock_module2.Tag = mock_tag
+            
+            mock_module3 = MagicMock()
+            mock_module3.SyslogServerProfile = mock_syslog
+            
+            mock_module4 = MagicMock()
+            mock_module4.Region = mock_region
+            
+            mock_module5 = MagicMock()
+            mock_module5.Schedule = mock_schedule
             
             # Set side_effect to return different modules based on import path
             def side_effect(module_name):
@@ -53,6 +65,12 @@ class TestUnifiedClient:
                     return mock_module1
                 elif module_name == 'scm.config.objects.tag':
                     return mock_module2
+                elif module_name == 'scm.config.objects.syslog_server_profiles':
+                    return mock_module3
+                elif module_name == 'scm.config.objects.region':
+                    return mock_module4
+                elif module_name == 'scm.config.objects.schedules':
+                    return mock_module5
                 raise ImportError(f"No module named '{module_name}'")
             
             mock_import.side_effect = side_effect
@@ -60,14 +78,23 @@ class TestUnifiedClient:
             # Access services via attributes
             api_client.address
             api_client.tag
+            api_client.syslog_server_profile
+            api_client.region
+            api_client.schedule
             
             # Verify correct modules were imported
             mock_import.assert_any_call('scm.config.objects.address')
             mock_import.assert_any_call('scm.config.objects.tag')
+            mock_import.assert_any_call('scm.config.objects.syslog_server_profiles')
+            mock_import.assert_any_call('scm.config.objects.region')
+            mock_import.assert_any_call('scm.config.objects.schedules')
             
             # Verify service classes were instantiated with api_client
             mock_address.assert_called_once_with(api_client)
             mock_tag.assert_called_once_with(api_client)
+            mock_syslog.assert_called_once_with(api_client)
+            mock_region.assert_called_once_with(api_client)
+            mock_schedule.assert_called_once_with(api_client)
 
     def test_nonexistent_service(self, api_client):
         """Test accessing a non-existent service."""

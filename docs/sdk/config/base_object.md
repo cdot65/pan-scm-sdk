@@ -8,14 +8,14 @@
 4. [Exceptions](#exceptions)
 5. [Basic Configuration](#basic-configuration)
 6. [Usage Examples](#usage-examples)
-    - [Creating Objects](#creating-objects)
-    - [Retrieving Objects](#retrieving-objects)
-    - [Updating Objects](#updating-objects)
-    - [Listing Objects](#listing-objects)
-    - [Deleting Objects](#deleting-objects)
+   1. [Creating Objects](#creating-objects)
+   2. [Retrieving Objects](#retrieving-objects)
+   3. [Updating Objects](#updating-objects)
+   4. [Listing Objects](#listing-objects)
+   5. [Deleting Objects](#deleting-objects)
 7. [Managing Configuration Changes](#managing-configuration-changes)
-    - [Performing Commits](#performing-commits)
-    - [Monitoring Jobs](#monitoring-jobs)
+   1. [Performing Commits](#performing-commits)
+   2. [Monitoring Jobs](#monitoring-jobs)
 8. [Error Handling](#error-handling)
 9. [Best Practices](#best-practices)
 10. [Full Script Examples](#full-script-examples)
@@ -23,10 +23,7 @@
 
 ## Overview
 
-The `BaseObject` class serves as the foundation for all configuration objects in Palo Alto Networks' Strata Cloud
-Manager.
-This class provides standardized CRUD operations (Create, Read, Update, Delete) and job management functionality that is
-inherited by all configuration object types.
+The `BaseObject` class serves as the foundation for all configuration objects in Palo Alto Networks' Strata Cloud Manager. This class provides standardized CRUD operations (Create, Read, Update, Delete) and job management functionality that is inherited by all configuration object types.
 
 ## Core Methods
 
@@ -65,25 +62,23 @@ inherited by all configuration object types.
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 from scm.config.objects import BaseObject
 
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+# Initialize client using unified approach
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
 )
 
-# Unified Client Approach
 # Most objects can be accessed directly through the client
 # Example: client.address, client.service_group, client.security_rule, etc.
 
-# For custom or extended objects, you can still use the BaseObject approach
+# For custom or extended objects, you can use the BaseObject approach
 class CustomObject(BaseObject):
-    ENDPOINT = "/config/objects/v1/custom"
+   ENDPOINT = "/config/objects/v1/custom"
 
 # Initialize custom object
 custom_obj = CustomObject(client)
@@ -98,21 +93,38 @@ custom_obj = CustomObject(client)
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import InvalidObjectError
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Create custom object class
+class CustomObject(BaseObject):
+   ENDPOINT = "/config/objects/v1/custom"
+
+# Initialize custom object
+custom_obj = CustomObject(client)
+
 # Prepare object data
 object_data = {
-    "name": "test-object",
-    "description": "Test object creation",
-    "folder": "Texas"
+   "name": "test-object",
+   "description": "Test object creation",
+   "folder": "Texas"
 }
 
 # Create new object
 try:
-    new_object = custom_obj.create(object_data)
-    print(f"Created object with ID: {new_object['id']}")
+   new_object = custom_obj.create(object_data)
+   print(f"Created object with ID: {new_object['id']}")
 except InvalidObjectError as e:
-    print(f"Invalid object data: {e.message}")
+   print(f"Invalid object data: {e.message}")
 ```
 
 </div>
@@ -122,15 +134,26 @@ except InvalidObjectError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import NotFoundError
+
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 # Get object by ID
 try:
-    object_id = "123e4567-e89b-12d3-a456-426655440000"
-    retrieved_object = custom_obj.get(object_id)
-    print(f"Retrieved object: {retrieved_object['name']}")
+   object_id = "123e4567-e89b-12d3-a456-426655440000"
+   retrieved_object = custom_obj.get(object_id)
+   print(f"Retrieved object: {retrieved_object['name']}")
 except NotFoundError as e:
-    print(f"Object not found: {e.message}")
+   print(f"Object not found: {e.message}")
 ```
 
 </div>
@@ -140,22 +163,33 @@ except NotFoundError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import InvalidObjectError
+
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 # Update object data
 update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "updated-object",
-    "description": "Updated description",
-    "folder": "Texas"
+   "id": "123e4567-e89b-12d3-a456-426655440000",
+   "name": "updated-object",
+   "description": "Updated description",
+   "folder": "Texas"
 }
 
 # Perform update
 try:
-    updated_object = custom_obj.update(update_data)
-    print(f"Updated object: {updated_object['name']}")
+   updated_object = custom_obj.update(update_data)
+   print(f"Updated object: {updated_object['name']}")
 except InvalidObjectError as e:
-    print(f"Invalid update data: {e.message}")
+   print(f"Invalid update data: {e.message}")
 ```
 
 </div>
@@ -165,22 +199,33 @@ except InvalidObjectError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import InvalidObjectError
+
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 # Define filter parameters
 list_params = {
-    "folder": "Texas",
-    "limit": 100,
-    "offset": 0
+   "folder": "Texas",
+   "limit": 100,
+   "offset": 0
 }
 
 # List objects with filters
 try:
-    objects = custom_obj.list(**list_params)
-    for obj in objects:
-        print(f"Name: {obj['name']}")
+   objects = custom_obj.list(**list_params)
+   for obj in objects:
+      print(f"Name: {obj['name']}")
 except InvalidObjectError as e:
-    print(f"Invalid filter parameters: {e.message}")
+   print(f"Invalid filter parameters: {e.message}")
 ```
 
 </div>
@@ -190,15 +235,26 @@ except InvalidObjectError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import NotFoundError
+
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 # Delete object by ID
 try:
-    object_id = "123e4567-e89b-12d3-a456-426655440000"
-    custom_obj.delete(object_id)
-    print("Object deleted successfully")
+   object_id = "123e4567-e89b-12d3-a456-426655440000"
+   custom_obj.delete(object_id)
+   print("Object deleted successfully")
 except NotFoundError as e:
-    print(f"Object not found: {e.message}")
+   print(f"Object not found: {e.message}")
 ```
 
 </div>
@@ -210,22 +266,33 @@ except NotFoundError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import InvalidObjectError
+
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 # Prepare commit parameters
 commit_params = {
-    "folders": ["Texas"],
-    "description": "Configuration update",
-    "sync": True,
-    "timeout": 300  # 5 minute timeout
+   "folders": ["Texas"],
+   "description": "Configuration update",
+   "sync": True,
+   "timeout": 300  # 5 minute timeout
 }
 
 # Commit changes
 try:
-    result = custom_obj.commit(**commit_params)
-    print(f"Commit job ID: {result.job_id}")
+   result = custom_obj.commit(**commit_params)
+   print(f"Commit job ID: {result.job_id}")
 except InvalidObjectError as e:
-    print(f"Invalid commit parameters: {e.message}")
+   print(f"Invalid commit parameters: {e.message}")
 ```
 
 </div>
@@ -235,19 +302,31 @@ except InvalidObjectError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
+from scm.exceptions import InvalidObjectError
+
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 # Get status of specific job
 try:
-    job_status = custom_obj.get_job_status(result.job_id)
-    print(f"Job status: {job_status.data[0].status_str}")
+   # Assume result is from a previous commit operation
+   job_status = custom_obj.get_job_status(result.job_id)
+   print(f"Job status: {job_status.data[0].status_str}")
 
-    # List recent jobs
-    recent_jobs = custom_obj.list_jobs(limit=10)
-    for job in recent_jobs.data:
-        print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+   # List recent jobs
+   recent_jobs = custom_obj.list_jobs(limit=10)
+   for job in recent_jobs.data:
+      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 except InvalidObjectError as e:
-    print(f"Error checking job status: {e.message}")
+   print(f"Error checking job status: {e.message}")
 ```
 
 </div>
@@ -257,40 +336,49 @@ except InvalidObjectError as e:
 <div class="termy">
 
 <!-- termynal -->
-
 ```python
+from scm.client import ScmClient
+from scm.config.objects import BaseObject
 from scm.exceptions import (
-    InvalidObjectError,
-    NotFoundError,
-    AuthenticationError,
-    ServerError
+   InvalidObjectError,
+   NotFoundError,
+   AuthenticationError,
+   ServerError
 )
 
+# Initialize client and custom object
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+custom_obj = CustomObject(client)
+
 try:
-    # Attempt operation
-    result = custom_obj.create({
-        "name": "test-object",
-        "folder": "Texas"
-    })
+   # Attempt operation
+   result = custom_obj.create({
+      "name": "test-object",
+      "folder": "Texas"
+   })
 
-    # Commit changes
-    commit_result = custom_obj.commit(
-        folders=["Texas"],
-        description="Added test object",
-        sync=True
-    )
+   # Commit changes
+   commit_result = custom_obj.commit(
+      folders=["Texas"],
+      description="Added test object",
+      sync=True
+   )
 
-    # Check job status
-    status = custom_obj.get_job_status(commit_result.job_id)
+   # Check job status
+   status = custom_obj.get_job_status(commit_result.job_id)
 
 except InvalidObjectError as e:
-    print(f"Invalid object data: {e.message}")
+   print(f"Invalid object data: {e.message}")
 except NotFoundError as e:
-    print(f"Object not found: {e.message}")
+   print(f"Object not found: {e.message}")
 except AuthenticationError as e:
-    print(f"Authentication failed: {e.message}")
+   print(f"Authentication failed: {e.message}")
 except ServerError as e:
-    print(f"Server error: {e.message}")
+   print(f"Server error: {e.message}")
 ```
 
 </div>
@@ -298,41 +386,41 @@ except ServerError as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Prefer the unified client interface (`client.object_name`) for standard objects
-    - Only use the BaseObject approach for custom extensions or advanced use cases
-    - Perform commits directly on the client (`client.commit()`)
-    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
-    - Initialize the client once and reuse across different object types
+   - Prefer the unified client interface (`client.object_name`) for standard objects
+   - Only use the BaseObject approach for custom extensions or advanced use cases
+   - Perform commits directly on the client (`client.commit()`)
+   - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
+   - Initialize the client once and reuse across different object types
 
 2. **Object Initialization** (when using BaseObject directly)
-    - Define ENDPOINT in all subclasses
-    - Validate api_client type
-    - Use proper error handling
-    - Initialize logging appropriately
+   - Define ENDPOINT in all subclasses
+   - Validate api_client type
+   - Use proper error handling
+   - Initialize logging appropriately
 
 3. **CRUD Operations**
-    - Validate input data before operations
-    - Handle response data consistently
-    - Implement proper error handling
-    - Use appropriate timeouts
+   - Validate input data before operations
+   - Handle response data consistently
+   - Implement proper error handling
+   - Use appropriate timeouts
 
 4. **Job Management**
-    - Monitor commit job status
-    - Handle job failures appropriately
-    - Use sync mode judiciously
-    - Implement proper timeout handling
+   - Monitor commit job status
+   - Handle job failures appropriately
+   - Use sync mode judiciously
+   - Implement proper timeout handling
 
 5. **Error Handling**
-    - Catch specific exceptions first
-    - Log error details
-    - Provide meaningful error messages
-    - Implement proper retry logic
+   - Catch specific exceptions first
+   - Log error details
+   - Provide meaningful error messages
+   - Implement proper retry logic
 
 6. **Performance**
-    - Reuse object instances
-    - Configure appropriate pagination limits during client initialization
-    - Batch operations when possible
-    - Cache frequently accessed data
+   - Reuse object instances
+   - Configure appropriate pagination limits during client initialization
+   - Batch operations when possible
+   - Cache frequently accessed data
 
 ## Full Script Examples
 
@@ -340,6 +428,6 @@ Refer to the [examples](https://github.com/cdot65/pan-scm-sdk/tree/main/examples
 
 ## Related Models
 
-- [JobStatusResponse](../models/operations/jobs.md)
-- [JobListResponse](../models/operations/jobs.md)
-- [CandidatePushResponseModel](../models/operations/candidate_push.md)
+- [JobStatusResponse](../../models/operations/jobs.md)
+- [JobListResponse](../../models/operations/jobs.md)
+- [CandidatePushResponseModel](../../models/operations/candidate_push.md)
