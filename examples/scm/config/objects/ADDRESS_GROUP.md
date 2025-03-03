@@ -54,7 +54,7 @@ The script is organized into modular functions that each demonstrate a specific 
 ### Dynamic Address Group Examples
 - `create_dynamic_address_group()` - Creates a tag-based dynamic group
 - `create_complex_tag_filter_group()` - Creates a dynamic group with complex filter expression
-- `Note:` Address groups can only be static OR dynamic, not both
+- `Important Note:` Address groups can only be static OR dynamic, not both
 
 ### Nested Address Group Examples
 - `create_nested_address_group()` - Creates a group containing other groups
@@ -105,7 +105,7 @@ complex_group_config = {
     "folder": "Texas",
     "tag": ["Automation", "Example"],
     "dynamic": {
-        "filter": "'Automation' and ('Servers' or 'Database') and not 'Guest'"
+        "filter": "'Automation' and ('Servers' or 'Database')"
     }
 }
 ```
@@ -139,7 +139,22 @@ group_configs = [
         "tag": ["Automation", "Bulk", "Workstations"],
         "static": ["workstation-network"],
     },
-    # Additional groups...
+    {
+        "name": "all-endpoints-group",
+        "description": "All endpoints address group",
+        "folder": "Texas",
+        "tag": ["Automation", "Bulk"],  # Be careful with tag names - use only valid tags
+        "static": ["server1", "workstation-network", "guest-network"],
+    },
+    {
+        "name": "filter-web-group",
+        "description": "Web servers filter group",
+        "folder": "Texas",
+        "tag": ["Automation", "Bulk", "Web"],
+        "dynamic": {
+            "filter": "'Web' and 'Automation'"
+        },
+    }
 ]
 ```
 
@@ -260,14 +275,20 @@ The examples demonstrate the proper structure for each address group type:
 
 ### Complex Filter Expression
 
-The dynamic address group filter syntax supports complex expressions:
+The dynamic address group filter syntax supports expressions with logical operators:
 
 - **Basic Tag Match**: `'TagName'`
 - **AND Operator**: `'Tag1' and 'Tag2'`
 - **OR Operator**: `'Tag1' or 'Tag2'`
 - **NOT Operator**: `not 'Tag1'`
 - **Grouping**: `('Tag1' or 'Tag2') and 'Tag3'`
-- **Complex Example**: `'Automation' and not ('Development' or 'Testing')`
+- **Complex Example**: `'Automation' and ('Servers' or 'Database')`
+
+**Important Notes**:
+- Ensure proper syntax in your filter expressions
+- Make sure all tag names in the filter actually exist in your environment
+- Keep expressions as simple as possible to avoid syntax errors
+- Test your filter expressions carefully before deploying
 
 ## Programming Techniques Demonstrated
 
@@ -277,7 +298,7 @@ The example script showcases several important programming techniques:
 2. **Unique Naming** - Using UUID suffixes to avoid name conflicts
 3. **Modular Code Organization** - Separate functions for each address group type
 4. **Dependency Management** - Creating address objects before groups
-5. **Proper Cleanup** - Ensuring all created objects are deleted in the right order
+5. **Dependency-Aware Cleanup** - Smart deletion with retry logic and proper ordering
 6. **Logging** - Consistent and informative log messages with color coding
 7. **Command-line Arguments** - Flexible script execution with various options
 8. **Environment Variable Support** - Using .env files for credentials
@@ -307,6 +328,8 @@ The example script showcases several important programming techniques:
 4. **Tag Filter Expressions**
    - Keep filter expressions as simple as possible
    - Use parentheses to clarify complex expressions
+   - Ensure proper syntax in filter expressions to avoid errors
+   - Make sure tags in filter expressions actually exist in your environment
    - Document complex filters in the description field
    - Test filter expressions to ensure they match expected addresses
 
