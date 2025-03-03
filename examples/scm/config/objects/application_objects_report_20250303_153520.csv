@@ -1,0 +1,15 @@
+Object ID,Name,Category,Subcategory,Technology,Risk,Ports,Description,Tags,Security Attributes,Created On,Report Generation Time
+7e7f67a6-8f7b-40d1-85f8-76df30880abf,custom-db-d59efc,business-systems,database,client-server,4,None,Updated description for custom-db-d59efc,None,None,Unknown,2025-03-03 15:35:21
+fdf76555-a974-4c15-9cf4-7687c64b99c2,secure-app-9aa11d,collaboration,instant-messaging,peer-to-peer,1,None,Example secure messaging application,None,None,Unknown,2025-03-03 15:35:21
+264de04c-b503-4667-9aca-27d0be555186,high-risk-app-26e7b1,general-internet,file-sharing,peer-to-peer,5,None,Example high-risk file sharing application,None,"Used by Malware, Prone to Misuse",Unknown,2025-03-03 15:35:22
+da232f7d-1d5a-4d98-8b7c-b1caa137baf3,custom-protocol-294a5c,networking,ip-protocol,client-server,2,None,Example custom network protocol,None,None,Unknown,2025-03-03 15:35:22
+0cf44a8d-9f5e-4963-9c9e-368ca602be80,bulk-app-1-4062af,business-systems,database,client-server,2,None,Bulk created application 1,None,None,Unknown,2025-03-03 15:35:23
+5a4eab1a-ab71-4b16-9889-683a6625b022,bulk-app-2-2ac726,collaboration,instant-messaging,client-server,3,None,Bulk created application 2,None,None,Unknown,2025-03-03 15:35:23
+5f9554eb-d8a7-4153-b08b-30a59db972a3,bulk-protocol-910961,networking,ip-protocol,client-server,1,None,Bulk created protocol,None,None,Unknown,2025-03-03 15:35:24
+
+SUMMARY
+Total Objects Processed,7
+Successfully Retrieved,7
+Failed to Retrieve,0
+Execution Time (so far),45.73 seconds
+Report Generated On,2025-03-03 15:35:24
