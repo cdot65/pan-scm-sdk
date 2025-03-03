@@ -6,30 +6,34 @@ This directory contains extensive example scripts demonstrating how to use the P
 
 The `hip_profile.py` script showcases enterprise-ready HIP profile configurations addressing common host-based security needs, including:
 
-1. **Basic HIP Profile Configurations**:
-   - Simple match criteria - matching basic host attributes
-   - Complex match criteria - using logical operators (AND, OR, NOT)
-   - Security-focused profiles - checking for security software and controls
-   - Compliance-focused profiles - checking for encryption and patch management
+1. **Match Expression Types**:
+   - Simple match expressions - for basic host identification
+   - AND/OR logical operators - for combining multiple conditions
+   - NOT operators - for excluding specific hosts
+   - Complex nested expressions - for sophisticated policy requirements
 
-2. **HIP Profile Management Operations**:
-   - Creating HIP profiles in different locations (folders, snippets, devices)
-   - Retrieving and filtering profiles using various criteria
-   - Updating existing profiles to modify match expressions
-   - Bulk creation of profiles for different operating systems
+2. **HIP Profile Use Cases**:
+   - OS identification profiles (Windows, macOS, Linux)
+   - Security software validation (anti-malware, firewall)
+   - Compliance verification (encryption, patch management)
+   - Custom security posture assessments
 
-3. **Match Expressions**:
-   - Single condition matches (e.g., `"is-win"`)
-   - Multiple condition matches with AND/OR logic (e.g., `"is-win" and "is-firewall-enabled"`)
-   - Negated conditions using NOT operator (e.g., `not ("is-win")`)
-   - Complex expressions with nested conditions
+3. **Advanced Operations**:
+   - Creating profiles in different containers (folders, snippets, devices)
+   - Updating match expressions for existing profiles
+   - Filtering and searching profiles with various criteria
+   - Bulk creation and management operations
 
 4. **Operational Functions**:
-   - Bulk operations for mass configuration
+   - CSV report generation with profile details
    - Advanced filtering and search capabilities
    - Comprehensive error handling
    - Safe cleanup procedures
-   - CSV report generation
+
+5. **Reporting and Documentation**:
+   - Detailed CSV report generation
+   - Formatted output with color-coded logging
+   - Execution statistics and performance metrics
 
 ## Prerequisites
 
@@ -40,41 +44,35 @@ Before running the examples, you need:
 3. Python 3.10 or higher
 4. The PAN-SCM-SDK package installed (`pip install pan-scm-sdk`)
 5. A folder named "Texas" in your SCM environment (or modify the script)
-6. Existing HIP objects in your environment that match the ones used in the script
+6. Existing HIP objects in your environment that match the ones referenced in match expressions
 
 ## Script Organization
 
-The script is organized into modular functions that each demonstrate a specific HIP profile configuration pattern or operational task:
+The script is organized into modular functions that each demonstrate a specific HIP profile type or operational task:
 
-### Basic HIP Profile Examples
-- `create_basic_hip_profile()` - Simple single-condition profiles
-- `create_complex_hip_profile()` - Multi-condition profiles with AND/OR logic
-- `create_security_focused_hip_profile()` - Profiles checking for security software
-- `create_compliance_hip_profile()` - Profiles checking for compliance requirements
-
-### Container-Specific Examples
-- `create_hip_profile_with_snippet()` - Creating profiles in snippet containers
-- `create_hip_profile_with_device()` - Creating profiles in device containers
-- `create_negative_match_hip_profile()` - Creating profiles with NOT conditions
+### HIP Profile Creation Functions
+- `create_basic_hip_profile()` - Simple match expression profiles
+- `create_complex_hip_profile()` - Profiles with AND/OR logical operators
+- `create_negative_match_hip_profile()` - Profiles with NOT operators
+- `create_hip_profile_with_snippet()` - Profiles in snippet containers
+- `create_hip_profile_with_device()` - Profiles in device containers
 
 ### Operational Functions
-- `fetch_and_update_hip_profile()` - Updating existing profiles
-- `list_and_filter_hip_profiles()` - Filtering profiles with various criteria
-- `fetch_hip_profile_by_name()` - Retrieving a profile by name
+- `fetch_and_update_hip_profile()` - Modifying existing profiles
+- `list_and_filter_hip_profiles()` - Finding and filtering profiles
+- `fetch_hip_profile_by_name()` - Looking up profiles by name
+- `delete_hip_profile()` - Deleting individual profiles
 - `cleanup_hip_profiles()` - Safely removing test profiles
-- `generate_hip_profile_report()` - Creating CSV reports of profiles
-
-### Bulk Management
-- `create_bulk_hip_profiles()` - Creating multiple profiles programmatically
+- `generate_hip_profile_report()` - Creating comprehensive CSV reports
 
 ## Real-World HIP Profile Scenarios
 
-The example script demonstrates these common real-world HIP profile scenarios:
+The example script demonstrates these common real-world HIP profile patterns:
 
 ### 1. Basic Windows Host Profile
 ```python
 basic_profile_config = {
-    "name": "basic-hip-profile-12345",
+    "name": "basic-hip-profile-example",
     "description": "Example basic HIP profile with simple match criteria",
     "folder": "Texas",
     "match": '"is-win"',
@@ -83,51 +81,43 @@ basic_profile_config = {
 
 ### 2. Windows Host with Security Software
 ```python
-security_profile_config = {
-    "name": "security-hip-profile-12345",
-    "description": "Security-focused HIP profile checking for security software",
+complex_profile_config = {
+    "name": "complex-hip-profile-example",
+    "description": "Example HIP profile with complex match criteria using AND/OR logic",
     "folder": "Texas",
-    "match": '"is-win" and "is-anti-malware-and-rtp-enabled" and "is-firewall-enabled"',
+    "match": '"is-win" and "is-firewall-enabled"',
 }
 ```
 
-### 3. Compliance Requirements Profile
-```python
-compliance_profile_config = {
-    "name": "compliance-hip-profile-12345",
-    "description": "Compliance-focused HIP profile checking for encryption and patches",
-    "folder": "Texas",
-    "match": '"disk-encryption" = "yes" and "patch-management" = "yes"',
-}
-```
-
-### 4. Negative Match Expression
+### 3. Non-Windows Systems Profile
 ```python
 negative_profile_config = {
-    "name": "negative-hip-profile-12345",
-    "description": "HIP profile with negative match criteria",
+    "name": "negative-hip-profile-example",
+    "description": "Example HIP profile with negative match criteria",
     "folder": "Texas",
     "match": 'not ("is-win")',
 }
 ```
 
-### 5. OS-Specific Profiles (Bulk Creation)
+### 4. Complex Nested Expression
 ```python
-# Create multiple similar HIP profiles for different operating systems
-operating_systems = [
-    {"name": "Windows 10", "match": '"is-win" and "os-version" >= "10.0.0"'},
-    {"name": "Windows 11", "match": '"is-win" and "os-version" >= "11.0.0"'},
-    {"name": "macOS", "match": '"is-mac"'},
-    {"name": "Linux", "match": '"is-linux"'},
-]
+nested_profile_config = {
+    "name": "nested-hip-profile-example",
+    "description": "Example HIP profile with nested match criteria",
+    "folder": "Texas",
+    "match": '("is-win" and "is-firewall-enabled") or ("is-mac" and "is-encrypted")',
+}
+```
 
-for os_info in operating_systems:
-    profile_config = {
-        "name": f"{os_info['name'].lower()}-hip-profile-12345",
-        "description": f"HIP profile for {os_info['name']} systems",
-        "folder": "Texas",
-        "match": os_info["match"],
-    }
+### 5. Cross-Platform Security Profile
+```python
+security_profile_config = {
+    "name": "security-hip-profile-example",
+    "description": "Security profile for all operating systems",
+    "folder": "Texas",
+    "match": '("is-win" and "is-firewall-enabled" and "is-anti-malware-and-rtp-enabled") or ' +
+             '("is-mac" and "is-encrypted")',
+}
 ```
 
 ## Running the Example
@@ -165,24 +155,31 @@ Follow these steps to run the example:
    - You can also add these settings to your `.env` file:
      ```
      SCM_FOLDER=Texas
+     SKIP_CLEANUP=true  # To preserve created objects
      ```
 
-4. Run the script with options to customize behavior:
+4. Run the script with various options:
    ```bash
-   # Run all examples with default settings
+   # Run all examples
    python hip_profile.py
    
-   # Run only the basic profile examples
-   python hip_profile.py --basic
+   # Demonstrate only creation operations
+   python hip_profile.py --create
    
-   # Run only the security profile examples
-   python hip_profile.py --security
+   # Demonstrate only update operations
+   python hip_profile.py --update
    
-   # Skip cleanup to preserve created profiles
+   # Demonstrate only listing operations
+   python hip_profile.py --list
+   
+   # Demonstrate only deletion operations
+   python hip_profile.py --delete
+   
+   # Skip cleaning up created profiles
    python hip_profile.py --skip-cleanup
    
-   # Use a different folder
-   python hip_profile.py --folder "Production"
+   # Specify a different folder
+   python hip_profile.py --folder=Production
    ```
 
 5. Examine the console output to understand:
@@ -215,11 +212,13 @@ hip_profile_create = {
 
 ```python
 # Update model requires an ID
-hip_profile_update = HIPProfileUpdateModel(
-    id=profile_id,               # Required - UUID of the profile to update
-    name="profile-name",         # Required
-    match="new-match-expression", # Required
-    description="new-description", # Optional
+from scm.models.objects import HIPProfileUpdateModel
+
+update_model = HIPProfileUpdateModel(
+    id=profile_id,                  # Required - UUID of the profile to update
+    name="profile-name",            # Required
+    match="new-match-expression",   # Required
+    description="new-description",  # Optional
 )
 ```
 
@@ -244,60 +243,39 @@ not ("hipobject1")
 ("hipobject1" and "hipobject2") or "hipobject3"
 ```
 
-### Common Match Expression Examples
-
-```
-# Windows systems
-"is-win"
-
-# Windows systems with firewall
-"is-win" and "is-firewall-enabled"
-
-# Windows systems with anti-malware and real-time protection
-"is-win" and "is-anti-malware-and-rtp-enabled"
-
-# Windows systems with recent anti-malware scans (within 1 day)
-"is-win" and "is-anti-malware-installed-1day"
-
-# Windows systems with recent anti-malware scans (within 7 days)
-"is-win" and "is-anti-malware-installed-7days"
-
-# Windows systems with patch management
-"is-win" and "is-patch-management-enabled"
-
-# Non-Windows systems
-not ("is-win")
-```
-
 ## Programming Techniques Demonstrated
 
 The example script showcases several important programming techniques:
 
 1. **Error Handling** - Comprehensive try/except blocks for each API call
-2. **Pydantic Model Construction** - Both direct dictionary and explicit model building approaches
-3. **Bulk Operations** - Creating multiple related objects programmatically  
-4. **Unique Naming** - Using UUID suffixes to avoid name conflicts
-5. **Modular Code Organization** - Separate functions for each profile type
-6. **Proper Cleanup** - Ensuring all created objects are deleted
-7. **Logging** - Consistent and informative log messages
-8. **Object Model Conversion** - Converting between Pydantic models and dictionaries
+2. **Unique Naming** - Using UUID suffixes to avoid name conflicts
+3. **Modular Code Organization** - Separate functions for each profile type
+4. **Proper Cleanup** - Ensuring all created objects are deleted
+5. **Logging** - Consistent and informative log messages with color coding
+6. **Command-line Arguments** - Flexible script execution with various options
+7. **Environment Variable Support** - Using .env files for credentials
+8. **Progress Tracking** - Showing progress during lengthy operations
+9. **Performance Metrics** - Tracking and reporting execution statistics
 
 ## Best Practices
 
 1. **HIP Profile Design**
    - Use clear, descriptive names with consistent naming conventions
    - Document the purpose in the description field
-   - Keep match expressions as simple as possible while meeting requirements
-   - Test match expressions against actual endpoints
+   - Keep match expressions as simple as possible
+   - Group related criteria logically with proper parentheses
 
 2. **Match Expression Selection**
    - Use simple expressions for basic profiling
-   - Use compound expressions with AND/OR/NOT for complex requirements
-   - Consider using negated expressions to exclude specific hosts
+   - Use AND operators for combining mandatory criteria
+   - Use OR operators for alternatives
+   - Use NOT operators to exclude specific conditions
+   - Use parentheses to control evaluation order
 
-3. **Organization Best Practices**
-   - Group related profiles in a consistent folder structure
-   - Consider using naming conventions that reflect the purpose or policy requirement
+3. **Naming Conventions**
+   - Include the primary match criteria in the name
+   - Use consistent prefixes for similar profile types
+   - Consider including security level or environment information
 
 4. **API Usage**
    - Handle all exceptions appropriately
@@ -307,118 +285,6 @@ The example script showcases several important programming techniques:
 
 5. **Security Considerations**
    - Validate match expressions against sample devices
-   - Test on a limited set of endpoints before wide deployment
-   - Consider the performance impact of complex match expressions
-
-## Example Output
-
-```bash
-❯ poetry run python hip_profile.py --skip-cleanup
-2025-02-28 07:30:22 INFO
-2025-02-28 07:30:22 INFO     ================================================================================
-2025-02-28 07:30:22 INFO        AUTHENTICATION & INITIALIZATION
-2025-02-28 07:30:22 INFO     ================================================================================
-2025-02-28 07:30:22 INFO     ▶ STARTING: Loading credentials and initializing client
-2025-02-28 07:30:22 INFO     ✓ Loaded environment variables from /Users/cdot/PycharmProjects/cdot65/pan-scm-sdk/examples/scm/config/objects/.env
-2025-02-28 07:30:22 INFO     ✓ All required credentials found
-2025-02-28 07:30:22 INFO     ▶ STARTING: Creating SCM client
-2025-02-28 07:30:23 INFO     ✓ COMPLETED: SCM client initialization - TSG ID: 1540**2209
-2025-02-28 07:30:23 INFO
-2025-02-28 07:30:23 INFO     ================================================================================
-2025-02-28 07:30:23 INFO        HIP PROFILE CONFIGURATION
-2025-02-28 07:30:23 INFO     ================================================================================
-2025-02-28 07:30:23 INFO     ▶ STARTING: Initializing HIP profile manager
-2025-02-28 07:30:23 INFO     ✓ COMPLETED: HIP profile manager initialization
-2025-02-28 07:30:23 INFO
-2025-02-28 07:30:23 INFO     ================================================================================
-2025-02-28 07:30:23 INFO        HIP PROFILE CREATION
-2025-02-28 07:30:23 INFO     ================================================================================
-2025-02-28 07:30:23 INFO     Demonstrating HIP profile creation with various match expressions
-2025-02-28 07:30:23 INFO     Using folder: Texas
-2025-02-28 07:30:23 INFO     ▶ STARTING: Creating basic HIP profile with simple match criteria
-2025-02-28 07:30:23 INFO     Profile name: basic-hip-profile-9139c7
-2025-02-28 07:30:23 INFO     Configuration details:
-2025-02-28 07:30:23 INFO       - Name: basic-hip-profile-9139c7
-2025-02-28 07:30:23 INFO       - Match: "is-win"
-2025-02-28 07:30:23 INFO       - Container: folder 'Texas'
-2025-02-28 07:30:23 INFO     Sending request to Strata Cloud Manager API...
-2025-02-28 07:30:23 INFO     ✓ Created HIP profile: basic-hip-profile-9139c7
-2025-02-28 07:30:23 INFO       - Profile ID: 4c4530cd-01af-473b-a2f7-b46bdee68dc5
-2025-02-28 07:30:23 INFO       - Match criteria: "is-win"
-2025-02-28 07:30:23 INFO     ✓ COMPLETED: Basic HIP profile creation - Profile: basic-hip-profile-9139c7
-2025-02-28 07:30:23 INFO     ▶ STARTING: Creating HIP profile with complex match criteria
-2025-02-28 07:30:23 INFO     Profile name: complex-hip-profile-212e13
-2025-02-28 07:30:23 INFO     Configuration details:
-2025-02-28 07:30:23 INFO       - Name: complex-hip-profile-212e13
-2025-02-28 07:30:23 INFO       - Match: "is-win" and "is-firewall-enabled"
-2025-02-28 07:30:23 INFO       - Container: folder 'Texas'
-2025-02-28 07:30:23 INFO     Sending request to Strata Cloud Manager API...
-2025-02-28 07:30:23 INFO     ✓ Created HIP profile: complex-hip-profile-212e13
-2025-02-28 07:30:23 INFO       - Profile ID: 18a69eca-e198-40ec-8c56-9c4d1fc8588b
-2025-02-28 07:30:23 INFO       - Match criteria: "is-win" and "is-firewall-enabled"
-2025-02-28 07:30:23 INFO     ✓ COMPLETED: Complex HIP profile creation - Profile: complex-hip-profile-212e13
-2025-02-28 07:30:23 INFO
-2025-02-28 07:30:23 INFO     ================================================================================
-2025-02-28 07:30:23 INFO        LISTING AND FILTERING HIP PROFILES
-2025-02-28 07:30:23 INFO     ================================================================================
-2025-02-28 07:30:28 INFO     ▶ STARTING: Listing and filtering HIP profiles
-2025-02-28 07:30:29 INFO     ✓ Found 21 HIP profiles in the Texas folder
-2025-02-28 07:30:29 INFO     Found 1 HIP profiles directly in the Texas folder
-2025-02-28 07:30:29 INFO     Found 21 HIP profiles excluding 'Texas/SubFolder'
-2025-02-28 07:30:29 INFO
-Details of HIP profiles:
-2025-02-28 07:30:29 INFO       - Profile: is-win-and-anti-malware
-2025-02-28 07:30:29 INFO         ID: c56a5f2c-6f6a-459d-a223-e3e7718391f3
-2025-02-28 07:30:29 INFO         Match: "is-win"  and "is-anti-malware-and-rtp-enabled"
-2025-02-28 07:30:29 INFO         Description: Matches Windows endpoints that have anti-malware software installed
-2025-02-28 07:30:29 INFO
-2025-02-28 07:30:29 INFO       - Profile: is-win-and-anti-malware-1day
-2025-02-28 07:30:29 INFO         ID: e08e8d45-426d-4a50-b0f7-d1c6a609b4fd
-2025-02-28 07:30:29 INFO         Match: "is-win"  and "is-anti-malware-installed-1day"
-2025-02-28 07:30:29 INFO         Description: Matches Windows endpoints that have anti-malware software installed and a Last Scan Time and Virus Definition within 1 day
-2025-02-28 07:30:29 INFO
-2025-02-28 07:30:29 INFO       - Profile: is-win-and-anti-malware-7days
-2025-02-28 07:30:29 INFO         ID: 40291007-729a-445e-9431-cc6c6593d5af
-2025-02-28 07:30:29 INFO         Match: "is-win"  and "is-anti-malware-installed-7days"
-2025-02-28 07:30:29 INFO         Description: Matches Windows endpoints that have anti-malware software installed and a Last Scan Time and Virus Definition within 7 days
-2025-02-28 07:30:29 INFO
-2025-02-28 07:30:29 INFO       - Profile: is-win-and-firewall
-2025-02-28 07:30:29 INFO         ID: 62882bd5-631e-4b93-8bd9-a06b8ff03208
-2025-02-28 07:30:29 INFO         Match: "is-win"  and "is-firewall-enabled"
-2025-02-28 07:30:29 INFO         Description: Matches Windows endpoints that have firewall software installed and enabled
-2025-02-28 07:30:29 INFO
-2025-02-28 07:30:29 INFO       - Profile: is-win-and-patch-management
-2025-02-28 07:30:29 INFO         ID: d015823d-cf5a-4c65-819c-bf902b23ace4
-2025-02-28 07:30:29 INFO         Match: "is-win"  and "is-patch-management-enabled"
-2025-02-28 07:30:29 INFO         Description: Matches Windows endpoints that have patch management software installed and enabled
-2025-02-28 07:30:29 INFO
-2025-02-28 07:30:29 INFO
-2025-02-28 07:30:29 INFO     ================================================================================
-2025-02-28 07:30:29 INFO        EXECUTION SUMMARY
-2025-02-28 07:30:29 INFO     ================================================================================
-2025-02-28 07:30:29 INFO     ✓ Example script completed successfully
-2025-02-28 07:30:29 INFO     Total HIP profiles created: 2
-2025-02-28 07:30:29 INFO     Total execution time: 0 minutes 7 seconds
-```
-
-## CSV Report Example
-
-When the script generates a CSV report, it will look similar to the following:
-
-```csv
-Profile ID,Name,Description,Match Criteria,Folder,Report Generation Time
-4c4530cd-01af-473b-a2f7-b46bdee68dc5,basic-hip-profile-9139c7,Example basic HIP profile with simple match criteria,"is-win",Texas,2025-02-28 07:30:29
-18a69eca-e198-40ec-8c56-9c4d1fc8588b,complex-hip-profile-212e13,Example HIP profile with complex match criteria using AND/OR logic,"is-win" and "is-firewall-enabled",Texas,2025-02-28 07:30:29
-d015823d-cf5a-4c65-819c-bf902b23ace4,is-win-and-patch-management,Matches Windows endpoints that have patch management software installed and enabled,"is-win"  and "is-patch-management-enabled",Texas,2025-02-28 07:30:29
-62882bd5-631e-4b93-8bd9-a06b8ff03208,is-win-and-firewall,Matches Windows endpoints that have firewall software installed and enabled,"is-win"  and "is-firewall-enabled",Texas,2025-02-28 07:30:29
-40291007-729a-445e-9431-cc6c6593d5af,is-win-and-anti-malware-7days,Matches Windows endpoints that have anti-malware software installed and a Last Scan Time and Virus Definition within 7 days,"is-win"  and "is-anti-malware-installed-7days",Texas,2025-02-28 07:30:29
-e08e8d45-426d-4a50-b0f7-d1c6a609b4fd,is-win-and-anti-malware-1day,Matches Windows endpoints that have anti-malware software installed and a Last Scan Time and Virus Definition within 1 day,"is-win"  and "is-anti-malware-installed-1day",Texas,2025-02-28 07:30:29
-c56a5f2c-6f6a-459d-a223-e3e7718391f3,is-win-and-anti-malware,Matches Windows endpoints that have anti-malware software installed,"is-win"  and "is-anti-malware-and-rtp-enabled",Texas,2025-02-28 07:30:29
-
-SUMMARY
-Total Profiles Processed,7
-Successfully Retrieved,7
-Failed to Retrieve,0
-Execution Time (so far),6.82 seconds
-Report Generated On,2025-02-28 07:30:29
-```
+   - Test on limited endpoints before wide deployment
+   - Consider impact of complex expressions on performance
+   - Follow principle of least privilege for permissions
