@@ -1,0 +1,18 @@
+Object ID,Name,Type,Source URL,Update Schedule,Container Type,Container Name,Additional Features,Report Generation Time
+5ea54931-955c-4251-861b-6ebc7ad5d65f,ip-threat-feed-f92a82,IP List,https://www.example.com/threat-feeds/ip-blocklist.txt,Daily at 02:00,Folder,Texas,None,2025-03-03 16:44:29
+4626b188-a6b5-4865-ad2c-fd9c14badd1f,domain-blocklist-05f7af,Domain List,https://www.example.com/threat-feeds/domain-blocklist.txt,Daily at 01:00,Folder,Texas,Expand Domain,2025-03-03 16:44:30
+fed9364e-dfdd-4173-b50d-96a6399c338e,url-malware-feed-d1c707,URL List,https://www.example.com/threat-feeds/malware-urls.txt,N/A,Folder,Texas,Basic Authentication,2025-03-03 16:44:30
+648494fd-88c4-4418-8020-f59f0b5ee673,panw-ip-blocklist-1e3b3c,Predefined IP List,Palo Alto Networks maintained,N/A,Folder,Texas,Predefined: panw-bulletproof-ip-list,2025-03-03 16:44:31
+ff75151b-2a08-4b20-b918-44798fd47d5d,blocked-imsi-86cf39,IMSI List,https://www.example.com/mobile/blocked-imsi.txt,Weekly on monday at 02:00,Folder,Texas,None,2025-03-03 16:44:31
+ef30077b-a68e-4de5-9437-876698785628,stolen-imei-260eb2,IMEI List,https://www.example.com/mobile/stolen-imei.txt,Monthly on day 1 at 03:00,Folder,Texas,None,2025-03-03 16:44:32
+451f1e24-cae9-46fb-8fb5-871327821394,bulk-ip-feed-e85b94,IP List,https://www.example.com/bulk/ip-feed1.txt,Daily at 03:00,Folder,Texas,None,2025-03-03 16:44:32
+39d9b242-a6bd-4bee-acd2-a59dbe3d4973,bulk-ip-feed-9014c0,IP List,https://www.example.com/bulk/ip-feed2.txt,Daily at 03:00,Folder,Texas,None,2025-03-03 16:44:33
+4c1da43f-e5ec-4976-9c1a-c7f2e0191d6d,bulk-domain-feed-1f566b,Domain List,https://www.example.com/bulk/domain-feed.txt,Daily at 03:00,Folder,Texas,Expand Domain,2025-03-03 16:44:33
+5254ec80-2b1f-4e68-b83d-abd2594e1acb,bulk-url-feed-98243d,URL List,https://www.example.com/bulk/url-feed.txt,Daily at 03:00,Folder,Texas,None,2025-03-03 16:44:34
+
+SUMMARY
+Total Objects Processed,10
+Successfully Retrieved,10
+Failed to Retrieve,0
+Execution Time (so far),12.79 seconds
+Report Generated On,2025-03-03 16:44:34
