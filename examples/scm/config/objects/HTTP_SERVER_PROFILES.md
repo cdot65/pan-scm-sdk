@@ -248,8 +248,8 @@ Follow these steps to run the example:
    # Run only listing examples
    python http_server_profiles.py --list
    
-   # Generate a CSV report
-   python http_server_profiles.py --generate-report
+   # Skip CSV report generation
+   python http_server_profiles.py --no-report
    
    # Skip cleanup to preserve created profiles
    python http_server_profiles.py --skip-cleanup

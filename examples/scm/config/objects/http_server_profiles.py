@@ -1211,9 +1211,9 @@ def parse_arguments():
 
     # Report generation
     parser.add_argument(
-        "--generate-report",
+        "--no-report", 
         action="store_true",
-        help="Generate a CSV report of all created HTTP server profiles",
+        help="Skip CSV report generation"
     )
 
     # Operations to demonstrate
@@ -1276,9 +1276,7 @@ def main():
 
     # Determine whether to generate a report
     # Command-line argument takes precedence over environment variable
-    generate_report = (
-        args.generate_report or os.environ.get("GENERATE_REPORT", "").lower() == "true"
-    )
+    skip_report = args.no_report or os.environ.get("NO_REPORT", "").lower() == "true"
 
     # Determine which operations to demonstrate
     # If no specific operations are specified, demonstrate all (default behavior)
@@ -1388,12 +1386,10 @@ def main():
             else:
                 log_warning("No profiles were created to delete")
 
-        # Generate report if enabled
-        if generate_report and created_profiles:
-            log_section("GENERATING HTTP SERVER PROFILE REPORT")
-            log_operation_start(
-                f"Generating report for {len(created_profiles)} HTTP server profiles"
-            )
+        # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
+        if created_profiles and not skip_report:
+            log_section("REPORT GENERATION")
+            log_operation_start(f"Generating HTTP server profiles CSV report")
 
             # Calculate execution time so far
             current_time = __import__("time").time()
@@ -1405,12 +1401,14 @@ def main():
             )
 
             if report_file:
-                log_success(
-                    f"Successfully generated HTTP server profile report: {report_file}"
-                )
-                log_operation_complete("HTTP server profile report generation")
+                log_success(f"Generated HTTP server profiles report: {report_file}")
+                log_info(f"The report contains details of all {len(created_profiles)} HTTP server profiles created")
             else:
-                log_error("Failed to generate HTTP server profile report")
+                log_error("Failed to generate HTTP server profiles report")
+        elif skip_report:
+            log_info("Report generation disabled by --no-report flag")
+        else:
+            log_info("No HTTP server profiles were created, skipping report generation")
 
         # Clean up the created profiles, unless skip_cleanup is true
         if created_profiles:
