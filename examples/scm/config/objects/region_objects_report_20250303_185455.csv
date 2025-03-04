@@ -1,0 +1,14 @@
+Object ID,Name,Description,Tags,Latitude,Longitude,Addresses,Folder,Created On,Report Generation Time
+9853537a-6176-439e-8a1d-4842c8c1f1d3,us-west-7bb004,None,None,37.7849,-122.40939999999999,"198.18.0.0/15, 203.0.113.0/24",Texas,Unknown,2025-03-03 18:54:55
+77a5bfef-7c00-4cfe-b13f-c2690c0b6068,corp-net-5674a9,None,None,N/A,N/A,"10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16",Texas,Unknown,2025-03-03 18:54:55
+b217791b-3ee6-4b52-b885-3a8f11e6396f,nyc-region-ee5549,None,None,40.7128,-74.006,"198.51.100.0/24, 203.0.113.0/24",Texas,Unknown,2025-03-03 18:54:55
+9ca3c573-117c-4f93-92e3-fadffdaf8d92,eu-west-0ff87b,None,None,51.5074,-0.1278,198.51.100.0/24,Texas,Unknown,2025-03-03 18:54:56
+354b3c33-6bbb-497f-af40-fe9f82ad04d9,eu-central-1a33d0,None,None,52.52,13.405,203.0.113.0/24,Texas,Unknown,2025-03-03 18:54:56
+a72cf1a4-25d2-4766-a65d-58ec0334d470,asia-east-21e021,None,None,35.6762,139.6503,192.0.2.0/24,Texas,Unknown,2025-03-03 18:54:56
+
+SUMMARY
+Total Objects Processed,6
+Successfully Retrieved,6
+Failed to Retrieve,0
+Execution Time (so far),3.78 seconds
+Report Generated On,2025-03-03 18:54:56
