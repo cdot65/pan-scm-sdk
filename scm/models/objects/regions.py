@@ -39,8 +39,17 @@ class RegionBaseModel(BaseModel):
     """
     Base model for Region objects containing fields common to all CRUD operations.
 
+    Note:
+        Although this model supports 'description' and 'tag' fields for consistency
+        with other object types in the SDK, these fields are not supported by the
+        Strata Cloud Manager API for Region objects. They will be automatically
+        excluded when sending requests to the API, but can be used locally for
+        organizing and managing region objects within your application.
+
     Attributes:
         name (str): The name of the region.
+        description (Optional[str]): A description of the region (not sent to API).
+        tag (Optional[List[str]]): A list of tags associated with the region (not sent to API).
         geo_location (Optional[GeoLocation]): The geographic location of the region.
         address (Optional[List[str]]): A list of addresses associated with the region.
         folder (Optional[str]): The folder in which the resource is defined.
@@ -55,6 +64,14 @@ class RegionBaseModel(BaseModel):
     )
 
     # Optional fields
+    description: Optional[str] = Field(
+        None,
+        description="A description of the region",
+    )
+    tag: Optional[List[str]] = Field(
+        None,
+        description="A list of tags associated with the region",
+    )
     geo_location: Optional[GeoLocation] = Field(
         None,
         description="The geographic location of the region",
@@ -88,8 +105,8 @@ class RegionBaseModel(BaseModel):
         arbitrary_types_allowed=True,
     )
 
-    # Custom validator to ensure addresses are unique
-    @field_validator("address", mode="before")
+    # Custom validator to ensure addresses and tags are unique
+    @field_validator("address", "tag", mode="before")
     def ensure_list_of_strings(cls, v):  # noqa
         if v is None:
             return v
@@ -98,12 +115,18 @@ class RegionBaseModel(BaseModel):
         if isinstance(v, list):
             return v
         # Catch all other types
-        raise ValueError("Address must be a string or a list of strings")
+        raise ValueError("Value must be a string or a list of strings")
 
     @field_validator("address")
     def ensure_unique_addresses(cls, v):  # noqa
         if v is not None and len(v) != len(set(v)):
             raise ValueError("List of addresses must contain unique values")
+        return v
+    
+    @field_validator("tag")
+    def ensure_unique_tags(cls, v):  # noqa
+        if v is not None and len(v) != len(set(v)):
+            raise ValueError("List of tags must contain unique values")
         return v
 
 
