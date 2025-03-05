@@ -12,6 +12,7 @@ from scm.models.network import (
     SecurityZoneCreateModel,
     SecurityZoneResponseModel,
     SecurityZoneUpdateModel,
+    NetworkConfig,
 )
 
 
@@ -184,6 +185,131 @@ class TestSecurityZone(TestSecurityZoneBase):
         assert len(result) == 1
         assert isinstance(result[0], SecurityZoneResponseModel)
         assert result[0].name == sample_security_zone_dict["name"]
+        
+    def test_list_response_errors(self):
+        """Test list method error handling for invalid responses."""
+        # Test non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(folder="Test Folder")
+        assert "Response is not a dictionary" in str(excinfo.value)
+        
+        # Test missing data field
+        self.mock_scm.get.return_value = {"no_data": "field"}
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(folder="Test Folder")
+        assert "\"data\" field missing in the response" in str(excinfo.value)
+        
+        # Test data field not a list
+        self.mock_scm.get.return_value = {"data": "not a list"}
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(folder="Test Folder")
+        assert "\"data\" field must be a list" in str(excinfo.value)
+        
+    def test_list_pagination(self, sample_security_zone_dict):
+        """Test list method pagination."""
+        # Create multiple pages of data
+        zone1 = sample_security_zone_dict.copy()
+        zone1["id"] = str(uuid.uuid4())
+        zone1["name"] = "zone1"
+        
+        zone2 = sample_security_zone_dict.copy()
+        zone2["id"] = str(uuid.uuid4())
+        zone2["name"] = "zone2"
+        
+        # Mock responses for pagination
+        self.mock_scm.get.side_effect = [
+            # First page
+            {
+                "data": [zone1],
+                "limit": 1,
+                "offset": 0,
+                "total": 2
+            },
+            # Second page
+            {
+                "data": [zone2],
+                "limit": 1,
+                "offset": 1,
+                "total": 2
+            },
+            # Empty page (to end pagination)
+            {
+                "data": [],
+                "limit": 1,
+                "offset": 2,
+                "total": 2
+            }
+        ]
+        
+        # Set a small limit to force pagination
+        self.client.max_limit = 1
+        result = self.client.list(folder="Test Folder")
+        
+        # Should have made 3 calls (2 pages + 1 empty page to end pagination)
+        assert self.mock_scm.get.call_count == 3
+        
+        # We should get both zones in the result
+        assert len(result) == 2
+        zone_names = [zone.name for zone in result]
+        assert "zone1" in zone_names
+        assert "zone2" in zone_names
+        
+    def test_list_with_exclusions(self, sample_security_zone_dict):
+        """Test list method with exclusion filters."""
+        # Create multiple zones with different containers
+        zone1 = sample_security_zone_dict.copy()
+        zone1["id"] = str(uuid.uuid4())
+        zone1["name"] = "zone1"
+        zone1["folder"] = "Folder1"
+        
+        zone2 = sample_security_zone_dict.copy()
+        zone2["id"] = str(uuid.uuid4())
+        zone2["name"] = "zone2"
+        zone2["folder"] = "Folder2"
+        
+        zone3 = sample_security_zone_dict.copy()
+        zone3["id"] = str(uuid.uuid4())
+        zone3["name"] = "zone3"
+        zone3["folder"] = "Folder1"
+        zone3["snippet"] = "Snippet1"
+        
+        zone4 = sample_security_zone_dict.copy()
+        zone4["id"] = str(uuid.uuid4())
+        zone4["name"] = "zone4"
+        zone4["folder"] = "Folder1"
+        zone4["device"] = "Device1"
+        
+        self.mock_scm.get.return_value = {
+            "data": [zone1, zone2, zone3, zone4],
+            "limit": 100,
+            "offset": 0,
+            "total": 4
+        }
+        
+        # Test exact_match filter
+        result = self.client.list(folder="Folder1", exact_match=True)
+        assert len(result) == 3  # Should match zone1, zone3, zone4
+        
+        # Test exclude_folders filter
+        result = self.client.list(folder="Folder1", exclude_folders=["Folder2"])
+        assert len(result) == 3  # Should exclude only zone2
+        
+        # Test exclude_snippets filter
+        result = self.client.list(folder="Folder1", exclude_snippets=["Snippet1"])
+        assert len(result) == 3  # Should exclude zone3
+        
+        # Test exclude_devices filter
+        result = self.client.list(folder="Folder1", exclude_devices=["Device1"])
+        assert len(result) == 3  # Should exclude zone4
+        
+        # Test combining multiple exclusions
+        result = self.client.list(
+            folder="Folder1",
+            exclude_snippets=["Snippet1"],
+            exclude_devices=["Device1"]
+        )
+        assert len(result) == 2  # Should exclude zone3 and zone4
 
     def test_list_with_empty_folder(self):
         """Test list method with empty folder parameter."""
@@ -213,11 +339,15 @@ class TestSecurityZone(TestSecurityZoneBase):
         zone1["id"] = str(uuid.uuid4())
         zone1["name"] = "zone1"
         zone1["enable_user_identification"] = True
+        zone1["enable_device_identification"] = True
+        zone1["network"] = {"layer3": ["ethernet1/1"], "zone_protection_profile": "default"}
         
         zone2 = sample_security_zone_dict.copy()
         zone2["id"] = str(uuid.uuid4())
         zone2["name"] = "zone2"
         zone2["enable_user_identification"] = False
+        zone2["enable_device_identification"] = False
+        zone2["network"] = {"layer2": ["ethernet1/2"]}
         
         self.mock_scm.get.return_value = {
             "data": [zone1, zone2],
@@ -235,13 +365,46 @@ class TestSecurityZone(TestSecurityZoneBase):
         assert len(result) == 1
         assert result[0].name == "zone1"
         
-        # Test with invalid filter type
+        # Test filtering by enable_device_identification
+        result = self.client.list(
+            folder="Test Folder", 
+            enable_device_identification=True
+        )
+        
+        assert len(result) == 1
+        assert result[0].name == "zone1"
+        
+        # Test filtering by network_type
+        result = self.client.list(
+            folder="Test Folder", 
+            network_type=["layer3"]
+        )
+        
+        assert len(result) == 1
+        assert result[0].name == "zone1"
+        
+        # Test with invalid filter type for enable_user_identification
         with pytest.raises(InvalidObjectError) as excinfo:
             self.client.list(
                 folder="Test Folder", 
                 enable_user_identification="not-a-boolean"
             )
+        assert "Invalid Object" in str(excinfo.value)
         
+        # Test with invalid filter type for enable_device_identification
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(
+                folder="Test Folder", 
+                enable_device_identification="not-a-boolean"
+            )
+        assert "Invalid Object" in str(excinfo.value)
+        
+        # Test with invalid filter type for network_type
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(
+                folder="Test Folder", 
+                network_type="layer3"  # Should be a list
+            )
         assert "Invalid Object" in str(excinfo.value)
 
     def test_fetch(self, sample_security_zone_dict):
@@ -267,6 +430,13 @@ class TestSecurityZone(TestSecurityZoneBase):
             self.client.fetch(name="", folder="Test Folder")
             
         assert '"name" is not allowed to be empty' in str(excinfo.value)
+        
+    def test_fetch_with_empty_folder(self):
+        """Test fetch method with empty folder parameter."""
+        with pytest.raises(MissingQueryParameterError) as excinfo:
+            self.client.fetch(name="test-zone", folder="")
+            
+        assert '"folder" is not allowed to be empty' in str(excinfo.value)
     
     def test_fetch_with_missing_container(self):
         """Test fetch method with missing container parameter."""
@@ -284,3 +454,58 @@ class TestSecurityZone(TestSecurityZoneBase):
             self.client.fetch(name="test-zone", folder="Test Folder")
             
         assert "Response missing 'id' field" in str(excinfo.value)
+        
+    def test_fetch_response_errors(self):
+        """Test fetch method error handling for invalid responses."""
+        # Test non-dictionary response
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="test-zone", folder="Test Folder")
+        assert "Response is not a dictionary" in str(excinfo.value)
+        
+        # Test list-style response (should have direct object, not list)
+        self.mock_scm.get.return_value = {
+            "data": [{"id": "123", "name": "test-zone"}]
+        }
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="test-zone", folder="Test Folder")
+        assert "Response missing 'id' field" in str(excinfo.value)
+        
+    def test_network_config_validation(self):
+        """Test validation of NetworkConfig to ensure only one network type is configured."""
+        # Valid configuration with one network type
+        valid_config = NetworkConfig(layer3=["ethernet1/1"])
+        assert valid_config.layer3 == ["ethernet1/1"]
+        
+        # Invalid configuration with multiple network types
+        with pytest.raises(ValueError) as excinfo:
+            NetworkConfig(
+                layer3=["ethernet1/1"],
+                layer2=["ethernet1/2"]
+            )
+        assert "Only one network interface type can be configured at a time" in str(excinfo.value)
+    
+    def test_security_zone_create_model_container_validation(self):
+        """Test validation of SecurityZoneCreateModel to ensure one container field is provided."""
+        # Valid model with one container field
+        valid_model = SecurityZoneCreateModel(
+            name="test-zone",
+            folder="Test Folder"
+        )
+        assert valid_model.folder == "Test Folder"
+        
+        # Invalid model with no container fields
+        with pytest.raises(ValueError) as excinfo:
+            SecurityZoneCreateModel(
+                name="test-zone"
+            )
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(excinfo.value)
+        
+        # Invalid model with multiple container fields
+        with pytest.raises(ValueError) as excinfo:
+            SecurityZoneCreateModel(
+                name="test-zone",
+                folder="Test Folder",
+                snippet="Test Snippet"
+            )
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(excinfo.value)

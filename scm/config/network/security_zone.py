@@ -21,7 +21,7 @@ from scm.models.network import (
 class SecurityZone(BaseObject):
     """
     Manages Security Zone objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -206,7 +206,8 @@ class SecurityZone(BaseObject):
                 )
             enable_user_id = filters["enable_user_identification"]
             filter_criteria = [
-                zone for zone in filter_criteria 
+                zone
+                for zone in filter_criteria
                 if zone.enable_user_identification == enable_user_id
             ]
 
@@ -221,7 +222,8 @@ class SecurityZone(BaseObject):
                 )
             enable_device_id = filters["enable_device_identification"]
             filter_criteria = [
-                zone for zone in filter_criteria 
+                zone
+                for zone in filter_criteria
                 if zone.enable_device_identification == enable_device_id
             ]
 
@@ -236,9 +238,11 @@ class SecurityZone(BaseObject):
                 )
             network_types = filters["network_type"]
             filter_criteria = [
-                zone for zone in filter_criteria
-                if zone.network and any(
-                    getattr(zone.network, network_type) is not None 
+                zone
+                for zone in filter_criteria
+                if zone.network
+                and any(
+                    getattr(zone.network, network_type) is not None
                     for network_type in network_types
                 )
             ]

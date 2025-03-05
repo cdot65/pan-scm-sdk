@@ -13,7 +13,7 @@ from pydantic import (
 
 class NetworkInterfaceType(str, Enum):
     """Types of network interfaces for security zones."""
-    
+
     TAP = "tap"
     VIRTUAL_WIRE = "virtual_wire"
     LAYER2 = "layer2"
@@ -24,7 +24,7 @@ class NetworkInterfaceType(str, Enum):
 
 class UserAcl(BaseModel):
     """User access control list configuration."""
-    
+
     include_list: Optional[List[str]] = Field(
         default_factory=list,
         description="List of users to include",
@@ -37,7 +37,7 @@ class UserAcl(BaseModel):
 
 class DeviceAcl(BaseModel):
     """Device access control list configuration."""
-    
+
     include_list: Optional[List[str]] = Field(
         default_factory=list,
         description="List of devices to include",
@@ -50,12 +50,12 @@ class DeviceAcl(BaseModel):
 
 class NetworkConfig(BaseModel):
     """Network configuration for security zones."""
-    
+
     model_config = ConfigDict(
         validate_assignment=True,
         extra="forbid",
     )
-    
+
     zone_protection_profile: Optional[str] = Field(
         None,
         description="Zone protection profile name",
@@ -68,7 +68,7 @@ class NetworkConfig(BaseModel):
         None,
         description="Log setting name",
     )
-    
+
     # Network interface configurations - only one can be used at a time
     tap: Optional[List[str]] = None
     virtual_wire: Optional[List[str]] = None
@@ -76,7 +76,7 @@ class NetworkConfig(BaseModel):
     layer3: Optional[List[str]] = None
     tunnel: Optional[Dict[str, Any]] = None
     external: Optional[List[str]] = None
-    
+
     @model_validator(mode="after")
     def validate_network_type(self) -> "NetworkConfig":
         """Validate that only one network interface type is configured."""
@@ -86,33 +86,34 @@ class NetworkConfig(BaseModel):
             self.layer2,
             self.layer3,
             self.tunnel,
-            self.external
+            self.external,
         ]
-        
+
         # Filter out None values
         configured_types = [t for t in network_types if t is not None]
-        
+
         # Check if more than one type is configured
         if len(configured_types) > 1:
             raise ValueError(
                 "Only one network interface type can be configured at a time"
             )
-            
+
         return self
 
 
 class SecurityZoneBaseModel(BaseModel):
     """Base model for Security Zones containing fields common to all operations."""
-    
+
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
     )
-    
-    name: constr(pattern=r"^[0-9a-zA-Z._-]+$") = Field(
+
+    name: str = Field(
         ...,
         description="The name of the security zone",
+        pattern=r"^[0-9a-zA-Z._-]+$",  # Pattern moved to Field for linting compatibility
         max_length=63,
     )
     enable_user_identification: Optional[bool] = Field(
@@ -143,7 +144,7 @@ class SecurityZoneBaseModel(BaseModel):
         None,
         description="Device access control list",
     )
-    
+
     # Container fields
     folder: Optional[str] = Field(
         None,
@@ -167,7 +168,7 @@ class SecurityZoneBaseModel(BaseModel):
 
 class SecurityZoneCreateModel(SecurityZoneBaseModel):
     """Model for creating new Security Zones."""
-    
+
     @model_validator(mode="after")
     def validate_container(self) -> "SecurityZoneCreateModel":
         container_fields = ["folder", "snippet", "device"]
@@ -183,7 +184,7 @@ class SecurityZoneCreateModel(SecurityZoneBaseModel):
 
 class SecurityZoneUpdateModel(SecurityZoneBaseModel):
     """Model for updating existing Security Zones."""
-    
+
     id: UUID = Field(
         ...,
         description="The UUID of the security zone",
@@ -193,7 +194,7 @@ class SecurityZoneUpdateModel(SecurityZoneBaseModel):
 
 class SecurityZoneResponseModel(SecurityZoneBaseModel):
     """Model for Security Zone responses."""
-    
+
     id: UUID = Field(
         ...,
         description="The UUID of the security zone",

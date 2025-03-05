@@ -431,6 +431,10 @@ class Scm:
                 "scm.config.network.nat_rules",
                 "NATRule",
             ),
+            "security_zone": (
+                "scm.config.network.security_zone",
+                "SecurityZone",
+            ),
             # Deployment
             "remote_network": (
                 "scm.config.deployment.remote_networks",
