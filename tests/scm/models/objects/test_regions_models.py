@@ -324,6 +324,52 @@ class TestRegionResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data)
         assert "List of addresses must contain unique values" in str(exc_info.value)
+            
+    def test_tag_field_accepts_string(self):
+        """Test that the 'tag' field accepts a single string and converts it to a list."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRegion",
+            "folder": "Global",
+            "tag": "prod"
+        }
+        model = RegionResponseModel(**data)
+        assert model.tag == ["prod"]
+        
+    def test_tag_field_accepts_list(self):
+        """Test that the 'tag' field accepts a list of strings."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRegion",
+            "folder": "Global",
+            "tag": ["prod", "web"]
+        }
+        model = RegionResponseModel(**data)
+        assert model.tag == ["prod", "web"]
+        
+    def test_tag_field_rejects_invalid_type(self):
+        """Test that the 'tag' field rejects invalid types."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRegion",
+            "folder": "Global",
+            "tag": {"invalid": "type"}
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            RegionResponseModel(**data)
+        assert "1 validation error for RegionResponseModel" in str(exc_info.value)
+        
+    def test_tag_field_rejects_duplicate_items(self):
+        """Test that the 'tag' field rejects duplicate items."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRegion",
+            "folder": "Global",
+            "tag": ["prod", "prod"]
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            RegionResponseModel(**data)
+        assert "List of tags must contain unique values" in str(exc_info.value)
 
 
 # -------------------- End of Test Classes --------------------

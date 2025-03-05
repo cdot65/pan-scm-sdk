@@ -506,6 +506,42 @@ class TestRegionList(TestRegionBase):
                 "offset": 0,
             },
         )
+    
+    def test_list_with_invalid_items(self):
+        """
+        Test that the list method correctly handles invalid items in the response.
+        This tests the logging code in Region.list() that handles invalid items.
+        """
+        # Create mock response with some invalid items (missing ID)
+        mock_response = {
+            "data": [
+                # Valid items
+                RegionResponseFactory(
+                    name="Valid Region 1",
+                    folder="Global",
+                ).model_dump(),
+                RegionResponseFactory(
+                    name="Valid Region 2",
+                    folder="Global",
+                ).model_dump(),
+                # Invalid items (no ID)
+                {"name": "Invalid Region 1", "folder": "Global"},
+                {"name": "Invalid Region 2", "folder": "Global"},
+                {"name": "Invalid Region 3", "folder": "Global"},
+                {"name": "Invalid Region 4", "folder": "Global"},  # One more than the 3 logged
+            ]
+        }
+        
+        self.mock_scm.get.return_value = mock_response  # noqa
+        
+        # Get results - should only include valid items
+        results = self.client.list(folder="Global")
+        
+        # Verify results
+        assert len(results) == 2  # Only valid items
+        assert all(isinstance(r, RegionResponseModel) for r in results)
+        assert results[0].name == "Valid Region 1"
+        assert results[1].name == "Valid Region 2"
 
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
