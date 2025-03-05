@@ -1,0 +1,16 @@
+Object ID,Name,Description,Match Lists Count,Log Types,HTTP Servers,Syslog Servers,Send to Panorama,Enhanced Application Logging,Created On,Report Generation Time
+c8e3dc3f-e2fc-46e5-bfb4-db53aa100f7f,traffic-logs-20deff,Updated description for traffic-logs-20deff,1,traffic,None,test123,Yes,No,Unknown,2025-03-03 17:15:13
+c12b8452-2817-48ec-ae2d-bb4f6be764bb,threat-logs-43ef99,Example threat log forwarding profile,1,threat,None,test123,Yes,No,Unknown,2025-03-03 17:15:13
+b0245468-5880-4300-973a-96ab5690df5c,url-logs-c7e4be,Example URL log forwarding profile,1,url,None,test123,No,No,Unknown,2025-03-03 17:15:13
+d599c31e-c8f7-483a-a868-d02551016d66,wildfire-logs-f79089,Example WildFire log forwarding profile,1,wildfire,None,test123,Yes,No,Unknown,2025-03-03 17:15:14
+dc917603-bd0b-4de7-86f6-afdedab9300e,multi-type-logs-0d61f8,Example multi-type log forwarding profile,3,"traffic, threat, url",None,test123,No,Yes,Unknown,2025-03-03 17:15:14
+9d876b37-bf63-4ef1-aa14-7fb1f7028c35,bulk-traffic-4071af,Bulk created traffic profile,1,traffic,None,test123,No,No,Unknown,2025-03-03 17:15:14
+2aacbac4-9de7-4c1a-8688-b43af6dac874,bulk-threat-cb1498,Bulk created threat profile,1,threat,None,test123,No,No,Unknown,2025-03-03 17:15:14
+063547b6-cff4-4aea-8b76-acca6b7d1d27,bulk-url-ffadcd,Bulk created URL profile,1,url,None,test123,No,No,Unknown,2025-03-03 17:15:14
+
+SUMMARY
+Total Objects Processed,8
+Successfully Retrieved,8
+Failed to Retrieve,0
+Execution Time (so far),5.26 seconds
+Report Generated On,2025-03-03 17:15:14

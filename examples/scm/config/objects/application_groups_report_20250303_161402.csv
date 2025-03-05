@@ -1,0 +1,16 @@
+Object ID,Name,Members,Container Type,Container Name,Number of Members,Report Generation Time
+bebddb60-204d-4590-9900-a08cd0173ec6,basic-apps-bc783b,"web-browsing, ssl, dns, smtp, pop3",Folder,Texas,5,2025-03-03 16:14:02
+464a4908-616b-4ae2-90bc-e65b924527a9,custom-apps-d98088,"web-browsing, ssl, ping",Folder,Texas,3,2025-03-03 16:14:02
+46b887f8-7f29-4d13-8f11-36c069a828b3,nested-group-74c6ec,"basic-apps-bc783b, custom-apps-d98088",Folder,Texas,2,2025-03-03 16:14:02
+d604dd5a-b86e-49ff-9584-7c3761b2908b,mixed-apps-14f73c,"basic-apps-bc783b, ping, dns, ssl",Folder,Texas,4,2025-03-03 16:14:03
+f28cc320-9541-41f1-a672-24c04319fcbe,bulk-web-387fda,"web-browsing, ssl, dns",Folder,Texas,3,2025-03-03 16:14:03
+3f8b2fe4-ad93-4a10-9efd-e48ed843907d,bulk-email-d78b7c,"smtp, imap, pop3",Folder,Texas,3,2025-03-03 16:14:03
+b0c2750d-0097-45dd-a44d-5c1cd25d66fd,bulk-file-29383f,"ftp, tftp, web-browsing",Folder,Texas,3,2025-03-03 16:14:03
+d60f303e-c379-4c5a-8f9e-0eb80a50a728,bulk-mgmt-a8a37b,"ping, dns, ssl",Folder,Texas,3,2025-03-03 16:14:03
+
+SUMMARY
+Total Objects Processed,8
+Successfully Retrieved,8
+Failed to Retrieve,0
+Execution Time (so far),19.20 seconds
+Report Generated On,2025-03-03 16:14:03

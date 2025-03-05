@@ -1,0 +1,15 @@
+Object ID,Name,Description,Members,Member Count,Tags,Created On,Report Generation Time
+e34a7d38-2ae7-4db4-b780-16cbf76edbe9,web-services-a49642,None,"service-http, service-https, example123",3,"Web Security Global, PA_predefined_embargo_rule, best-practice",Unknown,2025-03-04 18:48:27
+480a716d-31f5-42e0-ae23-68ac7f0b77c0,mixed-services-ea50ea,None,"service-http, service-https, example123",3,"Web Security Global, PA_predefined_embargo_rule",Unknown,2025-03-04 18:48:27
+fdc58da5-cbc9-41ba-a9cb-f4664be89c10,hierarchical-services-f2e102,None,"web-services-a49642, service-http, service-https",3,"Web Security Global, PA_predefined_embargo_rule",Unknown,2025-03-04 18:48:27
+f3eab8cc-2fb9-4172-bb5d-50a800f2c186,bulk-web-5caa2f,None,"service-http, service-https, example123",3,Web Security Global,Unknown,2025-03-04 18:48:27
+ae207365-b188-44b2-9c6a-586bbe6deb33,bulk-mail-f72e2f,None,"service-http, service-https, example123",3,Web Security Global,Unknown,2025-03-04 18:48:28
+6f2b8281-17c7-40c5-87b0-2d7a9616ad50,bulk-remote-8095c6,None,"service-http, service-https, example123",3,Web Security Global,Unknown,2025-03-04 18:48:28
+c652a96b-46f8-4e79-bebf-3965c7a29153,bulk-dns-5f56a0,None,"service-http, service-https, example123",3,Web Security Global,Unknown,2025-03-04 18:48:28
+
+SUMMARY
+Total Objects Processed,7
+Successfully Retrieved,7
+Failed to Retrieve,0
+Execution Time (so far),17.28 seconds
+Report Generated On,2025-03-04 18:48:28

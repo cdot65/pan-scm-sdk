@@ -1,0 +1,12 @@
+Object ID,Name,Match Expression,Description,Container,Container Value,Created On,Report Generation Time
+e325b45a-b55f-44de-9349-6aafe7506499,basic-hip-profile-6705f3,"""is-win"" or ""is-firewall-enabled""",Updated HIP profile - modified on 2025-03-03 17:02:31,Folder,Texas,Unknown,2025-03-03 17:02:33
+de7185b7-9756-40e8-b017-6818874d92d4,complex-hip-profile-2a53a3,"""is-win"" and ""is-firewall-enabled""",Example HIP profile with complex match criteria using AND/OR logic,Folder,Texas,Unknown,2025-03-03 17:02:33
+0613380d-0589-49a9-98a0-1137b024072b,snippet-hip-profile-6962a7,"""is-win""",Example HIP profile in a snippet container,Folder,Texas,Unknown,2025-03-03 17:02:33
+71aa35b4-858b-4cf1-9d9d-2dec09054fc6,device-hip-profile-10e079,"""is-win""",Example HIP profile in a device container,Folder,Texas,Unknown,2025-03-03 17:02:33
+
+SUMMARY
+Total Profiles Processed,4
+Successfully Retrieved,4
+Failed to Retrieve,0
+Execution Time (so far),3.73 seconds
+Report Generated On,2025-03-03 17:02:33

@@ -41,14 +41,14 @@ class ServiceGroupBaseModel(BaseModel):
         ...,
         min_length=1,
         max_length=1024,
-        description="A list of members of the service group.",
+        description="A list of members of the service group. Each member must be an existing service or service group object name in the SCM environment, not predefined names like 'HTTP' or 'HTTPS'.",
         examples=[["custom-service1", "custom-service2"]],
     )
 
     # Optional fields
-    tag: Optional[List[TagString]] = Field(  # type: ignore
+    tag: Optional[List[str]] = Field(  # type: ignore
         None,
-        description="Tags associated with the service group",
+        description="Tags associated with the service group. These must be references to existing tag objects, not just string labels.",
     )
 
     # Container Types

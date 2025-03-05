@@ -1,0 +1,17 @@
+Object ID,Name,Description,Filter Expression,Tags,Container Type,Container Name,Report Generation Time
+ed274c35-1813-47e0-b751-9f7d32fd1202,exec-users-4b7b04,Executive users identified by role tag - With approved access only,tag.role.executive AND tag.access.approved,"Automation, Executive",Folder,Texas,2025-03-03 16:26:26
+ef633a64-3f95-4768-8b2b-7fcc0da1f406,it-admins-9ed684,IT administrators with specific access requirements,(tag.department.it AND tag.role.administrator) OR (tag.access.systems AND tag.level.admin),"Automation, IT",Folder,Texas,2025-03-03 16:26:26
+09eaa8d0-3980-4a22-a536-e1f0e492984d,contractors-ebe6a9,External contractors with specific access requirements,tag.employment.contractor AND tag.location.remote AND tag.clearance.standard,"Automation, Contractors",Folder,Texas,2025-03-03 16:26:26
+07658a25-ad5e-464c-8cf5-1cd605ece4ab,finance-users-ee85ac,All users in the finance department,tag.department.finance,"Automation, Finance",Folder,Texas,2025-03-03 16:26:26
+4eff21ff-01cc-4e41-a6fe-2ce3eeddf066,developers-c4709f,Software developers across all departments,tag.role.developer OR tag.role.engineer,"Automation, Developers",Folder,Texas,2025-03-03 16:26:26
+703b5813-b039-4fe1-b326-f73f3011fce1,hr-users-329a34,All HR department users,tag.department.hr,"Automation, Bulk, HR",Folder,Texas,2025-03-03 16:26:26
+339c109c-3f94-48a8-a9f6-e3fae7463f98,marketing-users-0273e4,All marketing department users,tag.department.marketing,"Automation, Bulk, Marketing",Folder,Texas,2025-03-03 16:26:26
+f3feab82-ab86-4f78-b9e8-c266b5b6e295,admin-level-94de48,Users with administrative access,tag.access.admin AND tag.level.high,"Automation, Bulk, Admin",Folder,Texas,2025-03-03 16:26:27
+a1153c2e-933d-44fc-aeef-91deca0dddb4,remote-employees-23b4d1,Remote workers requiring VPN access,tag.location.remote AND tag.status.active,"Automation, Bulk, Remote",Folder,Texas,2025-03-03 16:26:27
+
+SUMMARY
+Total Objects Processed,9
+Successfully Retrieved,9
+Failed to Retrieve,0
+Execution Time (so far),4.51 seconds
+Report Generated On,2025-03-03 16:26:27

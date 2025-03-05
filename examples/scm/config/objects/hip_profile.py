@@ -53,6 +53,7 @@ Before running this example:
 """
 
 import argparse
+import csv
 import datetime
 import logging
 import os
@@ -752,6 +753,131 @@ def cleanup_hip_profiles(hip_profiles, profile_ids):
             log_error(f"Error deleting HIP profile with ID {profile_id}", str(e))
 
 
+def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
+    """
+    Generate a comprehensive CSV report of all HIP profiles created by the script.
+    
+    This function fetches detailed information about each HIP profile and writes it to a
+    CSV file with a timestamp in the filename. It provides progress updates during
+    processing and includes a summary section with execution statistics.
+    
+    Args:
+        hip_profiles: The HIPProfile manager instance used to fetch object details
+        profile_ids: List of HIP profile IDs to include in the report
+        execution_time: Total execution time in seconds (up to the point of report generation)
+    
+    Returns:
+        str: Path to the generated CSV report file, or None if generation failed
+    """
+    # Create a timestamp for the filename
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_file = f"hip_profiles_report_{timestamp}.csv"
+    
+    # Define CSV headers
+    headers = [
+        "Object ID", 
+        "Name",
+        "Match Expression", 
+        "Description", 
+        "Container",
+        "Container Value", 
+        "Created On",
+        "Report Generation Time"
+    ]
+    
+    # Stats for report summary
+    successful_fetches = 0
+    failed_fetches = 0
+    
+    # Collect data for each HIP profile
+    profile_data = []
+    for idx, profile_id in enumerate(profile_ids):
+        # Show progress for large sets
+        if (idx + 1) % 5 == 0 or idx == 0 or idx == len(profile_ids) - 1:
+            log_info(f"Processing HIP profile {idx + 1} of {len(profile_ids)}")
+            
+        try:
+            # Get the HIP profile details
+            profile = hip_profiles.get(profile_id)
+            
+            # Determine container type
+            container_type = "Unknown"
+            container_value = "Unknown"
+            if profile.folder:
+                container_type = "Folder"
+                container_value = profile.folder
+            elif profile.snippet:
+                container_type = "Snippet"
+                container_value = profile.snippet
+            elif profile.device:
+                container_type = "Device"
+                container_value = profile.device
+            
+            # Add HIP profile data
+            profile_data.append([
+                profile.id,
+                profile.name,
+                profile.match,
+                profile.description if profile.description else "None",
+                container_type,
+                container_value,
+                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") if hasattr(profile, "created_on") and profile.created_on else "Unknown",
+                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ])
+            
+            successful_fetches += 1
+            
+        except Exception as e:
+            log_error(f"Error getting details for HIP profile ID {profile_id}", str(e))
+            # Add minimal info for HIP profiles that couldn't be retrieved
+            profile_data.append([
+                profile_id, 
+                "ERROR", 
+                "ERROR",
+                f"Failed to retrieve HIP profile details: {str(e)}", 
+                "Unknown",
+                "Unknown",
+                "",
+                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ])
+            failed_fetches += 1
+    
+    try:
+        # Write to CSV file
+        with open(report_file, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(headers)
+            writer.writerows(profile_data)
+            
+            # Add summary section
+            writer.writerow([])
+            writer.writerow(["SUMMARY"])
+            writer.writerow(["Total Profiles Processed", len(profile_ids)])
+            writer.writerow(["Successfully Retrieved", successful_fetches])
+            writer.writerow(["Failed to Retrieve", failed_fetches])
+            writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
+            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+        
+        return report_file
+        
+    except Exception as e:
+        log_error("Failed to write CSV report file", str(e))
+        # Try to write to a different location as fallback
+        try:
+            fallback_file = f"hip_profiles_{timestamp}.csv"
+            log_info(f"Attempting to write to fallback location: {fallback_file}")
+            
+            with open(fallback_file, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(headers)
+                writer.writerows(profile_data)
+            
+            return fallback_file
+        except Exception as fallback_error:
+            log_error("Failed to write to fallback location", str(fallback_error))
+            return None
+
+
 def parse_arguments():
     """
     Parse command-line arguments for the HIP profile example script.
@@ -760,6 +886,7 @@ def parse_arguments():
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created profiles
     - Which HIP profile operations to demonstrate
+    - Whether to generate a CSV report
     - Folder name to use for profile creation
     
     Returns:
@@ -803,6 +930,13 @@ def parse_arguments():
         "--all", 
         action="store_true",
         help="Demonstrate all operations (default behavior)"
+    )
+    
+    # Reporting
+    parser.add_argument(
+        "--no-report", 
+        action="store_true",
+        help="Skip CSV report generation"
     )
     
     # Container name
@@ -954,6 +1088,25 @@ def main():
                     log_success(f"Successfully demonstrated deletion of HIP profile {deleted_id}")
             else:
                 log_warning("No profiles were created to delete")
+                
+        # Calculate intermediate execution statistics for the report
+        current_time = __import__("time").time()
+        execution_time_so_far = current_time - start_time
+        
+        # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
+        if created_profiles and not args.no_report:
+            log_section("REPORT GENERATION")
+            log_operation_start("Generating HIP profiles CSV report")
+            report_file = generate_hip_profile_report(hip_profiles, created_profiles, execution_time_so_far)
+            if report_file:
+                log_success(f"Generated HIP profiles report: {report_file}")
+                log_info(f"The report contains details of all {len(created_profiles)} HIP profiles created")
+            else:
+                log_error("Failed to generate HIP profiles report")
+        elif args.no_report:
+            log_info("Report generation disabled by --no-report flag")
+        else:
+            log_info("No HIP profiles were created, skipping report generation")
         
         # Clean up the created profiles, unless skip_cleanup is true
         if created_profiles:

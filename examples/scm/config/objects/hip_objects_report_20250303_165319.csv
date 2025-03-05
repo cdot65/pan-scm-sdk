@@ -1,0 +1,13 @@
+Object ID,Name,Type,Details,Description,Created On,Report Generation Time
+61b28754-e7a3-4d11-99ad-c871e8ba766a,host-info-037c1d,Host Information,"OS criteria specified, Domain criteria specified, Managed: True",Updated description for host-info-037c1d,Unknown,2025-03-03 16:53:19
+6054a22d-9ed9-4335-8840-42178d08e93f,network-info-d416df,Network Information,Network criteria specified,HIP object for wired network connections only,Unknown,2025-03-03 16:53:19
+4d8bd08f-0733-4647-86f1-c673769380df,bulk-win10-240b3c,Host Information,OS criteria specified,Bulk Windows 10 HIP profile,Unknown,2025-03-03 16:53:20
+9d294a4d-6ae9-4849-977a-a490d142156e,bulk-macos-86a9b6,Host Information,OS criteria specified,Bulk macOS HIP profile,Unknown,2025-03-03 16:53:20
+7d1f987b-01c9-49a2-a958-f98c446d69ab,bulk-encrypted-5f2b33,Disk Encryption,Encrypted Locations: SystemDrive,Bulk disk encryption HIP profile,Unknown,2025-03-03 16:53:20
+
+SUMMARY
+Total Objects Processed,5
+Successfully Retrieved,5
+Failed to Retrieve,0
+Execution Time (so far),2.92 seconds
+Report Generated On,2025-03-03 16:53:20

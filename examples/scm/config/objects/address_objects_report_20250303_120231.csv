@@ -1,0 +1,17 @@
+Object ID,Name,Type,Value,Description,Tags,Created On,Report Generation Time
+fe09aa22-3461-4c17-bb69-a724623937e6,network-segment-e595c0,IPv4 Network,10.10.10.0/24,Updated description for network-segment-e595c0,"Automation, Corporate, Updated",Unknown,2025-03-03 12:02:32
+f3bffe1e-a25f-4aa3-b5c0-564d01650e43,server-host-5e77c7,IPv4 Host,192.168.1.100/32,Example server host address,"Automation, Servers",Unknown,2025-03-03 12:02:33
+dc000bc0-e5a4-48a4-add9-841e5b7d6616,dhcp-range-74fc61,IPv4 Range,10.20.30.100-10.20.30.200,Example DHCP address range,"Automation, DHCP",Unknown,2025-03-03 12:02:33
+48649dfa-8a6e-4c61-90d6-847b19afaaab,ipv6-segment-8526f0,IPv6 Network,2001:db8:1234::/64,Example IPv6 network segment,"Automation, IPv6",Unknown,2025-03-03 12:02:34
+2a9c9d3c-8bd6-4abe-9f0c-99a17eca7115,website-fqdn-eb9393,FQDN,www.example.com,Example website FQDN address,"Automation, Web",Unknown,2025-03-03 12:02:34
+918d4372-5860-4b72-a6cc-fe1e6b419a50,bulk-host-1-cfc218,IPv4 Host,10.100.1.1/32,Bulk created host 1,"Automation, Bulk",Unknown,2025-03-03 12:02:35
+70cc9f97-4481-4fcd-ab8f-e10e23c21eb3,bulk-host-2-8a9876,IPv4 Host,10.100.1.2/32,Bulk created host 2,"Automation, Bulk",Unknown,2025-03-03 12:02:35
+3016de14-495d-4af2-96e3-d0f5d9867fa4,bulk-network-d368e7,IPv4 Network,10.100.2.0/24,Bulk created network,"Automation, Bulk",Unknown,2025-03-03 12:02:36
+beeda171-1a5e-4d64-b5ab-a86839eb199c,bulk-fqdn-a9e9cf,FQDN,api.example.com,Bulk created FQDN,"Automation, Bulk",Unknown,2025-03-03 12:02:36
+
+SUMMARY
+Total Objects Processed,9
+Successfully Retrieved,9
+Failed to Retrieve,0
+Execution Time (so far),42.81 seconds
+Report Generated On,2025-03-03 12:02:36

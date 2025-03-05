@@ -1,0 +1,7 @@
+id,name,description,folder,schedule_type,created_on,created_by,modified_on,modified_by
+3f3b93b1-f7f5-432e-a0d3-2d581131ec77,Daily-WorkHours-ff41f3,,Texas,Recurring - Daily,,,,
+0a491e03-fb22-4f45-90bc-5286f3634cc3,Weekly-WorkDays-252e4c,,Texas,Recurring - Weekly,,,,
+e0a5d073-50e5-4290-9e15-5d5eb7a507db,NonRecurring-Event-b003bc,,Texas,Non-Recurring,,,,
+f7e2ad05-9770-4e16-b90e-b2753465211f,Daily-WorkHours-3a16de,,Texas,Recurring - Daily,,,,
+4b08324d-2fd2-4f4f-9a81-bef9bb32b859,Weekly-WorkDays-e629f0,,Texas,Recurring - Weekly,,,,
+57d9a669-1acb-403f-9299-6529bc163522,NonRecurring-Event-774938,,Texas,Non-Recurring,,,,

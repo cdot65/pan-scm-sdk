@@ -1,0 +1,17 @@
+Object ID,Name,Categories,Sub-Categories,Technologies,Risk Levels,Behavioral Flags,SaaS Properties,Report Generation Time
+b5fc4e4e-547c-4520-bf40-a3cb6d805697,category-filter-9002a9,"business-systems, collaboration, media",None,None,None,None,None,2025-03-03 16:02:25
+ef37ee49-2393-41de-9f89-ba29ab406585,tech-filter-9c6423,None,None,"browser-based, client-server",None,None,None,2025-03-03 16:02:25
+d45e8cf8-9ff9-469a-bf30-097128b34c3d,risk-filter-05a732,None,None,None,"4, 5",None,None,2025-03-03 16:02:25
+aa43042d-2b7a-401c-b385-444bc7f672d5,behavior-filter-9caf04,None,None,None,None,"Evasive, Used By Malware, Transfers Files",None,2025-03-03 16:02:25
+a1078fe4-5aea-4f93-b3d4-800ff3b4249b,comprehensive-filter-08a5a3,collaboration,None,browser-based,"3, 4, 5","Pervasive, Is Saas",Is SaaS,2025-03-03 16:02:26
+b961f1b3-0c8b-415d-8173-40df3fe76c99,bulk-category-2f8bbc,networking,None,None,None,None,None,2025-03-03 16:02:26
+b206e3be-b927-4414-b729-a794ef55b123,bulk-tech-cd0405,None,None,client-server,None,None,None,2025-03-03 16:02:26
+3b77552f-3d92-4926-8a49-e0f74019e487,bulk-risk-646d63,None,None,None,5,None,None,2025-03-03 16:02:26
+e185271b-8d53-4594-99d6-356058d27cc0,bulk-behavior-789d2f,None,None,None,None,"Has Known Vulnerabilities, Tunnels Other Apps",None,2025-03-03 16:02:26
+
+SUMMARY
+Total Objects Processed,9
+Successfully Retrieved,9
+Failed to Retrieve,0
+Execution Time (so far),13.90 seconds
+Report Generated On,2025-03-03 16:02:26

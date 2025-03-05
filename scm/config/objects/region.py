@@ -20,6 +20,13 @@ from scm.models.objects import (
 class Region(BaseObject):
     """
     Manages Region objects in Palo Alto Networks' Strata Cloud Manager.
+    
+    Note:
+        While the SDK models support 'description' and 'tag' fields for region objects
+        to maintain consistency with other object types, these fields are not supported
+        by the Strata Cloud Manager API. They will be automatically excluded when
+        sending requests to the API.
+    
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -109,7 +116,8 @@ class Region(BaseObject):
         region = RegionCreateModel(**data)
 
         # Convert back to a Python dictionary, removing any unset fields
-        payload = region.model_dump(exclude_unset=True)
+        # Also exclude tag and description fields since they're not supported by the API
+        payload = region.model_dump(exclude_unset=True, exclude={"tag", "description"})
 
         # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
         response: Dict[str, Any] = self.api_client.post(
@@ -151,7 +159,8 @@ class Region(BaseObject):
             RegionResponseModel
         """
         # Convert to dict for API request, excluding unset fields
-        payload = region.model_dump(exclude_unset=True)
+        # Also exclude tag and description fields since they're not supported by the API
+        payload = region.model_dump(exclude_unset=True, exclude={"tag", "description"})
 
         # Extract ID and remove from payload since it's in the URL
         object_id = str(region.id)
@@ -351,7 +360,17 @@ class Region(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [RegionResponseModel(**item) for item in data]
+            # Filter out any items without valid ID - likely predefined or system regions
+            invalid_data = [item for item in data if not isinstance(item, dict) or 'id' not in item]
+            if invalid_data:
+                self.logger.debug(f"Filtering out {len(invalid_data)} items without valid ID field")
+                for idx, item in enumerate(invalid_data[:3]):  # Log up to 3 examples
+                    self.logger.debug(f"Invalid item {idx}: {item}")
+                if len(invalid_data) > 3:
+                    self.logger.debug(f"... and {len(invalid_data) - 3} more")
+            
+            valid_data = [item for item in data if isinstance(item, dict) and 'id' in item]
+            object_instances = [RegionResponseModel(**item) for item in valid_data]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end

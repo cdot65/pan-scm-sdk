@@ -1,0 +1,16 @@
+Group ID,Name,Type,Members/Filter,Description,Tags,Created On,Report Generation Time
+996a41bc-0b97-4c6a-aa91-02825325f0a9,static-group-8fe000,Static Address Group,"server-network-a66b31, workstation-network-92e319, guest-network-c224e3",Updated: Example static address group,"Automation, Example, Updated",Unknown,2025-03-03 14:50:54
+6775cbe2-1a84-40f0-abcf-5eea8a2abef7,dynamic-group-87786d,Dynamic Address Group,'Automation' and 'Web',Example dynamic address group,"Automation, Example",Unknown,2025-03-03 14:50:54
+ee98118c-b349-4a47-86f8-176272c7b7d7,complex-filter-group-97b5d8,Dynamic Address Group,'Automation' and ('Servers' or 'Database'),Example dynamic address group with complex filter,"Automation, Example",Unknown,2025-03-03 14:50:54
+8bcd0f3c-e6a9-45d8-ab1f-6681bbd91acb,nested-group-9c4b95,Static Address Group,"static-group-8fe000, dynamic-group-87786d",Example nested address group,"Automation, Example",Unknown,2025-03-03 14:50:55
+80b5d456-205e-4eb3-a26a-2f103e379647,servers-group-279b04,Static Address Group,"server-network-a66b31, workstation-network-92e319",Server address group,"Automation, Bulk, Servers",Unknown,2025-03-03 14:50:55
+77e68815-a8fb-40fd-8771-635d0c6352f0,workstations-group-7a0ef3,Static Address Group,guest-network-c224e3,Workstation address group,"Automation, Bulk, Workstations",Unknown,2025-03-03 14:50:55
+5b0c468f-a2b6-4530-ba5b-774188916d01,all-endpoints-group-37de70,Static Address Group,"server-network-a66b31, workstation-network-92e319, guest-network-c224e3",All endpoints address group,"Automation, Bulk",Unknown,2025-03-03 14:50:56
+3aac150f-5a2e-4dd9-b07c-3c91d28419ae,filter-web-group-6c467b,Dynamic Address Group,'Web' and 'Automation',Web servers filter group,"Automation, Bulk, Web",Unknown,2025-03-03 14:50:56
+
+SUMMARY
+Total Groups Processed,8
+Successfully Retrieved,8
+Failed to Retrieve,0
+Execution Time (so far),21.41 seconds
+Report Generated On,2025-03-03 14:50:56

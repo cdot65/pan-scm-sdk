@@ -1,0 +1,11 @@
+Object ID,Name,Protocol,Ports,Description,Tags,Created On,Report Generation Time
+9e97a876-5aed-408e-9f6f-5b40e2c01441,tcp-http-6f6e45,TCP,"80,8080",Updated description for tcp-http-6f6e45,"Automation, Web, Updated",Unknown,2025-03-04 18:20:54
+75e0fef1-b464-463e-9e37-9f6d24aeb112,tcp-web-5c744b,TCP,"80,443",Combined HTTP and HTTPS web service,"Automation, Web",Unknown,2025-03-04 18:20:54
+890fd8a9-77d6-4aca-a8c3-029cc4c82a3d,udp-dhcp-66b364,UDP,"67,68","DHCP client and server ports (67,68)","Automation, DHCP",Unknown,2025-03-04 18:20:54
+
+SUMMARY
+Total Objects Processed,3
+Successfully Retrieved,3
+Failed to Retrieve,0
+Execution Time (so far),5.63 seconds
+Report Generated On,2025-03-04 18:20:54
