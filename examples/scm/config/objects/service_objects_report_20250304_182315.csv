@@ -1,0 +1,16 @@
+Object ID,Name,Protocol,Ports,Description,Tags,Created On,Report Generation Time
+cfd2a4e4-19fc-4d91-97ae-811d0c4f5a79,tcp-http-55c426,TCP,"80,8080",Updated description for tcp-http-55c426,"Automation, Web, Updated",Unknown,2025-03-04 18:23:15
+b55bfef5-ba80-4756-bf50-545ee0bc1e9a,tcp-web-e966be,TCP,"80,443",Combined HTTP and HTTPS web service,"Automation, Web",Unknown,2025-03-04 18:23:15
+9f895b84-1288-47ca-8d24-522290ff14fb,udp-dns-004b65,UDP,53,DNS service on port 53,"Automation, DNS",Unknown,2025-03-04 18:23:15
+a5e761b0-885e-48d9-b0b6-a3ba4ee1033a,udp-dhcp-c9d4ed,UDP,"67,68","DHCP client and server ports (67,68)","Automation, DHCP",Unknown,2025-03-04 18:23:15
+82f0f6bf-b90a-482a-b08a-6efd0834137a,bulk-ssh-9d39b8,TCP,22,SSH service on port 22,"Automation, Bulk, SSH",Unknown,2025-03-04 18:23:16
+2d7bece7-2f83-4779-a735-7c42ea6ca125,bulk-rdp-5d7247,TCP,3389,RDP service on port 3389,"Automation, Bulk, Windows",Unknown,2025-03-04 18:23:16
+b1196cfd-665c-4a0e-934d-9bd586d56ba7,bulk-ntp-f9cb8c,UDP,123,NTP service on port 123,"Automation, Bulk, NTP",Unknown,2025-03-04 18:23:16
+390a491e-491b-45b1-93fe-09dc61f163d1,bulk-snmp-c78ce7,UDP,"161,162","SNMP service on ports 161,162","Automation, Bulk, SNMP",Unknown,2025-03-04 18:23:16
+
+SUMMARY
+Total Objects Processed,8
+Successfully Retrieved,8
+Failed to Retrieve,0
+Execution Time (so far),5.30 seconds
+Report Generated On,2025-03-04 18:23:16
