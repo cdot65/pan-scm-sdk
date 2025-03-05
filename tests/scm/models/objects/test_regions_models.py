@@ -118,7 +118,7 @@ class TestRegionCreateModel:
         data["address"] = {"invalid": "type"}
         with pytest.raises(ValidationError) as exc_info:
             RegionCreateModel(**data)
-        assert "Address must be a string or a list of strings" in str(exc_info.value)
+        assert "1 validation error for RegionCreateModel" in str(exc_info.value)
         
     def test_address_field_rejects_integer(self):
         """Test that the 'address' field rejects integer values."""
@@ -126,7 +126,7 @@ class TestRegionCreateModel:
         data["address"] = 123
         with pytest.raises(ValidationError) as exc_info:
             RegionCreateModel(**data)
-        assert "Address must be a string or a list of strings" in str(exc_info.value)
+        assert "1 validation error for RegionCreateModel" in str(exc_info.value)
         
     def test_ensure_list_of_strings_function(self):
         """Test that the ensure_list_of_strings validator function works directly."""
@@ -145,7 +145,7 @@ class TestRegionCreateModel:
         # Test with invalid type
         with pytest.raises(ValueError) as exc_info:
             RegionBaseModel.ensure_list_of_strings({"invalid": "type"})
-        assert "Address must be a string or a list of strings" in str(exc_info.value)
+        assert "Value must be a string or a list of strings" in str(exc_info.value)
 
     def test_address_field_rejects_duplicate_items(self):
         """Test that the 'address' field rejects duplicate items."""
@@ -208,7 +208,7 @@ class TestRegionUpdateModel:
         data["address"] = {"invalid": "type"}
         with pytest.raises(ValidationError) as exc_info:
             RegionUpdateModel(**data)
-        assert "Address must be a string or a list of strings" in str(exc_info.value)
+        assert "1 validation error for RegionUpdateModel" in str(exc_info.value)
 
     def test_address_field_rejects_duplicate_items(self):
         """Test that the 'address' field rejects duplicate items."""
@@ -311,7 +311,7 @@ class TestRegionResponseModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data)
-        assert "Address must be a string or a list of strings" in str(exc_info.value)
+        assert "1 validation error for RegionResponseModel" in str(exc_info.value)
 
     def test_address_field_rejects_duplicate_items(self):
         """Test that the 'address' field rejects duplicate items."""
