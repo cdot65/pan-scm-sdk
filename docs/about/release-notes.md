@@ -6,6 +6,10 @@ Released: March 6, 2025
 - **Security Zone**: Support for managing Security Zones
 - **Examples**: Added examples for each of the objects and network service files
 
+### Fixed
+- **Custom Token URL Support**: Fixed issue where `token_url` parameter defined in `AuthRequestModel` wasn't exposed through the `Scm` and `ScmClient` constructors. Users can now specify custom OAuth token endpoints when initializing the client.
+- **Documentation Updates**: Added comprehensive documentation for the `token_url` parameter
+
 ## Version 0.3.15
 
 Released: March 2, 2025
