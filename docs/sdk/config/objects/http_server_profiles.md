@@ -4,82 +4,85 @@
 
 ## Overview
 
-The `HTTPServerProfile` class facilitates the management of HTTP Server Profile objects in Palo Alto Networks' Strata Cloud Manager. HTTP Server Profiles define configurations for HTTP servers that can receive logs and other data from the Strata Cloud Manager.
+The `HTTPServerProfile` class facilitates the management of HTTP Server Profile objects in Palo Alto Networks' Strata
+Cloud Manager. HTTP Server Profiles define configurations for HTTP servers that can receive logs and other data from the
+Strata Cloud Manager.
 
-The `HTTPServerProfile` class inherits from the `BaseObject` class and provides methods for creating, retrieving, updating, listing, and deleting HTTP server profile configurations.
+The `HTTPServerProfile` class inherits from the `BaseObject` class and provides methods for creating, retrieving,
+updating, listing, and deleting HTTP server profile configurations.
 
 ## Core Methods
 
-| Method | Description | Parameters | Return Type |
-|--------|-------------|------------|-------------|
-| `create` | Creates a new HTTP server profile | `data` (Dict[str, Any]): Profile data | HTTPServerProfileResponseModel |
-| `get` | Retrieves an HTTP server profile by ID | `object_id` (str): Profile ID | HTTPServerProfileResponseModel |
-| `update` | Updates an existing HTTP server profile | `http_server_profile` (HTTPServerProfileUpdateModel): Update data | HTTPServerProfileResponseModel |
-| `delete` | Deletes an HTTP server profile | `object_id` (str): Profile ID | None |
-| `list` | Lists HTTP server profiles with optional filtering | See [list parameters](#list-method-parameters) | List[HTTPServerProfileResponseModel] |
-| `fetch` | Retrieves a single HTTP server profile by name | See [fetch parameters](#fetch-method-parameters) | HTTPServerProfileResponseModel |
+| Method   | Description                                        | Parameters                                                        | Return Type                          |
+|----------|----------------------------------------------------|-------------------------------------------------------------------|--------------------------------------|
+| `create` | Creates a new HTTP server profile                  | `data` (Dict[str, Any]): Profile data                             | HTTPServerProfileResponseModel       |
+| `get`    | Retrieves an HTTP server profile by ID             | `object_id` (str): Profile ID                                     | HTTPServerProfileResponseModel       |
+| `update` | Updates an existing HTTP server profile            | `http_server_profile` (HTTPServerProfileUpdateModel): Update data | HTTPServerProfileResponseModel       |
+| `delete` | Deletes an HTTP server profile                     | `object_id` (str): Profile ID                                     | None                                 |
+| `list`   | Lists HTTP server profiles with optional filtering | See [list parameters](#list-method-parameters)                    | List[HTTPServerProfileResponseModel] |
+| `fetch`  | Retrieves a single HTTP server profile by name     | See [fetch parameters](#fetch-method-parameters)                  | HTTPServerProfileResponseModel       |
 
 ### List Method Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `folder` | Optional[str] | No* | None | Folder in which the profiles are defined |
-| `snippet` | Optional[str] | No* | None | Snippet in which the profiles are defined |
-| `device` | Optional[str] | No* | None | Device in which the profiles are defined |
-| `exact_match` | bool | No | False | If True, only return profiles whose container exactly matches |
-| `exclude_folders` | Optional[List[str]] | No | None | List of folder names to exclude |
-| `exclude_snippets` | Optional[List[str]] | No | None | List of snippet values to exclude |
-| `exclude_devices` | Optional[List[str]] | No | None | List of device values to exclude |
-| `**filters` | Any | No | None | Additional filters including `tag_registration` (bool) and `protocol` (List[str]) |
+| Parameter          | Type                | Required | Default | Description                                                                       |
+|--------------------|---------------------|----------|---------|-----------------------------------------------------------------------------------|
+| `folder`           | Optional[str]       | No*      | None    | Folder in which the profiles are defined                                          |
+| `snippet`          | Optional[str]       | No*      | None    | Snippet in which the profiles are defined                                         |
+| `device`           | Optional[str]       | No*      | None    | Device in which the profiles are defined                                          |
+| `exact_match`      | bool                | No       | False   | If True, only return profiles whose container exactly matches                     |
+| `exclude_folders`  | Optional[List[str]] | No       | None    | List of folder names to exclude                                                   |
+| `exclude_snippets` | Optional[List[str]] | No       | None    | List of snippet values to exclude                                                 |
+| `exclude_devices`  | Optional[List[str]] | No       | None    | List of device values to exclude                                                  |
+| `**filters`        | Any                 | No       | None    | Additional filters including `tag_registration` (bool) and `protocol` (List[str]) |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ### Fetch Method Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `name` | str | Yes | - | The name of the HTTP server profile |
-| `folder` | Optional[str] | No* | None | Folder in which the profile is defined |
-| `snippet` | Optional[str] | No* | None | Snippet in which the profile is defined |
-| `device` | Optional[str] | No* | None | Device in which the profile is defined |
+| Parameter | Type          | Required | Default | Description                             |
+|-----------|---------------|----------|---------|-----------------------------------------|
+| `name`    | str           | Yes      | -       | The name of the HTTP server profile     |
+| `folder`  | Optional[str] | No*      | None    | Folder in which the profile is defined  |
+| `snippet` | Optional[str] | No*      | None    | Snippet in which the profile is defined |
+| `device`  | Optional[str] | No*      | None    | Device in which the profile is defined  |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ## HTTP Server Profile Attributes
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | str | Yes | The name of the HTTP server profile (max length: 63) |
-| `server` | List[ServerModel] | Yes | List of server configurations |
-| `tag_registration` | bool | No | Whether to register tags on match |
-| `description` | str | No | Description of the HTTP server profile |
-| `format` | Dict[str, PayloadFormatModel] | No | Format settings for different log types |
-| `folder` | str | No* | The folder in which the resource is defined |
-| `snippet` | str | No* | The snippet in which the resource is defined |
-| `device` | str | No* | The device in which the resource is defined |
-| `id` | UUID | Response only | The UUID of the HTTP server profile (response only) |
+| Attribute          | Type                          | Required      | Description                                          |
+|--------------------|-------------------------------|---------------|------------------------------------------------------|
+| `name`             | str                           | Yes           | The name of the HTTP server profile (max length: 63) |
+| `server`           | List[ServerModel]             | Yes           | List of server configurations                        |
+| `tag_registration` | bool                          | No            | Whether to register tags on match                    |
+| `description`      | str                           | No            | Description of the HTTP server profile               |
+| `format`           | Dict[str, PayloadFormatModel] | No            | Format settings for different log types              |
+| `folder`           | str                           | No*           | The folder in which the resource is defined          |
+| `snippet`          | str                           | No*           | The snippet in which the resource is defined         |
+| `device`           | str                           | No*           | The device in which the resource is defined          |
+| `id`               | UUID                          | Response only | The UUID of the HTTP server profile (response only)  |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ### Server Model Attributes
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | str | Yes | HTTP server name |
-| `address` | str | Yes | HTTP server address |
-| `protocol` | Literal["HTTP", "HTTPS"] | Yes | HTTP server protocol |
-| `port` | int | Yes | HTTP server port |
-| `tls_version` | Optional[Literal["1.0", "1.1", "1.2", "1.3"]] | No | HTTP server TLS version |
-| `certificate_profile` | Optional[str] | No | HTTP server certificate profile |
-| `http_method` | Optional[Literal["GET", "POST", "PUT", "DELETE"]] | No | HTTP operation to perform |
+| Attribute             | Type                                              | Required | Description                     |
+|-----------------------|---------------------------------------------------|----------|---------------------------------|
+| `name`                | str                                               | Yes      | HTTP server name                |
+| `address`             | str                                               | Yes      | HTTP server address             |
+| `protocol`            | Literal["HTTP", "HTTPS"]                          | Yes      | HTTP server protocol            |
+| `port`                | int                                               | Yes      | HTTP server port                |
+| `tls_version`         | Optional[Literal["1.0", "1.1", "1.2", "1.3"]]     | No       | HTTP server TLS version         |
+| `certificate_profile` | Optional[str]                                     | No       | HTTP server certificate profile |
+| `http_method`         | Optional[Literal["GET", "POST", "PUT", "DELETE"]] | No       | HTTP operation to perform       |
 
 ## Exceptions
 
-| Exception | HTTP Code | Description |
-|-----------|-----------|-------------|
-| `InvalidObjectError` | 400 | Invalid input data (e.g., invalid max_limit, invalid container parameters) |
-| `MissingQueryParameterError` | 400 | Required parameter is missing or empty (e.g., empty folder name) |
-| `InvalidObjectError` | 500 | Invalid response format from the API |
+| Exception                    | HTTP Code | Description                                                                |
+|------------------------------|-----------|----------------------------------------------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid input data (e.g., invalid max_limit, invalid container parameters) |
+| `MissingQueryParameterError` | 400       | Required parameter is missing or empty (e.g., empty folder name)           |
+| `InvalidObjectError`         | 500       | Invalid response format from the API                                       |
 
 ## Basic Configuration
 
@@ -380,8 +383,10 @@ except InvalidObjectError as e:
 
 ## Example Script
 
-See a complete example script for HTTP server profiles in the [examples directory](https://github.com/PaloAltoNetworks/pan-scm-sdk/blob/main/examples/scm/config/objects/http_server_profiles.py).
+See a complete example script for HTTP server profiles in
+the [examples directory](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/http_server_profiles.py).
 
 ## Related Models
 
-- [HTTP Server Profile Models](../../models/objects/http_server_profiles_models.md) - Pydantic models for HTTP server profiles
+- [HTTP Server Profile Models](../../models/objects/http_server_profiles_models.md) - Pydantic models for HTTP server
+  profiles

@@ -29,14 +29,14 @@ HIP profiles. HIP profiles define security posture matching criteria that can be
 
 ## Core Methods
 
-| Method     | Description                      | Parameters                          | Return Type                     |
-|------------|----------------------------------|-------------------------------------|----------------------------------|
-| `create()` | Creates a new HIP profile        | `data: Dict[str, Any]`              | `HIPProfileResponseModel`        |
-| `get()`    | Retrieves a HIP profile by ID    | `object_id: str`                    | `HIPProfileResponseModel`        |
-| `update()` | Updates an existing HIP profile  | `hip_profile: HIPProfileUpdateModel`| `HIPProfileResponseModel`        |
-| `delete()` | Deletes a HIP profile            | `object_id: str`                    | `None`                          |
-| `list()`   | Lists HIP profiles with filtering| `folder: str`, `**filters`          | `List[HIPProfileResponseModel]`  |
-| `fetch()`  | Gets HIP profile by name         | `name: str`, `folder: str`          | `HIPProfileResponseModel`        |
+| Method     | Description                       | Parameters                           | Return Type                     |
+|------------|-----------------------------------|--------------------------------------|---------------------------------|
+| `create()` | Creates a new HIP profile         | `data: Dict[str, Any]`               | `HIPProfileResponseModel`       |
+| `get()`    | Retrieves a HIP profile by ID     | `object_id: str`                     | `HIPProfileResponseModel`       |
+| `update()` | Updates an existing HIP profile   | `hip_profile: HIPProfileUpdateModel` | `HIPProfileResponseModel`       |
+| `delete()` | Deletes a HIP profile             | `object_id: str`                     | `None`                          |
+| `list()`   | Lists HIP profiles with filtering | `folder: str`, `**filters`           | `List[HIPProfileResponseModel]` |
+| `fetch()`  | Gets HIP profile by name          | `name: str`, `folder: str`           | `HIPProfileResponseModel`       |
 
 ## HIP Profile Model Attributes
 
