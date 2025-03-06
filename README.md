@@ -163,6 +163,7 @@ The unified client provides access to the following services through attribute-b
 | `tag`                              | Resource classification and organization labels                 |
 | **Network**                        |                                                                 |
 | `nat_rule`                         | Network address translation policies for traffic routing        |
+| `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | **Security**                       |                                                                 |

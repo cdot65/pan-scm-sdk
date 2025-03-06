@@ -100,6 +100,10 @@ nat_rules = client.nat_rule.list(
 )
 print(f"Found {len(nat_rules)} NAT rules with source zone 'trust'")
 
+# Work with Security Zones
+security_zones = client.security_zone.list(folder="Texas")
+print(f"Found {len(security_zones)} security zones")
+
 # Delete a NAT rule
 if nat_rules:
     client.nat_rule.delete(nat_rules[0].id)

@@ -14,6 +14,7 @@ This section covers the configuration of network features provided by the Palo A
 ## Available Network Objects
 
 - [NAT Rules](nat_rules.md) - Configure Network Address Translation rules for traffic handling
+- [Security Zones](security_zone.md) - Configure Security Zones for network segmentation
 
 ## Common Features
 

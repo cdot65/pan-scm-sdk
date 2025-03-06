@@ -13,6 +13,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Remote Networks](config/deployment/remote_networks.md)
     - Network
         - [NAT Rules](config/network/nat_rules.md)
+        - [Security Zones](config/network/security_zone.md)
     - Objects
         - [Address](config/objects/address.md)
         - [Address Group](config/objects/address_group.md)
@@ -45,6 +46,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Remote Networks](models/deployment/remote_networks_models.md)
     - Network
         - [NAT Rules](models/network/nat_rule_models.md)
+        - [Security Zones](models/network/security_zone_models.md)
     - Objects
         - [Address Models](models/objects/address_models.md)
         - [Address Group Models](models/objects/address_group_models.md)
@@ -179,6 +181,7 @@ The following table shows all services available through the unified client inte
 | `tag`                              | Resource classification and organization labels                 |
 | **Network**                        |                                                                 |
 | `nat_rule`                         | Network address translation policies for traffic routing        |
+| `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | **Security**                       |                                                                 |

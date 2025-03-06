@@ -41,6 +41,7 @@ nav:
           - Network:
               - Overview: sdk/config/network/index.md
               - NAT Rules: sdk/config/network/nat_rules.md
+              - Security Zones: sdk/config/network/security_zone.md
           - Objects:
               - Overview: sdk/config/objects/index.md
               - Address: sdk/config/objects/address.md
@@ -77,6 +78,7 @@ nav:
           - Network:
               - Overview: sdk/models/network/index.md
               - NAT Rule Models: sdk/models/network/nat_rule_models.md
+              - Security Zone Models: sdk/models/network/security_zone_models.md
           - Objects:
               - Overview: sdk/models/objects/index.md
               - Address Models: sdk/models/objects/address_models.md
