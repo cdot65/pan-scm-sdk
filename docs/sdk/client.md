@@ -25,6 +25,7 @@ class Scm:
             client_secret: str,
             tsg_id: str,
             api_base_url: str = "https://api.strata.paloaltonetworks.com",
+            token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
             log_level: str = "ERROR"
     )
 ```
@@ -36,6 +37,7 @@ class Scm:
 | Attribute      | Type             | Description                           |
 |----------------|------------------|---------------------------------------|
 | `api_base_url` | str              | Base URL for the API endpoints        |
+| `token_url`    | str              | URL for obtaining OAuth tokens        |
 | `oauth_client` | OAuth2Client     | OAuth2 client handling authentication |
 | `session`      | requests.Session | HTTP session for making requests      |
 | `logger`       | Logger           | Logger instance for SDK logging       |
@@ -59,7 +61,9 @@ from scm.client import Scm
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+    tsg_id="your_tsg_id",
+    # Optional parameters:
+    # token_url="https://custom.auth.server.com/oauth2/token"
 )
 
 # Access services directly through attributes
@@ -93,7 +97,9 @@ from scm.config.objects import Address
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+    tsg_id="your_tsg_id",
+    # Optional parameters:
+    # token_url="https://custom.auth.server.com/oauth2/token"
 )
 
 # Create service instance manually
@@ -279,7 +285,11 @@ from scm.client import Scm
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+    tsg_id="your_tsg_id",
+    # Optional parameters:
+    # api_base_url="https://api.custom-domain.com",  # Custom API endpoint
+    # token_url="https://auth.custom-domain.com/oauth2/token",  # Custom token endpoint
+    # log_level="DEBUG"  # Change logging level
 )
 ```
 
@@ -419,7 +429,9 @@ from scm.client import ScmClient
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
+    tsg_id="your_tsg_id",
+    # Optional parameters:
+    # token_url="https://custom.auth.server.com/oauth2/token"
 )
 ```
 

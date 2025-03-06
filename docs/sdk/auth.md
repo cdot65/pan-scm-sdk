@@ -43,20 +43,37 @@ The client establishes an authenticated session using the following steps:
 
 1. Creates a BackendApplicationClient with the provided client ID
 2. Configures retry strategy for resilient connections
-3. Fetches initial OAuth2 token
+3. Fetches initial OAuth2 token from the configured token URL
 4. Sets up HTTP adapters with retry logic
+
+The token URL can be customized when initializing the client, allowing for integration with different authentication providers or environments:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
+# Using the standard token URL (default)
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using a custom token URL
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    token_url="https://custom.auth.server.com/oauth2/token"
+)
+
+# The token URL is passed to the OAuth2Client internally
 auth_client = OAuth2Client(
     AuthRequestModel(
         client_id="your_client_id",
         client_secret="your_client_secret",
-        token_url="https://auth.example.com/token",
-        scope="your_scope",
+        token_url="https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",  # Default or custom URL
         tsg_id="your_tsg_id"
     )
 )
@@ -257,12 +274,18 @@ The module requires the following external libraries:
     - Implement proper error handling for token refresh
     - Use the token expiry buffer to prevent last-minute expiration
 
-2. Error Handling
+2. Custom Token URLs
+    - Use the `token_url` parameter when working with different environments (dev, staging, production)
+    - When integrating with custom authentication providers, specify the appropriate token endpoint
+    - Always ensure the token endpoint is secure (HTTPS)
+    - Example: `client = Scm(..., token_url="https://custom.auth.server.com/oauth2/token")`
+
+3. Error Handling
     - Catch specific exceptions for different error scenarios
     - Implement proper logging for troubleshooting
     - Use retry mechanisms for transient failures
 
-3. Security
+4. Security
     - Store credentials securely
     - Use environment variables for sensitive information
     - Implement proper token validation
