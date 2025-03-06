@@ -28,6 +28,14 @@ from scm.models.operations import (
 class Scm:
     """
     A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
+    
+    Args:
+        client_id: OAuth client ID for authentication
+        client_secret: OAuth client secret for authentication
+        tsg_id: Tenant Service Group ID for scope construction
+        api_base_url: Base URL for the SCM API (default: "https://api.strata.paloaltonetworks.com")
+        token_url: URL for obtaining OAuth tokens (default: "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token")
+        log_level: Logging level (default: "ERROR")
     """
 
     def __init__(
@@ -36,6 +44,7 @@ class Scm:
         client_secret: str,
         tsg_id: str,
         api_base_url: str = "https://api.strata.paloaltonetworks.com",
+        token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
         log_level: str = "ERROR",
     ):
         self.api_base_url = api_base_url
@@ -65,6 +74,7 @@ class Scm:
                 client_id=client_id,
                 client_secret=client_secret,
                 tsg_id=tsg_id,
+                token_url=token_url,
             )
         except ValueError as e:
             # Let exception propagate
@@ -498,6 +508,14 @@ class ScmClient(Scm):
     """
     Alias for the Scm class to provide a more explicit naming option.
     This class provides all the same functionality as Scm.
+    
+    Args:
+        client_id: OAuth client ID for authentication
+        client_secret: OAuth client secret for authentication
+        tsg_id: Tenant Service Group ID for scope construction
+        api_base_url: Base URL for the SCM API (default: "https://api.strata.paloaltonetworks.com")
+        token_url: URL for obtaining OAuth tokens (default: "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token")
+        log_level: Logging level (default: "ERROR")
     """
 
     pass
