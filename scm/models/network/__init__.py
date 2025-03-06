@@ -14,3 +14,13 @@ from .nat_rules import (
     DnsRewrite,
     DnsRewriteDirection,
 )
+
+from .security_zone import (
+    SecurityZoneCreateModel,
+    SecurityZoneUpdateModel,
+    SecurityZoneResponseModel,
+    NetworkInterfaceType,
+    NetworkConfig,
+    UserAcl,
+    DeviceAcl,
+)

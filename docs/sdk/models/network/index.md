@@ -91,6 +91,10 @@ updated_result = client.nat_rule.update(update_dict)
 
 - [NAT Rule Models](nat_rule_models.md) - Network Address Translation rules
 
+### Security Zones
+
+- [Security Zone Models](security_zone_models.md) - Security Zone configuration and management
+
 ## Best Practices
 
 1. **Model Validation**

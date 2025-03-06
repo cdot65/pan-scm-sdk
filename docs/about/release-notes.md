@@ -1,3 +1,11 @@
+## Version 0.3.16
+
+Released: March 6, 2025
+
+### Added
+- **Security Zone**: Support for managing Security Zones
+- **Examples**: Added examples for each of the objects and network service files
+
 ## Version 0.3.15
 
 Released: March 2, 2025
