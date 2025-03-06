@@ -113,7 +113,7 @@ class SecurityZoneBaseModel(BaseModel):
     name: str = Field(
         ...,
         description="The name of the security zone",
-        pattern=r"^[0-9a-zA-Z._-]+$",  # Pattern moved to Field for linting compatibility
+        pattern=r"^[0-9a-zA-Z._\- ]+$",  # Pattern includes whitespace
         max_length=63,
     )
     enable_user_identification: Optional[bool] = Field(
