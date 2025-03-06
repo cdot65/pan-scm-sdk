@@ -40,6 +40,7 @@ nav:
               - Remote Networks: sdk/config/deployment/remote_networks.md
           - Network:
               - Overview: sdk/config/network/index.md
+              - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
               - NAT Rules: sdk/config/network/nat_rules.md
               - Security Zones: sdk/config/network/security_zone.md
           - Objects:
@@ -77,6 +78,7 @@ nav:
               - Remote Network Models: sdk/models/deployment/remote_networks_models.md
           - Network:
               - Overview: sdk/models/network/index.md
+              - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md
               - NAT Rule Models: sdk/models/network/nat_rule_models.md
               - Security Zone Models: sdk/models/network/security_zone_models.md
           - Objects:
