@@ -2,3 +2,4 @@
 
 from .nat_rules import NatRule
 from .security_zone import SecurityZone
+from .ike_crypto_profile import IKECryptoProfile

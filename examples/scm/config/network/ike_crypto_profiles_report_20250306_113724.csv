@@ -1,0 +1,15 @@
+Profile ID,Name,Description,Hash Algorithms,Encryption Algorithms,DH Groups,Lifetime,Authentication Multiple,Folder,Report Generation Time
+8db8c571-c116-4007-8659-70acb8eab5bc,ike-basic-a7e07a,No description available,"sha1, sha256","aes-128-cbc, aes-256-cbc","group2, group14",8 hours,0,,2025-03-06 11:37:24
+12df0e2e-b708-4eef-bdaa-44adfe9da72e,ike-high-security-3f7981,No description available,"sha256, sha384, sha512","aes-256-cbc, aes-256-gcm","group14, group19, group20",4 hours,3,,2025-03-06 11:37:25
+a2035e47-efd9-42ad-8183-ace09dba4ddf,ike-legacy-compat-8668e4,No description available,"md5, sha1","3des, aes-128-cbc, aes-256-cbc","group1, group2, group5",1 days,0,,2025-03-06 11:37:25
+d47146fc-b670-4d74-9c43-2ca4590947c7,ike-seconds-5fa7b7,No description available,"sha1, sha256","aes-128-cbc, aes-256-cbc","group2, group14",3600 seconds,0,,2025-03-06 11:37:25
+898f4e67-1794-45c3-9734-a303a93f799b,ike-minutes-81139d,No description available,"sha1, sha256","aes-128-cbc, aes-256-cbc","group2, group14",120 minutes,0,,2025-03-06 11:37:25
+df0577a2-88f3-4c3e-a6a6-24f3110d902b,ike-hours-f7d2f8,No description available,"sha1, sha256","aes-128-cbc, aes-256-cbc","group2, group14",12 hours,0,,2025-03-06 11:37:25
+3127df16-008c-4422-887b-3f65f34383bc,ike-days-441b2d,No description available,"sha1, sha256","aes-128-cbc, aes-256-cbc","group2, group14",2 days,0,,2025-03-06 11:37:25
+
+SUMMARY
+Total Profiles Processed,7
+Successfully Retrieved,7
+Failed to Retrieve,0
+Execution Time (so far),2.96 seconds
+Report Generated On,2025-03-06 11:37:25
