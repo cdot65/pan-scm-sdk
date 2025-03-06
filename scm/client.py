@@ -439,7 +439,7 @@ class Scm:
             # Network
             "nat_rule": (
                 "scm.config.network.nat_rules",
-                "NATRule",
+                "NatRule",
             ),
             "security_zone": (
                 "scm.config.network.security_zone",
