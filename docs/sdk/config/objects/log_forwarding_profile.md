@@ -387,7 +387,7 @@ except InvalidObjectError as e:
 
 ## Example Script
 
-See a complete example script for log forwarding profiles in the [examples directory](https://github.com/PaloAltoNetworks/pan-scm-sdk/blob/main/examples/scm/config/objects/log_forwarding_profile.py).
+See a complete example script for log forwarding profiles in the [examples directory](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/log_forwarding_profile.py).
 
 ## Related Models
 

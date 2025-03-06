@@ -569,9 +569,9 @@ except MissingQueryParameterError as e:
    - Monitor commit status
    - Track job completion
 
-## Full Script Examples
+## Example Script
 
-A complete example including various schedule types and management operations will be available in the examples directory.
+See a complete example script for log forwarding profiles in the [examples directory](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/schedules.py).
 
 ## Related Models
 

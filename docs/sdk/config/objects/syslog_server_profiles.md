@@ -394,6 +394,10 @@ except InvalidObjectError as e:
 - Use appropriate syslog facilities to categorize different types of logs
 - Configure server redundancy for critical logging
 
+## Example Script
+
+See a complete example script for syslog server profiles in the [examples directory](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/objects/syslog_server_profiles.py).
+
 ## Related Models
 
 - [Syslog Server Profile Models](../../models/objects/syslog_server_profiles_models.md) - Pydantic models for syslog server profiles
