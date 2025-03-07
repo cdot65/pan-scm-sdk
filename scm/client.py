@@ -437,6 +437,10 @@ class Scm:
                 "Tag",
             ),
             # Network
+            "ike_crypto_profile": (
+                "scm.config.network.ike_crypto_profile",
+                "IKECryptoProfile",
+            ),
             "nat_rule": (
                 "scm.config.network.nat_rules",
                 "NatRule",
