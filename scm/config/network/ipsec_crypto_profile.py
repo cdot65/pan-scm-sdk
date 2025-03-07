@@ -3,7 +3,6 @@
 # Standard library imports
 import logging
 from typing import List, Dict, Any, Optional
-from uuid import UUID
 
 # Local SDK imports
 from scm.config import BaseObject
@@ -408,26 +407,26 @@ class IPsecCryptoProfile(BaseObject):
 
         if "data" in response and isinstance(response["data"], list):
             # We got a list back, find the matching profile
-            if len(response["data"]) == 0:
+            if not response["data"]:
                 raise InvalidObjectError(
                     message=f"IPsec crypto profile with name '{name}' not found",
                     error_code="E005",
                     http_status_code=404,
                     details={"error": "Object Not Present"},
                 )
-            
-            # Find the exact match by name
-            for item in response["data"]:
-                if item.get("name") == name:
-                    return IPsecCryptoProfileResponseModel(**item)
-            
-            # If we get here, we didn't find the exact match
-            raise InvalidObjectError(
-                message=f"IPsec crypto profile with name '{name}' not found",
-                error_code="E005",
-                http_status_code=404,
-                details={"error": "Object Not Present"},
-            )
+
+            try:
+                matched_item = next(item for item in response["data"] if item.get("name") == name)
+                return IPsecCryptoProfileResponseModel(**matched_item)
+
+            except StopIteration:
+                raise InvalidObjectError(
+                    message=f"IPsec crypto profile with name '{name}' not found",
+                    error_code = "E005",
+                    http_status_code = 404,
+                    details = {"error": "Object Not Present"},
+                )
+
         elif "id" in response:
             # We got a single object back
             return IPsecCryptoProfileResponseModel(**response)

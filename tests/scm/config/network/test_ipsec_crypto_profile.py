@@ -248,36 +248,64 @@ class TestIPsecCryptoProfile:
 
     def test_list_with_pagination(self, ipsec_crypto_profile_service, mock_client):
         """Test listing IPsec crypto profiles with pagination."""
-        # Create a profile for testing
-        profile_data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test-profile",
-            "lifetime": {"seconds": 3600},
-            "esp": {
-                "encryption": ["aes-128-cbc"],
-                "authentication": ["sha1"]
-            },
-            "folder": "Test Folder"
-        }
-        
-        # Setup single page response to simplify the test
-        mock_response = {
-            "data": [profile_data],
-            "limit": 200,
+        # Create a multi-page response to test pagination
+        first_page = {
+            "data": [
+                {
+                    "id": "123e4567-e89b-12d3-a456-426655440000",
+                    "name": "profile1",
+                    "lifetime": {"seconds": 3600},
+                    "esp": {
+                        "encryption": ["aes-128-cbc"],
+                        "authentication": ["sha1"]
+                    },
+                    "folder": "Test Folder"
+                }
+            ],
+            "limit": 1,
             "offset": 0,
-            "total": 1
+            "total": 2
         }
         
-        mock_client.get.return_value = mock_response
-
+        second_page = {
+            "data": [
+                {
+                    "id": "223e4567-e89b-12d3-a456-426655440000",
+                    "name": "profile2",
+                    "lifetime": {"hours": 1},
+                    "esp": {
+                        "encryption": ["aes-256-cbc"],
+                        "authentication": ["sha256"]
+                    },
+                    "folder": "Test Folder"
+                }
+            ],
+            "limit": 1,
+            "offset": 1,
+            "total": 2
+        }
+        
+        # Use a small max_limit to force pagination
+        ipsec_crypto_profile_service.max_limit = 1
+        
+        # Setup mock to return different responses for different calls
+        # This will cause the pagination to execute multiple times and hit the offset increment
+        mock_client.get.side_effect = [first_page, second_page, {"data": [], "limit": 1, "offset": 2, "total": 2}]
+        
         # Call list method
         result = ipsec_crypto_profile_service.list(folder="Test Folder")
-
+        
+        # Verify the pagination worked by checking call count
+        assert mock_client.get.call_count == 3  # Should make 3 calls for complete pagination
+        
         # Verify result
         assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].id == UUID(profile_data["id"])
-        assert result[0].name == profile_data["name"]
+        assert len(result) == 2
+        
+        # Verify IDs in results
+        result_ids = [str(item.id) for item in result]
+        assert "123e4567-e89b-12d3-a456-426655440000" in result_ids
+        assert "223e4567-e89b-12d3-a456-426655440000" in result_ids
 
     def test_list_invalid_container(self, ipsec_crypto_profile_service):
         """Test listing with invalid container parameters."""
@@ -336,7 +364,7 @@ class TestIPsecCryptoProfile:
 
     def test_list_with_filtering(self, ipsec_crypto_profile_service, mock_client):
         """Test listing with filtering options."""
-        # Setup mock response
+        # Setup mock response with various container types
         mock_response = {
             "data": [
                 {
@@ -368,11 +396,31 @@ class TestIPsecCryptoProfile:
                         "authentication": ["sha1"]
                     },
                     "folder": "Another Folder"
+                },
+                {
+                    "id": "423e4567-e89b-12d3-a456-426655440000",
+                    "name": "profile4",
+                    "lifetime": {"days": 1},
+                    "esp": {
+                        "encryption": ["aes-128-gcm"],
+                        "authentication": ["sha256"]
+                    },
+                    "snippet": "Test Snippet"
+                },
+                {
+                    "id": "523e4567-e89b-12d3-a456-426655440000",
+                    "name": "profile5",
+                    "lifetime": {"days": 1},
+                    "esp": {
+                        "encryption": ["aes-256-gcm"],
+                        "authentication": ["sha512"]
+                    },
+                    "device": "Test Device"
                 }
             ],
             "limit": 200,
             "offset": 0,
-            "total": 3
+            "total": 5
         }
         mock_client.get.return_value = mock_response
 
@@ -388,7 +436,21 @@ class TestIPsecCryptoProfile:
             folder="Test Folder",
             exclude_folders=["Another Folder"]
         )
-        assert len(result) == 2  # Only profiles not in excluded folder
+        assert len(result) == 4  # Exclude profiles in "Another Folder"
+        
+        # Test exclude_snippets - this covers line 320
+        result = ipsec_crypto_profile_service.list(
+            folder="Test Folder",
+            exclude_snippets=["Test Snippet"]
+        )
+        assert len(result) == 4  # Exclude profiles with "Test Snippet"
+        
+        # Test exclude_devices - this covers line 328
+        result = ipsec_crypto_profile_service.list(
+            folder="Test Folder",
+            exclude_devices=["Test Device"]
+        )
+        assert len(result) == 4  # Exclude profiles with "Test Device"
 
     def test_fetch(self, ipsec_crypto_profile_service, mock_client, sample_profile_data):
         """Test fetching a single IPsec crypto profile by name."""
@@ -430,7 +492,7 @@ class TestIPsecCryptoProfile:
         assert isinstance(result, IPsecCryptoProfileResponseModel)
         assert result.id == UUID(sample_profile_data["id"])
 
-    def test_fetch_invalid_params(self, ipsec_crypto_profile_service):
+    def test_fetch_invalid_params(self, ipsec_crypto_profile_service, mock_client):
         """Test fetching with invalid parameters."""
         # Test empty name
         try:
@@ -463,6 +525,24 @@ class TestIPsecCryptoProfile:
                 folder="Test Folder",
                 snippet="Test Snippet"
             )
+            pytest.fail("Should have raised InvalidObjectError")
+        except InvalidObjectError:
+            # Just check that the exception was raised, don't check the exact message
+            pass
+            
+        # Test non-dictionary response - covers line 402
+        mock_client.get.return_value = "not a dict"
+        try:
+            ipsec_crypto_profile_service.fetch(name="test-profile", folder="Test Folder")
+            pytest.fail("Should have raised InvalidObjectError")
+        except InvalidObjectError:
+            # Just check that the exception was raised, don't check the exact message
+            pass
+            
+        # Test missing required fields - covers line 435
+        mock_client.get.return_value = {"some_field": "value"}  # No 'id' or 'data' field
+        try:
+            ipsec_crypto_profile_service.fetch(name="test-profile", folder="Test Folder")
             pytest.fail("Should have raised InvalidObjectError")
         except InvalidObjectError:
             # Just check that the exception was raised, don't check the exact message
