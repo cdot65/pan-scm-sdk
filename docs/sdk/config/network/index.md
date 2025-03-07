@@ -15,6 +15,7 @@ This section covers the configuration of network features provided by the Palo A
 
 - [IKE Crypto Profiles](ike_crypto_profile.md) - Configure Internet Key Exchange crypto profiles for VPN tunnels
 - [IKE Gateways](ike_gateway.md) - Configure Internet Key Exchange gateways for VPN tunnel endpoints
+- [IPsec Crypto Profiles](ipsec_crypto_profile.md) - Configure IPsec crypto profiles for VPN tunnels
 - [NAT Rules](nat_rules.md) - Configure Network Address Translation rules for traffic handling
 - [Security Zones](security_zone.md) - Configure Security Zones for network segmentation
 
