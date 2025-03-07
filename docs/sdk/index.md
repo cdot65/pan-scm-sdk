@@ -14,6 +14,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Network
         - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
         - [IKE Gateways](config/network/ike_gateway.md)
+        - [IPsec Crypto Profiles](config/network/ipsec_crypto_profile.md)
         - [NAT Rules](config/network/nat_rules.md)
         - [Security Zones](config/network/security_zone.md)
     - Objects
@@ -49,6 +50,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Network
         - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
+        - [IPsec Crypto Profile Models](models/network/ipsec_crypto_profile_models.md)
         - [NAT Rules](models/network/nat_rule_models.md)
         - [Security Zones](models/network/security_zone_models.md)
     - Objects
@@ -186,6 +188,7 @@ The following table shows all services available through the unified client inte
 | **Network**                        |                                                                 |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnels                            |
 | `ike_gateway`                      | IKE gateway configurations for VPN tunnel endpoints             |
+| `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption                 |
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |

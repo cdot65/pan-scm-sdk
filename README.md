@@ -162,6 +162,9 @@ The unified client provides access to the following services through attribute-b
 | `syslog_server_profile`            | Syslog server configurations for centralized logging            |
 | `tag`                              | Resource classification and organization labels                 |
 | **Network**                        |                                                                 |
+| `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                   |
+| `ike_gateway`                      | IKE gateways for VPN tunnel endpoints                           |
+| `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption                 |
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |

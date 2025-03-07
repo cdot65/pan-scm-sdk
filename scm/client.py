@@ -441,6 +441,10 @@ class Scm:
                 "scm.config.network.ike_crypto_profile",
                 "IKECryptoProfile",
             ),
+            "ike_gateway": (
+                "scm.config.network.ike_gateway",
+                "IKEGateway",
+            ),
             "ipsec_crypto_profile": (
                 "scm.config.network.ipsec_crypto_profile",
                 "IPsecCryptoProfile",
