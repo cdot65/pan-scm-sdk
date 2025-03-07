@@ -37,3 +37,18 @@ from .ike_crypto_profile import (
     LifetimeHours,
     LifetimeDays,
 )
+
+from .ike_gateway import (
+    IKEGatewayCreateModel,
+    IKEGatewayUpdateModel,
+    IKEGatewayResponseModel,
+    PeerIdType,
+    LocalIdType,
+    ProtocolVersion,
+    Authentication,
+    PeerId,
+    LocalId,
+    Protocol,
+    ProtocolCommon,
+    PeerAddress,
+)

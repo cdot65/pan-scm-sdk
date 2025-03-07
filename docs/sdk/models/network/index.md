@@ -91,6 +91,10 @@ updated_result = client.nat_rule.update(update_dict)
 
 - [IKE Crypto Profile Models](ike_crypto_profile_models.md) - Internet Key Exchange crypto profiles for VPN tunnels
 
+### IKE Gateways
+
+- [IKE Gateway Models](ike_gateway_models.md) - Internet Key Exchange gateways for VPN tunnel endpoints
+
 ### NAT Rules
 
 - [NAT Rule Models](nat_rule_models.md) - Network Address Translation rules

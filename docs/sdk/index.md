@@ -12,6 +12,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Deployment
         - [Remote Networks](config/deployment/remote_networks.md)
     - Network
+        - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
+        - [IKE Gateways](config/network/ike_gateway.md)
         - [NAT Rules](config/network/nat_rules.md)
         - [Security Zones](config/network/security_zone.md)
     - Objects
@@ -45,6 +47,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Deployment
         - [Remote Networks](models/deployment/remote_networks_models.md)
     - Network
+        - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
+        - [IKE Gateway Models](models/network/ike_gateway_models.md)
         - [NAT Rules](models/network/nat_rule_models.md)
         - [Security Zones](models/network/security_zone_models.md)
     - Objects
@@ -180,6 +184,8 @@ The following table shows all services available through the unified client inte
 | `syslog_server_profile`            | Syslog server configurations for centralized logging            |
 | `tag`                              | Resource classification and organization labels                 |
 | **Network**                        |                                                                 |
+| `ike_crypto_profile`               | IKE crypto profiles for VPN tunnels                            |
+| `ike_gateway`                      | IKE gateway configurations for VPN tunnel endpoints             |
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
