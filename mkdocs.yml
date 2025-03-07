@@ -42,6 +42,7 @@ nav:
               - Overview: sdk/config/network/index.md
               - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
               - IKE Gateways: sdk/config/network/ike_gateway.md
+              - IPsec Crypto Profiles: sdk/config/network/ipsec_crypto_profile.md
               - NAT Rules: sdk/config/network/nat_rules.md
               - Security Zones: sdk/config/network/security_zone.md
           - Objects:
@@ -81,6 +82,7 @@ nav:
               - Overview: sdk/models/network/index.md
               - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md
               - IKE Gateway Models: sdk/models/network/ike_gateway_models.md
+              - IPsec Crypto Profile Models: sdk/models/network/ipsec_crypto_profile_models.md
               - NAT Rule Models: sdk/models/network/nat_rule_models.md
               - Security Zone Models: sdk/models/network/security_zone_models.md
           - Objects:
