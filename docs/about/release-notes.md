@@ -1,3 +1,12 @@
+## Version 0.3.17
+
+Released: March 7, 2025
+
+### Added
+- **ike_crypto_profile**: Support for managing IKE Crypto Profiles
+- **ike_gateway**: Support for managing IKE Gateways
+- **ipsec_crypto_profile**: Support for managing IPsec Crypto Profiles
+
 ## Version 0.3.16
 
 Released: March 6, 2025
