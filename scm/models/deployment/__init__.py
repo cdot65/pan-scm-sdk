@@ -5,3 +5,18 @@ from .remote_networks import (
     RemoteNetworkUpdateModel,
     RemoteNetworkResponseModel,
 )
+
+from .service_connections import (
+    ServiceConnectionCreateModel,
+    ServiceConnectionUpdateModel,
+    ServiceConnectionResponseModel,
+)
+
+__all__ = [
+    "RemoteNetworkCreateModel",
+    "RemoteNetworkUpdateModel",
+    "RemoteNetworkResponseModel",
+    "ServiceConnectionCreateModel",
+    "ServiceConnectionUpdateModel",
+    "ServiceConnectionResponseModel",
+]

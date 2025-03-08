@@ -16,6 +16,12 @@ from scm.models.deployment.remote_networks import (
     PeeringTypeEnum,
     ProtocolModel,
 )
+from scm.models.deployment.service_connections import (
+    ServiceConnectionCreateModel,
+    ServiceConnectionUpdateModel,
+    ServiceConnectionResponseModel,
+    ProtocolModel,
+)
 from scm.models.network.nat_rules import (
     NatRuleCreateModel,
     NatRuleUpdateModel,
@@ -27,7 +33,6 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     InterfaceAddress,
 )
-
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,
@@ -67,7 +72,6 @@ from scm.models.objects import (
     LogForwardingProfileCreateModel,
     LogForwardingProfileResponseModel,
     LogForwardingProfileUpdateModel,
-    MatchListItem,
     RegionCreateModel,
     RegionUpdateModel,
     RegionResponseModel,
@@ -5785,6 +5789,157 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
                 }
             ],
         )
+
+
+# ----------------------------------------------------------------------------
+# Service Connection factories.
+# ----------------------------------------------------------------------------
+
+
+class ServiceConnectionCreateApiFactory(factory.Factory):
+    """Factory for creating ServiceConnectionCreateModel instances."""
+
+    class Meta:
+        model = ServiceConnectionCreateModel
+
+    name = factory.Sequence(lambda n: f"service_connection_{n}")
+    folder = "Service Connections"
+    ipsec_tunnel = "ipsec-tunnel-1"
+    region = "us-east-1"
+    onboarding_type = "classic"
+    bgp_peer = None
+    nat_pool = None
+    protocol = None
+    qos = None
+    secondary_ipsec_tunnel = None
+    source_nat = False
+    subnets = []
+
+    @classmethod
+    def with_bgp_peer(cls, **kwargs):
+        """Create a service connection with BGP peer configuration."""
+        bgp_peer = {
+            "local_ip_address": "192.168.1.1",
+            "peer_ip_address": "192.168.1.2",
+        }
+        return cls(bgp_peer=bgp_peer, **kwargs)
+
+    @classmethod
+    def with_protocol(cls, **kwargs):
+        """Create a service connection with protocol configuration."""
+        protocol = {
+            "bgp": {
+                "enable": True,
+                "peer_as": "65000",
+                "local_ip_address": "192.168.1.1",
+                "peer_ip_address": "192.168.1.2",
+            }
+        }
+        return cls(protocol=protocol, **kwargs)
+
+    @classmethod
+    def with_qos(cls, **kwargs):
+        """Create a service connection with QoS configuration."""
+        qos = {
+            "enable": True,
+            "qos_profile": "high-priority",
+        }
+        return cls(qos=qos, **kwargs)
+
+
+class ServiceConnectionUpdateApiFactory(factory.Factory):
+    """Factory for creating ServiceConnectionUpdateModel instances."""
+
+    class Meta:
+        model = ServiceConnectionUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_connection_{n}")
+    ipsec_tunnel = "ipsec-tunnel-1"
+    region = "us-east-1"
+    onboarding_type = "classic"
+
+    @classmethod
+    def with_bgp_peer(cls, **kwargs):
+        """Create a service connection update with BGP peer configuration."""
+        bgp_peer = {
+            "local_ip_address": "192.168.1.1",
+            "peer_ip_address": "192.168.1.2",
+        }
+        return cls(bgp_peer=bgp_peer, **kwargs)
+
+    @classmethod
+    def with_protocol(cls, **kwargs):
+        """Create a service connection update with protocol configuration."""
+        protocol = {
+            "bgp": {
+                "enable": True,
+                "peer_as": "65000",
+                "local_ip_address": "192.168.1.1",
+                "peer_ip_address": "192.168.1.2",
+            }
+        }
+        return cls(protocol=protocol, **kwargs)
+
+
+class ServiceConnectionResponseFactory(factory.Factory):
+    """Factory for creating ServiceConnectionResponseModel instances."""
+
+    class Meta:
+        model = ServiceConnectionResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"service_connection_{n}")
+    folder = "Service Connections"
+    ipsec_tunnel = "ipsec-tunnel-1"
+    region = "us-east-1"
+    onboarding_type = "classic"
+    bgp_peer = None
+    nat_pool = None
+    protocol = None
+    qos = None
+    secondary_ipsec_tunnel = None
+    source_nat = False
+    subnets = []
+
+    @classmethod
+    def with_bgp_peer(cls, **kwargs):
+        """Create a service connection response with BGP peer configuration."""
+        bgp_peer = {
+            "local_ip_address": "192.168.1.1",
+            "peer_ip_address": "192.168.1.2",
+        }
+        return cls(bgp_peer=bgp_peer, **kwargs)
+
+    @classmethod
+    def with_protocol(cls, **kwargs):
+        """Create a service connection response with protocol configuration."""
+        protocol = {
+            "bgp": {
+                "enable": True,
+                "peer_as": "65000",
+                "local_ip_address": "192.168.1.1",
+                "peer_ip_address": "192.168.1.2",
+            }
+        }
+        return cls(protocol=protocol, **kwargs)
+
+    @classmethod
+    def with_qos(cls, **kwargs):
+        """Create a service connection response with QoS configuration."""
+        qos = {
+            "enable": True,
+            "qos_profile": "high-priority",
+        }
+        return cls(qos=qos, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: ServiceConnectionCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
 
 
 # ----------------------------------------------------------------------------
