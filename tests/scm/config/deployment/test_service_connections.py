@@ -69,6 +69,24 @@ class TestServiceConnection(TestServiceConnectionBase):
         assert service_connection.api_client == self.mock_scm
         assert service_connection.ENDPOINT == "/config/deployment/v1/service-connections"
         assert service_connection.max_limit == service_connection.DEFAULT_MAX_LIMIT
+        
+    def test_logger_initialization(self):
+        """Test that the logger is properly initialized."""
+        import logging
+        
+        # Create the ServiceConnection instance
+        service_connection = ServiceConnection(self.mock_scm)
+        
+        # Verify the logger attribute
+        assert hasattr(service_connection, "logger")
+        assert isinstance(service_connection.logger, logging.Logger)
+        
+        # Check that the logger has the correct name
+        # The logger name should be the module's __name__, which is 'scm.config.deployment.service_connections'
+        assert service_connection.logger.name.endswith('service_connections')
+        
+        # Check that the logger exists in the logging system
+        assert service_connection.logger.name in logging.root.manager.loggerDict
 
     def test_init_with_custom_max_limit(self):
         """Test initialization with custom max_limit."""
@@ -93,6 +111,32 @@ class TestServiceConnection(TestServiceConnectionBase):
             service_connection = ServiceConnection(self.mock_scm)
             service_connection.max_limit = 2000
         assert "max_limit exceeds maximum allowed value" in str(excinfo.value)
+        
+    def test_max_limit_property_setter(self):
+        """Test the max_limit property setter."""
+        # Create service connection with default max_limit
+        service_connection = ServiceConnection(self.mock_scm)
+        assert service_connection.max_limit == service_connection.DEFAULT_MAX_LIMIT
+        
+        # Change max_limit value
+        service_connection.max_limit = 500
+        assert service_connection.max_limit == 500
+        
+        # Try invalid values
+        with pytest.raises(InvalidObjectError) as excinfo:
+            service_connection.max_limit = "invalid"
+        assert "Invalid max_limit type" in str(excinfo.value)
+        
+        with pytest.raises(InvalidObjectError) as excinfo:
+            service_connection.max_limit = -10
+        assert "Invalid max_limit value" in str(excinfo.value)
+        
+        with pytest.raises(InvalidObjectError) as excinfo:
+            service_connection.max_limit = 1500
+        assert "max_limit exceeds maximum allowed value" in str(excinfo.value)
+        
+        # Confirm original value is unchanged after failed attempts
+        assert service_connection.max_limit == 500
 
     def test_create(self, sample_service_connection_dict):
         """Test create method."""
@@ -360,6 +404,16 @@ class TestServiceConnection(TestServiceConnectionBase):
             self.client.fetch(name="non-existent")
             
         assert "Service connection not found" in str(excinfo.value)
+            
+    def test_fetch_with_non_dict_response(self):
+        """Test fetch method with non-dictionary response."""
+        # Mock a non-dictionary response to hit line 294
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="test-connection")
+            
+        assert "Response is not a dictionary" in str(excinfo.value)
     
     def test_fetch_with_no_exact_match(self, sample_service_connection_dict):
         """Test fetch method with no exact match in results."""

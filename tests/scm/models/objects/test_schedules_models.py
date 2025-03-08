@@ -144,33 +144,102 @@ class TestNonRecurringScheduleModel:
         )
         assert model.non_recurring == ["2025/01/01@09:00-2025/01/01@17:00"]
         
+        # Test with multiple valid datetime ranges
+        model = NonRecurringScheduleModel(
+            non_recurring=[
+                "2025/01/01@09:00-2025/01/01@17:00",
+                "2025/02/15@10:30-2025/02/15@15:45"
+            ]
+        )
+        assert len(model.non_recurring) == 2
+        
         # Test with empty non_recurring list
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=[])
             
-        # Test with invalid datetime format
+        # Test with invalid datetime format (missing leading zero in hour)
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=["2025/01/01@9:00-2025/01/01@17:00"])
             
-        # Test with invalid year format
+        # Test with invalid year format (non-numeric)
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=["ABCD/01/01@09:00-2025/01/01@17:00"])
             
-        # Test with invalid month
+        # Test with invalid month (out of range)
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=["2025/13/01@09:00-2025/01/01@17:00"])
             
-        # Test with invalid day
+        # Test with invalid day (out of range)
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=["2025/01/32@09:00-2025/01/01@17:00"])
             
-        # Test with invalid hours
+        # Test with invalid hours (out of range)
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=["2025/01/01@24:00-2025/01/01@17:00"])
             
-        # Test with invalid minutes
+        # Test with invalid minutes (out of range)
         with pytest.raises(ValueError):
             NonRecurringScheduleModel(non_recurring=["2025/01/01@09:60-2025/01/01@17:00"])
+            
+        # Test with missing leading zero in month
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025/1/01@09:00-2025/01/01@17:00"])
+            
+        # Test with missing leading zero in day
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025/01/1@09:00-2025/01/01@17:00"])
+            
+        # Test with missing leading zero in minutes
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025/01/01@09:0-2025/01/01@17:00"])
+            
+        # Test with invalid separator (using - instead of /)
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025-01-01@09:00-2025/01/01@17:00"])
+            
+        # Test with missing @ separator
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025/01/01 09:00-2025/01/01@17:00"])
+            
+        # Test with only one side of the range
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025/01/01@09:00"])
+            
+        # Test with invalid range format (missing hyphen)
+        with pytest.raises(ValueError):
+            NonRecurringScheduleModel(non_recurring=["2025/01/01@09:00=2025/01/01@17:00"])
+            
+    def test_start_date_format_validation(self):
+        """Test validation of the start date format."""
+        # Test invalid start date parts count (covers line 171)
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01@09:00-2025/01/01@17:00"]  # Missing day in start date
+            )
+        assert "Start date must be in format YYYY/MM/DD" in str(exc_info.value)
+        
+        # Test invalid time format in start time (covers line 181)
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09-2025/01/01@17:00"]  # Missing minutes in start time
+            )
+        assert "Start time must be in format HH:MM" in str(exc_info.value)
+    
+    def test_end_date_format_validation(self):
+        """Test validation of the end date format."""
+        # Test missing @ separator in end date (covers line 188)
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/01 17:00"]  # Space instead of @ in end time
+            )
+        assert "End datetime must contain @ to separate date and time" in str(exc_info.value)
+        
+        # Test invalid parts count in end date (covers line 193)
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025@17:00"]  # Missing month/day in end date
+            )
+        assert "End date must be in format YYYY/MM/DD" in str(exc_info.value)
 
 
 class TestScheduleTypeModel:
@@ -270,15 +339,118 @@ class TestScheduleCreateModel:
         assert "Time range must be in format hh:mm-hh:mm" in str(exc_info.value)
     
     def test_schedule_create_model_invalid_date_format(self):
-        """Test validation when invalid date format is provided."""
-        data = ScheduleCreateModelFactory.build_with_invalid_date_format()
+        """Test validation when invalid date format is provided in a composed model."""
+        # Testing validation via the NonRecurringScheduleModel directly
+        # This is the proper way to ensure the validation is applied correctly
+        data = NonRecurringScheduleModel(
+            non_recurring=["2025/01/01@09:00-2025/01/01@17:00"]  # Valid format
+        )
+        assert len(data.non_recurring) == 1
         
-        # Let's directly test the NonRecurringScheduleModel to see if our validation works
-        non_recurring_value = data["schedule_type"]["non_recurring"]
-        with pytest.raises(ValidationError) as exc_info:
-            NonRecurringScheduleModel(non_recurring=non_recurring_value)
-        assert "Month must use leading zeros" in str(exc_info.value) or \
-               "Day must use leading zeros" in str(exc_info.value)
+        # Now test invalid format with direct model
+        with pytest.raises(ValueError) as exc_info:  # Note: Using ValueError, not ValidationError here
+            NonRecurringScheduleModel(
+                non_recurring=["2025/1/01@09:00-2025/01/01@17:00"]  # Missing leading zero in month
+            )
+        assert "Month must use leading zeros" in str(exc_info.value)
+        
+    def test_non_recurring_date_format_validation(self):
+        """Test validation of the date format for non-recurring schedules."""
+        # Test with various invalid formats directly using the NonRecurringScheduleModel
+        
+        # Test missing leading zero in month
+        with pytest.raises(ValueError) as exc_info:  # Using ValueError directly
+            NonRecurringScheduleModel(
+                non_recurring=["2025/1/01@09:00-2025/01/01@17:00"]
+            )
+        assert "Month must use leading zeros" in str(exc_info.value)
+        
+        # Test missing leading zero in day
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/1@09:00-2025/01/01@17:00"]
+            )
+        assert "Day must use leading zeros" in str(exc_info.value)
+        
+        # Test missing leading zero in hours
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@9:00-2025/01/01@17:00"]
+            )
+        assert "Hours must use leading zeros" in str(exc_info.value)
+        
+        # Test missing leading zero in minutes
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:0-2025/01/01@17:00"]
+            )
+        assert "Minutes must use leading zeros" in str(exc_info.value)
+        
+    def test_non_recurring_end_date_format_validation(self):
+        """Test validation of the end date format for non-recurring schedules."""
+        # Test various invalid end date formats
+        
+        # Test missing leading zero in end month
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/1/01@17:00"]
+            )
+        assert "Month must use leading zeros" in str(exc_info.value)
+        
+        # Test missing leading zero in end day
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/1@17:00"]
+            )
+        assert "Day must use leading zeros" in str(exc_info.value)
+        
+        # Test missing leading zero in end hours
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/01@9:00"]
+            )
+        assert "Hours must use leading zeros" in str(exc_info.value)
+        
+        # Test missing leading zero in end minutes
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/01@17:0"]
+            )
+        assert "Minutes must use leading zeros" in str(exc_info.value)
+        
+        # Test invalid end date separator
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025-01-01@17:00"]
+            )
+        assert "Invalid datetime range format" in str(exc_info.value)
+        
+        # Test invalid end time separator
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/01@17.00"]
+            )
+        assert "End time must be in format HH:MM" in str(exc_info.value)
+        
+        # Test invalid end year format
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-ABCD/01/01@17:00"]
+            )
+        assert "Year must be numeric" in str(exc_info.value)
+        
+        # Test out of range end values
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/13/01@17:00"]
+            )
+        assert "Month must be between 01 and 12" in str(exc_info.value)
+        
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/32@17:00"]
+            )
+        assert "Day must be between 01 and 31" in str(exc_info.value)
     
     def test_schedule_create_model_both_recurring_types(self):
         """Test validation when both weekly and daily schedules are provided."""
@@ -354,6 +526,56 @@ class TestScheduleUpdateModel:
             )
         assert "required" in str(exc_info.value)
         assert "schedule_type" in str(exc_info.value)
+
+
+class TestModelConfig:
+    """Tests for Pydantic model configuration options."""
+    
+    def test_populate_by_name(self):
+        """Test that populate_by_name works correctly in ScheduleBaseModel."""
+        # Creating a model with an alias
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestSchedule",
+            "folder": "Shared",
+            "schedule_type": {
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"]
+                    }
+                }
+            }
+        }
+        
+        # Test with update model (inherits from ScheduleBaseModel)
+        model = ScheduleUpdateModel(**data)
+        
+        # Verify model_config settings are applied
+        assert model.model_config["populate_by_name"] is True
+        assert model.model_config["validate_assignment"] is True
+        assert model.model_config["arbitrary_types_allowed"] is True
+    
+    def test_validate_assignment(self):
+        """Test that validate_assignment works correctly."""
+        # Create a model
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestSchedule",
+            "folder": "Shared",
+            "schedule_type": {
+                "recurring": {
+                    "weekly": {
+                        "monday": ["09:00-17:00"]
+                    }
+                }
+            }
+        }
+        model = ScheduleUpdateModel(**data)
+        
+        # Test that assignment is validated
+        with pytest.raises(ValueError):
+            # Name has a pattern validation that only allows certain characters
+            model.name = "$Invalid~Name"
 
 
 class TestScheduleResponseModel:
