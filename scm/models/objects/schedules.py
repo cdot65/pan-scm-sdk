@@ -153,46 +153,97 @@ class NonRecurringScheduleModel(BaseModel):
         """Validate that datetime ranges follow the correct format."""
         if not v:
             raise ValueError("Non-recurring schedule must contain at least one datetime range")
-        
+            
         for dt_range in v:
-            # Datetime range should be exactly 33 characters: YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm
-            if not dt_range or len(dt_range) != 33:
-                raise ValueError(
-                    "Datetime range must be in format YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm and be exactly 33 characters"
-                )
-            
-            # Split into start and end datetimes
-            start_dt, end_dt = dt_range.split("-")
-            
-            # Validate start datetime
+            # Check for the format YYYY/M/D@HH:MM - detecting missing leading zeros
+            dt_parts = dt_range.split("-")
+            if len(dt_parts) != 2:
+                raise ValueError("Invalid datetime range format - must contain a single hyphen")
+                
+            # Process start date/time
+            start_dt = dt_parts[0]
+            if "@" not in start_dt:
+                raise ValueError("Start datetime must contain @ to separate date and time")
+                
             start_date, start_time = start_dt.split("@")
-            start_year, start_month, start_day = start_date.split("/")
-            start_hour, start_minute = start_time.split(":")
+            start_parts = start_date.split("/")
+            if len(start_parts) != 3:
+                raise ValueError("Start date must be in format YYYY/MM/DD")
+                
+            start_year, start_month, start_day = start_parts
             
-            # Validate end datetime
-            end_date, end_time = end_dt.split("@")
-            end_year, end_month, end_day = end_date.split("/")
-            end_hour, end_minute = end_time.split(":")
-            
-            # Validate years
-            if not start_year.isdigit() or not end_year.isdigit():
+            # Validate that year is numeric
+            if not start_year.isdigit():
                 raise ValueError("Year must be numeric")
+                
+            start_time_parts = start_time.split(":")
+            if len(start_time_parts) != 2:
+                raise ValueError("Start time must be in format HH:MM")
+                
+            start_hour, start_minute = start_time_parts
             
-            # Validate months (01-12)
-            if not (1 <= int(start_month) <= 12 and 1 <= int(end_month) <= 12):
-                raise ValueError("Month must be between 01 and 12")
+            # Process end date/time
+            end_dt = dt_parts[1]
+            if "@" not in end_dt:
+                raise ValueError("End datetime must contain @ to separate date and time")
+                
+            end_date, end_time = end_dt.split("@")
+            end_parts = end_date.split("/")
+            if len(end_parts) != 3:
+                raise ValueError("End date must be in format YYYY/MM/DD")
+                
+            end_year, end_month, end_day = end_parts
             
-            # Validate days (01-31)
-            if not (1 <= int(start_day) <= 31 and 1 <= int(end_day) <= 31):
-                raise ValueError("Day must be between 01 and 31")
+            # Validate that year is numeric
+            if not end_year.isdigit():
+                raise ValueError("Year must be numeric")
+                
+            end_time_parts = end_time.split(":")
+            if len(end_time_parts) != 2:
+                raise ValueError("End time must be in format HH:MM")
+                
+            end_hour, end_minute = end_time_parts
             
-            # Validate hours (00-23)
+            # Validate leading zeros for months
+            if len(start_month) != 2 or not start_month.startswith("0") and int(start_month) < 10:
+                raise ValueError("Month must use leading zeros (01-12)")
+                
+            if len(end_month) != 2 or not end_month.startswith("0") and int(end_month) < 10:
+                raise ValueError("Month must use leading zeros (01-12)")
+            
+            # Validate leading zeros for days
+            if len(start_day) != 2 or not start_day.startswith("0") and int(start_day) < 10:
+                raise ValueError("Day must use leading zeros (01-31)")
+                
+            if len(end_day) != 2 or not end_day.startswith("0") and int(end_day) < 10:
+                raise ValueError("Day must use leading zeros (01-31)")
+            
+            # Validate leading zeros for hours
+            if len(start_hour) != 2 or not start_hour.startswith("0") and int(start_hour) < 10:
+                raise ValueError("Hours must use leading zeros (00-23)")
+                
+            if len(end_hour) != 2 or not end_hour.startswith("0") and int(end_hour) < 10:
+                raise ValueError("Hours must use leading zeros (00-23)")
+            
+            # Validate leading zeros for minutes
+            if len(start_minute) != 2 or not start_minute.startswith("0") and int(start_minute) < 10:
+                raise ValueError("Minutes must use leading zeros (00-59)")
+                
+            if len(end_minute) != 2 or not end_minute.startswith("0") and int(end_minute) < 10:
+                raise ValueError("Minutes must use leading zeros (00-59)")
+            
+            # Validate numeric ranges
             if not (0 <= int(start_hour) <= 23 and 0 <= int(end_hour) <= 23):
                 raise ValueError("Hours must be between 00 and 23")
-            
-            # Validate minutes (00-59)
+                
             if not (0 <= int(start_minute) <= 59 and 0 <= int(end_minute) <= 59):
                 raise ValueError("Minutes must be between 00 and 59")
+                
+            if not (1 <= int(start_month) <= 12 and 1 <= int(end_month) <= 12):
+                raise ValueError("Month must be between 01 and 12")
+                
+            if not (1 <= int(start_day) <= 31 and 1 <= int(end_day) <= 31):
+                raise ValueError("Day must be between 01 and 31")
             
         return v
 

@@ -271,9 +271,14 @@ class TestScheduleCreateModel:
     
     def test_schedule_create_model_invalid_date_format(self):
         """Test validation when invalid date format is provided."""
-        # Skip this test as the current implementation doesn't fail on this case
-        # This would need a more rigorous custom validator
-        pytest.skip("Current implementation accepts this non-standard format")
+        data = ScheduleCreateModelFactory.build_with_invalid_date_format()
+        
+        # Let's directly test the NonRecurringScheduleModel to see if our validation works
+        non_recurring_value = data["schedule_type"]["non_recurring"]
+        with pytest.raises(ValidationError) as exc_info:
+            NonRecurringScheduleModel(non_recurring=non_recurring_value)
+        assert "Month must use leading zeros" in str(exc_info.value) or \
+               "Day must use leading zeros" in str(exc_info.value)
     
     def test_schedule_create_model_both_recurring_types(self):
         """Test validation when both weekly and daily schedules are provided."""

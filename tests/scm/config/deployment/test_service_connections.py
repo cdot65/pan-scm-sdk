@@ -1,14 +1,13 @@
 """Unit tests for the ServiceConnection class."""
 
-import json
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from scm.config.network import ServiceConnection
+from scm.config.deployment import ServiceConnection
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
+from scm.models.deployment import (
     ServiceConnectionCreateModel,
     ServiceConnectionResponseModel,
     ServiceConnectionUpdateModel,

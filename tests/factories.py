@@ -6676,7 +6676,8 @@ class RemoteNetworkResponseFactory(factory.Factory):
                 "peering_type": PeeringTypeEnum.exchange_v4_over_v4,
             }
         }
-        return cls(protocol=ProtocolModel(**protocol_data), **kwargs)
+        # Pass the protocol as a dict instead of a pre-constructed model
+        return cls(protocol=protocol_data, **kwargs)
 
     @classmethod
     def with_ecmp_enabled(

@@ -1,9 +1,10 @@
 """Test models for Service Connections."""
-import pytest
 from uuid import UUID
+
+import pytest
 from pydantic import ValidationError
 
-from scm.models.network import (
+from scm.models.deployment import (
     ServiceConnectionCreateModel,
     ServiceConnectionUpdateModel,
     ServiceConnectionResponseModel,
