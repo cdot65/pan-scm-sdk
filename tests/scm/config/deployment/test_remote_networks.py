@@ -165,20 +165,6 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         error_msg = str(exc_info.value)
         assert "HTTP error: 400 - API error: E003" in error_msg
 
-    # def test_list_container_multiple_error(self):
-    #     """Test validation of container parameters."""
-    #     self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
-    #         status_code=400,
-    #         error_code="E003",
-    #         message="Multiple container types provided",
-    #         error_type="Invalid Object",
-    #     )
-    #
-    #     with pytest.raises(InvalidObjectError) as exc_info:
-    #         self.client.list(folder="folder1")
-    #
-    #     error_msg = str(exc_info.value)
-    #     assert "HTTP error: 400 - API error: E003" in error_msg
 
     def test_list_filters_valid(self):
         """Test that filters are properly added to parameters."""
@@ -1179,19 +1165,6 @@ class TestRemoteNetworkFetch(TestRemoteNetworkBase):
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 400
 
-    # def test_fetch_multiple_containers_provided_error(self):
-    #     """Test that InvalidObjectError is raised when multiple container parameters are provided."""
-    #     with pytest.raises(InvalidObjectError) as exc_info:
-    #         self.client.fetch(
-    #             name="test-remote-network",
-    #             folder="Remote Networks",
-    #             # snippet="TestSnippet",
-    #         )
-    #
-    #     error_msg = str(exc_info.value)
-    #     assert "HTTP error: 400 - API error: E003" in error_msg
-    #     assert exc_info.value.error_code == "E003"
-    #     assert exc_info.value.http_status_code == 400
 
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""

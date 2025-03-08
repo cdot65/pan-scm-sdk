@@ -7,3 +7,13 @@ from .security_rule import SecurityRule
 from .url_categories import URLCategories
 from .vulnerability_protection_profile import VulnerabilityProtectionProfile
 from .wildfire_antivirus_profile import WildfireAntivirusProfile
+
+__all__ = [
+    "AntiSpywareProfile",
+    "DecryptionProfile",
+    "DNSSecurityProfile",
+    "SecurityRule",
+    "URLCategories",
+    "VulnerabilityProtectionProfile",
+    "WildfireAntivirusProfile",
+]

@@ -14,6 +14,7 @@ This section covers the configuration of SASE deployments provided by the Palo A
 ## Available Deployment Objects
 
 - [Remote Networks](remote_networks.md) - Configure remote network connections for Prisma Access
+- [Service Connections](service_connections.md) - Configure service connections to cloud service providers
 
 ## Common Features
 

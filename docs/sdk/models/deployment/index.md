@@ -8,6 +8,7 @@
 4. [Usage Examples](#usage-examples)
 5. [Models by Category](#models-by-category)
    1. [Remote Networks](#remote-networks)
+   2. [Service Connections](#service-connections)
 6. [Best Practices](#best-practices)
 7. [Related Documentation](#related-documentation)
 
@@ -91,6 +92,10 @@ updated_result = client.remote_networks.update(update_dict)
 
 - [Remote Networks Models](remote_networks_models.md) - Remote network connection configurations
 
+### Service Connections
+
+- [Service Connections Models](service_connections_models.md) - Service connection configurations for cloud service providers
+
 ## Best Practices
 
 1. **Model Validation**
@@ -120,3 +125,4 @@ updated_result = client.remote_networks.update(update_dict)
 
 - [Deployment Configuration](../../config/deployment/index.md) - Working with deployment configurations
 - [Remote Networks Configuration](../../config/deployment/remote_networks.md) - Remote network operations
+- [Service Connections Configuration](../../config/deployment/service_connections.md) - Service connection operations

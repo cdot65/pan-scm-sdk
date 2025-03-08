@@ -169,6 +169,7 @@ The unified client provides access to the following services through attribute-b
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
+| `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |
 | `security_rule`                    | Core security policies controlling network traffic              |
 | `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration   |
