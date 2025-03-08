@@ -38,6 +38,7 @@ nav:
           - Deployment:
               - Overview: sdk/config/deployment/index.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
+              - Service Connections: sdk/config/deployment/service_connections.md
           - Network:
               - Overview: sdk/config/network/index.md
               - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
@@ -78,6 +79,7 @@ nav:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
               - Remote Network Models: sdk/models/deployment/remote_networks_models.md
+              - Service Connection Models: sdk/models/deployment/service_connections_models.md
           - Network:
               - Overview: sdk/models/network/index.md
               - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md
