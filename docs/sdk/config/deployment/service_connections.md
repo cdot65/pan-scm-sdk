@@ -31,34 +31,34 @@ which are used to establish connectivity to cloud service providers.
 
 ## Core Methods
 
-| Method     | Description                                  | Parameters                                       | Return Type                        |
-|------------|----------------------------------------------|--------------------------------------------------|-------------------------------------|
-| `create()` | Creates a new service connection             | `data: Dict[str, Any]`                           | `ServiceConnectionResponseModel`    |
-| `get()`    | Retrieves a service connection by ID         | `object_id: str`                                 | `ServiceConnectionResponseModel`    |
-| `update()` | Updates an existing service connection       | `service_connection: ServiceConnectionUpdateModel` | `ServiceConnectionResponseModel`  |
-| `delete()` | Deletes a service connection                 | `object_id: str`                                 | `None`                              |
-| `list()`   | Lists service connections with filtering     | `name: Optional[str]`, `**filters`               | `List[ServiceConnectionResponseModel]` |
-| `fetch()`  | Gets service connection by name              | `name: str`                                      | `ServiceConnectionResponseModel`    |
+| Method     | Description                              | Parameters                                         | Return Type                            |
+|------------|------------------------------------------|----------------------------------------------------|----------------------------------------|
+| `create()` | Creates a new service connection         | `data: Dict[str, Any]`                             | `ServiceConnectionResponseModel`       |
+| `get()`    | Retrieves a service connection by ID     | `object_id: str`                                   | `ServiceConnectionResponseModel`       |
+| `update()` | Updates an existing service connection   | `service_connection: ServiceConnectionUpdateModel` | `ServiceConnectionResponseModel`       |
+| `delete()` | Deletes a service connection             | `object_id: str`                                   | `None`                                 |
+| `list()`   | Lists service connections with filtering | `name: Optional[str]`, `**filters`                 | `List[ServiceConnectionResponseModel]` |
+| `fetch()`  | Gets service connection by name          | `name: str`                                        | `ServiceConnectionResponseModel`       |
 
 ## Service Connection Model Attributes
 
-| Attribute             | Type                  | Required     | Description                                       |
-|-----------------------|-----------------------|--------------|---------------------------------------------------|
-| `name`                | str                   | Yes          | Name of service connection (max 63 chars)         |
-| `id`                  | UUID                  | Yes*         | Unique identifier (*response only)                |
-| `folder`              | str                   | Yes          | Always "Service Connections"                      |
-| `ipsec_tunnel`        | str                   | Yes          | IPsec tunnel for the service connection          |
-| `onboarding_type`     | OnboardingType        | Yes          | Onboarding type (default: "classic")             |
-| `region`              | str                   | Yes          | Region for the service connection                |
-| `backup_SC`           | str                   | No           | Backup service connection                         |
-| `bgp_peer`            | BgpPeerModel          | No           | BGP peer configuration                            |
-| `nat_pool`            | str                   | No           | NAT pool for the service connection              |
-| `no_export_community` | NoExportCommunity     | No           | No export community configuration                |
-| `protocol`            | ProtocolModel         | No           | Protocol configuration                            |
-| `qos`                 | QosModel              | No           | QoS configuration                                 |
-| `secondary_ipsec_tunnel` | str               | No           | Secondary IPsec tunnel                            |
-| `source_nat`          | bool                  | No           | Enable source NAT                                 |
-| `subnets`             | List[str]             | No           | Subnets for the service connection               |
+| Attribute                | Type              | Required | Description                               |
+|--------------------------|-------------------|----------|-------------------------------------------|
+| `name`                   | str               | Yes      | Name of service connection (max 63 chars) |
+| `id`                     | UUID              | Yes*     | Unique identifier (*response only)        |
+| `folder`                 | str               | Yes      | Always "Service Connections"              |
+| `ipsec_tunnel`           | str               | Yes      | IPsec tunnel for the service connection   |
+| `onboarding_type`        | OnboardingType    | Yes      | Onboarding type (default: "classic")      |
+| `region`                 | str               | Yes      | Region for the service connection         |
+| `backup_SC`              | str               | No       | Backup service connection                 |
+| `bgp_peer`               | BgpPeerModel      | No       | BGP peer configuration                    |
+| `nat_pool`               | str               | No       | NAT pool for the service connection       |
+| `no_export_community`    | NoExportCommunity | No       | No export community configuration         |
+| `protocol`               | ProtocolModel     | No       | Protocol configuration                    |
+| `qos`                    | QosModel          | No       | QoS configuration                         |
+| `secondary_ipsec_tunnel` | str               | No       | Secondary IPsec tunnel                    |
+| `source_nat`             | bool              | No       | Enable source NAT                         |
+| `subnets`                | List[str]         | No       | Subnets for the service connection        |
 
 ## Exceptions
 
