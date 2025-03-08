@@ -462,6 +462,10 @@ class Scm:
                 "scm.config.deployment.remote_networks",
                 "RemoteNetworks",
             ),
+            "service_connection": (
+                "scm.config.deployment.service_connections",
+                "ServiceConnection",
+            ),
             # Security
             "security_rule": (
                 "scm.config.security.security_rule",
