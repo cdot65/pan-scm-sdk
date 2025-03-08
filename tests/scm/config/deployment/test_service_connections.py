@@ -327,6 +327,42 @@ class TestServiceConnection(TestServiceConnectionBase):
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0].name == "test-connection"
+        
+    def test_list_with_empty_name_parameter(self):
+        """Test list method with empty name parameter."""
+        # Set up response for the mock
+        self.mock_scm.get.return_value = {"data": []}
+        
+        # Empty name should not raise an error, as it's handled as falsy 
+        # and the name filter won't be applied
+        result = self.client.list(name="")
+        assert isinstance(result, list)
+        assert len(result) == 0
+        
+        # Check that name parameter wasn't included in API call
+        call_args = self.mock_scm.get.call_args
+        assert "name" not in call_args[1]["params"]
+        
+    def test_list_with_invalid_name_filter_types(self):
+        """Test list method with invalid name filter types."""
+        # Set up a proper response for the mock to prevent additional errors
+        self.mock_scm.get.return_value = {"data": []}
+        
+        # Test with whitespace only - should raise error
+        with pytest.raises(ValueError) as excinfo:
+            self.client.list(name="   ")
+        assert "Name filter must be a non-empty string" in str(excinfo.value)
+        
+        # Test with name that's too long (over 255 chars)
+        long_name = "a" * 256
+        with pytest.raises(ValueError) as excinfo:
+            self.client.list(name=long_name)
+        assert "Name filter exceeds maximum length of 255 characters" in str(excinfo.value)
+        
+        # Test with non-string value
+        with pytest.raises(ValueError) as excinfo:
+            self.client.list(name=123)
+        assert "Name filter must be a non-empty string" in str(excinfo.value)
 
     def test_list_folder_override(self, sample_service_connection_dict):
         """Test list method folder override."""
@@ -437,3 +473,32 @@ class TestServiceConnection(TestServiceConnectionBase):
             self.client.fetch(name="test-connection")
             
         assert "Response format not recognized" in str(excinfo.value)
+        
+    def test_fetch_with_no_exact_name_match(self):
+        """Test fetch method with data list that has no exact match."""
+        # Data list with similar but not identical name objects
+        response_data = {
+            "data": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "test-connection-1",
+                    "folder": "Service Connections",
+                    "ipsec_tunnel": "test-tunnel",
+                    "region": "us-east-1",
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "test-connection-2",
+                    "folder": "Service Connections",
+                    "ipsec_tunnel": "test-tunnel",
+                    "region": "us-east-1",
+                }
+            ]
+        }
+        
+        self.mock_scm.get.return_value = response_data
+        
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="test-connection")
+            
+        assert "Service connection not found" in str(excinfo.value)

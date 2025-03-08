@@ -203,7 +203,11 @@ class ServiceConnection(BaseObject):
         
         # Add name filter if provided
         if name:
-            params["name"] = name
+            if not isinstance(name, str) or not name.strip():
+                raise ValueError("Name filter must be a non-empty string")
+            if len(name) > 255:
+                raise ValueError("Name filter exceeds maximum length of 255 characters")
+            params["name"] = name.strip()
 
         while True:
             params["limit"] = limit
