@@ -19,6 +19,7 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     StaticIp,
     DynamicIpAndPort,
+    BiDirectional,
 )
 from tests.factories import (
     NatRuleCreateModelFactory,
@@ -246,19 +247,23 @@ class TestSourceTranslation:
         model = SourceTranslationFactory.with_bi_directional()
         # In the updated structure, bi_directional is an attribute of static_ip
         assert model.static_ip is not None
-        assert model.static_ip.bi_directional == "yes"  # String value not boolean
+        assert model.static_ip.bi_directional == BiDirectional.YES  # Enum value now
         assert model.dynamic_ip_and_port is None
         assert model.dynamic_ip is None
         
     def test_static_ip_bi_directional_validation(self):
         """Test that bi_directional validation works correctly."""
-        # Test with "yes" value
-        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional="yes")
-        assert static_ip.bi_directional == "yes"
+        # Test with YES enum
+        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional=BiDirectional.YES)
+        assert static_ip.bi_directional == BiDirectional.YES
         
-        # Test with "no" value
-        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional="no")
-        assert static_ip.bi_directional == "no"
+        # Test with NO enum
+        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional=BiDirectional.NO)
+        assert static_ip.bi_directional == BiDirectional.NO
+        
+        # Test with string values (should convert to enum)
+        static_ip = StaticIp(translated_address="192.168.1.100", bi_directional="yes")
+        assert static_ip.bi_directional == BiDirectional.YES
         
         # Test with invalid value
         with pytest.raises(Exception) as exc_info:
@@ -277,24 +282,23 @@ class TestSourceTranslation:
         field validator runs.
         """
         # Directly test the validator function
-        from scm.models.network.nat_rules import StaticIp
+        from scm.models.network.nat_rules import StaticIp, BiDirectional
         
-        # Test with None (line 114)
-        result = StaticIp.ensure_string_yes_no(None)
+        # Test with None
+        result = StaticIp.convert_boolean_to_enum(None)
         assert result is None
         
-        # Test with boolean True (line 117)
-        result = StaticIp.ensure_string_yes_no(True)
-        assert result == "yes"
+        # Test with boolean True
+        result = StaticIp.convert_boolean_to_enum(True)
+        assert result == BiDirectional.YES
         
-        # Test with boolean False (line 117)
-        result = StaticIp.ensure_string_yes_no(False)
-        assert result == "no"
+        # Test with boolean False
+        result = StaticIp.convert_boolean_to_enum(False)
+        assert result == BiDirectional.NO
         
-        # Test with invalid string (line 120)
-        with pytest.raises(ValueError) as exc_info:
-            StaticIp.ensure_string_yes_no("invalid")
-        assert "bi_directional must be 'yes' or 'no'" in str(exc_info.value)
+        # Test with enum values
+        result = StaticIp.convert_boolean_to_enum(BiDirectional.YES)
+        assert result == BiDirectional.YES
 
     def test_source_translation_with_interface(self):
         """Test validation with interface configuration."""
@@ -407,7 +411,7 @@ class TestNatRuleResponseModel:
         data["source_translation"] = {
             "static_ip": {
                 "translated_address": "192.168.1.100",
-                "bi_directional": "yes"
+                "bi_directional": BiDirectional.YES
             },
             "dynamic_ip": None,
             "dynamic_ip_and_port": None

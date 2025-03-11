@@ -60,8 +60,7 @@ class CandidatePushRequestModel(BaseModel):
             raise ValueError("At least one admin must be specified")
 
         if not all(
-            isinstance(admin, str) and (admin.lower() == "all" or "@" in admin)
-            for admin in v
+            isinstance(admin, str) and (admin.lower() == "all" or "@" in admin) for admin in v
         ):
             raise ValueError("All admin entries must be 'all' or valid email addresses")
 

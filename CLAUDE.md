@@ -3,8 +3,11 @@
 ## Build & Test Commands
 - **Install**: `poetry install`
 - **Build**: `poetry build`
-- **Lint**: `poetry run flake8`
-- **Format**: `poetry run black scm tests`
+- **Lint (flake8)**: `poetry run flake8`
+- **Lint (ruff)**: `poetry run ruff check scm tests`
+- **Format (black)**: `poetry run black scm tests`
+- **Format (ruff)**: `poetry run ruff format scm tests`
+- **Lint & Format (ruff)**: `poetry run ruff check --fix scm tests && poetry run ruff format scm tests`
 - **Run all tests**: `poetry run pytest`
 - **Run single test**: `poetry run pytest tests/path/to/test_file.py::TestClass::test_method`
 - **Run specific test module**: `poetry run pytest tests/scm/config/objects/test_address.py`

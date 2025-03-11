@@ -37,11 +37,8 @@ class TestIPsecCryptoProfile:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-ipsec-profile",
             "lifetime": {"seconds": 3600},
-            "esp": {
-                "encryption": ["aes-128-cbc"],
-                "authentication": ["sha1"]
-            },
-            "folder": "Test Folder"
+            "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+            "folder": "Test Folder",
         }
 
     def test_init(self, mock_client):
@@ -68,7 +65,10 @@ class TestIPsecCryptoProfile:
         assert ipsec_crypto_profile_service._validate_max_limit(1000) == 1000
 
         # Test None defaults to DEFAULT_MAX_LIMIT
-        assert ipsec_crypto_profile_service._validate_max_limit(None) == IPsecCryptoProfile.DEFAULT_MAX_LIMIT
+        assert (
+            ipsec_crypto_profile_service._validate_max_limit(None)
+            == IPsecCryptoProfile.DEFAULT_MAX_LIMIT
+        )
 
         # Test invalid values - using try/except because we need to check the InvalidObjectError details
         try:
@@ -86,7 +86,9 @@ class TestIPsecCryptoProfile:
             pass
 
         try:
-            ipsec_crypto_profile_service._validate_max_limit(IPsecCryptoProfile.ABSOLUTE_MAX_LIMIT + 1)
+            ipsec_crypto_profile_service._validate_max_limit(
+                IPsecCryptoProfile.ABSOLUTE_MAX_LIMIT + 1
+            )
             pytest.fail("Should have raised InvalidObjectError")
         except InvalidObjectError:
             # Just check that the exception was raised, don't check the exact message
@@ -101,26 +103,20 @@ class TestIPsecCryptoProfile:
         create_data = {
             "name": "test-ipsec-profile",
             "lifetime": {"seconds": 3600},
-            "esp": {
-                "encryption": ["aes-128-cbc"],
-                "authentication": ["sha1"]
-            },
-            "folder": "Test Folder"
+            "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+            "folder": "Test Folder",
         }
 
         result = ipsec_crypto_profile_service.create(create_data)
 
         # Verify API was called correctly
-        mock_client.post.assert_called_once_with(
-            IPsecCryptoProfile.ENDPOINT,
-            json=create_data
-        )
+        mock_client.post.assert_called_once_with(IPsecCryptoProfile.ENDPOINT, json=create_data)
 
         # Verify result
         assert isinstance(result, IPsecCryptoProfileResponseModel)
         assert result.id == UUID(sample_profile_data["id"])
         assert result.name == sample_profile_data["name"]
-        assert result.lifetime.seconds == sample_profile_data["lifetime"]["seconds"]
+        assert result.lifetime == sample_profile_data["lifetime"]
 
     def test_get(self, ipsec_crypto_profile_service, sample_profile_data, mock_client):
         """Test getting an IPsec crypto profile by ID."""
@@ -147,25 +143,19 @@ class TestIPsecCryptoProfile:
             "id": sample_profile_data["id"],
             "name": "updated-profile",
             "lifetime": {"seconds": 7200},
-            "esp": {
-                "encryption": ["aes-256-cbc"],
-                "authentication": ["sha256"]
-            },
-            "folder": "Updated Folder"
+            "esp": {"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+            "folder": "Updated Folder",
         }
 
-        # Convert to IPsecCryptoProfileUpdateModel by loading the attributes
-        lifetime = LifetimeSeconds(seconds=7200)
-        esp_config = EspConfig(
-            encryption=[EspEncryption.AES_256_CBC],
-            authentication=["sha256"]
-        )
-        update_model = IPsecCryptoProfileResponseModel(
+        # Create the update model directly from the update_data
+        from scm.models.network.ipsec_crypto_profile import IPsecCryptoProfileUpdateModel
+
+        update_model = IPsecCryptoProfileUpdateModel(
             id=UUID(update_data["id"]),
             name=update_data["name"],
-            lifetime=lifetime,
-            esp=esp_config,
-            folder=update_data["folder"]
+            lifetime={"seconds": 7200},  # Using dict format
+            esp={"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+            folder=update_data["folder"],
         )
 
         # Call update
@@ -175,15 +165,11 @@ class TestIPsecCryptoProfile:
         expected_payload = {
             "name": "updated-profile",
             "lifetime": {"seconds": 7200},
-            "esp": {
-                "encryption": ["aes-256-cbc"],
-                "authentication": ["sha256"]
-            },
-            "folder": "Updated Folder"
+            "esp": {"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+            "folder": "Updated Folder",
         }
         mock_client.put.assert_called_once_with(
-            f"{IPsecCryptoProfile.ENDPOINT}/{sample_profile_data['id']}",
-            json=expected_payload
+            f"{IPsecCryptoProfile.ENDPOINT}/{sample_profile_data['id']}", json=expected_payload
         )
 
         # Verify result
@@ -207,26 +193,20 @@ class TestIPsecCryptoProfile:
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "profile1",
                     "lifetime": {"seconds": 3600},
-                    "esp": {
-                        "encryption": ["aes-128-cbc"],
-                        "authentication": ["sha1"]
-                    },
-                    "folder": "Test Folder"
+                    "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+                    "folder": "Test Folder",
                 },
                 {
                     "id": "223e4567-e89b-12d3-a456-426655440000",
                     "name": "profile2",
                     "lifetime": {"hours": 1},
-                    "esp": {
-                        "encryption": ["aes-256-cbc"],
-                        "authentication": ["sha256"]
-                    },
-                    "folder": "Test Folder"
-                }
+                    "esp": {"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+                    "folder": "Test Folder",
+                },
             ],
             "limit": 200,
             "offset": 0,
-            "total": 2
+            "total": 2,
         }
         mock_client.get.return_value = mock_response
 
@@ -236,7 +216,11 @@ class TestIPsecCryptoProfile:
         # Verify API was called correctly
         mock_client.get.assert_called_once_with(
             IPsecCryptoProfile.ENDPOINT,
-            params={"folder": "Test Folder", "limit": IPsecCryptoProfile.DEFAULT_MAX_LIMIT, "offset": 0}
+            params={
+                "folder": "Test Folder",
+                "limit": IPsecCryptoProfile.DEFAULT_MAX_LIMIT,
+                "offset": 0,
+            },
         )
 
         # Verify result
@@ -255,53 +239,51 @@ class TestIPsecCryptoProfile:
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "profile1",
                     "lifetime": {"seconds": 3600},
-                    "esp": {
-                        "encryption": ["aes-128-cbc"],
-                        "authentication": ["sha1"]
-                    },
-                    "folder": "Test Folder"
+                    "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+                    "folder": "Test Folder",
                 }
             ],
             "limit": 1,
             "offset": 0,
-            "total": 2
+            "total": 2,
         }
-        
+
         second_page = {
             "data": [
                 {
                     "id": "223e4567-e89b-12d3-a456-426655440000",
                     "name": "profile2",
                     "lifetime": {"hours": 1},
-                    "esp": {
-                        "encryption": ["aes-256-cbc"],
-                        "authentication": ["sha256"]
-                    },
-                    "folder": "Test Folder"
+                    "esp": {"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+                    "folder": "Test Folder",
                 }
             ],
             "limit": 1,
             "offset": 1,
-            "total": 2
+            "total": 2,
         }
-        
+
         # Use a small max_limit to force pagination
         ipsec_crypto_profile_service.max_limit = 1
-        
+
         # Setup mock to return different responses for different calls
         # This will cause the pagination to execute multiple times and hit the offset increment
-        mock_client.get.side_effect = [first_page, second_page, {"data": [], "limit": 1, "offset": 2, "total": 2}]
-        
+        mock_client.get.side_effect = [
+            first_page,
+            second_page,
+            {"data": [], "limit": 1, "offset": 2, "total": 2},
+        ]
+
         # Call list method
         result = ipsec_crypto_profile_service.list(folder="Test Folder")
-        
+
         # Verify the pagination worked by checking call count
         assert mock_client.get.call_count == 3  # Should make 3 calls for complete pagination
-        
+
         # Verify result
         assert isinstance(result, list)
         assert len(result) == 2
-        
+
         # Verify IDs in results
         result_ids = [str(item.id) for item in result]
         assert "123e4567-e89b-12d3-a456-426655440000" in result_ids
@@ -371,84 +353,63 @@ class TestIPsecCryptoProfile:
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "profile1",
                     "lifetime": {"seconds": 3600},
-                    "esp": {
-                        "encryption": ["aes-128-cbc"],
-                        "authentication": ["sha1"]
-                    },
-                    "folder": "Test Folder"
+                    "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+                    "folder": "Test Folder",
                 },
                 {
                     "id": "223e4567-e89b-12d3-a456-426655440000",
                     "name": "profile2",
                     "lifetime": {"hours": 1},
-                    "esp": {
-                        "encryption": ["aes-256-cbc"],
-                        "authentication": ["sha256"]
-                    },
-                    "folder": "Test Folder"
+                    "esp": {"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+                    "folder": "Test Folder",
                 },
                 {
                     "id": "323e4567-e89b-12d3-a456-426655440000",
                     "name": "profile3",
                     "lifetime": {"minutes": 30},
-                    "esp": {
-                        "encryption": ["aes-128-cbc"],
-                        "authentication": ["sha1"]
-                    },
-                    "folder": "Another Folder"
+                    "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+                    "folder": "Another Folder",
                 },
                 {
                     "id": "423e4567-e89b-12d3-a456-426655440000",
                     "name": "profile4",
                     "lifetime": {"days": 1},
-                    "esp": {
-                        "encryption": ["aes-128-gcm"],
-                        "authentication": ["sha256"]
-                    },
-                    "snippet": "Test Snippet"
+                    "esp": {"encryption": ["aes-128-gcm"], "authentication": ["sha256"]},
+                    "snippet": "Test Snippet",
                 },
                 {
                     "id": "523e4567-e89b-12d3-a456-426655440000",
                     "name": "profile5",
                     "lifetime": {"days": 1},
-                    "esp": {
-                        "encryption": ["aes-256-gcm"],
-                        "authentication": ["sha512"]
-                    },
-                    "device": "Test Device"
-                }
+                    "esp": {"encryption": ["aes-256-gcm"], "authentication": ["sha512"]},
+                    "device": "Test Device",
+                },
             ],
             "limit": 200,
             "offset": 0,
-            "total": 5
+            "total": 5,
         }
         mock_client.get.return_value = mock_response
 
         # Test exact_match
-        result = ipsec_crypto_profile_service.list(
-            folder="Test Folder",
-            exact_match=True
-        )
+        result = ipsec_crypto_profile_service.list(folder="Test Folder", exact_match=True)
         assert len(result) == 2  # Only profiles with exact folder match
 
         # Test exclude_folders
         result = ipsec_crypto_profile_service.list(
-            folder="Test Folder",
-            exclude_folders=["Another Folder"]
+            folder="Test Folder", exclude_folders=["Another Folder"]
         )
         assert len(result) == 4  # Exclude profiles in "Another Folder"
-        
+
         # Test exclude_snippets - this covers line 320
         result = ipsec_crypto_profile_service.list(
-            folder="Test Folder",
-            exclude_snippets=["Test Snippet"]
+            folder="Test Folder", exclude_snippets=["Test Snippet"]
         )
         assert len(result) == 4  # Exclude profiles with "Test Snippet"
-        
+
         # Test exclude_devices - this covers line 328
         result = ipsec_crypto_profile_service.list(
-            folder="Test Folder",
-            exclude_devices=["Test Device"]
+            folder="Test Folder", exclude_devices=["Test Device"]
         )
         assert len(result) == 4  # Exclude profiles with "Test Device"
 
@@ -459,19 +420,16 @@ class TestIPsecCryptoProfile:
             "data": [sample_profile_data],
             "limit": 200,
             "offset": 0,
-            "total": 1
+            "total": 1,
         }
 
         # Call fetch
-        result = ipsec_crypto_profile_service.fetch(
-            name="test-ipsec-profile",
-            folder="Test Folder"
-        )
+        result = ipsec_crypto_profile_service.fetch(name="test-ipsec-profile", folder="Test Folder")
 
         # Verify API was called correctly
         mock_client.get.assert_called_once_with(
             IPsecCryptoProfile.ENDPOINT,
-            params={"name": "test-ipsec-profile", "folder": "Test Folder"}
+            params={"name": "test-ipsec-profile", "folder": "Test Folder"},
         )
 
         # Verify result
@@ -479,15 +437,14 @@ class TestIPsecCryptoProfile:
         assert result.id == UUID(sample_profile_data["id"])
         assert result.name == sample_profile_data["name"]
 
-    def test_fetch_single_object(self, ipsec_crypto_profile_service, mock_client, sample_profile_data):
+    def test_fetch_single_object(
+        self, ipsec_crypto_profile_service, mock_client, sample_profile_data
+    ):
         """Test fetching a single object response."""
         # Some API endpoints might return a single object instead of a list
         mock_client.get.return_value = sample_profile_data
 
-        result = ipsec_crypto_profile_service.fetch(
-            name="test-ipsec-profile",
-            folder="Test Folder"
-        )
+        result = ipsec_crypto_profile_service.fetch(name="test-ipsec-profile", folder="Test Folder")
 
         assert isinstance(result, IPsecCryptoProfileResponseModel)
         assert result.id == UUID(sample_profile_data["id"])
@@ -521,15 +478,13 @@ class TestIPsecCryptoProfile:
         # Test multiple containers
         try:
             ipsec_crypto_profile_service.fetch(
-                name="test-profile",
-                folder="Test Folder",
-                snippet="Test Snippet"
+                name="test-profile", folder="Test Folder", snippet="Test Snippet"
             )
             pytest.fail("Should have raised InvalidObjectError")
         except InvalidObjectError:
             # Just check that the exception was raised, don't check the exact message
             pass
-            
+
         # Test non-dictionary response - covers line 402
         mock_client.get.return_value = "not a dict"
         try:
@@ -538,7 +493,7 @@ class TestIPsecCryptoProfile:
         except InvalidObjectError:
             # Just check that the exception was raised, don't check the exact message
             pass
-            
+
         # Test missing required fields - covers line 435
         mock_client.get.return_value = {"some_field": "value"}  # No 'id' or 'data' field
         try:
@@ -551,12 +506,7 @@ class TestIPsecCryptoProfile:
     def test_fetch_not_found(self, ipsec_crypto_profile_service, mock_client):
         """Test fetching a profile that doesn't exist."""
         # Empty data list
-        mock_client.get.return_value = {
-            "data": [],
-            "limit": 200,
-            "offset": 0,
-            "total": 0
-        }
+        mock_client.get.return_value = {"data": [], "limit": 200, "offset": 0, "total": 0}
 
         try:
             ipsec_crypto_profile_service.fetch(name="nonexistent", folder="Test Folder")
@@ -574,16 +524,13 @@ class TestIPsecCryptoProfile:
                     "id": "123e4567-e89b-12d3-a456-426655440000",
                     "name": "different-name",
                     "lifetime": {"seconds": 3600},
-                    "esp": {
-                        "encryption": ["aes-128-cbc"],
-                        "authentication": ["sha1"]
-                    },
-                    "folder": "Test Folder"
+                    "esp": {"encryption": ["aes-128-cbc"], "authentication": ["sha1"]},
+                    "folder": "Test Folder",
                 }
             ],
             "limit": 200,
             "offset": 0,
-            "total": 1
+            "total": 1,
         }
 
         try:
@@ -597,24 +544,18 @@ class TestIPsecCryptoProfile:
         """Test building container parameters."""
         # Single container
         params = ipsec_crypto_profile_service._build_container_params(
-            folder="Test Folder",
-            snippet=None,
-            device=None
+            folder="Test Folder", snippet=None, device=None
         )
         assert params == {"folder": "Test Folder"}
 
         # Different container
         params = ipsec_crypto_profile_service._build_container_params(
-            folder=None,
-            snippet="Test Snippet",
-            device=None
+            folder=None, snippet="Test Snippet", device=None
         )
         assert params == {"snippet": "Test Snippet"}
 
         # No containers
         params = ipsec_crypto_profile_service._build_container_params(
-            folder=None,
-            snippet=None,
-            device=None
+            folder=None, snippet=None, device=None
         )
         assert params == {}

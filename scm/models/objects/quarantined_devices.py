@@ -2,14 +2,12 @@
 
 # Standard library imports
 from typing import Optional
-from uuid import UUID
 
 # External libraries
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    model_validator,
 )
 
 

@@ -321,9 +321,7 @@ class DNSSecurityProfile(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [
-                DNSSecurityProfileResponseModel(**item) for item in data
-            ]
+            object_instances = [DNSSecurityProfileResponseModel(**item) for item in data]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -344,9 +342,7 @@ class DNSSecurityProfile(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -358,9 +354,7 @@ class DNSSecurityProfile(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided

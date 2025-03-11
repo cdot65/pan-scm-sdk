@@ -288,9 +288,7 @@ class AntiSpywareProfileBase(BaseModel):
         None,
         description="Inline exception IP addresses",
     )
-    mica_engine_spyware_enabled: Optional[
-        List[AntiSpywareMicaEngineSpywareEnabledEntry]
-    ] = Field(
+    mica_engine_spyware_enabled: Optional[List[AntiSpywareMicaEngineSpywareEnabledEntry]] = Field(
         None,
         description="List of MICA engine spyware enabled entries",
     )
@@ -336,13 +334,9 @@ class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

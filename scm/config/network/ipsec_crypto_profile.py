@@ -303,30 +303,20 @@ class IPsecCryptoProfile(BaseObject):
             # Determine which container key and value we are filtering on
             container_key, container_value = next(iter(container_parameters.items()))
             all_objects = [
-                obj
-                for obj in all_objects
-                if getattr(obj, container_key) == container_value
+                obj for obj in all_objects if getattr(obj, container_key) == container_value
             ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
-            all_objects = [
-                obj for obj in all_objects if obj.folder not in exclude_folders
-            ]
+            all_objects = [obj for obj in all_objects if obj.folder not in exclude_folders]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
-            all_objects = [
-                obj
-                for obj in all_objects
-                if obj.snippet not in exclude_snippets
-            ]
+            all_objects = [obj for obj in all_objects if obj.snippet not in exclude_snippets]
 
         # Exclude devices if provided
         if exclude_devices and isinstance(exclude_devices, list):
-            all_objects = [
-                obj for obj in all_objects if obj.device not in exclude_devices
-            ]
+            all_objects = [obj for obj in all_objects if obj.device not in exclude_devices]
 
         return all_objects
 
@@ -422,9 +412,9 @@ class IPsecCryptoProfile(BaseObject):
             except StopIteration:
                 raise InvalidObjectError(
                     message=f"IPsec crypto profile with name '{name}' not found",
-                    error_code = "E005",
-                    http_status_code = 404,
-                    details = {"error": "Object Not Present"},
+                    error_code="E005",
+                    http_status_code=404,
+                    details={"error": "Object Not Present"},
                 )
 
         elif "id" in response:

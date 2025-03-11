@@ -142,20 +142,14 @@ class RemoteNetworkBaseModel(BaseModel):
     def validate_remote_network_logic(self) -> "RemoteNetworkBaseModel":
         if self.ecmp_load_balancing == EcmpLoadBalancingEnum.enable:
             if not self.ecmp_tunnels:
-                raise ValueError(
-                    "ecmp_tunnels is required when ecmp_load_balancing is enable"
-                )
+                raise ValueError("ecmp_tunnels is required when ecmp_load_balancing is enable")
         else:
             # disable
             if not self.ipsec_tunnel:
-                raise ValueError(
-                    "ipsec_tunnel is required when ecmp_load_balancing is disable"
-                )
+                raise ValueError("ipsec_tunnel is required when ecmp_load_balancing is disable")
 
         if self.license_type == "FWAAS-AGGREGATE" and not self.spn_name:
-            raise ValueError(
-                "spn_name is required when license_type is FWAAS-AGGREGATE"
-            )
+            raise ValueError("spn_name is required when license_type is FWAAS-AGGREGATE")
 
         return self
 

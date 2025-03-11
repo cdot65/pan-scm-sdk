@@ -1,7 +1,7 @@
 # scm/models/objects/http_server_profiles.py
 
 # Standard library imports
-from typing import Optional, List, Dict, Union, Literal
+from typing import Optional, List, Dict, Literal
 from uuid import UUID
 
 # External libraries
@@ -10,8 +10,8 @@ from pydantic import (
     Field,
     model_validator,
     ConfigDict,
-    constr,
 )
+
 
 # Server model for HTTP server profile
 class ServerModel(BaseModel):
@@ -35,9 +35,7 @@ class ServerModel(BaseModel):
     tls_version: Optional[Literal["1.0", "1.1", "1.2", "1.3"]] = Field(
         None, description="HTTP server TLS version"
     )
-    certificate_profile: Optional[str] = Field(
-        None, description="HTTP server certificate profile"
-    )
+    certificate_profile: Optional[str] = Field(None, description="HTTP server certificate profile")
     http_method: Optional[Literal["GET", "POST", "PUT", "DELETE"]] = Field(
         None, description="HTTP operation to perform"
     )
@@ -48,6 +46,7 @@ class PayloadFormatModel(BaseModel):
     """
     Represents the payload format configuration for a specific log type.
     """
+
     # The exact fields in the payload format model are not specified in the OpenAPI spec
     # but we can define a base model that can be extended if needed
     model_config = ConfigDict(extra="allow")  # Allow extra fields since spec isn't clear
@@ -74,24 +73,24 @@ class HTTPServerProfileBaseModel(BaseModel):
         max_length=63,
         description="The name of the HTTP server profile",
     )
-    
+
     # Server configurations
     server: List[ServerModel] = Field(
         ...,
         description="List of server configurations",
     )
-    
+
     # Optional fields
     tag_registration: Optional[bool] = Field(
         None,
         description="Register tags on match",
     )
-    
+
     description: Optional[str] = Field(
         None,
         description="Description of the HTTP server profile",
     )
-    
+
     format: Optional[Dict[str, PayloadFormatModel]] = Field(
         None,
         description="Format settings for different log types",
@@ -152,13 +151,9 @@ class HTTPServerProfileCreateModel(HTTPServerProfileBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 
@@ -167,7 +162,7 @@ class HTTPServerProfileUpdateModel(HTTPServerProfileBaseModel):
     Represents the update of an existing HTTP Server Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an HTTPServerProfileUpdateModel object.
-    
+
     Attributes:
         id (UUID): The UUID of the HTTP server profile.
     """

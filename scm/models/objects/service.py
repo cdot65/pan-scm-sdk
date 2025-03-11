@@ -68,13 +68,9 @@ class Protocol(BaseModel):
     @model_validator(mode="after")
     def validate_protocol(self) -> "Protocol":
         protocol_fields = ["tcp", "udp"]
-        provided = [
-            field for field in protocol_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in protocol_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'tcp' or 'udp' must be provided in 'protocol'."
-            )
+            raise ValueError("Exactly one of 'tcp' or 'udp' must be provided in 'protocol'.")
         return self
 
 
@@ -148,13 +144,9 @@ class ServiceCreateModel(ServiceBaseModel):
     @model_validator(mode="after")
     def validate_container_type(self) -> "ServiceCreateModel":
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

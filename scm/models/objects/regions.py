@@ -122,7 +122,7 @@ class RegionBaseModel(BaseModel):
         if v is not None and len(v) != len(set(v)):
             raise ValueError("List of addresses must contain unique values")
         return v
-    
+
     @field_validator("tag")
     def ensure_unique_tags(cls, v):  # noqa
         if v is not None and len(v) != len(set(v)):
@@ -154,13 +154,9 @@ class RegionCreateModel(RegionBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

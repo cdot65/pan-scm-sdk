@@ -1,6 +1,6 @@
 # scm/models/objects/hip_object.py
 
-from typing import Optional, List, Union, Literal, Dict
+from typing import Optional, List, Union, Literal
 from uuid import UUID
 
 from pydantic import (
@@ -653,13 +653,9 @@ class HIPObjectCreateModel(HIPObjectBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

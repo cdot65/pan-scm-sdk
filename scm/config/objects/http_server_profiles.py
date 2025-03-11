@@ -123,7 +123,7 @@ class HTTPServerProfile(BaseObject):
                 json=payload,
             )
         except Exception as e:
-            self.logger.error(f"Error in API call: {str(e)}")
+            self.logger.error(f"Error in API call: {str(e)}", exc_info=True)
             raise
 
         # Return the SCM API response as a new Pydantic object
@@ -207,8 +207,8 @@ class HTTPServerProfile(BaseObject):
                 )
             tag_registration = filters["tag_registration"]
             filter_criteria = [
-                profile 
-                for profile in filter_criteria 
+                profile
+                for profile in filter_criteria
                 if profile.tag_registration == tag_registration
             ]
 
@@ -223,8 +223,8 @@ class HTTPServerProfile(BaseObject):
                 )
             protocols = filters["protocol"]
             filter_criteria = [
-                profile 
-                for profile in filter_criteria 
+                profile
+                for profile in filter_criteria
                 if any(server.protocol in protocols for server in profile.server)
             ]
 
@@ -375,9 +375,7 @@ class HTTPServerProfile(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -389,9 +387,7 @@ class HTTPServerProfile(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided
