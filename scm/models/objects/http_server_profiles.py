@@ -13,6 +13,7 @@ from pydantic import (
     constr,
 )
 
+
 # Server model for HTTP server profile
 class ServerModel(BaseModel):
     """
@@ -48,9 +49,12 @@ class PayloadFormatModel(BaseModel):
     """
     Represents the payload format configuration for a specific log type.
     """
+
     # The exact fields in the payload format model are not specified in the OpenAPI spec
     # but we can define a base model that can be extended if needed
-    model_config = ConfigDict(extra="allow")  # Allow extra fields since spec isn't clear
+    model_config = ConfigDict(
+        extra="allow"
+    )  # Allow extra fields since spec isn't clear
 
 
 class HTTPServerProfileBaseModel(BaseModel):
@@ -74,24 +78,24 @@ class HTTPServerProfileBaseModel(BaseModel):
         max_length=63,
         description="The name of the HTTP server profile",
     )
-    
+
     # Server configurations
     server: List[ServerModel] = Field(
         ...,
         description="List of server configurations",
     )
-    
+
     # Optional fields
     tag_registration: Optional[bool] = Field(
         None,
         description="Register tags on match",
     )
-    
+
     description: Optional[str] = Field(
         None,
         description="Description of the HTTP server profile",
     )
-    
+
     format: Optional[Dict[str, PayloadFormatModel]] = Field(
         None,
         description="Format settings for different log types",
@@ -167,7 +171,7 @@ class HTTPServerProfileUpdateModel(HTTPServerProfileBaseModel):
     Represents the update of an existing HTTP Server Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an HTTPServerProfileUpdateModel object.
-    
+
     Attributes:
         id (UUID): The UUID of the HTTP server profile.
     """

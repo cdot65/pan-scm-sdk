@@ -20,7 +20,7 @@ from scm.models.objects import (
 class LogForwardingProfile(BaseObject):
     """
     Manages Log Forwarding Profile objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -125,7 +125,9 @@ class LogForwardingProfile(BaseObject):
             # Return the SCM API response as a new Pydantic object
             return LogForwardingProfileResponseModel(**response)
         except Exception as e:
-            self.logger.error(f"Error in API call to create log forwarding profile: {str(e)}")
+            self.logger.error(
+                f"Error in API call to create log forwarding profile: {str(e)}"
+            )
             raise
 
     def get(
@@ -198,11 +200,11 @@ class LogForwardingProfile(BaseObject):
         # Filter by log_type (singular)
         if "log_type" in filters:
             log_type_filter = filters["log_type"]
-            
+
             # Convert to list if it's a string
             if isinstance(log_type_filter, str):
                 log_type_filter = [log_type_filter]
-                
+
             # Validate log_type_filter is a list
             if not isinstance(log_type_filter, list):
                 raise InvalidObjectError(
@@ -211,12 +213,13 @@ class LogForwardingProfile(BaseObject):
                     http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
-                
-            # Apply the filter    
+
+            # Apply the filter
             filter_criteria = [
                 profile
                 for profile in filter_criteria
-                if profile.match_list and any(
+                if profile.match_list
+                and any(
                     match.log_type in log_type_filter for match in profile.match_list
                 )
             ]
@@ -234,9 +237,8 @@ class LogForwardingProfile(BaseObject):
             filter_criteria = [
                 profile
                 for profile in filter_criteria
-                if profile.match_list and any(
-                    match.log_type in log_types for match in profile.match_list
-                )
+                if profile.match_list
+                and any(match.log_type in log_types for match in profile.match_list)
             ]
 
         # Filter by tags
@@ -250,9 +252,11 @@ class LogForwardingProfile(BaseObject):
                 )
             tags = filters["tags"]
             filter_criteria = [
-                profile 
+                profile
                 for profile in filter_criteria
-                if hasattr(profile, "tag") and profile.tag and any(tag in profile.tag for tag in tags)
+                if hasattr(profile, "tag")
+                and profile.tag
+                and any(tag in profile.tag for tag in tags)
             ]
 
         return filter_criteria
@@ -371,7 +375,9 @@ class LogForwardingProfile(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [LogForwardingProfileResponseModel(**item) for item in data]
+            object_instances = [
+                LogForwardingProfileResponseModel(**item) for item in data
+            ]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end

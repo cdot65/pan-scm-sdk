@@ -28,7 +28,7 @@ from scm.models.operations import (
 class Scm:
     """
     A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
-    
+
     Args:
         client_id: OAuth client ID for authentication
         client_secret: OAuth client secret for authentication
@@ -390,7 +390,7 @@ class Scm:
             ),
             "external_dynamic_list": (
                 "scm.config.objects.external_dynamic_lists",
-                "ExternalDynamicLists", 
+                "ExternalDynamicLists",
             ),
             "hip_object": (
                 "scm.config.objects.hip_object",
@@ -485,7 +485,7 @@ class Scm:
             ),
             "url_category": (
                 "scm.config.security.url_categories",
-                "URLCategories", 
+                "URLCategories",
             ),
             "vulnerability_protection_profile": (
                 "scm.config.security.vulnerability_protection_profile",
@@ -524,7 +524,7 @@ class ScmClient(Scm):
     """
     Alias for the Scm class to provide a more explicit naming option.
     This class provides all the same functionality as Scm.
-    
+
     Args:
         client_id: OAuth client ID for authentication
         client_secret: OAuth client secret for authentication

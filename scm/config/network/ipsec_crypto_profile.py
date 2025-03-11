@@ -289,7 +289,9 @@ class IPsecCryptoProfile(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [IPsecCryptoProfileResponseModel(**item) for item in data]
+            object_instances = [
+                IPsecCryptoProfileResponseModel(**item) for item in data
+            ]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -317,9 +319,7 @@ class IPsecCryptoProfile(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             all_objects = [
-                obj
-                for obj in all_objects
-                if obj.snippet not in exclude_snippets
+                obj for obj in all_objects if obj.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided
@@ -416,15 +416,17 @@ class IPsecCryptoProfile(BaseObject):
                 )
 
             try:
-                matched_item = next(item for item in response["data"] if item.get("name") == name)
+                matched_item = next(
+                    item for item in response["data"] if item.get("name") == name
+                )
                 return IPsecCryptoProfileResponseModel(**matched_item)
 
             except StopIteration:
                 raise InvalidObjectError(
                     message=f"IPsec crypto profile with name '{name}' not found",
-                    error_code = "E005",
-                    http_status_code = 404,
-                    details = {"error": "Object Not Present"},
+                    error_code="E005",
+                    http_status_code=404,
+                    details={"error": "Object Not Present"},
                 )
 
         elif "id" in response:

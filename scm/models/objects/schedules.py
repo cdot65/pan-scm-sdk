@@ -37,44 +37,55 @@ class WeeklyScheduleModel(BaseModel):
     friday: Optional[List[str]] = None
     saturday: Optional[List[str]] = None
 
-    @field_validator("sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday")
+    @field_validator(
+        "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"
+    )
     def validate_time_ranges(cls, v):
         """Validate that time ranges follow the correct format."""
         if v is None:
             return v
-        
+
         for time_range in v:
             # Time range should match pattern hh:mm-hh:mm
             if not time_range or len(time_range) != 11:
-                raise ValueError("Time range must be in format hh:mm-hh:mm and be exactly 11 characters")
-            
+                raise ValueError(
+                    "Time range must be in format hh:mm-hh:mm and be exactly 11 characters"
+                )
+
             # Split into start and end times
             start_time, end_time = time_range.split("-")
             start_h, start_m = start_time.split(":")
             end_h, end_m = end_time.split(":")
-            
+
             # Validate hours (00-23)
             if not (0 <= int(start_h) <= 23 and 0 <= int(end_h) <= 23):
                 raise ValueError("Hours must be between 00 and 23")
-            
+
             # Validate minutes (00-59)
             if not (0 <= int(start_m) <= 59 and 0 <= int(end_m) <= 59):
                 raise ValueError("Minutes must be between 00 and 59")
-            
+
         return v
 
     @model_validator(mode="after")
     def validate_at_least_one_day(cls, values):
         """Validate that at least one day has time ranges defined."""
         days = [
-            values.sunday, values.monday, values.tuesday, 
-            values.wednesday, values.thursday, values.friday, values.saturday
+            values.sunday,
+            values.monday,
+            values.tuesday,
+            values.wednesday,
+            values.thursday,
+            values.friday,
+            values.saturday,
         ]
-        
+
         # Check if at least one day has time ranges
         if not any(day is not None and len(day) > 0 for day in days):
-            raise ValueError("Weekly schedule must define time ranges for at least one day")
-        
+            raise ValueError(
+                "Weekly schedule must define time ranges for at least one day"
+            )
+
         return values
 
 
@@ -93,25 +104,27 @@ class DailyScheduleModel(BaseModel):
         """Validate that time ranges follow the correct format."""
         if not v:
             raise ValueError("Daily schedule must contain at least one time range")
-        
+
         for time_range in v:
             # Time range should match pattern hh:mm-hh:mm
             if not time_range or len(time_range) != 11:
-                raise ValueError("Time range must be in format hh:mm-hh:mm and be exactly 11 characters")
-            
+                raise ValueError(
+                    "Time range must be in format hh:mm-hh:mm and be exactly 11 characters"
+                )
+
             # Split into start and end times
             start_time, end_time = time_range.split("-")
             start_h, start_m = start_time.split(":")
             end_h, end_m = end_time.split(":")
-            
+
             # Validate hours (00-23)
             if not (0 <= int(start_h) <= 23 and 0 <= int(end_h) <= 23):
                 raise ValueError("Hours must be between 00 and 23")
-            
+
             # Validate minutes (00-59)
             if not (0 <= int(start_m) <= 59 and 0 <= int(end_m) <= 59):
                 raise ValueError("Minutes must be between 00 and 59")
-            
+
         return v
 
 
@@ -134,7 +147,7 @@ class RecurringScheduleModel(BaseModel):
             raise ValueError("Exactly one of 'weekly' or 'daily' must be provided")
         if values.weekly is None and values.daily is None:
             raise ValueError("Either 'weekly' or 'daily' must be provided")
-            
+
         return values
 
 
@@ -152,99 +165,135 @@ class NonRecurringScheduleModel(BaseModel):
     def validate_datetime_ranges(cls, v):
         """Validate that datetime ranges follow the correct format."""
         if not v:
-            raise ValueError("Non-recurring schedule must contain at least one datetime range")
-            
+            raise ValueError(
+                "Non-recurring schedule must contain at least one datetime range"
+            )
+
         for dt_range in v:
             # Check for the format YYYY/M/D@HH:MM - detecting missing leading zeros
             dt_parts = dt_range.split("-")
             if len(dt_parts) != 2:
-                raise ValueError("Invalid datetime range format - must contain a single hyphen")
-                
+                raise ValueError(
+                    "Invalid datetime range format - must contain a single hyphen"
+                )
+
             # Process start date/time
             start_dt = dt_parts[0]
             if "@" not in start_dt:
-                raise ValueError("Start datetime must contain @ to separate date and time")
-                
+                raise ValueError(
+                    "Start datetime must contain @ to separate date and time"
+                )
+
             start_date, start_time = start_dt.split("@")
             start_parts = start_date.split("/")
             if len(start_parts) != 3:
                 raise ValueError("Start date must be in format YYYY/MM/DD")
-                
+
             start_year, start_month, start_day = start_parts
-            
+
             # Validate that year is numeric
             if not start_year.isdigit():
                 raise ValueError("Year must be numeric")
-                
+
             start_time_parts = start_time.split(":")
             if len(start_time_parts) != 2:
                 raise ValueError("Start time must be in format HH:MM")
-                
+
             start_hour, start_minute = start_time_parts
-            
+
             # Process end date/time
             end_dt = dt_parts[1]
             if "@" not in end_dt:
-                raise ValueError("End datetime must contain @ to separate date and time")
-                
+                raise ValueError(
+                    "End datetime must contain @ to separate date and time"
+                )
+
             end_date, end_time = end_dt.split("@")
             end_parts = end_date.split("/")
             if len(end_parts) != 3:
                 raise ValueError("End date must be in format YYYY/MM/DD")
-                
+
             end_year, end_month, end_day = end_parts
-            
+
             # Validate that year is numeric
             if not end_year.isdigit():
                 raise ValueError("Year must be numeric")
-                
+
             end_time_parts = end_time.split(":")
             if len(end_time_parts) != 2:
                 raise ValueError("End time must be in format HH:MM")
-                
+
             end_hour, end_minute = end_time_parts
-            
+
             # Validate leading zeros for months
-            if len(start_month) != 2 or not start_month.startswith("0") and int(start_month) < 10:
+            if (
+                len(start_month) != 2
+                or not start_month.startswith("0")
+                and int(start_month) < 10
+            ):
                 raise ValueError("Month must use leading zeros (01-12)")
-                
-            if len(end_month) != 2 or not end_month.startswith("0") and int(end_month) < 10:
+
+            if (
+                len(end_month) != 2
+                or not end_month.startswith("0")
+                and int(end_month) < 10
+            ):
                 raise ValueError("Month must use leading zeros (01-12)")
-            
+
             # Validate leading zeros for days
-            if len(start_day) != 2 or not start_day.startswith("0") and int(start_day) < 10:
+            if (
+                len(start_day) != 2
+                or not start_day.startswith("0")
+                and int(start_day) < 10
+            ):
                 raise ValueError("Day must use leading zeros (01-31)")
-                
+
             if len(end_day) != 2 or not end_day.startswith("0") and int(end_day) < 10:
                 raise ValueError("Day must use leading zeros (01-31)")
-            
+
             # Validate leading zeros for hours
-            if len(start_hour) != 2 or not start_hour.startswith("0") and int(start_hour) < 10:
+            if (
+                len(start_hour) != 2
+                or not start_hour.startswith("0")
+                and int(start_hour) < 10
+            ):
                 raise ValueError("Hours must use leading zeros (00-23)")
-                
-            if len(end_hour) != 2 or not end_hour.startswith("0") and int(end_hour) < 10:
+
+            if (
+                len(end_hour) != 2
+                or not end_hour.startswith("0")
+                and int(end_hour) < 10
+            ):
                 raise ValueError("Hours must use leading zeros (00-23)")
-            
+
             # Validate leading zeros for minutes
-            if len(start_minute) != 2 or not start_minute.startswith("0") and int(start_minute) < 10:
+            if (
+                len(start_minute) != 2
+                or not start_minute.startswith("0")
+                and int(start_minute) < 10
+            ):
                 raise ValueError("Minutes must use leading zeros (00-59)")
-                
-            if len(end_minute) != 2 or not end_minute.startswith("0") and int(end_minute) < 10:
+
+            if (
+                len(end_minute) != 2
+                or not end_minute.startswith("0")
+                and int(end_minute) < 10
+            ):
                 raise ValueError("Minutes must use leading zeros (00-59)")
-            
+
             # Validate numeric ranges
             if not (0 <= int(start_hour) <= 23 and 0 <= int(end_hour) <= 23):
                 raise ValueError("Hours must be between 00 and 23")
-                
+
             if not (0 <= int(start_minute) <= 59 and 0 <= int(end_minute) <= 59):
                 raise ValueError("Minutes must be between 00 and 59")
-                
+
             if not (1 <= int(start_month) <= 12 and 1 <= int(end_month) <= 12):
                 raise ValueError("Month must be between 01 and 12")
-                
+
             if not (1 <= int(start_day) <= 31 and 1 <= int(end_day) <= 31):
                 raise ValueError("Day must be between 01 and 31")
-            
+
         return v
 
 
@@ -264,10 +313,12 @@ class ScheduleTypeModel(BaseModel):
     def validate_exactly_one_type(cls, values):
         """Validate that exactly one of recurring or non_recurring is provided."""
         if values.recurring is not None and values.non_recurring is not None:
-            raise ValueError("Exactly one of 'recurring' or 'non_recurring' must be provided")
+            raise ValueError(
+                "Exactly one of 'recurring' or 'non_recurring' must be provided"
+            )
         if values.recurring is None and values.non_recurring is None:
             raise ValueError("Either 'recurring' or 'non_recurring' must be provided")
-            
+
         return values
 
 

@@ -317,9 +317,7 @@ class IKEGateway(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             all_objects = [
-                each
-                for each in all_objects
-                if each.snippet not in exclude_snippets
+                each for each in all_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided
@@ -405,7 +403,11 @@ class IKEGateway(BaseObject):
                 details={"error": "Response is not a dictionary"},
             )
 
-        if "data" in response and isinstance(response["data"], list) and len(response["data"]) > 0:
+        if (
+            "data" in response
+            and isinstance(response["data"], list)
+            and len(response["data"]) > 0
+        ):
             # Handle API response with data array
             return IKEGatewayResponseModel(**response["data"][0])
         elif "id" in response:

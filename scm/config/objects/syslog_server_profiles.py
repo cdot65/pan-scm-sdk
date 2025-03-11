@@ -361,7 +361,9 @@ class SyslogServerProfile(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [SyslogServerProfileResponseModel(**item) for item in data]
+            object_instances = [
+                SyslogServerProfileResponseModel(**item) for item in data
+            ]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end

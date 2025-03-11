@@ -122,7 +122,7 @@ class RegionBaseModel(BaseModel):
         if v is not None and len(v) != len(set(v)):
             raise ValueError("List of addresses must contain unique values")
         return v
-    
+
     @field_validator("tag")
     def ensure_unique_tags(cls, v):  # noqa
         if v is not None and len(v) != len(set(v)):

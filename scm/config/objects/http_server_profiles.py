@@ -207,8 +207,8 @@ class HTTPServerProfile(BaseObject):
                 )
             tag_registration = filters["tag_registration"]
             filter_criteria = [
-                profile 
-                for profile in filter_criteria 
+                profile
+                for profile in filter_criteria
                 if profile.tag_registration == tag_registration
             ]
 
@@ -223,8 +223,8 @@ class HTTPServerProfile(BaseObject):
                 )
             protocols = filters["protocol"]
             filter_criteria = [
-                profile 
-                for profile in filter_criteria 
+                profile
+                for profile in filter_criteria
                 if any(server.protocol in protocols for server in profile.server)
             ]
 

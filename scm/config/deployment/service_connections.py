@@ -200,7 +200,7 @@ class ServiceConnection(BaseObject):
         # Folder is required for service-connections API (from OpenAPI spec)
         params = dict(filters)
         params["folder"] = "Service Connections"  # Always set folder parameter
-        
+
         # Add name filter if provided
         if name:
             if not isinstance(name, str) or not name.strip():
@@ -309,30 +309,30 @@ class ServiceConnection(BaseObject):
                     message=f"No service connection found with name: {name}",
                     error_code="E004",
                     http_status_code=404,
-                    details={"error": "Service connection not found"}
+                    details={"error": "Service connection not found"},
                 )
-                
+
             for item in response["data"]:
                 if item.get("name") == name:
                     return ServiceConnectionResponseModel(**item)
-                    
+
             # If we get here, no exact match was found
             raise InvalidObjectError(
                 message=f"No exact match found for service connection with name: {name}",
                 error_code="E004",
                 http_status_code=404,
-                details={"error": "Service connection not found"}
+                details={"error": "Service connection not found"},
             )
-            
+
         # Direct response with ID field (single resource response)
         if "id" in response:
             return ServiceConnectionResponseModel(**response)
-            
+
         raise InvalidObjectError(
             message="Invalid response format",
             error_code="E003",
             http_status_code=500,
-            details={"error": "Response format not recognized"}
+            details={"error": "Response format not recognized"},
         )
 
     def delete(

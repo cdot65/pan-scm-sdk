@@ -13,6 +13,7 @@ from pydantic import (
 
 class HashAlgorithm(str, Enum):
     """Hash algorithm options for IKE crypto profiles."""
+
     MD5 = "md5"
     SHA1 = "sha1"
     SHA256 = "sha256"
@@ -22,6 +23,7 @@ class HashAlgorithm(str, Enum):
 
 class EncryptionAlgorithm(str, Enum):
     """Encryption algorithm options for IKE crypto profiles."""
+
     DES = "des"
     THREE_DES = "3des"
     AES_128_CBC = "aes-128-cbc"
@@ -33,6 +35,7 @@ class EncryptionAlgorithm(str, Enum):
 
 class DHGroup(str, Enum):
     """Diffie-Hellman group options for IKE crypto profiles."""
+
     GROUP1 = "group1"
     GROUP2 = "group2"
     GROUP5 = "group5"
@@ -43,6 +46,7 @@ class DHGroup(str, Enum):
 
 class LifetimeSeconds(BaseModel):
     """Lifetime in seconds model."""
+
     seconds: int = Field(
         ...,
         description="Specify lifetime in seconds",
@@ -53,6 +57,7 @@ class LifetimeSeconds(BaseModel):
 
 class LifetimeMinutes(BaseModel):
     """Lifetime in minutes model."""
+
     minutes: int = Field(
         ...,
         description="Specify lifetime in minutes",
@@ -63,6 +68,7 @@ class LifetimeMinutes(BaseModel):
 
 class LifetimeHours(BaseModel):
     """Lifetime in hours model."""
+
     hours: int = Field(
         ...,
         description="Specify lifetime in hours",
@@ -73,6 +79,7 @@ class LifetimeHours(BaseModel):
 
 class LifetimeDays(BaseModel):
     """Lifetime in days model."""
+
     days: int = Field(
         ...,
         description="Specify lifetime in days",
@@ -189,7 +196,7 @@ class IKECryptoProfileResponseModel(IKECryptoProfileBaseModel):
         description="The UUID of the IKE crypto profile",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-    
+
     # Exclude description field from model_fields - API doesn't return it
     # Use exclude=True so it doesn't appear in model_fields but still can be passed to init
     description: Optional[str] = Field(None, exclude=True)

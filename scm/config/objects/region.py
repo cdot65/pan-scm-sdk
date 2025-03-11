@@ -20,13 +20,13 @@ from scm.models.objects import (
 class Region(BaseObject):
     """
     Manages Region objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Note:
         While the SDK models support 'description' and 'tag' fields for region objects
         to maintain consistency with other object types, these fields are not supported
         by the Strata Cloud Manager API. They will be automatically excluded when
         sending requests to the API.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -209,9 +209,14 @@ class Region(BaseObject):
             # Filter by latitude range if specified
             if "latitude" in geo_filter:
                 lat_range = geo_filter["latitude"]
-                if isinstance(lat_range, dict) and "min" in lat_range and "max" in lat_range:
+                if (
+                    isinstance(lat_range, dict)
+                    and "min" in lat_range
+                    and "max" in lat_range
+                ):
                     filter_criteria = [
-                        region for region in filter_criteria
+                        region
+                        for region in filter_criteria
                         if region.geo_location
                         and region.geo_location.latitude >= lat_range["min"]
                         and region.geo_location.latitude <= lat_range["max"]
@@ -220,9 +225,14 @@ class Region(BaseObject):
             # Filter by longitude range if specified
             if "longitude" in geo_filter:
                 long_range = geo_filter["longitude"]
-                if isinstance(long_range, dict) and "min" in long_range and "max" in long_range:
+                if (
+                    isinstance(long_range, dict)
+                    and "min" in long_range
+                    and "max" in long_range
+                ):
                     filter_criteria = [
-                        region for region in filter_criteria
+                        region
+                        for region in filter_criteria
                         if region.geo_location
                         and region.geo_location.longitude >= long_range["min"]
                         and region.geo_location.longitude <= long_range["max"]
@@ -361,15 +371,21 @@ class Region(BaseObject):
 
             data = response["data"]
             # Filter out any items without valid ID - likely predefined or system regions
-            invalid_data = [item for item in data if not isinstance(item, dict) or 'id' not in item]
+            invalid_data = [
+                item for item in data if not isinstance(item, dict) or "id" not in item
+            ]
             if invalid_data:
-                self.logger.debug(f"Filtering out {len(invalid_data)} items without valid ID field")
+                self.logger.debug(
+                    f"Filtering out {len(invalid_data)} items without valid ID field"
+                )
                 for idx, item in enumerate(invalid_data[:3]):  # Log up to 3 examples
                     self.logger.debug(f"Invalid item {idx}: {item}")
                 if len(invalid_data) > 3:
                     self.logger.debug(f"... and {len(invalid_data) - 3} more")
-            
-            valid_data = [item for item in data if isinstance(item, dict) and 'id' in item]
+
+            valid_data = [
+                item for item in data if isinstance(item, dict) and "id" in item
+            ]
             object_instances = [RegionResponseModel(**item) for item in valid_data]
             all_objects.extend(object_instances)
 

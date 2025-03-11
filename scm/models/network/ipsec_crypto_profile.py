@@ -184,9 +184,11 @@ class IPsecCryptoProfileBaseModel(BaseModel):
         default=DhGroup.GROUP2,
         description="Phase-2 DH group (PFS DH group)",
     )
-    lifetime: Union[LifetimeSeconds, LifetimeMinutes, LifetimeHours, LifetimeDays] = Field(
-        ...,
-        description="Lifetime configuration",
+    lifetime: Union[LifetimeSeconds, LifetimeMinutes, LifetimeHours, LifetimeDays] = (
+        Field(
+            ...,
+            description="Lifetime configuration",
+        )
     )
     lifesize: Optional[Union[LifesizeKB, LifesizeMB, LifesizeGB, LifesizeTB]] = Field(
         None,
@@ -225,11 +227,15 @@ class IPsecCryptoProfileBaseModel(BaseModel):
     def validate_security_protocol(self) -> "IPsecCryptoProfileBaseModel":
         """Validate that exactly one security protocol (ESP or AH) is configured."""
         if self.esp is not None and self.ah is not None:
-            raise ValueError("Only one security protocol (ESP or AH) can be configured at a time")
-        
+            raise ValueError(
+                "Only one security protocol (ESP or AH) can be configured at a time"
+            )
+
         if self.esp is None and self.ah is None:
-            raise ValueError("At least one security protocol (ESP or AH) must be configured")
-        
+            raise ValueError(
+                "At least one security protocol (ESP or AH) must be configured"
+            )
+
         return self
 
 

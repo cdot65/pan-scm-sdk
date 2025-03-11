@@ -20,7 +20,7 @@ from scm.models.objects import (
 class HIPProfile(BaseObject):
     """
     Manages HIP profiles in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
