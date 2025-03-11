@@ -1,7 +1,7 @@
 # scm/models/objects/syslog_server_profiles.py
 
 # Standard library imports
-from typing import Optional, List, Dict, Literal, Union, Any
+from typing import Optional, Dict, Literal, Any
 from uuid import UUID
 
 # External libraries
@@ -58,9 +58,7 @@ class FormatModel(BaseModel):
         correlation (Optional[str]): Format for correlation logs.
     """
 
-    escaping: Optional[EscapingModel] = Field(
-        None, description="Character escaping configuration"
-    )
+    escaping: Optional[EscapingModel] = Field(None, description="Character escaping configuration")
     traffic: Optional[str] = Field(None, description="Format for traffic logs")
     threat: Optional[str] = Field(None, description="Format for threat logs")
     wildfire: Optional[str] = Field(None, description="Format for wildfire logs")
@@ -75,9 +73,7 @@ class FormatModel(BaseModel):
     decryption: Optional[str] = Field(None, description="Format for decryption logs")
     config: Optional[str] = Field(None, description="Format for configuration logs")
     system: Optional[str] = Field(None, description="Format for system logs")
-    globalprotect: Optional[str] = Field(
-        None, description="Format for GlobalProtect logs"
-    )
+    globalprotect: Optional[str] = Field(None, description="Format for GlobalProtect logs")
     hip_match: Optional[str] = Field(None, description="Format for HIP match logs")
     correlation: Optional[str] = Field(None, description="Format for correlation logs")
 
@@ -128,9 +124,7 @@ class SyslogServerProfileBaseModel(BaseModel):
     """
 
     # Required fields
-    name: constr(max_length=31) = Field(
-        ..., description="The name of the syslog server profile"
-    )
+    name: constr(max_length=31) = Field(..., description="The name of the syslog server profile")
 
     # Server configurations - can be a dict or list in API
     servers: Dict[str, Any] = Field(..., description="Syslog server configurations")
@@ -189,13 +183,9 @@ class SyslogServerProfileCreateModel(SyslogServerProfileBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

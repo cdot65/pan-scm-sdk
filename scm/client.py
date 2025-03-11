@@ -62,9 +62,7 @@ class Scm:
         if not self.logger.handlers:
             handler = logging.StreamHandler(sys.stdout)
             handler.setLevel(numeric_level)
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
@@ -227,9 +225,7 @@ class Scm:
 
         # If parent_id filter is specified, filter the jobs
         if parent_id is not None:
-            filtered_data = [
-                job for job in jobs_response.data if job.parent_id == parent_id
-            ]
+            filtered_data = [job for job in jobs_response.data if job.parent_id == parent_id]
             jobs_response.data = filtered_data
             jobs_response.total = len(filtered_data)
 
@@ -268,9 +264,7 @@ class Scm:
         start_time = time.time()
         while True:
             if time.time() - start_time > timeout:
-                raise TimeoutError(
-                    f"Job {job_id} did not complete within {timeout} seconds"
-                )
+                raise TimeoutError(f"Job {job_id} did not complete within {timeout} seconds")
 
             status = self.get_job_status(job_id)
             if not status.data:
@@ -324,9 +318,7 @@ class Scm:
 
         if sync and commit_response.success and commit_response.job_id:
             try:
-                final_status = self.wait_for_job(
-                    commit_response.job_id, timeout=timeout
-                )
+                final_status = self.wait_for_job(commit_response.job_id, timeout=timeout)
                 if final_status:
                     self.logger.info(
                         f"Commit job {commit_response.job_id} completed: "
@@ -499,9 +491,7 @@ class Scm:
 
         # Check if the requested service exists in our registry
         if name not in service_imports:
-            raise AttributeError(
-                f"'{self.__class__.__name__}' object has no attribute '{name}'"
-            )
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
         try:
             # Import the module and class dynamically

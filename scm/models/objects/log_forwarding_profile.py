@@ -42,21 +42,11 @@ class MatchListItem(BaseModel):
         "auth",
         "decryption",
     ] = Field(..., description="Log type")
-    filter: Optional[str] = Field(
-        None, description="Filter match criteria", max_length=65535
-    )
-    send_http: Optional[List[str]] = Field(
-        None, description="A list of HTTP server profiles"
-    )
-    send_syslog: Optional[List[str]] = Field(
-        None, description="A list of syslog server profiles"
-    )
-    send_to_panorama: Optional[bool] = Field(
-        None, description="Flag to send logs to Panorama"
-    )
-    quarantine: Optional[bool] = Field(
-        None, description="Flag to quarantine matching logs"
-    )
+    filter: Optional[str] = Field(None, description="Filter match criteria", max_length=65535)
+    send_http: Optional[List[str]] = Field(None, description="A list of HTTP server profiles")
+    send_syslog: Optional[List[str]] = Field(None, description="A list of syslog server profiles")
+    send_to_panorama: Optional[bool] = Field(None, description="Flag to send logs to Panorama")
+    quarantine: Optional[bool] = Field(None, description="Flag to quarantine matching logs")
 
 
 class LogForwardingProfileBaseModel(BaseModel):
@@ -152,13 +142,9 @@ class LogForwardingProfileCreateModel(LogForwardingProfileBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

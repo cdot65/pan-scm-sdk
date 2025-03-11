@@ -2,7 +2,7 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional, Literal
+from typing import List, Dict, Any, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
@@ -125,9 +125,7 @@ class LogForwardingProfile(BaseObject):
             # Return the SCM API response as a new Pydantic object
             return LogForwardingProfileResponseModel(**response)
         except Exception as e:
-            self.logger.error(
-                f"Error in API call to create log forwarding profile: {str(e)}"
-            )
+            self.logger.error(f"Error in API call to create log forwarding profile: {str(e)}")
             raise
 
     def get(
@@ -219,9 +217,7 @@ class LogForwardingProfile(BaseObject):
                 profile
                 for profile in filter_criteria
                 if profile.match_list
-                and any(
-                    match.log_type in log_type_filter for match in profile.match_list
-                )
+                and any(match.log_type in log_type_filter for match in profile.match_list)
             ]
 
         # Filter by log_types (plural, for backwards compatibility)
@@ -375,9 +371,7 @@ class LogForwardingProfile(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [
-                LogForwardingProfileResponseModel(**item) for item in data
-            ]
+            object_instances = [LogForwardingProfileResponseModel(**item) for item in data]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -398,9 +392,7 @@ class LogForwardingProfile(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -412,9 +404,7 @@ class LogForwardingProfile(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided

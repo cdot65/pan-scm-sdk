@@ -105,14 +105,9 @@ class OAuth2Client:
             raise APIError("Cannot retrieve signing key: No token available.")
 
         try:
-            jwks_uri = (
-                "/".join(self.auth_request.token_url.split("/")[:-1])
-                + "/connect/jwk_uri"
-            )
+            jwks_uri = "/".join(self.auth_request.token_url.split("/")[:-1]) + "/connect/jwk_uri"
             jwks_client = PyJWKClient(jwks_uri)
-            signing_key = jwks_client.get_signing_key_from_jwt(
-                self.session.token["access_token"]
-            )
+            signing_key = jwks_client.get_signing_key_from_jwt(self.session.token["access_token"])
             return signing_key
         except (PyJWKClientError, DecodeError) as e:
             logger.error(f"Failed to retrieve signing key: {str(e)}")
@@ -123,10 +118,7 @@ class OAuth2Client:
         """Check if the token will expire soon, accounting for buffer time."""
         if not self.session.token:
             return True
-        return (
-            time.time()
-            >= self.session.token.get("expires_at", 0) - self.TOKEN_EXPIRY_BUFFER
-        )
+        return time.time() >= self.session.token.get("expires_at", 0) - self.TOKEN_EXPIRY_BUFFER
 
     @property
     def is_expired(self) -> bool:
@@ -202,9 +194,7 @@ class OAuth2Client:
                 error_content = response.json()
                 ErrorHandler.raise_for_error(error_content, response.status_code)
             else:
-                raise APIError(
-                    f"HTTP error occurred while refreshing token: {str(e)}"
-                ) from e
+                raise APIError(f"HTTP error occurred while refreshing token: {str(e)}") from e
         except RequestException as e:
             logger.error(f"Request error during token refresh: {str(e)}")
             raise APIError(f"Request failed during token refresh: {str(e)}") from e

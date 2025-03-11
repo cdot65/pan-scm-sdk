@@ -91,11 +91,6 @@ from .syslog_server_profiles import (
     FormatModel,
     EscapingModel,
 )
-from .syslog_server_profiles import (
-    SyslogServerProfileCreateModel,
-    SyslogServerProfileUpdateModel,
-    SyslogServerProfileResponseModel,
-)
 from .tag import (
     TagCreateModel,
     TagResponseModel,

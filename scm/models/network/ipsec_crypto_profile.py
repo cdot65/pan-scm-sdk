@@ -1,10 +1,9 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Union
 from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
     model_validator,
     ConfigDict,
 )
@@ -184,11 +183,9 @@ class IPsecCryptoProfileBaseModel(BaseModel):
         default=DhGroup.GROUP2,
         description="Phase-2 DH group (PFS DH group)",
     )
-    lifetime: Union[LifetimeSeconds, LifetimeMinutes, LifetimeHours, LifetimeDays] = (
-        Field(
-            ...,
-            description="Lifetime configuration",
-        )
+    lifetime: Union[LifetimeSeconds, LifetimeMinutes, LifetimeHours, LifetimeDays] = Field(
+        ...,
+        description="Lifetime configuration",
     )
     lifesize: Optional[Union[LifesizeKB, LifesizeMB, LifesizeGB, LifesizeTB]] = Field(
         None,
@@ -227,14 +224,10 @@ class IPsecCryptoProfileBaseModel(BaseModel):
     def validate_security_protocol(self) -> "IPsecCryptoProfileBaseModel":
         """Validate that exactly one security protocol (ESP or AH) is configured."""
         if self.esp is not None and self.ah is not None:
-            raise ValueError(
-                "Only one security protocol (ESP or AH) can be configured at a time"
-            )
+            raise ValueError("Only one security protocol (ESP or AH) can be configured at a time")
 
         if self.esp is None and self.ah is None:
-            raise ValueError(
-                "At least one security protocol (ESP or AH) must be configured"
-            )
+            raise ValueError("At least one security protocol (ESP or AH) must be configured")
 
         return self
 
@@ -246,13 +239,9 @@ class IPsecCryptoProfileCreateModel(IPsecCryptoProfileBaseModel):
     def validate_container(self) -> "IPsecCryptoProfileCreateModel":
         """Validate that exactly one container field is provided."""
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

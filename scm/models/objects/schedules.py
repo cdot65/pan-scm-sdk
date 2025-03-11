@@ -1,7 +1,7 @@
 # scm/models/objects/schedules.py
 
 # Standard library imports
-from typing import Dict, List, Optional, Union, Literal
+from typing import List, Optional
 from uuid import UUID
 
 # External libraries
@@ -11,7 +11,6 @@ from pydantic import (
     model_validator,
     field_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -37,9 +36,7 @@ class WeeklyScheduleModel(BaseModel):
     friday: Optional[List[str]] = None
     saturday: Optional[List[str]] = None
 
-    @field_validator(
-        "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"
-    )
+    @field_validator("sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday")
     def validate_time_ranges(cls, v):
         """Validate that time ranges follow the correct format."""
         if v is None:
@@ -82,9 +79,7 @@ class WeeklyScheduleModel(BaseModel):
 
         # Check if at least one day has time ranges
         if not any(day is not None and len(day) > 0 for day in days):
-            raise ValueError(
-                "Weekly schedule must define time ranges for at least one day"
-            )
+            raise ValueError("Weekly schedule must define time ranges for at least one day")
 
         return values
 
@@ -165,24 +160,18 @@ class NonRecurringScheduleModel(BaseModel):
     def validate_datetime_ranges(cls, v):
         """Validate that datetime ranges follow the correct format."""
         if not v:
-            raise ValueError(
-                "Non-recurring schedule must contain at least one datetime range"
-            )
+            raise ValueError("Non-recurring schedule must contain at least one datetime range")
 
         for dt_range in v:
             # Check for the format YYYY/M/D@HH:MM - detecting missing leading zeros
             dt_parts = dt_range.split("-")
             if len(dt_parts) != 2:
-                raise ValueError(
-                    "Invalid datetime range format - must contain a single hyphen"
-                )
+                raise ValueError("Invalid datetime range format - must contain a single hyphen")
 
             # Process start date/time
             start_dt = dt_parts[0]
             if "@" not in start_dt:
-                raise ValueError(
-                    "Start datetime must contain @ to separate date and time"
-                )
+                raise ValueError("Start datetime must contain @ to separate date and time")
 
             start_date, start_time = start_dt.split("@")
             start_parts = start_date.split("/")
@@ -204,9 +193,7 @@ class NonRecurringScheduleModel(BaseModel):
             # Process end date/time
             end_dt = dt_parts[1]
             if "@" not in end_dt:
-                raise ValueError(
-                    "End datetime must contain @ to separate date and time"
-                )
+                raise ValueError("End datetime must contain @ to separate date and time")
 
             end_date, end_time = end_dt.split("@")
             end_parts = end_date.split("/")
@@ -226,44 +213,24 @@ class NonRecurringScheduleModel(BaseModel):
             end_hour, end_minute = end_time_parts
 
             # Validate leading zeros for months
-            if (
-                len(start_month) != 2
-                or not start_month.startswith("0")
-                and int(start_month) < 10
-            ):
+            if len(start_month) != 2 or not start_month.startswith("0") and int(start_month) < 10:
                 raise ValueError("Month must use leading zeros (01-12)")
 
-            if (
-                len(end_month) != 2
-                or not end_month.startswith("0")
-                and int(end_month) < 10
-            ):
+            if len(end_month) != 2 or not end_month.startswith("0") and int(end_month) < 10:
                 raise ValueError("Month must use leading zeros (01-12)")
 
             # Validate leading zeros for days
-            if (
-                len(start_day) != 2
-                or not start_day.startswith("0")
-                and int(start_day) < 10
-            ):
+            if len(start_day) != 2 or not start_day.startswith("0") and int(start_day) < 10:
                 raise ValueError("Day must use leading zeros (01-31)")
 
             if len(end_day) != 2 or not end_day.startswith("0") and int(end_day) < 10:
                 raise ValueError("Day must use leading zeros (01-31)")
 
             # Validate leading zeros for hours
-            if (
-                len(start_hour) != 2
-                or not start_hour.startswith("0")
-                and int(start_hour) < 10
-            ):
+            if len(start_hour) != 2 or not start_hour.startswith("0") and int(start_hour) < 10:
                 raise ValueError("Hours must use leading zeros (00-23)")
 
-            if (
-                len(end_hour) != 2
-                or not end_hour.startswith("0")
-                and int(end_hour) < 10
-            ):
+            if len(end_hour) != 2 or not end_hour.startswith("0") and int(end_hour) < 10:
                 raise ValueError("Hours must use leading zeros (00-23)")
 
             # Validate leading zeros for minutes
@@ -274,11 +241,7 @@ class NonRecurringScheduleModel(BaseModel):
             ):
                 raise ValueError("Minutes must use leading zeros (00-59)")
 
-            if (
-                len(end_minute) != 2
-                or not end_minute.startswith("0")
-                and int(end_minute) < 10
-            ):
+            if len(end_minute) != 2 or not end_minute.startswith("0") and int(end_minute) < 10:
                 raise ValueError("Minutes must use leading zeros (00-59)")
 
             # Validate numeric ranges
@@ -313,9 +276,7 @@ class ScheduleTypeModel(BaseModel):
     def validate_exactly_one_type(cls, values):
         """Validate that exactly one of recurring or non_recurring is provided."""
         if values.recurring is not None and values.non_recurring is not None:
-            raise ValueError(
-                "Exactly one of 'recurring' or 'non_recurring' must be provided"
-            )
+            raise ValueError("Exactly one of 'recurring' or 'non_recurring' must be provided")
         if values.recurring is None and values.non_recurring is None:
             raise ValueError("Either 'recurring' or 'non_recurring' must be provided")
 
@@ -398,13 +359,9 @@ class ScheduleCreateModel(ScheduleBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

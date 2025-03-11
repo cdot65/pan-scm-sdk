@@ -289,9 +289,7 @@ class IPsecCryptoProfile(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [
-                IPsecCryptoProfileResponseModel(**item) for item in data
-            ]
+            object_instances = [IPsecCryptoProfileResponseModel(**item) for item in data]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -305,28 +303,20 @@ class IPsecCryptoProfile(BaseObject):
             # Determine which container key and value we are filtering on
             container_key, container_value = next(iter(container_parameters.items()))
             all_objects = [
-                obj
-                for obj in all_objects
-                if getattr(obj, container_key) == container_value
+                obj for obj in all_objects if getattr(obj, container_key) == container_value
             ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
-            all_objects = [
-                obj for obj in all_objects if obj.folder not in exclude_folders
-            ]
+            all_objects = [obj for obj in all_objects if obj.folder not in exclude_folders]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
-            all_objects = [
-                obj for obj in all_objects if obj.snippet not in exclude_snippets
-            ]
+            all_objects = [obj for obj in all_objects if obj.snippet not in exclude_snippets]
 
         # Exclude devices if provided
         if exclude_devices and isinstance(exclude_devices, list):
-            all_objects = [
-                obj for obj in all_objects if obj.device not in exclude_devices
-            ]
+            all_objects = [obj for obj in all_objects if obj.device not in exclude_devices]
 
         return all_objects
 
@@ -416,9 +406,7 @@ class IPsecCryptoProfile(BaseObject):
                 )
 
             try:
-                matched_item = next(
-                    item for item in response["data"] if item.get("name") == name
-                )
+                matched_item = next(item for item in response["data"] if item.get("name") == name)
                 return IPsecCryptoProfileResponseModel(**matched_item)
 
             except StopIteration:

@@ -108,9 +108,7 @@ class SSLProtocolSettings(BaseModel):
 
     @model_validator(mode="after")
     def validate_versions(self):
-        if SSL_VERSIONS_ORDER.index(self.max_version) < SSL_VERSIONS_ORDER.index(
-            self.min_version
-        ):
+        if SSL_VERSIONS_ORDER.index(self.max_version) < SSL_VERSIONS_ORDER.index(self.min_version):
             raise ValueError("max_version cannot be less than min_version")
         return self
 
@@ -258,13 +256,9 @@ class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

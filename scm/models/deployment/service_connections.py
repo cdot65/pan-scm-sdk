@@ -1,13 +1,10 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional
 from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
-    model_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -29,39 +26,25 @@ class NoExportCommunity(str, Enum):
 class BgpPeerModel(BaseModel):
     """BGP peer configuration for service connections."""
 
-    local_ip_address: Optional[str] = Field(
-        None, description="Local IPv4 address for BGP peering"
-    )
+    local_ip_address: Optional[str] = Field(None, description="Local IPv4 address for BGP peering")
     local_ipv6_address: Optional[str] = Field(
         None, description="Local IPv6 address for BGP peering"
     )
-    peer_ip_address: Optional[str] = Field(
-        None, description="Peer IPv4 address for BGP peering"
-    )
-    peer_ipv6_address: Optional[str] = Field(
-        None, description="Peer IPv6 address for BGP peering"
-    )
+    peer_ip_address: Optional[str] = Field(None, description="Peer IPv4 address for BGP peering")
+    peer_ipv6_address: Optional[str] = Field(None, description="Peer IPv6 address for BGP peering")
     secret: Optional[str] = Field(None, description="BGP authentication secret")
 
 
 class BgpProtocolModel(BaseModel):
     """BGP protocol configuration for service connections."""
 
-    do_not_export_routes: Optional[bool] = Field(
-        None, description="Do not export routes option"
-    )
+    do_not_export_routes: Optional[bool] = Field(None, description="Do not export routes option")
     enable: Optional[bool] = Field(None, description="Enable BGP")
     fast_failover: Optional[bool] = Field(None, description="Enable fast failover")
-    local_ip_address: Optional[str] = Field(
-        None, description="Local IPv4 address for BGP peering"
-    )
-    originate_default_route: Optional[bool] = Field(
-        None, description="Originate default route"
-    )
+    local_ip_address: Optional[str] = Field(None, description="Local IPv4 address for BGP peering")
+    originate_default_route: Optional[bool] = Field(None, description="Originate default route")
     peer_as: Optional[str] = Field(None, description="BGP peer AS number")
-    peer_ip_address: Optional[str] = Field(
-        None, description="Peer IPv4 address for BGP peering"
-    )
+    peer_ip_address: Optional[str] = Field(None, description="Peer IPv4 address for BGP peering")
     secret: Optional[str] = Field(None, description="BGP authentication secret")
     summarize_mobile_user_routes: Optional[bool] = Field(
         None, description="Summarize mobile user routes"
@@ -71,9 +54,7 @@ class BgpProtocolModel(BaseModel):
 class ProtocolModel(BaseModel):
     """Protocol configuration for service connections."""
 
-    bgp: Optional[BgpProtocolModel] = Field(
-        None, description="BGP protocol configuration"
-    )
+    bgp: Optional[BgpProtocolModel] = Field(None, description="BGP protocol configuration")
 
 
 class QosModel(BaseModel):
@@ -102,32 +83,22 @@ class ServiceConnectionBaseModel(BaseModel):
         "Service Connections",
         description="The folder containing the service connection",
     )
-    ipsec_tunnel: str = Field(
-        ..., description="IPsec tunnel for the service connection"
-    )
+    ipsec_tunnel: str = Field(..., description="IPsec tunnel for the service connection")
     onboarding_type: OnboardingType = Field(
         OnboardingType.CLASSIC, description="Onboarding type for the service connection"
     )
     region: str = Field(..., description="Region for the service connection")
     backup_SC: Optional[str] = Field(None, description="Backup service connection")
     bgp_peer: Optional[BgpPeerModel] = Field(None, description="BGP peer configuration")
-    nat_pool: Optional[str] = Field(
-        None, description="NAT pool for the service connection"
-    )
+    nat_pool: Optional[str] = Field(None, description="NAT pool for the service connection")
     no_export_community: Optional[NoExportCommunity] = Field(
         None, description="No export community configuration"
     )
-    protocol: Optional[ProtocolModel] = Field(
-        None, description="Protocol configuration"
-    )
+    protocol: Optional[ProtocolModel] = Field(None, description="Protocol configuration")
     qos: Optional[QosModel] = Field(None, description="QoS configuration")
-    secondary_ipsec_tunnel: Optional[str] = Field(
-        None, description="Secondary IPsec tunnel"
-    )
+    secondary_ipsec_tunnel: Optional[str] = Field(None, description="Secondary IPsec tunnel")
     source_nat: Optional[bool] = Field(None, description="Enable source NAT")
-    subnets: Optional[List[str]] = Field(
-        None, description="Subnets for the service connection"
-    )
+    subnets: Optional[List[str]] = Field(None, description="Subnets for the service connection")
 
 
 class ServiceConnectionCreateModel(ServiceConnectionBaseModel):

@@ -1,7 +1,7 @@
 # scm/models/objects/http_server_profiles.py
 
 # Standard library imports
-from typing import Optional, List, Dict, Union, Literal
+from typing import Optional, List, Dict, Literal
 from uuid import UUID
 
 # External libraries
@@ -10,7 +10,6 @@ from pydantic import (
     Field,
     model_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -36,9 +35,7 @@ class ServerModel(BaseModel):
     tls_version: Optional[Literal["1.0", "1.1", "1.2", "1.3"]] = Field(
         None, description="HTTP server TLS version"
     )
-    certificate_profile: Optional[str] = Field(
-        None, description="HTTP server certificate profile"
-    )
+    certificate_profile: Optional[str] = Field(None, description="HTTP server certificate profile")
     http_method: Optional[Literal["GET", "POST", "PUT", "DELETE"]] = Field(
         None, description="HTTP operation to perform"
     )
@@ -52,9 +49,7 @@ class PayloadFormatModel(BaseModel):
 
     # The exact fields in the payload format model are not specified in the OpenAPI spec
     # but we can define a base model that can be extended if needed
-    model_config = ConfigDict(
-        extra="allow"
-    )  # Allow extra fields since spec isn't clear
+    model_config = ConfigDict(extra="allow")  # Allow extra fields since spec isn't clear
 
 
 class HTTPServerProfileBaseModel(BaseModel):
@@ -156,13 +151,9 @@ class HTTPServerProfileCreateModel(HTTPServerProfileBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

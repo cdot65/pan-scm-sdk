@@ -1,13 +1,11 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
     model_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -185,13 +183,9 @@ class Protocol(BaseModel):
     def validate_protocol_config(self) -> "Protocol":
         """Validate protocol configuration based on version selection."""
         if self.version == ProtocolVersion.IKEV1 and self.ikev1 is None:
-            raise ValueError(
-                "IKEv1 configuration is required when version is set to ikev1"
-            )
+            raise ValueError("IKEv1 configuration is required when version is set to ikev1")
         if self.version == ProtocolVersion.IKEV2 and self.ikev2 is None:
-            raise ValueError(
-                "IKEv2 configuration is required when version is set to ikev2"
-            )
+            raise ValueError("IKEv2 configuration is required when version is set to ikev2")
         if (
             self.version == ProtocolVersion.IKEV2_PREFERRED
             and self.ikev1 is None
@@ -367,13 +361,9 @@ class IKEGatewayCreateModel(IKEGatewayBaseModel):
     @model_validator(mode="after")
     def validate_container(self) -> "IKEGatewayCreateModel":
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

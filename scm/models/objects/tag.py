@@ -1,7 +1,7 @@
 # scm/models/objects/tag.py
 
 from enum import Enum
-from typing import Optional, List
+from typing import Optional
 from uuid import UUID
 
 from pydantic import (
@@ -183,13 +183,9 @@ class TagCreateModel(TagBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

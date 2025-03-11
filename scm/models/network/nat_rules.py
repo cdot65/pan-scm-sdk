@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Union, Dict, Any, Literal
+from typing import List, Optional, Literal
 from uuid import UUID
 from pydantic import (
     BaseModel,
@@ -63,9 +63,7 @@ class InterfaceAddress(BaseModel):
 class DynamicIpAndPortTranslatedAddress(BaseModel):
     """Dynamic IP and port translated address configuration."""
 
-    translated_address: List[str] = Field(
-        ..., description="Translated source IP addresses"
-    )
+    translated_address: List[str] = Field(..., description="Translated source IP addresses")
 
 
 class DynamicIpAndPortInterfaceAddress(BaseModel):
@@ -158,9 +156,7 @@ class SourceTranslation(BaseModel):
     dynamic_ip: Optional[DynamicIp] = Field(
         None, description="Dynamic IP translation configuration"
     )
-    static_ip: Optional[StaticIp] = Field(
-        None, description="Static IP translation configuration"
-    )
+    static_ip: Optional[StaticIp] = Field(None, description="Static IP translation configuration")
 
     @model_validator(mode="after")
     def validate_source_translation(self) -> "SourceTranslation":
@@ -186,15 +182,11 @@ class DestinationTranslation(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True)
 
-    translated_address: Optional[str] = Field(
-        None, description="Translated destination IP address"
-    )
+    translated_address: Optional[str] = Field(None, description="Translated destination IP address")
     translated_port: Optional[int] = Field(
         None, description="Translated destination port", ge=1, le=65535
     )
-    dns_rewrite: Optional[DnsRewrite] = Field(
-        None, description="DNS rewrite configuration"
-    )
+    dns_rewrite: Optional[DnsRewrite] = Field(None, description="DNS rewrite configuration")
     # The API doesn't accept 'distribution' directly in the destination_translation object
     # Distribution settings should be configured separately
 
@@ -357,13 +349,9 @@ class NatRuleCreateModel(NatRuleBaseModel):
     @model_validator(mode="after")
     def validate_container(self) -> "NatRuleCreateModel":
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

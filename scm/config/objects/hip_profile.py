@@ -302,9 +302,7 @@ class HIPProfile(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -316,9 +314,7 @@ class HIPProfile(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided

@@ -229,14 +229,8 @@ class Schedule(BaseObject):
                 if hasattr(s.schedule_type, "recurring")
                 and s.schedule_type.recurring is not None
                 and (
-                    (
-                        recurring_type == "weekly"
-                        and s.schedule_type.recurring.weekly is not None
-                    )
-                    or (
-                        recurring_type == "daily"
-                        and s.schedule_type.recurring.daily is not None
-                    )
+                    (recurring_type == "weekly" and s.schedule_type.recurring.weekly is not None)
+                    or (recurring_type == "daily" and s.schedule_type.recurring.daily is not None)
                 )
             ]
 
@@ -375,9 +369,7 @@ class Schedule(BaseObject):
         if exact_match and container_parameters:
             container_key, container_value = next(iter(container_parameters.items()))
             filtered_objects = [
-                obj
-                for obj in filtered_objects
-                if getattr(obj, container_key) == container_value
+                obj for obj in filtered_objects if getattr(obj, container_key) == container_value
             ]
 
         # Exclude folders if provided
