@@ -114,7 +114,7 @@ class TestIPsecCryptoProfileModels:
         # Test valid ESP-based profile with required fields
         profile = IPsecCryptoProfileCreateModel(
             name="test-esp-profile",
-            lifetime=LifetimeSeconds(seconds=3600),
+            lifetime={"seconds": 3600},
             esp=EspConfig(
                 encryption=[EspEncryption.AES_128_CBC],
                 authentication=["sha1"],
@@ -122,7 +122,7 @@ class TestIPsecCryptoProfileModels:
             folder="Test Folder",
         )
         assert profile.name == "test-esp-profile"
-        assert profile.lifetime.seconds == 3600
+        assert profile.lifetime == {"seconds": 3600}
         assert profile.esp.encryption == [EspEncryption.AES_128_CBC]
         assert profile.esp.authentication == ["sha1"]
         assert profile.folder == "Test Folder"
@@ -131,22 +131,22 @@ class TestIPsecCryptoProfileModels:
         # Test valid AH-based profile with required fields
         profile = IPsecCryptoProfileCreateModel(
             name="test-ah-profile",
-            lifetime=LifetimeHours(hours=1),
+            lifetime={"hours": 1},
             ah=AhConfig(
                 authentication=[AhAuthentication.SHA1],
             ),
             snippet="Test Snippet",
         )
         assert profile.name == "test-ah-profile"
-        assert profile.lifetime.hours == 1
+        assert profile.lifetime == {"hours": 1}
         assert profile.ah.authentication == [AhAuthentication.SHA1]
         assert profile.snippet == "Test Snippet"
 
         # Test valid profile with optional lifesize
         profile = IPsecCryptoProfileCreateModel(
             name="test-profile-with-lifesize",
-            lifetime=LifetimeMinutes(minutes=30),
-            lifesize=LifesizeGB(gb=100),
+            lifetime={"minutes": 30},
+            lifesize={"gb": 100},
             esp=EspConfig(
                 encryption=[EspEncryption.AES_256_CBC],
                 authentication=["sha256"],
@@ -154,15 +154,15 @@ class TestIPsecCryptoProfileModels:
             device="Test Device",
         )
         assert profile.name == "test-profile-with-lifesize"
-        assert profile.lifetime.minutes == 30
-        assert profile.lifesize.gb == 100
+        assert profile.lifetime == {"minutes": 30}
+        assert profile.lifesize == {"gb": 100}
         assert profile.device == "Test Device"
 
         # Test invalid - both ESP and AH provided
         with pytest.raises(ValueError, match="Only one security protocol"):
             IPsecCryptoProfileCreateModel(
                 name="invalid-both-protocols",
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 esp=EspConfig(
                     encryption=[EspEncryption.AES_128_CBC],
                     authentication=["sha1"],
@@ -177,7 +177,7 @@ class TestIPsecCryptoProfileModels:
         with pytest.raises(ValueError, match="At least one security protocol"):
             IPsecCryptoProfileCreateModel(
                 name="invalid-no-protocols",
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 folder="Test Folder",
             )
 
@@ -185,7 +185,7 @@ class TestIPsecCryptoProfileModels:
         with pytest.raises(ValueError, match="Exactly one of 'folder'"):
             IPsecCryptoProfileCreateModel(
                 name="invalid-containers",
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 esp=EspConfig(
                     encryption=[EspEncryption.AES_128_CBC],
                     authentication=["sha1"],
@@ -198,7 +198,7 @@ class TestIPsecCryptoProfileModels:
         with pytest.raises(ValueError, match="Exactly one of 'folder'"):
             IPsecCryptoProfileCreateModel(
                 name="invalid-no-container",
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 esp=EspConfig(
                     encryption=[EspEncryption.AES_128_CBC],
                     authentication=["sha1"],
@@ -209,7 +209,7 @@ class TestIPsecCryptoProfileModels:
         with pytest.raises(ValidationError):
             IPsecCryptoProfileCreateModel(
                 name="invalid name!",  # Invalid character !
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 esp=EspConfig(
                     encryption=[EspEncryption.AES_128_CBC],
                     authentication=["sha1"],
@@ -223,7 +223,7 @@ class TestIPsecCryptoProfileModels:
         profile = IPsecCryptoProfileUpdateModel(
             id=UUID("123e4567-e89b-12d3-a456-426655440000"),
             name="updated-profile",
-            lifetime=LifetimeSeconds(seconds=7200),
+            lifetime={"seconds": 7200},
             esp=EspConfig(
                 encryption=[EspEncryption.AES_256_CBC],
                 authentication=["sha256"],
@@ -232,7 +232,7 @@ class TestIPsecCryptoProfileModels:
         )
         assert profile.id == UUID("123e4567-e89b-12d3-a456-426655440000")
         assert profile.name == "updated-profile"
-        assert profile.lifetime.seconds == 7200
+        assert profile.lifetime == {"seconds": 7200}
         assert profile.esp.encryption == [EspEncryption.AES_256_CBC]
         assert profile.folder == "Updated Folder"
 
@@ -240,7 +240,7 @@ class TestIPsecCryptoProfileModels:
         with pytest.raises(ValidationError):
             IPsecCryptoProfileUpdateModel(
                 name="missing-id",
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 esp=EspConfig(
                     encryption=[EspEncryption.AES_128_CBC],
                     authentication=["sha1"],
@@ -254,7 +254,7 @@ class TestIPsecCryptoProfileModels:
         profile = IPsecCryptoProfileResponseModel(
             id=UUID("123e4567-e89b-12d3-a456-426655440000"),
             name="response-profile",
-            lifetime=LifetimeSeconds(seconds=3600),
+            lifetime={"seconds": 3600},
             esp=EspConfig(
                 encryption=[EspEncryption.AES_128_CBC],
                 authentication=["sha1"],
@@ -263,7 +263,7 @@ class TestIPsecCryptoProfileModels:
         )
         assert profile.id == UUID("123e4567-e89b-12d3-a456-426655440000")
         assert profile.name == "response-profile"
-        assert profile.lifetime.seconds == 3600
+        assert profile.lifetime == {"seconds": 3600}
         assert profile.esp.encryption == [EspEncryption.AES_128_CBC]
         assert profile.folder == "Test Folder"
 
@@ -271,7 +271,7 @@ class TestIPsecCryptoProfileModels:
         with pytest.raises(ValidationError):
             IPsecCryptoProfileResponseModel(
                 name="missing-id",
-                lifetime=LifetimeSeconds(seconds=3600),
+                lifetime={"seconds": 3600},
                 esp=EspConfig(
                     encryption=[EspEncryption.AES_128_CBC],
                     authentication=["sha1"],
@@ -284,8 +284,8 @@ class TestIPsecCryptoProfileModels:
         # Create a profile
         profile = IPsecCryptoProfileCreateModel(
             name="serialization-test",
-            lifetime=LifetimeSeconds(seconds=3600),
-            lifesize=LifesizeMB(mb=500),
+            lifetime={"seconds": 3600},
+            lifesize={"mb": 500},
             dh_group=DhGroup.GROUP14,
             esp=EspConfig(
                 encryption=[EspEncryption.AES_256_CBC],
@@ -311,3 +311,83 @@ class TestIPsecCryptoProfileModels:
         assert "snippet" not in profile_dict
         assert "device" not in profile_dict
         assert "ah" not in profile_dict
+        
+    def test_process_lifetime_and_lifesize_validator(self):
+        """Test the process_lifetime_and_lifesize validator directly."""
+        from scm.models.network.ipsec_crypto_profile import (
+            IPsecCryptoProfileBaseModel,
+            LifetimeSeconds,
+            LifetimeMinutes,
+            LifetimeHours,
+            LifetimeDays,
+            LifesizeKB,
+            LifesizeMB,
+            LifesizeGB,
+            LifesizeTB,
+        )
+        
+        # Test validator with non-dict input
+        values = "not-a-dict"
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result == "not-a-dict"
+        
+        # Test with no lifetime
+        values = {"name": "test", "folder": "folder"}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result == values
+        
+        # Test with different lifetime types
+        # Test with LifetimeSeconds
+        values = {"name": "test", "lifetime": LifetimeSeconds(seconds=3600)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifetime"] == {"seconds": 3600}
+        
+        # Test with LifetimeMinutes
+        values = {"name": "test", "lifetime": LifetimeMinutes(minutes=60)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifetime"] == {"minutes": 60}
+        
+        # Test with LifetimeHours
+        values = {"name": "test", "lifetime": LifetimeHours(hours=1)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifetime"] == {"hours": 1}
+        
+        # Test with LifetimeDays
+        values = {"name": "test", "lifetime": LifetimeDays(days=1)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifetime"] == {"days": 1}
+        
+        # Test with no lifesize
+        values = {"name": "test", "lifetime": {"seconds": 3600}}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result == values
+        
+        # Test with different lifesize types
+        # Test with LifesizeKB
+        values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeKB(kb=1024)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifesize"] == {"kb": 1024}
+        
+        # Test with LifesizeMB
+        values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeMB(mb=10)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifesize"] == {"mb": 10}
+        
+        # Test with LifesizeGB
+        values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeGB(gb=1)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifesize"] == {"gb": 1}
+        
+        # Test with LifesizeTB
+        values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeTB(tb=1)}
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result["lifesize"] == {"tb": 1}
+        
+        # Test with both lifetime and lifesize already as dictionaries
+        values = {
+            "name": "test", 
+            "lifetime": {"seconds": 3600}, 
+            "lifesize": {"mb": 10}
+        }
+        result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
+        assert result == values

@@ -52,6 +52,13 @@ class DnsRewriteDirection(str, Enum):
     FORWARD = "forward"
 
 
+class BiDirectional(str, Enum):
+    """Bi-directional translation options."""
+
+    YES = "yes"
+    NO = "no"
+
+
 class InterfaceAddress(BaseModel):
     """Interface address configuration."""
 
@@ -100,23 +107,19 @@ class StaticIp(BaseModel):
     """Static IP translation configuration."""
 
     translated_address: str = Field(..., description="Translated IP address")
-    bi_directional: Optional[str] = Field(
+    bi_directional: Optional[BiDirectional] = Field(
         None,
-        description="Enable bi-directional translation (yes/no)",
-        pattern="^(yes|no)$",
+        description="Enable bi-directional translation",
     )
 
     @field_validator("bi_directional")
-    def ensure_string_yes_no(cls, v):
-        """Ensure bi_directional is a string 'yes' or 'no', not a boolean."""
+    def convert_boolean_to_enum(cls, v):
+        """Convert boolean to BiDirectional enum if needed."""
         if v is None:
             return v
 
         if isinstance(v, bool):
-            return "yes" if v else "no"
-
-        if v not in ("yes", "no"):
-            raise ValueError("bi_directional must be 'yes' or 'no'")
+            return BiDirectional.YES if v else BiDirectional.NO
 
         return v
 
@@ -334,7 +337,7 @@ class NatRuleBaseModel(BaseModel):
         if (
             self.source_translation
             and self.source_translation.static_ip
-            and self.source_translation.static_ip.bi_directional == "yes"
+            and self.source_translation.static_ip.bi_directional == BiDirectional.YES
             and self.destination_translation
         ):
             raise ValueError(

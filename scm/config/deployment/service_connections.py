@@ -2,6 +2,7 @@
 
 # Standard library imports
 import logging
+import re
 from typing import List, Dict, Any, Optional
 
 # Local SDK imports
@@ -204,9 +205,24 @@ class ServiceConnection(BaseObject):
         # Add name filter if provided
         if name:
             if not isinstance(name, str) or not name.strip():
-                raise ValueError("Name filter must be a non-empty string")
+                raise InvalidObjectError(
+                    message="Name filter must be a non-empty string",
+                    error_code="E002",
+                    http_status_code=400,
+                )
             if len(name) > 255:
-                raise ValueError("Name filter exceeds maximum length of 255 characters")
+                raise InvalidObjectError(
+                    message="Name filter exceeds maximum length of 255 characters",
+                    error_code="E003",
+                    http_status_code=400,
+                )
+            # Validate name format (alphanumeric, underscores, and hyphens allowed)
+            if not re.match(r"^[a-zA-Z0-9_-]{1,255}$", name.strip()):
+                raise InvalidObjectError(
+                    message="Invalid name format. Name must contain only alphanumeric characters, underscores, and hyphens",
+                    error_code="E003",
+                    http_status_code=400,
+                )
             params["name"] = name.strip()
 
         while True:

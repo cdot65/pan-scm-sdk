@@ -123,7 +123,7 @@ class SyslogServerProfile(BaseObject):
                 json=payload,
             )
         except Exception as e:
-            self.logger.error(f"Error in API call: {str(e)}")
+            self.logger.error(f"Error in API call: {str(e)}", exc_info=True)
             raise
 
         # Return the SCM API response as a new Pydantic object

@@ -125,7 +125,9 @@ class LogForwardingProfile(BaseObject):
             # Return the SCM API response as a new Pydantic object
             return LogForwardingProfileResponseModel(**response)
         except Exception as e:
-            self.logger.error(f"Error in API call to create log forwarding profile: {str(e)}")
+            self.logger.error(
+                f"Error in API call to create log forwarding profile: {str(e)}", exc_info=True
+            )
             raise
 
     def get(

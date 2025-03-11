@@ -27,6 +27,7 @@ from .ike_gateway import (
     PeerAddress,
 )
 from .ipsec_crypto_profile import (
+    IPsecCryptoProfileBaseModel,
     IPsecCryptoProfileCreateModel,
     IPsecCryptoProfileUpdateModel,
     IPsecCryptoProfileResponseModel,
@@ -96,6 +97,7 @@ __all__ = [
     "ProtocolCommon",
     "PeerAddress",
     # IPsec Crypto Profile
+    "IPsecCryptoProfileBaseModel",
     "IPsecCryptoProfileCreateModel",
     "IPsecCryptoProfileUpdateModel",
     "IPsecCryptoProfileResponseModel",

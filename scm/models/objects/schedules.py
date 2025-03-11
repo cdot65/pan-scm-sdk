@@ -1,6 +1,7 @@
 # scm/models/objects/schedules.py
 
 # Standard library imports
+import re
 from typing import List, Optional
 from uuid import UUID
 
@@ -12,6 +13,13 @@ from pydantic import (
     field_validator,
     ConfigDict,
 )
+
+# Regular expression to validate time range in format hh:mm-hh:mm
+# This pattern ensures:
+# - Hours from 00-23 (first digit can only be 0, 1, or 2)
+# - Minutes from 00-59
+# - Proper format with a hyphen between times
+TIME_RANGE_PATTERN = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)-([01]\d|2[0-3]):([0-5]\d)$")
 
 
 class WeeklyScheduleModel(BaseModel):
@@ -43,24 +51,8 @@ class WeeklyScheduleModel(BaseModel):
             return v
 
         for time_range in v:
-            # Time range should match pattern hh:mm-hh:mm
-            if not time_range or len(time_range) != 11:
-                raise ValueError(
-                    "Time range must be in format hh:mm-hh:mm and be exactly 11 characters"
-                )
-
-            # Split into start and end times
-            start_time, end_time = time_range.split("-")
-            start_h, start_m = start_time.split(":")
-            end_h, end_m = end_time.split(":")
-
-            # Validate hours (00-23)
-            if not (0 <= int(start_h) <= 23 and 0 <= int(end_h) <= 23):
-                raise ValueError("Hours must be between 00 and 23")
-
-            # Validate minutes (00-59)
-            if not (0 <= int(start_m) <= 59 and 0 <= int(end_m) <= 59):
-                raise ValueError("Minutes must be between 00 and 59")
+            if not TIME_RANGE_PATTERN.match(time_range):
+                raise ValueError("Time range must be in format hh:mm-hh:mm (00:00-23:59)")
 
         return v
 
@@ -101,24 +93,8 @@ class DailyScheduleModel(BaseModel):
             raise ValueError("Daily schedule must contain at least one time range")
 
         for time_range in v:
-            # Time range should match pattern hh:mm-hh:mm
-            if not time_range or len(time_range) != 11:
-                raise ValueError(
-                    "Time range must be in format hh:mm-hh:mm and be exactly 11 characters"
-                )
-
-            # Split into start and end times
-            start_time, end_time = time_range.split("-")
-            start_h, start_m = start_time.split(":")
-            end_h, end_m = end_time.split(":")
-
-            # Validate hours (00-23)
-            if not (0 <= int(start_h) <= 23 and 0 <= int(end_h) <= 23):
-                raise ValueError("Hours must be between 00 and 23")
-
-            # Validate minutes (00-59)
-            if not (0 <= int(start_m) <= 59 and 0 <= int(end_m) <= 59):
-                raise ValueError("Minutes must be between 00 and 59")
+            if not TIME_RANGE_PATTERN.match(time_range):
+                raise ValueError("Time range must be in format hh:mm-hh:mm (00:00-23:59)")
 
         return v
 

@@ -66,7 +66,7 @@ class QuarantinedDevices(BaseObject):
             # Return the API response as a Pydantic model
             return QuarantinedDevicesResponseModel(**response)
         except Exception as e:
-            self.logger.error(f"Error creating quarantined device: {e}")
+            self.logger.error(f"Error creating quarantined device: {e}", exc_info=True)
             raise
 
     def list(
