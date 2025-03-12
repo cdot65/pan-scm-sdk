@@ -2,6 +2,14 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.19
+
+**Released:** March 12, 2025
+
+### Added
+
+- **NAT Rules**: Support for managing tags not named "Automation" and "Decryption". Oof.
+
 ## Version 0.3.18
 
 **Released:** March 8, 2025
