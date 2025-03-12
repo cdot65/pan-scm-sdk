@@ -20,10 +20,10 @@ from scm.models.objects import (
 class Schedule(BaseObject):
     """
     Manages Schedule objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Schedules can be configured as recurring (weekly or daily) or non-recurring,
     and are used to specify when policies should be active.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -206,9 +206,10 @@ class Schedule(BaseObject):
                 )
 
             filtered_schedules = [
-                s for s in filtered_schedules 
-                if hasattr(s.schedule_type, schedule_type) and 
-                getattr(s.schedule_type, schedule_type) is not None
+                s
+                for s in filtered_schedules
+                if hasattr(s.schedule_type, schedule_type)
+                and getattr(s.schedule_type, schedule_type) is not None
             ]
 
         # Filter by recurring_type
@@ -223,12 +224,13 @@ class Schedule(BaseObject):
                 )
 
             filtered_schedules = [
-                s for s in filtered_schedules 
-                if hasattr(s.schedule_type, "recurring") and
-                s.schedule_type.recurring is not None and
-                (
-                    (recurring_type == "weekly" and s.schedule_type.recurring.weekly is not None) or
-                    (recurring_type == "daily" and s.schedule_type.recurring.daily is not None)
+                s
+                for s in filtered_schedules
+                if hasattr(s.schedule_type, "recurring")
+                and s.schedule_type.recurring is not None
+                and (
+                    (recurring_type == "weekly" and s.schedule_type.recurring.weekly is not None)
+                    or (recurring_type == "daily" and s.schedule_type.recurring.daily is not None)
                 )
             ]
 
@@ -367,29 +369,25 @@ class Schedule(BaseObject):
         if exact_match and container_parameters:
             container_key, container_value = next(iter(container_parameters.items()))
             filtered_objects = [
-                obj for obj in filtered_objects 
-                if getattr(obj, container_key) == container_value
+                obj for obj in filtered_objects if getattr(obj, container_key) == container_value
             ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
             filtered_objects = [
-                obj for obj in filtered_objects 
-                if obj.folder not in exclude_folders
+                obj for obj in filtered_objects if obj.folder not in exclude_folders
             ]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                obj for obj in filtered_objects 
-                if obj.snippet not in exclude_snippets
+                obj for obj in filtered_objects if obj.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided
         if exclude_devices and isinstance(exclude_devices, list):
             filtered_objects = [
-                obj for obj in filtered_objects 
-                if obj.device not in exclude_devices
+                obj for obj in filtered_objects if obj.device not in exclude_devices
             ]
 
         return filtered_objects
@@ -468,7 +466,7 @@ class Schedule(BaseObject):
                     http_status_code=404,
                     details={"error": "Object not found"},
                 )
-            
+
             # Return the first match
             return ScheduleResponseModel(**response["data"][0])
         elif "id" in response:

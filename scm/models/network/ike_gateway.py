@@ -1,13 +1,11 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
     model_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -43,7 +41,7 @@ class PreSharedKey(BaseModel):
     key: str = Field(
         ...,
         description="Pre-shared key for authentication",
-        json_schema_extra={"format": "password"}
+        json_schema_extra={"format": "password"},
     )
 
 
@@ -108,7 +106,7 @@ class PeerId(BaseModel):
     id: str = Field(
         ...,
         description="Peer ID string",
-        pattern=r'^(.+\@[\*a-zA-Z0-9.-]+)$|^([\*$a-zA-Z0-9_:.-]+)$|^(([[:xdigit:]][[:xdigit:]])+)$|^([a-zA-Z0-9.]+=(\\,|[^,])+[, ]+)*([a-zA-Z0-9.]+=(\\,|[^,])+)$',
+        pattern=r"^(.+\@[\*a-zA-Z0-9.-]+)$|^([\*$a-zA-Z0-9_:.-]+)$|^(([[:xdigit:]][[:xdigit:]])+)$|^([a-zA-Z0-9.]+=(\\,|[^,])+[, ]+)*([a-zA-Z0-9.]+=(\\,|[^,])+)$",
         min_length=1,
         max_length=1024,
     )
@@ -124,7 +122,7 @@ class LocalId(BaseModel):
     id: str = Field(
         ...,
         description="Local ID string",
-        pattern=r'^(.+\@[a-zA-Z0-9.-]+)$|^([$a-zA-Z0-9_:.-]+)$|^(([[:xdigit:]][[:xdigit:]])+)$|^([a-zA-Z0-9.]+=(\\,|[^,])+[, ]+)*([a-zA-Z0-9.]+=(\\,|[^,])+)$',
+        pattern=r"^(.+\@[a-zA-Z0-9.-]+)$|^([$a-zA-Z0-9_:.-]+)$|^(([[:xdigit:]][[:xdigit:]])+)$|^([a-zA-Z0-9.]+=(\\,|[^,])+[, ]+)*([a-zA-Z0-9.]+=(\\,|[^,])+)$",
         min_length=1,
         max_length=1024,
     )
@@ -188,8 +186,14 @@ class Protocol(BaseModel):
             raise ValueError("IKEv1 configuration is required when version is set to ikev1")
         if self.version == ProtocolVersion.IKEV2 and self.ikev2 is None:
             raise ValueError("IKEv2 configuration is required when version is set to ikev2")
-        if self.version == ProtocolVersion.IKEV2_PREFERRED and self.ikev1 is None and self.ikev2 is None:
-            raise ValueError("Either IKEv1 or IKEv2 configuration must be provided when version is ikev2-preferred")
+        if (
+            self.version == ProtocolVersion.IKEV2_PREFERRED
+            and self.ikev1 is None
+            and self.ikev2 is None
+        ):
+            raise ValueError(
+                "Either IKEv1 or IKEv2 configuration must be provided when version is ikev2-preferred"
+            )
         return self
 
 
@@ -282,7 +286,7 @@ class PeerAddress(BaseModel):
             self.dynamic,
         ]
         filled_types = [t for t in configured_types if t is not None]
-        
+
         if len(filled_types) != 1:
             raise ValueError(
                 "Exactly one peer address type must be configured: ip, fqdn, or dynamic"
@@ -357,13 +361,9 @@ class IKEGatewayCreateModel(IKEGatewayBaseModel):
     @model_validator(mode="after")
     def validate_container(self) -> "IKEGatewayCreateModel":
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

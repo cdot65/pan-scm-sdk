@@ -227,9 +227,7 @@ class RemoteNetworks(BaseObject):
         # license_type
         if "license_types" in filters:
             license_value = filters["license_types"]
-            filtered = [
-                rn for rn in filtered if match_field(rn.license_type, license_value)
-            ]
+            filtered = [rn for rn in filtered if match_field(rn.license_type, license_value)]
 
         # subnets
         # For subnets, let's assume an object is a match if ANY of the filter's subnets appear in `rn.subnets`.
@@ -245,15 +243,11 @@ class RemoteNetworks(BaseObject):
             if isinstance(subnets_value, list):
                 # If subnets_value is empty, we returned [] above
                 filtered = [
-                    rn
-                    for rn in filtered
-                    if has_subnet_overlap(rn.subnets or [], subnets_value)
+                    rn for rn in filtered if has_subnet_overlap(rn.subnets or [], subnets_value)
                 ]
             else:
                 # Single string => require that exact string is in the rn.subnets list
-                filtered = [
-                    rn for rn in filtered if rn.subnets and subnets_value in rn.subnets
-                ]
+                filtered = [rn for rn in filtered if rn.subnets and subnets_value in rn.subnets]
 
         # spn_name
         if "spn_names" in filters:
@@ -265,17 +259,13 @@ class RemoteNetworks(BaseObject):
             ecmp_value = filters["ecmp_load_balancing"]
             # ecmp_load_balancing is an enum, but .value is a string
             filtered = [
-                rn
-                for rn in filtered
-                if match_field(rn.ecmp_load_balancing.value, ecmp_value)
+                rn for rn in filtered if match_field(rn.ecmp_load_balancing.value, ecmp_value)
             ]
 
         # ipsec_tunnel
         if "ipsec_tunnels" in filters:
             ipsec_value = filters["ipsec_tunnels"]
-            filtered = [
-                rn for rn in filtered if match_field(rn.ipsec_tunnel, ipsec_value)
-            ]
+            filtered = [rn for rn in filtered if match_field(rn.ipsec_tunnel, ipsec_value)]
 
         # protocol
         if "protocol" in filters:
@@ -426,9 +416,7 @@ class RemoteNetworks(BaseObject):
 
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         if exclude_folders and isinstance(exclude_folders, list):

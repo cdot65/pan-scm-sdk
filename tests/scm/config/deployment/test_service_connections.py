@@ -349,20 +349,25 @@ class TestServiceConnection(TestServiceConnectionBase):
         self.mock_scm.get.return_value = {"data": []}
         
         # Test with whitespace only - should raise error
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(InvalidObjectError) as excinfo:
             self.client.list(name="   ")
-        assert "Name filter must be a non-empty string" in str(excinfo.value)
+        assert excinfo.value.message == "Name filter must be a non-empty string"
         
         # Test with name that's too long (over 255 chars)
         long_name = "a" * 256
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(InvalidObjectError) as excinfo:
             self.client.list(name=long_name)
-        assert "Name filter exceeds maximum length of 255 characters" in str(excinfo.value)
+        assert excinfo.value.message == "Name filter exceeds maximum length of 255 characters"
         
         # Test with non-string value
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(InvalidObjectError) as excinfo:
             self.client.list(name=123)
-        assert "Name filter must be a non-empty string" in str(excinfo.value)
+        assert excinfo.value.message == "Name filter must be a non-empty string"
+        
+        # Test with invalid character in name
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(name="invalid@name")
+        assert excinfo.value.message == "Invalid name format. Name must contain only alphanumeric characters, underscores, and hyphens"
 
     def test_list_folder_override(self, sample_service_connection_dict):
         """Test list method folder override."""

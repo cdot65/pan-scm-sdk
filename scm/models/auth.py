@@ -26,9 +26,7 @@ class AuthRequestModel(BaseModel):
     client_secret: str
     tsg_id: str
     scope: str = Field(default=None)
-    token_url: str = Field(
-        default="https://auth.apps.paloaltonetworks.com/am/oauth2/access_token"
-    )
+    token_url: str = Field(default="https://auth.apps.paloaltonetworks.com/am/oauth2/access_token")
 
     @model_validator(mode="before")
     def construct_scope(cls, values):

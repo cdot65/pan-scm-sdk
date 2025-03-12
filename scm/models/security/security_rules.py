@@ -72,9 +72,7 @@ class SecurityRuleBaseModel(BaseModel):
         description="The name of the security rule",
     )
     disabled: bool = Field(False, description="Is the security rule disabled?")
-    description: Optional[str] = Field(
-        None, description="The description of the security rule"
-    )
+    description: Optional[str] = Field(None, description="The description of the security rule")
     tag: List[str] = Field(
         default_factory=list, description="The tags associated with the security rule"
     )
@@ -105,9 +103,7 @@ class SecurityRuleBaseModel(BaseModel):
         default_factory=lambda: ["any"],
         description="The destination address(es)",
     )
-    negate_destination: bool = Field(
-        False, description="Negate the destination addresses(es)?"
-    )
+    negate_destination: bool = Field(False, description="Negate the destination addresses(es)?")
     destination_hip: List[str] = Field(
         default_factory=lambda: ["any"],
         description="The destination Host Integrity Profile(s)",
@@ -207,13 +203,9 @@ class SecurityRuleCreateModel(SecurityRuleBaseModel):
     @model_validator(mode="after")
     def validate_container(self) -> "SecurityRuleCreateModel":
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

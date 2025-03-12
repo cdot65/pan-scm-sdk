@@ -2,6 +2,7 @@
 
 # Standard library imports
 import logging
+import re
 from typing import List, Dict, Any, Optional
 
 # Local SDK imports
@@ -200,13 +201,28 @@ class ServiceConnection(BaseObject):
         # Folder is required for service-connections API (from OpenAPI spec)
         params = dict(filters)
         params["folder"] = "Service Connections"  # Always set folder parameter
-        
+
         # Add name filter if provided
         if name:
             if not isinstance(name, str) or not name.strip():
-                raise ValueError("Name filter must be a non-empty string")
+                raise InvalidObjectError(
+                    message="Name filter must be a non-empty string",
+                    error_code="E002",
+                    http_status_code=400,
+                )
             if len(name) > 255:
-                raise ValueError("Name filter exceeds maximum length of 255 characters")
+                raise InvalidObjectError(
+                    message="Name filter exceeds maximum length of 255 characters",
+                    error_code="E003",
+                    http_status_code=400,
+                )
+            # Validate name format (alphanumeric, underscores, and hyphens allowed)
+            if not re.match(r"^[a-zA-Z0-9_-]{1,255}$", name.strip()):
+                raise InvalidObjectError(
+                    message="Invalid name format. Name must contain only alphanumeric characters, underscores, and hyphens",
+                    error_code="E003",
+                    http_status_code=400,
+                )
             params["name"] = name.strip()
 
         while True:
@@ -309,30 +325,30 @@ class ServiceConnection(BaseObject):
                     message=f"No service connection found with name: {name}",
                     error_code="E004",
                     http_status_code=404,
-                    details={"error": "Service connection not found"}
+                    details={"error": "Service connection not found"},
                 )
-                
+
             for item in response["data"]:
                 if item.get("name") == name:
                     return ServiceConnectionResponseModel(**item)
-                    
+
             # If we get here, no exact match was found
             raise InvalidObjectError(
                 message=f"No exact match found for service connection with name: {name}",
                 error_code="E004",
                 http_status_code=404,
-                details={"error": "Service connection not found"}
+                details={"error": "Service connection not found"},
             )
-            
+
         # Direct response with ID field (single resource response)
         if "id" in response:
             return ServiceConnectionResponseModel(**response)
-            
+
         raise InvalidObjectError(
             message="Invalid response format",
             error_code="E003",
             http_status_code=500,
-            details={"error": "Response format not recognized"}
+            details={"error": "Response format not recognized"},
         )
 
     def delete(

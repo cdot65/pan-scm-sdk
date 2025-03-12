@@ -3,7 +3,6 @@
 # Standard library imports
 import logging
 from typing import List, Dict, Any, Optional
-from uuid import UUID
 
 # Local SDK imports
 from scm.config import BaseObject
@@ -303,30 +302,20 @@ class IKEGateway(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             all_objects = [
-                each
-                for each in all_objects
-                if getattr(each, container_key) == container_value
+                each for each in all_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
         if exclude_folders and isinstance(exclude_folders, list):
-            all_objects = [
-                each for each in all_objects if each.folder not in exclude_folders
-            ]
+            all_objects = [each for each in all_objects if each.folder not in exclude_folders]
 
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
-            all_objects = [
-                each
-                for each in all_objects
-                if each.snippet not in exclude_snippets
-            ]
+            all_objects = [each for each in all_objects if each.snippet not in exclude_snippets]
 
         # Exclude devices if provided
         if exclude_devices and isinstance(exclude_devices, list):
-            all_objects = [
-                each for each in all_objects if each.device not in exclude_devices
-            ]
+            all_objects = [each for each in all_objects if each.device not in exclude_devices]
 
         return all_objects
 

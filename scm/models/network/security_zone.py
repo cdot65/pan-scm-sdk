@@ -1,13 +1,11 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
     model_validator,
     ConfigDict,
-    constr,
 )
 
 
@@ -94,9 +92,7 @@ class NetworkConfig(BaseModel):
 
         # Check if more than one type is configured
         if len(configured_types) > 1:
-            raise ValueError(
-                "Only one network interface type can be configured at a time"
-            )
+            raise ValueError("Only one network interface type can be configured at a time")
 
         return self
 
@@ -172,13 +168,9 @@ class SecurityZoneCreateModel(SecurityZoneBaseModel):
     @model_validator(mode="after")
     def validate_container(self) -> "SecurityZoneCreateModel":
         container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

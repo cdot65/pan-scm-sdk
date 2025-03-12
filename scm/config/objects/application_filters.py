@@ -197,8 +197,7 @@ class ApplicationFilters(BaseObject):
             filter_criteria = [
                 app
                 for app in filter_criteria
-                if app.category is not None
-                and any(cat in app.category for cat in categories)
+                if app.category is not None and any(cat in app.category for cat in categories)
             ]
 
         # Filter by subcategory
@@ -259,11 +258,7 @@ class ApplicationFilters(BaseObject):
         snippet: Optional[str],
     ) -> dict:
         """Builds container parameters dictionary."""
-        return {
-            k: v
-            for k, v in {"folder": folder, "snippet": snippet}.items()
-            if v is not None
-        }
+        return {k: v for k, v in {"folder": folder, "snippet": snippet}.items() if v is not None}
 
     def list(
         self,
@@ -363,9 +358,7 @@ class ApplicationFilters(BaseObject):
                 )
 
             data = response["data"]
-            object_instances = [
-                ApplicationFiltersResponseModel(**item) for item in data
-            ]
+            object_instances = [ApplicationFiltersResponseModel(**item) for item in data]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -386,9 +379,7 @@ class ApplicationFilters(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -400,9 +391,7 @@ class ApplicationFilters(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         return filtered_objects
@@ -458,9 +447,7 @@ class ApplicationFilters(BaseObject):
                 message="Exactly one of 'folder' or 'snippet' must be provided.",
                 error_code="E003",
                 http_status_code=400,
-                details={
-                    "error": "Exactly one of 'folder' or 'snippet' must be provided."
-                },
+                details={"error": "Exactly one of 'folder' or 'snippet' must be provided."},
             )
 
         params.update(container_parameters)

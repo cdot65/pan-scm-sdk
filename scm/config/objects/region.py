@@ -20,13 +20,13 @@ from scm.models.objects import (
 class Region(BaseObject):
     """
     Manages Region objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Note:
         While the SDK models support 'description' and 'tag' fields for region objects
         to maintain consistency with other object types, these fields are not supported
         by the Strata Cloud Manager API. They will be automatically excluded when
         sending requests to the API.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -211,7 +211,8 @@ class Region(BaseObject):
                 lat_range = geo_filter["latitude"]
                 if isinstance(lat_range, dict) and "min" in lat_range and "max" in lat_range:
                     filter_criteria = [
-                        region for region in filter_criteria
+                        region
+                        for region in filter_criteria
                         if region.geo_location
                         and region.geo_location.latitude >= lat_range["min"]
                         and region.geo_location.latitude <= lat_range["max"]
@@ -222,7 +223,8 @@ class Region(BaseObject):
                 long_range = geo_filter["longitude"]
                 if isinstance(long_range, dict) and "min" in long_range and "max" in long_range:
                     filter_criteria = [
-                        region for region in filter_criteria
+                        region
+                        for region in filter_criteria
                         if region.geo_location
                         and region.geo_location.longitude >= long_range["min"]
                         and region.geo_location.longitude <= long_range["max"]
@@ -361,15 +363,15 @@ class Region(BaseObject):
 
             data = response["data"]
             # Filter out any items without valid ID - likely predefined or system regions
-            invalid_data = [item for item in data if not isinstance(item, dict) or 'id' not in item]
+            invalid_data = [item for item in data if not isinstance(item, dict) or "id" not in item]
             if invalid_data:
                 self.logger.debug(f"Filtering out {len(invalid_data)} items without valid ID field")
                 for idx, item in enumerate(invalid_data[:3]):  # Log up to 3 examples
                     self.logger.debug(f"Invalid item {idx}: {item}")
                 if len(invalid_data) > 3:
                     self.logger.debug(f"... and {len(invalid_data) - 3} more")
-            
-            valid_data = [item for item in data if isinstance(item, dict) and 'id' in item]
+
+            valid_data = [item for item in data if isinstance(item, dict) and "id" in item]
             object_instances = [RegionResponseModel(**item) for item in valid_data]
             all_objects.extend(object_instances)
 
@@ -391,9 +393,7 @@ class Region(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -405,9 +405,7 @@ class Region(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided

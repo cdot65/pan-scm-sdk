@@ -3,7 +3,6 @@
 # Standard library imports
 import logging
 from typing import List, Dict, Any, Optional
-from uuid import UUID
 
 # Local SDK imports
 from scm.config import BaseObject
@@ -210,9 +209,7 @@ class NatRule(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             nat_types = filters["nat_type"]
-            filter_criteria = [
-                rule for rule in filter_criteria if rule.nat_type in nat_types
-            ]
+            filter_criteria = [rule for rule in filter_criteria if rule.nat_type in nat_types]
 
         # Filter by service
         if "service" in filters:
@@ -224,9 +221,7 @@ class NatRule(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             services = filters["service"]
-            filter_criteria = [
-                rule for rule in filter_criteria if rule.service in services
-            ]
+            filter_criteria = [rule for rule in filter_criteria if rule.service in services]
 
         # Filter by destination
         if "destination" in filters:
@@ -255,9 +250,7 @@ class NatRule(BaseObject):
                 )
             sources = filters["source"]
             filter_criteria = [
-                rule
-                for rule in filter_criteria
-                if any(src in rule.source for src in sources)
+                rule for rule in filter_criteria if any(src in rule.source for src in sources)
             ]
 
         # Filter by tag
@@ -286,9 +279,7 @@ class NatRule(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             disabled = filters["disabled"]
-            filter_criteria = [
-                rule for rule in filter_criteria if rule.disabled == disabled
-            ]
+            filter_criteria = [rule for rule in filter_criteria if rule.disabled == disabled]
 
         return filter_criteria
 
@@ -434,9 +425,7 @@ class NatRule(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -448,9 +437,7 @@ class NatRule(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided

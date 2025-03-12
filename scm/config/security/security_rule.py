@@ -248,9 +248,7 @@ class SecurityRule(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             actions = filters["action"]
-            filter_criteria = [
-                rule for rule in filter_criteria if rule.action in actions
-            ]
+            filter_criteria = [rule for rule in filter_criteria if rule.action in actions]
 
         # Filter by category
         if "category" in filters:
@@ -263,9 +261,7 @@ class SecurityRule(BaseObject):
                 )
             categories = filters["category"]
             filter_criteria = [
-                rule
-                for rule in filter_criteria
-                if any(cat in rule.category for cat in categories)
+                rule for rule in filter_criteria if any(cat in rule.category for cat in categories)
             ]
 
         # Filter by service
@@ -279,9 +275,7 @@ class SecurityRule(BaseObject):
                 )
             services = filters["service"]
             filter_criteria = [
-                rule
-                for rule in filter_criteria
-                if any(svc in rule.service for svc in services)
+                rule for rule in filter_criteria if any(svc in rule.service for svc in services)
             ]
 
         # Filter by application
@@ -327,9 +321,7 @@ class SecurityRule(BaseObject):
                 )
             to_zones = filters["to_"]
             filter_criteria = [
-                rule
-                for rule in filter_criteria
-                if any(zone in rule.to_ for zone in to_zones)
+                rule for rule in filter_criteria if any(zone in rule.to_ for zone in to_zones)
             ]
 
         # Filter by source
@@ -343,9 +335,7 @@ class SecurityRule(BaseObject):
                 )
             sources = filters["source"]
             filter_criteria = [
-                rule
-                for rule in filter_criteria
-                if any(src in rule.source for src in sources)
+                rule for rule in filter_criteria if any(src in rule.source for src in sources)
             ]
 
         # Filter by from_
@@ -359,9 +349,7 @@ class SecurityRule(BaseObject):
                 )
             from_zones = filters["from_"]
             filter_criteria = [
-                rule
-                for rule in filter_criteria
-                if any(zone in rule.from_ for zone in from_zones)
+                rule for rule in filter_criteria if any(zone in rule.from_ for zone in from_zones)
             ]
 
         # Filter by tag
@@ -390,9 +378,7 @@ class SecurityRule(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             disabled = filters["disabled"]
-            filter_criteria = [
-                rule for rule in filter_criteria if rule.disabled == disabled
-            ]
+            filter_criteria = [rule for rule in filter_criteria if rule.disabled == disabled]
 
         # Filter by profile_setting group
         if "profile_setting" in filters:
@@ -422,9 +408,7 @@ class SecurityRule(BaseObject):
                     details={"errorType": "Invalid Object"},
                 )
             log_settings = filters["log_setting"]
-            filter_criteria = [
-                rule for rule in filter_criteria if rule.log_setting in log_settings
-            ]
+            filter_criteria = [rule for rule in filter_criteria if rule.log_setting in log_settings]
 
         return filter_criteria
 
@@ -588,9 +572,7 @@ class SecurityRule(BaseObject):
         # If exact_match is True, filter out filtered_objects that don't match exactly
         if exact_match:
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if getattr(each, container_key) == container_value
+                each for each in filtered_objects if getattr(each, container_key) == container_value
             ]
 
         # Exclude folders if provided
@@ -602,9 +584,7 @@ class SecurityRule(BaseObject):
         # Exclude snippets if provided
         if exclude_snippets and isinstance(exclude_snippets, list):
             filtered_objects = [
-                each
-                for each in filtered_objects
-                if each.snippet not in exclude_snippets
+                each for each in filtered_objects if each.snippet not in exclude_snippets
             ]
 
         # Exclude devices if provided

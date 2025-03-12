@@ -260,7 +260,6 @@ class ErrorHandler:
         response_data: Dict[str, Any],
         http_status_code: int,
     ) -> None:
-
         # Perform the mapping of the error response from the provided response data
         error_response = ErrorResponse.from_response(response_data)
 
@@ -289,7 +288,6 @@ class ErrorHandler:
 
             # if code_mapping is of type dictionary
             if isinstance(code_mapping, dict):
-
                 # Try to match errorType (case-insensitive)
                 if error_type:
                     error_type_lower = error_type.lower()

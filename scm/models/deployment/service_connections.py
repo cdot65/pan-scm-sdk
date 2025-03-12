@@ -1,23 +1,22 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional
 from uuid import UUID
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
-    model_validator,
     ConfigDict,
-    constr,
 )
 
 
 class OnboardingType(str, Enum):
     """Types of onboarding for service connections."""
+
     CLASSIC = "classic"
 
 
 class NoExportCommunity(str, Enum):
     """No export community options for service connections."""
+
     DISABLED = "Disabled"
     ENABLED_IN = "Enabled-In"
     ENABLED_OUT = "Enabled-Out"
@@ -26,9 +25,11 @@ class NoExportCommunity(str, Enum):
 
 class BgpPeerModel(BaseModel):
     """BGP peer configuration for service connections."""
-    
+
     local_ip_address: Optional[str] = Field(None, description="Local IPv4 address for BGP peering")
-    local_ipv6_address: Optional[str] = Field(None, description="Local IPv6 address for BGP peering")
+    local_ipv6_address: Optional[str] = Field(
+        None, description="Local IPv6 address for BGP peering"
+    )
     peer_ip_address: Optional[str] = Field(None, description="Peer IPv4 address for BGP peering")
     peer_ipv6_address: Optional[str] = Field(None, description="Peer IPv6 address for BGP peering")
     secret: Optional[str] = Field(None, description="BGP authentication secret")
@@ -45,7 +46,9 @@ class BgpProtocolModel(BaseModel):
     peer_as: Optional[str] = Field(None, description="BGP peer AS number")
     peer_ip_address: Optional[str] = Field(None, description="Peer IPv4 address for BGP peering")
     secret: Optional[str] = Field(None, description="BGP authentication secret")
-    summarize_mobile_user_routes: Optional[bool] = Field(None, description="Summarize mobile user routes")
+    summarize_mobile_user_routes: Optional[bool] = Field(
+        None, description="Summarize mobile user routes"
+    )
 
 
 class ProtocolModel(BaseModel):
