@@ -375,16 +375,22 @@ class TestNatRuleResponseModel:
         assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
         
     def test_nat_rule_custom_tag_accepted(self):
-        """Test that using custom tags is now allowed."""
+        """Test that using custom tags is now allowed and properly validated."""
         data = NatRuleResponseFactory().model_dump()
-        data["tag"] = ["custom-tag", "another-tag"]  # Use custom tag
-        
+
+        # Test valid tags
         model = NatRuleResponseModel(**data)
-        
-        # Verify the custom tags are accepted
-        assert "custom-tag" in model.tag
-        assert "another-tag" in model.tag
-        
+        valid_tags = ["custom-tag", "another_tag", "Tag123", "tag-with-hyphens"]
+        data["tag"] = valid_tags
+        assert set(model.tag) == set(valid_tags)
+
+        # Test invalid tags
+        invalid_tags = ["", " ", "tag with spaces", "tag@with!symbols"]
+        for invalid_tag in invalid_tags:
+            data["tag"] = [invalid_tag]
+            with pytest.raises(ValueError):
+                NatRuleResponseModel(**data)
+
     def test_nat64_dns_rewrite_compatibility(self):
         """Test that using DNS rewrite with NAT64 raises a validation error."""
         # Create a NAT64 rule with DNS rewrite to trigger the validation error
