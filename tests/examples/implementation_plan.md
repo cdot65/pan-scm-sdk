@@ -150,6 +150,11 @@
    - Add category-specific metrics
    - Consider test speed and reliability metrics
 
+4. **Review Test Dependencies**
+   - Conduct comprehensive review of test dependencies and shared fixtures
+   - Identify opportunities to improve test isolation and performance
+   - Refactor shared resources as needed
+
 ## Usage Examples
 
 ### Running Tests by Category

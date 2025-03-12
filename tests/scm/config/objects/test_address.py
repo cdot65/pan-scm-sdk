@@ -39,6 +39,12 @@ class TestAddressBase:
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
         self.client = Address(self.mock_scm, max_limit=5000)  # noqa
+        yield
+        # Reset mock methods after each test
+        self.mock_scm.get.reset_mock()
+        self.mock_scm.post.reset_mock()
+        self.mock_scm.put.reset_mock()
+        self.mock_scm.delete.reset_mock()
 
 
 # -------------------- Unit Tests --------------------
@@ -168,45 +174,36 @@ class TestAddressFilters(TestAddressBase):
         
     def test_list_filters_with_valid_data(self):
         """Test the filtering functionality with different types of objects."""
-        # Test filtering by types
         mock_addresses = [
             AddressResponseModel(
-                id=uuid.uuid4(), name="addr1", folder="test", ip_netmask="10.0.0.0/24"
+                id=uuid.uuid4(), name="addr1", folder="test", ip_netmask="10.0.0.0/24", tag=["tag1", "tag2"]
             ),
             AddressResponseModel(
-                id=uuid.uuid4(), name="addr2", folder="test", ip_range="10.0.0.1-10.0.0.10"
+                id=uuid.uuid4(), name="addr2", folder="test", ip_range="10.0.0.1-10.0.0.10", tag=["tag2"]
             ),
             AddressResponseModel(
-                id=uuid.uuid4(), name="addr3", folder="test", fqdn="example.com"
+                id=uuid.uuid4(), name="addr3", folder="test", fqdn="example.com", tag=["tag3"]
             ),
         ]
         
-        # Test types filter (lines 197-200)
+        # Test types filter
         filters = {"types": ["netmask"]}
         filtered = self.client._apply_filters(mock_addresses, filters)
         assert len(filtered) == 1
         assert filtered[0].name == "addr1"
         
-        # Test values filter (lines 219-220)
+        # Test values filter
         filters = {"values": ["10.0.0.0/24"]}
         filtered = self.client._apply_filters(mock_addresses, filters)
         assert len(filtered) == 1
         assert filtered[0].name == "addr1"
         
-        # Test tags filter (lines 239-240)
-        mock_addresses_with_tags = [
-            AddressResponseModel(
-                id=uuid.uuid4(), name="addr1", folder="test", ip_netmask="10.0.0.0/24", tag=["tag1", "tag2"]
-            ),
-            AddressResponseModel(
-                id=uuid.uuid4(), name="addr2", folder="test", ip_range="10.0.0.1-10.0.0.10", tag=["tag3"]
-            ),
-        ]
+        # Test tags filter
+        filters = {"tags": ["tag2"]}
+        filtered = self.client._apply_filters(mock_addresses, filters)
+        assert len(filtered) == 2
+        assert set(obj.name for obj in filtered) == {"addr1", "addr2"}
         
-        filters = {"tags": ["tag1"]}
-        filtered = self.client._apply_filters(mock_addresses_with_tags, filters)
-        assert len(filtered) == 1
-        assert filtered[0].name == "addr1"
 
 
 # -------------------- Integration Tests --------------------
@@ -401,31 +398,30 @@ class TestAddressList(TestAddressBase):
         assert obj.device != "DeviceA"
         
     def test_list_pagination_offset_increment(self):
-        """Test that pagination offset is properly incremented (line 370)."""
-        # Configure client with a smaller max_limit to test pagination more easily
+        """Test that pagination offset is properly incremented and data is correctly aggregated."""
         client = Address(self.mock_scm, max_limit=10)
         
-        # Generate valid UUID strings for the mock data
         uuids = [str(uuid.uuid4()) for _ in range(15)]
         
-        # First page has full data - should trigger offset increment
         page1 = {"data": [{"id": uuids[i], "name": f"test{i}", "folder": "Test", "ip_netmask": f"10.0.0.{i}/32"} for i in range(10)]}
-        # Second page has less data - should end loop
         page2 = {"data": [{"id": uuids[i+10], "name": f"test{i+10}", "folder": "Test", "ip_netmask": f"10.0.0.{i+10}/32"} for i in range(5)]}
         
         self.mock_scm.get.side_effect = [page1, page2]
         
         results = client.list(folder="Test")
         
-        # Verify the API was called twice with different offsets
         assert self.mock_scm.get.call_count == 2
-        # First call with offset 0
         assert self.mock_scm.get.call_args_list[0][1]["params"]["offset"] == 0
-        # Second call with offset 10 (after increment)
         assert self.mock_scm.get.call_args_list[1][1]["params"]["offset"] == 10
         
-        # Total results should be 15 (10 from page 1 + 5 from page 2)
         assert len(results) == 15
+        
+        # Verify content of results
+        for i, result in enumerate(results):
+            assert str(result.id) == uuids[i]  # Convert UUID to string for comparison
+            assert result.name == f"test{i}"
+            assert result.folder == "Test"
+            assert result.ip_netmask == f"10.0.0.{i}/32"
 
 
 @pytest.mark.integration

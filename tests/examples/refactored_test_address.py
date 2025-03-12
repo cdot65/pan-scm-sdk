@@ -38,6 +38,12 @@ class TestAddressBase:
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
         self.client = Address(self.mock_scm, max_limit=5000)  # noqa
+        yield
+        # Reset mock methods after each test
+        self.mock_scm.get.reset_mock()
+        self.mock_scm.post.reset_mock()
+        self.mock_scm.put.reset_mock()
+        self.mock_scm.delete.reset_mock()
 
 
 # -------------------- Unit Tests --------------------
@@ -297,15 +303,18 @@ class TestAddressParametrized(TestAddressBase):
 
 # -------------------- Functional Tests --------------------
 
-@pytest.mark.functional
-def test_address_lifecycle(mock_scm):
-    """Functional test for complete address object lifecycle (CRUD)."""
-    # Setup
+@pytest.fixture
+def address_client(mock_scm):
     mock_scm.get = MagicMock()
     mock_scm.post = MagicMock()
     mock_scm.put = MagicMock()
     mock_scm.delete = MagicMock()
-    client = Address(mock_scm, max_limit=5000)
+    return Address(mock_scm, max_limit=5000)
+
+@pytest.mark.functional
+def test_address_lifecycle(address_client):
+    """Functional test for complete address object lifecycle (CRUD)."""
+    client = address_client
     
     # Generate test data
     address_id = str(uuid.uuid4())
