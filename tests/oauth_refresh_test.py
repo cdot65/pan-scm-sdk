@@ -44,9 +44,7 @@ class TokenMonitor:
         print(f"Elapsed Time: {self._format_time(elapsed)}")
         print(f"Iteration: {self.iteration}")
         print("-" * 50)
-        print(
-            f"API Call Result Count: {result_count if result_count is not None else 'ERROR'}"
-        )
+        print(f"API Call Result Count: {result_count if result_count is not None else 'ERROR'}")
         print(f"Token Status: {'EXPIRED' if is_expired else 'VALID'}")
         print("=" * 50)
         sys.stdout.flush()

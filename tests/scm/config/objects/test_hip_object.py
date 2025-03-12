@@ -63,18 +63,16 @@ class TestHIPObjectMaxLimit(TestHIPObjectBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             HIPObject(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             HIPObject(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -302,9 +300,7 @@ class TestHIPObjectList(TestHIPObjectBase):
         # Create mock responses for pagination
         page1 = {
             "data": [
-                HIPObjectResponseFactory(
-                    name=f"hip_object{i}", folder="All"
-                ).model_dump()
+                HIPObjectResponseFactory(name=f"hip_object{i}", folder="All").model_dump()
                 for i in range(5000)  # max_limit worth of objects
             ],
             "offset": 0,
@@ -314,9 +310,7 @@ class TestHIPObjectList(TestHIPObjectBase):
 
         page2 = {
             "data": [
-                HIPObjectResponseFactory(
-                    name=f"hip_object{i}", folder="All"
-                ).model_dump()
+                HIPObjectResponseFactory(name=f"hip_object{i}", folder="All").model_dump()
                 for i in range(5000, 7500)  # Remaining 2500 objects
             ],
             "offset": 5000,
@@ -493,9 +487,7 @@ class TestHIPObjectCreate(TestHIPObjectBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
@@ -585,9 +577,7 @@ class TestHIPObjectGet(TestHIPObjectBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -679,9 +669,7 @@ class TestHIPObjectUpdate(TestHIPObjectBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -701,9 +689,7 @@ class TestHIPObjectUpdate(TestHIPObjectBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -790,9 +776,7 @@ class TestHIPObjectDelete(TestHIPObjectBase):
         self.mock_scm.delete.return_value = None
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with(
-            f"/config/objects/v1/hip-objects/{object_id}"
-        )
+        self.mock_scm.delete.assert_called_once_with(f"/config/objects/v1/hip-objects/{object_id}")
 
     def test_delete_referenced_object(self):
         """Test deleting an object that is referenced."""
@@ -809,9 +793,7 @@ class TestHIPObjectDelete(TestHIPObjectBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Reference not zero"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -828,9 +810,7 @@ class TestHIPObjectDelete(TestHIPObjectBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -915,9 +895,7 @@ class TestHIPObjectFetch(TestHIPObjectBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""

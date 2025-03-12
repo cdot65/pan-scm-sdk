@@ -26,10 +26,7 @@ class TestAuthRequestModel:
         assert model.client_secret == data["client_secret"]
         assert model.tsg_id == data["tsg_id"]
         assert model.scope == "tsg_id:test_tsg_id"
-        assert (
-            model.token_url
-            == "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token"
-        )
+        assert model.token_url == "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token"
 
     def test_auth_request_model_with_custom_scope(self):
         """Test validation when custom scope is provided."""

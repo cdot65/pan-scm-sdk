@@ -177,10 +177,10 @@ from scm.models.objects.regions import RegionResponseModel
 def process_region(region: RegionResponseModel):
     print(f"Region ID: {region.id}")
     print(f"Region Name: {region.name}")
-    
+
     if region.geo_location:
         print(f"Geographic Location: {region.geo_location.latitude}, {region.geo_location.longitude}")
-    
+
     if region.address:
         print("Associated Addresses:")
         for addr in region.address:

@@ -272,13 +272,9 @@ class TestBaseObject:
         self.mock_scm.list_jobs.assert_called_with(limit=100, offset=0, parent_id=None)
 
         # Test with custom parameters
-        response = self.test_object.list_jobs(
-            limit=50, offset=10, parent_id="parent123"
-        )
+        response = self.test_object.list_jobs(limit=50, offset=10, parent_id="parent123")
         assert isinstance(response, JobListResponse)
-        self.mock_scm.list_jobs.assert_called_with(
-            limit=50, offset=10, parent_id="parent123"
-        )
+        self.mock_scm.list_jobs.assert_called_with(limit=50, offset=10, parent_id="parent123")
 
     def test_get_job_status(self):
         """
@@ -335,9 +331,7 @@ class TestBaseObject:
         self.mock_scm.commit.return_value = CandidatePushResponseModel(**mock_response)
 
         # Test with minimal required parameters
-        response = self.test_object.commit(
-            folders=["folder1"], description="Test commit"
-        )
+        response = self.test_object.commit(folders=["folder1"], description="Test commit")
         assert isinstance(response, CandidatePushResponseModel)
         assert response.success is True
         assert response.job_id == "1586"

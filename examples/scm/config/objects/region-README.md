@@ -176,7 +176,7 @@ automation_tagged = regions.list(
 
 # Filter by name pattern (when supported)
 west_regions = regions.list(
-    folder="Global", 
+    folder="Global",
     name="west"
 )
 

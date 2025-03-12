@@ -17,7 +17,7 @@ The Dynamic User Group models provide a structured way to manage dynamic user gr
 | device      | str       | No*      | None    | Device where dynamic user group is defined. Max length: 64 chars            |
 | id          | UUID      | Yes**    | None    | UUID of the dynamic user group (response only)                              |
 
-\* Exactly one container type (folder/snippet/device) must be provided for create operations  
+\* Exactly one container type (folder/snippet/device) must be provided for create operations
 \** Only required for response model
 
 ## Exceptions

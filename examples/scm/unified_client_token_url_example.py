@@ -10,7 +10,7 @@ client = ScmClient(
     client_secret="your-client-secret",
     tsg_id="your-tsg-id",
     token_url="https://custom.auth.server.example.com/oauth2/token",
-    log_level="INFO"
+    log_level="INFO",
 )
 
 # The client is now configured to use the custom token URL for authentication

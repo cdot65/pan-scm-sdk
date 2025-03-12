@@ -57,17 +57,7 @@ from dotenv import load_dotenv
 
 from scm.client import Scm
 from scm.config.deployment import RemoteNetworks
-from scm.models.deployment import (
-    RemoteNetworkCreateModel,
-    RemoteNetworkUpdateModel,
-    RemoteNetworkResponseModel,
-    BgpPeerModel,
-    ProtocolModel,
-    BgpModel,
-    EcmpTunnelModel,
-    EcmpLoadBalancingEnum,
-    PeeringTypeEnum
-)
+from scm.models.deployment import RemoteNetworkUpdateModel, EcmpLoadBalancingEnum
 from scm.exceptions import (
     InvalidObjectError,
     NotFoundError,
@@ -117,9 +107,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -130,17 +118,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -151,9 +135,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -200,8 +182,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -277,7 +259,9 @@ def create_basic_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
     if not folder:
         log_error("No folder name provided")
         log_info("Please provide a folder name with --folder parameter")
-        log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+        log_info(
+            "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+        )
         return None
 
     # Generate a unique network name to avoid conflicts
@@ -292,7 +276,7 @@ def create_basic_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
         "license_type": "FWAAS-AGGREGATE",
         "spn_name": "service-provider-network",
         "subnets": ["10.1.0.0/24", "192.168.1.0/24"],
-        "folder": folder
+        "folder": folder,
     }
 
     log_info("Configuration details:")
@@ -309,26 +293,24 @@ def create_basic_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
         log_success(f"Created basic remote network: {new_network.name}")
         log_info(f"  - Network ID: {new_network.id}")
         log_info(f"  - IPsec Tunnel: {new_network.ipsec_tunnel}")
-        log_operation_complete(
-            "Basic remote network creation", f"Network: {new_network.name}"
-        )
+        log_operation_complete("Basic remote network creation", f"Network: {new_network.name}")
         return new_network
     except NameNotUniqueError as e:
-        log_error(f"Network name conflict", e.message)
+        log_error("Network name conflict", e.message)
         log_info("Try using a different network name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid network data", e.message)
+        log_error("Invalid network data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
         error_str = str(e)
         if "is not a valid reference" in error_str and "ipsec-tunnel" in error_str:
-            log_error(f"Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
+            log_error("Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
             log_info("Please provide an existing IPsec tunnel name with --ipsec-tunnel parameter")
             log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name")
         else:
-            log_error(f"Unexpected error creating remote network", error_str)
+            log_error("Unexpected error creating remote network", error_str)
 
     return None
 
@@ -361,7 +343,9 @@ def create_bgp_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
     if not folder:
         log_error("No folder name provided")
         log_info("Please provide a folder name with --folder parameter")
-        log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+        log_info(
+            "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+        )
         return None
 
     # Generate a unique network name to avoid conflicts
@@ -386,9 +370,9 @@ def create_bgp_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
                 "enable": True,
                 "peer_as": "65000",
                 "originate_default_route": True,
-                "summarize_mobile_user_routes": True
+                "summarize_mobile_user_routes": True,
             }
-        }
+        },
     }
 
     log_info("Configuration details:")
@@ -407,26 +391,24 @@ def create_bgp_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
         log_success(f"Created BGP remote network: {new_network.name}")
         log_info(f"  - Network ID: {new_network.id}")
         log_info(f"  - IPsec Tunnel: {new_network.ipsec_tunnel}")
-        log_operation_complete(
-            "BGP remote network creation", f"Network: {new_network.name}"
-        )
+        log_operation_complete("BGP remote network creation", f"Network: {new_network.name}")
         return new_network
     except NameNotUniqueError as e:
-        log_error(f"Network name conflict", e.message)
+        log_error("Network name conflict", e.message)
         log_info("Try using a different network name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid network data", e.message)
+        log_error("Invalid network data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
         error_str = str(e)
         if "is not a valid reference" in error_str and "ipsec-tunnel" in error_str:
-            log_error(f"Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
+            log_error("Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
             log_info("Please provide an existing IPsec tunnel name with --ipsec-tunnel parameter")
             log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name")
         else:
-            log_error(f"Unexpected error creating remote network", error_str)
+            log_error("Unexpected error creating remote network", error_str)
 
     return None
 
@@ -452,14 +434,18 @@ def create_ecmp_remote_network(rn_manager, ipsec_tunnels=None, folder=None):
     if not ipsec_tunnels or len(ipsec_tunnels) < 2:
         log_error("At least 2 valid IPsec tunnel names are required for ECMP configuration")
         log_info("Please provide existing IPsec tunnel names with --ipsec-tunnels parameter")
-        log_info("Example: python remote_networks.py --ipsec-tunnels tunnel1 tunnel2 --folder your-folder")
+        log_info(
+            "Example: python remote_networks.py --ipsec-tunnels tunnel1 tunnel2 --folder your-folder"
+        )
         return None
 
     # Check if folder was provided
     if not folder:
         log_error("No folder name provided")
         log_info("Please provide a folder name with --folder parameter")
-        log_info("Example: python remote_networks.py --ipsec-tunnels tunnel1 tunnel2 --folder your-folder")
+        log_info(
+            "Example: python remote_networks.py --ipsec-tunnels tunnel1 tunnel2 --folder your-folder"
+        )
         return None
 
     # Generate a unique network name to avoid conflicts
@@ -490,7 +476,7 @@ def create_ecmp_remote_network(rn_manager, ipsec_tunnels=None, folder=None):
         "subnets": ["10.3.0.0/24", "192.168.3.0/24"],
         "folder": folder,
         "ecmp_load_balancing": "enable",
-        "ecmp_tunnels": ecmp_tunnels
+        "ecmp_tunnels": ecmp_tunnels,
     }
 
     log_info("Configuration details:")
@@ -501,8 +487,12 @@ def create_ecmp_remote_network(rn_manager, ipsec_tunnels=None, folder=None):
     log_info(f"  - ECMP Load Balancing: {ecmp_network_config['ecmp_load_balancing']}")
     log_info(f"  - ECMP Tunnels: {len(ecmp_tunnels)}")
     for i, tunnel in enumerate(ecmp_tunnels):
-        log_info(f"    - Tunnel {i + 1}: {tunnel['name']} using IPsec tunnel {tunnel['ipsec_tunnel']}")
-        log_info(f"      Local IP: {tunnel['local_ip_address']}, Peer IP: {tunnel['peer_ip_address']}")
+        log_info(
+            f"    - Tunnel {i + 1}: {tunnel['name']} using IPsec tunnel {tunnel['ipsec_tunnel']}"
+        )
+        log_info(
+            f"      Local IP: {tunnel['local_ip_address']}, Peer IP: {tunnel['peer_ip_address']}"
+        )
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
@@ -510,30 +500,30 @@ def create_ecmp_remote_network(rn_manager, ipsec_tunnels=None, folder=None):
         log_success(f"Created ECMP remote network: {new_network.name}")
         log_info(f"  - Network ID: {new_network.id}")
         log_info(f"  - ECMP Enabled: {new_network.ecmp_load_balancing}")
-        log_operation_complete(
-            "ECMP remote network creation", f"Network: {new_network.name}"
-        )
+        log_operation_complete("ECMP remote network creation", f"Network: {new_network.name}")
         return new_network
     except NameNotUniqueError as e:
-        log_error(f"Network name conflict", e.message)
+        log_error("Network name conflict", e.message)
         log_info("Try using a different network name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid network data", e.message)
+        log_error("Invalid network data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
         error_str = str(e)
         if "is not a valid reference" in error_str and "ipsec-tunnel" in error_str:
-            log_error(f"Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
+            log_error("Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
             log_info("Please provide existing IPsec tunnel names with --ipsec-tunnels parameter")
         else:
-            log_error(f"Unexpected error creating remote network", error_str)
+            log_error("Unexpected error creating remote network", error_str)
 
     return None
 
 
-def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunnel=None, folder=None):
+def create_advanced_remote_network(
+    rn_manager, ipsec_tunnel=None, secondary_tunnel=None, folder=None
+):
     """
     Create a remote network with advanced configuration options.
 
@@ -562,7 +552,9 @@ def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunn
     if not folder:
         log_error("No folder name provided")
         log_info("Please provide a folder name with --folder parameter")
-        log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+        log_info(
+            "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+        )
         return None
 
     # Generate a unique network name to avoid conflicts
@@ -582,7 +574,7 @@ def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunn
         "bgp_peer": {
             "local_ip_address": "192.168.4.1",
             "peer_ip_address": "192.168.4.2",
-            "secret": "bgp-auth-key"
+            "secret": "bgp-auth-key",
         },
         "protocol": {
             "bgp": {
@@ -591,9 +583,9 @@ def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunn
                 "originate_default_route": True,
                 "summarize_mobile_user_routes": True,
                 "do_not_export_routes": False,
-                "peering_type": "exchange-v4-over-v4"
+                "peering_type": "exchange-v4-over-v4",
             }
-        }
+        },
     }
 
     # Add secondary tunnel if provided
@@ -601,7 +593,9 @@ def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunn
         advanced_network_config["secondary_ipsec_tunnel"] = secondary_tunnel
         log_info(f"Using provided secondary IPsec tunnel: {secondary_tunnel}")
     else:
-        log_info("No secondary IPsec tunnel provided, advanced network will use only primary tunnel")
+        log_info(
+            "No secondary IPsec tunnel provided, advanced network will use only primary tunnel"
+        )
 
     log_info("Configuration details:")
     log_info(f"  - Primary IPsec Tunnel: {advanced_network_config['ipsec_tunnel']}")
@@ -611,7 +605,9 @@ def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunn
     log_info(f"  - License Type: {advanced_network_config['license_type']}")
     log_info(f"  - SPN Name: {advanced_network_config['spn_name']}")
     log_info(f"  - Subnets: {', '.join(advanced_network_config['subnets'])}")
-    log_info(f"  - BGP Configuration: Enabled with AS {advanced_network_config['protocol']['bgp']['peer_as']}")
+    log_info(
+        f"  - BGP Configuration: Enabled with AS {advanced_network_config['protocol']['bgp']['peer_as']}"
+    )
     log_info(f"  - Peering Type: {advanced_network_config['protocol']['bgp']['peering_type']}")
 
     try:
@@ -620,26 +616,24 @@ def create_advanced_remote_network(rn_manager, ipsec_tunnel=None, secondary_tunn
         log_success(f"Created advanced remote network: {new_network.name}")
         log_info(f"  - Network ID: {new_network.id}")
         log_info(f"  - IPsec Tunnel: {new_network.ipsec_tunnel}")
-        log_operation_complete(
-            "Advanced remote network creation", f"Network: {new_network.name}"
-        )
+        log_operation_complete("Advanced remote network creation", f"Network: {new_network.name}")
         return new_network
     except NameNotUniqueError as e:
-        log_error(f"Network name conflict", e.message)
+        log_error("Network name conflict", e.message)
         log_info("Try using a different network name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid network data", e.message)
+        log_error("Invalid network data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
         error_str = str(e)
         if "is not a valid reference" in error_str and "ipsec-tunnel" in error_str:
-            log_error(f"Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
+            log_error("Invalid IPsec tunnel reference", "The specified IPsec tunnel does not exist")
             log_info("Please provide an existing IPsec tunnel name with --ipsec-tunnel parameter")
             log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name")
         else:
-            log_error(f"Unexpected error creating remote network", error_str)
+            log_error("Unexpected error creating remote network", error_str)
 
     return None
 
@@ -687,9 +681,12 @@ def fetch_and_update_remote_network(rn_manager, network_id):
             log_info("Updating BGP configuration")
             # Toggle summarize_mobile_user_routes setting
             original_route_summarization = update_model.protocol.bgp.summarize_mobile_user_routes
-            update_model.protocol.bgp.summarize_mobile_user_routes = not original_route_summarization
+            update_model.protocol.bgp.summarize_mobile_user_routes = (
+                not original_route_summarization
+            )
             log_info(
-                f"  - Route summarization changed from {original_route_summarization} to {update_model.protocol.bgp.summarize_mobile_user_routes}")
+                f"  - Route summarization changed from {original_route_summarization} to {update_model.protocol.bgp.summarize_mobile_user_routes}"
+            )
 
         # Perform the update
         log_info("Sending update request to Strata Cloud Manager API...")
@@ -702,19 +699,20 @@ def fetch_and_update_remote_network(rn_manager, network_id):
 
         if updated_network.protocol and updated_network.protocol.bgp:
             log_info(
-                f"  ✓ BGP summarize_mobile_user_routes update verified: {updated_network.protocol.bgp.summarize_mobile_user_routes}")
+                f"  ✓ BGP summarize_mobile_user_routes update verified: {updated_network.protocol.bgp.summarize_mobile_user_routes}"
+            )
 
         log_operation_complete("Remote network update", f"Network: {updated_network.name}")
         return updated_network
 
     except NotFoundError as e:
-        log_error(f"Remote network not found", e.message)
+        log_error("Remote network not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid remote network update", e.message)
+        log_error("Invalid remote network update", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error updating remote network", str(e))
+        log_error("Unexpected error updating remote network", str(e))
 
     return None
 
@@ -760,8 +758,12 @@ def list_and_filter_remote_networks(rn_manager, folder):
         if all_networks:
             name_pattern = "basic"
             log_operation_start(f"Filtering remote networks by name containing '{name_pattern}'")
-            basic_networks = [network for network in all_networks if name_pattern in network.name.lower()]
-            log_success(f"Found {len(basic_networks)} remote networks with '{name_pattern}' in the name")
+            basic_networks = [
+                network for network in all_networks if name_pattern in network.name.lower()
+            ]
+            log_success(
+                f"Found {len(basic_networks)} remote networks with '{name_pattern}' in the name"
+            )
 
             # Filter networks by region
             if "us-east-1" in networks_by_region:
@@ -781,7 +783,7 @@ def list_and_filter_remote_networks(rn_manager, folder):
 
             # Show ECMP configuration if enabled
             if network.ecmp_load_balancing == EcmpLoadBalancingEnum.enable:
-                log_info(f"    ECMP Load Balancing: Enabled")
+                log_info("    ECMP Load Balancing: Enabled")
                 if network.ecmp_tunnels:
                     log_info(f"    ECMP Tunnels: {len(network.ecmp_tunnels)}")
                     for j, tunnel in enumerate(network.ecmp_tunnels):
@@ -799,7 +801,7 @@ def list_and_filter_remote_networks(rn_manager, folder):
             if network.protocol and network.protocol.bgp and network.protocol.bgp.enable:
                 log_info(f"    BGP: Enabled with peer AS {network.protocol.bgp.peer_as}")
             else:
-                log_info(f"    BGP: Not configured")
+                log_info("    BGP: Not configured")
 
             log_info("")
 
@@ -807,11 +809,11 @@ def list_and_filter_remote_networks(rn_manager, folder):
         return all_networks
 
     except InvalidObjectError as e:
-        log_error(f"Error listing remote networks", e.message)
+        log_error("Error listing remote networks", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error listing remote networks", str(e))
+        log_error("Unexpected error listing remote networks", str(e))
 
     return []
 
@@ -846,11 +848,11 @@ def fetch_remote_network_by_name(rn_manager, network_name, folder):
         return network
 
     except MissingQueryParameterError as e:
-        log_error(f"Missing query parameter", e.message)
+        log_error("Missing query parameter", e.message)
     except InvalidObjectError as e:
-        log_error(f"Remote network not found", e.message)
+        log_error("Remote network not found", e.message)
     except Exception as e:
-        log_error(f"Unexpected error fetching remote network", str(e))
+        log_error("Unexpected error fetching remote network", str(e))
 
     return None
 
@@ -878,20 +880,20 @@ def cleanup_remote_networks(rn_manager, network_ids):
             log_success(f"Deleted remote network with ID: {network_id}")
             deleted_ids.add(network_id)
         except NotFoundError as e:
-            log_error(f"Remote network not found", e.message)
+            log_error("Remote network not found", e.message)
             deleted_ids.add(network_id)  # Consider it deleted if not found
         except ReferenceNotZeroError as e:
-            log_error(f"Remote network still in use", e.message)
+            log_error("Remote network still in use", e.message)
             log_info("This usually means the network is referenced by another object")
         except Exception as e:
-            log_error(f"Error deleting remote network", str(e))
+            log_error("Error deleting remote network", str(e))
 
     # Report results
     if len(deleted_ids) == len(network_ids):
         log_success(f"Successfully deleted all {len(deleted_ids)} remote networks")
     else:
         log_warning(f"Deleted {len(deleted_ids)} out of {len(network_ids)} remote networks")
-        log_info(f"Some networks could not be deleted due to dependencies")
+        log_info("Some networks could not be deleted due to dependencies")
 
 
 def generate_remote_network_report(rn_manager, network_ids, execution_time):
@@ -928,7 +930,7 @@ def generate_remote_network_report(rn_manager, network_ids, execution_time):
         "Peer AS",
         "ECMP Enabled",
         "ECMP Tunnels",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
 
     # Stats for report summary
@@ -951,7 +953,9 @@ def generate_remote_network_report(rn_manager, network_ids, execution_time):
             peer_as = "N/A"
             if network.protocol and network.protocol.bgp and network.protocol.bgp.enable:
                 bgp_enabled = "Yes"
-                peer_as = network.protocol.bgp.peer_as if network.protocol.bgp.peer_as else "Default"
+                peer_as = (
+                    network.protocol.bgp.peer_as if network.protocol.bgp.peer_as else "Default"
+                )
 
             # Extract ECMP information
             ecmp_enabled = "No"
@@ -962,47 +966,51 @@ def generate_remote_network_report(rn_manager, network_ids, execution_time):
                     ecmp_tunnels = ", ".join([tunnel.name for tunnel in network.ecmp_tunnels])
 
             # Add network data
-            network_data.append([
-                network.id,
-                network.name,
-                network.region,
-                network.license_type,
-                network.spn_name,
-                network.ipsec_tunnel if network.ipsec_tunnel else "N/A (ECMP)",
-                network.secondary_ipsec_tunnel if network.secondary_ipsec_tunnel else "None",
-                ", ".join(network.subnets) if network.subnets else "None",
-                bgp_enabled,
-                peer_as,
-                ecmp_enabled,
-                ecmp_tunnels,
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            network_data.append(
+                [
+                    network.id,
+                    network.name,
+                    network.region,
+                    network.license_type,
+                    network.spn_name,
+                    network.ipsec_tunnel if network.ipsec_tunnel else "N/A (ECMP)",
+                    network.secondary_ipsec_tunnel if network.secondary_ipsec_tunnel else "None",
+                    ", ".join(network.subnets) if network.subnets else "None",
+                    bgp_enabled,
+                    peer_as,
+                    ecmp_enabled,
+                    ecmp_tunnels,
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
 
             successful_fetches += 1
 
         except Exception as e:
             log_error(f"Error getting details for network ID {network_id}", str(e))
             # Add minimal info for networks that couldn't be retrieved
-            network_data.append([
-                network_id,
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            network_data.append(
+                [
+                    network_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
 
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(network_data)
@@ -1014,7 +1022,9 @@ def generate_remote_network_report(rn_manager, network_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
 
         return report_file
 
@@ -1025,7 +1035,7 @@ def generate_remote_network_report(rn_manager, network_ids, execution_time):
             fallback_file = f"remote_networks_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
 
-            with open(fallback_file, 'w', newline='') as csvfile:
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(network_data)
@@ -1052,42 +1062,30 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Remote Network Objects Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     # Cleanup behavior
     parser.add_argument(
         "--skip-cleanup",
         action="store_true",
-        help="Preserve created remote networks (don't delete them)"
+        help="Preserve created remote networks (don't delete them)",
     )
 
     # Connection types to create
     conn_type = parser.add_argument_group("Network Type Selection")
     conn_type.add_argument(
-        "--basic",
-        action="store_true",
-        help="Create basic remote network examples"
+        "--basic", action="store_true", help="Create basic remote network examples"
+    )
+    conn_type.add_argument("--bgp", action="store_true", help="Create BGP remote network examples")
+    conn_type.add_argument(
+        "--ecmp", action="store_true", help="Create ECMP remote network examples"
     )
     conn_type.add_argument(
-        "--bgp",
-        action="store_true",
-        help="Create BGP remote network examples"
+        "--advanced", action="store_true", help="Create advanced remote network examples"
     )
     conn_type.add_argument(
-        "--ecmp",
-        action="store_true",
-        help="Create ECMP remote network examples"
-    )
-    conn_type.add_argument(
-        "--advanced",
-        action="store_true",
-        help="Create advanced remote network examples"
-    )
-    conn_type.add_argument(
-        "--all",
-        action="store_true",
-        help="Create all remote network types (default behavior)"
+        "--all", action="store_true", help="Create all remote network types (default behavior)"
     )
 
     # IPsec Tunnel Configuration - REQUIRED for successful creation
@@ -1095,39 +1093,33 @@ def parse_arguments():
     tunnel_config.add_argument(
         "--ipsec-tunnel",
         type=str,
-        help="Name of existing IPsec tunnel to use (required for non-ECMP networks)"
+        help="Name of existing IPsec tunnel to use (required for non-ECMP networks)",
     )
     tunnel_config.add_argument(
         "--secondary-tunnel",
         type=str,
-        help="Name of existing secondary IPsec tunnel to use for advanced networks"
+        help="Name of existing secondary IPsec tunnel to use for advanced networks",
     )
     tunnel_config.add_argument(
         "--ipsec-tunnels",
         nargs="+",
-        help="List of existing IPsec tunnel names to use for ECMP networks (at least 2 required)"
+        help="List of existing IPsec tunnel names to use for ECMP networks (at least 2 required)",
     )
 
     # Folder Configuration - REQUIRED for all operations
     parser.add_argument(
-        "--folder",
-        type=str,
-        help="Folder name where remote networks will be created (required)"
+        "--folder", type=str, help="Folder name where remote networks will be created (required)"
     )
 
     # Reporting
-    parser.add_argument(
-        "--no-report",
-        action="store_true",
-        help="Skip CSV report generation"
-    )
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
 
     # Max limit for list operations
     parser.add_argument(
         "--max-limit",
         type=int,
         default=200,
-        help="Maximum number of objects to return in a single API request (1-5000)"
+        help="Maximum number of objects to return in a single API request (1-5000)",
     )
 
     return parser.parse_args()
@@ -1199,13 +1191,17 @@ def main():
         log_section("REMOTE NETWORK CONFIGURATION")
         log_operation_start("Initializing RemoteNetworks manager")
         remote_networks = RemoteNetworks(client, max_limit=args.max_limit)
-        log_operation_complete("RemoteNetworks manager initialization", f"Max limit: {remote_networks.max_limit}")
+        log_operation_complete(
+            "RemoteNetworks manager initialization", f"Max limit: {remote_networks.max_limit}"
+        )
 
         # Check if folder parameter is provided
         if not args.folder:
             log_error("Missing required folder parameter")
             log_info("A folder name is required to create remote networks")
-            log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+            log_info(
+                "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+            )
             log_info("Run with --help for more information")
             return
 
@@ -1217,14 +1213,16 @@ def main():
             # Check if we have required IPsec tunnel parameter
             if not args.ipsec_tunnel:
                 log_error("Missing required IPsec tunnel parameter for basic network")
-                log_info("An existing IPsec tunnel name is required to create basic remote networks")
-                log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+                log_info(
+                    "An existing IPsec tunnel name is required to create basic remote networks"
+                )
+                log_info(
+                    "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+                )
                 log_info("Skipping basic remote network creation")
             else:
                 basic_network = create_basic_remote_network(
-                    remote_networks,
-                    ipsec_tunnel=args.ipsec_tunnel,
-                    folder=args.folder
+                    remote_networks, ipsec_tunnel=args.ipsec_tunnel, folder=args.folder
                 )
                 if basic_network:
                     created_networks.append(basic_network)
@@ -1240,13 +1238,13 @@ def main():
             if not args.ipsec_tunnel:
                 log_error("Missing required IPsec tunnel parameter for BGP network")
                 log_info("An existing IPsec tunnel name is required to create BGP remote networks")
-                log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+                log_info(
+                    "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+                )
                 log_info("Skipping BGP remote network creation")
             else:
                 bgp_network = create_bgp_remote_network(
-                    remote_networks,
-                    ipsec_tunnel=args.ipsec_tunnel,
-                    folder=args.folder
+                    remote_networks, ipsec_tunnel=args.ipsec_tunnel, folder=args.folder
                 )
                 if bgp_network:
                     created_networks.append(bgp_network)
@@ -1261,14 +1259,16 @@ def main():
             # Check if we have required IPsec tunnels parameter
             if not args.ipsec_tunnels or len(args.ipsec_tunnels) < 2:
                 log_error("Missing required IPsec tunnels parameter for ECMP network")
-                log_info("At least 2 existing IPsec tunnel names are required to create ECMP remote networks")
-                log_info("Example: python remote_networks.py --ipsec-tunnels tunnel1 tunnel2 --folder your-folder")
+                log_info(
+                    "At least 2 existing IPsec tunnel names are required to create ECMP remote networks"
+                )
+                log_info(
+                    "Example: python remote_networks.py --ipsec-tunnels tunnel1 tunnel2 --folder your-folder"
+                )
                 log_info("Skipping ECMP remote network creation")
             else:
                 ecmp_network = create_ecmp_remote_network(
-                    remote_networks,
-                    ipsec_tunnels=args.ipsec_tunnels,
-                    folder=args.folder
+                    remote_networks, ipsec_tunnels=args.ipsec_tunnels, folder=args.folder
                 )
                 if ecmp_network:
                     created_networks.append(ecmp_network)
@@ -1283,15 +1283,19 @@ def main():
             # Check if we have required IPsec tunnel parameter
             if not args.ipsec_tunnel:
                 log_error("Missing required IPsec tunnel parameter for advanced network")
-                log_info("An existing IPsec tunnel name is required to create advanced remote networks")
-                log_info("Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder")
+                log_info(
+                    "An existing IPsec tunnel name is required to create advanced remote networks"
+                )
+                log_info(
+                    "Example: python remote_networks.py --ipsec-tunnel your-tunnel-name --folder your-folder"
+                )
                 log_info("Skipping advanced remote network creation")
             else:
                 advanced_network = create_advanced_remote_network(
                     remote_networks,
                     ipsec_tunnel=args.ipsec_tunnel,
                     secondary_tunnel=args.secondary_tunnel,
-                    folder=args.folder
+                    folder=args.folder,
                 )
                 if advanced_network:
                     created_networks.append(advanced_network)
@@ -1303,12 +1307,10 @@ def main():
             log_section("UPDATING REMOTE NETWORK")
             log_info("Demonstrating how to update an existing remote network")
 
-            updated_network = fetch_and_update_remote_network(
-                remote_networks, created_networks[0].id
-            )
+            fetch_and_update_remote_network(remote_networks, created_networks[0].id)
 
         # List and filter remote networks
-        all_networks = list_and_filter_remote_networks(remote_networks, args.folder)
+        list_and_filter_remote_networks(remote_networks, args.folder)
 
         # Fetch a specific network by name
         if created_networks:
@@ -1316,9 +1318,7 @@ def main():
             log_info("Demonstrating how to fetch a remote network by name")
 
             # Use the first created network's name
-            fetched_network = fetch_remote_network_by_name(
-                remote_networks, created_networks[0].name, args.folder
-            )
+            fetch_remote_network_by_name(remote_networks, created_networks[0].name, args.folder)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
@@ -1335,7 +1335,9 @@ def main():
 
             if report_file:
                 log_success(f"Generated remote networks report: {report_file}")
-                log_info(f"The report contains details of all {len(created_network_ids)} remote networks created")
+                log_info(
+                    f"The report contains details of all {len(created_network_ids)} remote networks created"
+                )
             else:
                 log_error("Failed to generate remote networks report")
         elif args.no_report:
@@ -1345,8 +1347,12 @@ def main():
 
         # Clean up the created networks, unless skip_cleanup is true
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_network_ids)} remote networks")
-            log_info("To clean up these networks, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_network_ids)} remote networks"
+            )
+            log_info(
+                "To clean up these networks, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
             cleanup_remote_networks(remote_networks, created_network_ids)
 
@@ -1356,23 +1362,24 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total remote networks created: {network_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
         if network_count > 0:
             log_info(f"Average time per network: {execution_time / network_count:.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some remote networks may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
+
         log_info(f"Stack trace: {traceback.format_exc()}")
 
 

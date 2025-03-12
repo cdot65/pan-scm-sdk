@@ -225,7 +225,7 @@ existing_schedule = client.schedule.fetch(name="WeekdayBusiness", folder="Shared
 # Update time ranges - add early morning hours
 if existing_schedule.schedule_type.recurring and existing_schedule.schedule_type.recurring.weekly:
     weekly = existing_schedule.schedule_type.recurring.weekly
-    
+
     # Add early morning hours to Monday through Friday
     if weekly.monday:
         weekly.monday.append("07:00-09:00")
@@ -237,7 +237,7 @@ if existing_schedule.schedule_type.recurring and existing_schedule.schedule_type
         weekly.thursday.append("07:00-09:00")
     if weekly.friday:
         weekly.friday.append("07:00-09:00")
-    
+
     # Add Saturday (half day)
     weekly.saturday = ["09:00-13:00"]
 
@@ -266,7 +266,7 @@ schedules = client.schedule.list(
 
 for schedule in schedules:
     print(f"Name: {schedule.name}, ID: {schedule.id}")
-    
+
     # Display schedule details based on type
     if schedule.schedule_type.recurring:
         if schedule.schedule_type.recurring.weekly:

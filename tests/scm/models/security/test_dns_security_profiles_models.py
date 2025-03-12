@@ -71,25 +71,19 @@ class TestListActionRequestModel:
         """Test validation when no action is provided."""
         with pytest.raises(ValueError) as exc_info:
             ListActionRequestModel.model_validate({})
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "Exactly one action must be provided in 'action' field." in str(exc_info.value)
 
     def test_multiple_actions_provided(self):
         """Test validation when multiple actions are provided."""
         with pytest.raises(ValueError) as exc_info:
             ListActionRequestModel.model_validate({"block": {}, "allow": {}})
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "Exactly one action must be provided in 'action' field." in str(exc_info.value)
 
     def test_invalid_action_name(self):
         """Test validation with invalid action name."""
         with pytest.raises(ValueError) as exc_info:
             ListActionRequestModel.model_validate({"invalid_action": {}})
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "Exactly one action must be provided in 'action' field." in str(exc_info.value)
 
     def test_action_with_parameters(self):
         """Test validation when action contains parameters."""
@@ -117,9 +111,7 @@ class TestListActionRequestModel:
         """Test validation with empty string."""
         with pytest.raises(ValueError) as exc_info:
             ListActionRequestModel.model_validate("")
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "Exactly one action must be provided in 'action' field." in str(exc_info.value)
 
 
 class TestDNSSecurityProfileCreateModel:
@@ -132,9 +124,7 @@ class TestDNSSecurityProfileCreateModel:
         assert model.name == data["name"]
         assert model.folder == data["folder"]
         assert len(model.botnet_domains.dns_security_categories) == 1
-        assert (
-            model.botnet_domains.dns_security_categories[0].action == ActionEnum.block
-        )
+        assert model.botnet_domains.dns_security_categories[0].action == ActionEnum.block
 
     def test_dns_security_profile_create_model_invalid_name(self):
         """Test validation when an invalid name is provided."""
@@ -148,9 +138,8 @@ class TestDNSSecurityProfileCreateModel:
         data = DNSSecurityProfileCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             DNSSecurityProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_dns_security_profile_create_model_invalid_action(self):
@@ -158,9 +147,8 @@ class TestDNSSecurityProfileCreateModel:
         data = DNSSecurityProfileCreateModelFactory.build_with_invalid_action()
         with pytest.raises(ValidationError) as exc_info:
             DNSSecurityProfileCreateModel(**data)
-        assert (
-            "action\n  Input should be 'default', 'allow', 'block' or 'sinkhole'"
-            in str(exc_info.value)
+        assert "action\n  Input should be 'default', 'allow', 'block' or 'sinkhole'" in str(
+            exc_info.value
         )
 
     def test_dns_security_profile_create_model_with_snippet(self):

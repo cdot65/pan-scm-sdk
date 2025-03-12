@@ -54,9 +54,8 @@ class TestDecryptionProfileCreateModel:
         data = DecryptionProfileCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             DecryptionProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_decryption_profile_create_model_no_container(self):
@@ -64,9 +63,8 @@ class TestDecryptionProfileCreateModel:
         data = DecryptionProfileCreateModelFactory.build_with_no_container()
         with pytest.raises(ValidationError) as exc_info:
             DecryptionProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_decryption_profile_create_model_ssl_protocol_settings(self):
@@ -108,7 +106,7 @@ class TestDecryptionProfileUpdateModel:
         data = DecryptionProfileUpdateModelFactory.build_minimal_update()
         model = DecryptionProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
-        assert model.ssl_forward_proxy.block_client_cert == True
+        assert model.ssl_forward_proxy.block_client_cert
 
     def test_decryption_profile_update_model_invalid_ssl_versions(self):
         """Test validation when invalid SSL versions are provided in update."""

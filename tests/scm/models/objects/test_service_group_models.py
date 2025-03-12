@@ -42,9 +42,8 @@ class TestServiceGroupCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_service_group_create_model_no_container(self):
@@ -55,9 +54,8 @@ class TestServiceGroupCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_service_group_create_model_missing_required_fields(self):
@@ -92,9 +90,7 @@ class TestServiceGroupCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupCreateModel(**data)
-        assert "List should have at least 1 item after validation" in str(
-            exc_info.value
-        )
+        assert "List should have at least 1 item after validation" in str(exc_info.value)
 
     def test_security_rule_create_model_string_to_list_conversion(self):
         """Test that string values are converted to lists for list fields."""
@@ -106,9 +102,7 @@ class TestServiceGroupCreateModel:
 
     def test_ensure_list_of_strings_invalid_type(self):
         """Test that a non-string, non-list value raises a ValueError."""
-        with pytest.raises(
-            ValueError, match="Tag must be a string or a list of strings"
-        ):
+        with pytest.raises(ValueError, match="Tag must be a string or a list of strings"):
             ServiceGroupCreateModel(
                 name="test-rule",
                 members=123,  # noqa
@@ -180,9 +174,7 @@ class TestServiceGroupUpdateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ServiceGroupUpdateModel(**data)
-        assert "List should have at least 1 item after validation" in str(
-            exc_info.value
-        )
+        assert "List should have at least 1 item after validation" in str(exc_info.value)
 
 
 class TestServiceGroupResponseModel:

@@ -200,25 +200,25 @@ Follow these steps to run the example:
    ```bash
    # Run all examples
    python address_group.py
-   
+
    # Create only static address groups
    python address_group.py --static
-   
+
    # Create only dynamic address groups
    python address_group.py --dynamic
-   
+
    # Create only nested address groups
    python address_group.py --nested
-   
+
    # Create only bulk address groups
    python address_group.py --bulk
-   
+
    # Skip cleaning up created objects
    python address_group.py --skip-cleanup
-   
+
    # Skip CSV report generation
    python address_group.py --no-report
-   
+
    # Specify a different folder
    python address_group.py --folder=Production
    ```

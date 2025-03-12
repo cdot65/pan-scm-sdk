@@ -30,9 +30,7 @@ class TestRemoteNetworkCreateModel:
         data["ecmp_tunnels"] = None
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkCreateModel(**data)
-        assert "ecmp_tunnels is required when ecmp_load_balancing is enable" in str(
-            exc_info.value
-        )
+        assert "ecmp_tunnels is required when ecmp_load_balancing is enable" in str(exc_info.value)
 
     def test_disable_ecmp_missing_ipsec_tunnel(self):
         """
@@ -47,9 +45,7 @@ class TestRemoteNetworkCreateModel:
             RemoteNetworkCreateModel(**data)
 
         # Verify the error message
-        assert "ipsec_tunnel is required when ecmp_load_balancing is disable" in str(
-            exc_info.value
-        )
+        assert "ipsec_tunnel is required when ecmp_load_balancing is disable" in str(exc_info.value)
 
     def test_no_container(self):
         """Test validation fails when no container field is provided at all."""
@@ -63,18 +59,14 @@ class TestRemoteNetworkCreateModel:
         data = RemoteNetworkCreateModelDictFactory.without_spn_name()
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkCreateModel(**data)
-        assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(
-            exc_info.value
-        )
+        assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(exc_info.value)
 
     def test_ecmp_tunnels_limit(self):
         """Test validation of max_length=4 for ecmp_tunnels."""
         data = RemoteNetworkCreateModelDictFactory.build_ecmp_enabled(ecmp_count=5)
         with pytest.raises(ValidationError) as exc_info:
             RemoteNetworkCreateModel(**data)
-        assert "List should have at most 4 items after validation, not 5" in str(
-            exc_info.value
-        )
+        assert "List should have at most 4 items after validation, not 5" in str(exc_info.value)
 
     def test_valid_ecmp_config(self):
         """Test valid ECMP configuration passes validation."""
@@ -116,18 +108,14 @@ class TestRemoteNetworkUpdateModel:
         data["ecmp_tunnels"] = None
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkUpdateModel(**data)
-        assert "ecmp_tunnels is required when ecmp_load_balancing is enable" in str(
-            exc_info.value
-        )
+        assert "ecmp_tunnels is required when ecmp_load_balancing is enable" in str(exc_info.value)
 
     def test_missing_spn_name(self):
         """Test validation fails when license_type=FWAAS-AGGREGATE but spn_name is missing."""
         data = RemoteNetworkUpdateModelDictFactory.without_spn_name()
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkUpdateModel(**data)
-        assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(
-            exc_info.value
-        )
+        assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(exc_info.value)
 
     def test_disable_ecmp_missing_ipsec_tunnel(self):
         """
@@ -140,6 +128,4 @@ class TestRemoteNetworkUpdateModel:
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkUpdateModel(**data)
 
-        assert "ipsec_tunnel is required when ecmp_load_balancing is disable" in str(
-            exc_info.value
-        )
+        assert "ipsec_tunnel is required when ecmp_load_balancing is disable" in str(exc_info.value)

@@ -166,7 +166,7 @@ for addr in addresses:
 </div>
 
 !!! warning
-    Using the traditional approach requires manually creating service instances for each service type you want to use, which can lead to code duplication and more complex management. It also doesn't automatically handle token refreshing across all service instances. 
+    Using the traditional approach requires manually creating service instances for each service type you want to use, which can lead to code duplication and more complex management. It also doesn't automatically handle token refreshing across all service instances.
 
 ## Common Operations
 
@@ -312,10 +312,10 @@ try:
         "fqdn": "server.example.com",
         "folder": "Texas"
     }
-    
+
     new_address = client.address.create(address_data)
     print(f"Created address: {new_address.name}")
-    
+
 except AuthenticationError as e:
     print(f"Authentication failed: {e.message}")
 except NameNotUniqueError as e:

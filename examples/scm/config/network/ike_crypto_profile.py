@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with IKE Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of IKE Crypto Profile configurations and operations commonly 
+This script demonstrates a wide range of IKE Crypto Profile configurations and operations commonly
 used in enterprise networks, including:
 
 1. IKE Crypto Profile Types and Configurations:
@@ -38,7 +38,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -110,9 +110,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -123,17 +121,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -144,9 +138,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -164,15 +156,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         ScmClient: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -193,8 +185,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -237,7 +229,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -245,14 +237,14 @@ def initialize_client():
 def create_basic_ike_crypto_profile(ike_profile_manager, folder="Texas"):
     """
     Create a basic IKE crypto profile with standard settings.
-    
+
     This function demonstrates creating a standard IKE crypto profile with
     commonly used settings for VPN tunnels.
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         IKECryptoProfileResponseModel: The created profile, or None if creation failed
     """
@@ -275,10 +267,10 @@ def create_basic_ike_crypto_profile(ike_profile_manager, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Hash Algorithms: SHA1, SHA256")
-    log_info(f"  - Encryption: AES-128-CBC, AES-256-CBC")
-    log_info(f"  - DH Groups: Group2, Group14")
-    log_info(f"  - Lifetime: 8 hours")
+    log_info("  - Hash Algorithms: SHA1, SHA256")
+    log_info("  - Encryption: AES-128-CBC, AES-256-CBC")
+    log_info("  - DH Groups: Group2, Group14")
+    log_info("  - Lifetime: 8 hours")
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
@@ -286,20 +278,18 @@ def create_basic_ike_crypto_profile(ike_profile_manager, folder="Texas"):
         log_success(f"Created IKE crypto profile: {new_profile.name}")
         log_info(f"  - Profile ID: {new_profile.id}")
         # No description field in response model
-        log_operation_complete(
-            "Basic IKE crypto profile creation", f"Profile: {new_profile.name}"
-        )
+        log_operation_complete("Basic IKE crypto profile creation", f"Profile: {new_profile.name}")
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating IKE crypto profile", str(e))
+        log_error("Unexpected error creating IKE crypto profile", str(e))
 
     return None
 
@@ -307,14 +297,14 @@ def create_basic_ike_crypto_profile(ike_profile_manager, folder="Texas"):
 def create_strong_security_ike_profile(ike_profile_manager, folder="Texas"):
     """
     Create an IKE crypto profile with stronger security settings.
-    
+
     This function demonstrates creating an IKE profile with high security
     settings for sensitive VPN tunnels.
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         IKECryptoProfileResponseModel: The created profile, or None if creation failed
     """
@@ -330,18 +320,21 @@ def create_strong_security_ike_profile(ike_profile_manager, folder="Texas"):
         "description": "High-security IKE crypto profile for sensitive VPNs",
         "folder": folder,
         "hash": [HashAlgorithm.SHA256, HashAlgorithm.SHA384, HashAlgorithm.SHA512],  # Stronger hash
-        "encryption": [EncryptionAlgorithm.AES_256_CBC, EncryptionAlgorithm.AES_256_GCM],  # Stronger encryption
+        "encryption": [
+            EncryptionAlgorithm.AES_256_CBC,
+            EncryptionAlgorithm.AES_256_GCM,
+        ],  # Stronger encryption
         "dh_group": [DHGroup.GROUP14, DHGroup.GROUP19, DHGroup.GROUP20],  # Stronger DH groups
         "lifetime": {"hours": 4},  # Shorter lifetime for more frequent key rotation
         "authentication_multiple": 3,  # Enable reauthentication
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Hash Algorithms: SHA256, SHA384, SHA512")
-    log_info(f"  - Encryption: AES-256-CBC, AES-256-GCM")
-    log_info(f"  - DH Groups: Group14, Group19, Group20")
-    log_info(f"  - Lifetime: 4 hours")
-    log_info(f"  - Authentication Multiple: 3")
+    log_info("  - Hash Algorithms: SHA256, SHA384, SHA512")
+    log_info("  - Encryption: AES-256-CBC, AES-256-GCM")
+    log_info("  - DH Groups: Group14, Group19, Group20")
+    log_info("  - Lifetime: 4 hours")
+    log_info("  - Authentication Multiple: 3")
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
@@ -354,15 +347,15 @@ def create_strong_security_ike_profile(ike_profile_manager, folder="Texas"):
         )
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating IKE crypto profile", str(e))
+        log_error("Unexpected error creating IKE crypto profile", str(e))
 
     return None
 
@@ -370,14 +363,14 @@ def create_strong_security_ike_profile(ike_profile_manager, folder="Texas"):
 def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
     """
     Create an IKE crypto profile with legacy algorithm support.
-    
+
     This function demonstrates creating an IKE profile with compatibility
     settings for legacy VPN endpoints.
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         IKECryptoProfileResponseModel: The created profile, or None if creation failed
     """
@@ -396,7 +389,7 @@ def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
         "encryption": [
             EncryptionAlgorithm.THREE_DES,  # Legacy encryption
             EncryptionAlgorithm.AES_128_CBC,
-            EncryptionAlgorithm.AES_256_CBC
+            EncryptionAlgorithm.AES_256_CBC,
         ],
         "dh_group": [DHGroup.GROUP1, DHGroup.GROUP2, DHGroup.GROUP5],  # Include legacy DH groups
         "lifetime": {"days": 1},  # Longer lifetime for compatibility
@@ -404,10 +397,10 @@ def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Hash Algorithms: MD5, SHA1")
-    log_info(f"  - Encryption: 3DES, AES-128-CBC, AES-256-CBC")
-    log_info(f"  - DH Groups: Group1, Group2, Group5")
-    log_info(f"  - Lifetime: 1 day")
+    log_info("  - Hash Algorithms: MD5, SHA1")
+    log_info("  - Encryption: 3DES, AES-128-CBC, AES-256-CBC")
+    log_info("  - DH Groups: Group1, Group2, Group5")
+    log_info("  - Lifetime: 1 day")
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
@@ -420,15 +413,15 @@ def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
         )
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating IKE crypto profile", str(e))
+        log_error("Unexpected error creating IKE crypto profile", str(e))
 
     return None
 
@@ -436,35 +429,51 @@ def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
 def create_custom_lifetime_profile(ike_profile_manager, folder="Texas"):
     """
     Create IKE crypto profiles with different lifetime settings.
-    
+
     This function demonstrates creating profiles with various lifetime
     configurations (seconds, minutes, hours, days).
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         list: List of created profiles, or empty list if creation failed
     """
     log_operation_start("Creating IKE crypto profiles with custom lifetimes")
 
     created_profiles = []
-    
+
     # Define lifetime configurations to demonstrate
     lifetime_configs = [
-        {"name": f"ike-seconds-{uuid.uuid4().hex[:6]}", "lifetime": {"seconds": 3600}, "description": "IKE profile with seconds-based lifetime (3600 seconds)"},
-        {"name": f"ike-minutes-{uuid.uuid4().hex[:6]}", "lifetime": {"minutes": 120}, "description": "IKE profile with minutes-based lifetime (120 minutes)"},
-        {"name": f"ike-hours-{uuid.uuid4().hex[:6]}", "lifetime": {"hours": 12}, "description": "IKE profile with hours-based lifetime (12 hours)"},
-        {"name": f"ike-days-{uuid.uuid4().hex[:6]}", "lifetime": {"days": 2}, "description": "IKE profile with days-based lifetime (2 days)"},
+        {
+            "name": f"ike-seconds-{uuid.uuid4().hex[:6]}",
+            "lifetime": {"seconds": 3600},
+            "description": "IKE profile with seconds-based lifetime (3600 seconds)",
+        },
+        {
+            "name": f"ike-minutes-{uuid.uuid4().hex[:6]}",
+            "lifetime": {"minutes": 120},
+            "description": "IKE profile with minutes-based lifetime (120 minutes)",
+        },
+        {
+            "name": f"ike-hours-{uuid.uuid4().hex[:6]}",
+            "lifetime": {"hours": 12},
+            "description": "IKE profile with hours-based lifetime (12 hours)",
+        },
+        {
+            "name": f"ike-days-{uuid.uuid4().hex[:6]}",
+            "lifetime": {"days": 2},
+            "description": "IKE profile with days-based lifetime (2 days)",
+        },
     ]
-    
+
     # Create each profile with a different lifetime configuration
     for config in lifetime_configs:
         log_info(f"Creating IKE profile: {config['name']}")
         log_info(f"  - Description: {config['description']}")
         log_info(f"  - Lifetime: {config['lifetime']}")
-        
+
         # Build complete profile configuration
         profile_config = {
             "name": config["name"],
@@ -476,7 +485,7 @@ def create_custom_lifetime_profile(ike_profile_manager, folder="Texas"):
             "lifetime": config["lifetime"],
             "authentication_multiple": 0,
         }
-        
+
         try:
             new_profile = ike_profile_manager.create(profile_config)
             log_success(f"Created IKE profile: {new_profile.name}")
@@ -484,7 +493,7 @@ def create_custom_lifetime_profile(ike_profile_manager, folder="Texas"):
             created_profiles.append(new_profile)
         except Exception as e:
             log_error(f"Failed to create profile {config['name']}", str(e))
-    
+
     log_operation_complete(
         "Custom lifetime profile creation", f"Created {len(created_profiles)} profiles"
     )
@@ -494,16 +503,16 @@ def create_custom_lifetime_profile(ike_profile_manager, folder="Texas"):
 def fetch_and_update_profile(ike_profile_manager, profile_id):
     """
     Fetch an IKE crypto profile by ID and update its settings.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing IKE crypto profile using its ID
     2. Modify profile properties (hash, encryption, DH groups)
     3. Submit the updated profile back to the SCM API
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         profile_id: The UUID of the profile to update
-        
+
     Returns:
         IKECryptoProfileResponseModel: The updated profile, or None if update failed
     """
@@ -521,7 +530,7 @@ def fetch_and_update_profile(ike_profile_manager, profile_id):
         update_data = {
             "id": str(profile.id),
             "name": profile.name,
-            # API doesn't return description but we can include it in the update
+            # API doesn't return description, but we can include it in the update
             "description": "Updated IKE crypto profile",
             "folder": profile.folder,
             # Add SHA384 if not already present
@@ -533,18 +542,20 @@ def fetch_and_update_profile(ike_profile_manager, profile_id):
             # Update lifetime to 6 hours if it exists
             "lifetime": {"hours": 6} if hasattr(profile, "lifetime") else None,
             # Keep original authentication multiple
-            "authentication_multiple": profile.authentication_multiple if hasattr(profile, "authentication_multiple") else 0,
+            "authentication_multiple": profile.authentication_multiple
+            if hasattr(profile, "authentication_multiple")
+            else 0,
         }
-        
+
         # Create update model
         update_model = IKECryptoProfileUpdateModel(**update_data)
-        
+
         # Perform the update
         updated_profile = ike_profile_manager.update(update_model)
         logger.info(f"Updated IKE crypto profile: {updated_profile.name}")
         logger.info(f"  - New hash algorithms: {[h.value for h in updated_profile.hash]}")
         logger.info(f"  - New encryption: {[e.value for e in updated_profile.encryption]}")
-        
+
         return updated_profile
 
     except NotFoundError as e:
@@ -562,16 +573,16 @@ def fetch_and_update_profile(ike_profile_manager, profile_id):
 def list_and_filter_profiles(ike_profile_manager, folder="Texas"):
     """
     List and filter IKE crypto profiles.
-    
+
     This function demonstrates how to:
     1. List all IKE crypto profiles in a folder
     2. Filter profiles using built-in filtering mechanisms
     3. Display detailed information about each profile
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         folder: Folder to search in (default: "Texas")
-        
+
     Returns:
         list: All retrieved IKE crypto profiles
     """
@@ -587,19 +598,19 @@ def list_and_filter_profiles(ike_profile_manager, folder="Texas"):
         logger.info(f"  - Profile: {profile.name}")
         logger.info(f"    ID: {profile.id}")
         # No description field in response model
-        
+
         # Display hash algorithms
         if hasattr(profile, "hash") and profile.hash:
             logger.info(f"    Hash Algorithms: {', '.join([h.value for h in profile.hash])}")
-        
+
         # Display encryption algorithms
         if hasattr(profile, "encryption") and profile.encryption:
             logger.info(f"    Encryption: {', '.join([e.value for e in profile.encryption])}")
-        
+
         # Display DH groups
         if hasattr(profile, "dh_group") and profile.dh_group:
             logger.info(f"    DH Groups: {', '.join([g.value for g in profile.dh_group])}")
-        
+
         # Display lifetime if it exists
         if hasattr(profile, "lifetime") and profile.lifetime:
             # Find which lifetime type is used
@@ -611,11 +622,11 @@ def list_and_filter_profiles(ike_profile_manager, folder="Texas"):
                 logger.info(f"    Lifetime: {profile.lifetime.hours} hours")
             elif hasattr(profile.lifetime, "days"):
                 logger.info(f"    Lifetime: {profile.lifetime.days} days")
-        
+
         # Display authentication multiple if it exists
         if hasattr(profile, "authentication_multiple"):
             logger.info(f"    Authentication Multiple: {profile.authentication_multiple}")
-        
+
         logger.info("")
 
     return all_profiles
@@ -624,7 +635,7 @@ def list_and_filter_profiles(ike_profile_manager, folder="Texas"):
 def cleanup_profiles(ike_profile_manager, profile_ids):
     """
     Delete the IKE crypto profiles created in this example.
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         profile_ids: List of profile IDs to delete
@@ -641,58 +652,60 @@ def cleanup_profiles(ike_profile_manager, profile_ids):
             logger.error(f"IKE crypto profile not found: {e.message}")
         except Exception as e:
             logger.error(f"Error deleting IKE crypto profile: {str(e)}")
-    
-    logger.info(f"Successfully deleted {deleted_count} out of {len(profile_ids)} IKE crypto profiles")
+
+    logger.info(
+        f"Successfully deleted {deleted_count} out of {len(profile_ids)} IKE crypto profiles"
+    )
 
 
 def generate_profile_report(ike_profile_manager, profile_ids, execution_time):
     """
     Generate a comprehensive CSV report of all IKE crypto profiles created by the script.
-    
+
     This function fetches detailed information about each profile and writes it to a
     CSV file with a timestamp in the filename.
-    
+
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
         profile_ids: List of profile IDs to include in the report
         execution_time: Total execution time in seconds
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"ike_crypto_profiles_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Profile ID", 
+        "Profile ID",
         "Name",
-        "Description", 
+        "Description",
         "Hash Algorithms",
         "Encryption Algorithms",
         "DH Groups",
         "Lifetime",
         "Authentication Multiple",
         "Folder",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each profile
     profile_data = []
     for idx, profile_id in enumerate(profile_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(profile_ids) - 1:
             log_info(f"Processing profile {idx + 1} of {len(profile_ids)}")
-            
+
         try:
             # Get the profile details
             profile = ike_profile_manager.get(profile_id)
-            
+
             # Determine lifetime value
             lifetime_value = "None"
             if hasattr(profile, "lifetime") and profile.lifetime:
@@ -704,47 +717,59 @@ def generate_profile_report(ike_profile_manager, profile_ids, execution_time):
                     lifetime_value = f"{profile.lifetime.hours} hours"
                 elif hasattr(profile.lifetime, "days"):
                     lifetime_value = f"{profile.lifetime.days} days"
-            
+
             # Add profile data
-            profile_data.append([
-                profile.id,
-                profile.name,
-                "No description available",  # No description field in response model
-                ", ".join([h.value for h in profile.hash]) if hasattr(profile, "hash") else "None",
-                ", ".join([e.value for e in profile.encryption]) if hasattr(profile, "encryption") else "None",
-                ", ".join([g.value for g in profile.dh_group]) if hasattr(profile, "dh_group") else "None",
-                lifetime_value,
-                profile.authentication_multiple if hasattr(profile, "authentication_multiple") else "None",
-                profile.folder if hasattr(profile, "folder") else "None",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            profile_data.append(
+                [
+                    profile.id,
+                    profile.name,
+                    "No description available",  # No description field in response model
+                    ", ".join([h.value for h in profile.hash])
+                    if hasattr(profile, "hash")
+                    else "None",
+                    ", ".join([e.value for e in profile.encryption])
+                    if hasattr(profile, "encryption")
+                    else "None",
+                    ", ".join([g.value for g in profile.dh_group])
+                    if hasattr(profile, "dh_group")
+                    else "None",
+                    lifetime_value,
+                    profile.authentication_multiple
+                    if hasattr(profile, "authentication_multiple")
+                    else "None",
+                    profile.folder if hasattr(profile, "folder") else "None",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for profile ID {profile_id}", str(e))
             # Add minimal info for profiles that couldn't be retrieved
-            profile_data.append([
-                profile_id, 
-                "ERROR", 
-                "ERROR", 
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            profile_data.append(
+                [
+                    profile_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(profile_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -752,22 +777,24 @@ def generate_profile_report(ike_profile_manager, profile_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"ike_profiles_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(profile_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -777,72 +804,59 @@ def generate_profile_report(ike_profile_manager, profile_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the IKE crypto profile example script.
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager IKE Crypto Profile Examples",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created IKE crypto profiles (don't delete them)"
+        help="Preserve created IKE crypto profiles (don't delete them)",
     )
-    
+
     # Profile types to create
     profile_group = parser.add_argument_group("Profile Type Selection")
     profile_group.add_argument(
-        "--basic", 
-        action="store_true",
-        help="Create basic IKE crypto profile example"
+        "--basic", action="store_true", help="Create basic IKE crypto profile example"
     )
     profile_group.add_argument(
-        "--high-security", 
-        action="store_true", 
-        help="Create high-security IKE crypto profile example"
+        "--high-security",
+        action="store_true",
+        help="Create high-security IKE crypto profile example",
     )
     profile_group.add_argument(
-        "--legacy", 
+        "--legacy",
         action="store_true",
-        help="Create legacy compatibility IKE crypto profile example"
+        help="Create legacy compatibility IKE crypto profile example",
     )
     profile_group.add_argument(
-        "--lifetime", 
-        action="store_true",
-        help="Create custom lifetime IKE crypto profile examples"
+        "--lifetime", action="store_true", help="Create custom lifetime IKE crypto profile examples"
     )
     profile_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Create all IKE crypto profile types (default behavior)"
+        "--all", action="store_true", help="Create all IKE crypto profile types (default behavior)"
     )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of IKE crypto profile examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -852,7 +866,7 @@ def main():
     6. Generate a detailed CSV report of all created profiles
     7. Clean up created profiles (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created profiles (don't delete them)
         --basic: Create only basic IKE crypto profile examples
@@ -862,32 +876,32 @@ def main():
         --all: Create all IKE crypto profile types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created profiles (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     profile_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which profile types to create
     # If no specific types are specified, create all (default behavior)
     create_all = args.all or not (args.basic or args.high_security or args.legacy or args.lifetime)
-    
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -921,7 +935,9 @@ def main():
             log_info("Creating high-security IKE crypto profile")
             log_info(f"Using folder: {folder_name}")
 
-            high_security_profile = create_strong_security_ike_profile(ike_profile_manager, folder_name)
+            high_security_profile = create_strong_security_ike_profile(
+                ike_profile_manager, folder_name
+            )
             if high_security_profile:
                 created_profiles.append(high_security_profile)
                 profile_count += 1
@@ -952,27 +968,31 @@ def main():
         if created_profiles:
             log_section("UPDATING IKE CRYPTO PROFILE")
             log_info("Demonstrating how to update an existing IKE crypto profile")
-            
-            updated_profile = fetch_and_update_profile(ike_profile_manager, created_profiles[0].id)
+
+            fetch_and_update_profile(ike_profile_manager, created_profiles[0].id)
 
         # List and filter profiles
         log_section("LISTING AND FILTERING IKE CRYPTO PROFILES")
         log_info("Demonstrating how to search and filter IKE crypto profiles")
-        all_profiles = list_and_filter_profiles(ike_profile_manager, folder_name)
+        list_and_filter_profiles(ike_profile_manager, folder_name)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are profiles to report and report generation is not disabled
         if created_profiles and not args.no_report:
             log_section("REPORT GENERATION")
             log_operation_start("Generating IKE crypto profiles CSV report")
             profile_ids = [profile.id for profile in created_profiles]
-            report_file = generate_profile_report(ike_profile_manager, profile_ids, execution_time_so_far)
+            report_file = generate_profile_report(
+                ike_profile_manager, profile_ids, execution_time_so_far
+            )
             if report_file:
                 log_success(f"Generated IKE crypto profiles report: {report_file}")
-                log_info(f"The report contains details of all {len(created_profiles)} IKE crypto profiles created")
+                log_info(
+                    f"The report contains details of all {len(created_profiles)} IKE crypto profiles created"
+                )
             else:
                 log_error("Failed to generate IKE crypto profiles report")
         elif args.no_report:
@@ -983,8 +1003,12 @@ def main():
         # Clean up the created profiles, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_profiles)} IKE crypto profiles")
-            log_info("To clean up these profiles, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_profiles)} IKE crypto profiles"
+            )
+            log_info(
+                "To clean up these profiles, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
             log_operation_start(f"Cleaning up {len(created_profiles)} created IKE crypto profiles")
             profile_ids = [profile.id for profile in created_profiles]
@@ -996,22 +1020,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total IKE crypto profiles created: {profile_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per profile: {execution_time/max(profile_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per profile: {execution_time / max(profile_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some IKE crypto profiles may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

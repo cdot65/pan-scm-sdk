@@ -4,6 +4,7 @@ from .remote_networks import (
     RemoteNetworkCreateModel,
     RemoteNetworkUpdateModel,
     RemoteNetworkResponseModel,
+    EcmpLoadBalancingEnum,
 )
 
 from .service_connections import (
@@ -22,6 +23,7 @@ __all__ = [
     "RemoteNetworkCreateModel",
     "RemoteNetworkUpdateModel",
     "RemoteNetworkResponseModel",
+    "EcmpLoadBalancingEnum",
     "ServiceConnectionCreateModel",
     "ServiceConnectionUpdateModel",
     "ServiceConnectionResponseModel",

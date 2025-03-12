@@ -66,18 +66,16 @@ class TestRemoteNetworkMaxLimit(TestRemoteNetworkBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             RemoteNetworks(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             RemoteNetworks(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -164,7 +162,6 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
             self.client.list()
         error_msg = str(exc_info.value)
         assert "HTTP error: 400 - API error: E003" in error_msg
-
 
     def test_list_filters_valid(self):
         """Test that filters are properly added to parameters."""
@@ -287,13 +284,8 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Remote Networks", regions="test123")
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"] == "'regions' filter must be a list"
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Invalid Query Parameter"
-        )
+        assert error_response["_errors"][0]["message"] == "'regions' filter must be a list"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Query Parameter"
 
         # Reset side effect for next test
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
@@ -305,14 +297,8 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Remote Networks", license_types="test123")
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"]
-            == "'license_types' filter must be a list"
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Invalid Query Parameter"
-        )
+        assert error_response["_errors"][0]["message"] == "'license_types' filter must be a list"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Query Parameter"
 
         # Reset side effect for next test
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
@@ -324,13 +310,8 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Remote Networks", subnets="1.1.1.1/24")
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"] == "'subnets' filter must be a list"
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Invalid Query Parameter"
-        )
+        assert error_response["_errors"][0]["message"] == "'subnets' filter must be a list"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Query Parameter"
 
         # Reset side effect for successful case
         self.mock_scm.get.side_effect = None  # noqa
@@ -683,9 +664,7 @@ class TestRemoteNetworkCreate(TestRemoteNetworkBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
@@ -742,9 +721,7 @@ class TestRemoteNetworkGet(TestRemoteNetworkBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -844,9 +821,7 @@ class TestRemoteNetworkUpdate(TestRemoteNetworkBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -863,9 +838,7 @@ class TestRemoteNetworkUpdate(TestRemoteNetworkBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -939,13 +912,8 @@ class TestRemoteNetworkDelete(TestRemoteNetworkBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"]
-            == "Your configuration is not valid."
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["message"] == "Your configuration is not valid."
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -962,9 +930,7 @@ class TestRemoteNetworkDelete(TestRemoteNetworkBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -1049,9 +1015,7 @@ class TestRemoteNetworkFetch(TestRemoteNetworkBase):
             self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -1165,7 +1129,6 @@ class TestRemoteNetworkFetch(TestRemoteNetworkBase):
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 400
 
-
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
@@ -1237,9 +1200,7 @@ class TestRemoteNetworkFilters(TestRemoteNetworkBase):
             RemoteNetworkResponseFactory(ecmp_load_balancing="disable"),
             RemoteNetworkResponseFactory(ecmp_load_balancing="disable"),
         ]
-        filtered = self.client._apply_filters(
-            networks, {"ecmp_load_balancing": "enable"}
-        )
+        filtered = self.client._apply_filters(networks, {"ecmp_load_balancing": "enable"})
         assert len(filtered) == 0
 
     def test_protocol_filtering_list(self):

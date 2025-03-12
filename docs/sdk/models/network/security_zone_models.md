@@ -93,12 +93,12 @@ The models perform strict validation and will raise `ValueError` in scenarios su
 
 ### Field Validators in `NetworkConfig`
 
-- **validate_network_type**:  
+- **validate_network_type**:
   Ensures that only one network interface type is configured at a time. If multiple interface types are set, it raises a `ValueError`.
 
 ### Container Validation in `SecurityZoneCreateModel`
 
-- **validate_container**:  
+- **validate_container**:
   After model initialization, this validator checks that exactly one of the container fields (`folder`, `snippet`, or `device`) is provided. If not, it raises a `ValueError`.
 
 ## Usage Examples

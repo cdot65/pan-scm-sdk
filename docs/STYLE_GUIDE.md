@@ -234,7 +234,7 @@ client = ScmClient(
 try:
    # Operation code
    result = client.service.operation(config)
-   
+
 except ExceptionType1 as e:
    print(f"Error message: {e.message}")
 except ExceptionType2 as e:

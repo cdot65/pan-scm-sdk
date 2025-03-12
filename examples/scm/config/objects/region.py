@@ -2,14 +2,14 @@
 """
 Comprehensive examples of working with Region objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of Region object configurations and operations commonly 
+This script demonstrates a wide range of Region object configurations and operations commonly
 used in enterprise networks, including:
 
 1. Region Object Types:
    - Regions with geographic coordinates (latitude/longitude)
    - Regions with associated network addresses
    - Regions with both coordinates and network addresses
-   
+
 2. Operational examples:
    - Creating region objects
    - Searching and filtering region objects
@@ -37,7 +37,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -103,9 +103,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -116,17 +114,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -137,9 +131,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -157,15 +149,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -186,8 +178,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -230,7 +222,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -238,14 +230,14 @@ def initialize_client():
 def create_region_with_coordinates(regions, folder="Texas"):
     """
     Create a region object with geographic coordinates.
-    
-    This function demonstrates creating a region with latitude and longitude 
+
+    This function demonstrates creating a region with latitude and longitude
     coordinates for a geographic location.
-    
+
     Args:
         regions: The Region manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         RegionResponseModel: The created region object, or None if creation failed
     """
@@ -262,15 +254,12 @@ def create_region_with_coordinates(regions, folder="Texas"):
         "description": "Example region for San Francisco metropolitan area",
         "folder": folder,  # Use the provided folder name
         "tag": ["Automation", "West-Coast"],
-        "geo_location": {
-            "latitude": 37.7749,
-            "longitude": -122.4194
-        }
+        "geo_location": {"latitude": 37.7749, "longitude": -122.4194},
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Geographic Coordinates Region")
-    log_info(f"  - Location: San Francisco")
+    log_info("  - Type: Geographic Coordinates Region")
+    log_info("  - Location: San Francisco")
     log_info(f"  - Description: {region_config['description']}")
     log_info(f"  - Tags: {', '.join(region_config['tag'])}")
     log_info(f"  - Latitude: {region_config['geo_location']['latitude']}")
@@ -283,25 +272,23 @@ def create_region_with_coordinates(regions, folder="Texas"):
         log_info(f"  - Object ID: {new_region.id}")
         description = getattr(new_region, "description", None)
         log_info(f"  - Description: {description}")
-        if hasattr(new_region, 'tag') and new_region.tag:
+        if hasattr(new_region, "tag") and new_region.tag:
             log_info(f"  - Tags: {', '.join(new_region.tag)}")
         if new_region.geo_location:
             log_info(f"  - Latitude: {new_region.geo_location.latitude}")
             log_info(f"  - Longitude: {new_region.geo_location.longitude}")
-        log_operation_complete(
-            "Region with coordinates creation", f"Region: {new_region.name}"
-        )
+        log_operation_complete("Region with coordinates creation", f"Region: {new_region.name}")
         return new_region
     except NameNotUniqueError as e:
-        log_error(f"Region name conflict", e.message)
+        log_error("Region name conflict", e.message)
         log_info("Try using a different region name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid region data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid region data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating region object", str(e))
+        log_error("Unexpected error creating region object", str(e))
 
     return None
 
@@ -309,14 +296,14 @@ def create_region_with_coordinates(regions, folder="Texas"):
 def create_region_with_addresses(regions, folder="Texas"):
     """
     Create a region object with network addresses.
-    
-    This function demonstrates creating a region with a list of network 
+
+    This function demonstrates creating a region with a list of network
     addresses without specific geographic coordinates.
-    
+
     Args:
         regions: The Region manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         RegionResponseModel: The created region object, or None if creation failed
     """
@@ -332,15 +319,11 @@ def create_region_with_addresses(regions, folder="Texas"):
         "description": "Example region for corporate network addresses",
         "folder": folder,  # Use the provided folder name
         "tag": ["Automation", "Corporate", "Internal"],
-        "address": [
-            "10.0.0.0/8",
-            "172.16.0.0/12",
-            "192.168.0.0/16"
-        ]
+        "address": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Network Addresses Region")
+    log_info("  - Type: Network Addresses Region")
     log_info(f"  - Description: {region_config['description']}")
     log_info(f"  - Tags: {', '.join(region_config['tag'])}")
     log_info(f"  - Addresses: {', '.join(region_config['address'])}")
@@ -353,24 +336,22 @@ def create_region_with_addresses(regions, folder="Texas"):
         # Safely access description field
         description = getattr(new_region, "description", None)
         log_info(f"  - Description: {description}")
-        if hasattr(new_region, 'tag') and new_region.tag:
+        if hasattr(new_region, "tag") and new_region.tag:
             log_info(f"  - Tags: {', '.join(new_region.tag)}")
         if new_region.address:
             log_info(f"  - Addresses: {', '.join(new_region.address)}")
-        log_operation_complete(
-            "Region with addresses creation", f"Region: {new_region.name}"
-        )
+        log_operation_complete("Region with addresses creation", f"Region: {new_region.name}")
         return new_region
     except NameNotUniqueError as e:
-        log_error(f"Region name conflict", e.message)
+        log_error("Region name conflict", e.message)
         log_info("Try using a different region name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid region data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid region data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating region object", str(e))
+        log_error("Unexpected error creating region object", str(e))
 
     return None
 
@@ -378,14 +359,14 @@ def create_region_with_addresses(regions, folder="Texas"):
 def create_comprehensive_region(regions, folder="Texas"):
     """
     Create a comprehensive region object with both coordinates and addresses.
-    
+
     This function demonstrates creating a region with both geographic coordinates
     and a list of network addresses for a complete definition.
-    
+
     Args:
         regions: The Region manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         RegionResponseModel: The created region object, or None if creation failed
     """
@@ -402,19 +383,13 @@ def create_comprehensive_region(regions, folder="Texas"):
         "description": "Example comprehensive region for NYC area",
         "folder": folder,  # Use the provided folder name
         "tag": ["Automation", "East-Coast", "Office"],
-        "geo_location": {
-            "latitude": 40.7128,
-            "longitude": -74.0060
-        },
-        "address": [
-            "198.51.100.0/24",
-            "203.0.113.0/24"
-        ]
+        "geo_location": {"latitude": 40.7128, "longitude": -74.0060},
+        "address": ["198.51.100.0/24", "203.0.113.0/24"],
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Comprehensive Region")
-    log_info(f"  - Location: New York City")
+    log_info("  - Type: Comprehensive Region")
+    log_info("  - Location: New York City")
     log_info(f"  - Description: {region_config['description']}")
     log_info(f"  - Tags: {', '.join(region_config['tag'])}")
     log_info(f"  - Latitude: {region_config['geo_location']['latitude']}")
@@ -429,27 +404,25 @@ def create_comprehensive_region(regions, folder="Texas"):
         # Safely access description field
         description = getattr(new_region, "description", None)
         log_info(f"  - Description: {description}")
-        if hasattr(new_region, 'tag') and new_region.tag:
+        if hasattr(new_region, "tag") and new_region.tag:
             log_info(f"  - Tags: {', '.join(new_region.tag)}")
         if new_region.geo_location:
             log_info(f"  - Latitude: {new_region.geo_location.latitude}")
             log_info(f"  - Longitude: {new_region.geo_location.longitude}")
         if new_region.address:
             log_info(f"  - Addresses: {', '.join(new_region.address)}")
-        log_operation_complete(
-            "Comprehensive region creation", f"Region: {new_region.name}"
-        )
+        log_operation_complete("Comprehensive region creation", f"Region: {new_region.name}")
         return new_region
     except NameNotUniqueError as e:
-        log_error(f"Region name conflict", e.message)
+        log_error("Region name conflict", e.message)
         log_info("Try using a different region name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid region data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid region data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating region object", str(e))
+        log_error("Unexpected error creating region object", str(e))
 
     return None
 
@@ -457,16 +430,16 @@ def create_comprehensive_region(regions, folder="Texas"):
 def fetch_and_update_region(regions, region_id):
     """
     Fetch a region object by ID and update its coordinates and addresses.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing region object using its ID
     2. Modify object properties (coordinates, addresses)
     3. Submit the updated object back to the SCM API
-    
+
     Args:
         regions: The Region manager instance
         region_id: The UUID of the region object to update
-        
+
     Returns:
         RegionResponseModel: The updated region object, or None if update failed
     """
@@ -480,18 +453,18 @@ def fetch_and_update_region(regions, region_id):
         # Update description
         region.description = f"Updated description for {region.name}"
         logger.info(f"Updated description: {region.description}")
-        
+
         # Add or update tags
-        if hasattr(region, 'tag') and region.tag:
+        if hasattr(region, "tag") and region.tag:
             # Add a new tag if not already present
             if "Updated" not in region.tag:
                 region.tag.append("Updated")
-                logger.info(f"Added new tag: Updated")
+                logger.info("Added new tag: Updated")
         else:
             # Create tag list if none exists
             region.tag = ["Updated", "Modified"]
-            logger.info(f"Added new tags: Updated, Modified")
-                
+            logger.info("Added new tags: Updated, Modified")
+
         # Update geo_location if exists, create new geo_location if none exists
         if region.geo_location:
             # Slightly adjust coordinates
@@ -504,10 +477,10 @@ def fetch_and_update_region(regions, region_id):
             # Add geo_location if it doesn't exist
             region.geo_location = {
                 "latitude": 51.5074,  # London coordinates
-                "longitude": -0.1278
+                "longitude": -0.1278,
             }
-            logger.info(f"Added new coordinates: 51.5074, -0.1278")
-        
+            logger.info("Added new coordinates: 51.5074, -0.1278")
+
         # Add or update addresses
         if region.address:
             # Add a new address if not already present
@@ -518,20 +491,18 @@ def fetch_and_update_region(regions, region_id):
         else:
             # Create address list if none exists
             region.address = ["198.18.0.0/15", "203.0.113.0/24"]
-            logger.info(f"Added new addresses: 198.18.0.0/15, 203.0.113.0/24")
+            logger.info("Added new addresses: 198.18.0.0/15, 203.0.113.0/24")
 
         # Perform the update
         updated_region = regions.update(region)
-        logger.info(
-            f"Updated region object: {updated_region.name}"
-        )
+        logger.info(f"Updated region object: {updated_region.name}")
         return updated_region
 
     except NotFoundError as e:
         logger.error(f"Region object not found: {e.message}")
     except InvalidObjectError as e:
         logger.error(f"Invalid region object update: {e.message}")
-        if hasattr(e, 'details') and e.details:
+        if hasattr(e, "details") and e.details:
             logger.error(f"Details: {e.details}")
 
     return None
@@ -540,16 +511,16 @@ def fetch_and_update_region(regions, region_id):
 def list_and_filter_regions(regions, folder="Texas"):
     """
     List and filter region objects.
-    
+
     This function demonstrates how to:
     1. List all region objects in a folder
     2. Filter region objects by various criteria
     3. Display detailed information about each object
-    
+
     Args:
         regions: The Region manager instance
         folder: Folder name to list regions from (default: "Texas")
-        
+
     Returns:
         list: All retrieved region objects
     """
@@ -565,7 +536,7 @@ def list_and_filter_regions(regions, folder="Texas"):
         logger.info(f"Found {len(automation_tagged)} region objects with 'Automation' tag")
     except Exception as e:
         logger.error(f"Filtering by tag failed: {str(e)}")
-    
+
     # Filter by name pattern (where supported)
     try:
         west_regions = regions.list(folder=folder, name="west")
@@ -577,10 +548,7 @@ def list_and_filter_regions(regions, folder="Texas"):
     try:
         # Filter for western hemisphere (longitude < 0)
         western_regions = regions.list(
-            folder=folder,
-            geo_location={
-                "longitude": {"min": -180, "max": 0}
-            }
+            folder=folder, geo_location={"longitude": {"min": -180, "max": 0}}
         )
         logger.info(f"Found {len(western_regions)} region objects in the western hemisphere")
     except Exception as e:
@@ -589,10 +557,7 @@ def list_and_filter_regions(regions, folder="Texas"):
     # Filter by network address
     try:
         # Filter for regions with specific address ranges
-        filtered_regions = regions.list(
-            folder=folder,
-            addresses=["10.0.0.0/8"]
-        )
+        filtered_regions = regions.list(folder=folder, addresses=["10.0.0.0/8"])
         logger.info(f"Found {len(filtered_regions)} region objects with 10.0.0.0/8 address")
     except Exception as e:
         logger.error(f"Filtering by addresses failed: {str(e)}")
@@ -602,29 +567,31 @@ def list_and_filter_regions(regions, folder="Texas"):
     for region in all_regions[:5]:  # Print details of up to 5 objects
         logger.info(f"  - Region: {region.name}")
         logger.info(f"    ID: {region.id}")
-        
+
         # Print description if available
         description = getattr(region, "description", "None")
         logger.info(f"    Description: {description}")
-        
+
         # Print tags if available
         if hasattr(region, "tag") and region.tag:
             logger.info(f"    Tags: {', '.join(region.tag)}")
         else:
-            logger.info(f"    Tags: None")
-            
+            logger.info("    Tags: None")
+
         # Print geographic location if available
         if hasattr(region, "geo_location") and region.geo_location:
-            logger.info(f"    Geographic Location: {region.geo_location.latitude}, {region.geo_location.longitude}")
+            logger.info(
+                f"    Geographic Location: {region.geo_location.latitude}, {region.geo_location.longitude}"
+            )
         else:
-            logger.info(f"    Geographic Location: None")
-            
+            logger.info("    Geographic Location: None")
+
         # Print addresses if available
         if hasattr(region, "address") and region.address:
             logger.info(f"    Addresses: {', '.join(region.address)}")
         else:
-            logger.info(f"    Addresses: None")
-            
+            logger.info("    Addresses: None")
+
         logger.info("")
 
     return all_regions
@@ -633,7 +600,7 @@ def list_and_filter_regions(regions, folder="Texas"):
 def cleanup_region_objects(regions, region_ids):
     """
     Delete the region objects created in this example.
-    
+
     Args:
         regions: The Region manager instance
         region_ids: List of region object IDs to delete
@@ -653,14 +620,14 @@ def cleanup_region_objects(regions, region_ids):
 def create_bulk_region_objects(regions, folder="Texas"):
     """
     Create multiple region objects in a batch.
-    
+
     This function demonstrates creating multiple region objects in a batch,
     which is useful for setting up multiple regions at once.
-    
+
     Args:
         regions: The Region manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created region objects, or empty list if creation failed
     """
@@ -673,34 +640,25 @@ def create_bulk_region_objects(regions, folder="Texas"):
             "description": "London region with primary datacenters",
             "folder": folder,
             "tag": ["Automation", "Bulk", "Europe", "DC"],
-            "geo_location": {
-                "latitude": 51.5074,
-                "longitude": -0.1278
-            },
-            "address": ["198.51.100.0/24"]
+            "geo_location": {"latitude": 51.5074, "longitude": -0.1278},
+            "address": ["198.51.100.0/24"],
         },
         {
             "name": f"eu-central-{uuid.uuid4().hex[:6]}",
             "description": "Berlin region for continental operations",
             "folder": folder,
             "tag": ["Automation", "Bulk", "Europe"],
-            "geo_location": {
-                "latitude": 52.5200,
-                "longitude": 13.4050
-            },
-            "address": ["203.0.113.0/24"]
+            "geo_location": {"latitude": 52.5200, "longitude": 13.4050},
+            "address": ["203.0.113.0/24"],
         },
         {
             "name": f"asia-east-{uuid.uuid4().hex[:6]}",
             "description": "Tokyo region for APAC operations",
             "folder": folder,
             "tag": ["Automation", "Bulk", "APAC"],
-            "geo_location": {
-                "latitude": 35.6762,
-                "longitude": 139.6503
-            },
-            "address": ["192.0.2.0/24"]
-        }
+            "geo_location": {"latitude": 35.6762, "longitude": 139.6503},
+            "address": ["192.0.2.0/24"],
+        },
     ]
 
     created_regions = []
@@ -709,13 +667,11 @@ def create_bulk_region_objects(regions, folder="Texas"):
     for region_config in region_configs:
         try:
             new_region = regions.create(region_config)
-            logger.info(
-                f"Created region object: {new_region.name} with ID: {new_region.id}"
-            )
+            logger.info(f"Created region object: {new_region.name} with ID: {new_region.id}")
             # Safely access description field
             description = getattr(new_region, "description", None)
             logger.info(f"  - Description: {description}")
-            if hasattr(new_region, 'tag') and new_region.tag:
+            if hasattr(new_region, "tag") and new_region.tag:
                 logger.info(f"  - Tags: {', '.join(new_region.tag)}")
             created_regions.append(new_region.id)
         except Exception as e:
@@ -727,117 +683,125 @@ def create_bulk_region_objects(regions, folder="Texas"):
 def generate_region_report(regions, region_ids, execution_time):
     """
     Generate a comprehensive CSV report of all region objects created by the script.
-    
+
     This function fetches detailed information about each region object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         regions: The Region manager instance used to fetch object details
         region_ids: List of region object IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"region_objects_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
         "Description",
         "Tags",
-        "Latitude", 
+        "Latitude",
         "Longitude",
         "Addresses",
         "Folder",
         "Created On",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each region object
     region_data = []
     for idx, region_id in enumerate(region_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(region_ids) - 1:
             log_info(f"Processing region {idx + 1} of {len(region_ids)}")
-            
+
         try:
             # Get the region details
             region = regions.get(region_id)
-            
+
             # Get description if available
-            description = region.description if hasattr(region, "description") and region.description else "None"
-            
+            description = (
+                region.description
+                if hasattr(region, "description") and region.description
+                else "None"
+            )
+
             # Get tags if available
             tags = "None"
             if hasattr(region, "tag") and region.tag:
                 tags = ", ".join(region.tag)
-            
+
             # Get latitude and longitude if available
             latitude = "N/A"
             longitude = "N/A"
             if region.geo_location:
                 latitude = region.geo_location.latitude
                 longitude = region.geo_location.longitude
-                
+
             # Get addresses if available
             addresses = "N/A"
             if region.address:
                 addresses = ", ".join(region.address)
-            
+
             # Get created_on timestamp if available
             created_on = "Unknown"
             if hasattr(region, "created_on") and region.created_on:
                 created_on = region.created_on.strftime("%Y-%m-%d %H:%M:%S")
-            
+
             # Add region data
-            region_data.append([
-                region.id,
-                region.name,
-                description,
-                tags,
-                latitude,
-                longitude,
-                addresses,
-                region.folder if hasattr(region, "folder") and region.folder else "N/A",
-                created_on,
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            region_data.append(
+                [
+                    region.id,
+                    region.name,
+                    description,
+                    tags,
+                    latitude,
+                    longitude,
+                    addresses,
+                    region.folder if hasattr(region, "folder") and region.folder else "N/A",
+                    created_on,
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for region ID {region_id}", str(e))
             # Add minimal info for regions that couldn't be retrieved
-            region_data.append([
-                region_id, 
-                "ERROR", 
-                "ERROR", 
-                "ERROR",
-                "ERROR", 
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            region_data.append(
+                [
+                    region_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(region_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -845,22 +809,24 @@ def generate_region_report(regions, region_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"region_objects_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(region_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -870,79 +836,62 @@ def generate_region_report(regions, region_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the region example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which region object types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Region Objects Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created region objects (don't delete them)"
+        help="Preserve created region objects (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("Object Type Selection")
     object_group.add_argument(
-        "--coordinates", 
-        action="store_true",
-        help="Create regions with geographic coordinates"
+        "--coordinates", action="store_true", help="Create regions with geographic coordinates"
     )
     object_group.add_argument(
-        "--addresses", 
-        action="store_true", 
-        help="Create regions with network addresses"
+        "--addresses", action="store_true", help="Create regions with network addresses"
     )
     object_group.add_argument(
-        "--comprehensive", 
+        "--comprehensive",
         action="store_true",
-        help="Create comprehensive regions with both coordinates and addresses"
+        help="Create comprehensive regions with both coordinates and addresses",
     )
+    object_group.add_argument("--bulk", action="store_true", help="Create bulk region examples")
     object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk region examples"
+        "--all", action="store_true", help="Create all region object types (default behavior)"
     )
-    object_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Create all region object types (default behavior)"
-    )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of region object examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -952,7 +901,7 @@ def main():
     6. Generate a detailed CSV report of all created region objects
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created region objects (don't delete them)
         --coordinates: Create only regions with geographic coordinates
@@ -962,32 +911,34 @@ def main():
         --all: Create all region object types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
-    create_all = args.all or not (args.coordinates or args.addresses or args.comprehensive or args.bulk)
-    
+    create_all = args.all or not (
+        args.coordinates or args.addresses or args.comprehensive or args.bulk
+    )
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1030,7 +981,7 @@ def main():
                 created_regions.append(addr_region.id)
                 object_count += 1
 
-            log_success(f"Created region objects with network addresses")
+            log_success("Created region objects with network addresses")
 
         # Comprehensive Regions
         if create_all or args.comprehensive:
@@ -1044,7 +995,7 @@ def main():
                 created_regions.append(comp_region.id)
                 object_count += 1
 
-            log_success(f"Created comprehensive region objects")
+            log_success("Created comprehensive region objects")
 
         # Bulk Region creation
         if create_all or args.bulk:
@@ -1063,17 +1014,17 @@ def main():
         if created_regions:
             log_section("UPDATING REGION OBJECTS")
             log_info("Demonstrating how to update existing region objects")
-            updated_region = fetch_and_update_region(regions, created_regions[0])
+            fetch_and_update_region(regions, created_regions[0])
 
         # List and filter region objects
         log_section("LISTING AND FILTERING REGION OBJECTS")
         log_info("Demonstrating how to search and filter region objects")
-        all_regions = list_and_filter_regions(regions, folder_name)
+        list_and_filter_regions(regions, folder_name)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_regions and not args.no_report:
             log_section("REPORT GENERATION")
@@ -1081,7 +1032,9 @@ def main():
             report_file = generate_region_report(regions, created_regions, execution_time_so_far)
             if report_file:
                 log_success(f"Generated region objects report: {report_file}")
-                log_info(f"The report contains details of all {len(created_regions)} region objects created")
+                log_info(
+                    f"The report contains details of all {len(created_regions)} region objects created"
+                )
             else:
                 log_error("Failed to generate region objects report")
         elif args.no_report:
@@ -1092,8 +1045,12 @@ def main():
         # Clean up the created objects, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_regions)} region objects")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_regions)} region objects"
+            )
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
             log_operation_start(f"Cleaning up {len(created_regions)} created region objects")
             cleanup_region_objects(regions, created_regions)
@@ -1104,22 +1061,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total region objects created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some region objects may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

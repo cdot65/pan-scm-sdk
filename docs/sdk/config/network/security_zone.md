@@ -387,7 +387,7 @@ zones_list = client.security_zone.list(
 # Iterate and process each security zone
 for zone in zones_list:
    print(f"Name: {zone.name}")
-   
+
    # Check network configuration
    if zone.network:
       if zone.network.layer3:
@@ -402,7 +402,7 @@ for zone in zones_list:
          print(f"  Type: TAP, Interfaces: {', '.join(zone.network.tap)}")
       elif zone.network.external:
          print(f"  Type: External, Interfaces: {', '.join(zone.network.external)}")
-   
+
    # Display user identification status
    print(f"  User Identification Enabled: {zone.enable_user_identification}")
    print(f"  Device Identification Enabled: {zone.enable_device_identification}")
@@ -524,7 +524,7 @@ try:
       "folder": "Security Zones"
    }
    result = client.security_zone.create(invalid_zone)
-   
+
 except InvalidObjectError as e:
    print(f"Invalid object error: {e.message}")
    print(f"HTTP status: {e.http_status_code}")
@@ -533,7 +533,7 @@ except InvalidObjectError as e:
 try:
    # Attempt to fetch a security zone without specifying a container
    zone = client.security_zone.fetch(name="some-zone")
-   
+
 except MissingQueryParameterError as e:
    print(f"Missing parameter error: {e.message}")
 
@@ -541,7 +541,7 @@ try:
    # General API error handling
    zone_id = "non-existent-id"
    client.security_zone.get(zone_id)
-   
+
 except ApiError as e:
    print(f"API error: {e.message}")
    print(f"Status code: {e.http_status_code}")

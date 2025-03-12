@@ -41,7 +41,7 @@ The recommended workflow for creating service groups is:
    ```python
    existing_services = service_manager.list(folder="YOUR_FOLDER")
    service_names = [service.name for service in existing_services]
-   
+
    existing_tags = tag_manager.list(folder="YOUR_FOLDER")
    tag_names = [tag.name for tag in existing_tags]
    ```
@@ -50,7 +50,7 @@ The recommended workflow for creating service groups is:
    ```python
    from scm.config.objects import ServiceGroup
    service_group_manager = ServiceGroup(client)
-   
+
    # Use real service and tag names from your environment
    group_config = {
        "name": "my-service-group",
@@ -59,7 +59,7 @@ The recommended workflow for creating service groups is:
        "members": service_names[:2],  # Use first two services
        "tag": tag_names[:1]  # Use first tag
    }
-   
+
    new_group = service_group_manager.create(group_config)
    ```
 
@@ -133,7 +133,7 @@ hierarchical_relationships = {}
 # Analyze each group to find which groups reference others
 for group_id in group_ids:
     group = service_groups.get(group_id)
-    
+
     # Check if this group references other groups in our list
     for member in group.members:
         for other_id in group_ids:

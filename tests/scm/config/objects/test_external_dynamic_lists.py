@@ -61,18 +61,16 @@ class TestExternalDynamicListsMaxLimit(TestExternalDynamicListsBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             ExternalDynamicLists(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             ExternalDynamicLists(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -401,9 +399,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
         # Verify results
         assert len(results) == 7500  # Total objects across all pages
         assert isinstance(results[0], ExternalDynamicListsResponseModel)
-        assert all(
-            isinstance(obj, ExternalDynamicListsResponseModel) for obj in results
-        )
+        assert all(isinstance(obj, ExternalDynamicListsResponseModel) for obj in results)
 
         # Verify API calls
         assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
@@ -467,12 +463,9 @@ class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
         # Now data is a dict without container keys
         with pytest.raises(ValidationError) as exc_info:
             ExternalDynamicListsCreateModel(**data)
-        assert "1 validation error for ExternalDynamicListsCreateModel" in str(
+        assert "1 validation error for ExternalDynamicListsCreateModel" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
             exc_info.value
-        )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
         )
 
     def test_create_multiple_containers(self):
@@ -480,12 +473,9 @@ class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
         # Data with multiple containers (folder + snippet)
         with pytest.raises(ValidationError) as exc_info:
             ExternalDynamicListsCreateModel(**data)
-        assert "1 validation error for ExternalDynamicListsCreateModel" in str(
+        assert "1 validation error for ExternalDynamicListsCreateModel" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
             exc_info.value
-        )
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
         )
 
     def test_create_http_error_no_response_content(self):
@@ -540,9 +530,7 @@ class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
 class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
     def test_update_valid(self):
         update_data = ExternalDynamicListsUpdateApiFactory.valid()  # returns a dict
-        update_model = ExternalDynamicListsUpdateModel(
-            **update_data
-        )  # convert to model
+        update_model = ExternalDynamicListsUpdateModel(**update_data)  # convert to model
         # Create a mock response from the update_model
         mock_response = ExternalDynamicListsResponseFactory(**update_model.model_dump())
         self.mock_scm.put.return_value = mock_response.model_dump()
@@ -645,9 +633,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
         mock_response = ExternalDynamicListsResponseFactory.valid()
         self.mock_scm.get.return_value = mock_response.model_dump()
 
-        fetched = self.client.fetch(
-            name=mock_response.name, folder=mock_response.folder
-        )
+        fetched = self.client.fetch(name=mock_response.name, folder=mock_response.folder)
         self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/external-dynamic-lists",
             params={"folder": mock_response.folder, "name": mock_response.name},

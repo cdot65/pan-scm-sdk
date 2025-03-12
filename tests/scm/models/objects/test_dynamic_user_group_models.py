@@ -57,9 +57,8 @@ class TestDynamicUserGroupCreateModel:
 
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
         )
 
     def test_multiple_containers_not_allowed(self):
@@ -73,9 +72,8 @@ class TestDynamicUserGroupCreateModel:
 
         with pytest.raises(ValidationError) as exc_info:
             DynamicUserGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
         )
 
     def test_tag_accepts_string(self):

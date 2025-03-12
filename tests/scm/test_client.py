@@ -266,7 +266,7 @@ class TestClientRequest(TestClientBase):
         self.session.request.side_effect = mock_http_error
 
         # Test request with empty content
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             self.client.request("GET", "/test-endpoint")
 
 
@@ -279,9 +279,7 @@ class TestClientMethods(TestClientBase):
 
         mock_oauth2client_instance.is_expired = False
 
-        with patch.object(
-            self.client, "request", return_value={"data": "test"}
-        ) as mock_request:
+        with patch.object(self.client, "request", return_value={"data": "test"}) as mock_request:
             response = self.client.get("/test-endpoint", params={"param1": "value1"})
             mock_request.assert_called_once_with(
                 "GET", "/test-endpoint", params={"param1": "value1"}
@@ -295,9 +293,7 @@ class TestClientMethods(TestClientBase):
         mock_oauth2client_instance.is_expired = True
         mock_oauth2client_instance.refresh_token = MagicMock()
 
-        with patch.object(
-            self.client, "request", return_value={"data": "test"}
-        ) as mock_request:
+        with patch.object(self.client, "request", return_value={"data": "test"}) as mock_request:
             response = self.client.get("/test-endpoint", params={"param1": "value1"})
             mock_oauth2client_instance.refresh_token.assert_called_once()
             mock_request.assert_called_once_with(
@@ -312,14 +308,10 @@ class TestClientMethods(TestClientBase):
         mock_oauth2client_instance.is_expired = True
         mock_oauth2client_instance.refresh_token = MagicMock()
 
-        with patch.object(
-            self.client, "request", return_value={"data": "test"}
-        ) as mock_request:
+        with patch.object(self.client, "request", return_value={"data": "test"}) as mock_request:
             response = self.client.post("/test-endpoint", json={"key": "value"})
             mock_oauth2client_instance.refresh_token.assert_called_once()
-            mock_request.assert_called_once_with(
-                "POST", "/test-endpoint", json={"key": "value"}
-            )
+            mock_request.assert_called_once_with("POST", "/test-endpoint", json={"key": "value"})
             assert response == {"data": "test"}
 
     def test_put_method_token_refresh(self):
@@ -329,14 +321,10 @@ class TestClientMethods(TestClientBase):
         mock_oauth2client_instance.is_expired = True
         mock_oauth2client_instance.refresh_token = MagicMock()
 
-        with patch.object(
-            self.client, "request", return_value={"data": "test"}
-        ) as mock_request:
+        with patch.object(self.client, "request", return_value={"data": "test"}) as mock_request:
             response = self.client.put("/test-endpoint", json={"key": "value"})
             mock_oauth2client_instance.refresh_token.assert_called_once()
-            mock_request.assert_called_once_with(
-                "PUT", "/test-endpoint", json={"key": "value"}
-            )
+            mock_request.assert_called_once_with("PUT", "/test-endpoint", json={"key": "value"})
             assert response == {"data": "test"}
 
     def test_delete_method_token_refresh(self):
@@ -346,9 +334,7 @@ class TestClientMethods(TestClientBase):
         mock_oauth2client_instance.is_expired = True
         mock_oauth2client_instance.refresh_token = MagicMock()
 
-        with patch.object(
-            self.client, "request", return_value={"data": "test"}
-        ) as mock_request:
+        with patch.object(self.client, "request", return_value={"data": "test"}) as mock_request:
             response = self.client.delete("/test-endpoint")
             mock_oauth2client_instance.refresh_token.assert_called_once()
             mock_request.assert_called_once_with("DELETE", "/test-endpoint")
@@ -654,9 +640,7 @@ class TestClientJobMethods(TestClientBase):
                     },
                 ]
 
-                result = self.client.wait_for_job(
-                    "test_job", timeout=30, poll_interval=10
-                )
+                result = self.client.wait_for_job("test_job", timeout=30, poll_interval=10)
 
                 assert isinstance(result, JobStatusResponse)
                 assert result.data[0].status_str == "FIN"
@@ -783,9 +767,7 @@ class TestClientCommitMethods(TestClientBase):
         assert isinstance(result, CandidatePushResponseModel)
         assert result.success is True
         assert result.job_id == "1586"
-        assert (
-            self.session.request.call_count == 2
-        )  # One for commit, one for status check
+        assert self.session.request.call_count == 2  # One for commit, one for status check
 
     def test_commit_sync_timeout(self):
         """Test commit with sync that times out."""
@@ -883,9 +865,7 @@ class TestClientCommitMethods(TestClientBase):
             )
 
         # Updated to match Pydantic's actual error message
-        assert "List should have at least 1 item after validation" in str(
-            exc_info.value
-        )
+        assert "List should have at least 1 item after validation" in str(exc_info.value)
 
     def test_commit_with_all_admin(self):
         """Test commit using 'all' as admin value."""

@@ -101,7 +101,7 @@ updated_result = client.security_rule.update(update_dict)
 
 - [Decryption Profile Models](decryption_profile_models.md) - SSL/TLS decryption profiles
 
-### DNS Security Profile 
+### DNS Security Profile
 
 - [DNS Security Profile Models](dns_security_profile_models.md) - DNS security profiles
 

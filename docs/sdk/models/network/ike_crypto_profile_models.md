@@ -245,7 +245,7 @@ profile_data = {
     "name": "example-ike-crypto",
     "hash": [HashAlgorithm.SHA1, HashAlgorithm.SHA256],
     "encryption": [
-        EncryptionAlgorithm.AES_128_CBC, 
+        EncryptionAlgorithm.AES_128_CBC,
         EncryptionAlgorithm.AES_256_CBC
     ],
     "dh_group": [DHGroup.GROUP2, DHGroup.GROUP5],

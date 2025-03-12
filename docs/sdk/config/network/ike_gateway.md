@@ -475,17 +475,17 @@ try:
       },
       "folder": "VPN"
    }
-   
+
    # Create the IKE gateway using the unified client interface
    new_gateway = client.ike_gateway.create(gateway_config)
-   
+
    # Commit changes directly from the client
    result = client.commit(
       folders=["VPN"],
       description="Added test gateway",
       sync=True
    )
-   
+
    # Check job status directly from the client
    status = client.get_job_status(result.job_id)
 

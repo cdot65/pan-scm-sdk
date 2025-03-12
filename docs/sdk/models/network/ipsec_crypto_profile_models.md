@@ -315,10 +315,10 @@ The IPsec Crypto Profile models include several validations:
        """Validate that exactly one security protocol (ESP or AH) is configured."""
        if self.esp is not None and self.ah is not None:
            raise ValueError("Only one security protocol (ESP or AH) can be configured at a time")
-       
+
        if self.esp is None and self.ah is None:
            raise ValueError("At least one security protocol (ESP or AH) must be configured")
-       
+
        return self
    ```
 

@@ -173,7 +173,7 @@ The examples demonstrate the proper structure for security zone configurations:
         "tap": ["ethernet1/4"],        # TAP interfaces
         "tunnel": {},                  # Tunnel configuration
         "external": ["ethernet1/5"],   # External interfaces
-        
+
         # Additional network options:
         "zone_protection_profile": "profile-name", # Optional
         "enable_packet_buffer_protection": bool,   # Optional

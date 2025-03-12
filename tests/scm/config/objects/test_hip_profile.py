@@ -63,18 +63,16 @@ class TestHIPProfileMaxLimit(TestHIPProfileBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             HIPProfile(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             HIPProfile(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -257,8 +255,12 @@ class TestHIPProfileList(TestHIPProfileBase):
         """Test filtering objects with exact container match."""
         mock_response = {
             "data": [
-                HIPProfileResponseFactory(name="hip1", folder="Exact", match="Any (hip1)").model_dump(),
-                HIPProfileResponseFactory(name="hip2", folder="Different", match="Any (hip2)").model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip1", folder="Exact", match="Any (hip1)"
+                ).model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip2", folder="Different", match="Any (hip2)"
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -276,8 +278,12 @@ class TestHIPProfileList(TestHIPProfileBase):
         """Test excluding objects from specific folders."""
         mock_response = {
             "data": [
-                HIPProfileResponseFactory(name="hip1", folder="Keep", match="Any (hip1)").model_dump(),
-                HIPProfileResponseFactory(name="hip2", folder="Exclude", match="Any (hip2)").model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip1", folder="Keep", match="Any (hip1)"
+                ).model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip2", folder="Exclude", match="Any (hip2)"
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -295,8 +301,12 @@ class TestHIPProfileList(TestHIPProfileBase):
         """Test excluding objects from specific snippets."""
         mock_response = {
             "data": [
-                HIPProfileResponseFactory(name="hip1", snippet="Keep", match="Any (hip1)").model_dump(),
-                HIPProfileResponseFactory(name="hip2", snippet="Exclude", match="Any (hip2)").model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip1", snippet="Keep", match="Any (hip1)"
+                ).model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip2", snippet="Exclude", match="Any (hip2)"
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -314,8 +324,12 @@ class TestHIPProfileList(TestHIPProfileBase):
         """Test excluding objects from specific devices."""
         mock_response = {
             "data": [
-                HIPProfileResponseFactory(name="hip1", device="Keep", match="Any (hip1)").model_dump(),
-                HIPProfileResponseFactory(name="hip2", device="Exclude", match="Any (hip2)").model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip1", device="Keep", match="Any (hip1)"
+                ).model_dump(),
+                HIPProfileResponseFactory(
+                    name="hip2", device="Exclude", match="Any (hip2)"
+                ).model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -397,9 +411,7 @@ class TestHIPProfileCreate(TestHIPProfileBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
@@ -482,9 +494,7 @@ class TestHIPProfileGet(TestHIPProfileBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -578,9 +588,7 @@ class TestHIPProfileUpdate(TestHIPProfileBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -601,9 +609,7 @@ class TestHIPProfileUpdate(TestHIPProfileBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -694,9 +700,7 @@ class TestHIPProfileDelete(TestHIPProfileBase):
         self.mock_scm.delete.return_value = None
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with(
-            f"/config/objects/v1/hip-profiles/{object_id}"
-        )
+        self.mock_scm.delete.assert_called_once_with(f"/config/objects/v1/hip-profiles/{object_id}")
 
     def test_delete_referenced_object(self):
         """Test deleting an object that is referenced."""
@@ -713,9 +717,7 @@ class TestHIPProfileDelete(TestHIPProfileBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Reference not zero"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -732,9 +734,7 @@ class TestHIPProfileDelete(TestHIPProfileBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -819,9 +819,7 @@ class TestHIPProfileFetch(TestHIPProfileBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""

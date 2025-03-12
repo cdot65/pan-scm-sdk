@@ -399,17 +399,17 @@ try:
       "description": "IT department users",
       "tag": ["Test"]
    }
-   
+
    # Create the dynamic user group using the unified client
    new_dug = client.dynamic_user_group.create(dug_config)
-   
+
    # Commit changes directly on the client
    result = client.commit(
       folders=["Security"],
       description="Added test dynamic user group",
       sync=True
    )
-   
+
    # Check job status on the client
    status = client.get_job_status(result.job_id)
 

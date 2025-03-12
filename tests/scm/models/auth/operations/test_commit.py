@@ -73,9 +73,9 @@ class TestCandidatePushRequestModel:
                 CandidatePushRequestModel(**invalid_data)
 
             error = exc_info.value
-            assert "1 validation error for CandidatePushRequestModel" in str(
-                error
-            ), f"Failed for {case['desc']}"
+            assert "1 validation error for CandidatePushRequestModel" in str(error), (
+                f"Failed for {case['desc']}"
+            )
 
     def test_admin_empty_list(self):
         """Test validation with empty admin list."""
@@ -109,9 +109,9 @@ class TestCandidatePushRequestModel:
                 CandidatePushRequestModel(**invalid_data)
 
             error = exc_info.value
-            assert "1 validation error for CandidatePushRequestModel" in str(
-                error
-            ), f"Failed for {case['desc']}"
+            assert "1 validation error for CandidatePushRequestModel" in str(error), (
+                f"Failed for {case['desc']}"
+            )
 
     def test_multiple_validation_errors(self):
         """Test handling of multiple validation errors."""
@@ -166,9 +166,7 @@ class TestCandidatePushRequestModel:
             if case["should_pass"]:
                 try:
                     model = CandidatePushRequestModel(**case["data"])
-                    assert (
-                        model is not None
-                    ), f"Failed to create model for {case['desc']}"
+                    assert model is not None, f"Failed to create model for {case['desc']}"
                 except ValidationError as e:
                     pytest.fail(f"Should have passed for {case['desc']}: {str(e)}")
             else:

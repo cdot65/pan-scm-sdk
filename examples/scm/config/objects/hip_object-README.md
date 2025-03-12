@@ -257,34 +257,34 @@ Follow these steps to run the example:
    ```bash
    # Run all examples
    python hip_object.py
-   
+
    # Create only Host Info HIP objects
    python hip_object.py --host-info
-   
+
    # Create only Network Info HIP objects
    python hip_object.py --network-info
-   
+
    # Create only Patch Management HIP objects
    python hip_object.py --patch-management
-   
+
    # Create only Disk Encryption HIP objects
    python hip_object.py --disk-encryption
-   
+
    # Create only Mobile Device HIP objects
    python hip_object.py --mobile-device
-   
+
    # Create only Certificate HIP objects
    python hip_object.py --certificate
-   
+
    # Create only bulk HIP objects
    python hip_object.py --bulk
-   
+
    # Skip cleaning up created objects
    python hip_object.py --skip-cleanup
-   
+
    # Skip CSV report generation
    python hip_object.py --no-report
-   
+
    # Specify a different folder
    python hip_object.py --folder=Production
    ```

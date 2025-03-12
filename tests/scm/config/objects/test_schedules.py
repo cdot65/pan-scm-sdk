@@ -3,17 +3,14 @@
 # Standard library imports
 import pytest
 import uuid
-from typing import Dict, Any, List, Optional
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 # External libraries
-import requests
 from pydantic import ValidationError
 
 # Local SDK imports
 from scm.config.objects import Schedule
 from scm.models.objects import (
-    ScheduleCreateModel,
     ScheduleResponseModel,
     ScheduleUpdateModel,
 )
@@ -110,10 +107,7 @@ class TestScheduleCreate(TestScheduleBase):
         }
 
         # Mock API response
-        mock_response = {
-            "id": str(uuid.uuid4()),
-            **schedule_data
-        }
+        mock_response = {"id": str(uuid.uuid4()), **schedule_data}
         self.mock_scm.post.return_value = mock_response
 
         # Call the method
@@ -123,7 +117,7 @@ class TestScheduleCreate(TestScheduleBase):
         assert isinstance(result, ScheduleResponseModel)
         assert result.id == uuid.UUID(mock_response["id"])
         assert result.name == schedule_data["name"]
-        
+
         # Verify API call
         self.mock_scm.post.assert_called_once_with(
             self.schedule.ENDPOINT,
@@ -181,7 +175,7 @@ class TestScheduleGet(TestScheduleBase):
         assert isinstance(result, ScheduleResponseModel)
         assert str(result.id) == object_id
         assert result.name == mock_response["name"]
-        
+
         # Verify API call
         self.mock_scm.get.assert_called_once_with(
             f"{self.schedule.ENDPOINT}/{object_id}",
@@ -192,7 +186,7 @@ class TestScheduleGet(TestScheduleBase):
         # Test data
         object_id = str(uuid.uuid4())
         error_details = {"error": "Object not found"}
-        
+
         self.mock_scm.get.side_effect = APIError(
             message="Object Not Present",
             error_code="E005",
@@ -203,12 +197,12 @@ class TestScheduleGet(TestScheduleBase):
         # Call the method and expect APIError
         with pytest.raises(APIError) as exc_info:
             self.schedule.get(object_id)
-        
+
         # Verify error details
         assert exc_info.value.message == "Object Not Present"
         assert exc_info.value.http_status_code == 404
         assert exc_info.value.error_code == "E005"
-        
+
         # Verify API call
         self.mock_scm.get.assert_called_once_with(
             f"{self.schedule.ENDPOINT}/{object_id}",
@@ -256,7 +250,7 @@ class TestScheduleUpdate(TestScheduleBase):
         assert isinstance(result, ScheduleResponseModel)
         assert str(result.id) == object_id
         assert result.name == "UpdatedSchedule"
-        
+
         # Verify API call - should not include ID in payload
         expected_payload = update_data.model_dump(exclude_unset=True)
         expected_payload.pop("id")
@@ -280,7 +274,7 @@ class TestScheduleDelete(TestScheduleBase):
 
         # Verify the result
         assert result is None
-        
+
         # Verify API call
         self.mock_scm.delete.assert_called_once_with(
             f"{self.schedule.ENDPOINT}/{object_id}",
@@ -291,7 +285,7 @@ class TestScheduleDelete(TestScheduleBase):
         # Test data
         object_id = str(uuid.uuid4())
         error_details = {"error": "Object not found"}
-        
+
         self.mock_scm.delete.side_effect = APIError(
             message="Object Not Present",
             error_code="E005",
@@ -302,12 +296,12 @@ class TestScheduleDelete(TestScheduleBase):
         # Call the method and expect APIError
         with pytest.raises(APIError) as exc_info:
             self.schedule.delete(object_id)
-        
+
         # Verify error details
         assert exc_info.value.message == "Object Not Present"
         assert exc_info.value.http_status_code == 404
         assert exc_info.value.error_code == "E005"
-        
+
         # Verify API call
         self.mock_scm.delete.assert_called_once_with(
             f"{self.schedule.ENDPOINT}/{object_id}",
@@ -332,13 +326,10 @@ class TestScheduleList(TestScheduleBase):
         # Test data
         folder = "Shared"
         object_count = 3
-        
+
         # Create test objects
-        mock_objects = [
-            ScheduleResponseFactory.build(folder=folder)
-            for _ in range(object_count)
-        ]
-        
+        mock_objects = [ScheduleResponseFactory.build(folder=folder) for _ in range(object_count)]
+
         # Create API response
         mock_response = {
             "data": [obj.model_dump() for obj in mock_objects],
@@ -354,7 +345,7 @@ class TestScheduleList(TestScheduleBase):
         # Verify the result
         assert len(result) == object_count
         assert all(isinstance(obj, ScheduleResponseModel) for obj in result)
-        
+
         # Verify API call
         self.mock_scm.get.assert_called_once_with(
             self.schedule.ENDPOINT,
@@ -371,11 +362,10 @@ class TestScheduleList(TestScheduleBase):
         folder = "Shared"
         page_size = self.schedule.max_limit
         total_objects = page_size + 5  # More than one page
-        
+
         # Create first page response
         first_page_objects = [
-            ScheduleResponseFactory.build(folder=folder).model_dump()
-            for _ in range(page_size)
+            ScheduleResponseFactory.build(folder=folder).model_dump() for _ in range(page_size)
         ]
         first_page_response = {
             "data": first_page_objects,
@@ -383,7 +373,7 @@ class TestScheduleList(TestScheduleBase):
             "offset": 0,
             "total": total_objects,
         }
-        
+
         # Create second page response
         second_page_objects = [
             ScheduleResponseFactory.build(folder=folder).model_dump()
@@ -395,7 +385,7 @@ class TestScheduleList(TestScheduleBase):
             "offset": page_size,
             "total": total_objects,
         }
-        
+
         # Configure mock to return different responses for each call
         self.mock_scm.get.side_effect = [first_page_response, second_page_response]
 
@@ -405,7 +395,7 @@ class TestScheduleList(TestScheduleBase):
         # Verify the result
         assert len(result) == total_objects
         assert all(isinstance(obj, ScheduleResponseModel) for obj in result)
-        
+
         # Verify API calls
         assert self.mock_scm.get.call_count == 2
         self.mock_scm.get.assert_any_call(
@@ -428,10 +418,10 @@ class TestScheduleList(TestScheduleBase):
     def test_list_schedules_invalid_response_not_dict(self):
         """Test listing schedules with invalid response (not a dict)."""
         self.mock_scm.get.return_value = "not a dict"
-        
+
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.list(folder="Shared")
-        
+
         assert exc_info.value.message == "Invalid response format: expected dictionary"
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -439,10 +429,10 @@ class TestScheduleList(TestScheduleBase):
     def test_list_schedules_invalid_response_no_data(self):
         """Test listing schedules with invalid response (no data field)."""
         self.mock_scm.get.return_value = {"not_data": []}
-        
+
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.list(folder="Shared")
-        
+
         assert exc_info.value.message == "Invalid response format: missing 'data' field"
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -450,10 +440,10 @@ class TestScheduleList(TestScheduleBase):
     def test_list_schedules_invalid_response_data_not_list(self):
         """Test listing schedules with invalid response (data is not a list)."""
         self.mock_scm.get.return_value = {"data": "not a list"}
-        
+
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.list(folder="Shared")
-        
+
         assert exc_info.value.message == "Invalid response format: 'data' field must be a list"
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
@@ -464,12 +454,12 @@ class TestScheduleList(TestScheduleBase):
         folder = "Shared"
         exact_match_folder = folder
         different_folder = "DifferentFolder"
-        
+
         # Create test objects with different folders
         object1 = ScheduleResponseFactory.build(folder=exact_match_folder)
         object2 = ScheduleResponseFactory.build(folder=different_folder)
         object3 = ScheduleResponseFactory.build(folder=exact_match_folder)
-        
+
         # Create API response containing mixed folders
         mock_response = {
             "data": [
@@ -495,12 +485,12 @@ class TestScheduleList(TestScheduleBase):
         # Test data
         folder = "Shared"
         exclude_folder = "ExcludeMe"
-        
+
         # Create test objects
         object1 = ScheduleResponseFactory.build(folder=folder)
         object2 = ScheduleResponseFactory.build(folder=exclude_folder)
         object3 = ScheduleResponseFactory.build(folder=folder)
-        
+
         # Create API response
         mock_response = {
             "data": [
@@ -529,7 +519,7 @@ class TestScheduleList(TestScheduleBase):
         # Test data
         folder = "Shared"
         exclude_snippet = "ExcludeSnippet"
-        
+
         # Create test objects
         object1 = ScheduleResponseFactory.build(folder=folder)
         object1.snippet = exclude_snippet  # Add snippet attribute
@@ -537,7 +527,7 @@ class TestScheduleList(TestScheduleBase):
         object2.snippet = None
         object3 = ScheduleResponseFactory.build(folder=folder)
         object3.snippet = "OtherSnippet"
-        
+
         # Create API response
         mock_response = {
             "data": [
@@ -566,7 +556,7 @@ class TestScheduleList(TestScheduleBase):
         # Test data
         folder = "Shared"
         exclude_device = "ExcludeDevice"
-        
+
         # Create test objects
         object1 = ScheduleResponseFactory.build(folder=folder)
         object1.device = exclude_device  # Add device attribute
@@ -574,7 +564,7 @@ class TestScheduleList(TestScheduleBase):
         object2.device = None
         object3 = ScheduleResponseFactory.build(folder=folder)
         object3.device = "OtherDevice"
-        
+
         # Create API response
         mock_response = {
             "data": [
@@ -609,10 +599,10 @@ class TestScheduleFilters(TestScheduleBase):
             ScheduleResponseFactory.build(),
             ScheduleResponseFactory.build(),
         ]
-        
+
         # Apply filters
         result = self.schedule._apply_filters(schedules, {})
-        
+
         # Verify no filtering occurred
         assert len(result) == len(schedules)
         assert result == schedules
@@ -623,10 +613,10 @@ class TestScheduleFilters(TestScheduleBase):
         recurring_schedule = ScheduleResponseFactory.build()
         non_recurring_schedule = ScheduleResponseFactory.with_non_recurring_schedule()
         schedules = [recurring_schedule, non_recurring_schedule]
-        
+
         # Apply filter for recurring schedules
         result = self.schedule._apply_filters(schedules, {"schedule_type": "recurring"})
-        
+
         # Verify filtering
         assert len(result) == 1
         assert result[0].schedule_type.recurring is not None
@@ -638,10 +628,10 @@ class TestScheduleFilters(TestScheduleBase):
         recurring_schedule = ScheduleResponseFactory.build()
         non_recurring_schedule = ScheduleResponseFactory.with_non_recurring_schedule()
         schedules = [recurring_schedule, non_recurring_schedule]
-        
+
         # Apply filter for non-recurring schedules
         result = self.schedule._apply_filters(schedules, {"schedule_type": "non_recurring"})
-        
+
         # Verify filtering
         assert len(result) == 1
         assert result[0].schedule_type.non_recurring is not None
@@ -651,13 +641,16 @@ class TestScheduleFilters(TestScheduleBase):
         """Test _apply_filters with invalid schedule_type value."""
         # Create test schedules
         schedules = [ScheduleResponseFactory.build()]
-        
+
         # Apply filter with invalid value
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule._apply_filters(schedules, {"schedule_type": "invalid_type"})
-        
+
         # Verify error
-        assert exc_info.value.message == "'schedule_type' filter must be 'recurring' or 'non_recurring'"
+        assert (
+            exc_info.value.message
+            == "'schedule_type' filter must be 'recurring' or 'non_recurring'"
+        )
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 400
 
@@ -668,10 +661,10 @@ class TestScheduleFilters(TestScheduleBase):
         daily_schedule = ScheduleResponseFactory.with_daily_schedule()
         non_recurring_schedule = ScheduleResponseFactory.with_non_recurring_schedule()
         schedules = [weekly_schedule, daily_schedule, non_recurring_schedule]
-        
+
         # Apply filter for weekly schedules
         result = self.schedule._apply_filters(schedules, {"recurring_type": "weekly"})
-        
+
         # Verify filtering
         assert len(result) == 1
         assert result[0].schedule_type.recurring is not None
@@ -684,10 +677,10 @@ class TestScheduleFilters(TestScheduleBase):
         daily_schedule = ScheduleResponseFactory.with_daily_schedule()
         non_recurring_schedule = ScheduleResponseFactory.with_non_recurring_schedule()
         schedules = [weekly_schedule, daily_schedule, non_recurring_schedule]
-        
+
         # Apply filter for daily schedules
         result = self.schedule._apply_filters(schedules, {"recurring_type": "daily"})
-        
+
         # Verify filtering
         assert len(result) == 1
         assert result[0].schedule_type.recurring is not None
@@ -697,11 +690,11 @@ class TestScheduleFilters(TestScheduleBase):
         """Test _apply_filters with invalid recurring_type value."""
         # Create test schedules
         schedules = [ScheduleResponseFactory.build()]
-        
+
         # Apply filter with invalid value
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule._apply_filters(schedules, {"recurring_type": "invalid_type"})
-        
+
         # Verify error
         assert exc_info.value.message == "'recurring_type' filter must be 'weekly' or 'daily'"
         assert exc_info.value.error_code == "E003"
@@ -715,7 +708,7 @@ class TestScheduleFetch(TestScheduleBase):
         """Test fetching a schedule with empty name."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.schedule.fetch(name="")
-        
+
         assert exc_info.value.message == "Field 'name' cannot be empty"
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 400
@@ -724,7 +717,7 @@ class TestScheduleFetch(TestScheduleBase):
         """Test fetching a schedule with empty folder."""
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.schedule.fetch(name="TestSchedule", folder="")
-        
+
         assert exc_info.value.message == "Field 'folder' cannot be empty"
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 400
@@ -733,8 +726,11 @@ class TestScheduleFetch(TestScheduleBase):
         """Test fetching a schedule with no container."""
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.fetch(name="TestSchedule")
-        
-        assert exc_info.value.message == "At least one of 'folder', 'snippet', or 'device' must be provided."
+
+        assert (
+            exc_info.value.message
+            == "At least one of 'folder', 'snippet', or 'device' must be provided."
+        )
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 400
 
@@ -744,7 +740,7 @@ class TestScheduleFetch(TestScheduleBase):
         name = "TestSchedule"
         folder = "Shared"
         object_id = str(uuid.uuid4())
-        
+
         # Create API response
         mock_response = {
             "data": [
@@ -775,7 +771,7 @@ class TestScheduleFetch(TestScheduleBase):
         assert str(result.id) == object_id
         assert result.name == name
         assert result.folder == folder
-        
+
         # Verify API call
         self.mock_scm.get.assert_called_once_with(
             self.schedule.ENDPOINT,
@@ -791,7 +787,7 @@ class TestScheduleFetch(TestScheduleBase):
         name = "TestSchedule"
         folder = "Shared"
         object_id = str(uuid.uuid4())
-        
+
         # Create API response (direct object)
         mock_response = {
             "id": object_id,
@@ -821,7 +817,7 @@ class TestScheduleFetch(TestScheduleBase):
         # Test data
         name = "NonExistentSchedule"
         folder = "Shared"
-        
+
         # Create API response with empty data list
         mock_response = {
             "data": [],
@@ -834,7 +830,7 @@ class TestScheduleFetch(TestScheduleBase):
         # Call the method and expect error
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.fetch(name=name, folder=folder)
-        
+
         # Verify error
         assert exc_info.value.message == f"No schedule found with name '{name}'"
         assert exc_info.value.error_code == "E005"
@@ -845,7 +841,7 @@ class TestScheduleFetch(TestScheduleBase):
         # Test data
         name = "TestSchedule"
         folder = "Shared"
-        
+
         # Create API response with invalid format
         mock_response = {
             "some_other_field": "value",
@@ -856,7 +852,7 @@ class TestScheduleFetch(TestScheduleBase):
         # Call the method and expect error
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.fetch(name=name, folder=folder)
-        
+
         # Verify error
         assert exc_info.value.message == "Invalid response format"
         assert exc_info.value.error_code == "E003"
@@ -867,14 +863,14 @@ class TestScheduleFetch(TestScheduleBase):
         # Test data
         name = "TestSchedule"
         folder = "Shared"
-        
+
         # Create invalid API response
         self.mock_scm.get.return_value = "not a dict"
 
         # Call the method and expect error
         with pytest.raises(InvalidObjectError) as exc_info:
             self.schedule.fetch(name=name, folder=folder)
-        
+
         # Verify error
         assert exc_info.value.message == "Invalid response format: expected dictionary"
         assert exc_info.value.error_code == "E003"

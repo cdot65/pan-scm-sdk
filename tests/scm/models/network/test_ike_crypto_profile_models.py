@@ -1,4 +1,5 @@
 """Test models for IKE crypto profiles."""
+
 import pytest
 from uuid import UUID
 from pydantic import ValidationError
@@ -147,7 +148,7 @@ class TestIKECryptoProfileModels:
         assert HashAlgorithm.SHA1 in profile.hash
         assert HashAlgorithm.SHA256 in profile.hash
         assert profile.folder == "test-folder"
-        
+
         # Test description is excluded from model fields but still accessible
         assert profile.model_fields["description"].exclude is True
 
@@ -161,7 +162,7 @@ class TestIKECryptoProfileModels:
         }
         with pytest.raises(ValidationError):
             IKECryptoProfileResponseModel(**invalid_data)
-            
+
     def test_description_in_update_model(self):
         """Test description field in update model but not in response model."""
         # The update model should accept description field
@@ -177,8 +178,8 @@ class TestIKECryptoProfileModels:
         # This should not raise an error - description should be accepted
         update_model = IKECryptoProfileUpdateModel(**update_data)
         assert update_model.description == "This is a test description"
-        
-        # Response model has description field but it's excluded from serialization
+
+        # Response model has description field, but it's excluded from serialization
         response_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-profile",

@@ -449,17 +449,17 @@ try:
       "description": "Test network segment",
       "tag": ["Test"]
    }
-   
+
    # Create the address using the unified client interface
    new_address = client.address.create(address_config)
-   
+
    # Commit changes directly from the client
    result = client.commit(
       folders=["Texas"],
       description="Added test address",
       sync=True
    )
-   
+
    # Check job status directly from the client
    status = client.get_job_status(result.job_id)
 

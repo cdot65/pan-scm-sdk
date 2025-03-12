@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with Dynamic User Group objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of Dynamic User Group configurations and operations commonly 
+This script demonstrates a wide range of Dynamic User Group configurations and operations commonly
 used in enterprise networks, including:
 
 1. Dynamic User Group Types:
@@ -39,7 +39,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -105,9 +105,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -118,17 +116,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -139,9 +133,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -159,15 +151,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -188,8 +180,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -232,7 +224,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -240,14 +232,14 @@ def initialize_client():
 def create_simple_tag_based_group(user_groups, folder="Texas"):
     """
     Create a simple tag-based dynamic user group.
-    
+
     This function demonstrates creating a dynamic user group using a simple
     tag expression to filter users based on a single attribute.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         DynamicUserGroupResponseModel: The created group object, or None if creation failed
     """
@@ -267,7 +259,7 @@ def create_simple_tag_based_group(user_groups, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Simple Tag-Based Group")
+    log_info("  - Type: Simple Tag-Based Group")
     log_info(f"  - Filter Expression: {simple_group_config['filter']}")
     log_info(f"  - Tags: {', '.join(simple_group_config['tag'])}")
 
@@ -283,15 +275,15 @@ def create_simple_tag_based_group(user_groups, folder="Texas"):
         )
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Group name conflict", e.message)
+        log_error("Group name conflict", e.message)
         log_info("Try using a different group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid group data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid group data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating dynamic user group", str(e))
+        log_error("Unexpected error creating dynamic user group", str(e))
 
     return None
 
@@ -299,14 +291,14 @@ def create_simple_tag_based_group(user_groups, folder="Texas"):
 def create_complex_boolean_group(user_groups, folder="Texas"):
     """
     Create a dynamic user group with complex boolean expressions.
-    
+
     This function demonstrates creating a dynamic user group using boolean operators
     (AND, OR, NOT) to create more sophisticated filtering logic.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         DynamicUserGroupResponseModel: The created group object, or None if creation failed
     """
@@ -327,7 +319,7 @@ def create_complex_boolean_group(user_groups, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Complex Boolean Expression Group")
+    log_info("  - Type: Complex Boolean Expression Group")
     log_info(f"  - Filter Expression: {complex_group_config['filter']}")
     log_info(f"  - Tags: {', '.join(complex_group_config['tag'])}")
 
@@ -343,15 +335,15 @@ def create_complex_boolean_group(user_groups, folder="Texas"):
         )
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Group name conflict", e.message)
+        log_error("Group name conflict", e.message)
         log_info("Try using a different group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid group data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid group data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating dynamic user group", str(e))
+        log_error("Unexpected error creating dynamic user group", str(e))
 
     return None
 
@@ -359,14 +351,14 @@ def create_complex_boolean_group(user_groups, folder="Texas"):
 def create_multi_attribute_group(user_groups, folder="Texas"):
     """
     Create a dynamic user group filtering on multiple user attributes.
-    
+
     This function demonstrates creating a group that filters users based on
     multiple attributes to provide fine-grained targeting.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         DynamicUserGroupResponseModel: The created group object, or None if creation failed
     """
@@ -387,7 +379,7 @@ def create_multi_attribute_group(user_groups, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Multi-Attribute Group")
+    log_info("  - Type: Multi-Attribute Group")
     log_info(f"  - Filter Expression: {multi_attr_config['filter']}")
     log_info(f"  - Tags: {', '.join(multi_attr_config['tag'])}")
 
@@ -403,15 +395,15 @@ def create_multi_attribute_group(user_groups, folder="Texas"):
         )
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Group name conflict", e.message)
+        log_error("Group name conflict", e.message)
         log_info("Try using a different group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid group data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid group data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating dynamic user group", str(e))
+        log_error("Unexpected error creating dynamic user group", str(e))
 
     return None
 
@@ -419,14 +411,14 @@ def create_multi_attribute_group(user_groups, folder="Texas"):
 def create_department_based_group(user_groups, folder="Texas"):
     """
     Create a dynamic user group based on department.
-    
+
     This function demonstrates creating a group that filters users based on
     their department, commonly used for role-based access control.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         DynamicUserGroupResponseModel: The created group object, or None if creation failed
     """
@@ -446,7 +438,7 @@ def create_department_based_group(user_groups, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Department-Based Group")
+    log_info("  - Type: Department-Based Group")
     log_info(f"  - Filter Expression: {department_group_config['filter']}")
     log_info(f"  - Tags: {', '.join(department_group_config['tag'])}")
 
@@ -462,15 +454,15 @@ def create_department_based_group(user_groups, folder="Texas"):
         )
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Group name conflict", e.message)
+        log_error("Group name conflict", e.message)
         log_info("Try using a different group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid group data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid group data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating dynamic user group", str(e))
+        log_error("Unexpected error creating dynamic user group", str(e))
 
     return None
 
@@ -478,14 +470,14 @@ def create_department_based_group(user_groups, folder="Texas"):
 def create_role_based_group(user_groups, folder="Texas"):
     """
     Create a dynamic user group based on role.
-    
+
     This function demonstrates creating a group that filters users based on
     their role within the organization, useful for functional access policies.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         DynamicUserGroupResponseModel: The created group object, or None if creation failed
     """
@@ -505,7 +497,7 @@ def create_role_based_group(user_groups, folder="Texas"):
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Role-Based Group")
+    log_info("  - Type: Role-Based Group")
     log_info(f"  - Filter Expression: {role_group_config['filter']}")
     log_info(f"  - Tags: {', '.join(role_group_config['tag'])}")
 
@@ -516,20 +508,18 @@ def create_role_based_group(user_groups, folder="Texas"):
         log_info(f"  - Object ID: {new_group.id}")
         log_info(f"  - Description: {new_group.description}")
         log_info(f"  - Filter: {new_group.filter}")
-        log_operation_complete(
-            "Role-based dynamic user group creation", f"Group: {new_group.name}"
-        )
+        log_operation_complete("Role-based dynamic user group creation", f"Group: {new_group.name}")
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Group name conflict", e.message)
+        log_error("Group name conflict", e.message)
         log_info("Try using a different group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid group data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid group data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating dynamic user group", str(e))
+        log_error("Unexpected error creating dynamic user group", str(e))
 
     return None
 
@@ -537,16 +527,16 @@ def create_role_based_group(user_groups, folder="Texas"):
 def fetch_and_update_dynamic_user_group(user_groups, group_id):
     """
     Fetch a dynamic user group by ID and update its filter expression.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing dynamic user group using its ID
     2. Modify the group's filter expression
     3. Submit the updated group back to the SCM API
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         group_id: The UUID of the group to update
-        
+
     Returns:
         DynamicUserGroupResponseModel: The updated group object, or None if update failed
     """
@@ -560,13 +550,13 @@ def fetch_and_update_dynamic_user_group(user_groups, group_id):
 
         # Update the filter expression with more specific criteria
         original_filter = user_group.filter
-        
+
         # Add additional condition to the filter
         if " AND " in original_filter:
             user_group.filter = f"({original_filter}) AND tag.access.approved"
         else:
             user_group.filter = f"{original_filter} AND tag.access.approved"
-            
+
         # Update description as well
         if user_group.description:
             user_group.description = f"{user_group.description} - With approved access only"
@@ -585,7 +575,7 @@ def fetch_and_update_dynamic_user_group(user_groups, group_id):
         logger.error(f"Dynamic user group not found: {e.message}")
     except InvalidObjectError as e:
         logger.error(f"Invalid dynamic user group update: {e.message}")
-        if hasattr(e, 'details') and e.details:
+        if hasattr(e, "details") and e.details:
             logger.error(f"Details: {e.details}")
 
     return None
@@ -594,15 +584,15 @@ def fetch_and_update_dynamic_user_group(user_groups, group_id):
 def list_and_filter_dynamic_user_groups(user_groups):
     """
     List and filter dynamic user group objects.
-    
+
     This function demonstrates how to:
     1. List all dynamic user groups in a folder
     2. Filter dynamic user groups by name pattern
     3. Display detailed information about each group
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
-        
+
     Returns:
         list: All retrieved dynamic user group objects
     """
@@ -615,7 +605,9 @@ def list_and_filter_dynamic_user_groups(user_groups):
     # Filter by name pattern (if supported)
     try:
         developer_groups = user_groups.list(folder="Texas", name="developer")
-        logger.info(f"Found {len(developer_groups)} dynamic user groups with 'developer' in the name")
+        logger.info(
+            f"Found {len(developer_groups)} dynamic user groups with 'developer' in the name"
+        )
     except Exception as e:
         logger.warning(f"Filtering by name is not supported: {str(e)}")
 
@@ -624,13 +616,15 @@ def list_and_filter_dynamic_user_groups(user_groups):
     for user_group in all_groups[:5]:  # Print details of up to 5 objects
         logger.info(f"  - Group: {user_group.name}")
         logger.info(f"    ID: {user_group.id}")
-        logger.info(f"    Description: {user_group.description if hasattr(user_group, 'description') and user_group.description else 'None'}")
+        logger.info(
+            f"    Description: {user_group.description if hasattr(user_group, 'description') and user_group.description else 'None'}"
+        )
         logger.info(f"    Filter: {user_group.filter}")
-        
+
         # Print tags if available
         if hasattr(user_group, "tag") and user_group.tag:
             logger.info(f"    Tags: {', '.join(user_group.tag)}")
-            
+
         # Print folder/container info if available
         if hasattr(user_group, "folder") and user_group.folder:
             logger.info(f"    Folder: {user_group.folder}")
@@ -638,7 +632,7 @@ def list_and_filter_dynamic_user_groups(user_groups):
             logger.info(f"    Snippet: {user_group.snippet}")
         elif hasattr(user_group, "device") and user_group.device:
             logger.info(f"    Device: {user_group.device}")
-            
+
         logger.info("")
 
     return all_groups
@@ -647,7 +641,7 @@ def list_and_filter_dynamic_user_groups(user_groups):
 def cleanup_dynamic_user_group_objects(user_groups, group_ids):
     """
     Delete the dynamic user group objects created in this example.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         group_ids: List of dynamic user group object IDs to delete
@@ -667,14 +661,14 @@ def cleanup_dynamic_user_group_objects(user_groups, group_ids):
 def create_bulk_dynamic_user_group_objects(user_groups, folder="Texas"):
     """
     Create multiple dynamic user group objects in a batch.
-    
+
     This function demonstrates creating multiple dynamic user group objects in a batch,
     which is useful for setting up multiple groups at once.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created dynamic user group objects, or empty list if creation failed
     """
@@ -709,7 +703,7 @@ def create_bulk_dynamic_user_group_objects(user_groups, folder="Texas"):
             "folder": folder,
             "tag": ["Automation", "Bulk", "Remote"],
             "filter": "tag.location.remote AND tag.status.active",
-        }
+        },
     ]
 
     created_groups = []
@@ -718,9 +712,7 @@ def create_bulk_dynamic_user_group_objects(user_groups, folder="Texas"):
     for group_config in group_configs:
         try:
             new_group = user_groups.create(group_config)
-            logger.info(
-                f"Created dynamic user group: {new_group.name} with ID: {new_group.id}"
-            )
+            logger.info(f"Created dynamic user group: {new_group.name} with ID: {new_group.id}")
             created_groups.append(new_group.id)
         except Exception as e:
             logger.error(f"Error creating group {group_config['name']}: {str(e)}")
@@ -731,54 +723,54 @@ def create_bulk_dynamic_user_group_objects(user_groups, folder="Texas"):
 def generate_dynamic_user_group_report(user_groups, group_ids, execution_time):
     """
     Generate a comprehensive CSV report of all dynamic user group objects created by the script.
-    
+
     This function fetches detailed information about each dynamic user group object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         user_groups: The DynamicUserGroup manager instance used to fetch object details
         group_ids: List of dynamic user group object IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"dynamic_user_groups_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
         "Description",
-        "Filter Expression", 
+        "Filter Expression",
         "Tags",
         "Container Type",
         "Container Name",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each dynamic user group object
     group_data = []
     for idx, group_id in enumerate(group_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(group_ids) - 1:
             log_info(f"Processing dynamic user group {idx + 1} of {len(group_ids)}")
-            
+
         try:
             # Get the dynamic user group details
             user_group = user_groups.get(group_id)
-            
+
             # Determine container type and name
             container_type = "Unknown"
             container_name = "Unknown"
-            
+
             if hasattr(user_group, "folder") and user_group.folder:
                 container_type = "Folder"
                 container_name = user_group.folder
@@ -788,43 +780,51 @@ def generate_dynamic_user_group_report(user_groups, group_ids, execution_time):
             elif hasattr(user_group, "device") and user_group.device:
                 container_type = "Device"
                 container_name = user_group.device
-                
+
             # Add group data
-            group_data.append([
-                user_group.id,
-                user_group.name,
-                user_group.description if hasattr(user_group, "description") and user_group.description else "None",
-                user_group.filter,
-                ", ".join(user_group.tag) if hasattr(user_group, "tag") and user_group.tag else "None",
-                container_type,
-                container_name,
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            group_data.append(
+                [
+                    user_group.id,
+                    user_group.name,
+                    user_group.description
+                    if hasattr(user_group, "description") and user_group.description
+                    else "None",
+                    user_group.filter,
+                    ", ".join(user_group.tag)
+                    if hasattr(user_group, "tag") and user_group.tag
+                    else "None",
+                    container_type,
+                    container_name,
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for dynamic user group ID {group_id}", str(e))
             # Add minimal info for groups that couldn't be retrieved
-            group_data.append([
-                group_id, 
-                "ERROR", 
-                "ERROR", 
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            group_data.append(
+                [
+                    group_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(group_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -832,22 +832,24 @@ def generate_dynamic_user_group_report(user_groups, group_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"dynamic_user_groups_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(group_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -857,89 +859,70 @@ def generate_dynamic_user_group_report(user_groups, group_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the dynamic user group example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which dynamic user group types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Dynamic User Groups Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created dynamic user group objects (don't delete them)"
+        help="Preserve created dynamic user group objects (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("Group Type Selection")
     object_group.add_argument(
-        "--simple", 
-        action="store_true",
-        help="Create simple tag-based dynamic user group examples"
+        "--simple", action="store_true", help="Create simple tag-based dynamic user group examples"
     )
     object_group.add_argument(
-        "--complex", 
-        action="store_true", 
-        help="Create complex boolean dynamic user group examples"
+        "--complex", action="store_true", help="Create complex boolean dynamic user group examples"
     )
     object_group.add_argument(
-        "--multi", 
-        action="store_true",
-        help="Create multi-attribute dynamic user group examples"
+        "--multi", action="store_true", help="Create multi-attribute dynamic user group examples"
     )
     object_group.add_argument(
-        "--department", 
+        "--department",
         action="store_true",
-        help="Create department-based dynamic user group examples"
+        help="Create department-based dynamic user group examples",
     )
     object_group.add_argument(
-        "--role", 
-        action="store_true",
-        help="Create role-based dynamic user group examples"
+        "--role", action="store_true", help="Create role-based dynamic user group examples"
     )
     object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk dynamic user group examples"
+        "--bulk", action="store_true", help="Create bulk dynamic user group examples"
     )
     object_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Create all dynamic user group types (default behavior)"
+        "--all", action="store_true", help="Create all dynamic user group types (default behavior)"
     )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of dynamic user group examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -949,7 +932,7 @@ def main():
     6. Generate a detailed CSV report of all created dynamic user group objects
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created dynamic user group objects (don't delete them)
         --simple: Create only simple tag-based dynamic user group examples
@@ -961,33 +944,34 @@ def main():
         --all: Create all dynamic user group types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
-    create_all = args.all or not (args.simple or args.complex or args.multi or 
-                                args.department or args.role or args.bulk)
-    
+    create_all = args.all or not (
+        args.simple or args.complex or args.multi or args.department or args.role or args.bulk
+    )
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1016,7 +1000,7 @@ def main():
                 created_groups.append(simple_group.id)
                 object_count += 1
 
-            log_success(f"Created simple tag-based dynamic user group")
+            log_success("Created simple tag-based dynamic user group")
 
         # Complex boolean dynamic user groups
         if create_all or args.complex:
@@ -1030,7 +1014,7 @@ def main():
                 created_groups.append(complex_group.id)
                 object_count += 1
 
-            log_success(f"Created complex boolean dynamic user group")
+            log_success("Created complex boolean dynamic user group")
 
         # Multi-attribute dynamic user groups
         if create_all or args.multi:
@@ -1044,7 +1028,7 @@ def main():
                 created_groups.append(multi_attr_group.id)
                 object_count += 1
 
-            log_success(f"Created multi-attribute dynamic user group")
+            log_success("Created multi-attribute dynamic user group")
 
         # Department-based dynamic user groups
         if create_all or args.department:
@@ -1058,7 +1042,7 @@ def main():
                 created_groups.append(department_group.id)
                 object_count += 1
 
-            log_success(f"Created department-based dynamic user group")
+            log_success("Created department-based dynamic user group")
 
         # Role-based dynamic user groups
         if create_all or args.role:
@@ -1072,7 +1056,7 @@ def main():
                 created_groups.append(role_group.id)
                 object_count += 1
 
-            log_success(f"Created role-based dynamic user group")
+            log_success("Created role-based dynamic user group")
 
         # Bulk dynamic user group creation
         if create_all or args.bulk:
@@ -1091,25 +1075,29 @@ def main():
         if created_groups:
             log_section("UPDATING DYNAMIC USER GROUPS")
             log_info("Demonstrating how to update existing dynamic user group objects")
-            updated_group = fetch_and_update_dynamic_user_group(user_groups, created_groups[0])
+            fetch_and_update_dynamic_user_group(user_groups, created_groups[0])
 
         # List and filter dynamic user group objects
         log_section("LISTING AND FILTERING DYNAMIC USER GROUPS")
         log_info("Demonstrating how to search and filter dynamic user group objects")
-        all_groups = list_and_filter_dynamic_user_groups(user_groups)
+        list_and_filter_dynamic_user_groups(user_groups)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_groups and not args.no_report:
             log_section("REPORT GENERATION")
             log_operation_start("Generating dynamic user groups CSV report")
-            report_file = generate_dynamic_user_group_report(user_groups, created_groups, execution_time_so_far)
+            report_file = generate_dynamic_user_group_report(
+                user_groups, created_groups, execution_time_so_far
+            )
             if report_file:
                 log_success(f"Generated dynamic user groups report: {report_file}")
-                log_info(f"The report contains details of all {len(created_groups)} dynamic user group objects created")
+                log_info(
+                    f"The report contains details of all {len(created_groups)} dynamic user group objects created"
+                )
             else:
                 log_error("Failed to generate dynamic user groups report")
         elif args.no_report:
@@ -1120,10 +1108,16 @@ def main():
         # Clean up the created objects, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_groups)} dynamic user group objects")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_groups)} dynamic user group objects"
+            )
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
-            log_operation_start(f"Cleaning up {len(created_groups)} created dynamic user group objects")
+            log_operation_start(
+                f"Cleaning up {len(created_groups)} created dynamic user group objects"
+            )
             cleanup_dynamic_user_group_objects(user_groups, created_groups)
 
         # Calculate and display final execution statistics
@@ -1132,22 +1126,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total dynamic user group objects created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some dynamic user group objects may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

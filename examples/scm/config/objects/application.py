@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with Application objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of Application object configurations and operations commonly 
+This script demonstrates a wide range of Application object configurations and operations commonly
 used in enterprise networks, including:
 
 1. Application Object Types:
@@ -38,7 +38,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -104,9 +104,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -117,17 +115,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -138,9 +132,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -158,15 +150,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -187,8 +179,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -231,7 +223,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -239,14 +231,14 @@ def initialize_client():
 def create_business_application(applications, folder="Texas"):
     """
     Create a standard business application.
-    
+
     This function demonstrates creating a standard business application,
     commonly used for corporate systems.
-    
+
     Args:
         applications: The Application manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ApplicationResponseModel: The created application object, or None if creation failed
     """
@@ -256,7 +248,7 @@ def create_business_application(applications, folder="Texas"):
     app_name = f"custom-db-{uuid.uuid4().hex[:6]}"
     log_info(f"Application name: {app_name}")
 
-    # Create the application configuration 
+    # Create the application configuration
     # Note: ApplicationResponseModel does not include a 'tag' field, so we don't include it here
     business_app_config = {
         "name": app_name,
@@ -282,20 +274,18 @@ def create_business_application(applications, folder="Texas"):
         log_success(f"Created application object: {new_app.name}")
         log_info(f"  - Object ID: {new_app.id}")
         log_info(f"  - Description: {new_app.description}")
-        log_operation_complete(
-            "Business application creation", f"Application: {new_app.name}"
-        )
+        log_operation_complete("Business application creation", f"Application: {new_app.name}")
         return new_app
     except NameNotUniqueError as e:
-        log_error(f"Application name conflict", e.message)
+        log_error("Application name conflict", e.message)
         log_info("Try using a different application name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid application data", e.message)
+        log_error("Invalid application data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating application object", str(e))
+        log_error("Unexpected error creating application object", str(e))
 
     return None
 
@@ -303,14 +293,14 @@ def create_business_application(applications, folder="Texas"):
 def create_secure_application(applications, folder="Texas"):
     """
     Create a secure application with special security attributes.
-    
+
     This function demonstrates creating a secure application with specific security attributes,
     commonly used for secure messaging, VPN, or other trusted applications.
-    
+
     Args:
         applications: The Application manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ApplicationResponseModel: The created application object, or None if creation failed
     """
@@ -352,20 +342,18 @@ def create_secure_application(applications, folder="Texas"):
         log_success(f"Created application object: {new_app.name}")
         log_info(f"  - Object ID: {new_app.id}")
         log_info(f"  - Description: {new_app.description}")
-        log_operation_complete(
-            "Secure application creation", f"Application: {new_app.name}"
-        )
+        log_operation_complete("Secure application creation", f"Application: {new_app.name}")
         return new_app
     except NameNotUniqueError as e:
-        log_error(f"Application name conflict", e.message)
+        log_error("Application name conflict", e.message)
         log_info("Try using a different application name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid application data", e.message)
+        log_error("Invalid application data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating application object", str(e))
+        log_error("Unexpected error creating application object", str(e))
 
     return None
 
@@ -373,14 +361,14 @@ def create_secure_application(applications, folder="Texas"):
 def create_high_risk_application(applications, folder="Texas"):
     """
     Create a high-risk application.
-    
+
     This function demonstrates creating a high-risk application,
     which might represent a potentially dangerous or suspicious application.
-    
+
     Args:
         applications: The Application manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ApplicationResponseModel: The created application object, or None if creation failed
     """
@@ -424,20 +412,18 @@ def create_high_risk_application(applications, folder="Texas"):
         log_success(f"Created application object: {new_app.name}")
         log_info(f"  - Object ID: {new_app.id}")
         log_info(f"  - Description: {new_app.description}")
-        log_operation_complete(
-            "High-risk application creation", f"Application: {new_app.name}"
-        )
+        log_operation_complete("High-risk application creation", f"Application: {new_app.name}")
         return new_app
     except NameNotUniqueError as e:
-        log_error(f"Application name conflict", e.message)
+        log_error("Application name conflict", e.message)
         log_info("Try using a different application name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid application data", e.message)
+        log_error("Invalid application data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating application object", str(e))
+        log_error("Unexpected error creating application object", str(e))
 
     return None
 
@@ -445,14 +431,14 @@ def create_high_risk_application(applications, folder="Texas"):
 def create_protocol_application(applications, folder="Texas"):
     """
     Create a network protocol application.
-    
+
     This function demonstrates creating a network protocol application,
     commonly used for specific network protocols not covered by predefined applications.
-    
+
     Args:
         applications: The Application manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ApplicationResponseModel: The created application object, or None if creation failed
     """
@@ -488,20 +474,18 @@ def create_protocol_application(applications, folder="Texas"):
         log_success(f"Created application object: {new_app.name}")
         log_info(f"  - Object ID: {new_app.id}")
         log_info(f"  - Description: {new_app.description}")
-        log_operation_complete(
-            "Protocol application creation", f"Application: {new_app.name}"
-        )
+        log_operation_complete("Protocol application creation", f"Application: {new_app.name}")
         return new_app
     except NameNotUniqueError as e:
-        log_error(f"Application name conflict", e.message)
+        log_error("Application name conflict", e.message)
         log_info("Try using a different application name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid application data", e.message)
+        log_error("Invalid application data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating application object", str(e))
+        log_error("Unexpected error creating application object", str(e))
 
     return None
 
@@ -509,16 +493,16 @@ def create_protocol_application(applications, folder="Texas"):
 def fetch_and_update_application(applications, application_id):
     """
     Fetch an application object by ID and update its description and risk level.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing application object using its ID
     2. Modify object properties (description, risk level)
     3. Submit the updated object back to the SCM API
-    
+
     Args:
         applications: The Application manager instance
         application_id: The UUID of the application object to update
-        
+
     Returns:
         ApplicationResponseModel: The updated application object, or None if update failed
     """
@@ -531,7 +515,7 @@ def fetch_and_update_application(applications, application_id):
 
         # Update description
         application.description = f"Updated description for {application.name}"
-        
+
         # Update risk level (if applicable)
         if hasattr(application, "risk") and application.risk < 5:
             application.risk += 1
@@ -557,15 +541,15 @@ def fetch_and_update_application(applications, application_id):
 def list_and_filter_applications(applications):
     """
     List and filter application objects.
-    
+
     This function demonstrates how to:
     1. List the applications we just created (by ID)
     2. Filter application objects by various criteria
     3. Display detailed information about each object
-    
+
     Args:
         applications: The Application manager instance
-        
+
     Returns:
         list: Our created application objects
     """
@@ -573,29 +557,29 @@ def list_and_filter_applications(applications):
 
     # Instead of trying to list all applications in the folder,
     # we'll just use the applications we've created and demonstrate filtering in code
-    
+
     # Create a small list of application objects to analyze
     created_apps = []
-    
+
     # For demonstration, pretend we're filtering from a larger set
     logger.info("Demonstrating application filtering (using our created applications)")
-    
+
     try:
         # Create a custom Application instance with small max_limit to avoid timeouts
         applications_limited = Application(applications.api_client, max_limit=5000)
-        
+
         app_ids = []
         # Get applications with small limit to avoid timeouts
         recent_apps = applications_limited.list(folder="Texas", exact_match=True)
-        
+
         # Get the IDs
         for app in recent_apps[:5]:  # Just use the first few
             if hasattr(app, "id"):
                 app_ids.append(app.id)
-        
+
         # Show how many we found
         logger.info(f"Found {len(app_ids)} recent applications in folder for analysis")
-        
+
         # Get details for a few applications (up to 3)
         for app_id in app_ids[:3]:
             logger.info(f"Getting details of application with ID: {app_id}")
@@ -606,25 +590,29 @@ def list_and_filter_applications(applications):
                     logger.info(f"Retrieved application: {app.name} ({app.category})")
             except Exception as app_error:
                 logger.warning(f"Could not retrieve application {app_id}: {str(app_error)}")
-        
+
     except Exception as e:
         logger.error(f"Error retrieving application details: {str(e)}")
         # If we couldn't get our created apps, we'll just report that and continue
         logger.info("Using only our newly created applications instead")
-    
+
     logger.info(f"Retrieved {len(created_apps)} applications for analysis")
-    
+
     # Demonstrate filtering in code (as if we had retrieved from the API)
     logger.info("\nDemonstrating filtering capabilities:")
-    
+
     # Filter by category
-    business_category = [app for app in created_apps if hasattr(app, "category") and app.category == "business-systems"]
+    business_category = [
+        app
+        for app in created_apps
+        if hasattr(app, "category") and app.category == "business-systems"
+    ]
     logger.info(f"Found {len(business_category)} business applications")
-    
+
     # Filter by risk level
     high_risk = [app for app in created_apps if hasattr(app, "risk") and app.risk >= 4]
     logger.info(f"Found {len(high_risk)} high-risk applications (risk ≥ 4)")
-    
+
     # Print details of applications
     logger.info("\nDetails of application objects:")
     for app in created_apps[:5]:  # Print details of up to 5 objects
@@ -635,11 +623,11 @@ def list_and_filter_applications(applications):
         logger.info(f"    Subcategory: {app.subcategory}")
         logger.info(f"    Technology: {app.technology}")
         logger.info(f"    Risk: {app.risk}")
-        
+
         # Show ports if they exist
         if hasattr(app, "ports") and app.ports:
             logger.info(f"    Ports: {', '.join(app.ports)}")
-            
+
         # Show security characteristics
         security_attrs = []
         if hasattr(app, "evasive") and app.evasive:
@@ -652,10 +640,10 @@ def list_and_filter_applications(applications):
             security_attrs.append("Has Known Vulnerabilities")
         if hasattr(app, "transfers_files") and app.transfers_files:
             security_attrs.append("Transfers Files")
-            
+
         if security_attrs:
             logger.info(f"    Security Attributes: {', '.join(security_attrs)}")
-            
+
         logger.info("")
 
     return created_apps
@@ -664,7 +652,7 @@ def list_and_filter_applications(applications):
 def cleanup_application_objects(applications, application_ids):
     """
     Delete the application objects created in this example.
-    
+
     Args:
         applications: The Application manager instance
         application_ids: List of application object IDs to delete
@@ -684,14 +672,14 @@ def cleanup_application_objects(applications, application_ids):
 def create_bulk_application_objects(applications, folder="Texas"):
     """
     Create multiple application objects in a batch.
-    
+
     This function demonstrates creating multiple application objects in a batch,
     which is useful for setting up multiple applications at once.
-    
+
     Args:
         applications: The Application manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created application objects, or empty list if creation failed
     """
@@ -729,7 +717,7 @@ def create_bulk_application_objects(applications, folder="Texas"):
             "technology": "client-server",
             "risk": 1,
             "ports": ["tcp/12345"],
-        }
+        },
     ]
 
     created_applications = []
@@ -738,9 +726,7 @@ def create_bulk_application_objects(applications, folder="Texas"):
     for app_config in application_configs:
         try:
             new_app = applications.create(app_config)
-            logger.info(
-                f"Created application object: {new_app.name} with ID: {new_app.id}"
-            )
+            logger.info(f"Created application object: {new_app.name} with ID: {new_app.id}")
             created_applications.append(new_app.id)
         except Exception as e:
             logger.error(f"Error creating application {app_config['name']}: {str(e)}")
@@ -751,54 +737,54 @@ def create_bulk_application_objects(applications, folder="Texas"):
 def generate_application_report(applications, application_ids, execution_time):
     """
     Generate a comprehensive CSV report of all application objects created by the script.
-    
+
     This function fetches detailed information about each application object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         applications: The Application manager instance used to fetch object details
         application_ids: List of application object IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"application_objects_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
         "Category",
-        "Subcategory", 
+        "Subcategory",
         "Technology",
         "Risk",
         "Ports",
-        "Description", 
+        "Description",
         "Tags",  # Note: Tag field not available in ApplicationResponseModel
         "Security Attributes",
         "Created On",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each application object
     application_data = []
     for idx, application_id in enumerate(application_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(application_ids) - 1:
             log_info(f"Processing application {idx + 1} of {len(application_ids)}")
-            
+
         try:
             # Get the application details
             application = applications.get(application_id)
-            
+
             # Determine security attributes
             security_attrs = []
             if hasattr(application, "evasive") and application.evasive:
@@ -807,7 +793,10 @@ def generate_application_report(applications, application_ids, execution_time):
                 security_attrs.append("Pervasive")
             if hasattr(application, "used_by_malware") and application.used_by_malware:
                 security_attrs.append("Used by Malware")
-            if hasattr(application, "has_known_vulnerabilities") and application.has_known_vulnerabilities:
+            if (
+                hasattr(application, "has_known_vulnerabilities")
+                and application.has_known_vulnerabilities
+            ):
                 security_attrs.append("Has Known Vulnerabilities")
             if hasattr(application, "transfers_files") and application.transfers_files:
                 security_attrs.append("Transfers Files")
@@ -815,55 +804,66 @@ def generate_application_report(applications, application_ids, execution_time):
                 security_attrs.append("Tunnels Other Apps")
             if hasattr(application, "prone_to_misuse") and application.prone_to_misuse:
                 security_attrs.append("Prone to Misuse")
-            if hasattr(application, "excessive_bandwidth_use") and application.excessive_bandwidth_use:
+            if (
+                hasattr(application, "excessive_bandwidth_use")
+                and application.excessive_bandwidth_use
+            ):
                 security_attrs.append("Excessive Bandwidth Use")
             if hasattr(application, "no_certifications") and application.no_certifications:
                 security_attrs.append("No Certifications")
-            
+
             # Add application data
-            application_data.append([
-                application.id,
-                application.name,
-                application.category,
-                application.subcategory,
-                application.technology,
-                application.risk,
-                ", ".join(application.ports) if hasattr(application, "ports") and application.ports else "None",
-                application.description if application.description else "None",
-                "None",  # No tag field in ApplicationResponseModel
-                ", ".join(security_attrs) if security_attrs else "None",
-                application.created_on.strftime("%Y-%m-%d %H:%M:%S") if hasattr(application, "created_on") and application.created_on else "Unknown",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            application_data.append(
+                [
+                    application.id,
+                    application.name,
+                    application.category,
+                    application.subcategory,
+                    application.technology,
+                    application.risk,
+                    ", ".join(application.ports)
+                    if hasattr(application, "ports") and application.ports
+                    else "None",
+                    application.description if application.description else "None",
+                    "None",  # No tag field in ApplicationResponseModel
+                    ", ".join(security_attrs) if security_attrs else "None",
+                    application.created_on.strftime("%Y-%m-%d %H:%M:%S")
+                    if hasattr(application, "created_on") and application.created_on
+                    else "Unknown",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for application ID {application_id}", str(e))
             # Add minimal info for applications that couldn't be retrieved
-            application_data.append([
-                application_id, 
-                "ERROR", 
-                "ERROR", 
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                f"Failed to retrieve application details: {str(e)}", 
-                "",
-                "",
-                "",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            application_data.append(
+                [
+                    application_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    f"Failed to retrieve application details: {str(e)}",
+                    "",
+                    "",
+                    "",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(application_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -871,22 +871,24 @@ def generate_application_report(applications, application_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"application_objects_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(application_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -896,84 +898,65 @@ def generate_application_report(applications, application_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the application example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which application object types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Application Objects Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created application objects (don't delete them)"
+        help="Preserve created application objects (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("Object Type Selection")
     object_group.add_argument(
-        "--business", 
-        action="store_true",
-        help="Create business application examples"
+        "--business", action="store_true", help="Create business application examples"
     )
     object_group.add_argument(
-        "--secure", 
-        action="store_true", 
-        help="Create secure application examples"
+        "--secure", action="store_true", help="Create secure application examples"
     )
     object_group.add_argument(
-        "--high-risk", 
-        action="store_true",
-        help="Create high-risk application examples"
+        "--high-risk", action="store_true", help="Create high-risk application examples"
     )
     object_group.add_argument(
-        "--protocol", 
-        action="store_true",
-        help="Create protocol application examples"
+        "--protocol", action="store_true", help="Create protocol application examples"
     )
     object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk application examples"
+        "--bulk", action="store_true", help="Create bulk application examples"
     )
     object_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Create all application object types (default behavior)"
+        "--all", action="store_true", help="Create all application object types (default behavior)"
     )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of application object examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -983,7 +966,7 @@ def main():
     6. Generate a detailed CSV report of all created application objects
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created application objects (don't delete them)
         --business: Create only business application examples
@@ -994,32 +977,34 @@ def main():
         --all: Create all application object types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
-    create_all = args.all or not (args.business or args.secure or args.high_risk or args.protocol or args.bulk)
-    
+    create_all = args.all or not (
+        args.business or args.secure or args.high_risk or args.protocol or args.bulk
+    )
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1048,7 +1033,7 @@ def main():
                 created_applications.append(business_app.id)
                 object_count += 1
 
-            log_success(f"Created business application objects")
+            log_success("Created business application objects")
 
         # Secure Application objects
         if create_all or args.secure:
@@ -1062,7 +1047,7 @@ def main():
                 created_applications.append(secure_app.id)
                 object_count += 1
 
-            log_success(f"Created secure application objects")
+            log_success("Created secure application objects")
 
         # High-risk Application objects
         if create_all or args.high_risk:
@@ -1076,7 +1061,7 @@ def main():
                 created_applications.append(risk_app.id)
                 object_count += 1
 
-            log_success(f"Created high-risk application objects")
+            log_success("Created high-risk application objects")
 
         # Protocol Application objects
         if create_all or args.protocol:
@@ -1090,7 +1075,7 @@ def main():
                 created_applications.append(protocol_app.id)
                 object_count += 1
 
-            log_success(f"Created protocol application objects")
+            log_success("Created protocol application objects")
 
         # Bulk Application object creation
         if create_all or args.bulk:
@@ -1109,25 +1094,29 @@ def main():
         if created_applications:
             log_section("UPDATING APPLICATION OBJECTS")
             log_info("Demonstrating how to update existing application objects")
-            updated_application = fetch_and_update_application(applications, created_applications[0])
+            fetch_and_update_application(applications, created_applications[0])
 
         # List and filter application objects
         log_section("LISTING AND FILTERING APPLICATION OBJECTS")
         log_info("Demonstrating how to search and filter application objects")
-        all_applications = list_and_filter_applications(applications)
+        list_and_filter_applications(applications)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_applications and not args.no_report:
             log_section("REPORT GENERATION")
             log_operation_start("Generating application objects CSV report")
-            report_file = generate_application_report(applications, created_applications, execution_time_so_far)
+            report_file = generate_application_report(
+                applications, created_applications, execution_time_so_far
+            )
             if report_file:
                 log_success(f"Generated application objects report: {report_file}")
-                log_info(f"The report contains details of all {len(created_applications)} application objects created")
+                log_info(
+                    f"The report contains details of all {len(created_applications)} application objects created"
+                )
             else:
                 log_error("Failed to generate application objects report")
         elif args.no_report:
@@ -1138,10 +1127,16 @@ def main():
         # Clean up the created objects, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_applications)} application objects")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_applications)} application objects"
+            )
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
-            log_operation_start(f"Cleaning up {len(created_applications)} created application objects")
+            log_operation_start(
+                f"Cleaning up {len(created_applications)} created application objects"
+            )
             cleanup_application_objects(applications, created_applications)
 
         # Calculate and display final execution statistics
@@ -1150,22 +1145,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total application objects created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some application objects may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

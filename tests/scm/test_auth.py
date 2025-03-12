@@ -62,9 +62,7 @@ class TestOAuth2Client:
         self.mock_signing_key = MagicMock()
         self.mock_signing_key.key = "mock_key"
         self.mock_jwks_client_instance = MagicMock()
-        self.mock_jwks_client_instance.get_signing_key_from_jwt.return_value = (
-            self.mock_signing_key
-        )
+        self.mock_jwks_client_instance.get_signing_key_from_jwt.return_value = self.mock_signing_key
         self.mock_jwks_client.return_value = self.mock_jwks_client_instance
 
         self.mock_jwt.decode.return_value = self.mock_jwt_payload
@@ -76,7 +74,7 @@ class TestOAuth2Client:
 
     def test_create_session_success(self, auth_request):
         """Test successful session creation."""
-        client = OAuth2Client(auth_request)
+        OAuth2Client(auth_request)
 
         self.mock_oauth_session.assert_called_once()
         self.mock_session.fetch_token.assert_called_once_with(
@@ -99,7 +97,7 @@ class TestOAuth2Client:
         client.session = self.mock_session
 
         # Expect APIError when trying to get signing key without token
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             client._get_signing_key()
 
     def test_token_expires_soon_with_expiry(self, auth_request):
@@ -120,7 +118,7 @@ class TestOAuth2Client:
         """Test session creation with general error."""
         self.mock_session.fetch_token.side_effect = Exception("Test error")
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             OAuth2Client(auth_request)
 
     def test_get_signing_key_success(self, auth_request):
@@ -136,11 +134,11 @@ class TestOAuth2Client:
 
     def test_get_signing_key_error(self, auth_request):
         """Test signing key retrieval error."""
-        self.mock_jwks_client_instance.get_signing_key_from_jwt.side_effect = (
-            PyJWKClientError("Test error")
+        self.mock_jwks_client_instance.get_signing_key_from_jwt.side_effect = PyJWKClientError(
+            "Test error"
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             OAuth2Client(auth_request)
 
     def test_decode_token_success(self, auth_request):
@@ -169,7 +167,7 @@ class TestOAuth2Client:
         self.mock_jwt.decode.side_effect = Exception("Test error")
         client = OAuth2Client(auth_request)
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             client.decode_token()
 
     def test_is_expired_false(self, auth_request):
@@ -188,7 +186,7 @@ class TestOAuth2Client:
         self.mock_jwt.decode.side_effect = Exception("Test error")
         client = OAuth2Client(auth_request)
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             _ = client.is_expired
 
     def test_refresh_token_success(self, auth_request):
@@ -220,9 +218,8 @@ class TestOAuth2Client:
         with pytest.raises(APIError) as exc_info:
             client.refresh_token()
 
-        assert (
-            "{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016"
-            in str(exc_info.value)
+        assert "{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016" in str(
+            exc_info.value
         )
 
     def test_refresh_token_general_error(self, auth_request):
@@ -230,7 +227,7 @@ class TestOAuth2Client:
         client = OAuth2Client(auth_request)
         self.mock_session.fetch_token.side_effect = Exception("Test error")
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             client.refresh_token()
 
     def test_refresh_token_http_error_no_content(self, auth_request):
@@ -241,7 +238,7 @@ class TestOAuth2Client:
         mock_response.status_code = 500
         self.mock_session.fetch_token.side_effect = HTTPError(response=mock_response)
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             client.refresh_token()
 
     def test_create_session_network_error(self, auth_request):
@@ -301,7 +298,7 @@ class TestOAuth2Client:
             "Request failed during refresh"
         )
 
-        with pytest.raises(APIError) as exc_info:
+        with pytest.raises(APIError):
             client.refresh_token()
 
     def test_create_session_http_error(self, auth_request):
@@ -309,12 +306,8 @@ class TestOAuth2Client:
         # Create mock HTTP error response with correct error format
         mock_response = MagicMock()
         mock_response.content = b'{"error": "test_error"}'
-        mock_response.content = (
-            b'{"_errors": [{"code": "E001", "message": "HTTP Error"}]}'
-        )
-        mock_response.json.return_value = {
-            "_errors": [{"code": "E001", "message": "HTTP Error"}]
-        }
+        mock_response.content = b'{"_errors": [{"code": "E001", "message": "HTTP Error"}]}'
+        mock_response.json.return_value = {"_errors": [{"code": "E001", "message": "HTTP Error"}]}
         mock_response.status_code = 500
 
         # Create HTTPError with mock response

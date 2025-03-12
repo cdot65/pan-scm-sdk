@@ -1,18 +1,15 @@
 # tests/scm/config/network/test_ipsec_crypto_profile.py
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid import UUID
-import json
+
+import pytest
 
 from scm.client import Scm
 from scm.config.network import IPsecCryptoProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.network import (
     IPsecCryptoProfileResponseModel,
-    LifetimeSeconds,
-    EspConfig,
-    EspEncryption,
 )
 
 

@@ -52,9 +52,8 @@ class TestWildfireAvProfileCreateModel:
         data = WildfireAvProfileCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             WildfireAvProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     # def test_wildfire_av_profile_create_model_no_container(self):

@@ -175,31 +175,31 @@ Follow these steps to run the example:
    ```bash
    # Run all examples
    python dynamic_user_group.py
-   
+
    # Create only simple tag-based dynamic user groups
    python dynamic_user_group.py --simple
-   
+
    # Create only complex boolean dynamic user groups
    python dynamic_user_group.py --complex
-   
+
    # Create only multi-attribute dynamic user groups
    python dynamic_user_group.py --multi
-   
+
    # Create only department-based dynamic user groups
    python dynamic_user_group.py --department
-   
+
    # Create only role-based dynamic user groups
    python dynamic_user_group.py --role
-   
+
    # Create only bulk dynamic user groups
    python dynamic_user_group.py --bulk
-   
+
    # Skip cleaning up created objects
    python dynamic_user_group.py --skip-cleanup
-   
+
    # Skip CSV report generation
    python dynamic_user_group.py --no-report
-   
+
    # Specify a different folder
    python dynamic_user_group.py --folder=Production
    ```

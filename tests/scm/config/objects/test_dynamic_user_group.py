@@ -2,7 +2,6 @@
 
 # Standard library imports
 from unittest.mock import MagicMock
-import uuid
 
 # External libraries
 import pytest
@@ -187,18 +186,16 @@ class TestDynamicUserGroupMaxLimit(TestDynamicUserGroupBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             DynamicUserGroup(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             DynamicUserGroup(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -262,10 +259,7 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
             self.client.list(folder="NonexistentFolder")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Listing failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Operation Impossible"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Operation Impossible"
 
     def test_list_container_missing_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
@@ -690,9 +684,7 @@ class TestDynamicUserGroupCreate(TestDynamicUserGroupBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
 
 class TestDynamicUserGroupGet(TestDynamicUserGroupBase):
@@ -736,9 +728,7 @@ class TestDynamicUserGroupGet(TestDynamicUserGroupBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_http_error_no_response_content(self):
         """Test get method when HTTP error has no response content."""
@@ -771,10 +761,7 @@ class TestDynamicUserGroupUpdate(TestDynamicUserGroupBase):
 
         self.mock_scm.put.assert_called_once()  # noqa
         call_args = self.mock_scm.put.call_args  # noqa
-        assert (
-            call_args[0][0]
-            == f"/config/objects/v1/dynamic-user-groups/{update_data.id}"
-        )
+        assert call_args[0][0] == f"/config/objects/v1/dynamic-user-groups/{update_data.id}"
 
         payload = call_args[1]["json"]
         assert payload["name"] == "updated_group"
@@ -804,9 +791,7 @@ class TestDynamicUserGroupUpdate(TestDynamicUserGroupBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -853,9 +838,7 @@ class TestDynamicUserGroupDelete(TestDynamicUserGroupBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""

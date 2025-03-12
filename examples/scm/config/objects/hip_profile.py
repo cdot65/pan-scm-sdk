@@ -45,7 +45,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. HIP object references in match expressions must exist in your environment or the
@@ -71,8 +71,6 @@ from scm.exceptions import (
     NameNotUniqueError,
 )
 from scm.models.objects import (
-    HIPProfileCreateModel,
-    HIPProfileResponseModel,
     HIPProfileUpdateModel,
 )
 
@@ -116,9 +114,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -129,17 +125,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -150,9 +142,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -170,15 +160,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -199,8 +189,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -243,7 +233,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -251,14 +241,14 @@ def initialize_client():
 def create_basic_hip_profile(hip_profiles, folder="Texas"):
     """
     Create a basic HIP profile with simple match criteria.
-    
+
     This function demonstrates creating a simple HIP profile with a basic match expression
     using a dictionary that gets converted to a HIPProfileCreateModel.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         HIPProfileResponseModel: The created HIP profile, or None if creation failed
     """
@@ -287,20 +277,18 @@ def create_basic_hip_profile(hip_profiles, folder="Texas"):
         log_success(f"Created HIP profile: {new_hip_profile.name}")
         log_info(f"  - Profile ID: {new_hip_profile.id}")
         log_info(f"  - Match criteria: {new_hip_profile.match}")
-        log_operation_complete(
-            "Basic HIP profile creation", f"Profile: {new_hip_profile.name}"
-        )
+        log_operation_complete("Basic HIP profile creation", f"Profile: {new_hip_profile.name}")
         return new_hip_profile
     except NameNotUniqueError as e:
-        log_error(f"HIP profile name conflict", e.message)
+        log_error("HIP profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HIP profile data", e.message)
+        log_error("Invalid HIP profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HIP profile", str(e))
+        log_error("Unexpected error creating HIP profile", str(e))
 
     return None
 
@@ -308,14 +296,14 @@ def create_basic_hip_profile(hip_profiles, folder="Texas"):
 def create_complex_hip_profile(hip_profiles, folder="Texas"):
     """
     Create a HIP profile with complex match criteria using AND/OR logic.
-    
+
     This function demonstrates creating a HIP profile with a more complex match expression
     that uses boolean logic (AND, OR) to combine multiple HIP objects.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         HIPProfileResponseModel: The created HIP profile, or None if creation failed
     """
@@ -347,20 +335,18 @@ def create_complex_hip_profile(hip_profiles, folder="Texas"):
         log_success(f"Created HIP profile: {new_hip_profile.name}")
         log_info(f"  - Profile ID: {new_hip_profile.id}")
         log_info(f"  - Match criteria: {new_hip_profile.match}")
-        log_operation_complete(
-            "Complex HIP profile creation", f"Profile: {new_hip_profile.name}"
-        )
+        log_operation_complete("Complex HIP profile creation", f"Profile: {new_hip_profile.name}")
         return new_hip_profile
     except NameNotUniqueError as e:
-        log_error(f"HIP profile name conflict", e.message)
+        log_error("HIP profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HIP profile data", e.message)
+        log_error("Invalid HIP profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HIP profile", str(e))
+        log_error("Unexpected error creating HIP profile", str(e))
 
     return None
 
@@ -368,14 +354,14 @@ def create_complex_hip_profile(hip_profiles, folder="Texas"):
 def create_hip_profile_with_snippet(hip_profiles, folder="Texas"):
     """
     Create a HIP profile in a snippet container instead of a folder.
-    
+
     This function demonstrates creating a HIP profile that is stored in a snippet
     container instead of the default folder container.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         HIPProfileResponseModel: The created HIP profile, or None if creation failed
     """
@@ -404,20 +390,18 @@ def create_hip_profile_with_snippet(hip_profiles, folder="Texas"):
         log_success(f"Created HIP profile: {new_hip_profile.name}")
         log_info(f"  - Profile ID: {new_hip_profile.id}")
         log_info(f"  - Container: snippet '{new_hip_profile.snippet}'")
-        log_operation_complete(
-            "Snippet HIP profile creation", f"Profile: {new_hip_profile.name}"
-        )
+        log_operation_complete("Snippet HIP profile creation", f"Profile: {new_hip_profile.name}")
         return new_hip_profile
     except NameNotUniqueError as e:
-        log_error(f"HIP profile name conflict", e.message)
+        log_error("HIP profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HIP profile data", e.message)
+        log_error("Invalid HIP profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HIP profile", str(e))
+        log_error("Unexpected error creating HIP profile", str(e))
 
     return None
 
@@ -425,14 +409,14 @@ def create_hip_profile_with_snippet(hip_profiles, folder="Texas"):
 def create_hip_profile_with_device(hip_profiles, folder="Texas"):
     """
     Create a HIP profile in a device container.
-    
+
     This function demonstrates creating a HIP profile that is stored in a device
     container instead of the default folder container.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         HIPProfileResponseModel: The created HIP profile, or None if creation failed
     """
@@ -461,20 +445,18 @@ def create_hip_profile_with_device(hip_profiles, folder="Texas"):
         log_success(f"Created HIP profile: {new_hip_profile.name}")
         log_info(f"  - Profile ID: {new_hip_profile.id}")
         log_info(f"  - Container: device '{new_hip_profile.device}'")
-        log_operation_complete(
-            "Device HIP profile creation", f"Profile: {new_hip_profile.name}"
-        )
+        log_operation_complete("Device HIP profile creation", f"Profile: {new_hip_profile.name}")
         return new_hip_profile
     except NameNotUniqueError as e:
-        log_error(f"HIP profile name conflict", e.message)
+        log_error("HIP profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HIP profile data", e.message)
+        log_error("Invalid HIP profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HIP profile", str(e))
+        log_error("Unexpected error creating HIP profile", str(e))
 
     return None
 
@@ -482,14 +464,14 @@ def create_hip_profile_with_device(hip_profiles, folder="Texas"):
 def create_negative_match_hip_profile(hip_profiles, folder="Texas"):
     """
     Create a HIP profile with negative match criteria (NOT operator).
-    
+
     This function demonstrates creating a HIP profile that uses the NOT operator
     in its match expression to exclude certain HIP objects.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         folder: Folder name in SCM to create the profile in (default: "Texas")
-        
+
     Returns:
         HIPProfileResponseModel: The created HIP profile, or None if creation failed
     """
@@ -521,20 +503,18 @@ def create_negative_match_hip_profile(hip_profiles, folder="Texas"):
         log_success(f"Created HIP profile: {new_hip_profile.name}")
         log_info(f"  - Profile ID: {new_hip_profile.id}")
         log_info(f"  - Match criteria: {new_hip_profile.match}")
-        log_operation_complete(
-            "Negative HIP profile creation", f"Profile: {new_hip_profile.name}"
-        )
+        log_operation_complete("Negative HIP profile creation", f"Profile: {new_hip_profile.name}")
         return new_hip_profile
     except NameNotUniqueError as e:
-        log_error(f"HIP profile name conflict", e.message)
+        log_error("HIP profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HIP profile data", e.message)
+        log_error("Invalid HIP profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HIP profile", str(e))
+        log_error("Unexpected error creating HIP profile", str(e))
 
     return None
 
@@ -542,16 +522,16 @@ def create_negative_match_hip_profile(hip_profiles, folder="Texas"):
 def fetch_and_update_hip_profile(hip_profiles, profile_id):
     """
     Fetch a HIP profile by ID and update its description and match criteria.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing HIP profile using its ID
     2. Modify profile properties (description, match criteria)
     3. Submit the updated profile back to the SCM API
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         profile_id: The UUID of the HIP profile to update
-        
+
     Returns:
         HIPProfileResponseModel: The updated HIP profile object, or None if update failed
     """
@@ -568,7 +548,7 @@ def fetch_and_update_hip_profile(hip_profiles, profile_id):
         # Create an update model with correct match syntax
         updated_match = '"is-win" or "is-firewall-enabled"'
         updated_description = f"Updated HIP profile - modified on {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        
+
         update_model = HIPProfileUpdateModel(
             id=hip_profile.id,
             name=hip_profile.name,
@@ -589,13 +569,13 @@ def fetch_and_update_hip_profile(hip_profiles, profile_id):
         return updated_profile
 
     except NotFoundError as e:
-        log_error(f"HIP profile not found", e.message)
+        log_error("HIP profile not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid HIP profile update", e.message)
+        log_error("Invalid HIP profile update", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error updating HIP profile", str(e))
+        log_error("Unexpected error updating HIP profile", str(e))
 
     return None
 
@@ -603,15 +583,15 @@ def fetch_and_update_hip_profile(hip_profiles, profile_id):
 def list_and_filter_hip_profiles(hip_profiles):
     """
     List and filter HIP profiles with various filtering options.
-    
+
     This function demonstrates:
     1. Listing all HIP profiles in a specific folder
     2. Filtering by exact match on container
     3. Excluding profiles from specific containers (folders/snippets/devices)
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
-        
+
     Returns:
         list: List of all HIP profiles found
     """
@@ -642,30 +622,30 @@ def list_and_filter_hip_profiles(hip_profiles):
             log_info("")
 
         return all_profiles
-    
+
     except InvalidObjectError as e:
-        log_error(f"Invalid request when listing HIP profiles", e.message)
+        log_error("Invalid request when listing HIP profiles", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error listing HIP profiles", str(e))
-        
+        log_error("Unexpected error listing HIP profiles", str(e))
+
     return []
 
 
 def fetch_hip_profile_by_name(hip_profiles, profile_name, folder="Texas"):
     """
     Fetch a specific HIP profile by name from a folder.
-    
+
     This function demonstrates using the fetch method to retrieve a HIP profile
     by its name rather than its ID, which is useful when you know the name but
     not the ID of the profile.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         profile_name: The name of the HIP profile to fetch
         folder: The folder containing the HIP profile (default: "Texas")
-        
+
     Returns:
         HIPProfileResponseModel: The fetched HIP profile, or None if fetch failed
     """
@@ -680,33 +660,33 @@ def fetch_hip_profile_by_name(hip_profiles, profile_name, folder="Texas"):
         log_info(f"  - Match: {profile.match}")
         if profile.description:
             log_info(f"  - Description: {profile.description}")
-        
+
         log_operation_complete("HIP profile fetch by name", f"Profile: {profile.name}")
         return profile
-        
+
     except NotFoundError as e:
-        log_error(f"HIP profile not found", e.message)
+        log_error("HIP profile not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid fetch request", e.message)
+        log_error("Invalid fetch request", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error fetching HIP profile", str(e))
-        
+        log_error("Unexpected error fetching HIP profile", str(e))
+
     return None
 
 
 def delete_hip_profile(hip_profiles, profile_id):
     """
     Delete a HIP profile.
-    
+
     This function demonstrates deleting a HIP profile using its ID. It handles
     common error cases such as the profile not being found or already deleted.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         profile_id: The UUID of the HIP profile to delete
-        
+
     Returns:
         bool: True if deletion was successful, False otherwise
     """
@@ -719,23 +699,23 @@ def delete_hip_profile(hip_profiles, profile_id):
         log_success(f"Successfully deleted HIP profile with ID: {profile_id}")
         log_operation_complete("HIP profile deletion")
         return True
-        
+
     except NotFoundError as e:
-        log_error(f"HIP profile not found", e.message)
+        log_error("HIP profile not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid delete request", e.message)
+        log_error("Invalid delete request", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error deleting HIP profile", str(e))
-        
+        log_error("Unexpected error deleting HIP profile", str(e))
+
     return False
 
 
 def cleanup_hip_profiles(hip_profiles, profile_ids):
     """
     Delete the HIP profiles created in this example.
-    
+
     Args:
         hip_profiles: The HIP profile manager instance
         profile_ids: List of UUIDs of HIP profiles to delete
@@ -748,7 +728,9 @@ def cleanup_hip_profiles(hip_profiles, profile_ids):
             hip_profiles.delete(profile_id)
             log_success(f"Deleted HIP profile with ID: {profile_id}")
         except NotFoundError:
-            log_warning(f"HIP profile with ID {profile_id} not found - may have been already deleted")
+            log_warning(
+                f"HIP profile with ID {profile_id} not found - may have been already deleted"
+            )
         except Exception as e:
             log_error(f"Error deleting HIP profile with ID {profile_id}", str(e))
 
@@ -756,50 +738,50 @@ def cleanup_hip_profiles(hip_profiles, profile_ids):
 def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
     """
     Generate a comprehensive CSV report of all HIP profiles created by the script.
-    
+
     This function fetches detailed information about each HIP profile and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         hip_profiles: The HIPProfile manager instance used to fetch object details
         profile_ids: List of HIP profile IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"hip_profiles_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
-        "Match Expression", 
-        "Description", 
+        "Match Expression",
+        "Description",
         "Container",
-        "Container Value", 
+        "Container Value",
         "Created On",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each HIP profile
     profile_data = []
     for idx, profile_id in enumerate(profile_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(profile_ids) - 1:
             log_info(f"Processing HIP profile {idx + 1} of {len(profile_ids)}")
-            
+
         try:
             # Get the HIP profile details
             profile = hip_profiles.get(profile_id)
-            
+
             # Determine container type
             container_type = "Unknown"
             container_value = "Unknown"
@@ -812,43 +794,49 @@ def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
             elif profile.device:
                 container_type = "Device"
                 container_value = profile.device
-            
+
             # Add HIP profile data
-            profile_data.append([
-                profile.id,
-                profile.name,
-                profile.match,
-                profile.description if profile.description else "None",
-                container_type,
-                container_value,
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") if hasattr(profile, "created_on") and profile.created_on else "Unknown",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            profile_data.append(
+                [
+                    profile.id,
+                    profile.name,
+                    profile.match,
+                    profile.description if profile.description else "None",
+                    container_type,
+                    container_value,
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    if hasattr(profile, "created_on") and profile.created_on
+                    else "Unknown",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for HIP profile ID {profile_id}", str(e))
             # Add minimal info for HIP profiles that couldn't be retrieved
-            profile_data.append([
-                profile_id, 
-                "ERROR", 
-                "ERROR",
-                f"Failed to retrieve HIP profile details: {str(e)}", 
-                "Unknown",
-                "Unknown",
-                "",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            profile_data.append(
+                [
+                    profile_id,
+                    "ERROR",
+                    "ERROR",
+                    f"Failed to retrieve HIP profile details: {str(e)}",
+                    "Unknown",
+                    "Unknown",
+                    "",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(profile_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -856,22 +844,24 @@ def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"hip_profiles_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(profile_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -881,79 +871,54 @@ def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the HIP profile example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created profiles
     - Which HIP profile operations to demonstrate
     - Whether to generate a CSV report
     - Folder name to use for profile creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager HIP Profiles Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created HIP profiles (don't delete them)"
+        help="Preserve created HIP profiles (don't delete them)",
     )
-    
+
     # Operations to demonstrate
     op_group = parser.add_argument_group("Operations")
+    op_group.add_argument("--create", action="store_true", help="Demonstrate creation operations")
+    op_group.add_argument("--update", action="store_true", help="Demonstrate update operations")
+    op_group.add_argument("--list", action="store_true", help="Demonstrate listing operations")
+    op_group.add_argument("--delete", action="store_true", help="Demonstrate deletion operations")
     op_group.add_argument(
-        "--create", 
-        action="store_true",
-        help="Demonstrate creation operations"
+        "--all", action="store_true", help="Demonstrate all operations (default behavior)"
     )
-    op_group.add_argument(
-        "--update", 
-        action="store_true", 
-        help="Demonstrate update operations"
-    )
-    op_group.add_argument(
-        "--list", 
-        action="store_true",
-        help="Demonstrate listing operations"
-    )
-    op_group.add_argument(
-        "--delete", 
-        action="store_true",
-        help="Demonstrate deletion operations"
-    )
-    op_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Demonstrate all operations (default behavior)"
-    )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Container name
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to use for operations"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to use for operations"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of HIP profile examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -962,7 +927,7 @@ def main():
     5. List and filter HIP profiles to show search functionality
     6. Clean up created profiles (unless skip_cleanup is enabled)
     7. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created HIP profiles (don't delete them)
         --create: Only demonstrate creation operations
@@ -971,86 +936,86 @@ def main():
         --delete: Only demonstrate deletion operations
         --all: Demonstrate all operations (default behavior)
         --folder: Folder name in SCM to use for operations (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created profiles (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     profile_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which operations to demonstrate
     # If no specific operations are specified, demonstrate all (default behavior)
     demo_all = args.all or not (args.create or args.update or args.list or args.delete)
-    
+
     # Get folder name for operations
     folder_name = args.folder
 
     try:
         # Initialize client
         client = initialize_client()
-        
+
         # Initialize HIP profiles object
         log_section("HIP PROFILE CONFIGURATION")
         log_operation_start("Initializing HIP profile manager")
         hip_profiles = HIPProfile(client)
         log_operation_complete("HIP profile manager initialization")
-        
+
         # Track created profiles for cleanup
         created_profiles = []
-        
+
         # Demonstrate creation operations
         if demo_all or args.create:
             log_section("HIP PROFILE CREATION")
             log_info("Demonstrating HIP profile creation with various match expressions")
             log_info(f"Using folder: {folder_name}")
-            
+
             # Create a basic HIP profile
             basic_profile = create_basic_hip_profile(hip_profiles, folder_name)
             if basic_profile:
                 created_profiles.append(basic_profile.id)
                 profile_count += 1
-            
+
             # Create a complex HIP profile
             complex_profile = create_complex_hip_profile(hip_profiles, folder_name)
             if complex_profile:
                 created_profiles.append(complex_profile.id)
                 profile_count += 1
-            
+
             # Create a HIP profile in a snippet container
             snippet_profile = create_hip_profile_with_snippet(hip_profiles, folder_name)
             if snippet_profile:
                 created_profiles.append(snippet_profile.id)
                 profile_count += 1
-            
+
             # Create a HIP profile in a device container
             device_profile = create_hip_profile_with_device(hip_profiles, folder_name)
             if device_profile:
                 created_profiles.append(device_profile.id)
                 profile_count += 1
-            
+
             # Create a HIP profile with negative match criteria
             negative_profile = create_negative_match_hip_profile(hip_profiles, folder_name)
             if negative_profile:
                 created_profiles.append(negative_profile.id)
                 profile_count += 1
-            
+
             log_success(f"Created {len(created_profiles)} HIP profiles")
-        
+
         # Demonstrate update operations
         if demo_all or args.update:
             if created_profiles:
@@ -1060,23 +1025,21 @@ def main():
                     log_success("Successfully updated HIP profile")
             else:
                 log_warning("No profiles were created to update")
-        
+
         # Demonstrate list and fetch operations
         if demo_all or args.list:
             # List and filter profiles
             all_profiles = list_and_filter_hip_profiles(hip_profiles)
-            
+
             # Fetch a profile by name if we have created any
             if created_profiles and all_profiles:
                 # Use the name of the first profile in the list
                 fetch_profile_by_name = fetch_hip_profile_by_name(
-                    hip_profiles, 
-                    all_profiles[0].name, 
-                    all_profiles[0].folder
+                    hip_profiles, all_profiles[0].name, all_profiles[0].folder
                 )
                 if fetch_profile_by_name:
                     log_success("Successfully fetched HIP profile by name")
-        
+
         # Demonstrate delete operations
         if demo_all or args.delete:
             if created_profiles:
@@ -1088,58 +1051,67 @@ def main():
                     log_success(f"Successfully demonstrated deletion of HIP profile {deleted_id}")
             else:
                 log_warning("No profiles were created to delete")
-                
+
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_profiles and not args.no_report:
             log_section("REPORT GENERATION")
             log_operation_start("Generating HIP profiles CSV report")
-            report_file = generate_hip_profile_report(hip_profiles, created_profiles, execution_time_so_far)
+            report_file = generate_hip_profile_report(
+                hip_profiles, created_profiles, execution_time_so_far
+            )
             if report_file:
                 log_success(f"Generated HIP profiles report: {report_file}")
-                log_info(f"The report contains details of all {len(created_profiles)} HIP profiles created")
+                log_info(
+                    f"The report contains details of all {len(created_profiles)} HIP profiles created"
+                )
             else:
                 log_error("Failed to generate HIP profiles report")
         elif args.no_report:
             log_info("Report generation disabled by --no-report flag")
         else:
             log_info("No HIP profiles were created, skipping report generation")
-        
+
         # Clean up the created profiles, unless skip_cleanup is true
         if created_profiles:
             if skip_cleanup:
-                log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_profiles)} HIP profiles")
-                log_info("To clean up these profiles, run the script again with SKIP_CLEANUP unset or set to false")
+                log_info(
+                    f"SKIP_CLEANUP is set to true - preserving {len(created_profiles)} HIP profiles"
+                )
+                log_info(
+                    "To clean up these profiles, run the script again with SKIP_CLEANUP unset or set to false"
+                )
             else:
                 log_operation_start(f"Cleaning up {len(created_profiles)} created HIP profiles")
                 cleanup_hip_profiles(hip_profiles, created_profiles)
-        
+
         # Calculate and display final execution statistics
         end_time = __import__("time").time()
         execution_time = end_time - start_time
         minutes, seconds = divmod(execution_time, 60)
-        
+
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total HIP profiles created: {profile_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
         if profile_count > 0:
-            log_info(f"Average time per profile: {execution_time/profile_count:.2f} seconds")
-        
+            log_info(f"Average time per profile: {execution_time / profile_count:.2f} seconds")
+
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some HIP profiles may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
+
         log_info(f"Stack trace: {traceback.format_exc()}")
 
 

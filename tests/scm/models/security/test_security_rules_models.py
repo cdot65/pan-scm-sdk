@@ -109,9 +109,8 @@ class TestSecurityRuleCreateModel:
         data.pop("folder")  # Remove the container field
         with pytest.raises(ValueError) as exc_info:
             SecurityRuleCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_security_rule_create_model_multiple_containers(self):
@@ -120,9 +119,8 @@ class TestSecurityRuleCreateModel:
         data["snippet"] = "TestSnippet"  # Add a second container
         with pytest.raises(ValueError) as exc_info:
             SecurityRuleCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_security_rule_create_model_all_containers(self):
@@ -132,9 +130,8 @@ class TestSecurityRuleCreateModel:
         data["device"] = "TestDevice"
         with pytest.raises(ValueError) as exc_info:
             SecurityRuleCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
 
@@ -168,9 +165,7 @@ class TestSecurityRuleUpdateModel:
 
     def test_security_rule_update_model_with_action_update(self):
         """Test update with modified action."""
-        model = SecurityRuleCreateApiFactory.with_post_rulebase(
-            action=SecurityRuleAction.deny
-        )
+        model = SecurityRuleCreateApiFactory.with_post_rulebase(action=SecurityRuleAction.deny)
         assert model.action == SecurityRuleAction.deny
 
     def test_security_rule_update_model_with_zones_update(self):
@@ -205,9 +200,7 @@ class TestSecurityRuleMoveModel:
         data = SecurityRuleMoveModelFactory.build_missing_destination_rule()
         with pytest.raises(ValueError) as exc_info:
             SecurityRuleMoveModel(**data)
-        assert "destination_rule is required when destination is 'before'" in str(
-            exc_info.value
-        )
+        assert "destination_rule is required when destination is 'before'" in str(exc_info.value)
 
     def test_security_rule_move_model_top_with_destination_rule(self):
         """Test validation when destination_rule is provided for top/bottom moves."""

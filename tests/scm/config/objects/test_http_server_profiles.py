@@ -4,13 +4,11 @@ import pytest
 from unittest.mock import MagicMock, patch
 import uuid
 import requests
-import sys
 
 from scm.client import Scm
 from scm.config.objects import HTTPServerProfile
-from scm.exceptions import InvalidObjectError, MissingQueryParameterError, NotFoundError, APIError
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import (
-    HTTPServerProfileCreateModel,
     HTTPServerProfileUpdateModel,
     HTTPServerProfileResponseModel,
     ServerModel,
@@ -29,12 +27,7 @@ def create_sample_http_server_profile_response():
         "id": str(uuid.uuid4()),
         "name": "test-http-profile",
         "server": [
-            {
-                "name": "test-server",
-                "address": "192.168.1.100",
-                "protocol": "HTTP",
-                "port": 80
-            }
+            {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
         ],
         "tag_registration": True,
         "format": {
@@ -102,7 +95,7 @@ class TestHTTPServerProfileOperations:
 
     def test_create(self):
         """Test creating a new HTTP server profile.
-        
+
         NOTE: This test now runs with mocks to ensure functionality and test coverage.
         """
         api_client = MagicMock(spec=Scm)
@@ -127,56 +120,58 @@ class TestHTTPServerProfileOperations:
 
     def test_create_with_api_error(self):
         """Test error handling when API returns an error during creation.
-        
+
         NOTE: This test now runs with mocks to ensure functionality and test coverage.
         """
         api_client = MagicMock(spec=Scm)
-        api_client.post.side_effect = requests.exceptions.HTTPError("API Error", response=MagicMock(status_code=500))
-        
+        api_client.post.side_effect = requests.exceptions.HTTPError(
+            "API Error", response=MagicMock(status_code=500)
+        )
+
         http_server_profile = HTTPServerProfile(api_client)
         data = HTTPServerProfileCreateModelFactory.build_valid()
-        
+
         with pytest.raises(Exception) as exc_info:
             http_server_profile.create(data)
         assert "API Error" in str(exc_info.value)
 
     def test_create_with_generic_exception(self):
         """Test handling of generic exceptions in the create method.
-        
+
         NOTE: This test now runs with mocks to ensure functionality and test coverage.
         """
         api_client = MagicMock(spec=Scm)
         api_client.post.side_effect = Exception("Generic error")
-        
+
         http_server_profile = HTTPServerProfile(api_client)
         data = HTTPServerProfileCreateModelFactory.build_valid()
-        
+
         with pytest.raises(Exception) as exc_info:
             http_server_profile.create(data)
         assert "Generic error" in str(exc_info.value)
-    
+
     def test_create_error_logging(self):
         """Test that errors are properly logged during create operations.
-        
+
         NOTE: This test now runs with mocks to ensure functionality and test coverage.
         """
         api_client = MagicMock(spec=Scm)
         api_client.post.side_effect = Exception("Test error")
-        
+
         with patch("logging.Logger.error") as mock_log:
             http_server_profile = HTTPServerProfile(api_client)
             data = HTTPServerProfileCreateModelFactory.build_valid()
-            
+
             with pytest.raises(Exception):
                 http_server_profile.create(data)
-            
+
             # Verify error was logged
             mock_log.assert_called_once()
             assert "Error in API call" in mock_log.call_args[0][0]
-    
+
     def test_create_with_server_error(self):
         """Test handling of 500 server errors in the create method.
-        
+
         NOTE: This test now runs with mocks to ensure functionality and test coverage.
         """
         api_client = MagicMock(spec=Scm)
@@ -186,10 +181,10 @@ class TestHTTPServerProfileOperations:
         api_client.post.side_effect = requests.exceptions.HTTPError(
             "500 Server Error", response=mock_response
         )
-        
+
         http_server_profile = HTTPServerProfile(api_client)
         data = HTTPServerProfileCreateModelFactory.build_valid()
-        
+
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             http_server_profile.create(data)
         assert "500 Server Error" in str(exc_info.value)
@@ -218,7 +213,7 @@ class TestHTTPServerProfileOperations:
 
     def test_update(self):
         """Test updating an HTTP server profile.
-        
+
         NOTE: This test no longer skipped but now runs with appropriate mocking to improve coverage.
         """
         api_client = MagicMock(spec=Scm)
@@ -226,7 +221,7 @@ class TestHTTPServerProfileOperations:
         api_client.put.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        
+
         # Create a valid update model
         update_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
@@ -236,12 +231,12 @@ class TestHTTPServerProfileOperations:
                     "name": "updated-server",
                     "address": "192.168.1.200",
                     "protocol": "HTTP",
-                    "port": 8080
+                    "port": 8080,
                 }
             ],
         }
         update_model = HTTPServerProfileUpdateModel(**update_data)
-        
+
         response = http_server_profile.update(update_model)
 
         # Verify the result is correct
@@ -395,7 +390,7 @@ class TestHTTPServerProfileListAndFetch:
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "another-profile"
         profile2["tag_registration"] = False
-        
+
         mock_response = {
             "data": [profile1, profile2],
             "limit": 200,
@@ -405,43 +400,40 @@ class TestHTTPServerProfileListAndFetch:
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        profiles = http_server_profile.list(
-            folder="Security Profiles", 
-            tag_registration=True
-        )
+        profiles = http_server_profile.list(folder="Security Profiles", tag_registration=True)
 
         # Verify the result
         assert len(profiles) == 1
         assert profiles[0].tag_registration is True
         assert profiles[0].name == "test-http-profile"
-        
+
     def test_list_with_multiple_filters(self):
         """Test listing HTTP server profiles with multiple filters."""
         api_client = MagicMock(spec=Scm)
-        
+
         # Profile 1: HTTP with tag_registration=True
         profile1 = create_sample_http_server_profile_response()
         profile1["tag_registration"] = True
         profile1["server"][0]["protocol"] = "HTTP"
-        
+
         # Profile 2: HTTP with tag_registration=False
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "profile2"
         profile2["tag_registration"] = False
         profile2["server"][0]["protocol"] = "HTTP"
-        
+
         # Profile 3: HTTPS with tag_registration=True
         profile3 = create_sample_http_server_profile_response()
         profile3["name"] = "profile3"
         profile3["tag_registration"] = True
         profile3["server"][0]["protocol"] = "HTTPS"
-        
+
         # Profile 4: HTTPS with tag_registration=False
         profile4 = create_sample_http_server_profile_response()
         profile4["name"] = "profile4"
         profile4["tag_registration"] = False
         profile4["server"][0]["protocol"] = "HTTPS"
-        
+
         mock_response = {
             "data": [profile1, profile2, profile3, profile4],
             "limit": 200,
@@ -449,16 +441,14 @@ class TestHTTPServerProfileListAndFetch:
             "total": 4,
         }
         api_client.get.return_value = mock_response
-        
+
         http_server_profile = HTTPServerProfile(api_client)
-        
+
         # Filter by tag_registration and protocol (should return only profile3)
         profiles = http_server_profile.list(
-            folder="Security Profiles",
-            tag_registration=True,
-            protocol=["HTTPS"]
+            folder="Security Profiles", tag_registration=True, protocol=["HTTPS"]
         )
-        
+
         # Verify the result - should be just one profile with both criteria
         assert len(profiles) == 1
         assert profiles[0].tag_registration is True
@@ -475,26 +465,26 @@ class TestHTTPServerProfileListAndFetch:
             "offset": 0,
             "total": 1,
         }
-        
+
         http_server_profile = HTTPServerProfile(api_client)
 
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.list(folder="Security Profiles", tag_registration="invalid")
         assert "errorType" in str(exc_info.value.details)
-        
+
     def test_list_with_protocol_filter(self):
         """Test listing HTTP server profiles with protocol filter."""
         api_client = MagicMock(spec=Scm)
-        
+
         # Profile with HTTP server
         profile1 = create_sample_http_server_profile_response()
         profile1["server"][0]["protocol"] = "HTTP"
-        
+
         # Profile with HTTPS server
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "https-profile"
         profile2["server"][0]["protocol"] = "HTTPS"
-        
+
         mock_response = {
             "data": [profile1, profile2],
             "limit": 200,
@@ -504,16 +494,13 @@ class TestHTTPServerProfileListAndFetch:
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        profiles = http_server_profile.list(
-            folder="Security Profiles", 
-            protocol=["HTTPS"]
-        )
+        profiles = http_server_profile.list(folder="Security Profiles", protocol=["HTTPS"])
 
         # Verify the result
         assert len(profiles) == 1
         assert profiles[0].name == "https-profile"
         assert profiles[0].server[0].protocol == "HTTPS"
-        
+
     def test_list_with_invalid_protocol_filter(self):
         """Test listing HTTP server profiles with invalid protocol filter."""
         api_client = MagicMock(spec=Scm)
@@ -524,58 +511,47 @@ class TestHTTPServerProfileListAndFetch:
             "offset": 0,
             "total": 1,
         }
-        
+
         http_server_profile = HTTPServerProfile(api_client)
 
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.list(folder="Security Profiles", protocol="HTTPS")
         assert "errorType" in str(exc_info.value.details)
-        
+
     def test_apply_filters_directly(self):
         """Test _apply_filters method directly to improve code coverage."""
         api_client = MagicMock(spec=Scm)
         http_server_profile = HTTPServerProfile(api_client)
-        
+
         # Create sample profiles
         profile1 = HTTPServerProfileResponseModel(**create_sample_http_server_profile_response())
         profile2 = HTTPServerProfileResponseModel(**create_sample_http_server_profile_response())
         profile2.tag_registration = False
-        
+
         # Test tag_registration filter
         filtered = http_server_profile._apply_filters(
-            [profile1, profile2], 
-            {"tag_registration": True}
+            [profile1, profile2], {"tag_registration": True}
         )
         assert len(filtered) == 1
         assert filtered[0].tag_registration is True
-        
+
         # Test protocol filter
         profiles = [profile1]
-        filtered = http_server_profile._apply_filters(
-            profiles,
-            {"protocol": ["HTTP"]}
-        )
+        filtered = http_server_profile._apply_filters(profiles, {"protocol": ["HTTP"]})
         assert len(filtered) == 1
-        
+
         # Test multiple filters (should result in empty list with our test data)
         filtered = http_server_profile._apply_filters(
-            [profile1, profile2],
-            {"tag_registration": False, "protocol": ["HTTPS"]}
+            [profile1, profile2], {"tag_registration": False, "protocol": ["HTTPS"]}
         )
         assert len(filtered) == 0
-        
+
         # Test with empty profiles list
-        filtered = http_server_profile._apply_filters(
-            [],
-            {"tag_registration": True}
-        )
+        filtered = http_server_profile._apply_filters([], {"tag_registration": True})
         assert len(filtered) == 0
-        
+
         # Test with empty filters dictionary
-        filtered = http_server_profile._apply_filters(
-            [profile1, profile2],
-            {}
-        )
+        filtered = http_server_profile._apply_filters([profile1, profile2], {})
         assert len(filtered) == 2
 
     def test_fetch(self):
@@ -585,10 +561,7 @@ class TestHTTPServerProfileListAndFetch:
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        profile = http_server_profile.fetch(
-            name="test-http-profile", 
-            folder="Security Profiles"
-        )
+        profile = http_server_profile.fetch(name="test-http-profile", folder="Security Profiles")
 
         # Verify the result
         assert profile.name == "test-http-profile"
@@ -611,10 +584,7 @@ class TestHTTPServerProfileListAndFetch:
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        profile = http_server_profile.fetch(
-            name="test-http-profile", 
-            snippet="TestSnippet"
-        )
+        profile = http_server_profile.fetch(name="test-http-profile", snippet="TestSnippet")
 
         # Verify the result
         assert profile.name == "test-http-profile"
@@ -637,10 +607,7 @@ class TestHTTPServerProfileListAndFetch:
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        profile = http_server_profile.fetch(
-            name="test-http-profile", 
-            device="TestDevice"
-        )
+        profile = http_server_profile.fetch(name="test-http-profile", device="TestDevice")
 
         # Verify the result
         assert profile.name == "test-http-profile"
@@ -653,7 +620,7 @@ class TestHTTPServerProfileListAndFetch:
         assert "params" in kwargs
         assert kwargs["params"]["name"] == "test-http-profile"
         assert kwargs["params"]["device"] == "TestDevice"
-    
+
     # fetch_not_found test removed to achieve 100% test pass rate
 
     def test_fetch_empty_name(self):
@@ -681,8 +648,10 @@ class TestHTTPServerProfileListAndFetch:
 
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.fetch(name="test-profile")
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
-        
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
+
     def test_fetch_invalid_response_format(self):
         """Test fetching with an invalid response format."""
         api_client = MagicMock(spec=Scm)
@@ -692,7 +661,7 @@ class TestHTTPServerProfileListAndFetch:
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.fetch(name="test-profile", folder="Security Profiles")
         assert "Invalid response format: expected dictionary" in exc_info.value.message
-        
+
     def test_fetch_missing_id_field(self):
         """Test fetching with response missing ID field."""
         api_client = MagicMock(spec=Scm)
@@ -702,7 +671,7 @@ class TestHTTPServerProfileListAndFetch:
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.fetch(name="test-profile", folder="Security Profiles")
         assert "Invalid response format: missing 'id' field" in exc_info.value.message
-        
+
     def test_list_response_not_dict(self):
         """Test list with response that's not a dictionary."""
         api_client = MagicMock(spec=Scm)
@@ -712,7 +681,7 @@ class TestHTTPServerProfileListAndFetch:
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.list(folder="Security Profiles")
         assert "Invalid response format: expected dictionary" in exc_info.value.message
-        
+
     def test_list_response_missing_data(self):
         """Test list with response missing data field."""
         api_client = MagicMock(spec=Scm)
@@ -722,7 +691,7 @@ class TestHTTPServerProfileListAndFetch:
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.list(folder="Security Profiles")
         assert "Invalid response format: missing 'data' field" in exc_info.value.message
-        
+
     def test_list_response_data_not_list(self):
         """Test list with data field that's not a list."""
         api_client = MagicMock(spec=Scm)
@@ -732,42 +701,42 @@ class TestHTTPServerProfileListAndFetch:
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.list(folder="Security Profiles")
         assert "Invalid response format: 'data' field must be a list" in exc_info.value.message
-        
+
     def test_list_with_pagination(self):
         """Test list with pagination through multiple requests."""
         api_client = MagicMock(spec=Scm)
-        
+
         # First response with 2 items (limit=2)
         profile1 = create_sample_http_server_profile_response()
         profile1["name"] = "profile1"
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "profile2"
-        
+
         first_response = {
             "data": [profile1, profile2],
             "limit": 2,
             "offset": 0,
             "total": 3,
         }
-        
+
         # Second response with 1 item
         profile3 = create_sample_http_server_profile_response()
         profile3["name"] = "profile3"
-        
+
         second_response = {
             "data": [profile3],
             "limit": 2,
             "offset": 2,
             "total": 3,
         }
-        
+
         # Configure the mock to return different responses based on the offset parameter
         def get_side_effect(*args, **kwargs):
             if kwargs.get("params", {}).get("offset") == 0:
                 return first_response
             else:
                 return second_response
-                
+
         api_client.get.side_effect = get_side_effect
 
         # Call list with max_limit=2 to trigger pagination
@@ -779,37 +748,37 @@ class TestHTTPServerProfileListAndFetch:
         assert profiles[0].name == "profile1"
         assert profiles[1].name == "profile2"
         assert profiles[2].name == "profile3"
-        
+
         # Verify API was called twice with different offset values
         assert api_client.get.call_count == 2
         # First call should have offset=0
         assert api_client.get.call_args_list[0][1]["params"]["offset"] == 0
         # Second call should have offset=2
         assert api_client.get.call_args_list[1][1]["params"]["offset"] == 2
-        
+
     # list_with_exact_limit test removed to achieve 100% test pass rate
-        
+
     def test_list_with_exclude_filters(self):
         """Test list with exclude filters."""
         api_client = MagicMock(spec=Scm)
-        
+
         # Create test profiles
         profile1 = create_sample_http_server_profile_response()
         profile1["name"] = "profile1"
         profile1["folder"] = "Folder1"
-        
+
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "profile2"
         profile2["folder"] = "Folder2"
-        
+
         profile3 = create_sample_http_server_profile_response()
         profile3["name"] = "profile3"
         profile3["snippet"] = "Snippet1"
-        
+
         profile4 = create_sample_http_server_profile_response()
         profile4["name"] = "profile4"
         profile4["device"] = "Device1"
-        
+
         mock_response = {
             "data": [profile1, profile2, profile3, profile4],
             "limit": 200,
@@ -820,56 +789,49 @@ class TestHTTPServerProfileListAndFetch:
 
         # Test excluding folders
         http_server_profile = HTTPServerProfile(api_client)
-        profiles = http_server_profile.list(
-            folder="Security Profiles", 
-            exclude_folders=["Folder2"]
-        )
-        
+        profiles = http_server_profile.list(folder="Security Profiles", exclude_folders=["Folder2"])
+
         # Should exclude profile2 with Folder2
         assert len(profiles) == 3
         assert "profile2" not in [p.name for p in profiles]
-        
+
         # Test excluding snippets
         profiles = http_server_profile.list(
-            folder="Security Profiles", 
-            exclude_snippets=["Snippet1"]
+            folder="Security Profiles", exclude_snippets=["Snippet1"]
         )
-        
+
         # Should exclude profile3 with Snippet1
         assert len(profiles) == 3
         assert "profile3" not in [p.name for p in profiles]
-        
+
         # Test excluding devices
-        profiles = http_server_profile.list(
-            folder="Security Profiles", 
-            exclude_devices=["Device1"]
-        )
-        
+        profiles = http_server_profile.list(folder="Security Profiles", exclude_devices=["Device1"])
+
         # Should exclude profile4 with Device1
         assert len(profiles) == 3
         assert "profile4" not in [p.name for p in profiles]
-        
+
     def test_list_with_multiple_excludes(self):
         """Test list with multiple exclude filters."""
         api_client = MagicMock(spec=Scm)
-        
+
         # Create test profiles
         profile1 = create_sample_http_server_profile_response()
         profile1["name"] = "profile1"
         profile1["folder"] = "Folder1"
-        
+
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "profile2"
         profile2["folder"] = "Folder2"
-        
+
         profile3 = create_sample_http_server_profile_response()
         profile3["name"] = "profile3"
         profile3["snippet"] = "Snippet1"
-        
+
         profile4 = create_sample_http_server_profile_response()
         profile4["name"] = "profile4"
         profile4["device"] = "Device1"
-        
+
         mock_response = {
             "data": [profile1, profile2, profile3, profile4],
             "limit": 200,
@@ -881,16 +843,16 @@ class TestHTTPServerProfileListAndFetch:
         # Test excluding multiple items
         http_server_profile = HTTPServerProfile(api_client)
         profiles = http_server_profile.list(
-            folder="Security Profiles", 
+            folder="Security Profiles",
             exclude_folders=["Folder2"],
             exclude_snippets=["Snippet1"],
-            exclude_devices=["Device1"]
+            exclude_devices=["Device1"],
         )
-        
+
         # Should only keep profile1
         assert len(profiles) == 1
         assert profiles[0].name == "profile1"
-        
+
     def test_list_with_invalid_exclude_types(self):
         """Test list with invalid exclude filter types."""
         api_client = MagicMock(spec=Scm)
@@ -901,31 +863,31 @@ class TestHTTPServerProfileListAndFetch:
             "offset": 0,
             "total": 1,
         }
-        
+
         http_server_profile = HTTPServerProfile(api_client)
-        
+
         # Testing with non-list exclude_folders (should still work but ignore the filter)
         profiles = http_server_profile.list(
-            folder="Security Profiles", 
-            exclude_folders="Folder2"  # String instead of list
+            folder="Security Profiles",
+            exclude_folders="Folder2",  # String instead of list
         )
-        
+
         # Should not apply the invalid filter
         assert len(profiles) == 1
-        
+
     def test_list_with_exact_match(self):
         """Test list with exact_match parameter."""
         api_client = MagicMock(spec=Scm)
-        
+
         # Create test profiles with different folder values
         profile1 = create_sample_http_server_profile_response()
         profile1["name"] = "profile1"
         profile1["folder"] = "Security Profiles"  # Exact match
-        
+
         profile2 = create_sample_http_server_profile_response()
         profile2["name"] = "profile2"
         profile2["folder"] = "Other Folder"  # Different folder
-        
+
         mock_response = {
             "data": [profile1, profile2],
             "limit": 200,
@@ -935,51 +897,52 @@ class TestHTTPServerProfileListAndFetch:
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
-        
+
         # Without exact_match, should return both profiles
         profiles = http_server_profile.list(folder="Security Profiles", exact_match=False)
         assert len(profiles) == 2
-        
+
         # With exact_match, should return only the exact match profile
         profiles = http_server_profile.list(folder="Security Profiles", exact_match=True)
         assert len(profiles) == 1
         assert profiles[0].name == "profile1"
         assert profiles[0].folder == "Security Profiles"
-        
+
     def test_build_container_params(self):
         """Test the _build_container_params method directly for code coverage."""
         api_client = MagicMock(spec=Scm)
         http_server_profile = HTTPServerProfile(api_client)
-        
+
         # Test with all None values
         params = http_server_profile._build_container_params(None, None, None)
         assert params == {}
-        
+
         # Test with only folder
         params = http_server_profile._build_container_params("FolderA", None, None)
         assert params == {"folder": "FolderA"}
-        
+
         # Test with only snippet
         params = http_server_profile._build_container_params(None, "SnippetB", None)
         assert params == {"snippet": "SnippetB"}
-        
+
         # Test with only device
         params = http_server_profile._build_container_params(None, None, "DeviceC")
         assert params == {"device": "DeviceC"}
-        
+
         # Test with multiple values (this would lead to an error in actual usage)
         params = http_server_profile._build_container_params("FolderA", "SnippetB", "DeviceC")
         assert len(params) == 3
         assert params["folder"] == "FolderA"
-        assert params["snippet"] == "SnippetB" 
+        assert params["snippet"] == "SnippetB"
         assert params["device"] == "DeviceC"
 
 
 # -------------------- Tests for ServerModel --------------------
 
+
 class TestServerModel:
     """Tests for ServerModel configuration."""
-    
+
     def test_http_server_model(self):
         """Test creating a ServerModel with HTTP protocol."""
         server = ServerModel(
@@ -987,9 +950,9 @@ class TestServerModel:
             address="192.168.1.100",
             protocol="HTTP",
             port=80,
-            http_method="POST"
+            http_method="POST",
         )
-        
+
         assert server.name == "test-server"
         assert server.address == "192.168.1.100"
         assert server.protocol == "HTTP"
@@ -997,7 +960,7 @@ class TestServerModel:
         assert server.http_method == "POST"
         assert server.tls_version is None
         assert server.certificate_profile is None
-        
+
     def test_https_server_model(self):
         """Test creating a ServerModel with HTTPS protocol."""
         server = ServerModel(
@@ -1007,9 +970,9 @@ class TestServerModel:
             port=443,
             tls_version="1.2",
             certificate_profile="default",
-            http_method="POST"
+            http_method="POST",
         )
-        
+
         assert server.name == "secure-server"
         assert server.address == "secure.example.com"
         assert server.protocol == "HTTPS"
@@ -1017,7 +980,7 @@ class TestServerModel:
         assert server.tls_version == "1.2"
         assert server.certificate_profile == "default"
         assert server.http_method == "POST"
-        
+
     def test_https_server_model_without_certificate(self):
         """Test creating an HTTPS server without certificate_profile."""
         server = ServerModel(
@@ -1026,9 +989,9 @@ class TestServerModel:
             protocol="HTTPS",
             port=443,
             tls_version="1.2",
-            http_method="POST"
+            http_method="POST",
         )
-        
+
         assert server.name == "secure-server"
         assert server.protocol == "HTTPS"
         assert server.tls_version == "1.2"

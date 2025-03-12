@@ -19,38 +19,36 @@ from scm.models.objects.syslog_server_profiles import (
 
 # -------------------- Helper Functions --------------------
 
+
 def create_valid_server():
     """Helper function to create a valid server model dict."""
     return {
         "name": "test-server",
-        "server": "192.168.1.100", 
+        "server": "192.168.1.100",
         "transport": "UDP",
         "port": 514,
         "format": "BSD",
-        "facility": "LOG_USER"
+        "facility": "LOG_USER",
     }
+
 
 def create_valid_format():
     """Helper function to create a valid format model dict."""
     return {
         "traffic": "$format_string_traffic",
         "threat": "$format_string_threat",
-        "escaping": {
-            "escape_character": "\\",
-            "escaped_characters": "%"
-        }
+        "escaping": {"escape_character": "\\", "escaped_characters": "%"},
     }
+
 
 def create_valid_profile_data(container_type="folder"):
     """Helper function to create a valid syslog server profile data dict."""
     data = {
         "name": "test-syslog-profile",
-        "servers": {
-            "name": create_valid_server()
-        },
-        "format": create_valid_format()
+        "servers": {"name": create_valid_server()},
+        "format": create_valid_format(),
     }
-    
+
     # Add the specified container
     if container_type == "folder":
         data["folder"] = "Shared"
@@ -58,7 +56,7 @@ def create_valid_profile_data(container_type="folder"):
         data["snippet"] = "TestSnippet"
     elif container_type == "device":
         data["device"] = "TestDevice"
-    
+
     return data
 
 
@@ -67,7 +65,7 @@ def create_valid_profile_data(container_type="folder"):
 
 class TestSyslogServerModel:
     """Tests for SyslogServerModel validation."""
-    
+
     def test_valid_server(self):
         """Test that a valid server configuration is accepted."""
         server_data = create_valid_server()
@@ -83,29 +81,29 @@ class TestSyslogServerModel:
         """Test that an invalid transport protocol is rejected."""
         server_data = create_valid_server()
         server_data["transport"] = "INVALID"
-        
+
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerModel(**server_data)
         error_msg = str(exc_info.value)
         assert "transport" in error_msg
         assert "Input should be 'UDP' or 'TCP'" in error_msg
-    
+
     def test_invalid_format(self):
         """Test that an invalid format is rejected."""
         server_data = create_valid_server()
         server_data["format"] = "INVALID"
-        
+
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerModel(**server_data)
         error_msg = str(exc_info.value)
         assert "format" in error_msg
         assert "Input should be 'BSD' or 'IETF'" in error_msg
-    
+
     def test_invalid_facility(self):
         """Test that an invalid facility is rejected."""
         server_data = create_valid_server()
         server_data["facility"] = "INVALID"
-        
+
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerModel(**server_data)
         error_msg = str(exc_info.value)
@@ -115,14 +113,14 @@ class TestSyslogServerModel:
     def test_port_range(self):
         """Test port number validation."""
         server_data = create_valid_server()
-        
+
         # Test port below minimum
         server_data["port"] = 0
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerModel(**server_data)
         assert "port" in str(exc_info.value)
         assert "Input should be greater than or equal to 1" in str(exc_info.value)
-        
+
         # Test port above maximum
         server_data["port"] = 65536
         with pytest.raises(ValidationError) as exc_info:
@@ -133,7 +131,7 @@ class TestSyslogServerModel:
 
 class TestFormatModel:
     """Tests for FormatModel validation."""
-    
+
     def test_valid_format(self):
         """Test that a valid format configuration is accepted."""
         format_data = create_valid_format()
@@ -141,23 +139,23 @@ class TestFormatModel:
         assert format_model.traffic == format_data["traffic"]
         assert format_model.threat == format_data["threat"]
         assert format_model.escaping.escape_character == format_data["escaping"]["escape_character"]
-        assert format_model.escaping.escaped_characters == format_data["escaping"]["escaped_characters"]
-    
+        assert (
+            format_model.escaping.escaped_characters
+            == format_data["escaping"]["escaped_characters"]
+        )
+
     def test_escaping_model(self):
         """Test EscapingModel validation."""
-        escaping_data = {
-            "escape_character": "\\",
-            "escaped_characters": "%$[]"
-        }
+        escaping_data = {"escape_character": "\\", "escaped_characters": "%$[]"}
         escaping = EscapingModel(**escaping_data)
         assert escaping.escape_character == escaping_data["escape_character"]
         assert escaping.escaped_characters == escaping_data["escaped_characters"]
-    
+
     def test_escape_character_length(self):
         """Test that escape_character must be a single character."""
         escaping_data = {
             "escape_character": "\\\\",  # More than one character
-            "escaped_characters": "%"
+            "escaped_characters": "%",
         }
         with pytest.raises(ValidationError) as exc_info:
             EscapingModel(**escaping_data)
@@ -189,24 +187,22 @@ class TestSyslogServerProfileCreateModel:
         """Test validation when multiple containers are provided."""
         data = create_valid_profile_data()
         data["snippet"] = "TestSnippet"  # Adding a second container
-        
+
         with pytest.raises(ValueError) as exc_info:
             SyslogServerProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_no_container_error(self):
         """Test validation when no container is provided."""
         data = create_valid_profile_data()
         data.pop("folder")  # Remove the container
-        
+
         with pytest.raises(ValueError) as exc_info:
             SyslogServerProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_valid_model_with_folder(self):
@@ -263,7 +259,7 @@ class TestSyslogServerProfileUpdateModel:
         """Test validation for invalid UUID format."""
         data = create_valid_profile_data()
         data["id"] = "invalid-uuid"
-        
+
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerProfileUpdateModel(**data)
         assert "id\n  Input should be a valid UUID" in str(exc_info.value)
@@ -272,7 +268,7 @@ class TestSyslogServerProfileUpdateModel:
         """Test validation with valid data."""
         data = create_valid_profile_data()
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = SyslogServerProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -284,11 +280,9 @@ class TestSyslogServerProfileUpdateModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "updated-profile",
-            "servers": {
-                "server1": create_valid_server()
-            }
+            "servers": {"server1": create_valid_server()},
         }
-        
+
         model = SyslogServerProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -306,7 +300,7 @@ class TestSyslogServerProfileResponseModel:
         """Test validation with valid response data."""
         data = create_valid_profile_data()
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = SyslogServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -319,7 +313,7 @@ class TestSyslogServerProfileResponseModel:
         """Test validation with snippet container."""
         data = create_valid_profile_data("snippet")
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = SyslogServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.snippet == data["snippet"]
@@ -330,7 +324,7 @@ class TestSyslogServerProfileResponseModel:
         """Test validation with device container."""
         data = create_valid_profile_data("device")
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = SyslogServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.device == data["device"]

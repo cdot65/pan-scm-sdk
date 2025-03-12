@@ -286,14 +286,14 @@ with open("applications_report.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
     # Write headers
     writer.writerow([
-        "ID", "Name", "Category", "Subcategory", 
+        "ID", "Name", "Category", "Subcategory",
         "Technology", "Risk", "Ports", "Security Attributes"
     ])
-    
+
     # Write application data
     for app_id in application_ids:
         app = applications.get(app_id)
-        
+
         # Collect security attributes
         security_attrs = []
         if hasattr(app, "evasive") and app.evasive:
@@ -301,7 +301,7 @@ with open("applications_report.csv", "w", newline="") as csvfile:
         if hasattr(app, "used_by_malware") and app.used_by_malware:
             security_attrs.append("Used by Malware")
         # Add more attributes as needed
-        
+
         writer.writerow([
             app.id,
             app.name,

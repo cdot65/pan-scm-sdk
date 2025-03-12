@@ -70,18 +70,16 @@ class TestWildfireAntivirusProfileMaxLimit(TestWildfireAntivirusProfileBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             WildfireAntivirusProfile(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             WildfireAntivirusProfile(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -110,9 +108,8 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
         }
         with pytest.raises(PydanticValidationError) as exc_info:
             WildfireAvProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_object_model_multiple_containers(self):
@@ -133,9 +130,8 @@ class TestWildfireAntivirusProfileModelValidation(TestWildfireAntivirusProfileBa
         }
         with pytest.raises(PydanticValidationError) as exc_info:
             WildfireAvProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
 
@@ -553,10 +549,7 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object Already Exists"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Object Already Exists"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Already Exists"
 
     def test_create_generic_exception_handling(self):
         """Test generic exception handling in create method."""
@@ -696,9 +689,7 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -756,8 +747,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
 
         # Check endpoint
         assert (
-            call_args[0][0]
-            == f"/config/security/v1/wildfire-anti-virus-profiles/{update_data.id}"
+            call_args[0][0] == f"/config/security/v1/wildfire-anti-virus-profiles/{update_data.id}"
         )
 
         # Check important payload fields
@@ -787,9 +777,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_generic_exception_handling(self):
         # Create update data using factory
@@ -836,9 +824,7 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Reference not zero"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_error_handling(self):
         """
@@ -863,9 +849,7 @@ class TestWildfireAntivirusProfileDelete(TestWildfireAntivirusProfileBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_generic_exception_handling(self):
         """Test generic exception handling in delete method."""
@@ -976,9 +960,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             self.client.fetch(name=object_name, folder=folder_name)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
         # Verify the get method was called with correct parameters
         self.mock_scm.get.assert_called_once_with(  # noqa
@@ -1025,9 +1007,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
 
         # Test multiple containers provided
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(
-                name="test-profile", folder="Texas", snippet="TestSnippet"
-            )
+            self.client.fetch(name="test-profile", folder="Texas", snippet="TestSnippet")
         assert "HTTP error: 400 - API error: E003" in str(exc_info.value)
 
     def test_fetch_object_unexpected_response_format(self):
@@ -1061,10 +1041,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             self.client.fetch(name="test", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Input Format Mismatch"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Input Format Mismatch"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Input Format Mismatch"
 
     def test_fetch_response_not_dict(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""

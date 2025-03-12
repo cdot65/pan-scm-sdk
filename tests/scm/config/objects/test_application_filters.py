@@ -61,18 +61,16 @@ class TestApplicationFiltersMaxLimit(TestApplicationsFilterBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             ApplicationFilters(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             ApplicationFilters(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -148,10 +146,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
             self.client.list(folder="NonexistentFolder")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Listing failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Operation Impossible"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Operation Impossible"
 
     def test_list_container_missing_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
@@ -580,9 +575,7 @@ class TestApplicationFiltersCreate(TestApplicationsFilterBase):
             self.client.fetch(name="test-group", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Error occurred"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
 
 class TestApplicationFiltersGet(TestApplicationsFilterBase):
@@ -628,9 +621,7 @@ class TestApplicationFiltersGet(TestApplicationsFilterBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_http_error_no_response_content(self):
         """Test get method when HTTP error has no response content."""
@@ -668,10 +659,7 @@ class TestApplicationFiltersUpdate(TestApplicationsFilterBase):
 
         self.mock_scm.put.assert_called_once()
         call_args = self.mock_scm.put.call_args
-        assert (
-            call_args[0][0]
-            == f"/config/objects/v1/application-filters/{update_data.id}"
-        )
+        assert call_args[0][0] == f"/config/objects/v1/application-filters/{update_data.id}"
 
         payload = call_args[1]["json"]
         assert payload["name"] == "updated-app-filter"
@@ -706,9 +694,7 @@ class TestApplicationFiltersUpdate(TestApplicationsFilterBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -760,9 +746,7 @@ class TestApplicationFiltersDelete(TestApplicationsFilterBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -900,9 +884,7 @@ class TestApplicationFiltersFetch(TestApplicationsFilterBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_missing_id_field_error(self):
         """Test that InvalidObjectError is raised when the response is missing 'id' field."""

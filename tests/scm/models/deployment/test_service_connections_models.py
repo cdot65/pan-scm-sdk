@@ -1,4 +1,5 @@
 """Test models for Service Connections."""
+
 from uuid import UUID
 
 import pytest

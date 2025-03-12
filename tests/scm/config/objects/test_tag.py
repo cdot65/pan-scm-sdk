@@ -64,18 +64,16 @@ class TestTagMaxLimit(TestTagBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Tag(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Tag(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -128,12 +126,8 @@ class TestTagList(TestTagBase):
         """Test exact_match=True ensures only tags with the exact folder match are returned."""
         mock_response = {
             "data": [
-                TagResponseFactory.build(
-                    name="ExactMatchTag", folder="Texas"
-                ).model_dump(),
-                TagResponseFactory.build(
-                    name="InheritedTag", folder="All"
-                ).model_dump(),
+                TagResponseFactory.build(name="ExactMatchTag", folder="Texas").model_dump(),
+                TagResponseFactory.build(name="InheritedTag", folder="All").model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -151,12 +145,8 @@ class TestTagList(TestTagBase):
         """Test exact_match=False returns tags from the specified folder and potentially others."""
         mock_response = {
             "data": [
-                TagResponseFactory.build(
-                    name="ExactMatchTag", folder="Texas"
-                ).model_dump(),
-                TagResponseFactory.build(
-                    name="InheritedTag", folder="All"
-                ).model_dump(),
+                TagResponseFactory.build(name="ExactMatchTag", folder="Texas").model_dump(),
+                TagResponseFactory.build(name="InheritedTag", folder="All").model_dump(),
             ],
             "offset": 0,
             "total": 2,
@@ -177,9 +167,7 @@ class TestTagList(TestTagBase):
             "data": [
                 TagResponseFactory.build(name="TagTexas", folder="Texas").model_dump(),
                 TagResponseFactory.build(name="TagAll", folder="All").model_dump(),
-                TagResponseFactory.build(
-                    name="TagGlobal", folder="Global"
-                ).model_dump(),
+                TagResponseFactory.build(name="TagGlobal", folder="Global").model_dump(),
             ],
             "offset": 0,
             "total": 3,
@@ -217,9 +205,7 @@ class TestTagList(TestTagBase):
         self.mock_scm.get.return_value = mock_response
 
         # Exclude 'predefined' and 'custom-snippet'
-        tags = self.client.list(
-            folder="Texas", exclude_snippets=["predefined", "custom-snippet"]
-        )
+        tags = self.client.list(folder="Texas", exclude_snippets=["predefined", "custom-snippet"])
         # Only NoSnippet should remain
         assert len(tags) == 1
         assert tags[0].name == "NoSnippet"
@@ -486,9 +472,8 @@ class TestTagCreate(TestTagBase):
         with pytest.raises(ValidationError) as exc_info:
             self.client.create(test_tag_data)
 
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_create_no_container(self):
@@ -499,9 +484,8 @@ class TestTagCreate(TestTagBase):
         with pytest.raises(ValidationError) as exc_info:
             self.client.create(test_tag_data)
 
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_create_http_error_no_response_content(self):
@@ -573,9 +557,7 @@ class TestTagGet(TestTagBase):
             self.client.get(tag_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Tag not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_http_error_no_response_content(self):
         """Test get method when HTTP error has no response content."""
@@ -716,13 +698,8 @@ class TestTagDelete(TestTagBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.delete(tag_id)
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"]
-            == "Tag is referenced by other objects."
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["message"] == "Tag is referenced by other objects."
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_tag_not_present_error(self):
         """Test error handling when the tag to delete is not present."""
@@ -739,9 +716,7 @@ class TestTagDelete(TestTagBase):
             self.client.delete(tag_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Tag not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -812,9 +787,7 @@ class TestTagFetch(TestTagBase):
             self.client.fetch(name="NonexistentTag", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Tag not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -842,10 +815,7 @@ class TestTagFetch(TestTagBase):
             self.client.fetch(name="TestTag")
 
         error_msg = exc_info.value.message
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in error_msg
-        )
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in error_msg
 
     def test_fetch_multiple_containers_provided_error(self):
         """Test fetching when multiple container parameters are provided."""
@@ -853,10 +823,7 @@ class TestTagFetch(TestTagBase):
             self.client.fetch(name="TestTag", folder="Texas", snippet="TestSnippet")
 
         error_msg = exc_info.value.message
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in error_msg
-        )
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in error_msg
 
     def test_fetch_invalid_response_format_error(self):
         """Test fetching when the API returns an unexpected format."""
