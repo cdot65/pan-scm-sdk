@@ -374,16 +374,16 @@ class TestNatRuleResponseModel:
         assert model.source_translation.dynamic_ip_and_port is not None
         assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
         
-    def test_nat_rule_invalid_tag_validation(self):
-        """Test that using invalid tags raises a validation error."""
+    def test_nat_rule_custom_tag_accepted(self):
+        """Test that using custom tags is now allowed."""
         data = NatRuleResponseFactory().model_dump()
-        data["tag"] = ["invalid-tag"]  # Use invalid tag
+        data["tag"] = ["custom-tag", "another-tag"]  # Use custom tag
         
-        with pytest.raises(ValueError) as exc_info:
-            NatRuleResponseModel(**data)
+        model = NatRuleResponseModel(**data)
         
-        error_msg = str(exc_info.value)
-        assert "Invalid tags: invalid-tag. Only 'Automation' and 'Decrypted' tags are allowed" in error_msg
+        # Verify the custom tags are accepted
+        assert "custom-tag" in model.tag
+        assert "another-tag" in model.tag
         
     def test_nat64_dns_rewrite_compatibility(self):
         """Test that using DNS rewrite with NAT64 raises a validation error."""

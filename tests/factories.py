@@ -5027,7 +5027,7 @@ class NatRuleCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
-    tag = ["Automation", "Decrypted"]  # Only these tags are allowed
+    tag = ["Automation", "Decrypted"]  # Example tags (tags are no longer restricted)
     disabled = False
     nat_type = NatType.ipv4
     from_ = ["any"]
@@ -5078,7 +5078,7 @@ class NatRuleUpdateApiFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
-    tag = ["Automation"]  # Only allowed tags
+    tag = ["Automation"]  # Example tag (tags are no longer restricted)
     disabled = False
     nat_type = NatType.ipv4
     from_ = ["any"]
@@ -5108,7 +5108,7 @@ class NatRuleResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
-    tag = ["Automation", "Decrypted"]  # Only allowed tags
+    tag = ["Automation", "Decrypted"]  # Example tags (tags are no longer restricted)
     disabled = False
     nat_type = NatType.ipv4
     from_ = ["any"]
@@ -5172,7 +5172,7 @@ class NatRuleCreateModelFactory(factory.DictFactory):
     name = factory.Sequence(lambda n: f"nat_rule_{n}")
     description = factory.Faker("sentence")
     folder = "Shared"
-    tag = ["Automation"]  # Only allowed tags
+    tag = ["Automation"]  # Example tag (tags are no longer restricted)
     nat_type = NatType.ipv4
 
     @classmethod

@@ -149,7 +149,7 @@ class TestNatRuleList(TestNatRuleBase):
                     service="http",
                     source=["10.0.0.0/24"],
                     destination=["any"],
-                    tag=["Automation"],  # Only allowed tags
+                    tag=["Automation"],  # Example tag
                     disabled=False,
                 ).model_dump(by_alias=True),
                 NatRuleResponseFactory(
@@ -159,7 +159,7 @@ class TestNatRuleList(TestNatRuleBase):
                     service="https",
                     source=["any"],
                     destination=["20.0.0.0/24"],
-                    tag=["Decrypted"],  # Only allowed tags
+                    tag=["Decrypted"],  # Example tag
                     disabled=True,
                 ).model_dump(by_alias=True),
             ],
@@ -175,7 +175,7 @@ class TestNatRuleList(TestNatRuleBase):
             "source": [
                 "10.0.0.0/24"
             ],  # Note: adjust if your filter logic expects list of strings
-            "tag": ["Automation"],  # Updated to use allowed tag
+            "tag": ["Automation"],  # Filter by tag
             "disabled": False,
         }
         rules = self.client.list(folder="Shared", **filters)
@@ -584,7 +584,7 @@ class TestNatRuleApplyFilters:
             service="http",
             destination=["10.0.0.1"],
             source=["any"],
-            tag=["Automation"],  # Only allowed tags
+            tag=["Automation"],  # Tag for filtering
             disabled=False,
         )
         self.rule2 = NatRuleResponseFactory(
@@ -593,7 +593,7 @@ class TestNatRuleApplyFilters:
             service="https",
             destination=["20.0.0.1"],
             source=["any"],
-            tag=["Decrypted"],  # Only allowed tags
+            tag=["Decrypted"],  # Tag for filtering
             disabled=True,
         )
         self.rules = [self.rule1, self.rule2]
@@ -650,7 +650,7 @@ class TestNatRuleListFiltering:
             service="http",
             destination=["10.0.0.1"],
             source=["any"],
-            tag=["Automation"],  # Only allowed tags
+            tag=["Automation"],  # Tag for filtering
             disabled=False,
         )
         self.rule2 = NatRuleResponseFactory(
@@ -659,7 +659,7 @@ class TestNatRuleListFiltering:
             service="https",
             destination=["20.0.0.1"],
             source=["any"],
-            tag=["Decrypted"],  # Only allowed tags
+            tag=["Decrypted"],  # Tag for filtering
             disabled=True,
         )
         self.rule3 = NatRuleResponseFactory(
@@ -668,7 +668,7 @@ class TestNatRuleListFiltering:
             service="http",
             destination=["30.0.0.1"],
             source=["any"],
-            tag=["Automation", "Decrypted"],  # Only allowed tags
+            tag=["Automation", "Decrypted"],  # Multiple tags for filtering
             disabled=False,
         )
         # We'll use these objects as our base rules.
