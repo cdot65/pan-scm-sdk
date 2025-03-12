@@ -311,7 +311,7 @@ class TestIPsecCryptoProfileModels:
         assert "snippet" not in profile_dict
         assert "device" not in profile_dict
         assert "ah" not in profile_dict
-        
+
     def test_process_lifetime_and_lifesize_validator(self):
         """Test the process_lifetime_and_lifesize validator directly."""
         from scm.models.network.ipsec_crypto_profile import (
@@ -325,69 +325,65 @@ class TestIPsecCryptoProfileModels:
             LifesizeGB,
             LifesizeTB,
         )
-        
+
         # Test validator with non-dict input
         values = "not-a-dict"
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result == "not-a-dict"
-        
+
         # Test with no lifetime
         values = {"name": "test", "folder": "folder"}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result == values
-        
+
         # Test with different lifetime types
         # Test with LifetimeSeconds
         values = {"name": "test", "lifetime": LifetimeSeconds(seconds=3600)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifetime"] == {"seconds": 3600}
-        
+
         # Test with LifetimeMinutes
         values = {"name": "test", "lifetime": LifetimeMinutes(minutes=60)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifetime"] == {"minutes": 60}
-        
+
         # Test with LifetimeHours
         values = {"name": "test", "lifetime": LifetimeHours(hours=1)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifetime"] == {"hours": 1}
-        
+
         # Test with LifetimeDays
         values = {"name": "test", "lifetime": LifetimeDays(days=1)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifetime"] == {"days": 1}
-        
+
         # Test with no lifesize
         values = {"name": "test", "lifetime": {"seconds": 3600}}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result == values
-        
+
         # Test with different lifesize types
         # Test with LifesizeKB
         values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeKB(kb=1024)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifesize"] == {"kb": 1024}
-        
+
         # Test with LifesizeMB
         values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeMB(mb=10)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifesize"] == {"mb": 10}
-        
+
         # Test with LifesizeGB
         values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeGB(gb=1)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifesize"] == {"gb": 1}
-        
+
         # Test with LifesizeTB
         values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": LifesizeTB(tb=1)}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result["lifesize"] == {"tb": 1}
-        
+
         # Test with both lifetime and lifesize already as dictionaries
-        values = {
-            "name": "test", 
-            "lifetime": {"seconds": 3600}, 
-            "lifesize": {"mb": 10}
-        }
+        values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": {"mb": 10}}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result == values

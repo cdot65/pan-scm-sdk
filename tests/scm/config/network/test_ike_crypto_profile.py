@@ -1,10 +1,10 @@
 """Test the IKE Crypto Profile configuration class."""
+
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from scm.config.network import IKECryptoProfile
 from scm.models.network import (
-    IKECryptoProfileCreateModel,
     IKECryptoProfileUpdateModel,
     IKECryptoProfileResponseModel,
 )
@@ -95,7 +95,9 @@ class TestIKECryptoProfileInit(TestIKECryptoProfileBase):
 class TestIKECryptoProfileCreate(TestIKECryptoProfileBase):
     """Test IKE Crypto Profile create method."""
 
-    def test_create_ike_crypto_profile(self, ike_crypto_profile, sample_profile_data, sample_profile_response):
+    def test_create_ike_crypto_profile(
+        self, ike_crypto_profile, sample_profile_data, sample_profile_response
+    ):
         """Test creating an IKE crypto profile."""
         # Mock the API response
         self.mock_scm.post.return_value = sample_profile_response
@@ -150,7 +152,10 @@ class TestIKECryptoProfileUpdate(TestIKECryptoProfileBase):
         # Check API client was called correctly
         self.mock_scm.put.assert_called_once()
         call_args = self.mock_scm.put.call_args
-        assert call_args[0][0] == "/config/network/v1/ike-crypto-profiles/123e4567-e89b-12d3-a456-426655440000"
+        assert (
+            call_args[0][0]
+            == "/config/network/v1/ike-crypto-profiles/123e4567-e89b-12d3-a456-426655440000"
+        )
         assert "id" not in call_args[1]["json"], "ID should not be in the request payload"
         # Verify description is in the update payload
         assert "description" in call_args[1]["json"], "Description should be in the request payload"
@@ -213,9 +218,17 @@ class TestIKECryptoProfileList(TestIKECryptoProfileBase):
         """Test list with pagination."""
         # First response has max limit items
         first_page = {
-            "data": [{"id": f"123e4567-e89b-12d3-a456-42665544{i:04d}", "name": f"profile-{i}", "hash": ["sha1"], 
-                      "encryption": ["aes-128-cbc"], "dh_group": ["group2"], 
-                      "folder": "test-folder"} for i in range(1, 2501)],
+            "data": [
+                {
+                    "id": f"123e4567-e89b-12d3-a456-42665544{i:04d}",
+                    "name": f"profile-{i}",
+                    "hash": ["sha1"],
+                    "encryption": ["aes-128-cbc"],
+                    "dh_group": ["group2"],
+                    "folder": "test-folder",
+                }
+                for i in range(1, 2501)
+            ],
             "limit": 2500,
             "offset": 0,
             "total": 3000,
@@ -223,9 +236,17 @@ class TestIKECryptoProfileList(TestIKECryptoProfileBase):
 
         # Second response has remaining items
         second_page = {
-            "data": [{"id": f"123e4567-e89b-12d3-a456-42665544{i:04d}", "name": f"profile-{i}", "hash": ["sha1"], 
-                      "encryption": ["aes-128-cbc"], "dh_group": ["group2"], 
-                      "folder": "test-folder"} for i in range(2501, 3001)],
+            "data": [
+                {
+                    "id": f"123e4567-e89b-12d3-a456-42665544{i:04d}",
+                    "name": f"profile-{i}",
+                    "hash": ["sha1"],
+                    "encryption": ["aes-128-cbc"],
+                    "dh_group": ["group2"],
+                    "folder": "test-folder",
+                }
+                for i in range(2501, 3001)
+            ],
             "limit": 2500,
             "offset": 2500,
             "total": 3000,
@@ -299,7 +320,7 @@ class TestIKECryptoProfileList(TestIKECryptoProfileBase):
         self.mock_scm.get.return_value = list_response
 
         result = ike_crypto_profile.list(
-            folder="test-folder", 
+            folder="test-folder",
             exclude_folders=["exclude-folder"],
         )
 
@@ -315,7 +336,7 @@ class TestIKECryptoProfileList(TestIKECryptoProfileBase):
         self.mock_scm.get.return_value = list_response
 
         result = ike_crypto_profile.list(
-            folder="test-folder", 
+            folder="test-folder",
             exclude_snippets=["exclude-snippet"],
         )
 
@@ -331,7 +352,7 @@ class TestIKECryptoProfileList(TestIKECryptoProfileBase):
         self.mock_scm.get.return_value = list_response
 
         result = ike_crypto_profile.list(
-            folder="test-folder", 
+            folder="test-folder",
             exclude_devices=["exclude-device"],
         )
 

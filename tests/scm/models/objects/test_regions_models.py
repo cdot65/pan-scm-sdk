@@ -83,9 +83,8 @@ class TestRegionCreateModel:
         data = RegionCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             RegionCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_region_create_model_no_container_provided(self):
@@ -93,9 +92,8 @@ class TestRegionCreateModel:
         data = RegionCreateModelFactory.build_with_no_container()
         with pytest.raises(ValueError) as exc_info:
             RegionCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_address_field_accepts_string(self):
@@ -119,7 +117,7 @@ class TestRegionCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             RegionCreateModel(**data)
         assert "1 validation error for RegionCreateModel" in str(exc_info.value)
-        
+
     def test_address_field_rejects_integer(self):
         """Test that the 'address' field rejects integer values."""
         data = RegionCreateModelFactory.build_valid()
@@ -127,21 +125,21 @@ class TestRegionCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             RegionCreateModel(**data)
         assert "1 validation error for RegionCreateModel" in str(exc_info.value)
-        
+
     def test_ensure_list_of_strings_function(self):
         """Test that the ensure_list_of_strings validator function works directly."""
         from scm.models.objects.regions import RegionBaseModel
-        
+
         # Test with None value
         assert RegionBaseModel.ensure_list_of_strings(None) is None
-        
+
         # Test with string value
         assert RegionBaseModel.ensure_list_of_strings("192.168.1.1") == ["192.168.1.1"]
-        
+
         # Test with list value
         test_list = ["192.168.1.1", "10.0.0.1"]
         assert RegionBaseModel.ensure_list_of_strings(test_list) == test_list
-        
+
         # Test with invalid type
         with pytest.raises(ValueError) as exc_info:
             RegionBaseModel.ensure_list_of_strings({"invalid": "type"})
@@ -324,48 +322,48 @@ class TestRegionResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data)
         assert "List of addresses must contain unique values" in str(exc_info.value)
-            
+
     def test_tag_field_accepts_string(self):
         """Test that the 'tag' field accepts a single string and converts it to a list."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "TestRegion",
             "folder": "Global",
-            "tag": "prod"
+            "tag": "prod",
         }
         model = RegionResponseModel(**data)
         assert model.tag == ["prod"]
-        
+
     def test_tag_field_accepts_list(self):
         """Test that the 'tag' field accepts a list of strings."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "TestRegion",
             "folder": "Global",
-            "tag": ["prod", "web"]
+            "tag": ["prod", "web"],
         }
         model = RegionResponseModel(**data)
         assert model.tag == ["prod", "web"]
-        
+
     def test_tag_field_rejects_invalid_type(self):
         """Test that the 'tag' field rejects invalid types."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "TestRegion",
             "folder": "Global",
-            "tag": {"invalid": "type"}
+            "tag": {"invalid": "type"},
         }
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data)
         assert "1 validation error for RegionResponseModel" in str(exc_info.value)
-        
+
     def test_tag_field_rejects_duplicate_items(self):
         """Test that the 'tag' field rejects duplicate items."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "TestRegion",
             "folder": "Global",
-            "tag": ["prod", "prod"]
+            "tag": ["prod", "prod"],
         }
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data)

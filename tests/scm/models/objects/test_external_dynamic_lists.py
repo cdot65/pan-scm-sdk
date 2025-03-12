@@ -1,7 +1,6 @@
 # tests/scm/models/objects/test_external_dynamic_lists.py
 
 import pytest
-from pydantic import ValidationError
 from scm.models.objects.external_dynamic_lists import (
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsUpdateModel,
@@ -19,18 +18,16 @@ class TestExternalDynamicListsCreateModel:
         data = ExternalDynamicListsCreateModelFactory.build_without_container()
         with pytest.raises(ValueError) as exc_info:
             ExternalDynamicListsCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_multiple_containers_provided(self):
         data = ExternalDynamicListsCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             ExternalDynamicListsCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_no_type_provided(self):
@@ -44,11 +41,7 @@ class TestExternalDynamicListsCreateModel:
         # But this is a create model, snippet defaults None and type optional.
         # The instructions don't say we must have type at creation if snippet='predefined'.
         # If we need type at creation (assuming from logic), let's fail this.
-        if (
-            model.snippet != "predefined"
-            and model.type is None
-            and model.folder is None
-        ):
+        if model.snippet != "predefined" and model.type is None and model.folder is None:
             pytest.fail("type is required if snippet is not 'predefined'")
 
     def test_valid_creation(self):
@@ -116,17 +109,13 @@ class TestExternalDynamicListsResponseModel:
         assert model.type is None
 
     def test_missing_id_non_predefined_snippet(self):
-        data = (
-            ExternalDynamicListsResponseModelFactory.build_without_id_non_predefined()
-        )
+        data = ExternalDynamicListsResponseModelFactory.build_without_id_non_predefined()
         with pytest.raises(ValueError) as exc_info:
             ExternalDynamicListsResponseModel(**data)
         assert "id is required if snippet is not 'predefined'" in str(exc_info.value)
 
     def test_missing_type_non_predefined_snippet(self):
-        data = (
-            ExternalDynamicListsResponseModelFactory.build_without_type_non_predefined()
-        )
+        data = ExternalDynamicListsResponseModelFactory.build_without_type_non_predefined()
         with pytest.raises(ValueError) as exc_info:
             ExternalDynamicListsResponseModel(**data)
         assert "type is required if snippet is not 'predefined'" in str(exc_info.value)

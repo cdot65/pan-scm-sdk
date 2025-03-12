@@ -2,7 +2,6 @@
 
 # Standard library imports
 import pytest
-from uuid import UUID
 
 # Local SDK imports
 from scm.models.objects.quarantined_devices import QuarantinedDevicesBaseModel

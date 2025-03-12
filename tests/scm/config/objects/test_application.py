@@ -2,7 +2,6 @@
 
 # Standard library imports
 from unittest.mock import MagicMock
-import uuid
 
 # External libraries
 import pytest
@@ -72,18 +71,16 @@ class TestApplicationMaxLimit(TestApplicationBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Application(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Application(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -171,10 +168,7 @@ class TestApplicationList(TestApplicationBase):
             self.client.list(folder="NonexistentFolder")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Listing failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Operation Impossible"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Operation Impossible"
 
     def test_list_container_missing_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
@@ -614,7 +608,6 @@ class TestApplicationCreate(TestApplicationBase):
         assert created_object.folder == test_object.folder
 
 
-
 @pytest.mark.integration
 class TestApplicationGet(TestApplicationBase):
     """Tests for retrieving a specific Application object."""
@@ -643,7 +636,6 @@ class TestApplicationGet(TestApplicationBase):
         assert retrieved_object.id == mock_response.id
         assert retrieved_object.name == mock_response.name
         assert retrieved_object.folder == mock_response.folder
-
 
 
 @pytest.mark.integration
@@ -689,7 +681,6 @@ class TestApplicationUpdate(TestApplicationBase):
         assert updated_object.risk == mock_response.risk
 
 
-
 @pytest.mark.integration
 class TestApplicationDelete(TestApplicationBase):
     """Tests for deleting Application objects."""
@@ -705,7 +696,6 @@ class TestApplicationDelete(TestApplicationBase):
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/objects/v1/applications/{object_id}"
         )
-
 
 
 @pytest.mark.integration
@@ -802,7 +792,7 @@ class TestApplicationFetch(TestApplicationBase):
 @pytest.mark.mock
 class TestApplicationCreateErrorHandling(TestApplicationBase):
     """Mock tests for error handling in create operations."""
-    
+
     def test_create_http_error_no_response_content(self):
         """Test create method when HTTP error has no response content."""
         mock_response = MagicMock()
@@ -846,15 +836,13 @@ class TestApplicationCreateErrorHandling(TestApplicationBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Error occurred"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
 
 @pytest.mark.mock
 class TestApplicationGetErrorHandling(TestApplicationBase):
     """Mock tests for error handling in get operations."""
-    
+
     def test_get_object_not_present_error(self):
         """Test error handling when the application is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -870,9 +858,7 @@ class TestApplicationGetErrorHandling(TestApplicationBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_http_error_no_response_content(self):
         """Test get method when HTTP error has no response content."""
@@ -892,7 +878,7 @@ class TestApplicationGetErrorHandling(TestApplicationBase):
 @pytest.mark.mock
 class TestApplicationUpdateErrorHandling(TestApplicationBase):
     """Mock tests for error handling in update operations."""
-    
+
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
         update_data = ApplicationUpdateApiFactory(
@@ -916,9 +902,7 @@ class TestApplicationUpdateErrorHandling(TestApplicationBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -945,7 +929,7 @@ class TestApplicationUpdateErrorHandling(TestApplicationBase):
 @pytest.mark.mock
 class TestApplicationDeleteErrorHandling(TestApplicationBase):
     """Mock tests for error handling in delete operations."""
-    
+
     def test_delete_object_not_present_error(self):
         """Test error handling when the application to delete is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -961,9 +945,7 @@ class TestApplicationDeleteErrorHandling(TestApplicationBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -1008,7 +990,7 @@ class TestApplicationFetchErrorHandling(TestApplicationBase):
         assert error.error_code == "E003"
         assert error.http_status_code == 500
         assert "HTTP error: 500 - API error: E003" in str(error)
-            
+
     def test_fetch_no_container_provided_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -1028,7 +1010,7 @@ class TestApplicationFetchErrorHandling(TestApplicationBase):
 
         error_msg = str(exc_info.value)
         assert "HTTP error: 400 - API error: E003" in error_msg
-    
+
     def test_fetch_error_handler(self):
         """Test error handler behavior in fetch method with properly formatted error response."""
         mock_error_response = MagicMock()
@@ -1053,9 +1035,7 @@ class TestApplicationFetchErrorHandling(TestApplicationBase):
             self.client.fetch(name="test-app", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
 
 # -------------------- Parametrized Tests --------------------
@@ -1071,25 +1051,22 @@ class TestApplicationParametrized(TestApplicationBase):
             ("general-internet", "file-sharing", "peer-to-peer", 5),
             ("business-systems", "ics-protocols", "client-server", 2),
             ("web-applications", "social-networking", "browser-based", 3),
-        ]
+        ],
     )
     def test_create_application_types(self, category, subcategory, technology, risk):
         """Test creating applications with different types."""
         test_object = ApplicationCreateApiFactory(
-            category=category,
-            subcategory=subcategory,
-            technology=technology,
-            risk=risk
+            category=category, subcategory=subcategory, technology=technology, risk=risk
         )
-        
+
         mock_response = ApplicationResponseFactory.from_request(test_object)
-        
+
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
         created_object = self.client.create(test_object.model_dump(exclude_unset=True))
-        
+
         # Verify the application attributes match the expected values
         assert created_object.category == category
-        assert created_object.subcategory == subcategory 
+        assert created_object.subcategory == subcategory
         assert created_object.technology == technology
         assert created_object.risk == risk
 
@@ -1106,7 +1083,7 @@ def test_application_lifecycle(mock_scm):
     mock_scm.put = MagicMock()
     mock_scm.delete = MagicMock()
     client = Application(mock_scm, max_limit=5000)
-    
+
     # 1. Create application
     create_data = {
         "name": "test-app-lifecycle",
@@ -1116,9 +1093,9 @@ def test_application_lifecycle(mock_scm):
         "technology": "browser-based",
         "risk": 3,
         "description": "Lifecycle test application",
-        "ports": ["tcp/443,80"]
+        "ports": ["tcp/443,80"],
     }
-    
+
     app_id = "123e4567-e89b-12d3-a456-426655440000"
     mock_create_response = {
         "id": app_id,
@@ -1129,33 +1106,28 @@ def test_application_lifecycle(mock_scm):
         "technology": "browser-based",
         "risk": 3,
         "description": "Lifecycle test application",
-        "ports": ["tcp/443,80"]
+        "ports": ["tcp/443,80"],
     }
     mock_scm.post.return_value = mock_create_response
-    
+
     created = client.create(create_data)
     assert str(created.id) == app_id
     assert created.name == "test-app-lifecycle"
-    
+
     # 2. List applications
-    mock_list_response = {
-        "data": [mock_create_response],
-        "offset": 0,
-        "total": 1,
-        "limit": 100
-    }
+    mock_list_response = {"data": [mock_create_response], "offset": 0, "total": 1, "limit": 100}
     mock_scm.get.return_value = mock_list_response
-    
+
     apps = client.list(folder="Texas")
     assert len(apps) == 1
     assert str(apps[0].id) == app_id
-    
+
     # 3. Get specific application
     mock_scm.get.return_value = mock_create_response
-    
+
     retrieved = client.get(app_id)
     assert str(retrieved.id) == app_id
-    
+
     # 4. Update application
     update_data = ApplicationUpdateApiFactory(
         id=app_id,
@@ -1166,9 +1138,9 @@ def test_application_lifecycle(mock_scm):
         technology="browser-based",
         risk=3,
         description="Updated lifecycle test application",
-        ports=["tcp/443,80,8080"]
+        ports=["tcp/443,80,8080"],
     )
-    
+
     mock_update_response = {
         "id": app_id,
         "name": "test-app-lifecycle",
@@ -1178,17 +1150,17 @@ def test_application_lifecycle(mock_scm):
         "technology": "browser-based",
         "risk": 3,
         "description": "Updated lifecycle test application",
-        "ports": ["tcp/443,80,8080"]
+        "ports": ["tcp/443,80,8080"],
     }
     mock_scm.put.return_value = mock_update_response
-    
+
     updated = client.update(update_data)
     assert updated.description == "Updated lifecycle test application"
     assert updated.ports == ["tcp/443,80,8080"]
-    
+
     # 5. Delete application
     mock_scm.delete.return_value = None
-    
+
     # Should not raise any exceptions
     client.delete(app_id)
     mock_scm.delete.assert_called_once_with(f"/config/objects/v1/applications/{app_id}")

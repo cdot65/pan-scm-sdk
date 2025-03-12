@@ -175,9 +175,8 @@ class TestServiceCreateModel:
         data = ServiceCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             ServiceCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_service_create_model_missing_required_fields(self):

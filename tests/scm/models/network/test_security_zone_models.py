@@ -1,4 +1,5 @@
 """Test models for Security Zones."""
+
 import pytest
 from uuid import UUID
 from pydantic import ValidationError
@@ -10,7 +11,6 @@ from scm.models.network import (
     NetworkConfig,
     UserAcl,
     DeviceAcl,
-    NetworkInterfaceType,
 )
 
 
@@ -29,7 +29,7 @@ class TestSecurityZoneModels:
                 "layer3": ["ethernet1/1", "ethernet1/2"],
                 "zone_protection_profile": "default",
                 "enable_packet_buffer_protection": True,
-            }
+            },
         }
         model = SecurityZoneCreateModel(**valid_data)
         assert model.name == "test-zone"
@@ -103,7 +103,9 @@ class TestSecurityZoneModels:
         }
         with pytest.raises(ValueError) as exc_info:
             SecurityZoneCreateModel(**invalid_no_container)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
 
         # Test with multiple containers
         invalid_multiple_containers = {
@@ -113,7 +115,9 @@ class TestSecurityZoneModels:
         }
         with pytest.raises(ValueError) as exc_info:
             SecurityZoneCreateModel(**invalid_multiple_containers)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
 
     def test_network_config_validation(self):
         """Test validation of NetworkConfig to ensure only one network type is configured."""
@@ -122,19 +126,13 @@ class TestSecurityZoneModels:
         assert valid_config.layer3 == ["ethernet1/1"]
 
         # Valid configuration with log setting
-        valid_config = NetworkConfig(
-            layer3=["ethernet1/1"],
-            log_setting="default-log-setting"
-        )
+        valid_config = NetworkConfig(layer3=["ethernet1/1"], log_setting="default-log-setting")
         assert valid_config.layer3 == ["ethernet1/1"]
         assert valid_config.log_setting == "default-log-setting"
 
         # Invalid configuration with multiple network types
         with pytest.raises(ValueError) as exc_info:
-            NetworkConfig(
-                layer3=["ethernet1/1"],
-                layer2=["ethernet1/2"]
-            )
+            NetworkConfig(layer3=["ethernet1/1"], layer2=["ethernet1/2"])
         assert "Only one network interface type can be configured at a time" in str(exc_info.value)
 
     def test_user_acl_model(self):
@@ -145,10 +143,7 @@ class TestSecurityZoneModels:
         assert user_acl.exclude_list == []
 
         # Test with values
-        user_acl = UserAcl(
-            include_list=["user1", "user2"],
-            exclude_list=["user3"]
-        )
+        user_acl = UserAcl(include_list=["user1", "user2"], exclude_list=["user3"])
         assert user_acl.include_list == ["user1", "user2"]
         assert user_acl.exclude_list == ["user3"]
 
@@ -160,10 +155,7 @@ class TestSecurityZoneModels:
         assert device_acl.exclude_list == []
 
         # Test with values
-        device_acl = DeviceAcl(
-            include_list=["device1", "device2"],
-            exclude_list=["device3"]
-        )
+        device_acl = DeviceAcl(include_list=["device1", "device2"], exclude_list=["device3"])
         assert device_acl.include_list == ["device1", "device2"]
         assert device_acl.exclude_list == ["device3"]
 
@@ -177,7 +169,7 @@ class TestSecurityZoneModels:
             "enable_user_identification": True,
             "network": {
                 "layer3": ["ethernet1/1", "ethernet1/2"],
-            }
+            },
         }
         model = SecurityZoneUpdateModel(**valid_data)
         assert model.id == UUID("123e4567-e89b-12d3-a456-426655440000")
@@ -208,7 +200,7 @@ class TestSecurityZoneModels:
             "enable_user_identification": True,
             "network": {
                 "layer3": ["ethernet1/1", "ethernet1/2"],
-            }
+            },
         }
         model = SecurityZoneResponseModel(**valid_data)
         assert model.id == UUID("123e4567-e89b-12d3-a456-426655440000")

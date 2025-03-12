@@ -76,18 +76,16 @@ class TestSecurityRuleMaxLimit(TestSecurityRuleBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             SecurityRule(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             SecurityRule(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -190,9 +188,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
                     from_=["trust"],
                     to_=["untrust"],
                     tag=["tag1"],
-                    profile_setting=SecurityRuleProfileSettingFactory(
-                        group=["best-practice"]
-                    ),
+                    profile_setting=SecurityRuleProfileSettingFactory(group=["best-practice"]),
                 ).model_dump(by_alias=True),
                 SecurityRuleResponseFactory(
                     name="rule2",
@@ -432,9 +428,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Test filtering by log setting
-        filtered_objects = self.client.list(
-            folder="Texas", log_setting=["default-logging"]
-        )
+        filtered_objects = self.client.list(folder="Texas", log_setting=["default-logging"])
         assert len(filtered_objects) == 1
         assert filtered_objects[0].name == "rule1"
         assert filtered_objects[0].log_setting == "default-logging"
@@ -903,9 +897,7 @@ class TestSecurityRuleCreate(TestSecurityRuleBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
@@ -987,9 +979,7 @@ class TestSecurityRuleGet(TestSecurityRuleBase):
             self.client.list(folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -1097,9 +1087,7 @@ class TestSecurityRuleUpdate(TestSecurityRuleBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -1119,9 +1107,7 @@ class TestSecurityRuleUpdate(TestSecurityRuleBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -1224,9 +1210,7 @@ class TestSecurityRuleDelete(TestSecurityRuleBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Reference not zero"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -1243,9 +1227,7 @@ class TestSecurityRuleDelete(TestSecurityRuleBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -1377,9 +1359,7 @@ class TestSecurityRuleFetch(TestSecurityRuleBase):
             self.client.fetch(name="nonexistent", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
@@ -1569,9 +1549,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         with pytest.raises(ValidationError) as exc_info:
             self.client.move(source_rule, move_data)  # noqa
 
-        assert "destination_rule is required when destination is 'before'" in str(
-            exc_info.value
-        )
+        assert "destination_rule is required when destination is 'before'" in str(exc_info.value)
 
     def test_move_rule_not_found_error(self):
         """Test error handling when source or destination rule is not found."""
@@ -1592,9 +1570,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
             self.client.move(rule_id, move_data)  # noqa
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Rule not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_move_http_error_no_response_content(self):
         """Test move method when HTTP error has no response content."""
@@ -1652,7 +1628,6 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
 
 
 class TestSecurityRuleModelMisc(TestSecurityRuleBase):
-
     def test_security_rule_profile_setting_group_unique(self):
         """Test that duplicate items in 'group' raise a ValueError."""
         with pytest.raises(ValueError, match="List items in 'group' must be unique"):
@@ -1661,7 +1636,9 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
     def test_ensure_list_of_strings_single_string(self):
         """Test that a single string is converted to a list containing that string."""
         model = SecurityRuleCreateModel(
-            name="test-rule", source="192.168.1.1", folder="Texas"  # noqa
+            name="test-rule",
+            source="192.168.1.1",
+            folder="Texas",  # noqa
         )
         assert model.source == ["192.168.1.1"]
 
@@ -1677,9 +1654,7 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
     def test_ensure_list_of_strings_non_string_items(self):
         """Test that a list containing non-string items raises a ValueError."""
         with pytest.raises(ValueError, match="All items must be strings"):
-            SecurityRuleCreateModel(
-                name="test-rule", source=["192.168.1.1", 123], folder="Texas"
-            )
+            SecurityRuleCreateModel(name="test-rule", source=["192.168.1.1", 123], folder="Texas")
 
     def test_ensure_unique_items_duplicates(self):
         """Test that duplicate items in lists raise a ValueError."""
@@ -1702,9 +1677,7 @@ class TestSecurityRuleModelMisc(TestSecurityRuleBase):
             ValueError,
             match="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
         ):
-            SecurityRuleCreateModel(
-                name="test-rule", folder="Texas", snippet="MySnippet"
-            )
+            SecurityRuleCreateModel(name="test-rule", folder="Texas", snippet="MySnippet")
 
     def test_move_model_unexpected_destination_rule_top(self):
         """Test that providing destination_rule with 'top' raises a ValueError."""

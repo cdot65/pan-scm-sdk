@@ -14,13 +14,11 @@ from scm.models.deployment.remote_networks import (
     RemoteNetworkResponseModel,
     EcmpTunnelModel,
     PeeringTypeEnum,
-    ProtocolModel,
 )
 from scm.models.deployment.service_connections import (
     ServiceConnectionCreateModel,
     ServiceConnectionUpdateModel,
     ServiceConnectionResponseModel,
-    ProtocolModel,
 )
 from scm.models.network.nat_rules import (
     NatRuleCreateModel,
@@ -33,6 +31,7 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     InterfaceAddress,
 )
+
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,
@@ -1766,9 +1765,7 @@ class HIPObjectCreateApiFactory(factory.Factory):
     disk_encryption = {
         "criteria": {
             "is_installed": True,
-            "encrypted_locations": [
-                {"name": "C:", "encryption_state": {"is": "encrypted"}}
-            ],
+            "encrypted_locations": [{"name": "C:", "encryption_state": {"is": "encrypted"}}],
         },
         "exclude_vendor": False,
     }
@@ -1804,9 +1801,7 @@ class HIPObjectUpdateApiFactory(factory.Factory):
     disk_encryption = {
         "criteria": {
             "is_installed": True,
-            "encrypted_locations": [
-                {"name": "C:", "encryption_state": {"is": "encrypted"}}
-            ],
+            "encrypted_locations": [{"name": "C:", "encryption_state": {"is": "encrypted"}}],
         },
         "exclude_vendor": False,
     }
@@ -1834,9 +1829,7 @@ class HIPObjectUpdateApiFactory(factory.Factory):
             )
 
         # Create and add new location
-        new_location = EncryptionLocationModel(
-            name=location, encryption_state={"is": "encrypted"}
-        )
+        new_location = EncryptionLocationModel(name=location, encryption_state={"is": "encrypted"})
 
         # Access via model attributes
         base_instance.disk_encryption.criteria.encrypted_locations.append(new_location)
@@ -1857,9 +1850,7 @@ class HIPObjectResponseFactory(factory.Factory):
     disk_encryption = {
         "criteria": {
             "is_installed": True,
-            "encrypted_locations": [
-                {"name": "C:", "encryption_state": {"is": "encrypted"}}
-            ],
+            "encrypted_locations": [{"name": "C:", "encryption_state": {"is": "encrypted"}}],
         },
         "exclude_vendor": False,
     }
@@ -1933,9 +1924,7 @@ class HIPObjectCreateModelFactory(factory.DictFactory):
             disk_encryption={
                 "criteria": {
                     "is_installed": True,
-                    "encrypted_locations": [
-                        {"name": "C:", "encryption_state": "invalid"}
-                    ],
+                    "encrypted_locations": [{"name": "C:", "encryption_state": "invalid"}],
                 }
             },
         )
@@ -1971,11 +1960,7 @@ class HIPObjectUpdateModelFactory(factory.DictFactory):
             id="invalid-uuid",
             name="@invalid-name",
             disk_encryption={
-                "criteria": {
-                    "encrypted_locations": [
-                        {"name": "C:", "encryption_state": "invalid"}
-                    ]
-                }
+                "criteria": {"encrypted_locations": [{"name": "C:", "encryption_state": "invalid"}]}
             },
         )
 
@@ -2898,9 +2883,7 @@ class AntiSpywareRuleBaseFactory(factory.Factory):
         return cls(severity=severities, **kwargs)
 
     @classmethod
-    def with_category(
-        cls, category: AntiSpywareCategory = AntiSpywareCategory.botnet, **kwargs
-    ):
+    def with_category(cls, category: AntiSpywareCategory = AntiSpywareCategory.botnet, **kwargs):
         """Create an instance with a specific category."""
         return cls(category=category, **kwargs)
 
@@ -2913,17 +2896,13 @@ class AntiSpywareThreatExceptionBaseFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"exception_{n}")
     packet_capture = AntiSpywarePacketCapture.single_packet
-    exempt_ip = factory.LazyAttribute(
-        lambda _: [AntiSpywareExemptIpEntry(name="192.168.1.1")]
-    )
+    exempt_ip = factory.LazyAttribute(lambda _: [AntiSpywareExemptIpEntry(name="192.168.1.1")])
     notes = "Test exception"
 
     @classmethod
     def with_multiple_exempt_ips(cls, ips: list[str], **kwargs):
         """Create an instance with multiple exempt IPs."""
-        return cls(
-            exempt_ip=[AntiSpywareExemptIpEntry(name=ip) for ip in ips], **kwargs
-        )
+        return cls(exempt_ip=[AntiSpywareExemptIpEntry(name=ip) for ip in ips], **kwargs)
 
 
 # SDK tests against SCM API
@@ -2938,9 +2917,7 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
     folder = "Texas"
     cloud_inline_analysis = False
     rules = factory.LazyAttribute(lambda _: [AntiSpywareRuleBaseFactory()])
-    threat_exception = factory.LazyAttribute(
-        lambda _: [AntiSpywareThreatExceptionBaseFactory()]
-    )
+    threat_exception = factory.LazyAttribute(lambda _: [AntiSpywareThreatExceptionBaseFactory()])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -2960,13 +2937,9 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
         return cls(mica_engine_spyware_enabled=entries, **kwargs)
 
     @classmethod
-    def with_inline_exceptions(
-        cls, urls: list[str] = None, ips: list[str] = None, **kwargs
-    ):
+    def with_inline_exceptions(cls, urls: list[str] = None, ips: list[str] = None, **kwargs):
         """Create a profile with inline exceptions."""
-        return cls(
-            inline_exception_edl_url=urls, inline_exception_ip_address=ips, **kwargs
-        )
+        return cls(inline_exception_edl_url=urls, inline_exception_ip_address=ips, **kwargs)
 
 
 class AntiSpywareProfileUpdateApiFactory(factory.Factory):
@@ -2979,9 +2952,7 @@ class AntiSpywareProfileUpdateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)]
-    )
+    threat_exception = factory.List([factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)])
 
     @classmethod
     def with_cloud_inline_analysis(cls, enabled: bool = True, **kwargs):
@@ -3006,9 +2977,7 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
     folder = "Texas"
     cloud_inline_analysis = False
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)]
-    )
+    threat_exception = factory.List([factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -3585,9 +3554,7 @@ class SecurityRuleUpdateApiFactory(factory.Factory):
     rulebase = None
 
     @classmethod
-    def with_action_update(
-        cls, action: SecurityRuleAction = SecurityRuleAction.deny, **kwargs
-    ):
+    def with_action_update(cls, action: SecurityRuleAction = SecurityRuleAction.deny, **kwargs):
         """Create an instance updating only the action."""
         return cls(action=action, **kwargs)
 
@@ -3933,9 +3900,7 @@ class BotnetDomainsFactory(factory.Factory):
     class Meta:
         model = BotnetDomainsModel
 
-    dns_security_categories = factory.List(
-        [factory.SubFactory(DNSSecurityCategoryEntryFactory)]
-    )
+    dns_security_categories = factory.List([factory.SubFactory(DNSSecurityCategoryEntryFactory)])
     lists = factory.List([factory.SubFactory(ListEntryBaseFactory)])
     sinkhole = factory.SubFactory(SinkholeSettingsFactory)
     whitelist = factory.List([factory.SubFactory(WhitelistEntryFactory)])
@@ -4076,9 +4041,7 @@ class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
             name="TestProfile",
             folder="Texas",
             botnet_domains={
-                "dns_security_categories": [
-                    {"name": "malware", "action": "invalid-action"}
-                ]
+                "dns_security_categories": [{"name": "malware", "action": "invalid-action"}]
             },
         )
 
@@ -4096,9 +4059,7 @@ class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             name="UpdatedProfile",
             description="Updated description",
-            botnet_domains={
-                "sinkhole": {"ipv4_address": "127.0.0.1", "ipv6_address": "::1"}
-            },
+            botnet_domains={"sinkhole": {"ipv4_address": "127.0.0.1", "ipv6_address": "::1"}},
         )
 
     @classmethod
@@ -4107,9 +4068,7 @@ class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             id="invalid-uuid",
             name="@invalid-name",
-            botnet_domains={
-                "dns_security_categories": [{"name": "malware", "action": "invalid"}]
-            },
+            botnet_domains={"dns_security_categories": [{"name": "malware", "action": "invalid"}]},
         )
 
     @classmethod
@@ -4368,9 +4327,7 @@ class URLCategoriesUpdateModelFactory(factory.DictFactory):
         return cls(
             id="invalid-uuid",
             name="@invalid-name",
-            botnet_domains={
-                "dns_security_categories": [{"name": "malware", "action": "invalid"}]
-            },
+            botnet_domains={"dns_security_categories": [{"name": "malware", "action": "invalid"}]},
         )
 
     @classmethod
@@ -4736,12 +4693,8 @@ class WildfireAvProfileCreateApiFactory(factory.Factory):
     folder = "Texas"
     packet_capture = False
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List(
-        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
-    )
-    threat_exception = factory.List(
-        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
-    )
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -4769,12 +4722,8 @@ class WildfireAvProfileUpdateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
     description = factory.Faker("sentence")
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List(
-        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
-    )
-    threat_exception = factory.List(
-        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
-    )
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
 
     @classmethod
     def with_packet_capture(cls, enabled: bool = True, **kwargs):
@@ -4794,12 +4743,8 @@ class WildfireAvProfileResponseFactory(factory.Factory):
     folder = "Texas"
     packet_capture = False
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List(
-        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
-    )
-    threat_exception = factory.List(
-        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
-    )
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -4968,13 +4913,10 @@ class SourceTranslationFactory(factory.Factory):
         model = SourceTranslation
 
     # Need to explicitly set one of the three source translation types
-    dynamic_ip_and_port = {
-        "type": "dynamic_ip_and_port",
-        "translated_address": ["10.0.0.1"]
-    }
+    dynamic_ip_and_port = {"type": "dynamic_ip_and_port", "translated_address": ["10.0.0.1"]}
     dynamic_ip = None
     static_ip = None
-    
+
     # These fields aren't direct attributes of SourceTranslation
     # but can be used in other contexts
     bi_directional = False
@@ -4990,28 +4932,30 @@ class SourceTranslationFactory(factory.Factory):
         """Create an instance with static IP translation."""
         static_ip = {
             "translated_address": "192.168.1.100",
-            "bi_directional": "yes" if kwargs.pop("bi_directional", False) else "no"
+            "bi_directional": "yes" if kwargs.pop("bi_directional", False) else "no",
         }
         return cls(dynamic_ip_and_port=None, dynamic_ip=None, static_ip=static_ip, **kwargs)
-        
+
     @classmethod
     def with_dynamic_ip(cls, **kwargs):
         """Create an instance with dynamic IP translation."""
         dynamic_ip = {
             "translated_address": ["192.168.1.100", "192.168.1.101"],
-            "fallback_type": None
+            "fallback_type": None,
         }
         return cls(dynamic_ip_and_port=None, dynamic_ip=dynamic_ip, static_ip=None, **kwargs)
-        
+
     @classmethod
     def with_dynamic_ip_and_port(cls, **kwargs):
         """Create an instance with dynamic IP and port translation."""
         dynamic_ip_and_port = {
             "type": "dynamic_ip_and_port",
-            "translated_address": kwargs.pop("translated_address", ["192.168.1.100"])
+            "translated_address": kwargs.pop("translated_address", ["192.168.1.100"]),
         }
-        return cls(dynamic_ip_and_port=dynamic_ip_and_port, dynamic_ip=None, static_ip=None, **kwargs)
-        
+        return cls(
+            dynamic_ip_and_port=dynamic_ip_and_port, dynamic_ip=None, static_ip=None, **kwargs
+        )
+
     @classmethod
     def with_bi_directional(cls, **kwargs):
         """Create an instance with bi-directional translation enabled."""
@@ -5326,7 +5270,9 @@ class HIPProfileCreateApiFactory(factory.Factory):
         return cls(folder=None, snippet=None, device=device, **kwargs)
 
     @classmethod
-    def with_complex_match(cls, match: str = "All of the members of (hipobject1 or hipobject2)", **kwargs):
+    def with_complex_match(
+        cls, match: str = "All of the members of (hipobject1 or hipobject2)", **kwargs
+    ):
         """Create an instance with a complex match expression."""
         return cls(match=match, **kwargs)
 
@@ -5480,14 +5426,9 @@ class HTTPServerProfileCreateApiFactory(factory.Factory):
         model = HTTPServerProfileCreateModel
 
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
-    server = factory.List([
-        {
-            "name": "test-server",
-            "address": "192.168.1.100",
-            "protocol": "HTTP",
-            "port": 80
-        }
-    ])
+    server = factory.List(
+        [{"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}]
+    )
     tag_registration = True
     format = {
         "traffic": {},
@@ -5523,7 +5464,7 @@ class HTTPServerProfileCreateApiFactory(factory.Factory):
             "port": 443,
             "tls_version": "1.2",
             "certificate_profile": "default",
-            "http_method": "POST"
+            "http_method": "POST",
         }
         return cls(server=[https_server], **kwargs)
 
@@ -5536,14 +5477,9 @@ class HTTPServerProfileUpdateApiFactory(factory.Factory):
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
-    server = factory.List([
-        {
-            "name": "updated-server",
-            "address": "192.168.1.200",
-            "protocol": "HTTP",
-            "port": 8080
-        }
-    ])
+    server = factory.List(
+        [{"name": "updated-server", "address": "192.168.1.200", "protocol": "HTTP", "port": 8080}]
+    )
     tag_registration = True
     format = {
         "traffic": {},
@@ -5560,7 +5496,7 @@ class HTTPServerProfileUpdateApiFactory(factory.Factory):
             "port": 443,
             "tls_version": "1.3",
             "certificate_profile": "updated-cert",
-            "http_method": "GET"
+            "http_method": "GET",
         }
         return cls(server=[https_server], **kwargs)
 
@@ -5573,14 +5509,9 @@ class HTTPServerProfileResponseFactory(factory.Factory):
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
-    server = factory.List([
-        {
-            "name": "test-server",
-            "address": "192.168.1.100",
-            "protocol": "HTTP",
-            "port": 80
-        }
-    ])
+    server = factory.List(
+        [{"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}]
+    )
     tag_registration = True
     format = {
         "traffic": {},
@@ -5605,7 +5536,7 @@ class HTTPServerProfileResponseFactory(factory.Factory):
     def with_device(cls, device="TestDevice", **kwargs):
         """Create a response model with a device container."""
         return cls(folder=None, snippet=None, device=device, **kwargs)
-    
+
     @classmethod
     def from_request(cls, request_model: HTTPServerProfileCreateModel, **kwargs):
         """Create a response model based on a request model."""
@@ -5620,14 +5551,7 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for HTTPServerProfileCreateModel."""
 
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
-    server = [
-        {
-            "name": "test-server",
-            "address": "192.168.1.100",
-            "protocol": "HTTP",
-            "port": 80
-        }
-    ]
+    server = [{"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}]
     tag_registration = True
     format = {
         "traffic": {},
@@ -5644,12 +5568,7 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestHTTPServerProfile",
             server=[
-                {
-                    "name": "test-server",
-                    "address": "192.168.1.100",
-                    "protocol": "HTTP",
-                    "port": 80
-                },
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80},
                 {
                     "name": "test-https-server",
                     "address": "secure.example.com",
@@ -5657,8 +5576,8 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
                     "port": 443,
                     "tls_version": "1.2",
                     "certificate_profile": "default",
-                    "http_method": "POST"
-                }
+                    "http_method": "POST",
+                },
             ],
             tag_registration=True,
             format={
@@ -5675,12 +5594,7 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestHTTPServerProfile",
             server=[
-                {
-                    "name": "test-server",
-                    "address": "192.168.1.100",
-                    "protocol": "HTTP",
-                    "port": 80
-                }
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
             ],
             folder="Security Profiles",
             snippet="TestSnippet",
@@ -5692,12 +5606,7 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestHTTPServerProfile",
             server=[
-                {
-                    "name": "test-server",
-                    "address": "192.168.1.100",
-                    "protocol": "HTTP",
-                    "port": 80
-                }
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
             ],
             folder=None,
             snippet=None,
@@ -5713,7 +5622,7 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
                 {
                     "name": "test-server",
                     "protocol": "INVALID",  # Invalid protocol
-                    "port": 80
+                    "port": 80,
                 }
             ],
             folder="Security Profiles",
@@ -5726,12 +5635,7 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
     id = "123e4567-e89b-12d3-a456-426655440000"
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
     server = [
-        {
-            "name": "updated-server",
-            "address": "192.168.1.200",
-            "protocol": "HTTP",
-            "port": 8080
-        }
+        {"name": "updated-server", "address": "192.168.1.200", "protocol": "HTTP", "port": 8080}
     ]
     tag_registration = True
     format = {
@@ -5750,7 +5654,7 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
                     "name": "updated-server",
                     "address": "192.168.1.200",
                     "protocol": "HTTP",
-                    "port": 8080
+                    "port": 8080,
                 }
             ],
             tag_registration=False,
@@ -5765,13 +5669,7 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             id="invalid-uuid",
             name="valid-name",
-            server=[
-                {
-                    "name": "test-server",
-                    "protocol": "INVALID",
-                    "port": 80
-                }
-            ],
+            server=[{"name": "test-server", "protocol": "INVALID", "port": 80}],
         )
 
     @classmethod
@@ -5781,12 +5679,7 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="MinimalUpdate",
             server=[
-                {
-                    "name": "minimal-server",
-                    "address": "10.0.0.1",
-                    "protocol": "HTTP",
-                    "port": 80
-                }
+                {"name": "minimal-server", "address": "10.0.0.1", "protocol": "HTTP", "port": 80}
             ],
         )
 
@@ -5957,14 +5850,16 @@ class LogForwardingProfileCreateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
     description = factory.Faker("sentence")
     folder = "Shared"
-    match_list = factory.List([
-        {
-            "name": "test-match",
-            "log_type": "traffic",
-            "filter": "addr.src in 192.168.0.0/24",
-            "send_http": ["test-http-profile"]
-        }
-    ])
+    match_list = factory.List(
+        [
+            {
+                "name": "test-match",
+                "log_type": "traffic",
+                "filter": "addr.src in 192.168.0.0/24",
+                "send_http": ["test-http-profile"],
+            }
+        ]
+    )
 
     @classmethod
     def with_folder(cls, folder="Shared", **kwargs):
@@ -5989,14 +5884,14 @@ class LogForwardingProfileCreateApiFactory(factory.Factory):
                 "name": "traffic-match",
                 "log_type": "traffic",
                 "filter": "addr.src in 192.168.0.0/24",
-                "send_http": ["traffic-http-profile"]
+                "send_http": ["traffic-http-profile"],
             },
             {
                 "name": "threat-match",
                 "log_type": "threat",
                 "filter": "addr.dst in 10.0.0.0/8",
-                "send_syslog": ["threat-syslog-profile"]
-            }
+                "send_syslog": ["threat-syslog-profile"],
+            },
         ]
         return cls(match_list=matches, **kwargs)
 
@@ -6010,14 +5905,16 @@ class LogForwardingProfileUpdateApiFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
     description = factory.Faker("sentence")
-    match_list = factory.List([
-        {
-            "name": "updated-match",
-            "log_type": "traffic",
-            "filter": "addr.src in 10.0.0.0/8",
-            "send_http": ["updated-http-profile"]
-        }
-    ])
+    match_list = factory.List(
+        [
+            {
+                "name": "updated-match",
+                "log_type": "traffic",
+                "filter": "addr.src in 10.0.0.0/8",
+                "send_http": ["updated-http-profile"],
+            }
+        ]
+    )
 
     @classmethod
     def with_multiple_match_items(cls, **kwargs):
@@ -6027,14 +5924,14 @@ class LogForwardingProfileUpdateApiFactory(factory.Factory):
                 "name": "updated-traffic-match",
                 "log_type": "traffic",
                 "filter": "addr.src in 172.16.0.0/16",
-                "send_http": ["updated-http-profile"]
+                "send_http": ["updated-http-profile"],
             },
             {
                 "name": "updated-url-match",
                 "log_type": "url",
                 "filter": "category eq social-networking",
-                "send_syslog": ["updated-syslog-profile"]
-            }
+                "send_syslog": ["updated-syslog-profile"],
+            },
         ]
         return cls(match_list=matches, **kwargs)
 
@@ -6049,14 +5946,16 @@ class LogForwardingProfileResponseFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"log_forwarding_profile_{n}")
     description = factory.Faker("sentence")
     folder = "Shared"
-    match_list = factory.List([
-        {
-            "name": "test-match",
-            "log_type": "traffic", 
-            "filter": "addr.src in 192.168.0.0/24",
-            "send_http": ["test-http-profile"]
-        }
-    ])
+    match_list = factory.List(
+        [
+            {
+                "name": "test-match",
+                "log_type": "traffic",
+                "filter": "addr.src in 192.168.0.0/24",
+                "send_http": ["test-http-profile"],
+            }
+        ]
+    )
 
     @classmethod
     def with_folder(cls, folder="Shared", **kwargs):
@@ -6072,7 +5971,7 @@ class LogForwardingProfileResponseFactory(factory.Factory):
     def with_device(cls, device="TestDevice", **kwargs):
         """Create a response model with a device container."""
         return cls(folder=None, snippet=None, device=device, **kwargs)
-    
+
     @classmethod
     def from_request(cls, request_model: LogForwardingProfileCreateModel, **kwargs):
         """Create a response model based on a request model."""
@@ -6094,7 +5993,7 @@ class LogForwardingProfileCreateModelFactory(factory.DictFactory):
             "name": "test-match",
             "log_type": "traffic",
             "filter": "addr.src in 192.168.0.0/24",
-            "send_http": ["test-http-profile"]
+            "send_http": ["test-http-profile"],
         }
     ]
 
@@ -6110,14 +6009,14 @@ class LogForwardingProfileCreateModelFactory(factory.DictFactory):
                     "name": "traffic-match",
                     "log_type": "traffic",
                     "filter": "addr.src in 192.168.0.0/24",
-                    "send_http": ["traffic-http-profile"]
+                    "send_http": ["traffic-http-profile"],
                 },
                 {
                     "name": "threat-match",
                     "log_type": "threat",
                     "filter": "severity eq critical",
-                    "send_syslog": ["threat-syslog-profile"]
-                }
+                    "send_syslog": ["threat-syslog-profile"],
+                },
             ],
         )
 
@@ -6133,7 +6032,7 @@ class LogForwardingProfileCreateModelFactory(factory.DictFactory):
                     "name": "test-match",
                     "log_type": "traffic",
                     "filter": "addr.src in 192.168.0.0/24",
-                    "send_http": ["test-http-profile"]
+                    "send_http": ["test-http-profile"],
                 }
             ],
         )
@@ -6148,7 +6047,7 @@ class LogForwardingProfileCreateModelFactory(factory.DictFactory):
                     "name": "test-match",
                     "log_type": "traffic",
                     "filter": "addr.src in 192.168.0.0/24",
-                    "send_http": ["test-http-profile"]
+                    "send_http": ["test-http-profile"],
                 }
             ],
             folder=None,
@@ -6182,7 +6081,7 @@ class LogForwardingProfileUpdateModelFactory(factory.DictFactory):
             "name": "updated-match",
             "log_type": "traffic",
             "filter": "addr.src in 10.0.0.0/8",
-            "send_http": ["updated-http-profile"]
+            "send_http": ["updated-http-profile"],
         }
     ]
 
@@ -6198,7 +6097,7 @@ class LogForwardingProfileUpdateModelFactory(factory.DictFactory):
                     "name": "updated-match",
                     "log_type": "url",
                     "filter": "category eq social-networking",
-                    "send_syslog": ["url-syslog-profile"]
+                    "send_syslog": ["url-syslog-profile"],
                 }
             ],
         )
@@ -6229,6 +6128,7 @@ class LogForwardingProfileUpdateModelFactory(factory.DictFactory):
 # ----------------------------------------------------------------------------
 # Region object factories.
 # ----------------------------------------------------------------------------
+
 
 # SDK tests against SCM API
 class RegionCreateApiFactory(factory.Factory):
@@ -6891,9 +6791,11 @@ class RemoteNetworkUpdateModelDictFactory(factory.DictFactory):
             **kwargs,
         )
 
+
 # ----------------------------------------------------------------------------
 # Schedule factories for SDK usage (model-based)
 # ----------------------------------------------------------------------------
+
 
 # SDK tests against SCM API
 class ScheduleCreateApiFactory(factory.Factory):
@@ -6923,24 +6825,20 @@ class ScheduleCreateApiFactory(factory.Factory):
     def with_device(cls, device: str = "TestDevice", **kwargs):
         """Create an instance with device container."""
         return cls(folder=None, snippet=None, device=device, **kwargs)
-    
+
     @classmethod
     def with_daily_schedule(cls, **kwargs):
         """Create an instance with daily schedule."""
-        schedule_type = {
-            "recurring": {
-                "daily": ["09:00-17:00", "18:00-20:00"]
-            }
-        }
+        schedule_type = {"recurring": {"daily": ["09:00-17:00", "18:00-20:00"]}}
         return cls(schedule_type=schedule_type, **kwargs)
-    
+
     @classmethod
     def with_non_recurring_schedule(cls, **kwargs):
         """Create an instance with non-recurring schedule."""
         schedule_type = {
             "non_recurring": [
                 "2025/01/01@09:00-2025/01/01@17:00",
-                "2025/02/01@09:00-2025/02/01@17:00"
+                "2025/02/01@09:00-2025/02/01@17:00",
             ]
         }
         return cls(schedule_type=schedule_type, **kwargs)
@@ -6973,7 +6871,7 @@ class ScheduleUpdateApiFactory(factory.Factory):
             }
         }
         return cls(schedule_type=schedule_type, **kwargs)
-    
+
     @classmethod
     def with_non_recurring_schedule(cls, **kwargs):
         """Create an instance with non-recurring schedule."""
@@ -7013,28 +6911,24 @@ class ScheduleResponseFactory(factory.Factory):
     def with_device(cls, device: str = "TestDevice", **kwargs):
         """Create an instance with device container."""
         return cls(folder=None, snippet=None, device=device, **kwargs)
-    
+
     @classmethod
     def with_daily_schedule(cls, **kwargs):
         """Create an instance with daily schedule."""
-        schedule_type = {
-            "recurring": {
-                "daily": ["09:00-17:00", "18:00-20:00"]
-            }
-        }
+        schedule_type = {"recurring": {"daily": ["09:00-17:00", "18:00-20:00"]}}
         return cls(schedule_type=schedule_type, **kwargs)
-    
+
     @classmethod
     def with_non_recurring_schedule(cls, **kwargs):
         """Create an instance with non-recurring schedule."""
         schedule_type = {
             "non_recurring": [
                 "2025/01/01@09:00-2025/01/01@17:00",
-                "2025/02/01@09:00-2025/02/01@17:00"
+                "2025/02/01@09:00-2025/02/01@17:00",
             ]
         }
         return cls(schedule_type=schedule_type, **kwargs)
-    
+
     @classmethod
     def from_request(cls, request_model: ScheduleCreateModel, **kwargs):
         """Create a response model based on a request model."""
@@ -7076,20 +6970,16 @@ class ScheduleCreateModelFactory(factory.DictFactory):
                 }
             },
         )
-    
+
     @classmethod
     def build_valid_daily(cls):
         """Return a valid data dict with daily schedule."""
         return cls(
             name="TestSchedule",
-            folder="Shared", 
-            schedule_type={
-                "recurring": {
-                    "daily": ["09:00-17:00", "18:00-20:00"]
-                }
-            },
+            folder="Shared",
+            schedule_type={"recurring": {"daily": ["09:00-17:00", "18:00-20:00"]}},
         )
-    
+
     @classmethod
     def build_valid_non_recurring(cls):
         """Return a valid data dict with non-recurring schedule."""
@@ -7099,7 +6989,7 @@ class ScheduleCreateModelFactory(factory.DictFactory):
             schedule_type={
                 "non_recurring": [
                     "2025/01/01@09:00-2025/01/01@17:00",
-                    "2025/02/01@09:00-2025/02/01@17:00"
+                    "2025/02/01@09:00-2025/02/01@17:00",
                 ]
             },
         )
@@ -7151,7 +7041,7 @@ class ScheduleCreateModelFactory(factory.DictFactory):
             snippet=None,
             device=None,
         )
-    
+
     @classmethod
     def build_with_invalid_time_format(cls):
         """Return a data dict with invalid time format."""
@@ -7166,7 +7056,7 @@ class ScheduleCreateModelFactory(factory.DictFactory):
                 }
             },
         )
-    
+
     @classmethod
     def build_with_invalid_date_format(cls):
         """Return a data dict with invalid date format."""
@@ -7179,7 +7069,7 @@ class ScheduleCreateModelFactory(factory.DictFactory):
                 ]
             },
         )
-    
+
     @classmethod
     def build_with_both_recurring_types(cls):
         """Return a data dict with both weekly and daily schedules."""
@@ -7195,7 +7085,7 @@ class ScheduleCreateModelFactory(factory.DictFactory):
                 }
             },
         )
-    
+
     @classmethod
     def build_with_both_schedule_types(cls):
         """Return a data dict with both recurring and non-recurring schedules."""
@@ -7210,7 +7100,7 @@ class ScheduleCreateModelFactory(factory.DictFactory):
                 },
                 "non_recurring": [
                     "2025/01/01@09:00-2025/01/01@17:00",
-                ]
+                ],
             },
         )
 
@@ -7245,20 +7135,16 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
                 }
             },
         )
-    
+
     @classmethod
     def build_valid_daily(cls):
         """Return a valid data dict with daily schedule."""
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="UpdatedSchedule",
-            schedule_type={
-                "recurring": {
-                    "daily": ["10:00-18:00"]
-                }
-            },
+            schedule_type={"recurring": {"daily": ["10:00-18:00"]}},
         )
-    
+
     @classmethod
     def build_valid_non_recurring(cls):
         """Return a valid data dict with non-recurring schedule."""

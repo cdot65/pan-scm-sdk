@@ -41,9 +41,8 @@ class TestApplicationGroupCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_application_group_create_model_no_container(self):
@@ -54,9 +53,8 @@ class TestApplicationGroupCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_application_group_create_model_missing_required_fields(self):
@@ -91,9 +89,7 @@ class TestApplicationGroupCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupCreateModel(**data)
-        assert "List should have at least 1 item after validation" in str(
-            exc_info.value
-        )
+        assert "List should have at least 1 item after validation" in str(exc_info.value)
 
 
 class TestApplicationGroupUpdateModel:
@@ -142,9 +138,7 @@ class TestApplicationGroupUpdateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationGroupUpdateModel(**data)
-        assert "List should have at least 1 item after validation" in str(
-            exc_info.value
-        )
+        assert "List should have at least 1 item after validation" in str(exc_info.value)
 
 
 class TestApplicationGroupResponseModel:

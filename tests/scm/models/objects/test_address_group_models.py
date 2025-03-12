@@ -28,9 +28,7 @@ class TestAddressGroupCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupCreateModel(**data)
         assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
-        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
-            exc_info.value
-        )
+        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(exc_info.value)
 
     def test_address_group_create_model_multiple_types_provided(self):
         """Test validation when both static and dynamic group types are provided."""
@@ -38,9 +36,7 @@ class TestAddressGroupCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupCreateModel(**data)
         assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
-        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
-            exc_info.value
-        )
+        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(exc_info.value)
 
     def test_address_group_create_model_invalid_data_error(self):
         """Test that ValidationError is raised when invalid data is provided."""
@@ -58,9 +54,8 @@ class TestAddressGroupCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupCreateModel(**data)
         assert "1 validation error for AddressGroupCreateModel" in str(exc_info.value)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_address_group_create_model_missing_required_fields_error(self):
@@ -143,9 +138,7 @@ class TestAddressGroupUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupUpdateModel(**data)
         assert "1 validation error for AddressGroupUpdateModel" in str(exc_info.value)
-        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(
-            exc_info.value
-        )
+        assert "Exactly one of 'static' or 'dynamic' must be provided." in str(exc_info.value)
 
     def test_address_group_update_model_valid_static(self):
         """Test validation with valid data for updating a static address group."""

@@ -56,9 +56,8 @@ class TestAddressCreateModel:
         data = AddressCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             AddressCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_address_create_model_missing_required_fields_error(self):
@@ -126,7 +125,6 @@ class TestAddressCreateModel:
 
 
 class TestAddressUpdateModel:
-
     def test_address_update_model_invalid_data_error(self):
         """Test that ValidationError is raised when invalid data is provided."""
         data = {"invalid": "data"}
@@ -166,10 +164,7 @@ class TestAddressUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert (
-            "1 validation error for AddressUpdateModel\nid\n  Field required"
-            in error_msg
-        )
+        assert "1 validation error for AddressUpdateModel\nid\n  Field required" in error_msg
 
     def test_address_update_model_valid(self):
         """Test validation with valid data in update model."""

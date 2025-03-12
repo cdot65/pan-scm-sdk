@@ -11,11 +11,11 @@ from scm.models.objects.log_forwarding_profile import (
     LogForwardingProfileCreateModel,
     LogForwardingProfileUpdateModel,
     LogForwardingProfileResponseModel,
-    MatchListItem,
 )
 
 
 # -------------------- Helper Functions --------------------
+
 
 def create_valid_match_list_item():
     """Helper function to create a valid match list item dict."""
@@ -23,17 +23,18 @@ def create_valid_match_list_item():
         "name": "test-match",
         "log_type": "traffic",
         "filter": "addr.src in 192.168.0.0/24",
-        "send_http": ["test-http-profile"]
+        "send_http": ["test-http-profile"],
     }
+
 
 def create_valid_profile_data(container_type="folder"):
     """Helper function to create a valid log forwarding profile data dict."""
     data = {
         "name": "test-log-profile",
         "description": "Test log forwarding profile for unit tests",
-        "match_list": [create_valid_match_list_item()]
+        "match_list": [create_valid_match_list_item()],
     }
-    
+
     # Add the specified container
     if container_type == "folder":
         data["folder"] = "Shared"
@@ -41,7 +42,7 @@ def create_valid_profile_data(container_type="folder"):
         data["snippet"] = "TestSnippet"
     elif container_type == "device":
         data["device"] = "TestDevice"
-    
+
     return data
 
 
@@ -71,31 +72,29 @@ class TestLogForwardingProfileCreateModel:
         """Test validation when multiple containers are provided."""
         data = create_valid_profile_data()
         data["snippet"] = "TestSnippet"  # Adding a second container
-        
+
         with pytest.raises(ValueError) as exc_info:
             LogForwardingProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_no_container_error(self):
         """Test validation when no container is provided."""
         data = create_valid_profile_data()
         data.pop("folder")  # Remove the container
-        
+
         with pytest.raises(ValueError) as exc_info:
             LogForwardingProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_invalid_match_list_item(self):
         """Test validation for invalid match_list item configuration."""
         data = create_valid_profile_data()
         data["match_list"] = [{"name": "invalid-match", "log_type": "invalid-type"}]
-        
+
         with pytest.raises(ValidationError) as exc_info:
             LogForwardingProfileCreateModel(**data)
         error_msg = str(exc_info.value)
@@ -155,7 +154,7 @@ class TestLogForwardingProfileUpdateModel:
         """Test validation for invalid UUID format."""
         data = create_valid_profile_data()
         data["id"] = "invalid-uuid"
-        
+
         with pytest.raises(ValidationError) as exc_info:
             LogForwardingProfileUpdateModel(**data)
         assert "id\n  Input should be a valid UUID" in str(exc_info.value)
@@ -164,7 +163,7 @@ class TestLogForwardingProfileUpdateModel:
         """Test validation with valid data."""
         data = create_valid_profile_data()
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = LogForwardingProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -178,7 +177,7 @@ class TestLogForwardingProfileUpdateModel:
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "updated-profile",
         }
-        
+
         model = LogForwardingProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -196,7 +195,7 @@ class TestLogForwardingProfileResponseModel:
         """Test validation with valid response data."""
         data = create_valid_profile_data()
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = LogForwardingProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -209,7 +208,7 @@ class TestLogForwardingProfileResponseModel:
         """Test validation with snippet container."""
         data = create_valid_profile_data("snippet")
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = LogForwardingProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.snippet == data["snippet"]
@@ -220,7 +219,7 @@ class TestLogForwardingProfileResponseModel:
         """Test validation with device container."""
         data = create_valid_profile_data("device")
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = LogForwardingProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.device == data["device"]
@@ -239,11 +238,11 @@ class TestLogForwardingProfileResponseModel:
                     "log_type": "traffic",
                     "filter": "All Logs",
                     "send_to_panorama": True,
-                    "quarantine": False
+                    "quarantine": False,
                 }
-            ]
+            ],
         }
-        
+
         model = LogForwardingProfileResponseModel(**data)
         assert model.id is None
         assert model.name == "Predefined Profile"
@@ -252,15 +251,15 @@ class TestLogForwardingProfileResponseModel:
         assert len(model.match_list) == 1
         assert model.match_list[0].send_to_panorama is True
         assert model.match_list[0].quarantine is False
-    
+
     def test_non_predefined_missing_id_error(self):
         """Test that non-predefined profiles require ID."""
         data = create_valid_profile_data()
-        
+
         with pytest.raises(ValueError) as exc_info:
             LogForwardingProfileResponseModel(**data)
         assert "ID is required for non-predefined profiles" in str(exc_info.value)
-    
+
     def test_with_enhanced_application_logging(self):
         """Test with enhanced_application_logging field."""
         data = create_valid_profile_data()
@@ -268,7 +267,7 @@ class TestLogForwardingProfileResponseModel:
         data["enhanced_application_logging"] = True
         data["match_list"][0]["send_to_panorama"] = True
         data["match_list"][0]["quarantine"] = False
-        
+
         model = LogForwardingProfileResponseModel(**data)
         assert model.enhanced_application_logging is True
         assert model.match_list[0].send_to_panorama is True

@@ -13,13 +13,21 @@ load_dotenv()
 
 # Register custom markers
 def pytest_configure(config):
-    config.addinivalue_line("markers", "unit: Unit tests for individual functions and classes in isolation")
+    config.addinivalue_line(
+        "markers", "unit: Unit tests for individual functions and classes in isolation"
+    )
     config.addinivalue_line("markers", "integration: Tests how components work together")
     config.addinivalue_line("markers", "functional: Tests complete features from end to end")
     config.addinivalue_line("markers", "mock: Tests that simulate external dependencies")
-    config.addinivalue_line("markers", "parametrized: Tests that run the same test with different inputs")
-    config.addinivalue_line("markers", "configuration: Tests verifying SDK behavior with different configurations")
-    config.addinivalue_line("markers", "documentation: Tests ensuring examples in documentation work")
+    config.addinivalue_line(
+        "markers", "parametrized: Tests that run the same test with different inputs"
+    )
+    config.addinivalue_line(
+        "markers", "configuration: Tests verifying SDK behavior with different configurations"
+    )
+    config.addinivalue_line(
+        "markers", "documentation: Tests ensuring examples in documentation work"
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)

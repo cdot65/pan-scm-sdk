@@ -123,9 +123,8 @@ class TestAntiSpywareProfileCreateModel:
         data = AntiSpywareProfileCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             AntiSpywareProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
 
@@ -253,17 +252,13 @@ class TestActionModels:
         """Test validation when no action is provided."""
         with pytest.raises(ValidationError) as exc_info:
             AntiSpywareActionRequest.model_validate({})
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "Exactly one action must be provided in 'action' field." in str(exc_info.value)
 
     def test_action_request_multiple_actions(self):
         """Test validation when multiple actions are provided."""
         with pytest.raises(ValidationError) as exc_info:
             AntiSpywareActionRequest.model_validate({"alert": {}, "drop": {}})
-        assert "Exactly one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "Exactly one action must be provided in 'action' field." in str(exc_info.value)
 
     def test_action_response_string_conversion(self):
         """Test string to dict conversion in ActionResponse."""
@@ -296,9 +291,7 @@ class TestActionModels:
         """Test validation when multiple actions are provided."""
         with pytest.raises(ValidationError) as exc_info:
             AntiSpywareActionResponse.model_validate({"alert": {}, "drop": {}})
-        assert "At most one action must be provided in 'action' field." in str(
-            exc_info.value
-        )
+        assert "At most one action must be provided in 'action' field." in str(exc_info.value)
 
     def test_action_request_valid_actions(self):
         """Test all valid action types in ActionRequest."""

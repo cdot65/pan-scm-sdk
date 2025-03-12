@@ -66,18 +66,16 @@ class TestRegionMaxLimit(TestRegionBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Region(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Region(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -202,7 +200,7 @@ class TestRegionList(TestRegionBase):
         filters = {
             "geo_location": {
                 "latitude": {"min": 30, "max": 40},
-                "longitude": {"min": -130, "max": -120}
+                "longitude": {"min": -130, "max": -120},
             },
             "addresses": ["10.0.0.0/8", "192.168.1.0/24"],
         }
@@ -252,7 +250,7 @@ class TestRegionList(TestRegionBase):
             folder="Global",
             geo_location={
                 "latitude": {"min": 30, "max": 40},
-            }
+            },
         )
         assert len(regions) == 1
         assert regions[0].name == "North America Region"
@@ -262,7 +260,7 @@ class TestRegionList(TestRegionBase):
             folder="Global",
             geo_location={
                 "longitude": {"min": -5, "max": 5},
-            }
+            },
         )
         assert len(regions) == 1
         assert regions[0].name == "Europe Region"
@@ -273,7 +271,7 @@ class TestRegionList(TestRegionBase):
             geo_location={
                 "latitude": {"min": 0, "max": 10},
                 "longitude": {"min": 0, "max": 10},
-            }
+            },
         )
         assert len(regions) == 0
 
@@ -310,10 +308,7 @@ class TestRegionList(TestRegionBase):
         self.mock_scm.get.return_value = mock_response  # noqa
 
         # Filter for specific address
-        regions = self.client.list(
-            folder="Global",
-            addresses=["10.0.0.0/8"]
-        )
+        regions = self.client.list(folder="Global", addresses=["10.0.0.0/8"])
         assert len(regions) == 1
         assert regions[0].name == "Region_10"
 
@@ -464,18 +459,9 @@ class TestRegionList(TestRegionBase):
 
         # Create test data
         total_objects = 7500  # Three pages worth
-        first_batch = [
-            RegionResponseFactory(name=f"Region_{i}")
-            for i in range(2500)
-        ]
-        second_batch = [
-            RegionResponseFactory(name=f"Region_{i}")
-            for i in range(2500, 5000)
-        ]
-        third_batch = [
-            RegionResponseFactory(name=f"Region_{i}")
-            for i in range(5000, 7500)
-        ]
+        first_batch = [RegionResponseFactory(name=f"Region_{i}") for i in range(2500)]
+        second_batch = [RegionResponseFactory(name=f"Region_{i}") for i in range(2500, 5000)]
+        third_batch = [RegionResponseFactory(name=f"Region_{i}") for i in range(5000, 7500)]
 
         # Set up mock responses
         mock_responses = [
@@ -506,7 +492,7 @@ class TestRegionList(TestRegionBase):
                 "offset": 0,
             },
         )
-    
+
     def test_list_with_invalid_items(self):
         """
         Test that the list method correctly handles invalid items in the response.
@@ -531,12 +517,12 @@ class TestRegionList(TestRegionBase):
                 {"name": "Invalid Region 4", "folder": "Global"},  # One more than the 3 logged
             ]
         }
-        
+
         self.mock_scm.get.return_value = mock_response  # noqa
-        
+
         # Get results - should only include valid items
         results = self.client.list(folder="Global")
-        
+
         # Verify results
         assert len(results) == 2  # Only valid items
         assert all(isinstance(r, RegionResponseModel) for r in results)
@@ -706,7 +692,7 @@ class TestRegionCreate(TestRegionBase):
         assert str(created_object.id) == str(mock_response.id)
         assert created_object.name == test_object.name
         assert created_object.folder == test_object.folder
-        
+
         # Different access pattern for model objects vs dictionaries
         geo_location_dict = test_object.model_dump()["geo_location"]
         assert created_object.geo_location.latitude == geo_location_dict["latitude"]
@@ -751,9 +737,7 @@ class TestRegionCreate(TestRegionBase):
         self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.create(
-                {"name": "test", "folder": "Global"}
-            )
+            self.client.create({"name": "test", "folder": "Global"})
 
     def test_create_http_error_with_response(self):
         """Test that HTTPError with response content triggers proper error handling."""
@@ -773,18 +757,14 @@ class TestRegionCreate(TestRegionBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
         self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
 
         with pytest.raises(Exception) as exc_info:
-            self.client.create(
-                {"name": "test", "folder": "Global"}
-            )
+            self.client.create({"name": "test", "folder": "Global"})
         assert str(exc_info.value) == "Generic error"
 
 
@@ -827,9 +807,7 @@ class TestRegionGet(TestRegionBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -930,9 +908,7 @@ class TestRegionUpdate(TestRegionBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -953,9 +929,7 @@ class TestRegionUpdate(TestRegionBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -1039,13 +1013,8 @@ class TestRegionDelete(TestRegionBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"]
-            == "Your configuration is not valid."
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["message"] == "Your configuration is not valid."
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -1062,9 +1031,7 @@ class TestRegionDelete(TestRegionBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -1160,9 +1127,7 @@ class TestRegionFetch(TestRegionBase):
             self.client.fetch(name="nonexistent", folder="Global")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""

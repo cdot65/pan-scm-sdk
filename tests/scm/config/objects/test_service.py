@@ -66,18 +66,16 @@ class TestServiceMaxLimit(TestServiceBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Service(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Service(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -338,14 +336,8 @@ class TestServiceList(TestServiceBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Texas", protocols="tcp")
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"]
-            == "'protocols' filter must be a list"
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Invalid Query Parameter"
-        )
+        assert error_response["_errors"][0]["message"] == "'protocols' filter must be a list"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Query Parameter"
 
         # Reset side effect for next test
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
@@ -358,10 +350,7 @@ class TestServiceList(TestServiceBase):
             self.client.list(folder="Texas", tags="automation")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "'tags' filter must be a list"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Invalid Query Parameter"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Query Parameter"
 
         # Reset side effect for successful case
         self.mock_scm.get.side_effect = None  # noqa
@@ -874,10 +863,7 @@ class TestServiceCreate(TestServiceBase):
             self.client.create(test_data.model_dump())
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object creation failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Object Already Exists"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Already Exists"
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
@@ -939,9 +925,7 @@ class TestServiceGet(TestServiceBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_generic_exception_handling(self):
         """Test generic exception handling in get method."""
@@ -1055,9 +1039,7 @@ class TestServiceUpdate(TestServiceBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -1081,9 +1063,7 @@ class TestServiceUpdate(TestServiceBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -1181,13 +1161,8 @@ class TestServiceDelete(TestServiceBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
-        assert (
-            error_response["_errors"][0]["message"]
-            == "Your configuration is not valid."
-        )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
-        )
+        assert error_response["_errors"][0]["message"] == "Your configuration is not valid."
+        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -1204,9 +1179,7 @@ class TestServiceDelete(TestServiceBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -1314,9 +1287,7 @@ class TestServiceFetch(TestServiceBase):
             error_response["_errors"][0]["message"]
             == "Your configuration is not valid. Please review the error message for more details."
         )
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""

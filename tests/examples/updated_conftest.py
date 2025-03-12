@@ -16,6 +16,7 @@ from scm.models.auth import AuthRequestModel
 
 # -------------------- Environment Setup --------------------
 
+
 @pytest.fixture
 def load_env():
     """
@@ -48,6 +49,7 @@ def mock_scm():
 
 # Unit Test Fixtures
 
+
 @pytest.fixture
 def unit_test_config():
     """Configuration for unit tests."""
@@ -58,6 +60,7 @@ def unit_test_config():
 
 
 # Integration Test Fixtures
+
 
 @pytest.fixture
 def integration_test_config():
@@ -80,6 +83,7 @@ def mock_api_responses():
 
 # Functional Test Fixtures
 
+
 @pytest.fixture
 def functional_test_workflow():
     """
@@ -94,6 +98,7 @@ def functional_test_workflow():
 
 
 # Mock Test Fixtures
+
 
 @pytest.fixture
 def mock_auth_request():
@@ -119,6 +124,7 @@ def mock_token_response():
 
 # Parametrized Test Fixtures
 
+
 @pytest.fixture(params=["ip_netmask", "ip_range", "ip_wildcard", "fqdn"])
 def address_type(request):
     """Parametrized fixture for address types."""
@@ -139,17 +145,18 @@ def address_value(address_type):
 
 # Configuration Test Fixtures
 
+
 @pytest.fixture
 def environment_config():
     """Setup environment configurations for testing."""
     original_env = os.environ.copy()
-    
+
     # Set test configuration
     os.environ["SCM_MAX_LIMIT"] = "3000"
     os.environ["SCM_TIMEOUT"] = "60"
-    
+
     yield
-    
+
     # Restore original environment
     for key in ["SCM_MAX_LIMIT", "SCM_TIMEOUT"]:
         if key in original_env:
@@ -159,6 +166,7 @@ def environment_config():
 
 
 # Documentation Test Fixtures
+
 
 @pytest.fixture
 def doc_example_context():

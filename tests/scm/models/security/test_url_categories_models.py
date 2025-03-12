@@ -24,9 +24,8 @@ class TestURLCategoriesCreateModel:
         data = URLCategoriesCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             URLCategoriesCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_url_categories_create_model_with_snippet(self):

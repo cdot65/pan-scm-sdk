@@ -72,18 +72,16 @@ class TestAddressGroupMaxLimit(TestAddressGroupBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             AddressGroup(self.mock_scm, max_limit="invalid")  # noqa
-        assert (
-            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             AddressGroup(self.mock_scm, max_limit=0)  # noqa
-        assert (
-            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
-            in str(exc_info.value)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc_info.value
         )
 
     def test_max_limit_too_high(self):
@@ -151,10 +149,7 @@ class TestAddressGroupList(TestAddressGroupBase):
             self.client.list(folder="NonexistentFolder")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Listing failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"]
-            == "Operation Impossible"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Operation Impossible"
 
     def test_list_container_missing_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
@@ -176,28 +171,40 @@ class TestAddressGroupList(TestAddressGroupBase):
         """Test the filtering functionality with different types of objects."""
         mock_address_groups = [
             AddressGroupResponseModel(
-                id=uuid.uuid4(), name="group1", folder="test", static=["address1", "address2"], tag=["tag1", "tag2"]
+                id=uuid.uuid4(),
+                name="group1",
+                folder="test",
+                static=["address1", "address2"],
+                tag=["tag1", "tag2"],
             ),
             AddressGroupResponseModel(
-                id=uuid.uuid4(), name="group2", folder="test", dynamic={"filter": "tag = 'test'"}, tag=["tag2"]
+                id=uuid.uuid4(),
+                name="group2",
+                folder="test",
+                dynamic={"filter": "tag = 'test'"},
+                tag=["tag2"],
             ),
             AddressGroupResponseModel(
-                id=uuid.uuid4(), name="group3", folder="test", static=["address3", "address4"], tag=["tag3"]
+                id=uuid.uuid4(),
+                name="group3",
+                folder="test",
+                static=["address3", "address4"],
+                tag=["tag3"],
             ),
         ]
-        
+
         # Test types filter
         filters = {"types": ["static"]}
         filtered = self.client._apply_filters(mock_address_groups, filters)
         assert len(filtered) == 2
         assert set(obj.name for obj in filtered) == {"group1", "group3"}
-        
+
         # Test values filter
         filters = {"values": ["address2"]}
         filtered = self.client._apply_filters(mock_address_groups, filters)
         assert len(filtered) == 1
         assert filtered[0].name == "group1"
-        
+
         # Test tags filter
         filters = {"tags": ["tag2"]}
         filtered = self.client._apply_filters(mock_address_groups, filters)
@@ -580,7 +587,6 @@ class TestAddressGroupCreate(TestAddressGroupBase):
         assert created_object.folder == test_object.folder
 
 
-
 @pytest.mark.integration
 class TestAddressGroupGet(TestAddressGroupBase):
     """Integration tests for retrieving a specific Address Group object."""
@@ -607,7 +613,6 @@ class TestAddressGroupGet(TestAddressGroupBase):
         assert retrieved_object.name == mock_response["name"]
         assert retrieved_object.static == mock_response["static"]
         assert retrieved_object.folder == mock_response["folder"]
-
 
 
 @pytest.mark.integration
@@ -647,7 +652,6 @@ class TestAddressGroupUpdate(TestAddressGroupBase):
         assert updated_object.folder == mock_response.folder
 
 
-
 @pytest.mark.integration
 class TestAddressGroupDelete(TestAddressGroupBase):
     """Integration tests for deleting Address Group objects."""
@@ -663,7 +667,6 @@ class TestAddressGroupDelete(TestAddressGroupBase):
         self.mock_scm.delete.assert_called_once_with(  # noqa
             f"/config/objects/v1/address-groups/{object_id}"
         )
-
 
 
 @pytest.mark.integration
@@ -811,7 +814,7 @@ class TestAddressGroupFetch(TestAddressGroupBase):
 @pytest.mark.mock
 class TestAddressGroupCreateErrorHandling(TestAddressGroupBase):
     """Mock tests for error handling in create operations."""
-    
+
     def test_create_http_error_no_response_content(self):
         """Test create method when HTTP error has no response content."""
         mock_response = MagicMock()
@@ -845,15 +848,13 @@ class TestAddressGroupCreateErrorHandling(TestAddressGroupBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
 
 @pytest.mark.mock
 class TestAddressGroupGetErrorHandling(TestAddressGroupBase):
     """Mock tests for error handling in get operations."""
-    
+
     def test_get_object_not_present_error(self):
         """Test error handling when the address group is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -869,9 +870,7 @@ class TestAddressGroupGetErrorHandling(TestAddressGroupBase):
             self.client.get(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_get_http_error_no_response_content(self):
         """Test get method when HTTP error has no response content."""
@@ -891,7 +890,7 @@ class TestAddressGroupGetErrorHandling(TestAddressGroupBase):
 @pytest.mark.mock
 class TestAddressGroupUpdateErrorHandling(TestAddressGroupBase):
     """Mock tests for error handling in update operations."""
-    
+
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
         update_data = AddressGroupUpdateApiFactory.with_static(
@@ -913,9 +912,7 @@ class TestAddressGroupUpdateErrorHandling(TestAddressGroupBase):
 
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
@@ -939,7 +936,7 @@ class TestAddressGroupUpdateErrorHandling(TestAddressGroupBase):
 @pytest.mark.mock
 class TestAddressGroupDeleteErrorHandling(TestAddressGroupBase):
     """Mock tests for error handling in delete operations."""
-    
+
     def test_delete_object_not_present_error(self):
         """Test error handling when the address group to delete is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -955,9 +952,7 @@ class TestAddressGroupDeleteErrorHandling(TestAddressGroupBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
 
     def test_delete_http_error_no_response_content(self):
         """Test delete method when HTTP error has no response content."""
@@ -991,16 +986,16 @@ class TestAddressGroupParametrized(TestAddressGroupBase):
     def test_create_address_group_types(self, create_factory, group_type, expected_value):
         """Test creating address groups with different types."""
         test_object = create_factory()
-        
+
         # Ensure expected value is present in the object
         if group_type == "static":
             test_object.static = expected_value
-            
+
         mock_response = AddressGroupResponseFactory.from_request(test_object)
-        
+
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
         created_object = self.client.create(test_object.model_dump(exclude_unset=True))
-        
+
         # Verify the group type attribute exists and matches the expected pattern
         if group_type == "static":
             assert getattr(created_object, group_type) == expected_value
@@ -1022,73 +1017,68 @@ def test_address_group_lifecycle(mock_scm):
     mock_scm.put = MagicMock()
     mock_scm.delete = MagicMock()
     client = AddressGroup(mock_scm, max_limit=5000)
-    
+
     # 1. Create address group
     create_data = {
         "name": "test-address-group-lifecycle",
         "folder": "Texas",
         "static": ["address1", "address2"],
-        "description": "Lifecycle test address group"
+        "description": "Lifecycle test address group",
     }
-    
+
     group_id = "123e4567-e89b-12d3-a456-426655440000"
     mock_create_response = {
         "id": group_id,
         "name": "test-address-group-lifecycle",
         "folder": "Texas",
         "static": ["address1", "address2"],
-        "description": "Lifecycle test address group"
+        "description": "Lifecycle test address group",
     }
     mock_scm.post.return_value = mock_create_response
-    
+
     created = client.create(create_data)
     assert str(created.id) == group_id
     assert created.name == "test-address-group-lifecycle"
-    
+
     # 2. List address groups
-    mock_list_response = {
-        "data": [mock_create_response],
-        "offset": 0,
-        "total": 1,
-        "limit": 100
-    }
+    mock_list_response = {"data": [mock_create_response], "offset": 0, "total": 1, "limit": 100}
     mock_scm.get.return_value = mock_list_response
-    
+
     groups = client.list(folder="Texas")
     assert len(groups) == 1
     assert str(groups[0].id) == group_id
-    
+
     # 3. Get specific address group
     mock_scm.get.return_value = mock_create_response
-    
+
     retrieved = client.get(group_id)
     assert str(retrieved.id) == group_id
-    
+
     # 4. Update address group
     update_data = AddressGroupUpdateApiFactory.with_static(
         id=group_id,
         name="test-address-group-lifecycle",
         folder="Texas",
         static=["address1", "address2", "address3"],
-        description="Updated lifecycle test address group"
+        description="Updated lifecycle test address group",
     )
-    
+
     mock_update_response = {
         "id": group_id,
         "name": "test-address-group-lifecycle",
         "folder": "Texas",
         "static": ["address1", "address2", "address3"],
-        "description": "Updated lifecycle test address group"
+        "description": "Updated lifecycle test address group",
     }
     mock_scm.put.return_value = mock_update_response
-    
+
     updated = client.update(update_data)
     assert updated.description == "Updated lifecycle test address group"
     assert updated.static == ["address1", "address2", "address3"]
-    
+
     # 5. Delete address group
     mock_scm.delete.return_value = None
-    
+
     # Should not raise any exceptions
     client.delete(group_id)
     mock_scm.delete.assert_called_once_with(f"/config/objects/v1/address-groups/{group_id}")

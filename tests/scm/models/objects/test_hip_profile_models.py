@@ -48,9 +48,8 @@ class TestHIPProfileCreateModel:
         data = HIPProfileCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             HIPProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_no_container_error(self):
@@ -58,9 +57,8 @@ class TestHIPProfileCreateModel:
         data = HIPProfileCreateModelFactory.build_with_no_container()
         with pytest.raises(ValueError) as exc_info:
             HIPProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_invalid_name_format(self):

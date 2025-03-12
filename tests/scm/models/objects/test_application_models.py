@@ -55,9 +55,7 @@ class TestApplicationCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationCreateModel(**data)
-        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
-            exc_info.value
-        )
+        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(exc_info.value)
 
     def test_application_create_model_no_container(self):
         """Test validation when no container is provided."""
@@ -70,9 +68,7 @@ class TestApplicationCreateModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             ApplicationCreateModel(**data)
-        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(
-            exc_info.value
-        )
+        assert "Exactly one of 'folder' or 'snippet' must be provided." in str(exc_info.value)
 
     def test_application_create_model_missing_required_fields(self):
         """Test validation when required fields are missing."""

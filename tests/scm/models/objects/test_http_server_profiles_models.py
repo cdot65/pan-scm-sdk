@@ -11,32 +11,29 @@ from scm.models.objects.http_server_profiles import (
     HTTPServerProfileCreateModel,
     HTTPServerProfileUpdateModel,
     HTTPServerProfileResponseModel,
-    ServerModel,
 )
 
 
 # -------------------- Helper Functions --------------------
 
+
 def create_valid_server():
     """Helper function to create a valid server model dict."""
-    return {
-        "name": "test-server",
-        "address": "192.168.1.100", 
-        "protocol": "HTTP",
-        "port": 80
-    }
+    return {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+
 
 def create_valid_https_server():
     """Helper function to create a valid HTTPS server model dict."""
     return {
         "name": "test-https-server",
-        "address": "secure.example.com", 
+        "address": "secure.example.com",
         "protocol": "HTTPS",
         "port": 443,
         "tls_version": "1.2",
         "certificate_profile": "default",
-        "http_method": "POST"
+        "http_method": "POST",
     }
+
 
 def create_valid_profile_data(container_type="folder"):
     """Helper function to create a valid HTTP server profile data dict."""
@@ -49,9 +46,9 @@ def create_valid_profile_data(container_type="folder"):
             "traffic": {},
             "threat": {},
             "url": {},
-        }
+        },
     }
-    
+
     # Add the specified container
     if container_type == "folder":
         data["folder"] = "Security Profiles"
@@ -59,7 +56,7 @@ def create_valid_profile_data(container_type="folder"):
         data["snippet"] = "TestSnippet"
     elif container_type == "device":
         data["device"] = "TestDevice"
-    
+
     return data
 
 
@@ -92,31 +89,29 @@ class TestHTTPServerProfileCreateModel:
         """Test validation when multiple containers are provided."""
         data = create_valid_profile_data()
         data["snippet"] = "TestSnippet"  # Adding a second container
-        
+
         with pytest.raises(ValueError) as exc_info:
             HTTPServerProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_no_container_error(self):
         """Test validation when no container is provided."""
         data = create_valid_profile_data()
         data.pop("folder")  # Remove the container
-        
+
         with pytest.raises(ValueError) as exc_info:
             HTTPServerProfileCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_invalid_server_config(self):
         """Test validation for invalid server configuration."""
         data = create_valid_profile_data()
         data["server"] = [{"name": "test-server", "port": 80}]  # Missing required fields
-        
+
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileCreateModel(**data)
         error_msg = str(exc_info.value)
@@ -132,10 +127,10 @@ class TestHTTPServerProfileCreateModel:
                 "name": "test-server",
                 "address": "192.168.1.100",
                 "protocol": "INVALID",  # Invalid protocol
-                "port": 80
+                "port": 80,
             }
         ]
-        
+
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileCreateModel(**data)
         error_msg = str(exc_info.value)
@@ -198,7 +193,7 @@ class TestHTTPServerProfileUpdateModel:
         """Test validation for invalid UUID format."""
         data = create_valid_profile_data()
         data["id"] = "invalid-uuid"
-        
+
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileUpdateModel(**data)
         assert "id\n  Input should be a valid UUID" in str(exc_info.value)
@@ -207,7 +202,7 @@ class TestHTTPServerProfileUpdateModel:
         """Test validation with valid data."""
         data = create_valid_profile_data()
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = HTTPServerProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -223,7 +218,7 @@ class TestHTTPServerProfileUpdateModel:
             "name": "updated-profile",
             "server": [create_valid_server()],
         }
-        
+
         model = HTTPServerProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -243,7 +238,7 @@ class TestHTTPServerProfileResponseModel:
         """Test validation with valid response data."""
         data = create_valid_profile_data()
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = HTTPServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
@@ -258,7 +253,7 @@ class TestHTTPServerProfileResponseModel:
         """Test validation with snippet container."""
         data = create_valid_profile_data("snippet")
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = HTTPServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.snippet == data["snippet"]
@@ -269,7 +264,7 @@ class TestHTTPServerProfileResponseModel:
         """Test validation with device container."""
         data = create_valid_profile_data("device")
         data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        
+
         model = HTTPServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.device == data["device"]
