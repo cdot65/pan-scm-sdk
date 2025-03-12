@@ -315,7 +315,7 @@ class NatRuleBaseModel(BaseModel):
         for tag in v:
             if not tag or not isinstance(tag, str) or not tag.strip():
                 raise ValueError("Tags must be non-empty strings")
-            if not tag.isalnum() and not set(tag).issubset(set("-_")):
+            if not all(c.isalnum() or c in "-_" for c in tag):
                 raise ValueError("Tags should only contain alphanumeric characters, hyphens, or underscores")
         return v
 

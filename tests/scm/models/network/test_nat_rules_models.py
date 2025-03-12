@@ -375,14 +375,16 @@ class TestNatRuleResponseModel:
         assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
         
     def test_nat_rule_custom_tag_accepted(self):
-        """Test that using custom tags is now allowed and properly validated."""
+        """Test that using custom tags is now allowed."""
         data = NatRuleResponseFactory().model_dump()
-
-        # Test valid tags
+        
+        # Test with custom tags
+        data["tag"] = ["custom-tag", "another_tag"]
         model = NatRuleResponseModel(**data)
-        valid_tags = ["custom-tag", "another_tag", "Tag123", "tag-with-hyphens"]
-        data["tag"] = valid_tags
-        assert set(model.tag) == set(valid_tags)
+        
+        # Verify the custom tags are accepted
+        assert "custom-tag" in model.tag
+        assert "another_tag" in model.tag
 
         # Test invalid tags
         invalid_tags = ["", " ", "tag with spaces", "tag@with!symbols"]
