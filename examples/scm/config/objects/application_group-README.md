@@ -149,28 +149,28 @@ Follow these steps to run the example:
    ```bash
    # Run all examples
    python application_group.py
-   
+
    # Create only basic application groups
    python application_group.py --basic
-   
+
    # Create only custom application groups
    python application_group.py --custom
-   
+
    # Create only nested application groups
    python application_group.py --nested
-   
+
    # Create only mixed application groups
    python application_group.py --mixed
-   
+
    # Create only bulk application groups
    python application_group.py --bulk
-   
+
    # Skip cleaning up created objects
    python application_group.py --skip-cleanup
-   
+
    # Skip CSV report generation
    python application_group.py --no-report
-   
+
    # Specify a different folder
    python application_group.py --folder=Production
    ```

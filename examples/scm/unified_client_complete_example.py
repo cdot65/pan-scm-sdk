@@ -24,17 +24,13 @@ TSG_ID = os.getenv("SCM_TSG_ID")
 FOLDER_NAME = os.getenv("SCM_FOLDER", "Testing")
 
 # Store objects we create for later cleanup
-created_objects = {
-    "addresses": [],
-    "tags": [],
-    "security_rules": []
-}
+created_objects = {"addresses": [], "tags": [], "security_rules": []}
 
 
 def create_address_objects(client):
     """Create IP and FQDN address objects using the unified client."""
     print("\n=== Creating Address Objects ===")
-    
+
     # Create an IP/Netmask address
     ip_address_data = {
         "name": "example-network",
@@ -42,7 +38,7 @@ def create_address_objects(client):
         "description": "Example network subnet",
         "folder": FOLDER_NAME,
     }
-    
+
     try:
         # Access the address service directly through the client
         ip_address = client.address.create(ip_address_data)
@@ -50,7 +46,7 @@ def create_address_objects(client):
         print(f"✅ Created IP address: {ip_address.name} ({ip_address.ip_netmask})")
     except APIError as e:
         print(f"❌ Failed to create IP address: {e.message}")
-    
+
     # Create an FQDN address
     fqdn_address_data = {
         "name": "example-server",
@@ -58,30 +54,27 @@ def create_address_objects(client):
         "description": "Example server hostname",
         "folder": FOLDER_NAME,
     }
-    
+
     try:
         fqdn_address = client.address.create(fqdn_address_data)
         created_objects["addresses"].append(fqdn_address.id)
         print(f"✅ Created FQDN address: {fqdn_address.name} ({fqdn_address.fqdn})")
     except APIError as e:
         print(f"❌ Failed to create FQDN address: {e.message}")
-    
+
     return ip_address, fqdn_address
 
 
 def create_tags(client):
     """Create tags with different colors using the unified client."""
     print("\n=== Creating Tags ===")
-    
+
     tags = []
-    tag_colors = [
-        {"name": "Production", "color": "red"},
-        {"name": "Development", "color": "blue"}
-    ]
-    
+    tag_colors = [{"name": "Production", "color": "red"}, {"name": "Development", "color": "blue"}]
+
     for tag_data in tag_colors:
         tag_data["folder"] = FOLDER_NAME
-        
+
         try:
             # Access the tag service directly through the client
             tag = client.tag.create(tag_data)
@@ -90,24 +83,20 @@ def create_tags(client):
             print(f"✅ Created tag: {tag.name} (color: {tag.color})")
         except APIError as e:
             print(f"❌ Failed to create tag '{tag_data['name']}': {e.message}")
-    
+
     return tags
 
 
 def create_security_rule(client, source_address, destination_address, tags):
     """Create a security rule using the created objects."""
     print("\n=== Creating Security Rule ===")
-    
+
     rule_data = {
         "name": "Example-Unified-Rule",
         "folder": FOLDER_NAME,
         "description": "Example rule created with unified client",
-        "source": {
-            "address": [source_address.name]
-        },
-        "destination": {
-            "address": [destination_address.name]
-        },
+        "source": {"address": [source_address.name]},
+        "destination": {"address": [destination_address.name]},
         "application": ["web-browsing", "ssl"],
         "service": ["application-default"],
         "action": "allow",
@@ -119,7 +108,7 @@ def create_security_rule(client, source_address, destination_address, tags):
         "negate_source": False,
         "negate_destination": False,
     }
-    
+
     try:
         # Access the security_rule service directly through the client
         security_rule = client.security_rule.create(rule_data)
@@ -130,11 +119,11 @@ def create_security_rule(client, source_address, destination_address, tags):
         print(f"   - Applications: {', '.join(security_rule.application)}")
         print(f"   - Action: {security_rule.action}")
         print(f"   - Tags: {', '.join(security_rule.tag) if security_rule.tag else 'None'}")
-        
+
         return security_rule
     except APIError as e:
         print(f"❌ Failed to create security rule: {e.message}")
-        if hasattr(e, 'details') and e.details:
+        if hasattr(e, "details") and e.details:
             print(f"   Details: {e.details}")
         return None
 
@@ -142,7 +131,7 @@ def create_security_rule(client, source_address, destination_address, tags):
 def cleanup(client):
     """Clean up all created objects."""
     print("\n=== Cleaning Up Resources ===")
-    
+
     # Delete security rules first
     for rule_id in created_objects["security_rules"]:
         try:
@@ -152,9 +141,9 @@ def cleanup(client):
             print(f"⚠️ Security rule with ID {rule_id} not found")
         except APIError as e:
             print(f"❌ Failed to delete security rule {rule_id}: {e.message}")
-    
+
     time.sleep(1)  # Brief pause to ensure resources are freed
-    
+
     # Delete addresses
     for address_id in created_objects["addresses"]:
         try:
@@ -164,7 +153,7 @@ def cleanup(client):
             print(f"⚠️ Address with ID {address_id} not found")
         except APIError as e:
             print(f"❌ Failed to delete address {address_id}: {e.message}")
-    
+
     # Delete tags
     for tag_id in created_objects["tags"]:
         try:
@@ -185,7 +174,7 @@ def main():
         print("SCM_TSG_ID=<your_tsg_id>")
         print("SCM_FOLDER=<your_folder>  # Optional, defaults to 'Testing'")
         return
-    
+
     try:
         # Initialize the unified client
         print(f"Initializing SCM client for folder: {FOLDER_NAME}")
@@ -196,52 +185,59 @@ def main():
             log_level="INFO",
         )
         print("✅ Client initialized successfully")
-        
+
         # Create all resources
         source_address, dest_address = create_address_objects(client)
         tags = create_tags(client)
         security_rule = create_security_rule(client, source_address, dest_address, tags)
-        
+
         if security_rule:
             print("\n=== Success! ===")
             print("All resources were created successfully using the unified client pattern.")
-            
+
             # Demonstrate committing changes
-            commit_changes = input("\nWould you like to commit these changes? (y/n): ").lower().strip() == 'y'
+            commit_changes = (
+                input("\nWould you like to commit these changes? (y/n): ").lower().strip() == "y"
+            )
             if commit_changes:
                 print("\n=== Committing Changes ===")
                 result = client.commit(
-                    folders=[FOLDER_NAME],
-                    description="Unified client example changes",
-                    sync=True
+                    folders=[FOLDER_NAME], description="Unified client example changes", sync=True
                 )
                 if result.success:
                     print(f"✅ Changes committed successfully. Job ID: {result.job_id}")
                 else:
-                    print(f"❌ Commit failed: {result.message if hasattr(result, 'message') else 'Unknown error'}")
-        
+                    print(
+                        f"❌ Commit failed: {result.message if hasattr(result, 'message') else 'Unknown error'}"
+                    )
+
         # Ask to clean up
-        cleanup_resources = input("\nWould you like to clean up created resources? (y/n): ").lower().strip() == 'y'
+        cleanup_resources = (
+            input("\nWould you like to clean up created resources? (y/n): ").lower().strip() == "y"
+        )
         if cleanup_resources:
             cleanup(client)
-            
+
             # Commit cleanup if requested
-            commit_cleanup = input("\nWould you like to commit the cleanup changes? (y/n): ").lower().strip() == 'y'
+            commit_cleanup = (
+                input("\nWould you like to commit the cleanup changes? (y/n): ").lower().strip()
+                == "y"
+            )
             if commit_cleanup:
                 print("\n=== Committing Cleanup ===")
                 result = client.commit(
-                    folders=[FOLDER_NAME],
-                    description="Unified client example cleanup",
-                    sync=True
+                    folders=[FOLDER_NAME], description="Unified client example cleanup", sync=True
                 )
                 if result.success:
                     print(f"✅ Cleanup committed successfully. Job ID: {result.job_id}")
                 else:
-                    print(f"❌ Cleanup commit failed: {result.message if hasattr(result, 'message') else 'Unknown error'}")
-    
+                    print(
+                        f"❌ Cleanup commit failed: {result.message if hasattr(result, 'message') else 'Unknown error'}"
+                    )
+
     except APIError as e:
         print(f"❌ API error: {e.message}")
-        if hasattr(e, 'details') and e.details:
+        if hasattr(e, "details") and e.details:
             print(f"Details: {e.details}")
     except Exception as e:
         print(f"❌ Unexpected error: {str(e)}")

@@ -48,7 +48,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 """
 
@@ -71,7 +71,6 @@ from scm.exceptions import (
     NameNotUniqueError,
 )
 from scm.models.objects import (
-    HTTPServerProfileResponseModel,
     HTTPServerProfileUpdateModel,
 )
 
@@ -108,18 +107,14 @@ def log_section(title):
     # Ensure section headers always start with a blank line
     logger.info("")
     logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_CYAN']}{separator}{COLORS['RESET']}")
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_CYAN']}   {title.upper()}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_CYAN']}   {title.upper()}{COLORS['RESET']}")
     logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_CYAN']}{separator}{COLORS['RESET']}")
 
 
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -130,17 +125,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -151,9 +142,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -200,8 +189,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -244,7 +233,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -313,10 +302,10 @@ def create_basic_http_server_profile(http_profiles, folder="Texas"):
         )
         return new_http_profile
     except NameNotUniqueError as e:
-        log_error(f"HTTP server profile name conflict", e.message)
+        log_error("HTTP server profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HTTP server profile data", e.message)
+        log_error("Invalid HTTP server profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
@@ -324,15 +313,13 @@ def create_basic_http_server_profile(http_profiles, folder="Texas"):
         error_type = str(type(e).__name__)
         if "HTTPSConnectionPool" in str(e) and "500" in str(e):
             log_error(
-                f"API server error (500) when creating HTTP server profile - "
-                f"The server may be experiencing issues or the API endpoint may not be fully implemented yet",
+                "API server error (500) when creating HTTP server profile - "
+                "The server may be experiencing issues or the API endpoint may not be fully implemented yet",
                 str(e),
             )
             log_info("This error is coming from the SCM API server, not your code")
         else:
-            log_error(
-                f"Unexpected error creating HTTP server profile ({error_type})", str(e)
-            )
+            log_error(f"Unexpected error creating HTTP server profile ({error_type})", str(e))
 
     return None
 
@@ -407,15 +394,15 @@ def create_https_server_profile(http_profiles, folder="Texas"):
         )
         return new_https_profile
     except NameNotUniqueError as e:
-        log_error(f"HTTP server profile name conflict", e.message)
+        log_error("HTTP server profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HTTP server profile data", e.message)
+        log_error("Invalid HTTP server profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HTTP server profile", str(e))
+        log_error("Unexpected error creating HTTP server profile", str(e))
 
     return None
 
@@ -483,7 +470,7 @@ def create_multi_server_profile(http_profiles, folder="Texas"):
     log_info(f"  - Number of servers: {len(multi_server_config['server'])}")
     for idx, server in enumerate(multi_server_config["server"]):
         log_info(
-            f"  - Server {idx+1}: {server['name']} ({server['address']}) - {server['protocol']}:{server['port']}"
+            f"  - Server {idx + 1}: {server['name']} ({server['address']}) - {server['protocol']}:{server['port']}"
         )
     log_info(f"  - Container: folder '{folder}'")
 
@@ -498,15 +485,15 @@ def create_multi_server_profile(http_profiles, folder="Texas"):
         )
         return new_multi_profile
     except NameNotUniqueError as e:
-        log_error(f"HTTP server profile name conflict", e.message)
+        log_error("HTTP server profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HTTP server profile data", e.message)
+        log_error("Invalid HTTP server profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating HTTP server profile", str(e))
+        log_error("Unexpected error creating HTTP server profile", str(e))
 
     return None
 
@@ -571,17 +558,15 @@ def create_http_server_profile_with_snippet(http_profiles, folder="Texas"):
         )
         return new_http_profile
     except NameNotUniqueError as e:
-        log_error(f"HTTP server profile name conflict", e.message)
+        log_error("HTTP server profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HTTP server profile data", e.message)
+        log_error("Invalid HTTP server profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             # If snippet doesn't exist, fallback to folder
             if "snippet" in str(e.details).lower():
-                log_warning(
-                    f"Snippet 'test123' may not exist. Falling back to folder '{folder}'"
-                )
+                log_warning(f"Snippet 'test123' may not exist. Falling back to folder '{folder}'")
                 snippet_profile_config.pop("snippet")
                 snippet_profile_config["folder"] = folder
                 try:
@@ -597,9 +582,9 @@ def create_http_server_profile_with_snippet(http_profiles, folder="Texas"):
                     )
                     return fallback_profile
                 except Exception as fallback_error:
-                    log_error(f"Fallback creation also failed", str(fallback_error))
+                    log_error("Fallback creation also failed", str(fallback_error))
     except Exception as e:
-        log_error(f"Unexpected error creating HTTP server profile", str(e))
+        log_error("Unexpected error creating HTTP server profile", str(e))
 
     return None
 
@@ -663,17 +648,15 @@ def create_http_server_profile_with_device(http_profiles, folder="Texas"):
         )
         return new_http_profile
     except NameNotUniqueError as e:
-        log_error(f"HTTP server profile name conflict", e.message)
+        log_error("HTTP server profile name conflict", e.message)
         log_info("Try using a different profile name or check existing profiles")
     except InvalidObjectError as e:
-        log_error(f"Invalid HTTP server profile data", e.message)
+        log_error("Invalid HTTP server profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             # If device doesn't exist, fallback to folder
             if "device" in str(e.details).lower():
-                log_warning(
-                    f"Device 'austin1' may not exist. Falling back to folder '{folder}'"
-                )
+                log_warning(f"Device 'austin1' may not exist. Falling back to folder '{folder}'")
                 device_profile_config.pop("device")
                 device_profile_config["folder"] = folder
                 try:
@@ -689,9 +672,9 @@ def create_http_server_profile_with_device(http_profiles, folder="Texas"):
                     )
                     return fallback_profile
                 except Exception as fallback_error:
-                    log_error(f"Fallback creation also failed", str(fallback_error))
+                    log_error("Fallback creation also failed", str(fallback_error))
     except Exception as e:
-        log_error(f"Unexpected error creating HTTP server profile", str(e))
+        log_error("Unexpected error creating HTTP server profile", str(e))
 
     return None
 
@@ -713,9 +696,7 @@ def fetch_and_update_http_server_profile(http_profiles, profile_id):
         HTTPServerProfileResponseModel: The updated HTTP server profile object, or None if update failed
     """
     log_section("UPDATING HTTP SERVER PROFILES")
-    log_operation_start(
-        f"Fetching and updating HTTP server profile with ID: {profile_id}"
-    )
+    log_operation_start(f"Fetching and updating HTTP server profile with ID: {profile_id}")
 
     try:
         # Fetch the profile
@@ -725,7 +706,7 @@ def fetch_and_update_http_server_profile(http_profiles, profile_id):
 
         for idx, server in enumerate(http_profile.server):
             log_info(
-                f"  - Server {idx+1}: {server.name} ({server.address}) - {server.protocol}:{server.port}"
+                f"  - Server {idx + 1}: {server.name} ({server.address}) - {server.protocol}:{server.port}"
             )
 
         # Create a modified server list - change port and add method if missing
@@ -736,9 +717,7 @@ def fetch_and_update_http_server_profile(http_profiles, profile_id):
                 "name": server.name,
                 "address": server.address,
                 "protocol": server.protocol,
-                "port": (
-                    8080 if server.port == 80 else server.port
-                ),  # Change HTTP port to 8080
+                "port": (8080 if server.port == 80 else server.port),  # Change HTTP port to 8080
             }
 
             # Add HTTP method if not present
@@ -794,22 +773,20 @@ def fetch_and_update_http_server_profile(http_profiles, profile_id):
 
         for idx, server in enumerate(updated_profile.server):
             log_info(
-                f"  - Server {idx+1}: {server.name} ({server.address}) - {server.protocol}:{server.port}"
+                f"  - Server {idx + 1}: {server.name} ({server.address}) - {server.protocol}:{server.port}"
             )
 
-        log_operation_complete(
-            "HTTP server profile update", f"Profile: {updated_profile.name}"
-        )
+        log_operation_complete("HTTP server profile update", f"Profile: {updated_profile.name}")
         return updated_profile
 
     except NotFoundError as e:
-        log_error(f"HTTP server profile not found", e.message)
+        log_error("HTTP server profile not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid HTTP server profile update", e.message)
+        log_error("Invalid HTTP server profile update", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error updating HTTP server profile", str(e))
+        log_error("Unexpected error updating HTTP server profile", str(e))
 
     return None
 
@@ -837,15 +814,11 @@ def list_and_filter_http_server_profiles(http_profiles):
     try:
         # List all HTTP server profiles in the Texas folder
         all_profiles = http_profiles.list(folder="Texas")
-        log_success(
-            f"Found {len(all_profiles)} HTTP server profiles in the Texas folder"
-        )
+        log_success(f"Found {len(all_profiles)} HTTP server profiles in the Texas folder")
 
         # Filter with exact_match=True to get profiles directly in the folder (not subfolder)
         direct_profiles = http_profiles.list(folder="Texas", exact_match=True)
-        log_info(
-            f"Found {len(direct_profiles)} HTTP server profiles directly in the Texas folder"
-        )
+        log_info(f"Found {len(direct_profiles)} HTTP server profiles directly in the Texas folder")
 
         # Filter by tag registration status
         tag_reg_profiles = http_profiles.list(folder="Texas", tag_registration=True)
@@ -855,17 +828,11 @@ def list_and_filter_http_server_profiles(http_profiles):
 
         # Filter by server protocol - profiles with at least one HTTPS server
         https_profiles = http_profiles.list(folder="Texas", protocol=["HTTPS"])
-        log_info(
-            f"Found {len(https_profiles)} HTTP server profiles with at least one HTTPS server"
-        )
+        log_info(f"Found {len(https_profiles)} HTTP server profiles with at least one HTTPS server")
 
         # Filter out profiles from a specific subfolder
-        filtered_profiles = http_profiles.list(
-            folder="Texas", exclude_folders=["Austin"]
-        )
-        log_info(
-            f"Found {len(filtered_profiles)} HTTP server profiles excluding 'Austin'"
-        )
+        filtered_profiles = http_profiles.list(folder="Texas", exclude_folders=["Austin"])
+        log_info(f"Found {len(filtered_profiles)} HTTP server profiles excluding 'Austin'")
 
         # Print details of profiles
         log_info("\nDetails of HTTP server profiles:")
@@ -874,9 +841,7 @@ def list_and_filter_http_server_profiles(http_profiles):
             log_info(f"    ID: {profile.id}")
             log_info(f"    Servers: {len(profile.server)}")
             for idx, server in enumerate(profile.server):
-                log_info(
-                    f"      Server {idx+1}: {server.name} ({server.protocol}:{server.port})"
-                )
+                log_info(f"      Server {idx + 1}: {server.name} ({server.protocol}:{server.port})")
             if profile.description:
                 log_info(f"    Description: {profile.description}")
             log_info("")
@@ -884,11 +849,11 @@ def list_and_filter_http_server_profiles(http_profiles):
         return all_profiles
 
     except InvalidObjectError as e:
-        log_error(f"Invalid request when listing HTTP server profiles", e.message)
+        log_error("Invalid request when listing HTTP server profiles", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error listing HTTP server profiles", str(e))
+        log_error("Unexpected error listing HTTP server profiles", str(e))
 
     return []
 
@@ -920,24 +885,22 @@ def fetch_http_server_profile_by_name(http_profiles, profile_name, folder="Texas
         log_info(f"  - Servers: {len(profile.server)}")
         for idx, server in enumerate(profile.server):
             log_info(
-                f"    Server {idx+1}: {server.name} ({server.address}) - {server.protocol}:{server.port}"
+                f"    Server {idx + 1}: {server.name} ({server.address}) - {server.protocol}:{server.port}"
             )
         if profile.description:
             log_info(f"  - Description: {profile.description}")
 
-        log_operation_complete(
-            "HTTP server profile fetch by name", f"Profile: {profile.name}"
-        )
+        log_operation_complete("HTTP server profile fetch by name", f"Profile: {profile.name}")
         return profile
 
     except NotFoundError as e:
-        log_error(f"HTTP server profile not found", e.message)
+        log_error("HTTP server profile not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid fetch request", e.message)
+        log_error("Invalid fetch request", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error fetching HTTP server profile", str(e))
+        log_error("Unexpected error fetching HTTP server profile", str(e))
 
     return None
 
@@ -967,13 +930,13 @@ def delete_http_server_profile(http_profiles, profile_id):
         return True
 
     except NotFoundError as e:
-        log_error(f"HTTP server profile not found", e.message)
+        log_error("HTTP server profile not found", e.message)
     except InvalidObjectError as e:
-        log_error(f"Invalid delete request", e.message)
+        log_error("Invalid delete request", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
     except Exception as e:
-        log_error(f"Unexpected error deleting HTTP server profile", str(e))
+        log_error("Unexpected error deleting HTTP server profile", str(e))
 
     return False
 
@@ -1126,9 +1089,7 @@ def generate_http_server_profile_report(http_profiles, profile_ids, execution_ti
             writer.writerow(["Total Profiles Processed", len(profile_ids)])
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
-            writer.writerow(
-                ["Execution Time (so far)", f"{execution_time:.2f} seconds"]
-            )
+            writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
             writer.writerow(
                 [
                     "Report Generated On",
@@ -1178,9 +1139,7 @@ def cleanup_http_server_profiles(http_profiles, profile_ids):
                 f"HTTP server profile with ID {profile_id} not found - may have been already deleted"
             )
         except Exception as e:
-            log_error(
-                f"Error deleting HTTP server profile with ID {profile_id}", str(e)
-            )
+            log_error(f"Error deleting HTTP server profile with ID {profile_id}", str(e))
 
 
 def parse_arguments():
@@ -1210,26 +1169,14 @@ def parse_arguments():
     )
 
     # Report generation
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
 
     # Operations to demonstrate
     op_group = parser.add_argument_group("Operations")
-    op_group.add_argument(
-        "--create", action="store_true", help="Demonstrate creation operations"
-    )
-    op_group.add_argument(
-        "--update", action="store_true", help="Demonstrate update operations"
-    )
-    op_group.add_argument(
-        "--list", action="store_true", help="Demonstrate listing operations"
-    )
-    op_group.add_argument(
-        "--delete", action="store_true", help="Demonstrate deletion operations"
-    )
+    op_group.add_argument("--create", action="store_true", help="Demonstrate creation operations")
+    op_group.add_argument("--update", action="store_true", help="Demonstrate update operations")
+    op_group.add_argument("--list", action="store_true", help="Demonstrate listing operations")
+    op_group.add_argument("--delete", action="store_true", help="Demonstrate deletion operations")
     op_group.add_argument(
         "--all",
         action="store_true",
@@ -1270,9 +1217,7 @@ def main():
 
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
-    skip_cleanup = (
-        args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    )
+    skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
 
     # Determine whether to generate a report
     # Command-line argument takes precedence over environment variable
@@ -1301,9 +1246,7 @@ def main():
         # Demonstrate creation operations
         if demo_all or args.create:
             log_section("HTTP SERVER PROFILE CREATION")
-            log_info(
-                "Demonstrating HTTP server profile creation with various configurations"
-            )
+            log_info("Demonstrating HTTP server profile creation with various configurations")
             log_info(f"Using folder: {folder_name}")
 
             # Create a basic HTTP server profile
@@ -1325,17 +1268,13 @@ def main():
                 profile_count += 1
 
             # Create an HTTP server profile in a snippet container
-            snippet_profile = create_http_server_profile_with_snippet(
-                http_profiles, folder_name
-            )
+            snippet_profile = create_http_server_profile_with_snippet(http_profiles, folder_name)
             if snippet_profile:
                 created_profiles.append(snippet_profile.id)
                 profile_count += 1
 
             # Create an HTTP server profile in a device container
-            device_profile = create_http_server_profile_with_device(
-                http_profiles, folder_name
-            )
+            device_profile = create_http_server_profile_with_device(http_profiles, folder_name)
             if device_profile:
                 created_profiles.append(device_profile.id)
                 profile_count += 1
@@ -1374,9 +1313,7 @@ def main():
         if demo_all or args.delete:
             if created_profiles:
                 # Delete the last created profile to demonstrate the delete operation
-                delete_success = delete_http_server_profile(
-                    http_profiles, created_profiles[-1]
-                )
+                delete_success = delete_http_server_profile(http_profiles, created_profiles[-1])
                 if delete_success:
                     # Remove it from the list of profiles to clean up later
                     deleted_id = created_profiles.pop()
@@ -1389,7 +1326,7 @@ def main():
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_profiles and not skip_report:
             log_section("REPORT GENERATION")
-            log_operation_start(f"Generating HTTP server profiles CSV report")
+            log_operation_start("Generating HTTP server profiles CSV report")
 
             # Calculate execution time so far
             current_time = __import__("time").time()
@@ -1402,7 +1339,9 @@ def main():
 
             if report_file:
                 log_success(f"Generated HTTP server profiles report: {report_file}")
-                log_info(f"The report contains details of all {len(created_profiles)} HTTP server profiles created")
+                log_info(
+                    f"The report contains details of all {len(created_profiles)} HTTP server profiles created"
+                )
             else:
                 log_error("Failed to generate HTTP server profiles report")
         elif skip_report:
@@ -1431,23 +1370,21 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total HTTP server profiles created: {profile_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
         if profile_count > 0:
-            log_info(
-                f"Average time per profile: {execution_time/profile_count:.2f} seconds"
-            )
+            log_info(f"Average time per profile: {execution_time / profile_count:.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some HTTP server profiles may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

@@ -179,7 +179,7 @@ class TestIKECryptoProfileModels:
         update_model = IKECryptoProfileUpdateModel(**update_data)
         assert update_model.description == "This is a test description"
 
-        # Response model has description field but it's excluded from serialization
+        # Response model has description field, but it's excluded from serialization
         response_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-profile",

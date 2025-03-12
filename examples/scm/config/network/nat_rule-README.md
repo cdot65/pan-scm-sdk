@@ -188,7 +188,7 @@ outbound_config = {
 }
 ```
 
-### 6. Branch Office NAT 
+### 6. Branch Office NAT
 ```python
 # Create multiple similar NAT rules for different branch offices
 for site in branch_sites:
@@ -286,7 +286,7 @@ The `source_translation` field supports three translation types:
            "translated_address": ["192.168.1.100", "192.168.1.101"]
        }
    }
-   
+
    # Option 2: Using an interface address
    "source_translation": {
        "dynamic_ip_and_port": {
@@ -359,7 +359,7 @@ The example script showcases several important programming techniques:
 
 1. **Error Handling** - Comprehensive try/except blocks for each API call
 2. **Pydantic Model Construction** - Both direct dictionary and explicit model building approaches
-3. **Bulk Operations** - Creating multiple related objects programmatically  
+3. **Bulk Operations** - Creating multiple related objects programmatically
 4. **Unique Naming** - Using UUID suffixes to avoid name conflicts
 5. **Modular Code Organization** - Separate functions for each NAT type
 6. **Proper Cleanup** - Ensuring all created objects are deleted
@@ -401,7 +401,7 @@ The example script showcases several important programming techniques:
 ```bash
 
 ❯ poetry run python nat_rule.py --skip-cleanup
-2025-02-27 20:14:55 INFO     
+2025-02-27 20:14:55 INFO
 2025-02-27 20:14:55 INFO     ================================================================================
 2025-02-27 20:14:55 INFO        AUTHENTICATION & INITIALIZATION
 2025-02-27 20:14:55 INFO     ================================================================================
@@ -410,13 +410,13 @@ The example script showcases several important programming techniques:
 2025-02-27 20:14:55 INFO     ✓ All required credentials found
 2025-02-27 20:14:55 INFO     ▶ STARTING: Creating SCM client
 2025-02-27 20:14:56 INFO     ✓ COMPLETED: SCM client initialization - TSG ID: 1540**2209
-2025-02-27 20:14:56 INFO     
+2025-02-27 20:14:56 INFO
 2025-02-27 20:14:56 INFO     ================================================================================
 2025-02-27 20:14:56 INFO        NAT RULE CONFIGURATION
 2025-02-27 20:14:56 INFO     ================================================================================
 2025-02-27 20:14:56 INFO     ▶ STARTING: Initializing NAT rule manager
 2025-02-27 20:14:56 INFO     ✓ COMPLETED: NAT rule manager initialization
-2025-02-27 20:14:56 INFO     
+2025-02-27 20:14:56 INFO
 2025-02-27 20:14:56 INFO     ================================================================================
 2025-02-27 20:14:56 INFO        BASIC SOURCE NAT CONFIGURATIONS
 2025-02-27 20:14:56 INFO     ================================================================================
@@ -440,7 +440,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:14:57 INFO     Creating a dynamic IP NAT rule with fallback
 2025-02-27 20:14:57 INFO     Created dynamic IP NAT rule: dynamic-ip-fallback-3da071 with ID: 58ab4494-1cea-4ac2-8cd5-3a402fe4d6c3
 2025-02-27 20:14:57 INFO     ✓ Created 4 source NAT rules so far
-2025-02-27 20:14:57 INFO     
+2025-02-27 20:14:57 INFO
 2025-02-27 20:14:57 INFO     ================================================================================
 2025-02-27 20:14:57 INFO        BASIC DESTINATION NAT CONFIGURATIONS
 2025-02-27 20:14:57 INFO     ================================================================================
@@ -450,7 +450,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:14:58 INFO     Created destination NAT rule: dest-nat-cd4a5f with ID: e37aed86-ed64-480f-bc7a-87392f2b8eed
 2025-02-27 20:14:58 INFO     Creating a dynamic destination NAT rule for load balancing
 2025-02-27 20:14:58 INFO     Created dynamic destination NAT rule: lb-nat-9bf5b0 with ID: 98d21247-c296-418b-af99-bda5e2f6fe10
-2025-02-27 20:14:58 INFO     
+2025-02-27 20:14:58 INFO
 2025-02-27 20:14:58 INFO     ================================================================================
 2025-02-27 20:14:58 INFO        SPECIAL NAT RULE TYPES
 2025-02-27 20:14:58 INFO     ================================================================================
@@ -460,7 +460,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:14:58 INFO     Created DNS64 NAT rule: dns64-nat-b4e4e8 with ID: 4b3309e8-053d-4212-9bc4-9450ca4ae393
 2025-02-27 20:14:58 INFO     Creating an NPTv6 NAT rule
 2025-02-27 20:14:58 INFO     Created NPTv6 NAT rule: nptv6-d75718 with ID: f564a6e3-7784-482d-89a0-3254bc39ec20
-2025-02-27 20:14:58 INFO     
+2025-02-27 20:14:58 INFO
 2025-02-27 20:14:58 INFO     ================================================================================
 2025-02-27 20:14:58 INFO        ADVANCED NAT CONFIGURATIONS
 2025-02-27 20:14:58 INFO     ================================================================================
@@ -474,7 +474,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:14:59 INFO     Created port forwarding NAT rule: port-forward-239c13 with ID: 9946a772-8f5e-4112-91f7-f0296da35714
 2025-02-27 20:14:59 INFO     Creating an outbound NAT rule with interface selection
 2025-02-27 20:15:00 INFO     Created outbound NAT rule with interface selection: outbound-primary-22940f with ID: 5b7cb1f3-9dba-40ea-97c4-a1dfbc784672
-2025-02-27 20:15:00 INFO     
+2025-02-27 20:15:00 INFO
 2025-02-27 20:15:00 INFO     ================================================================================
 2025-02-27 20:15:00 INFO        POSITION-SPECIFIC NAT RULES
 2025-02-27 20:15:00 INFO     ================================================================================
@@ -482,7 +482,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:15:00 INFO     Using folder: Texas
 2025-02-27 20:15:00 INFO     Creating a post-rulebase NAT rule
 2025-02-27 20:15:00 INFO     Created post-rulebase NAT rule: post-nat-8a2264 with ID: 32dbb51b-d2b7-4a3c-9a4f-4766d9c8d277
-2025-02-27 20:15:00 INFO     
+2025-02-27 20:15:00 INFO
 2025-02-27 20:15:00 INFO     ================================================================================
 2025-02-27 20:15:00 INFO        BULK NAT RULE CREATION
 2025-02-27 20:15:00 INFO     ================================================================================
@@ -499,7 +499,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:15:02 INFO     Created outbound NAT for Chicago: outbound-chicago-776033 with ID: b13f2f7f-472a-4e61-bcfc-b2cb3d8173ef
 2025-02-27 20:15:02 INFO     Created outbound NAT for Los Angeles: outbound-los-angeles-648c49 with ID: 840d9b48-f835-4eb7-a5d7-fa00f183926a
 2025-02-27 20:15:02 INFO     ✓ Created 3 branch site NAT rules
-2025-02-27 20:15:02 INFO     
+2025-02-27 20:15:02 INFO
 2025-02-27 20:15:02 INFO     ================================================================================
 2025-02-27 20:15:02 INFO        UPDATING NAT RULES
 2025-02-27 20:15:02 INFO     ================================================================================
@@ -508,7 +508,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:15:02 INFO     Found NAT rule: source-nat-example-9db32a
 2025-02-27 20:15:02 INFO     Updating translated addresses to: ['192.168.1.100', '192.168.1.101', '192.168.1.200']
 2025-02-27 20:15:03 INFO     Updated NAT rule: source-nat-example-9db32a with description: Updated description for source-nat-example-9db32a
-2025-02-27 20:15:03 INFO     
+2025-02-27 20:15:03 INFO
 2025-02-27 20:15:03 INFO     ================================================================================
 2025-02-27 20:15:03 INFO        LISTING AND FILTERING NAT RULES
 2025-02-27 20:15:03 INFO     ================================================================================
@@ -519,7 +519,7 @@ The example script showcases several important programming techniques:
 2025-02-27 20:15:03 INFO     Found 85 IPv4 NAT rules
 2025-02-27 20:15:04 INFO     Found 0 NAT rules with 'trust' source zone
 2025-02-27 20:15:04 INFO     Found 0 NAT rules with 'untrust' destination zone
-2025-02-27 20:15:04 INFO     
+2025-02-27 20:15:04 INFO
 Details of NAT rules:
 2025-02-27 20:15:04 INFO       - Rule: default
 2025-02-27 20:15:04 INFO         ID: 9cbc9ec8-abb9-46b7-89c3-5ffe0a1f25eb
@@ -527,36 +527,36 @@ Details of NAT rules:
 2025-02-27 20:15:04 INFO         Tags: []
 2025-02-27 20:15:04 INFO         From: ['any'], To: ['any']
 2025-02-27 20:15:04 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:15:04 INFO     
+2025-02-27 20:15:04 INFO
 2025-02-27 20:15:04 INFO       - Rule: Web-Security-Default
 2025-02-27 20:15:04 INFO         ID: a6ca47b5-0575-49d9-954b-c2895e21ff39
 2025-02-27 20:15:04 INFO         Description: None
 2025-02-27 20:15:04 INFO         Tags: []
 2025-02-27 20:15:04 INFO         From: ['any'], To: ['any']
 2025-02-27 20:15:04 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:15:04 INFO     
+2025-02-27 20:15:04 INFO
 2025-02-27 20:15:04 INFO       - Rule: hip-default
 2025-02-27 20:15:04 INFO         ID: 29472dcf-4d9a-4b2a-836a-b65b04ae5010
 2025-02-27 20:15:04 INFO         Description: None
 2025-02-27 20:15:04 INFO         Tags: []
 2025-02-27 20:15:04 INFO         From: ['any'], To: ['any']
 2025-02-27 20:15:04 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:15:04 INFO     
+2025-02-27 20:15:04 INFO
 2025-02-27 20:15:04 INFO       - Rule: Auto-VPN-Default-Snippet
 2025-02-27 20:15:04 INFO         ID: f15871d5-e7b8-4558-bb0b-4ff3d48b5c51
 2025-02-27 20:15:04 INFO         Description: None
 2025-02-27 20:15:04 INFO         Tags: []
 2025-02-27 20:15:04 INFO         From: ['any'], To: ['any']
 2025-02-27 20:15:04 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:15:04 INFO     
+2025-02-27 20:15:04 INFO
 2025-02-27 20:15:04 INFO       - Rule: app-tagging
 2025-02-27 20:15:04 INFO         ID: b15925f5-e572-4dae-8d4f-fb0b7e2448cc
 2025-02-27 20:15:04 INFO         Description: None
 2025-02-27 20:15:04 INFO         Tags: []
 2025-02-27 20:15:04 INFO         From: ['any'], To: ['any']
 2025-02-27 20:15:04 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:15:04 INFO     
-2025-02-27 20:15:04 INFO     
+2025-02-27 20:15:04 INFO
+2025-02-27 20:15:04 INFO
 2025-02-27 20:15:04 INFO     ================================================================================
 2025-02-27 20:15:04 INFO        REPORT GENERATION
 2025-02-27 20:15:04 INFO     ================================================================================
@@ -568,13 +568,13 @@ Details of NAT rules:
 2025-02-27 20:15:07 INFO     Processing rule 20 of 20
 2025-02-27 20:15:07 INFO     ✓ Generated NAT rules report: nat_rules_report_20250227_201504.csv
 2025-02-27 20:15:07 INFO     The report contains details of all 20 NAT rules created
-2025-02-27 20:15:07 INFO     
+2025-02-27 20:15:07 INFO
 2025-02-27 20:15:07 INFO     ================================================================================
 2025-02-27 20:15:07 INFO        CLEANUP
 2025-02-27 20:15:07 INFO     ================================================================================
 2025-02-27 20:15:07 INFO     SKIP_CLEANUP is set to true - preserving 20 NAT rules
 2025-02-27 20:15:07 INFO     To clean up these rules, run the script again with SKIP_CLEANUP unset or set to false
-2025-02-27 20:15:07 INFO     
+2025-02-27 20:15:07 INFO
 2025-02-27 20:15:07 INFO     ================================================================================
 2025-02-27 20:15:07 INFO        EXECUTION SUMMARY
 2025-02-27 20:15:07 INFO     ================================================================================
@@ -590,7 +590,7 @@ and if you want the rules cleaned up
 ```bash
 
 ❯ poetry run python nat_rule.py
-2025-02-27 20:16:58 INFO     
+2025-02-27 20:16:58 INFO
 2025-02-27 20:16:58 INFO     ================================================================================
 2025-02-27 20:16:58 INFO        AUTHENTICATION & INITIALIZATION
 2025-02-27 20:16:58 INFO     ================================================================================
@@ -599,13 +599,13 @@ and if you want the rules cleaned up
 2025-02-27 20:16:58 INFO     ✓ All required credentials found
 2025-02-27 20:16:58 INFO     ▶ STARTING: Creating SCM client
 2025-02-27 20:16:59 INFO     ✓ COMPLETED: SCM client initialization - TSG ID: 1540**2209
-2025-02-27 20:16:59 INFO     
+2025-02-27 20:16:59 INFO
 2025-02-27 20:16:59 INFO     ================================================================================
 2025-02-27 20:16:59 INFO        NAT RULE CONFIGURATION
 2025-02-27 20:16:59 INFO     ================================================================================
 2025-02-27 20:16:59 INFO     ▶ STARTING: Initializing NAT rule manager
 2025-02-27 20:16:59 INFO     ✓ COMPLETED: NAT rule manager initialization
-2025-02-27 20:16:59 INFO     
+2025-02-27 20:16:59 INFO
 2025-02-27 20:16:59 INFO     ================================================================================
 2025-02-27 20:16:59 INFO        BASIC SOURCE NAT CONFIGURATIONS
 2025-02-27 20:16:59 INFO     ================================================================================
@@ -629,7 +629,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:00 INFO     Creating a dynamic IP NAT rule with fallback
 2025-02-27 20:17:00 INFO     Created dynamic IP NAT rule: dynamic-ip-fallback-c0ef9c with ID: 3909e45b-7cc9-437f-a523-25da41213563
 2025-02-27 20:17:00 INFO     ✓ Created 4 source NAT rules so far
-2025-02-27 20:17:00 INFO     
+2025-02-27 20:17:00 INFO
 2025-02-27 20:17:00 INFO     ================================================================================
 2025-02-27 20:17:00 INFO        BASIC DESTINATION NAT CONFIGURATIONS
 2025-02-27 20:17:00 INFO     ================================================================================
@@ -639,7 +639,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:01 INFO     Created destination NAT rule: dest-nat-6e17e1 with ID: f64e5aee-f122-4b11-a475-a7a9526ba2cd
 2025-02-27 20:17:01 INFO     Creating a dynamic destination NAT rule for load balancing
 2025-02-27 20:17:01 INFO     Created dynamic destination NAT rule: lb-nat-fe5465 with ID: 39f47f59-4fd2-4d51-9679-269309f02188
-2025-02-27 20:17:01 INFO     
+2025-02-27 20:17:01 INFO
 2025-02-27 20:17:01 INFO     ================================================================================
 2025-02-27 20:17:01 INFO        SPECIAL NAT RULE TYPES
 2025-02-27 20:17:01 INFO     ================================================================================
@@ -649,7 +649,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:01 INFO     Created DNS64 NAT rule: dns64-nat-e797e5 with ID: a10aa020-af90-4478-8bb8-0acf4ac3c0f8
 2025-02-27 20:17:01 INFO     Creating an NPTv6 NAT rule
 2025-02-27 20:17:02 INFO     Created NPTv6 NAT rule: nptv6-4b04dc with ID: 6b38e9fd-32f6-487d-96fe-8ddde513200f
-2025-02-27 20:17:02 INFO     
+2025-02-27 20:17:02 INFO
 2025-02-27 20:17:02 INFO     ================================================================================
 2025-02-27 20:17:02 INFO        ADVANCED NAT CONFIGURATIONS
 2025-02-27 20:17:02 INFO     ================================================================================
@@ -663,7 +663,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:03 INFO     Created port forwarding NAT rule: port-forward-59b797 with ID: 21cc0af4-7b0b-45c3-a91f-d657b23e6b42
 2025-02-27 20:17:03 INFO     Creating an outbound NAT rule with interface selection
 2025-02-27 20:17:03 INFO     Created outbound NAT rule with interface selection: outbound-primary-c99ca3 with ID: 444852cb-0450-4726-a61b-c931af9063ec
-2025-02-27 20:17:03 INFO     
+2025-02-27 20:17:03 INFO
 2025-02-27 20:17:03 INFO     ================================================================================
 2025-02-27 20:17:03 INFO        POSITION-SPECIFIC NAT RULES
 2025-02-27 20:17:03 INFO     ================================================================================
@@ -671,7 +671,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:03 INFO     Using folder: Texas
 2025-02-27 20:17:03 INFO     Creating a post-rulebase NAT rule
 2025-02-27 20:17:03 INFO     Created post-rulebase NAT rule: post-nat-4876f9 with ID: 53931f49-d559-4eea-80c3-5cd3ba3742e1
-2025-02-27 20:17:03 INFO     
+2025-02-27 20:17:03 INFO
 2025-02-27 20:17:03 INFO     ================================================================================
 2025-02-27 20:17:03 INFO        BULK NAT RULE CREATION
 2025-02-27 20:17:03 INFO     ================================================================================
@@ -688,7 +688,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:05 INFO     Created outbound NAT for Chicago: outbound-chicago-17ff64 with ID: 3a800e91-c156-4bcc-8af2-20ed73c83cc0
 2025-02-27 20:17:05 INFO     Created outbound NAT for Los Angeles: outbound-los-angeles-626aa6 with ID: 2dd50db0-f338-4553-92b5-92475088a5e5
 2025-02-27 20:17:05 INFO     ✓ Created 3 branch site NAT rules
-2025-02-27 20:17:05 INFO     
+2025-02-27 20:17:05 INFO
 2025-02-27 20:17:05 INFO     ================================================================================
 2025-02-27 20:17:05 INFO        UPDATING NAT RULES
 2025-02-27 20:17:05 INFO     ================================================================================
@@ -697,7 +697,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:05 INFO     Found NAT rule: source-nat-example-64971f
 2025-02-27 20:17:05 INFO     Updating translated addresses to: ['192.168.1.100', '192.168.1.101', '192.168.1.200']
 2025-02-27 20:17:06 INFO     Updated NAT rule: source-nat-example-64971f with description: Updated description for source-nat-example-64971f
-2025-02-27 20:17:06 INFO     
+2025-02-27 20:17:06 INFO
 2025-02-27 20:17:06 INFO     ================================================================================
 2025-02-27 20:17:06 INFO        LISTING AND FILTERING NAT RULES
 2025-02-27 20:17:06 INFO     ================================================================================
@@ -708,7 +708,7 @@ and if you want the rules cleaned up
 2025-02-27 20:17:06 INFO     Found 102 IPv4 NAT rules
 2025-02-27 20:17:07 INFO     Found 0 NAT rules with 'trust' source zone
 2025-02-27 20:17:07 INFO     Found 0 NAT rules with 'untrust' destination zone
-2025-02-27 20:17:07 INFO     
+2025-02-27 20:17:07 INFO
 Details of NAT rules:
 2025-02-27 20:17:07 INFO       - Rule: default
 2025-02-27 20:17:07 INFO         ID: 9cbc9ec8-abb9-46b7-89c3-5ffe0a1f25eb
@@ -716,36 +716,36 @@ Details of NAT rules:
 2025-02-27 20:17:07 INFO         Tags: []
 2025-02-27 20:17:07 INFO         From: ['any'], To: ['any']
 2025-02-27 20:17:07 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:17:07 INFO     
+2025-02-27 20:17:07 INFO
 2025-02-27 20:17:07 INFO       - Rule: Web-Security-Default
 2025-02-27 20:17:07 INFO         ID: a6ca47b5-0575-49d9-954b-c2895e21ff39
 2025-02-27 20:17:07 INFO         Description: None
 2025-02-27 20:17:07 INFO         Tags: []
 2025-02-27 20:17:07 INFO         From: ['any'], To: ['any']
 2025-02-27 20:17:07 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:17:07 INFO     
+2025-02-27 20:17:07 INFO
 2025-02-27 20:17:07 INFO       - Rule: hip-default
 2025-02-27 20:17:07 INFO         ID: 29472dcf-4d9a-4b2a-836a-b65b04ae5010
 2025-02-27 20:17:07 INFO         Description: None
 2025-02-27 20:17:07 INFO         Tags: []
 2025-02-27 20:17:07 INFO         From: ['any'], To: ['any']
 2025-02-27 20:17:07 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:17:07 INFO     
+2025-02-27 20:17:07 INFO
 2025-02-27 20:17:07 INFO       - Rule: Auto-VPN-Default-Snippet
 2025-02-27 20:17:07 INFO         ID: f15871d5-e7b8-4558-bb0b-4ff3d48b5c51
 2025-02-27 20:17:07 INFO         Description: None
 2025-02-27 20:17:07 INFO         Tags: []
 2025-02-27 20:17:07 INFO         From: ['any'], To: ['any']
 2025-02-27 20:17:07 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:17:07 INFO     
+2025-02-27 20:17:07 INFO
 2025-02-27 20:17:07 INFO       - Rule: app-tagging
 2025-02-27 20:17:07 INFO         ID: b15925f5-e572-4dae-8d4f-fb0b7e2448cc
 2025-02-27 20:17:07 INFO         Description: None
 2025-02-27 20:17:07 INFO         Tags: []
 2025-02-27 20:17:07 INFO         From: ['any'], To: ['any']
 2025-02-27 20:17:07 INFO         Source: ['any'], Destination: ['any']
-2025-02-27 20:17:07 INFO     
-2025-02-27 20:17:07 INFO     
+2025-02-27 20:17:07 INFO
+2025-02-27 20:17:07 INFO
 2025-02-27 20:17:07 INFO     ================================================================================
 2025-02-27 20:17:07 INFO        REPORT GENERATION
 2025-02-27 20:17:07 INFO     ================================================================================
@@ -757,7 +757,7 @@ Details of NAT rules:
 2025-02-27 20:17:10 INFO     Processing rule 20 of 20
 2025-02-27 20:17:10 INFO     ✓ Generated NAT rules report: nat_rules_report_20250227_201707.csv
 2025-02-27 20:17:10 INFO     The report contains details of all 20 NAT rules created
-2025-02-27 20:17:10 INFO     
+2025-02-27 20:17:10 INFO
 2025-02-27 20:17:10 INFO     ================================================================================
 2025-02-27 20:17:10 INFO        CLEANUP
 2025-02-27 20:17:10 INFO     ================================================================================
@@ -783,7 +783,7 @@ Details of NAT rules:
 2025-02-27 20:17:15 INFO     Deleted NAT rule with ID: 676ff6bf-dfb2-46ba-82f4-b9f0c20fbfb2
 2025-02-27 20:17:15 INFO     Deleted NAT rule with ID: 3a800e91-c156-4bcc-8af2-20ed73c83cc0
 2025-02-27 20:17:15 INFO     Deleted NAT rule with ID: 2dd50db0-f338-4553-92b5-92475088a5e5
-2025-02-27 20:17:15 INFO     
+2025-02-27 20:17:15 INFO
 2025-02-27 20:17:15 INFO     ================================================================================
 2025-02-27 20:17:15 INFO        EXECUTION SUMMARY
 2025-02-27 20:17:15 INFO     ================================================================================

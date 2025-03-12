@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with Service objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of Service object configurations and operations commonly 
+This script demonstrates a wide range of Service object configurations and operations commonly
 used in enterprise networks, including:
 
 1. Service Object Types:
@@ -37,7 +37,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -103,9 +103,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -116,17 +114,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -137,9 +131,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -157,15 +149,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -186,8 +178,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -230,7 +222,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -238,14 +230,14 @@ def initialize_client():
 def create_tcp_single_port_service(services, folder="Texas"):
     """
     Create a service object for a single TCP port.
-    
+
     This function demonstrates creating a standard TCP service with a single port,
     commonly used for web servers and other applications.
-    
+
     Args:
         services: The Service manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceResponseModel: The created service object, or None if creation failed
     """
@@ -261,19 +253,11 @@ def create_tcp_single_port_service(services, folder="Texas"):
         "description": "HTTP web server service on port 80",
         "folder": folder,  # Use the provided folder name
         "tag": ["Automation", "Web"],
-        "protocol": {
-            "tcp": {
-                "port": "80",
-                "override": {
-                    "timeout": 60,
-                    "halfclose_timeout": 30
-                }
-            }
-        }
+        "protocol": {"tcp": {"port": "80", "override": {"timeout": 60, "halfclose_timeout": 30}}},
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Protocol: TCP")
+    log_info("  - Protocol: TCP")
     log_info(f"  - Port: {tcp_single_port_config['protocol']['tcp']['port']}")
     log_info(f"  - Tags: {', '.join(tcp_single_port_config['tag'])}")
 
@@ -283,20 +267,18 @@ def create_tcp_single_port_service(services, folder="Texas"):
         log_success(f"Created service object: {new_service.name}")
         log_info(f"  - Object ID: {new_service.id}")
         log_info(f"  - Description: {new_service.description}")
-        log_operation_complete(
-            "TCP single port service creation", f"Service: {new_service.name}"
-        )
+        log_operation_complete("TCP single port service creation", f"Service: {new_service.name}")
         return new_service
     except NameNotUniqueError as e:
-        log_error(f"Service name conflict", e.message)
+        log_error("Service name conflict", e.message)
         log_info("Try using a different service name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service data", e.message)
+        log_error("Invalid service data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating service object", str(e))
+        log_error("Unexpected error creating service object", str(e))
 
     return None
 
@@ -304,14 +286,14 @@ def create_tcp_single_port_service(services, folder="Texas"):
 def create_tcp_multi_port_service(services, folder="Texas"):
     """
     Create a service object for multiple TCP ports.
-    
+
     This function demonstrates creating a TCP service with multiple ports,
     useful for applications that use several ports (e.g., web services with HTTP and HTTPS).
-    
+
     Args:
         services: The Service manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceResponseModel: The created service object, or None if creation failed
     """
@@ -330,17 +312,13 @@ def create_tcp_multi_port_service(services, folder="Texas"):
         "protocol": {
             "tcp": {
                 "port": "80,443",
-                "override": {
-                    "timeout": 120,
-                    "halfclose_timeout": 60,
-                    "timewait_timeout": 15
-                }
+                "override": {"timeout": 120, "halfclose_timeout": 60, "timewait_timeout": 15},
             }
-        }
+        },
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Protocol: TCP")
+    log_info("  - Protocol: TCP")
     log_info(f"  - Ports: {tcp_multi_port_config['protocol']['tcp']['port']}")
     log_info(f"  - Tags: {', '.join(tcp_multi_port_config['tag'])}")
 
@@ -350,20 +328,18 @@ def create_tcp_multi_port_service(services, folder="Texas"):
         log_success(f"Created service object: {new_service.name}")
         log_info(f"  - Object ID: {new_service.id}")
         log_info(f"  - Description: {new_service.description}")
-        log_operation_complete(
-            "TCP multi-port service creation", f"Service: {new_service.name}"
-        )
+        log_operation_complete("TCP multi-port service creation", f"Service: {new_service.name}")
         return new_service
     except NameNotUniqueError as e:
-        log_error(f"Service name conflict", e.message)
+        log_error("Service name conflict", e.message)
         log_info("Try using a different service name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service data", e.message)
+        log_error("Invalid service data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating service object", str(e))
+        log_error("Unexpected error creating service object", str(e))
 
     return None
 
@@ -371,14 +347,14 @@ def create_tcp_multi_port_service(services, folder="Texas"):
 def create_udp_single_port_service(services, folder="Texas"):
     """
     Create a service object for a single UDP port.
-    
+
     This function demonstrates creating a standard UDP service with a single port,
     typically used for DNS, DHCP, or other UDP-based services.
-    
+
     Args:
         services: The Service manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceResponseModel: The created service object, or None if creation failed
     """
@@ -394,18 +370,11 @@ def create_udp_single_port_service(services, folder="Texas"):
         "description": "DNS service on port 53",
         "folder": folder,  # Use the provided folder name
         "tag": ["Automation", "DNS"],
-        "protocol": {
-            "udp": {
-                "port": "53",
-                "override": {
-                    "timeout": 30
-                }
-            }
-        }
+        "protocol": {"udp": {"port": "53", "override": {"timeout": 30}}},
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Protocol: UDP")
+    log_info("  - Protocol: UDP")
     log_info(f"  - Port: {udp_single_port_config['protocol']['udp']['port']}")
     log_info(f"  - Tags: {', '.join(udp_single_port_config['tag'])}")
 
@@ -415,20 +384,18 @@ def create_udp_single_port_service(services, folder="Texas"):
         log_success(f"Created service object: {new_service.name}")
         log_info(f"  - Object ID: {new_service.id}")
         log_info(f"  - Description: {new_service.description}")
-        log_operation_complete(
-            "UDP single port service creation", f"Service: {new_service.name}"
-        )
+        log_operation_complete("UDP single port service creation", f"Service: {new_service.name}")
         return new_service
     except NameNotUniqueError as e:
-        log_error(f"Service name conflict", e.message)
+        log_error("Service name conflict", e.message)
         log_info("Try using a different service name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service data", e.message)
+        log_error("Invalid service data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating service object", str(e))
+        log_error("Unexpected error creating service object", str(e))
 
     return None
 
@@ -436,14 +403,14 @@ def create_udp_single_port_service(services, folder="Texas"):
 def create_udp_multi_port_service(services, folder="Texas"):
     """
     Create a service object for multiple UDP ports.
-    
+
     This function demonstrates creating a UDP service with multiple ports,
     useful for applications that use several UDP ports (e.g., DHCP client and server).
-    
+
     Args:
         services: The Service manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceResponseModel: The created service object, or None if creation failed
     """
@@ -459,18 +426,11 @@ def create_udp_multi_port_service(services, folder="Texas"):
         "description": "DHCP client and server ports (67,68)",
         "folder": folder,  # Use the provided folder name
         "tag": ["Automation", "DHCP"],
-        "protocol": {
-            "udp": {
-                "port": "67,68",
-                "override": {
-                    "timeout": 45
-                }
-            }
-        }
+        "protocol": {"udp": {"port": "67,68", "override": {"timeout": 45}}},
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Protocol: UDP")
+    log_info("  - Protocol: UDP")
     log_info(f"  - Ports: {udp_multi_port_config['protocol']['udp']['port']}")
     log_info(f"  - Tags: {', '.join(udp_multi_port_config['tag'])}")
 
@@ -480,20 +440,18 @@ def create_udp_multi_port_service(services, folder="Texas"):
         log_success(f"Created service object: {new_service.name}")
         log_info(f"  - Object ID: {new_service.id}")
         log_info(f"  - Description: {new_service.description}")
-        log_operation_complete(
-            "UDP multi-port service creation", f"Service: {new_service.name}"
-        )
+        log_operation_complete("UDP multi-port service creation", f"Service: {new_service.name}")
         return new_service
     except NameNotUniqueError as e:
-        log_error(f"Service name conflict", e.message)
+        log_error("Service name conflict", e.message)
         log_info("Try using a different service name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service data", e.message)
+        log_error("Invalid service data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating service object", str(e))
+        log_error("Unexpected error creating service object", str(e))
 
     return None
 
@@ -501,16 +459,16 @@ def create_udp_multi_port_service(services, folder="Texas"):
 def fetch_and_update_service(services, service_id):
     """
     Fetch a service object by ID and update its description, port and tags.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing service object using its ID
     2. Modify object properties (description, ports, tags)
     3. Submit the updated object back to the SCM API
-    
+
     Args:
         services: The Service manager instance
         service_id: The UUID of the service object to update
-        
+
     Returns:
         ServiceResponseModel: The updated service object, or None if update failed
     """
@@ -523,11 +481,11 @@ def fetch_and_update_service(services, service_id):
 
         # Update description and tags
         service.description = f"Updated description for {service.name}"
-        
+
         # Add additional tags if they don't exist
         if "Updated" not in service.tag:
             service.tag = service.tag + ["Updated"]
-        
+
         # Update port configuration (assuming it's a TCP service for example)
         if hasattr(service.protocol, "tcp") and service.protocol.tcp:
             # If it already has a port range, we'll add a new port
@@ -557,15 +515,15 @@ def fetch_and_update_service(services, service_id):
 def list_and_filter_services(services):
     """
     List and filter service objects.
-    
+
     This function demonstrates how to:
     1. List all service objects in a folder
     2. Filter service objects by various criteria
     3. Display detailed information about each object
-    
+
     Args:
         services: The Service manager instance
-        
+
     Returns:
         list: All retrieved service objects
     """
@@ -583,7 +541,7 @@ def list_and_filter_services(services):
     try:
         tcp_services = services.list(folder="Texas", protocols=["tcp"])
         logger.info(f"Found {len(tcp_services)} TCP service objects")
-        
+
         udp_services = services.list(folder="Texas", protocols=["udp"])
         logger.info(f"Found {len(udp_services)} UDP service objects")
     except Exception as e:
@@ -596,18 +554,18 @@ def list_and_filter_services(services):
         logger.info(f"    ID: {service.id}")
         logger.info(f"    Description: {service.description}")
         logger.info(f"    Tags: {service.tag}")
-        
+
         # Determine service type and ports
         service_type = "Unknown"
         service_ports = "Unknown"
-        
+
         if hasattr(service.protocol, "tcp") and service.protocol.tcp:
             service_type = "TCP"
             service_ports = service.protocol.tcp.port
         elif hasattr(service.protocol, "udp") and service.protocol.udp:
             service_type = "UDP"
             service_ports = service.protocol.udp.port
-            
+
         logger.info(f"    Protocol: {service_type}")
         logger.info(f"    Ports: {service_ports}")
         logger.info("")
@@ -618,7 +576,7 @@ def list_and_filter_services(services):
 def cleanup_service_objects(services, service_ids):
     """
     Delete the service objects created in this example.
-    
+
     Args:
         services: The Service manager instance
         service_ids: List of service object IDs to delete
@@ -638,14 +596,14 @@ def cleanup_service_objects(services, service_ids):
 def create_bulk_service_objects(services, folder="Texas"):
     """
     Create multiple service objects in a batch.
-    
+
     This function demonstrates creating multiple service objects in a batch,
     which is useful for setting up multiple services at once.
-    
+
     Args:
         services: The Service manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created service objects, or empty list if creation failed
     """
@@ -658,57 +616,29 @@ def create_bulk_service_objects(services, folder="Texas"):
             "description": "SSH service on port 22",
             "folder": folder,
             "tag": ["Automation", "Bulk", "SSH"],
-            "protocol": {
-                "tcp": {
-                    "port": "22",
-                    "override": {
-                        "timeout": 60
-                    }
-                }
-            }
+            "protocol": {"tcp": {"port": "22", "override": {"timeout": 60}}},
         },
         {
             "name": f"bulk-rdp-{uuid.uuid4().hex[:6]}",
             "description": "RDP service on port 3389",
             "folder": folder,
             "tag": ["Automation", "Bulk", "Windows"],
-            "protocol": {
-                "tcp": {
-                    "port": "3389",
-                    "override": {
-                        "timeout": 120
-                    }
-                }
-            }
+            "protocol": {"tcp": {"port": "3389", "override": {"timeout": 120}}},
         },
         {
             "name": f"bulk-ntp-{uuid.uuid4().hex[:6]}",
             "description": "NTP service on port 123",
             "folder": folder,
             "tag": ["Automation", "Bulk", "NTP"],
-            "protocol": {
-                "udp": {
-                    "port": "123",
-                    "override": {
-                        "timeout": 30
-                    }
-                }
-            }
+            "protocol": {"udp": {"port": "123", "override": {"timeout": 30}}},
         },
         {
             "name": f"bulk-snmp-{uuid.uuid4().hex[:6]}",
             "description": "SNMP service on ports 161,162",
             "folder": folder,
             "tag": ["Automation", "Bulk", "SNMP"],
-            "protocol": {
-                "udp": {
-                    "port": "161,162",
-                    "override": {
-                        "timeout": 30
-                    }
-                }
-            }
-        }
+            "protocol": {"udp": {"port": "161,162", "override": {"timeout": 30}}},
+        },
     ]
 
     created_services = []
@@ -717,9 +647,7 @@ def create_bulk_service_objects(services, folder="Texas"):
     for service_config in service_configs:
         try:
             new_service = services.create(service_config)
-            logger.info(
-                f"Created service object: {new_service.name} with ID: {new_service.id}"
-            )
+            logger.info(f"Created service object: {new_service.name} with ID: {new_service.id}")
             created_services.append(new_service.id)
         except Exception as e:
             logger.error(f"Error creating service {service_config['name']}: {str(e)}")
@@ -730,97 +658,103 @@ def create_bulk_service_objects(services, folder="Texas"):
 def generate_service_report(services, service_ids, execution_time):
     """
     Generate a comprehensive CSV report of all service objects created by the script.
-    
+
     This function fetches detailed information about each service object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         services: The Service manager instance used to fetch object details
         service_ids: List of service object IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"service_objects_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
-        "Protocol", 
-        "Ports", 
-        "Description", 
+        "Protocol",
+        "Ports",
+        "Description",
         "Tags",
         "Created On",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each service object
     service_data = []
     for idx, service_id in enumerate(service_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(service_ids) - 1:
             log_info(f"Processing service {idx + 1} of {len(service_ids)}")
-            
+
         try:
             # Get the service details
             service = services.get(service_id)
-            
+
             # Determine service protocol and ports
             protocol = "Unknown"
             ports = "Unknown"
-            
+
             if hasattr(service.protocol, "tcp") and service.protocol.tcp:
                 protocol = "TCP"
                 ports = service.protocol.tcp.port
             elif hasattr(service.protocol, "udp") and service.protocol.udp:
                 protocol = "UDP"
                 ports = service.protocol.udp.port
-            
+
             # Add service data
-            service_data.append([
-                service.id,
-                service.name,
-                protocol,
-                ports,
-                service.description if service.description else "None",
-                ", ".join(service.tag) if service.tag else "None",
-                service.created_on.strftime("%Y-%m-%d %H:%M:%S") if hasattr(service, "created_on") and service.created_on else "Unknown",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            service_data.append(
+                [
+                    service.id,
+                    service.name,
+                    protocol,
+                    ports,
+                    service.description if service.description else "None",
+                    ", ".join(service.tag) if service.tag else "None",
+                    service.created_on.strftime("%Y-%m-%d %H:%M:%S")
+                    if hasattr(service, "created_on") and service.created_on
+                    else "Unknown",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for service ID {service_id}", str(e))
             # Add minimal info for services that couldn't be retrieved
-            service_data.append([
-                service_id, 
-                "ERROR", 
-                "ERROR", 
-                "ERROR",
-                f"Failed to retrieve service details: {str(e)}", 
-                "",
-                "",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            service_data.append(
+                [
+                    service_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    f"Failed to retrieve service details: {str(e)}",
+                    "",
+                    "",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(service_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -828,22 +762,24 @@ def generate_service_report(services, service_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"service_objects_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(service_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -853,74 +789,53 @@ def generate_service_report(services, service_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the service example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which service object types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Service Objects Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created service objects (don't delete them)"
+        help="Preserve created service objects (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("Object Type Selection")
+    object_group.add_argument("--tcp", action="store_true", help="Create TCP service examples")
+    object_group.add_argument("--udp", action="store_true", help="Create UDP service examples")
+    object_group.add_argument("--bulk", action="store_true", help="Create bulk service examples")
     object_group.add_argument(
-        "--tcp", 
-        action="store_true",
-        help="Create TCP service examples"
+        "--all", action="store_true", help="Create all service object types (default behavior)"
     )
-    object_group.add_argument(
-        "--udp", 
-        action="store_true", 
-        help="Create UDP service examples"
-    )
-    object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk service examples"
-    )
-    object_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Create all service object types (default behavior)"
-    )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of service object examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -930,7 +845,7 @@ def main():
     6. Generate a detailed CSV report of all created service objects
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created service objects (don't delete them)
         --tcp: Create only TCP service examples
@@ -939,32 +854,32 @@ def main():
         --all: Create all service object types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
     create_all = args.all or not (args.tcp or args.udp or args.bulk)
-    
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1019,7 +934,7 @@ def main():
                 created_services.append(udp_multi_port.id)
                 object_count += 1
 
-            log_success(f"Created UDP service objects")
+            log_success("Created UDP service objects")
 
         # Bulk Service object creation
         if create_all or args.bulk:
@@ -1038,17 +953,17 @@ def main():
         if created_services:
             log_section("UPDATING SERVICE OBJECTS")
             log_info("Demonstrating how to update existing service objects")
-            updated_service = fetch_and_update_service(services, created_services[0])
+            fetch_and_update_service(services, created_services[0])
 
         # List and filter service objects
         log_section("LISTING AND FILTERING SERVICE OBJECTS")
         log_info("Demonstrating how to search and filter service objects")
-        all_services = list_and_filter_services(services)
+        list_and_filter_services(services)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_services and not args.no_report:
             log_section("REPORT GENERATION")
@@ -1056,7 +971,9 @@ def main():
             report_file = generate_service_report(services, created_services, execution_time_so_far)
             if report_file:
                 log_success(f"Generated service objects report: {report_file}")
-                log_info(f"The report contains details of all {len(created_services)} service objects created")
+                log_info(
+                    f"The report contains details of all {len(created_services)} service objects created"
+                )
             else:
                 log_error("Failed to generate service objects report")
         elif args.no_report:
@@ -1067,8 +984,12 @@ def main():
         # Clean up the created objects, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_services)} service objects")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_services)} service objects"
+            )
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
             log_operation_start(f"Cleaning up {len(created_services)} created service objects")
             cleanup_service_objects(services, created_services)
@@ -1079,22 +1000,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total service objects created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some service objects may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

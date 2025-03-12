@@ -1,6 +1,12 @@
 from scm.client import Scm
 from scm.config.security import SecurityRule
-from scm.exceptions import InvalidObjectError, NotFoundError, AuthenticationError, NameNotUniqueError, ReferenceNotZeroError
+from scm.exceptions import (
+    InvalidObjectError,
+    NotFoundError,
+    AuthenticationError,
+    NameNotUniqueError,
+    ReferenceNotZeroError,
+)
 
 # Initialize client with debug logging
 client = Scm(
@@ -23,19 +29,17 @@ def create_security_rule():
             rule_1 = {
                 "folder": "Test Folder",
                 "name": "Test Security Rule 1",
-                "action": 'allow',
-                "from_": 'local',
-                "to_": 'internet',
-                "source": ['10.0.0.0/8'],
-                "destination": ['any'],
+                "action": "allow",
+                "from_": "local",
+                "to_": "internet",
+                "source": ["10.0.0.0/8"],
+                "destination": ["any"],
                 "description": "Default outbound allow",
-                "source_user": ['any'],
-                "application": ['web-browsing', 'ssl'],
-                "service": ['application-default'],
-                "category": ['any'],
-                "profile_setting": {
-                    "group": ["best-practice"]
-                },
+                "source_user": ["any"],
+                "application": ["web-browsing", "ssl"],
+                "service": ["application-default"],
+                "category": ["any"],
+                "profile_setting": {"group": ["best-practice"]},
                 "log_start": False,
                 "log_end": True,
             }

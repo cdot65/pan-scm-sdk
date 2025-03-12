@@ -82,7 +82,7 @@ from scm.client import ScmClient
 from scm.config.network import IKECryptoProfile
 
 client = ScmClient(
-    client_id="your-client-id", 
+    client_id="your-client-id",
     client_secret="your-client-secret",
     tsg_id="your-tsg-id"
 )

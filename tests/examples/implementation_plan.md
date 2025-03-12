@@ -50,7 +50,7 @@
      @pytest.mark.unit
      def test_validation_logic():
          ...
-     
+
      @pytest.mark.integration
      def test_api_interaction():
          ...

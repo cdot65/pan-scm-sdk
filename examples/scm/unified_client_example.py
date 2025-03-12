@@ -1,7 +1,7 @@
 """
 Example script demonstrating the unified client interface for the Palo Alto Networks SCM SDK.
 
-This example shows how to use the new attribute-based access pattern to create, read, 
+This example shows how to use the new attribute-based access pattern to create, read,
 update, and delete objects without instantiating individual service objects.
 """
 

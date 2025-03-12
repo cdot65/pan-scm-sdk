@@ -241,19 +241,19 @@ Follow these steps to run the example:
    ```bash
    # Run all examples with default settings
    python http_server_profiles.py
-   
+
    # Run only the creation examples
    python http_server_profiles.py --create
-   
+
    # Run only listing examples
    python http_server_profiles.py --list
-   
+
    # Skip CSV report generation
    python http_server_profiles.py --no-report
-   
+
    # Skip cleanup to preserve created profiles
    python http_server_profiles.py --skip-cleanup
-   
+
    # Use a different folder
    python http_server_profiles.py --folder "Production"
    ```

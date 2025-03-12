@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with Service Group objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of Service Group object configurations and operations commonly 
+This script demonstrates a wide range of Service Group object configurations and operations commonly
 used in enterprise networks, including:
 
 1. Service Group Object Types:
@@ -37,7 +37,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -103,9 +103,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -116,17 +114,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -137,9 +131,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -157,15 +149,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -186,8 +178,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -230,7 +222,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -238,14 +230,14 @@ def initialize_client():
 def create_basic_service_group(service_groups, folder="Texas"):
     """
     Create a service group with basic web services.
-    
-    This function demonstrates creating a standard service group with common 
+
+    This function demonstrates creating a standard service group with common
     built-in service references, like HTTP and HTTPS.
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceGroupResponseModel: The created service group object, or None if creation failed
     """
@@ -258,13 +250,14 @@ def create_basic_service_group(service_groups, folder="Texas"):
     # First, get existing services from the environment
     log_info("Looking up existing services to use in the service group...")
     from scm.config.objects import Service
+
     service_manager = Service(service_groups.api_client)
-    
+
     try:
         # Get services from the same folder
         existing_services = service_manager.list(folder=folder)
         log_info(f"Found {len(existing_services)} services in folder '{folder}'")
-        
+
         # If we didn't find any services, we need to use custom service names
         # Or create services first before creating groups
         if not existing_services:
@@ -281,15 +274,16 @@ def create_basic_service_group(service_groups, folder="Texas"):
         log_warning(f"Error listing services: {str(e)}")
         log_info("Falling back to custom service references that must exist")
         service_members = ["custom-http", "custom-https"]
-    
+
     # Look up existing tags to use
     from scm.config.objects import Tag
+
     try:
         tag_manager = Tag(service_groups.api_client)
         # Get tags from the same folder
         existing_tags = tag_manager.list(folder=folder)
         log_info(f"Found {len(existing_tags)} tags in folder '{folder}'")
-        
+
         if existing_tags and len(existing_tags) > 1:
             # Use up to 2 tags
             tag_count = min(2, len(existing_tags))
@@ -304,14 +298,14 @@ def create_basic_service_group(service_groups, folder="Texas"):
         log_warning(f"Error listing tags: {str(e)}")
         log_info("Falling back to 'Automation' tag that must exist in your environment")
         tag_members = ["Automation"]  # This must be an existing tag in the environment
-    
+
     # Create the service group configuration
     basic_group_config = {
         "name": service_group_name,
         "description": "Standard web services group",
         "folder": folder,  # Use the provided folder name
         "tag": tag_members,
-        "members": service_members
+        "members": service_members,
     }
 
     log_info("Configuration details:")
@@ -324,20 +318,18 @@ def create_basic_service_group(service_groups, folder="Texas"):
         log_success(f"Created service group: {new_group.name}")
         log_info(f"  - Object ID: {new_group.id}")
         log_info(f"  - Members: {', '.join(new_group.members)}")
-        log_operation_complete(
-            "Basic service group creation", f"Group: {new_group.name}"
-        )
+        log_operation_complete("Basic service group creation", f"Group: {new_group.name}")
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Service group name conflict", e.message)
+        log_error("Service group name conflict", e.message)
         log_info("Try using a different service group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service group data", e.message)
+        log_error("Invalid service group data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating service group", str(e))
+        log_error("Unexpected error creating service group", str(e))
 
     return None
 
@@ -345,14 +337,14 @@ def create_basic_service_group(service_groups, folder="Texas"):
 def create_mixed_service_group(service_groups, folder="Texas"):
     """
     Create a service group with a mix of standard and custom services.
-    
-    This function demonstrates creating a service group that references both 
+
+    This function demonstrates creating a service group that references both
     standard built-in services and custom services that might exist in your environment.
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceGroupResponseModel: The created service group object, or None if creation failed
     """
@@ -365,13 +357,14 @@ def create_mixed_service_group(service_groups, folder="Texas"):
     # First, get existing services from the environment
     log_info("Looking up existing services to use in the service group...")
     from scm.config.objects import Service
+
     service_manager = Service(service_groups.api_client)
-    
+
     try:
         # Get services from the same folder
         existing_services = service_manager.list(folder=folder)
         log_info(f"Found {len(existing_services)} services in folder '{folder}'")
-        
+
         # If we didn't find any services, we need to use custom service names
         if not existing_services:
             log_warning(f"No existing services found in folder '{folder}'")
@@ -388,15 +381,16 @@ def create_mixed_service_group(service_groups, folder="Texas"):
         log_warning(f"Error listing services: {str(e)}")
         log_info("Falling back to custom service references that must exist")
         service_members = ["custom-http", "custom-https", "custom-ssh", "custom-dns"]
-    
+
     # Look up existing tags to use
     from scm.config.objects import Tag
+
     try:
         tag_manager = Tag(service_groups.api_client)
         # Get tags from the same folder
         existing_tags = tag_manager.list(folder=folder)
         log_info(f"Found {len(existing_tags)} tags in folder '{folder}'")
-        
+
         if existing_tags and len(existing_tags) > 1:
             # Use up to 2 tags
             tag_count = min(2, len(existing_tags))
@@ -411,14 +405,14 @@ def create_mixed_service_group(service_groups, folder="Texas"):
         log_warning(f"Error listing tags: {str(e)}")
         log_info("Falling back to 'Automation' tag that must exist in your environment")
         tag_members = ["Automation"]  # This must be an existing tag in the environment
-    
+
     # Create the service group configuration with the services we found or fallback values
     mixed_group_config = {
         "name": service_group_name,
         "description": "Mixed standard and custom services",
         "folder": folder,  # Use the provided folder name
         "tag": tag_members,
-        "members": service_members
+        "members": service_members,
     }
 
     log_info("Configuration details:")
@@ -432,21 +426,19 @@ def create_mixed_service_group(service_groups, folder="Texas"):
         log_success(f"Created service group: {new_group.name}")
         log_info(f"  - Object ID: {new_group.id}")
         log_info(f"  - Members: {', '.join(new_group.members)}")
-        log_operation_complete(
-            "Mixed service group creation", f"Group: {new_group.name}"
-        )
+        log_operation_complete("Mixed service group creation", f"Group: {new_group.name}")
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Service group name conflict", e.message)
+        log_error("Service group name conflict", e.message)
         log_info("Try using a different service group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service group data", e.message)
+        log_error("Invalid service group data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
             log_info("Ensure all custom services exist in your environment")
     except Exception as e:
-        log_error(f"Unexpected error creating service group", str(e))
+        log_error("Unexpected error creating service group", str(e))
 
     return None
 
@@ -454,15 +446,15 @@ def create_mixed_service_group(service_groups, folder="Texas"):
 def create_hierarchical_service_group(service_groups, basic_group_name, folder="Texas"):
     """
     Create a hierarchical service group that includes other service groups.
-    
-    This function demonstrates creating a service group that references 
+
+    This function demonstrates creating a service group that references
     both individual services and other service groups, creating a hierarchy.
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
         basic_group_name: Name of an existing service group to include in this group
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ServiceGroupResponseModel: The created service group object, or None if creation failed
     """
@@ -475,13 +467,14 @@ def create_hierarchical_service_group(service_groups, basic_group_name, folder="
     # First, get existing services from the environment
     log_info("Looking up existing services to use in the service group...")
     from scm.config.objects import Service
+
     service_manager = Service(service_groups.api_client)
-    
+
     try:
         # Get services from the same folder
         existing_services = service_manager.list(folder=folder)
         log_info(f"Found {len(existing_services)} services in folder '{folder}'")
-        
+
         # If we didn't find any services, we need to use custom service names
         if not existing_services:
             log_warning(f"No existing services found in folder '{folder}'")
@@ -492,21 +485,24 @@ def create_hierarchical_service_group(service_groups, basic_group_name, folder="
         else:
             # Use up to 2 services that we found plus the basic group name
             service_count = min(2, len(existing_services))
-            service_members = [basic_group_name] + [service.name for service in existing_services[:service_count]]
+            service_members = [basic_group_name] + [
+                service.name for service in existing_services[:service_count]
+            ]
             log_info(f"Using service group and existing services: {', '.join(service_members)}")
     except Exception as e:
         log_warning(f"Error listing services: {str(e)}")
         log_info("Falling back to custom service references that must exist")
         service_members = [basic_group_name, "custom-dns", "custom-ftp"]
-    
+
     # Look up existing tags to use
     from scm.config.objects import Tag
+
     try:
         tag_manager = Tag(service_groups.api_client)
         # Get tags from the same folder
         existing_tags = tag_manager.list(folder=folder)
         log_info(f"Found {len(existing_tags)} tags in folder '{folder}'")
-        
+
         if existing_tags and len(existing_tags) > 1:
             # Use up to 2 tags
             tag_count = min(2, len(existing_tags))
@@ -521,14 +517,14 @@ def create_hierarchical_service_group(service_groups, basic_group_name, folder="
         log_warning(f"Error listing tags: {str(e)}")
         log_info("Falling back to 'Automation' tag that must exist in your environment")
         tag_members = ["Automation"]  # This must be an existing tag in the environment
-    
+
     # Create the service group configuration with a reference to another group
     hierarchical_group_config = {
         "name": service_group_name,
         "description": "Hierarchical group including other service groups",
         "folder": folder,  # Use the provided folder name
         "tag": tag_members,
-        "members": service_members
+        "members": service_members,
     }
 
     log_info("Configuration details:")
@@ -543,21 +539,19 @@ def create_hierarchical_service_group(service_groups, basic_group_name, folder="
         log_success(f"Created service group: {new_group.name}")
         log_info(f"  - Object ID: {new_group.id}")
         log_info(f"  - Members: {', '.join(new_group.members)}")
-        log_operation_complete(
-            "Hierarchical service group creation", f"Group: {new_group.name}"
-        )
+        log_operation_complete("Hierarchical service group creation", f"Group: {new_group.name}")
         return new_group
     except NameNotUniqueError as e:
-        log_error(f"Service group name conflict", e.message)
+        log_error("Service group name conflict", e.message)
         log_info("Try using a different service group name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid service group data", e.message)
+        log_error("Invalid service group data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
             log_info(f"Ensure the referenced group '{basic_group_name}' exists")
     except Exception as e:
-        log_error(f"Unexpected error creating service group", str(e))
+        log_error("Unexpected error creating service group", str(e))
 
     return None
 
@@ -565,16 +559,16 @@ def create_hierarchical_service_group(service_groups, basic_group_name, folder="
 def fetch_and_update_service_group(service_groups, group_id):
     """
     Fetch a service group object by ID and update its members and tags.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing service group object using its ID
     2. Modify object properties (members and tags)
     3. Submit the updated object back to the SCM API
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
         group_id: The UUID of the service group object to update
-        
+
     Returns:
         ServiceGroupResponseModel: The updated service group object, or None if update failed
     """
@@ -584,22 +578,23 @@ def fetch_and_update_service_group(service_groups, group_id):
         # Fetch the service group
         group = service_groups.get(group_id)
         logger.info(f"Found service group: {group.name}")
-        
+
         # First let's look up existing services to use for the new member
         from scm.config.objects import Service
+
         service_manager = Service(service_groups.api_client)
-        
+
         # Get folder from the service group
         folder = group.folder if hasattr(group, "folder") else None
         if not folder:
             logger.error("Could not determine folder for service group")
             return None
-        
+
         try:
             # Get services from the same folder
             existing_services = service_manager.list(folder=folder)
             logger.info(f"Found {len(existing_services)} services in folder '{folder}'")
-            
+
             if existing_services and len(existing_services) > 0:
                 # Get a service that's not already in the group members
                 new_service = None
@@ -607,7 +602,7 @@ def fetch_and_update_service_group(service_groups, group_id):
                     if service.name not in group.members:
                         new_service = service.name
                         break
-                
+
                 if new_service:
                     # Add the new service to the members list
                     group.members = group.members + [new_service]
@@ -618,15 +613,16 @@ def fetch_and_update_service_group(service_groups, group_id):
                 logger.warning(f"No existing services found in folder '{folder}'")
         except Exception as e:
             logger.warning(f"Error listing services: {str(e)}")
-        
+
         # Look up existing tags to use for the update
         from scm.config.objects import Tag
+
         try:
             tag_manager = Tag(service_groups.api_client)
             # Get tags from the same folder
             existing_tags = tag_manager.list(folder=folder)
             logger.info(f"Found {len(existing_tags)} tags in folder '{folder}'")
-            
+
             if existing_tags and len(existing_tags) > 0:
                 # Get a tag that's not already in the group tag list
                 new_tag = None
@@ -634,7 +630,7 @@ def fetch_and_update_service_group(service_groups, group_id):
                     if not group.tag or tag.name not in group.tag:
                         new_tag = tag.name
                         break
-                
+
                 if new_tag:
                     # Add the new tag to the tag list
                     group.tag = (group.tag or []) + [new_tag]
@@ -672,15 +668,15 @@ def fetch_and_update_service_group(service_groups, group_id):
 def list_and_filter_service_groups(service_groups):
     """
     List and filter service group objects.
-    
+
     This function demonstrates how to:
     1. List all service group objects in a folder
     2. Filter service group objects by various criteria
     3. Display detailed information about each object
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
-        
+
     Returns:
         list: All retrieved service group objects
     """
@@ -698,7 +694,7 @@ def list_and_filter_service_groups(service_groups):
     try:
         http_groups = service_groups.list(folder="Texas", values=["HTTP"])
         logger.info(f"Found {len(http_groups)} service groups containing 'HTTP'")
-        
+
         https_groups = service_groups.list(folder="Texas", values=["HTTPS"])
         logger.info(f"Found {len(https_groups)} service groups containing 'HTTPS'")
     except Exception as e:
@@ -709,7 +705,9 @@ def list_and_filter_service_groups(service_groups):
     for group in all_groups[:5]:  # Print details of up to 5 objects
         logger.info(f"  - Service Group: {group.name}")
         logger.info(f"    ID: {group.id}")
-        logger.info(f"    Description: {group.description if hasattr(group, 'description') else 'None'}")
+        logger.info(
+            f"    Description: {group.description if hasattr(group, 'description') else 'None'}"
+        )
         logger.info(f"    Tags: {group.tag}")
         logger.info(f"    Members: {', '.join(group.members)}")
         logger.info("")
@@ -720,7 +718,7 @@ def list_and_filter_service_groups(service_groups):
 def cleanup_service_group_objects(service_groups, group_ids):
     """
     Delete the service group objects created in this example.
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
         group_ids: List of service group object IDs to delete
@@ -734,7 +732,7 @@ def cleanup_service_group_objects(service_groups, group_ids):
         for group_id in group_ids:
             try:
                 group = service_groups.get(group_id)
-                
+
                 # Check if this group references other groups
                 for member in group.members:
                     # Check if this member is a reference to another group in our list
@@ -746,27 +744,33 @@ def cleanup_service_group_objects(service_groups, group_ids):
                                 if group_id not in hierarchical_relationships:
                                     hierarchical_relationships[group_id] = []
                                 hierarchical_relationships[group_id].append(other_id)
-                                logger.info(f"Found hierarchical relationship: {group.name} depends on {other_group.name}")
-                        except:
-                            pass
-            except:
-                pass
+                                logger.info(
+                                    f"Found hierarchical relationship: {group.name} depends on {other_group.name}"
+                                )
+                        except KeyError as e:
+                            logger.debug(f"Group {other_id} not found: {str(e)}")
+                        except Exception as e:
+                            logger.warning(f"Unexpected error checking group {other_id}: {str(e)}")
+            except KeyError as e:
+                logger.debug(f"Group {other_id} not found: {str(e)}")
+            except Exception as e:
+                logger.warning(f"Unexpected error checking group {other_id}: {str(e)}")
     except Exception as e:
         logger.warning(f"Error analyzing group relationships: {str(e)}")
-    
+
     # Sort group_ids so that groups referencing other groups are deleted first
     sorted_ids = []
     remaining_ids = group_ids.copy()
-    
+
     # First add all groups that reference other groups
     for group_id in hierarchical_relationships.keys():
         if group_id in remaining_ids:
             sorted_ids.append(group_id)
             remaining_ids.remove(group_id)
-    
+
     # Then add all remaining groups
     sorted_ids.extend(remaining_ids)
-    
+
     # Delete groups in the sorted order
     for group_id in sorted_ids:
         try:
@@ -777,20 +781,22 @@ def cleanup_service_group_objects(service_groups, group_ids):
         except Exception as e:
             logger.error(f"Error deleting service group: {str(e)}")
             # If deletion fails, log a warning and continue with other groups
-            logger.warning("This error may occur if other groups reference this service group. You may need to delete dependent groups manually.")
+            logger.warning(
+                "This error may occur if other groups reference this service group. You may need to delete dependent groups manually."
+            )
 
 
 def create_bulk_service_group_objects(service_groups, folder="Texas"):
     """
     Create multiple service group objects in a batch.
-    
+
     This function demonstrates creating multiple service group objects in a batch,
     which is useful for setting up multiple service groups at once.
-    
+
     Args:
         service_groups: The ServiceGroup manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created service group objects, or empty list if creation failed
     """
@@ -799,38 +805,54 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
     # First, get existing services from the environment
     log_info("Looking up existing services to use in the service groups...")
     from scm.config.objects import Service
+
     service_manager = Service(service_groups.api_client)
-    
+
     try:
         # Get services from the same folder
         existing_services = service_manager.list(folder=folder)
         log_info(f"Found {len(existing_services)} services in folder '{folder}'")
-        
+
         # Extract service names for use in our service groups
-        service_names = []
         if existing_services:
             service_names = [service.name for service in existing_services]
-            log_info(f"Found these services: {', '.join(service_names[:5])}{'...' if len(service_names) > 5 else ''}")
+            log_info(
+                f"Found these services: {', '.join(service_names[:5])}{'...' if len(service_names) > 5 else ''}"
+            )
         else:
             log_warning(f"No existing services found in folder '{folder}'")
             log_info("Will use custom service names that must exist in your environment")
             # Create a list of fallback custom service names
             service_names = [
-                "custom-http", "custom-https", "custom-http-alt", 
-                "custom-smtp", "custom-imap", "custom-pop3",
-                "custom-ssh", "custom-rdp", "custom-telnet",
-                "custom-dns", "custom-dns-tls"
+                "custom-http",
+                "custom-https",
+                "custom-http-alt",
+                "custom-smtp",
+                "custom-imap",
+                "custom-pop3",
+                "custom-ssh",
+                "custom-rdp",
+                "custom-telnet",
+                "custom-dns",
+                "custom-dns-tls",
             ]
     except Exception as e:
         log_warning(f"Error listing services: {str(e)}")
         log_info("Falling back to custom service references that must exist")
         service_names = [
-            "custom-http", "custom-https", "custom-http-alt", 
-            "custom-smtp", "custom-imap", "custom-pop3",
-            "custom-ssh", "custom-rdp", "custom-telnet",
-            "custom-dns", "custom-dns-tls"
+            "custom-http",
+            "custom-https",
+            "custom-http-alt",
+            "custom-smtp",
+            "custom-imap",
+            "custom-pop3",
+            "custom-ssh",
+            "custom-rdp",
+            "custom-telnet",
+            "custom-dns",
+            "custom-dns-tls",
         ]
-    
+
     # Get different subsets of services for different groups
     # Use the services we found for all groups to ensure they exist
     # If we only have a few services, use them repeatedly
@@ -852,19 +874,22 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
         mail_services = ["custom-smtp", "custom-imap", "custom-pop3"]
         remote_services = ["custom-ssh", "custom-rdp", "custom-telnet"]
         dns_services = ["custom-dns", "custom-dns-tls"]
-    
+
     # Look up existing tags to use
     from scm.config.objects import Tag
+
     try:
         tag_manager = Tag(service_groups.api_client)
         # Get tags from the same folder
         existing_tags = tag_manager.list(folder=folder)
         log_info(f"Found {len(existing_tags)} tags in folder '{folder}'")
-        
+
         if existing_tags and len(existing_tags) > 0:
             # Get tag names
             tag_names = [tag.name for tag in existing_tags]
-            log_info(f"Found these tags: {', '.join(tag_names[:5])}{'...' if len(tag_names) > 5 else ''}")
+            log_info(
+                f"Found these tags: {', '.join(tag_names[:5])}{'...' if len(tag_names) > 5 else ''}"
+            )
             # Use single tag for all service groups
             tag_to_use = [tag_names[0]]
             log_info(f"Using tag: {tag_to_use[0]}")
@@ -877,7 +902,7 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
         log_warning(f"Error listing tags: {str(e)}")
         log_info("Falling back to 'Automation' tag that must exist in your environment")
         tag_to_use = ["Automation"]  # This must be an existing tag in the environment
-    
+
     # Define a list of service group objects to create
     group_configs = [
         {
@@ -885,31 +910,31 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
             "description": "Web services group",
             "folder": folder,
             "tag": tag_to_use,
-            "members": web_services
+            "members": web_services,
         },
         {
             "name": f"bulk-mail-{uuid.uuid4().hex[:6]}",
             "description": "Mail services group",
             "folder": folder,
             "tag": tag_to_use,
-            "members": mail_services
+            "members": mail_services,
         },
         {
             "name": f"bulk-remote-{uuid.uuid4().hex[:6]}",
             "description": "Remote access services group",
             "folder": folder,
             "tag": tag_to_use,
-            "members": remote_services
+            "members": remote_services,
         },
         {
             "name": f"bulk-dns-{uuid.uuid4().hex[:6]}",
             "description": "DNS services group",
             "folder": folder,
             "tag": tag_to_use,
-            "members": dns_services
-        }
+            "members": dns_services,
+        },
     ]
-    
+
     log_info("Prepared bulk service group configurations:")
     for config in group_configs:
         log_info(f"  - {config['name']}: {', '.join(config['members'])}")
@@ -920,9 +945,7 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
     for group_config in group_configs:
         try:
             new_group = service_groups.create(group_config)
-            logger.info(
-                f"Created service group: {new_group.name} with ID: {new_group.id}"
-            )
+            logger.info(f"Created service group: {new_group.name} with ID: {new_group.id}")
             created_groups.append(new_group.id)
         except Exception as e:
             logger.error(f"Error creating service group {group_config['name']}: {str(e)}")
@@ -933,86 +956,94 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
 def generate_service_group_report(service_groups, group_ids, execution_time):
     """
     Generate a comprehensive CSV report of all service group objects created by the script.
-    
+
     This function fetches detailed information about each service group object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         service_groups: The ServiceGroup manager instance used to fetch object details
         group_ids: List of service group object IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"service_group_objects_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
-        "Description", 
-        "Members", 
-        "Member Count", 
+        "Description",
+        "Members",
+        "Member Count",
         "Tags",
         "Created On",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each service group object
     group_data = []
     for idx, group_id in enumerate(group_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(group_ids) - 1:
             log_info(f"Processing service group {idx + 1} of {len(group_ids)}")
-            
+
         try:
             # Get the service group details
             group = service_groups.get(group_id)
-            
+
             # Add group data
-            group_data.append([
-                group.id,
-                group.name,
-                group.description if hasattr(group, "description") and group.description else "None",
-                ", ".join(group.members) if group.members else "None",
-                len(group.members) if group.members else 0,
-                ", ".join(group.tag) if group.tag else "None",
-                group.created_on.strftime("%Y-%m-%d %H:%M:%S") if hasattr(group, "created_on") and group.created_on else "Unknown",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            group_data.append(
+                [
+                    group.id,
+                    group.name,
+                    group.description
+                    if hasattr(group, "description") and group.description
+                    else "None",
+                    ", ".join(group.members) if group.members else "None",
+                    len(group.members) if group.members else 0,
+                    ", ".join(group.tag) if group.tag else "None",
+                    group.created_on.strftime("%Y-%m-%d %H:%M:%S")
+                    if hasattr(group, "created_on") and group.created_on
+                    else "Unknown",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for service group ID {group_id}", str(e))
             # Add minimal info for groups that couldn't be retrieved
-            group_data.append([
-                group_id, 
-                "ERROR", 
-                "Failed to retrieve group details", 
-                "ERROR",
-                "ERROR", 
-                "",
-                "",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            group_data.append(
+                [
+                    group_id,
+                    "ERROR",
+                    "Failed to retrieve group details",
+                    "ERROR",
+                    "ERROR",
+                    "",
+                    "",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(group_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -1020,22 +1051,24 @@ def generate_service_group_report(service_groups, group_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"service_group_objects_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(group_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -1045,79 +1078,64 @@ def generate_service_group_report(service_groups, group_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the service group example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which service group object types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Service Group Objects Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created service group objects (don't delete them)"
+        help="Preserve created service group objects (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("Object Type Selection")
     object_group.add_argument(
-        "--basic", 
-        action="store_true",
-        help="Create basic service group examples"
+        "--basic", action="store_true", help="Create basic service group examples"
     )
     object_group.add_argument(
-        "--mixed", 
-        action="store_true", 
-        help="Create mixed service group examples"
+        "--mixed", action="store_true", help="Create mixed service group examples"
     )
     object_group.add_argument(
-        "--hierarchical", 
-        action="store_true",
-        help="Create hierarchical service group examples"
+        "--hierarchical", action="store_true", help="Create hierarchical service group examples"
     )
     object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk service group examples"
+        "--bulk", action="store_true", help="Create bulk service group examples"
     )
     object_group.add_argument(
-        "--all", 
+        "--all",
         action="store_true",
-        help="Create all service group object types (default behavior)"
+        help="Create all service group object types (default behavior)",
     )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of service group object examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -1127,7 +1145,7 @@ def main():
     6. Generate a detailed CSV report of all created service group objects
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created service group objects (don't delete them)
         --basic: Create only basic service group examples
@@ -1137,32 +1155,32 @@ def main():
         --all: Create all service group object types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
     create_all = args.all or not (args.basic or args.mixed or args.hierarchical or args.bulk)
-    
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1207,7 +1225,7 @@ def main():
                 created_groups.append(mixed_group.id)
                 object_count += 1
 
-            log_success(f"Created mixed service group objects")
+            log_success("Created mixed service group objects")
 
         # Hierarchical Service Group objects
         if (create_all or args.hierarchical) and basic_group_name:
@@ -1216,14 +1234,18 @@ def main():
             log_info(f"Using folder: {folder_name}")
 
             # Create a hierarchical service group referencing the basic group
-            hierarchical_group = create_hierarchical_service_group(service_groups, basic_group_name, folder_name)
+            hierarchical_group = create_hierarchical_service_group(
+                service_groups, basic_group_name, folder_name
+            )
             if hierarchical_group:
                 created_groups.append(hierarchical_group.id)
                 object_count += 1
 
-            log_success(f"Created hierarchical service group objects")
+            log_success("Created hierarchical service group objects")
         elif (create_all or args.hierarchical) and not basic_group_name:
-            log_warning("Skipping hierarchical group creation - no basic group was created successfully")
+            log_warning(
+                "Skipping hierarchical group creation - no basic group was created successfully"
+            )
 
         # Bulk Service Group object creation
         if create_all or args.bulk:
@@ -1242,25 +1264,29 @@ def main():
         if created_groups:
             log_section("UPDATING SERVICE GROUP OBJECTS")
             log_info("Demonstrating how to update existing service group objects")
-            updated_group = fetch_and_update_service_group(service_groups, created_groups[0])
+            fetch_and_update_service_group(service_groups, created_groups[0])
 
         # List and filter service group objects
         log_section("LISTING AND FILTERING SERVICE GROUP OBJECTS")
         log_info("Demonstrating how to search and filter service group objects")
-        all_groups = list_and_filter_service_groups(service_groups)
+        list_and_filter_service_groups(service_groups)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_groups and not args.no_report:
             log_section("REPORT GENERATION")
             log_operation_start("Generating service group objects CSV report")
-            report_file = generate_service_group_report(service_groups, created_groups, execution_time_so_far)
+            report_file = generate_service_group_report(
+                service_groups, created_groups, execution_time_so_far
+            )
             if report_file:
                 log_success(f"Generated service group objects report: {report_file}")
-                log_info(f"The report contains details of all {len(created_groups)} service group objects created")
+                log_info(
+                    f"The report contains details of all {len(created_groups)} service group objects created"
+                )
             else:
                 log_error("Failed to generate service group objects report")
         elif args.no_report:
@@ -1271,8 +1297,12 @@ def main():
         # Clean up the created objects, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_groups)} service group objects")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_groups)} service group objects"
+            )
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
             log_operation_start(f"Cleaning up {len(created_groups)} created service group objects")
             cleanup_service_group_objects(service_groups, created_groups)
@@ -1283,22 +1313,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total service group objects created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some service group objects may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

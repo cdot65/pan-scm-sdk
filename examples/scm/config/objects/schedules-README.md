@@ -77,7 +77,7 @@ Weekly schedules allow different time windows for specific days of the week.
 schedule = schedule_client.create(
     name="Weekly-WorkDays",
     description="Weekly schedule for Mon, Wed, Fri work days",
-    schedule_type="recurring", 
+    schedule_type="recurring",
     recurring_type="weekly",
     weekly_time_ranges={
         "monday": ["09:00-17:00"],
@@ -100,7 +100,7 @@ schedule = schedule_client.create(
         {
             "start_date": "2025-04-05",
             "start_time": "08:00",
-            "end_date": "2025-04-10", 
+            "end_date": "2025-04-10",
             "end_time": "17:00"
         }
     ]

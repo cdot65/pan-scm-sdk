@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with External Dynamic Lists (EDL) in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of External Dynamic List configurations and operations commonly 
+This script demonstrates a wide range of External Dynamic List configurations and operations commonly
 used in enterprise networks, including:
 
 1. External Dynamic List Types:
@@ -49,7 +49,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -87,14 +87,12 @@ from scm.models.objects.external_dynamic_lists import (
     ImsiModel,
     ImeiModel,
     PredefinedIpModel,
-    PredefinedUrlModel,
     IpType,
     DomainType,
     UrlType,
     ImsiType,
     ImeiType,
     PredefinedIpType,
-    PredefinedUrlType,
 )
 
 # Set up logging with color support and improved formatting
@@ -137,9 +135,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -150,17 +146,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -171,9 +163,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -191,15 +181,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -220,8 +210,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -264,7 +254,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -272,15 +262,15 @@ def initialize_client():
 def create_ip_edl_hourly(edl_manager, folder="Texas"):
     """
     Create an IP-based External Dynamic List with hourly updates.
-    
+
     This function demonstrates creating an EDL for IP addresses with
     hourly updates, commonly used for moderate-risk threat intelligence
     feeds that change relatively frequently.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The created EDL object, or None if creation failed
     """
@@ -299,41 +289,39 @@ def create_ip_edl_hourly(edl_manager, folder="Texas"):
     ip_list = IpModel(
         url="https://www.example.com/threat-feeds/ip-blocklist.txt",
         description="Hourly updated IP threat intelligence feed",
-        recurring=hourly_schedule
+        recurring=hourly_schedule,
     )
 
     # Create the EDL configuration
     ip_edl_config = {
         "name": edl_name,
         "folder": folder,  # Use the provided folder name
-        "type": IpType(ip=ip_list)
+        "type": IpType(ip=ip_list),
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: IP External Dynamic List")
+    log_info("  - Type: IP External Dynamic List")
     log_info(f"  - Source URL: {ip_list.url}")
-    log_info(f"  - Update Schedule: Hourly")
+    log_info("  - Update Schedule: Hourly")
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
         new_edl = edl_manager.create(ip_edl_config)
         log_success(f"Created EDL: {new_edl.name}")
         log_info(f"  - Object ID: {new_edl.id}")
-        log_info(f"  - Type: IP list")
-        log_operation_complete(
-            "IP-based EDL creation", f"EDL: {new_edl.name}"
-        )
+        log_info("  - Type: IP list")
+        log_operation_complete("IP-based EDL creation", f"EDL: {new_edl.name}")
         return new_edl
     except NameNotUniqueError as e:
-        log_error(f"EDL name conflict", e.message)
+        log_error("EDL name conflict", e.message)
         log_info("Try using a different EDL name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid EDL data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid EDL data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating EDL", str(e))
+        log_error("Unexpected error creating EDL", str(e))
 
     return None
 
@@ -341,15 +329,15 @@ def create_ip_edl_hourly(edl_manager, folder="Texas"):
 def create_domain_edl_daily(edl_manager, folder="Texas"):
     """
     Create a domain-based External Dynamic List with daily updates.
-    
+
     This function demonstrates creating an EDL for domain names with
     daily updates, commonly used for standard threat intelligence
     feeds that change on a daily basis.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The created EDL object, or None if creation failed
     """
@@ -369,18 +357,18 @@ def create_domain_edl_daily(edl_manager, folder="Texas"):
         url="https://www.example.com/threat-feeds/domain-blocklist.txt",
         description="Daily updated domain blocklist",
         recurring=daily_schedule,
-        expand_domain=True  # Automatically expand subdomains
+        expand_domain=True,  # Automatically expand subdomains
     )
 
     # Create the EDL configuration
     domain_edl_config = {
         "name": edl_name,
         "folder": folder,  # Use the provided folder name
-        "type": DomainType(domain=domain_list)
+        "type": DomainType(domain=domain_list),
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Domain External Dynamic List")
+    log_info("  - Type: Domain External Dynamic List")
     log_info(f"  - Source URL: {domain_list.url}")
     log_info(f"  - Update Schedule: Daily at {daily_schedule.daily.at}:00")
     log_info(f"  - Expand Domain: {domain_list.expand_domain}")
@@ -390,21 +378,19 @@ def create_domain_edl_daily(edl_manager, folder="Texas"):
         new_edl = edl_manager.create(domain_edl_config)
         log_success(f"Created EDL: {new_edl.name}")
         log_info(f"  - Object ID: {new_edl.id}")
-        log_info(f"  - Type: Domain list")
-        log_operation_complete(
-            "Domain-based EDL creation", f"EDL: {new_edl.name}"
-        )
+        log_info("  - Type: Domain list")
+        log_operation_complete("Domain-based EDL creation", f"EDL: {new_edl.name}")
         return new_edl
     except NameNotUniqueError as e:
-        log_error(f"EDL name conflict", e.message)
+        log_error("EDL name conflict", e.message)
         log_info("Try using a different EDL name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid EDL data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid EDL data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating EDL", str(e))
+        log_error("Unexpected error creating EDL", str(e))
 
     return None
 
@@ -412,15 +398,15 @@ def create_domain_edl_daily(edl_manager, folder="Texas"):
 def create_url_edl_five_minute(edl_manager, folder="Texas"):
     """
     Create a URL-based External Dynamic List with five-minute updates.
-    
+
     This function demonstrates creating an EDL for URLs with
     five-minute updates, commonly used for high-priority threat
     intelligence feeds that change frequently.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The created EDL object, or None if creation failed
     """
@@ -436,10 +422,7 @@ def create_url_edl_five_minute(edl_manager, folder="Texas"):
     )
 
     # Create the authentication model for protected feed
-    auth = AuthModel(
-        username="feed_reader",
-        password="example_password"
-    )
+    auth = AuthModel(username="feed_reader", password="example_password")
 
     # Create the URL list model
     url_list = UrlTypeModel(  # Changed from UrlModel to UrlTypeModel
@@ -447,42 +430,42 @@ def create_url_edl_five_minute(edl_manager, folder="Texas"):
         description="High-frequency malware URL blocklist",
         recurring=five_minute_schedule,
         certificate_profile="default",  # Required when using auth
-        auth=auth  # Use basic authentication
+        auth=auth,  # Use basic authentication
     )
 
     # Create the EDL configuration
     url_edl_config = {
         "name": edl_name,
         "folder": folder,  # Use the provided folder name
-        "type": UrlType(url=url_list)
+        "type": UrlType(url=url_list),
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: URL External Dynamic List")
+    log_info("  - Type: URL External Dynamic List")
     log_info(f"  - Source URL: {url_list.url}")
-    log_info(f"  - Update Schedule: Every five minutes")
-    log_info(f"  - Authentication: Basic (username/password) with certificate profile: {url_list.certificate_profile}")
+    log_info("  - Update Schedule: Every five minutes")
+    log_info(
+        f"  - Authentication: Basic (username/password) with certificate profile: {url_list.certificate_profile}"
+    )
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
         new_edl = edl_manager.create(url_edl_config)
         log_success(f"Created EDL: {new_edl.name}")
         log_info(f"  - Object ID: {new_edl.id}")
-        log_info(f"  - Type: URL list")
-        log_operation_complete(
-            "URL-based EDL creation", f"EDL: {new_edl.name}"
-        )
+        log_info("  - Type: URL list")
+        log_operation_complete("URL-based EDL creation", f"EDL: {new_edl.name}")
         return new_edl
     except NameNotUniqueError as e:
-        log_error(f"EDL name conflict", e.message)
+        log_error("EDL name conflict", e.message)
         log_info("Try using a different EDL name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid EDL data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid EDL data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating EDL", str(e))
+        log_error("Unexpected error creating EDL", str(e))
 
     return None
 
@@ -490,15 +473,15 @@ def create_url_edl_five_minute(edl_manager, folder="Texas"):
 def create_predefined_ip_edl(edl_manager, folder="Texas"):
     """
     Create a predefined IP External Dynamic List.
-    
+
     This function demonstrates creating an EDL using Palo Alto Networks
     predefined IP lists, which are maintained by Palo Alto Networks
     and updated automatically.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The created EDL object, or None if creation failed
     """
@@ -511,18 +494,18 @@ def create_predefined_ip_edl(edl_manager, folder="Texas"):
     # Create the predefined IP list model
     predefined_ip_list = PredefinedIpModel(
         url="panw-bulletproof-ip-list",  # The predefined list name must be provided as url
-        description="Palo Alto Networks maintained bulletproof IP blocklist"
+        description="Palo Alto Networks maintained bulletproof IP blocklist",
     )
 
     # Create the EDL configuration
     predefined_ip_edl_config = {
         "name": edl_name,
         "folder": folder,  # Use the provided folder name
-        "type": PredefinedIpType(predefined_ip=predefined_ip_list)
+        "type": PredefinedIpType(predefined_ip=predefined_ip_list),
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: Predefined IP External Dynamic List")
+    log_info("  - Type: Predefined IP External Dynamic List")
     log_info(f"  - Predefined List: {predefined_ip_list.url}")
 
     try:
@@ -530,21 +513,19 @@ def create_predefined_ip_edl(edl_manager, folder="Texas"):
         new_edl = edl_manager.create(predefined_ip_edl_config)
         log_success(f"Created EDL: {new_edl.name}")
         log_info(f"  - Object ID: {new_edl.id}")
-        log_info(f"  - Type: Predefined IP list")
-        log_operation_complete(
-            "Predefined IP EDL creation", f"EDL: {new_edl.name}"
-        )
+        log_info("  - Type: Predefined IP list")
+        log_operation_complete("Predefined IP EDL creation", f"EDL: {new_edl.name}")
         return new_edl
     except NameNotUniqueError as e:
-        log_error(f"EDL name conflict", e.message)
+        log_error("EDL name conflict", e.message)
         log_info("Try using a different EDL name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid EDL data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid EDL data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating EDL", str(e))
+        log_error("Unexpected error creating EDL", str(e))
 
     return None
 
@@ -552,15 +533,15 @@ def create_predefined_ip_edl(edl_manager, folder="Texas"):
 def create_imsi_edl_weekly(edl_manager, folder="Texas"):
     """
     Create an IMSI-based External Dynamic List with weekly updates.
-    
+
     This function demonstrates creating an EDL for IMSI (International Mobile
     Subscriber Identity) numbers with weekly updates, commonly used for
     mobile network security applications.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The created EDL object, or None if creation failed
     """
@@ -574,7 +555,7 @@ def create_imsi_edl_weekly(edl_manager, folder="Texas"):
     weekly_schedule = WeeklyRecurringModel(
         weekly={
             "day_of_week": "monday",
-            "at": "02"  # Update at 2:00 AM each Monday, format is hour only (00-23)
+            "at": "02",  # Update at 2:00 AM each Monday, format is hour only (00-23)
         }
     )
 
@@ -582,41 +563,41 @@ def create_imsi_edl_weekly(edl_manager, folder="Texas"):
     imsi_list = ImsiModel(
         url="https://www.example.com/mobile/blocked-imsi.txt",
         description="Weekly updated IMSI blocklist",
-        recurring=weekly_schedule
+        recurring=weekly_schedule,
     )
 
     # Create the EDL configuration
     imsi_edl_config = {
         "name": edl_name,
         "folder": folder,  # Use the provided folder name
-        "type": ImsiType(imsi=imsi_list)
+        "type": ImsiType(imsi=imsi_list),
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: IMSI External Dynamic List")
+    log_info("  - Type: IMSI External Dynamic List")
     log_info(f"  - Source URL: {imsi_list.url}")
-    log_info(f"  - Update Schedule: Weekly on {weekly_schedule.weekly.day_of_week} at {weekly_schedule.weekly.at}:00")
+    log_info(
+        f"  - Update Schedule: Weekly on {weekly_schedule.weekly.day_of_week} at {weekly_schedule.weekly.at}:00"
+    )
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
         new_edl = edl_manager.create(imsi_edl_config)
         log_success(f"Created EDL: {new_edl.name}")
         log_info(f"  - Object ID: {new_edl.id}")
-        log_info(f"  - Type: IMSI list")
-        log_operation_complete(
-            "IMSI-based EDL creation", f"EDL: {new_edl.name}"
-        )
+        log_info("  - Type: IMSI list")
+        log_operation_complete("IMSI-based EDL creation", f"EDL: {new_edl.name}")
         return new_edl
     except NameNotUniqueError as e:
-        log_error(f"EDL name conflict", e.message)
+        log_error("EDL name conflict", e.message)
         log_info("Try using a different EDL name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid EDL data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid EDL data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating EDL", str(e))
+        log_error("Unexpected error creating EDL", str(e))
 
     return None
 
@@ -624,15 +605,15 @@ def create_imsi_edl_weekly(edl_manager, folder="Texas"):
 def create_imei_edl_monthly(edl_manager, folder="Texas"):
     """
     Create an IMEI-based External Dynamic List with monthly updates.
-    
+
     This function demonstrates creating an EDL for IMEI (International Mobile
-    Equipment Identity) numbers with monthly updates, commonly used for 
+    Equipment Identity) numbers with monthly updates, commonly used for
     tracking stolen or compromised mobile devices.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The created EDL object, or None if creation failed
     """
@@ -646,7 +627,7 @@ def create_imei_edl_monthly(edl_manager, folder="Texas"):
     monthly_schedule = MonthlyRecurringModel(
         monthly={
             "day_of_month": 1,
-            "at": "03"  # Update at 3:00 AM on the 1st of each month, format is hour only (00-23)
+            "at": "03",  # Update at 3:00 AM on the 1st of each month, format is hour only (00-23)
         }
     )
 
@@ -654,41 +635,41 @@ def create_imei_edl_monthly(edl_manager, folder="Texas"):
     imei_list = ImeiModel(
         url="https://www.example.com/mobile/stolen-imei.txt",
         description="Monthly updated stolen device IMEI blocklist",
-        recurring=monthly_schedule
+        recurring=monthly_schedule,
     )
 
     # Create the EDL configuration
     imei_edl_config = {
         "name": edl_name,
         "folder": folder,  # Use the provided folder name
-        "type": ImeiType(imei=imei_list)
+        "type": ImeiType(imei=imei_list),
     }
 
     log_info("Configuration details:")
-    log_info(f"  - Type: IMEI External Dynamic List")
+    log_info("  - Type: IMEI External Dynamic List")
     log_info(f"  - Source URL: {imei_list.url}")
-    log_info(f"  - Update Schedule: Monthly on day {monthly_schedule.monthly.day_of_month} at {monthly_schedule.monthly.at}:00")
+    log_info(
+        f"  - Update Schedule: Monthly on day {monthly_schedule.monthly.day_of_month} at {monthly_schedule.monthly.at}:00"
+    )
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
         new_edl = edl_manager.create(imei_edl_config)
         log_success(f"Created EDL: {new_edl.name}")
         log_info(f"  - Object ID: {new_edl.id}")
-        log_info(f"  - Type: IMEI list")
-        log_operation_complete(
-            "IMEI-based EDL creation", f"EDL: {new_edl.name}"
-        )
+        log_info("  - Type: IMEI list")
+        log_operation_complete("IMEI-based EDL creation", f"EDL: {new_edl.name}")
         return new_edl
     except NameNotUniqueError as e:
-        log_error(f"EDL name conflict", e.message)
+        log_error("EDL name conflict", e.message)
         log_info("Try using a different EDL name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid EDL data", e.message)
-        if hasattr(e, 'details') and e.details:
+        log_error("Invalid EDL data", e.message)
+        if hasattr(e, "details") and e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating EDL", str(e))
+        log_error("Unexpected error creating EDL", str(e))
 
     return None
 
@@ -696,16 +677,16 @@ def create_imei_edl_monthly(edl_manager, folder="Texas"):
 def fetch_and_update_edl(edl_manager, edl_id):
     """
     Fetch an External Dynamic List by ID and update its configuration.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing EDL using its ID
     2. Modify the EDL configuration (description, update frequency, etc.)
     3. Submit the updated EDL back to the SCM API
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         edl_id: The UUID of the EDL to update
-        
+
     Returns:
         ExternalDynamicListsResponseModel: The updated EDL object, or None if update failed
     """
@@ -721,36 +702,36 @@ def fetch_and_update_edl(edl_manager, edl_id):
             logger.info("Updating IP-type EDL...")
             # Update the description
             edl.type.ip.description = f"Updated: {edl.type.ip.description}"
-            
+
             # Change to daily updates at 02:00
             edl.type.ip.recurring = DailyRecurringModel(
                 daily={"at": "02"}  # Format is hour only (00-23)
             )
-            
+
             update_details = "Changed to daily updates at 02:00"
-            
+
         elif hasattr(edl.type, "domain"):
             logger.info("Updating Domain-type EDL...")
             # Update the description
             edl.type.domain.description = f"Updated: {edl.type.domain.description}"
-            
+
             # Toggle the expand_domain setting
             edl.type.domain.expand_domain = not edl.type.domain.expand_domain
-            
+
             update_details = f"Toggled expand_domain to {edl.type.domain.expand_domain}"
-            
+
         elif hasattr(edl.type, "url"):
             logger.info("Updating URL-type EDL...")
             # Update the description
             edl.type.url.description = f"Updated: {edl.type.url.description}"
-            
+
             # Change to hourly updates
             edl.type.url.recurring = HourlyRecurringModel(
                 hourly={}  # The model doesn't support specific minute settings
             )
-            
+
             update_details = "Changed to hourly updates"
-            
+
         else:
             logger.info("This EDL type doesn't require updating in this example")
             update_details = "No updates made for this EDL type"
@@ -765,7 +746,7 @@ def fetch_and_update_edl(edl_manager, edl_id):
         logger.error(f"EDL not found: {e.message}")
     except InvalidObjectError as e:
         logger.error(f"Invalid EDL update: {e.message}")
-        if hasattr(e, 'details') and e.details:
+        if hasattr(e, "details") and e.details:
             logger.error(f"Details: {e.details}")
 
     return None
@@ -774,15 +755,15 @@ def fetch_and_update_edl(edl_manager, edl_id):
 def list_and_filter_edls(edl_manager):
     """
     List and filter External Dynamic List objects.
-    
+
     This function demonstrates how to:
     1. List all EDLs in a folder
     2. Filter EDLs by name pattern
     3. Display detailed information about each EDL
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
-        
+
     Returns:
         list: All retrieved EDL objects
     """
@@ -804,18 +785,21 @@ def list_and_filter_edls(edl_manager):
     for edl in all_edls[:5]:  # Print details of up to 5 objects
         logger.info(f"  - EDL: {edl.name}")
         logger.info(f"    ID: {edl.id}")
-        
+
         # Determine EDL type and details
         edl_type = "Unknown"
         edl_url = "N/A"
         edl_schedule = "N/A"
-        
+
         if hasattr(edl.type, "ip"):
             edl_type = "IP List"
             edl_url = edl.type.ip.url if hasattr(edl.type.ip, "url") else "N/A"
             # Determine update schedule type
             if hasattr(edl.type.ip, "recurring"):
-                if hasattr(edl.type.ip.recurring, "five_minute") and edl.type.ip.recurring.five_minute:
+                if (
+                    hasattr(edl.type.ip.recurring, "five_minute")
+                    and edl.type.ip.recurring.five_minute
+                ):
                     edl_schedule = "Every 5 minutes"
                 elif hasattr(edl.type.ip.recurring, "hourly") and edl.type.ip.recurring.hourly:
                     edl_schedule = f"Hourly at minute {edl.type.ip.recurring.at}"
@@ -825,7 +809,7 @@ def list_and_filter_edls(edl_manager):
                     edl_schedule = f"Weekly on {edl.type.ip.recurring.day_of_week} at {edl.type.ip.recurring.at}"
                 elif hasattr(edl.type.ip.recurring, "monthly") and edl.type.ip.recurring.monthly:
                     edl_schedule = f"Monthly on day {edl.type.ip.recurring.day_of_month} at {edl.type.ip.recurring.at}"
-        
+
         elif hasattr(edl.type, "domain"):
             edl_type = "Domain List"
             edl_url = edl.type.domain.url if hasattr(edl.type.domain, "url") else "N/A"
@@ -834,44 +818,58 @@ def list_and_filter_edls(edl_manager):
                 if hasattr(edl.type.domain.recurring, "daily") and edl.type.domain.recurring.daily:
                     edl_schedule = f"Daily at {edl.type.domain.recurring.at}"
             # Retrieve expand_domain setting
-            expand_domain = edl.type.domain.expand_domain if hasattr(edl.type.domain, "expand_domain") else False
+            expand_domain = (
+                edl.type.domain.expand_domain
+                if hasattr(edl.type.domain, "expand_domain")
+                else False
+            )
             logger.info(f"    Expand Domain: {expand_domain}")
-            
+
         elif hasattr(edl.type, "url"):
             edl_type = "URL List"
             edl_url = edl.type.url.url if hasattr(edl.type.url, "url") else "N/A"
             # Extract schedule similar to above
-            if hasattr(edl.type.url, "recurring") and hasattr(edl.type.url.recurring, "five_minute"):
+            if hasattr(edl.type.url, "recurring") and hasattr(
+                edl.type.url.recurring, "five_minute"
+            ):
                 edl_schedule = "Every 5 minutes"
-                
+
         elif hasattr(edl.type, "predefined_ip"):
             edl_type = "Predefined IP List"
-            predefined_name = edl.type.predefined_ip.name if hasattr(edl.type.predefined_ip, "name") else "Unknown"
+            predefined_name = (
+                edl.type.predefined_ip.name
+                if hasattr(edl.type.predefined_ip, "name")
+                else "Unknown"
+            )
             logger.info(f"    Predefined List: {predefined_name}")
-            
+
         elif hasattr(edl.type, "predefined_url"):
             edl_type = "Predefined URL List"
-            predefined_name = edl.type.predefined_url.name if hasattr(edl.type.predefined_url, "name") else "Unknown"
+            predefined_name = (
+                edl.type.predefined_url.name
+                if hasattr(edl.type.predefined_url, "name")
+                else "Unknown"
+            )
             logger.info(f"    Predefined List: {predefined_name}")
-            
+
         elif hasattr(edl.type, "imsi"):
             edl_type = "IMSI List"
             edl_url = edl.type.imsi.url if hasattr(edl.type.imsi, "url") else "N/A"
             # Extract schedule similar to above
             if hasattr(edl.type.imsi, "recurring") and hasattr(edl.type.imsi.recurring, "weekly"):
                 edl_schedule = f"Weekly on {edl.type.imsi.recurring.day_of_week} at {edl.type.imsi.recurring.at}"
-                
+
         elif hasattr(edl.type, "imei"):
             edl_type = "IMEI List"
             edl_url = edl.type.imei.url if hasattr(edl.type.imei, "url") else "N/A"
             # Extract schedule similar to above
             if hasattr(edl.type.imei, "recurring") and hasattr(edl.type.imei.recurring, "monthly"):
                 edl_schedule = f"Monthly on day {edl.type.imei.recurring.day_of_month} at {edl.type.imei.recurring.at}"
-            
+
         logger.info(f"    Type: {edl_type}")
         logger.info(f"    URL: {edl_url}")
         logger.info(f"    Update Schedule: {edl_schedule}")
-        
+
         # Print folder/container info if available
         if hasattr(edl, "folder") and edl.folder:
             logger.info(f"    Folder: {edl.folder}")
@@ -879,7 +877,7 @@ def list_and_filter_edls(edl_manager):
             logger.info(f"    Snippet: {edl.snippet}")
         elif hasattr(edl, "device") and edl.device:
             logger.info(f"    Device: {edl.device}")
-            
+
         logger.info("")
 
     return all_edls
@@ -888,7 +886,7 @@ def list_and_filter_edls(edl_manager):
 def cleanup_edl_objects(edl_manager, edl_ids):
     """
     Delete the External Dynamic List objects created in this example.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         edl_ids: List of EDL object IDs to delete
@@ -908,14 +906,14 @@ def cleanup_edl_objects(edl_manager, edl_ids):
 def create_bulk_edl_objects(edl_manager, folder="Texas"):
     """
     Create multiple External Dynamic List objects in a batch.
-    
+
     This function demonstrates creating multiple EDL objects in a batch,
     which is useful for setting up multiple threat intelligence feeds at once.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created EDL objects, or empty list if creation failed
     """
@@ -935,9 +933,9 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
                 ip=IpModel(
                     url="https://www.example.com/bulk/ip-feed1.txt",
                     description="Bulk created IP blocklist 1",
-                    recurring=daily_schedule
+                    recurring=daily_schedule,
                 )
-            )
+            ),
         },
         {
             "name": f"bulk-ip-feed-{uuid.uuid4().hex[:6]}",
@@ -946,9 +944,9 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
                 ip=IpModel(
                     url="https://www.example.com/bulk/ip-feed2.txt",
                     description="Bulk created IP blocklist 2",
-                    recurring=daily_schedule
+                    recurring=daily_schedule,
                 )
-            )
+            ),
         },
         {
             "name": f"bulk-domain-feed-{uuid.uuid4().hex[:6]}",
@@ -958,9 +956,9 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
                     url="https://www.example.com/bulk/domain-feed.txt",
                     description="Bulk created domain blocklist",
                     recurring=daily_schedule,
-                    expand_domain=True
+                    expand_domain=True,
                 )
-            )
+            ),
         },
         {
             "name": f"bulk-url-feed-{uuid.uuid4().hex[:6]}",
@@ -972,8 +970,8 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
                     recurring=daily_schedule,
                     # No auth used here so certificate_profile is not required
                 )
-            )
-        }
+            ),
+        },
     ]
 
     created_edls = []
@@ -982,9 +980,7 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
     for edl_config in edl_configs:
         try:
             new_edl = edl_manager.create(edl_config)
-            logger.info(
-                f"Created EDL: {new_edl.name} with ID: {new_edl.id}"
-            )
+            logger.info(f"Created EDL: {new_edl.name} with ID: {new_edl.id}")
             created_edls.append(new_edl.id)
         except Exception as e:
             logger.error(f"Error creating EDL {edl_config['name']}: {str(e)}")
@@ -995,199 +991,365 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
 def generate_edl_report(edl_manager, edl_ids, execution_time):
     """
     Generate a comprehensive CSV report of all External Dynamic List objects created by the script.
-    
+
     This function fetches detailed information about each EDL object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         edl_manager: The ExternalDynamicLists manager instance used to fetch object details
         edl_ids: List of EDL object IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"external_dynamic_lists_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
         "Type",
         "Source URL",
-        "Update Schedule", 
+        "Update Schedule",
         "Container Type",
         "Container Name",
         "Additional Features",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each EDL object
     edl_data = []
     for idx, edl_id in enumerate(edl_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(edl_ids) - 1:
             log_info(f"Processing External Dynamic List {idx + 1} of {len(edl_ids)}")
-            
+
         try:
             # Get the EDL details
             edl = edl_manager.get(edl_id)
-            
+
             # Determine EDL type, URL, and schedule
             edl_type = "Unknown"
             edl_url = "N/A"
             edl_schedule = "N/A"
             additional_features = "None"
-            
+
             if hasattr(edl.type, "ip"):
                 edl_type = "IP List"
                 edl_url = edl.type.ip.url if hasattr(edl.type.ip, "url") else "N/A"
                 # Extract schedule
                 if hasattr(edl.type.ip, "recurring"):
-                    if hasattr(edl.type.ip.recurring, "five_minute") and edl.type.ip.recurring.five_minute:
+                    if (
+                        hasattr(edl.type.ip.recurring, "five_minute")
+                        and edl.type.ip.recurring.five_minute
+                    ):
                         edl_schedule = "Every 5 minutes"
                     elif hasattr(edl.type.ip.recurring, "hourly") and edl.type.ip.recurring.hourly:
                         edl_schedule = "Hourly"
                     elif hasattr(edl.type.ip.recurring, "daily") and edl.type.ip.recurring.daily:
                         # Direct attribute access for models rather than dict access
-                        at_time = edl.type.ip.recurring.daily.at if hasattr(edl.type.ip.recurring.daily, "at") else "00"
+                        at_time = (
+                            edl.type.ip.recurring.daily.at
+                            if hasattr(edl.type.ip.recurring.daily, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Daily at {at_time}:00"
                     elif hasattr(edl.type.ip.recurring, "weekly") and edl.type.ip.recurring.weekly:
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.ip.recurring.weekly.day_of_week if hasattr(edl.type.ip.recurring.weekly, "day_of_week") else "monday"
-                        at_time = edl.type.ip.recurring.weekly.at if hasattr(edl.type.ip.recurring.weekly, "at") else "00"
+                        day = (
+                            edl.type.ip.recurring.weekly.day_of_week
+                            if hasattr(edl.type.ip.recurring.weekly, "day_of_week")
+                            else "monday"
+                        )
+                        at_time = (
+                            edl.type.ip.recurring.weekly.at
+                            if hasattr(edl.type.ip.recurring.weekly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Weekly on {day} at {at_time}:00"
-                    elif hasattr(edl.type.ip.recurring, "monthly") and edl.type.ip.recurring.monthly:
+                    elif (
+                        hasattr(edl.type.ip.recurring, "monthly") and edl.type.ip.recurring.monthly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.ip.recurring.monthly.day_of_month if hasattr(edl.type.ip.recurring.monthly, "day_of_month") else 1
-                        at_time = edl.type.ip.recurring.monthly.at if hasattr(edl.type.ip.recurring.monthly, "at") else "00"
+                        day = (
+                            edl.type.ip.recurring.monthly.day_of_month
+                            if hasattr(edl.type.ip.recurring.monthly, "day_of_month")
+                            else 1
+                        )
+                        at_time = (
+                            edl.type.ip.recurring.monthly.at
+                            if hasattr(edl.type.ip.recurring.monthly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Monthly on day {day} at {at_time}:00"
-            
+
             elif hasattr(edl.type, "domain"):
                 edl_type = "Domain List"
                 edl_url = edl.type.domain.url if hasattr(edl.type.domain, "url") else "N/A"
                 # Extract schedule
                 if hasattr(edl.type.domain, "recurring"):
-                    if hasattr(edl.type.domain.recurring, "five_minute") and edl.type.domain.recurring.five_minute:
+                    if (
+                        hasattr(edl.type.domain.recurring, "five_minute")
+                        and edl.type.domain.recurring.five_minute
+                    ):
                         edl_schedule = "Every 5 minutes"
-                    elif hasattr(edl.type.domain.recurring, "hourly") and edl.type.domain.recurring.hourly:
+                    elif (
+                        hasattr(edl.type.domain.recurring, "hourly")
+                        and edl.type.domain.recurring.hourly
+                    ):
                         edl_schedule = "Hourly"
-                    elif hasattr(edl.type.domain.recurring, "daily") and edl.type.domain.recurring.daily:
+                    elif (
+                        hasattr(edl.type.domain.recurring, "daily")
+                        and edl.type.domain.recurring.daily
+                    ):
                         # Direct attribute access for models rather than dict access
-                        at_time = edl.type.domain.recurring.daily.at if hasattr(edl.type.domain.recurring.daily, "at") else "00"
+                        at_time = (
+                            edl.type.domain.recurring.daily.at
+                            if hasattr(edl.type.domain.recurring.daily, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Daily at {at_time}:00"
-                    elif hasattr(edl.type.domain.recurring, "weekly") and edl.type.domain.recurring.weekly:
+                    elif (
+                        hasattr(edl.type.domain.recurring, "weekly")
+                        and edl.type.domain.recurring.weekly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.domain.recurring.weekly.day_of_week if hasattr(edl.type.domain.recurring.weekly, "day_of_week") else "monday"
-                        at_time = edl.type.domain.recurring.weekly.at if hasattr(edl.type.domain.recurring.weekly, "at") else "00"
+                        day = (
+                            edl.type.domain.recurring.weekly.day_of_week
+                            if hasattr(edl.type.domain.recurring.weekly, "day_of_week")
+                            else "monday"
+                        )
+                        at_time = (
+                            edl.type.domain.recurring.weekly.at
+                            if hasattr(edl.type.domain.recurring.weekly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Weekly on {day} at {at_time}:00"
-                    elif hasattr(edl.type.domain.recurring, "monthly") and edl.type.domain.recurring.monthly:
+                    elif (
+                        hasattr(edl.type.domain.recurring, "monthly")
+                        and edl.type.domain.recurring.monthly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.domain.recurring.monthly.day_of_month if hasattr(edl.type.domain.recurring.monthly, "day_of_month") else 1
-                        at_time = edl.type.domain.recurring.monthly.at if hasattr(edl.type.domain.recurring.monthly, "at") else "00"
+                        day = (
+                            edl.type.domain.recurring.monthly.day_of_month
+                            if hasattr(edl.type.domain.recurring.monthly, "day_of_month")
+                            else 1
+                        )
+                        at_time = (
+                            edl.type.domain.recurring.monthly.at
+                            if hasattr(edl.type.domain.recurring.monthly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Monthly on day {day} at {at_time}:00"
                 # Check for expand_domain
                 if hasattr(edl.type.domain, "expand_domain") and edl.type.domain.expand_domain:
                     additional_features = "Expand Domain"
-                
+
             elif hasattr(edl.type, "url"):
                 edl_type = "URL List"
                 edl_url = edl.type.url.url if hasattr(edl.type.url, "url") else "N/A"
                 # Extract schedule
                 if hasattr(edl.type.url, "recurring"):
-                    if hasattr(edl.type.url.recurring, "five_minute") and edl.type.url.recurring.five_minute:
+                    if (
+                        hasattr(edl.type.url.recurring, "five_minute")
+                        and edl.type.url.recurring.five_minute
+                    ):
                         edl_schedule = "Every 5 minutes"
-                    elif hasattr(edl.type.url.recurring, "hourly") and edl.type.url.recurring.hourly:
+                    elif (
+                        hasattr(edl.type.url.recurring, "hourly") and edl.type.url.recurring.hourly
+                    ):
                         edl_schedule = "Hourly"
                     elif hasattr(edl.type.url.recurring, "daily") and edl.type.url.recurring.daily:
                         # Direct attribute access for models rather than dict access
-                        at_time = edl.type.url.recurring.daily.at if hasattr(edl.type.url.recurring.daily, "at") else "00"
+                        at_time = (
+                            edl.type.url.recurring.daily.at
+                            if hasattr(edl.type.url.recurring.daily, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Daily at {at_time}:00"
-                    elif hasattr(edl.type.url.recurring, "weekly") and edl.type.url.recurring.weekly:
+                    elif (
+                        hasattr(edl.type.url.recurring, "weekly") and edl.type.url.recurring.weekly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.url.recurring.weekly.day_of_week if hasattr(edl.type.url.recurring.weekly, "day_of_week") else "monday"
-                        at_time = edl.type.url.recurring.weekly.at if hasattr(edl.type.url.recurring.weekly, "at") else "00"
+                        day = (
+                            edl.type.url.recurring.weekly.day_of_week
+                            if hasattr(edl.type.url.recurring.weekly, "day_of_week")
+                            else "monday"
+                        )
+                        at_time = (
+                            edl.type.url.recurring.weekly.at
+                            if hasattr(edl.type.url.recurring.weekly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Weekly on {day} at {at_time}:00"
-                    elif hasattr(edl.type.url.recurring, "monthly") and edl.type.url.recurring.monthly:
+                    elif (
+                        hasattr(edl.type.url.recurring, "monthly")
+                        and edl.type.url.recurring.monthly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.url.recurring.monthly.day_of_month if hasattr(edl.type.url.recurring.monthly, "day_of_month") else 1
-                        at_time = edl.type.url.recurring.monthly.at if hasattr(edl.type.url.recurring.monthly, "at") else "00"
+                        day = (
+                            edl.type.url.recurring.monthly.day_of_month
+                            if hasattr(edl.type.url.recurring.monthly, "day_of_month")
+                            else 1
+                        )
+                        at_time = (
+                            edl.type.url.recurring.monthly.at
+                            if hasattr(edl.type.url.recurring.monthly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Monthly on day {day} at {at_time}:00"
                 # Check for authentication
                 if hasattr(edl.type.url, "auth") and edl.type.url.auth:
                     additional_features = "Basic Authentication"
-                    
+
             elif hasattr(edl.type, "predefined_ip"):
                 edl_type = "Predefined IP List"
                 edl_url = "Palo Alto Networks maintained"
-                predefined_name = edl.type.predefined_ip.url if hasattr(edl.type.predefined_ip, "url") else "Unknown"
+                predefined_name = (
+                    edl.type.predefined_ip.url
+                    if hasattr(edl.type.predefined_ip, "url")
+                    else "Unknown"
+                )
                 additional_features = f"Predefined: {predefined_name}"
-                
+
             elif hasattr(edl.type, "predefined_url"):
                 edl_type = "Predefined URL List"
                 edl_url = "Palo Alto Networks maintained"
-                predefined_name = edl.type.predefined_url.url if hasattr(edl.type.predefined_url, "url") else "Unknown"
+                predefined_name = (
+                    edl.type.predefined_url.url
+                    if hasattr(edl.type.predefined_url, "url")
+                    else "Unknown"
+                )
                 additional_features = f"Predefined: {predefined_name}"
-                
+
             elif hasattr(edl.type, "imsi"):
                 edl_type = "IMSI List"
                 edl_url = edl.type.imsi.url if hasattr(edl.type.imsi, "url") else "N/A"
                 # Extract schedule
                 if hasattr(edl.type.imsi, "recurring"):
-                    if hasattr(edl.type.imsi.recurring, "five_minute") and edl.type.imsi.recurring.five_minute:
+                    if (
+                        hasattr(edl.type.imsi.recurring, "five_minute")
+                        and edl.type.imsi.recurring.five_minute
+                    ):
                         edl_schedule = "Every 5 minutes"
-                    elif hasattr(edl.type.imsi.recurring, "hourly") and edl.type.imsi.recurring.hourly:
+                    elif (
+                        hasattr(edl.type.imsi.recurring, "hourly")
+                        and edl.type.imsi.recurring.hourly
+                    ):
                         edl_schedule = "Hourly"
-                    elif hasattr(edl.type.imsi.recurring, "daily") and edl.type.imsi.recurring.daily:
+                    elif (
+                        hasattr(edl.type.imsi.recurring, "daily") and edl.type.imsi.recurring.daily
+                    ):
                         # Direct attribute access for models rather than dict access
-                        at_time = edl.type.imsi.recurring.daily.at if hasattr(edl.type.imsi.recurring.daily, "at") else "00"
+                        at_time = (
+                            edl.type.imsi.recurring.daily.at
+                            if hasattr(edl.type.imsi.recurring.daily, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Daily at {at_time}:00"
-                    elif hasattr(edl.type.imsi.recurring, "weekly") and edl.type.imsi.recurring.weekly:
+                    elif (
+                        hasattr(edl.type.imsi.recurring, "weekly")
+                        and edl.type.imsi.recurring.weekly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.imsi.recurring.weekly.day_of_week if hasattr(edl.type.imsi.recurring.weekly, "day_of_week") else "monday"
-                        at_time = edl.type.imsi.recurring.weekly.at if hasattr(edl.type.imsi.recurring.weekly, "at") else "00"
+                        day = (
+                            edl.type.imsi.recurring.weekly.day_of_week
+                            if hasattr(edl.type.imsi.recurring.weekly, "day_of_week")
+                            else "monday"
+                        )
+                        at_time = (
+                            edl.type.imsi.recurring.weekly.at
+                            if hasattr(edl.type.imsi.recurring.weekly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Weekly on {day} at {at_time}:00"
-                    elif hasattr(edl.type.imsi.recurring, "monthly") and edl.type.imsi.recurring.monthly:
+                    elif (
+                        hasattr(edl.type.imsi.recurring, "monthly")
+                        and edl.type.imsi.recurring.monthly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.imsi.recurring.monthly.day_of_month if hasattr(edl.type.imsi.recurring.monthly, "day_of_month") else 1
-                        at_time = edl.type.imsi.recurring.monthly.at if hasattr(edl.type.imsi.recurring.monthly, "at") else "00"
+                        day = (
+                            edl.type.imsi.recurring.monthly.day_of_month
+                            if hasattr(edl.type.imsi.recurring.monthly, "day_of_month")
+                            else 1
+                        )
+                        at_time = (
+                            edl.type.imsi.recurring.monthly.at
+                            if hasattr(edl.type.imsi.recurring.monthly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Monthly on day {day} at {at_time}:00"
-                    
+
             elif hasattr(edl.type, "imei"):
                 edl_type = "IMEI List"
                 edl_url = edl.type.imei.url if hasattr(edl.type.imei, "url") else "N/A"
                 # Extract schedule
                 if hasattr(edl.type.imei, "recurring"):
-                    if hasattr(edl.type.imei.recurring, "five_minute") and edl.type.imei.recurring.five_minute:
+                    if (
+                        hasattr(edl.type.imei.recurring, "five_minute")
+                        and edl.type.imei.recurring.five_minute
+                    ):
                         edl_schedule = "Every 5 minutes"
-                    elif hasattr(edl.type.imei.recurring, "hourly") and edl.type.imei.recurring.hourly:
+                    elif (
+                        hasattr(edl.type.imei.recurring, "hourly")
+                        and edl.type.imei.recurring.hourly
+                    ):
                         edl_schedule = "Hourly"
-                    elif hasattr(edl.type.imei.recurring, "daily") and edl.type.imei.recurring.daily:
+                    elif (
+                        hasattr(edl.type.imei.recurring, "daily") and edl.type.imei.recurring.daily
+                    ):
                         # Direct attribute access for models rather than dict access
-                        at_time = edl.type.imei.recurring.daily.at if hasattr(edl.type.imei.recurring.daily, "at") else "00"
+                        at_time = (
+                            edl.type.imei.recurring.daily.at
+                            if hasattr(edl.type.imei.recurring.daily, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Daily at {at_time}:00"
-                    elif hasattr(edl.type.imei.recurring, "weekly") and edl.type.imei.recurring.weekly:
+                    elif (
+                        hasattr(edl.type.imei.recurring, "weekly")
+                        and edl.type.imei.recurring.weekly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.imei.recurring.weekly.day_of_week if hasattr(edl.type.imei.recurring.weekly, "day_of_week") else "monday"
-                        at_time = edl.type.imei.recurring.weekly.at if hasattr(edl.type.imei.recurring.weekly, "at") else "00"
+                        day = (
+                            edl.type.imei.recurring.weekly.day_of_week
+                            if hasattr(edl.type.imei.recurring.weekly, "day_of_week")
+                            else "monday"
+                        )
+                        at_time = (
+                            edl.type.imei.recurring.weekly.at
+                            if hasattr(edl.type.imei.recurring.weekly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Weekly on {day} at {at_time}:00"
-                    elif hasattr(edl.type.imei.recurring, "monthly") and edl.type.imei.recurring.monthly:
+                    elif (
+                        hasattr(edl.type.imei.recurring, "monthly")
+                        and edl.type.imei.recurring.monthly
+                    ):
                         # Direct attribute access for models rather than dict access
-                        day = edl.type.imei.recurring.monthly.day_of_month if hasattr(edl.type.imei.recurring.monthly, "day_of_month") else 1
-                        at_time = edl.type.imei.recurring.monthly.at if hasattr(edl.type.imei.recurring.monthly, "at") else "00"
+                        day = (
+                            edl.type.imei.recurring.monthly.day_of_month
+                            if hasattr(edl.type.imei.recurring.monthly, "day_of_month")
+                            else 1
+                        )
+                        at_time = (
+                            edl.type.imei.recurring.monthly.at
+                            if hasattr(edl.type.imei.recurring.monthly, "at")
+                            else "00"
+                        )
                         edl_schedule = f"Monthly on day {day} at {at_time}:00"
-            
+
             # Determine container type and name
             container_type = "Unknown"
             container_name = "Unknown"
-            
+
             if hasattr(edl, "folder") and edl.folder:
                 container_type = "Folder"
                 container_name = edl.folder
@@ -1197,45 +1359,49 @@ def generate_edl_report(edl_manager, edl_ids, execution_time):
             elif hasattr(edl, "device") and edl.device:
                 container_type = "Device"
                 container_name = edl.device
-                
+
             # Add EDL data
-            edl_data.append([
-                edl.id,
-                edl.name,
-                edl_type,
-                edl_url,
-                edl_schedule,
-                container_type,
-                container_name,
-                additional_features,
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            edl_data.append(
+                [
+                    edl.id,
+                    edl.name,
+                    edl_type,
+                    edl_url,
+                    edl_schedule,
+                    container_type,
+                    container_name,
+                    additional_features,
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for EDL ID {edl_id}", str(e))
             # Add minimal info for EDLs that couldn't be retrieved
-            edl_data.append([
-                edl_id, 
-                "ERROR", 
-                "ERROR", 
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            edl_data.append(
+                [
+                    edl_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(edl_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -1243,22 +1409,24 @@ def generate_edl_report(edl_manager, edl_ids, execution_time):
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"edl_report_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(edl_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -1268,89 +1436,62 @@ def generate_edl_report(edl_manager, edl_ids, execution_time):
 def parse_arguments():
     """
     Parse command-line arguments for the External Dynamic Lists example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which EDL types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager External Dynamic Lists Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created External Dynamic List objects (don't delete them)"
+        help="Preserve created External Dynamic List objects (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("EDL Type Selection")
+    object_group.add_argument("--ip", action="store_true", help="Create IP-based EDL examples")
     object_group.add_argument(
-        "--ip", 
-        action="store_true",
-        help="Create IP-based EDL examples"
+        "--domain", action="store_true", help="Create domain-based EDL examples"
+    )
+    object_group.add_argument("--url", action="store_true", help="Create URL-based EDL examples")
+    object_group.add_argument(
+        "--predefined", action="store_true", help="Create predefined EDL examples"
     )
     object_group.add_argument(
-        "--domain", 
-        action="store_true", 
-        help="Create domain-based EDL examples"
+        "--mobile", action="store_true", help="Create IMSI and IMEI EDL examples"
     )
+    object_group.add_argument("--bulk", action="store_true", help="Create bulk EDL examples")
     object_group.add_argument(
-        "--url", 
-        action="store_true",
-        help="Create URL-based EDL examples"
+        "--all", action="store_true", help="Create all EDL types (default behavior)"
     )
-    object_group.add_argument(
-        "--predefined", 
-        action="store_true",
-        help="Create predefined EDL examples"
-    )
-    object_group.add_argument(
-        "--mobile", 
-        action="store_true",
-        help="Create IMSI and IMEI EDL examples"
-    )
-    object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk EDL examples"
-    )
-    object_group.add_argument(
-        "--all", 
-        action="store_true",
-        help="Create all EDL types (default behavior)"
-    )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of External Dynamic Lists examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -1360,7 +1501,7 @@ def main():
     6. Generate a detailed CSV report of all created EDL objects
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created EDL objects (don't delete them)
         --ip: Create only IP-based EDL examples
@@ -1372,33 +1513,34 @@ def main():
         --all: Create all EDL types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
-    create_all = args.all or not (args.ip or args.domain or args.url or 
-                                args.predefined or args.mobile or args.bulk)
-    
+    create_all = args.all or not (
+        args.ip or args.domain or args.url or args.predefined or args.mobile or args.bulk
+    )
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1427,7 +1569,7 @@ def main():
                 created_edls.append(ip_edl.id)
                 object_count += 1
 
-            log_success(f"Created IP-based EDL")
+            log_success("Created IP-based EDL")
 
         # Domain-based EDLs
         if create_all or args.domain:
@@ -1441,7 +1583,7 @@ def main():
                 created_edls.append(domain_edl.id)
                 object_count += 1
 
-            log_success(f"Created domain-based EDL")
+            log_success("Created domain-based EDL")
 
         # URL-based EDLs
         if create_all or args.url:
@@ -1455,7 +1597,7 @@ def main():
                 created_edls.append(url_edl.id)
                 object_count += 1
 
-            log_success(f"Created URL-based EDL")
+            log_success("Created URL-based EDL")
 
         # Predefined EDLs
         if create_all or args.predefined:
@@ -1469,7 +1611,7 @@ def main():
                 created_edls.append(predefined_edl.id)
                 object_count += 1
 
-            log_success(f"Created predefined EDL")
+            log_success("Created predefined EDL")
 
         # Mobile (IMSI/IMEI) EDLs
         if create_all or args.mobile:
@@ -1489,7 +1631,7 @@ def main():
                 created_edls.append(imei_edl.id)
                 object_count += 1
 
-            log_success(f"Created IMSI and IMEI EDLs")
+            log_success("Created IMSI and IMEI EDLs")
 
         # Bulk EDL creation
         if create_all or args.bulk:
@@ -1508,17 +1650,17 @@ def main():
         if created_edls:
             log_section("UPDATING EXTERNAL DYNAMIC LISTS")
             log_info("Demonstrating how to update existing EDL objects")
-            updated_edl = fetch_and_update_edl(edl_manager, created_edls[0])
+            fetch_and_update_edl(edl_manager, created_edls[0])
 
         # List and filter EDL objects
         log_section("LISTING AND FILTERING EXTERNAL DYNAMIC LISTS")
         log_info("Demonstrating how to search and filter EDL objects")
-        all_edls = list_and_filter_edls(edl_manager)
+        list_and_filter_edls(edl_manager)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_edls and not args.no_report:
             log_section("REPORT GENERATION")
@@ -1526,7 +1668,9 @@ def main():
             report_file = generate_edl_report(edl_manager, created_edls, execution_time_so_far)
             if report_file:
                 log_success(f"Generated External Dynamic Lists report: {report_file}")
-                log_info(f"The report contains details of all {len(created_edls)} EDL objects created")
+                log_info(
+                    f"The report contains details of all {len(created_edls)} EDL objects created"
+                )
             else:
                 log_error("Failed to generate External Dynamic Lists report")
         elif args.no_report:
@@ -1538,7 +1682,9 @@ def main():
         log_section("CLEANUP")
         if skip_cleanup:
             log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_edls)} EDL objects")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
             log_operation_start(f"Cleaning up {len(created_edls)} created EDL objects")
             cleanup_edl_objects(edl_manager, created_edls)
@@ -1549,22 +1695,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total External Dynamic List objects created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some EDL objects may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

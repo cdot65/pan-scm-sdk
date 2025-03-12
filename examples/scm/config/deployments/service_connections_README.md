@@ -100,7 +100,7 @@ python service_connections.py --ipsec-tunnel "your-tunnel-name" --max-limit 500
    - Minimal configuration
    - Region and subnets
    - Source NAT enabled
-   
+
 2. **BGP Service Connection**:
    - BGP peering configuration
    - AS number and local/peer IP addresses
@@ -138,7 +138,7 @@ If you see errors like this:
 This means the IPsec tunnel name you provided doesn't exist in your SCM environment. To fix this:
 
 1. Verify that you have provided the `--ipsec-tunnel` parameter with an existing tunnel name
-2. Check in the SCM console that the tunnel exists and is correctly configured 
+2. Check in the SCM console that the tunnel exists and is correctly configured
 3. Make sure you have appropriate permissions to access the tunnel
 
 ### Other Common Issues

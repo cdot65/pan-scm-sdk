@@ -232,31 +232,31 @@ Follow these steps to run the example:
    ```bash
    # Run all examples
    python external_dynamic_lists.py
-   
+
    # Create only IP-based EDLs
    python external_dynamic_lists.py --ip
-   
+
    # Create only domain-based EDLs
    python external_dynamic_lists.py --domain
-   
+
    # Create only URL-based EDLs
    python external_dynamic_lists.py --url
-   
+
    # Create only predefined EDLs
    python external_dynamic_lists.py --predefined
-   
+
    # Create only IMSI and IMEI EDLs
    python external_dynamic_lists.py --mobile
-   
+
    # Create only bulk EDLs
    python external_dynamic_lists.py --bulk
-   
+
    # Skip cleaning up created objects
    python external_dynamic_lists.py --skip-cleanup
-   
+
    # Skip CSV report generation
    python external_dynamic_lists.py --no-report
-   
+
    # Specify a different folder
    python external_dynamic_lists.py --folder=Production
    ```

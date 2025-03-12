@@ -144,7 +144,7 @@ def parse_arguments():
         description="Strata Cloud Manager Example Script",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    
+
     # Add common arguments
     parser.add_argument(
         "--skip-cleanup",
@@ -162,65 +162,65 @@ def parse_arguments():
         default="Texas",
         help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 def main():
     """Main function to execute the example script."""
     # Parse arguments
     args = parse_arguments()
-    
+
     # Track execution time
     start_time = time.time()
-    
+
     try:
         # Initialize client
         client_init = ClientInitializer(logger)
         client = client_init.initialize_client(Scm)
         if not client:
             return
-        
+
         # Initialize object manager
         logger.section("OBJECT CONFIGURATION")
         logger.operation_start("Initializing object manager")
         objects = SomeObject(client)
         logger.operation_complete("Object manager initialization")
-        
+
         # Create objects
         created_objects = []
         # [Object creation code]
-        
+
         # Generate reports
         if created_objects and not args.no_report:
             logger.section("REPORT GENERATION")
             logger.operation_start("Generating reports")
-            
+
             # Prepare report data
             # [Report data preparation]
-            
+
             # Generate reports
             report_gen = ReportGenerator("objects", logger)
             csv_file = report_gen.generate_csv(headers, data, summary)
             pdf_file = report_gen.generate_pdf("Objects Report", headers, data, summary)
-            
+
             if csv_file:
                 logger.success(f"Generated CSV report: {csv_file}")
             if pdf_file:
                 logger.success(f"Generated PDF report: {pdf_file}")
-        
+
         # Cleanup
         if not args.skip_cleanup:
             logger.section("CLEANUP")
             logger.operation_start(f"Cleaning up created objects")
             # [Cleanup code]
-        
+
         # Display execution summary
         end_time = time.time()
         execution_time = end_time - start_time
         logger.section("EXECUTION SUMMARY")
         logger.success("Example script completed successfully")
         logger.info(f"Total execution time: {execution_time:.2f} seconds")
-        
+
     except AuthenticationError as e:
         logger.error("Authentication failed", e)
     except KeyboardInterrupt:

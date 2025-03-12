@@ -2,7 +2,7 @@
 """
 Comprehensive examples of working with Syslog Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
-This script demonstrates a wide range of Syslog Server Profile configurations and operations commonly 
+This script demonstrates a wide range of Syslog Server Profile configurations and operations commonly
 used in enterprise networks, including:
 
 1. Syslog Server Profile Types:
@@ -43,7 +43,7 @@ Before running this example:
    SCM_LOG_LEVEL=DEBUG  # Optional
    ```
 
-2. Make sure you have a folder named "Texas" in your SCM environment or change the 
+2. Make sure you have a folder named "Texas" in your SCM environment or change the
    folder name throughout the script.
 
 3. Optional environment variables:
@@ -109,9 +109,7 @@ def log_section(title):
 # Helper function for operation start
 def log_operation_start(operation):
     """Log the start of an operation with clear visual indicator."""
-    logger.info(
-        f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}"
-    )
+    logger.info(f"{COLORS['BOLD']}{COLORS['BRIGHT_GREEN']}▶ STARTING: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation completion
@@ -122,17 +120,13 @@ def log_operation_complete(operation, details=None):
             f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation} - {details}{COLORS['RESET']}"
         )
     else:
-        logger.info(
-            f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}"
-        )
+        logger.info(f"{COLORS['BOLD']}{COLORS['GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
 
 # Helper function for operation warnings
 def log_warning(message):
     """Log a warning message with clear visual indicator."""
-    logger.warning(
-        f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}"
-    )
+    logger.warning(f"{COLORS['BOLD']}{COLORS['YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
 
 # Helper function for operation errors
@@ -143,9 +137,7 @@ def log_error(message, error=None):
             f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message} - {error}{COLORS['RESET']}"
         )
     else:
-        logger.error(
-            f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}"
-        )
+        logger.error(f"{COLORS['BOLD']}{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
 
 # Helper function for important information
@@ -163,15 +155,15 @@ def log_success(message):
 def initialize_client():
     """
     Initialize the SCM client using credentials from environment variables or .env file.
-    
+
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
     2. Validate required credentials (client_id, client_secret, tsg_id)
     3. Initialize the SCM client with appropriate credentials
-    
+
     Returns:
         Scm: An authenticated SCM client instance ready for API calls
-        
+
     Raises:
         AuthenticationError: If authentication fails due to invalid credentials
     """
@@ -192,8 +184,8 @@ def initialize_client():
             load_dotenv(dotenv_path=env_path)
             log_success(f"Loaded environment variables from {env_path}")
         else:
-            log_warning(f"No .env file found in current directory or script directory")
-            log_info(f"Searched locations:")
+            log_warning("No .env file found in current directory or script directory")
+            log_info("Searched locations:")
             log_info(f"  - {Path('.').absolute()}/.env")
             log_info(f"  - {script_dir}/.env")
             log_info("Using default or environment credentials instead")
@@ -236,7 +228,7 @@ def initialize_client():
 
     log_operation_complete(
         "SCM client initialization",
-        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id)-8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
+        f"TSG ID: {tsg_id[:4]}{'*' * (len(tsg_id) - 8) if tsg_id else '****'}{tsg_id[-4:] if tsg_id else '****'}",
     )
     return client
 
@@ -244,14 +236,14 @@ def initialize_client():
 def create_udp_syslog_profile(syslog_profiles, folder="Texas"):
     """
     Create a syslog server profile with a UDP server.
-    
+
     This function demonstrates creating a standard UDP syslog server profile
     commonly used for basic system and traffic logging.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         SyslogServerProfileResponseModel: The created profile, or None if creation failed
     """
@@ -272,9 +264,9 @@ def create_udp_syslog_profile(syslog_profiles, folder="Texas"):
                 "transport": "UDP",
                 "port": 514,
                 "format": "BSD",
-                "facility": "LOG_USER"
+                "facility": "LOG_USER",
             }
-        }
+        },
     }
 
     log_info("Configuration details:")
@@ -288,20 +280,18 @@ def create_udp_syslog_profile(syslog_profiles, folder="Texas"):
         new_profile = syslog_profiles.create(udp_syslog_config)
         log_success(f"Created syslog server profile: {new_profile.name}")
         log_info(f"  - Object ID: {new_profile.id}")
-        log_operation_complete(
-            "UDP syslog server profile creation", f"Profile: {new_profile.name}"
-        )
+        log_operation_complete("UDP syslog server profile creation", f"Profile: {new_profile.name}")
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating syslog server profile", str(e))
+        log_error("Unexpected error creating syslog server profile", str(e))
 
     return None
 
@@ -309,14 +299,14 @@ def create_udp_syslog_profile(syslog_profiles, folder="Texas"):
 def create_tcp_syslog_profile(syslog_profiles, folder="Texas"):
     """
     Create a syslog server profile with a TCP server.
-    
+
     This function demonstrates creating a TCP syslog server profile,
     commonly used for more reliable log delivery and critical system events.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         SyslogServerProfileResponseModel: The created profile, or None if creation failed
     """
@@ -337,14 +327,14 @@ def create_tcp_syslog_profile(syslog_profiles, folder="Texas"):
                 "transport": "TCP",
                 "port": 1514,
                 "format": "IETF",
-                "facility": "LOG_LOCAL0"
+                "facility": "LOG_LOCAL0",
             }
         },
         "format": {
             "traffic": "${time} ${src} ${dst} ${proto} ${action}",
             "threat": "${time} ${threatid} ${src} ${dst} ${severity}",
-            "system": "${time} ${severity} ${actiontext}"
-        }
+            "system": "${time} ${severity} ${actiontext}",
+        },
     }
 
     log_info("Configuration details:")
@@ -352,27 +342,25 @@ def create_tcp_syslog_profile(syslog_profiles, folder="Texas"):
     log_info(f"  - Transport: {tcp_syslog_config['servers']['primary-tcp']['transport']}")
     log_info(f"  - Port: {tcp_syslog_config['servers']['primary-tcp']['port']}")
     log_info(f"  - Format: {tcp_syslog_config['servers']['primary-tcp']['format']}")
-    log_info(f"  - Custom formats defined for: traffic, threat, system")
+    log_info("  - Custom formats defined for: traffic, threat, system")
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
         new_profile = syslog_profiles.create(tcp_syslog_config)
         log_success(f"Created syslog server profile: {new_profile.name}")
         log_info(f"  - Object ID: {new_profile.id}")
-        log_operation_complete(
-            "TCP syslog server profile creation", f"Profile: {new_profile.name}"
-        )
+        log_operation_complete("TCP syslog server profile creation", f"Profile: {new_profile.name}")
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating syslog server profile", str(e))
+        log_error("Unexpected error creating syslog server profile", str(e))
 
     return None
 
@@ -380,14 +368,14 @@ def create_tcp_syslog_profile(syslog_profiles, folder="Texas"):
 def create_multi_server_profile(syslog_profiles, folder="Texas"):
     """
     Create a syslog server profile with multiple servers of different types.
-    
+
     This function demonstrates creating a profile with multiple syslog servers,
     commonly used for redundant logging or separating different types of logs.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         SyslogServerProfileResponseModel: The created profile, or None if creation failed
     """
@@ -408,7 +396,7 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
                 "transport": "TCP",
                 "port": 1514,
                 "format": "IETF",
-                "facility": "LOG_LOCAL0"
+                "facility": "LOG_LOCAL0",
             },
             "secondary": {
                 "name": "secondary",
@@ -416,7 +404,7 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
                 "transport": "TCP",
                 "port": 1514,
                 "format": "IETF",
-                "facility": "LOG_LOCAL1"
+                "facility": "LOG_LOCAL1",
             },
             "local": {
                 "name": "local",
@@ -424,8 +412,8 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
                 "transport": "UDP",
                 "port": 514,
                 "format": "BSD",
-                "facility": "LOG_USER"
-            }
+                "facility": "LOG_USER",
+            },
         },
         "format": {
             "traffic": "${time} ${src} ${dst} ${proto} ${action}",
@@ -433,13 +421,13 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
             "system": "${time} ${severity} ${actiontext}",
             "url": "${time} ${src} ${dst} ${url} ${category}",
             "wildfire": "${time} ${src} ${dst} ${filetype} ${severity}",
-            "decryption": "${time} ${src} ${dst} ${cert-serial} ${error}"
-        }
+            "decryption": "${time} ${src} ${dst} ${cert-serial} ${error}",
+        },
     }
 
     log_info("Configuration details:")
     log_info(f"  - Number of servers: {len(multi_server_config['servers'])}")
-    for server_name, server_data in multi_server_config['servers'].items():
+    for server_name, server_data in multi_server_config["servers"].items():
         log_info(f"  - Server: {server_name}")
         log_info(f"    - Address: {server_data['server']}")
         log_info(f"    - Transport: {server_data['transport']}")
@@ -456,15 +444,15 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
         )
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating syslog server profile", str(e))
+        log_error("Unexpected error creating syslog server profile", str(e))
 
     return None
 
@@ -472,14 +460,14 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
 def create_escaping_profile(syslog_profiles, folder="Texas"):
     """
     Create a syslog server profile with character escaping configuration.
-    
+
     This function demonstrates creating a syslog profile with character escaping,
     used to handle special characters in log messages.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         folder: Folder name in SCM to create the object in (default: "Texas")
-        
+
     Returns:
         SyslogServerProfileResponseModel: The created profile, or None if creation failed
     """
@@ -500,46 +488,43 @@ def create_escaping_profile(syslog_profiles, folder="Texas"):
                 "transport": "TCP",
                 "port": 6514,
                 "format": "IETF",
-                "facility": "LOG_LOCAL3"
+                "facility": "LOG_LOCAL3",
             }
         },
         "format": {
-            "escaping": {
-                "escape_character": "\\",
-                "escaped_characters": "%\"\\[]"
-            },
+            "escaping": {"escape_character": "\\", "escaped_characters": '%"\\[]'},
             "traffic": "${time} ${src} ${dst} ${proto} ${action}",
             "threat": "${time} ${threatid} ${src} ${dst} ${severity}",
-            "system": "${time} ${severity} ${actiontext}"
-        }
+            "system": "${time} ${severity} ${actiontext}",
+        },
     }
 
     log_info("Configuration details:")
     log_info(f"  - Server: {escaping_config['servers']['main']['server']}")
     log_info(f"  - Transport: {escaping_config['servers']['main']['transport']}")
-    log_info(f"  - Character escaping enabled:")
+    log_info("  - Character escaping enabled:")
     log_info(f"    - Escape character: {escaping_config['format']['escaping']['escape_character']}")
-    log_info(f"    - Escaped characters: {escaping_config['format']['escaping']['escaped_characters']}")
+    log_info(
+        f"    - Escaped characters: {escaping_config['format']['escaping']['escaped_characters']}"
+    )
 
     try:
         log_info("Sending request to Strata Cloud Manager API...")
         new_profile = syslog_profiles.create(escaping_config)
         log_success(f"Created syslog server profile: {new_profile.name}")
         log_info(f"  - Object ID: {new_profile.id}")
-        log_operation_complete(
-            "Escaping syslog profile creation", f"Profile: {new_profile.name}"
-        )
+        log_operation_complete("Escaping syslog profile creation", f"Profile: {new_profile.name}")
         return new_profile
     except NameNotUniqueError as e:
-        log_error(f"Profile name conflict", e.message)
+        log_error("Profile name conflict", e.message)
         log_info("Try using a different profile name or check existing objects")
     except InvalidObjectError as e:
-        log_error(f"Invalid profile data", e.message)
+        log_error("Invalid profile data", e.message)
         if e.details:
             log_info(f"Error details: {e.details}")
             log_info("Check your configuration values and try again")
     except Exception as e:
-        log_error(f"Unexpected error creating syslog server profile", str(e))
+        log_error("Unexpected error creating syslog server profile", str(e))
 
     return None
 
@@ -547,16 +532,16 @@ def create_escaping_profile(syslog_profiles, folder="Texas"):
 def fetch_and_update_profile(syslog_profiles, profile_id):
     """
     Fetch a syslog server profile by ID and update its servers and format.
-    
+
     This function demonstrates how to:
     1. Retrieve an existing syslog server profile using its ID
     2. Modify profile properties (servers, format)
     3. Submit the updated profile back to the SCM API
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         profile_id: The UUID of the profile to update
-        
+
     Returns:
         SyslogServerProfileResponseModel: The updated profile, or None if update failed
     """
@@ -585,20 +570,22 @@ def fetch_and_update_profile(syslog_profiles, profile_id):
             "transport": "UDP",
             "port": 514,
             "format": "BSD",
-            "facility": "LOG_LOCAL7"
+            "facility": "LOG_LOCAL7",
         }
 
         # Modify or add format specifications
         if hasattr(profile, "format") and profile.format:
             update_data["format"] = profile.format.model_dump(exclude_unset=True)
             # Update existing format or add new ones
-            update_data["format"]["system"] = "${time} ${host} UPDATED ${severity} ${module} ${actiontext}"
+            update_data["format"]["system"] = (
+                "${time} ${host} UPDATED ${severity} ${module} ${actiontext}"
+            )
             update_data["format"]["auth"] = "${time} ${host} ${severity} ${user} ${event}"
         else:
             # Create new format if none exists
             update_data["format"] = {
                 "system": "${time} ${host} NEW ${severity} ${module} ${actiontext}",
-                "auth": "${time} ${host} ${severity} ${user} ${event}"
+                "auth": "${time} ${host} ${severity} ${user} ${event}",
             }
 
         # Perform the update
@@ -622,16 +609,16 @@ def fetch_and_update_profile(syslog_profiles, profile_id):
 def list_and_filter_profiles(syslog_profiles, folder="Texas"):
     """
     List and filter syslog server profiles.
-    
+
     This function demonstrates how to:
     1. List all syslog server profiles in a folder
     2. Filter profiles by various criteria
     3. Display detailed information about each profile
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         folder: Folder name in SCM to search in (default: "Texas")
-        
+
     Returns:
         list: All retrieved syslog server profiles
     """
@@ -645,7 +632,7 @@ def list_and_filter_profiles(syslog_profiles, folder="Texas"):
     try:
         udp_profiles = syslog_profiles.list(folder=folder, transport=["UDP"])
         logger.info(f"Found {len(udp_profiles)} profiles with UDP transport")
-        
+
         tcp_profiles = syslog_profiles.list(folder=folder, transport=["TCP"])
         logger.info(f"Found {len(tcp_profiles)} profiles with TCP transport")
     except Exception as e:
@@ -655,7 +642,7 @@ def list_and_filter_profiles(syslog_profiles, folder="Texas"):
     try:
         bsd_profiles = syslog_profiles.list(folder=folder, format=["BSD"])
         logger.info(f"Found {len(bsd_profiles)} profiles with BSD format")
-        
+
         ietf_profiles = syslog_profiles.list(folder=folder, format=["IETF"])
         logger.info(f"Found {len(ietf_profiles)} profiles with IETF format")
     except Exception as e:
@@ -668,7 +655,7 @@ def list_and_filter_profiles(syslog_profiles, folder="Texas"):
         logger.info(f"    ID: {profile.id}")
         logger.info(f"    Folder: {profile.folder if hasattr(profile, 'folder') else 'None'}")
         logger.info(f"    Number of servers: {len(profile.servers)}")
-        
+
         # Server details
         for server_name, server_data in profile.servers.items():
             logger.info(f"    - Server: {server_name}")
@@ -676,11 +663,14 @@ def list_and_filter_profiles(syslog_profiles, folder="Texas"):
             logger.info(f"      Transport: {server_data.get('transport', 'Unknown')}")
             logger.info(f"      Port: {server_data.get('port', 'Unknown')}")
             logger.info(f"      Format: {server_data.get('format', 'Unknown')}")
-        
+
         # Format details if available
         if hasattr(profile, "format") and profile.format:
-            format_fields = [field for field in dir(profile.format) 
-                             if not field.startswith('_') and not callable(getattr(profile.format, field))]
+            format_fields = [
+                field
+                for field in dir(profile.format)
+                if not field.startswith("_") and not callable(getattr(profile.format, field))
+            ]
             logger.info(f"    Custom formats defined for: {', '.join(format_fields)}")
         logger.info("")
 
@@ -690,7 +680,7 @@ def list_and_filter_profiles(syslog_profiles, folder="Texas"):
 def cleanup_syslog_profiles(syslog_profiles, profile_ids):
     """
     Delete the syslog server profiles created in this example.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         profile_ids: List of syslog server profile IDs to delete
@@ -710,14 +700,14 @@ def cleanup_syslog_profiles(syslog_profiles, profile_ids):
 def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
     """
     Create multiple syslog server profiles in a batch.
-    
+
     This function demonstrates creating multiple syslog server profiles in a batch,
     which is useful for setting up multiple logging configurations at once.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
         folder: Folder name in SCM to create objects in (default: "Texas")
-        
+
     Returns:
         list: List of IDs of created syslog server profiles, or empty list if creation failed
     """
@@ -735,9 +725,9 @@ def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
                     "transport": "UDP",
                     "port": 514,
                     "format": "BSD",
-                    "facility": "LOG_USER"
+                    "facility": "LOG_USER",
                 }
-            }
+            },
         },
         {
             "name": f"bulk-tcp-1-{uuid.uuid4().hex[:6]}",
@@ -749,9 +739,9 @@ def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
                     "transport": "TCP",
                     "port": 1514,
                     "format": "IETF",
-                    "facility": "LOG_LOCAL0"
+                    "facility": "LOG_LOCAL0",
                 }
-            }
+            },
         },
         {
             "name": f"bulk-mixed-{uuid.uuid4().hex[:6]}",
@@ -763,7 +753,7 @@ def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
                     "transport": "TCP",
                     "port": 1514,
                     "format": "IETF",
-                    "facility": "LOG_LOCAL1"
+                    "facility": "LOG_LOCAL1",
                 },
                 "udp-server": {
                     "name": "udp-server",
@@ -771,10 +761,10 @@ def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
                     "transport": "UDP",
                     "port": 514,
                     "format": "BSD",
-                    "facility": "LOG_LOCAL2"
-                }
-            }
-        }
+                    "facility": "LOG_LOCAL2",
+                },
+            },
+        },
     ]
 
     created_profiles = []
@@ -796,68 +786,68 @@ def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
 def generate_syslog_profile_report(syslog_profiles, profile_ids, execution_time):
     """
     Generate a comprehensive CSV report of all syslog server profiles created by the script.
-    
+
     This function fetches detailed information about each syslog server profile and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
     processing and includes a summary section with execution statistics.
-    
+
     Args:
         syslog_profiles: The SyslogServerProfile manager instance used to fetch profile details
         profile_ids: List of syslog server profile IDs to include in the report
         execution_time: Total execution time in seconds (up to the point of report generation)
-    
+
     Returns:
         str: Path to the generated CSV report file, or None if generation failed
     """
     # Create a timestamp for the filename
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     report_file = f"syslog_server_profiles_report_{timestamp}.csv"
-    
+
     # Define CSV headers
     headers = [
-        "Object ID", 
+        "Object ID",
         "Name",
         "Folder",
-        "Number of Servers", 
+        "Number of Servers",
         "Server Names",
         "Transport Protocols",
         "Format Types",
         "Custom Format Fields",
-        "Report Generation Time"
+        "Report Generation Time",
     ]
-    
+
     # Stats for report summary
     successful_fetches = 0
     failed_fetches = 0
-    
+
     # Collect data for each syslog server profile
     profile_data = []
     for idx, profile_id in enumerate(profile_ids):
         # Show progress for large sets
         if (idx + 1) % 5 == 0 or idx == 0 or idx == len(profile_ids) - 1:
             log_info(f"Processing profile {idx + 1} of {len(profile_ids)}")
-            
+
         try:
             # Get the profile details
             profile = syslog_profiles.get(profile_id)
-            
+
             # Server information
             server_names = ", ".join(profile.servers.keys())
-            
+
             # Transport protocols
             transport_protocols = set()
             for server_data in profile.servers.values():
                 if "transport" in server_data:
                     transport_protocols.add(server_data["transport"])
             transport_str = ", ".join(transport_protocols)
-            
+
             # Format types
             format_types = set()
             for server_data in profile.servers.values():
                 if "format" in server_data:
                     format_types.add(server_data["format"])
             format_str = ", ".join(format_types)
-            
+
             # Custom format fields
             custom_format_fields = []
             if hasattr(profile, "format") and profile.format:
@@ -867,45 +857,49 @@ def generate_syslog_profile_report(syslog_profiles, profile_ids, execution_time)
                     format_dict.pop("escaping")
                 custom_format_fields = list(format_dict.keys())
             custom_format_str = ", ".join(custom_format_fields) if custom_format_fields else "None"
-            
+
             # Add profile data
-            profile_data.append([
-                profile.id,
-                profile.name,
-                profile.folder if hasattr(profile, "folder") and profile.folder else "None",
-                len(profile.servers),
-                server_names,
-                transport_str,
-                format_str,
-                custom_format_str,
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
-            
+            profile_data.append(
+                [
+                    profile.id,
+                    profile.name,
+                    profile.folder if hasattr(profile, "folder") and profile.folder else "None",
+                    len(profile.servers),
+                    server_names,
+                    transport_str,
+                    format_str,
+                    custom_format_str,
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
             successful_fetches += 1
-            
+
         except Exception as e:
             log_error(f"Error getting details for profile ID {profile_id}", str(e))
             # Add minimal info for profiles that couldn't be retrieved
-            profile_data.append([
-                profile_id, 
-                "ERROR", 
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                "ERROR",
-                f"Failed to retrieve profile details: {str(e)}",
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            ])
+            profile_data.append(
+                [
+                    profile_id,
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    "ERROR",
+                    f"Failed to retrieve profile details: {str(e)}",
+                    datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
             failed_fetches += 1
-    
+
     try:
         # Write to CSV file
-        with open(report_file, 'w', newline='') as csvfile:
+        with open(report_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(profile_data)
-            
+
             # Add summary section
             writer.writerow([])
             writer.writerow(["SUMMARY"])
@@ -913,22 +907,24 @@ def generate_syslog_profile_report(syslog_profiles, profile_ids, execution_time)
             writer.writerow(["Successfully Retrieved", successful_fetches])
             writer.writerow(["Failed to Retrieve", failed_fetches])
             writer.writerow(["Execution Time (so far)", f"{execution_time:.2f} seconds"])
-            writer.writerow(["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-        
+            writer.writerow(
+                ["Report Generated On", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            )
+
         return report_file
-        
+
     except Exception as e:
         log_error("Failed to write CSV report file", str(e))
         # Try to write to a different location as fallback
         try:
             fallback_file = f"syslog_profiles_{timestamp}.csv"
             log_info(f"Attempting to write to fallback location: {fallback_file}")
-            
-            with open(fallback_file, 'w', newline='') as csvfile:
+
+            with open(fallback_file, "w", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(headers)
                 writer.writerows(profile_data)
-            
+
             return fallback_file
         except Exception as fallback_error:
             log_error("Failed to write to fallback location", str(fallback_error))
@@ -938,84 +934,67 @@ def generate_syslog_profile_report(syslog_profiles, profile_ids, execution_time)
 def parse_arguments():
     """
     Parse command-line arguments for the syslog server profile example script.
-    
+
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
     - Whether to skip cleanup of created objects
     - Which profile types to create
     - Whether to generate a CSV report
     - Folder name to use for object creation
-    
+
     Returns:
         argparse.Namespace: The parsed command-line arguments
     """
     parser = argparse.ArgumentParser(
         description="Strata Cloud Manager Syslog Server Profiles Example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    
+
     # Cleanup behavior
     parser.add_argument(
-        "--skip-cleanup", 
+        "--skip-cleanup",
         action="store_true",
-        help="Preserve created syslog server profiles (don't delete them)"
+        help="Preserve created syslog server profiles (don't delete them)",
     )
-    
+
     # Object types to create
     object_group = parser.add_argument_group("Profile Type Selection")
     object_group.add_argument(
-        "--udp", 
-        action="store_true",
-        help="Create UDP syslog server profile examples"
+        "--udp", action="store_true", help="Create UDP syslog server profile examples"
     )
     object_group.add_argument(
-        "--tcp", 
-        action="store_true", 
-        help="Create TCP syslog server profile examples"
+        "--tcp", action="store_true", help="Create TCP syslog server profile examples"
     )
     object_group.add_argument(
-        "--multi", 
-        action="store_true",
-        help="Create multi-server syslog profile examples"
+        "--multi", action="store_true", help="Create multi-server syslog profile examples"
     )
     object_group.add_argument(
-        "--escaping", 
-        action="store_true",
-        help="Create syslog profile with character escaping"
+        "--escaping", action="store_true", help="Create syslog profile with character escaping"
     )
     object_group.add_argument(
-        "--bulk", 
-        action="store_true",
-        help="Create bulk syslog profile examples"
+        "--bulk", action="store_true", help="Create bulk syslog profile examples"
     )
     object_group.add_argument(
-        "--all", 
+        "--all",
         action="store_true",
-        help="Create all syslog server profile types (default behavior)"
+        help="Create all syslog server profile types (default behavior)",
     )
-    
+
     # Reporting
-    parser.add_argument(
-        "--no-report", 
-        action="store_true",
-        help="Skip CSV report generation"
-    )
-    
+    parser.add_argument("--no-report", action="store_true", help="Skip CSV report generation")
+
     # Folder
     parser.add_argument(
-        "--folder", 
-        type=str, 
-        default="Texas",
-        help="Folder name in SCM to create objects in"
+        "--folder", type=str, default="Texas", help="Folder name in SCM to create objects in"
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """
     Execute the comprehensive set of syslog server profile examples for Strata Cloud Manager.
-    
+
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
     2. Initialize the SCM client with credentials from environment variables or .env file
@@ -1025,7 +1004,7 @@ def main():
     6. Generate a detailed CSV report of all created syslog server profiles
     7. Clean up created objects (unless skip_cleanup is enabled)
     8. Display execution statistics and summary information
-    
+
     Command-line Arguments:
         --skip-cleanup: Preserve created syslog server profiles (don't delete them)
         --udp: Create only UDP syslog server profile examples
@@ -1036,32 +1015,32 @@ def main():
         --all: Create all syslog server profile types (default behavior)
         --no-report: Skip CSV report generation
         --folder: Folder name in SCM to create objects in (default: "Texas")
-    
+
     Environment Variables:
         SCM_CLIENT_ID: Client ID for SCM authentication (required)
         SCM_CLIENT_SECRET: Client secret for SCM authentication (required)
         SCM_TSG_ID: Tenant Service Group ID for SCM authentication (required)
         SCM_LOG_LEVEL: Logging level, defaults to DEBUG (optional)
         SKIP_CLEANUP: Alternative way to preserve created objects (optional)
-    
+
     Returns:
         None
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Track execution time for reporting
     start_time = __import__("time").time()
     object_count = 0
-    
+
     # Determine whether to skip cleanup
     # Command-line argument takes precedence over environment variable
     skip_cleanup = args.skip_cleanup or os.environ.get("SKIP_CLEANUP", "").lower() == "true"
-    
+
     # Determine which object types to create
     # If no specific types are specified, create all (default behavior)
     create_all = args.all or not (args.udp or args.tcp or args.multi or args.escaping or args.bulk)
-    
+
     # Get folder name for object creation
     folder_name = args.folder
 
@@ -1090,7 +1069,7 @@ def main():
                 created_profiles.append(udp_profile.id)
                 object_count += 1
 
-            log_success(f"Created UDP syslog server profiles")
+            log_success("Created UDP syslog server profiles")
 
         # TCP Syslog Server Profile
         if create_all or args.tcp:
@@ -1104,7 +1083,7 @@ def main():
                 created_profiles.append(tcp_profile.id)
                 object_count += 1
 
-            log_success(f"Created TCP syslog server profiles")
+            log_success("Created TCP syslog server profiles")
 
         # Multi-server Syslog Profile
         if create_all or args.multi:
@@ -1118,7 +1097,7 @@ def main():
                 created_profiles.append(multi_profile.id)
                 object_count += 1
 
-            log_success(f"Created multi-server syslog profiles")
+            log_success("Created multi-server syslog profiles")
 
         # Syslog Profile with Character Escaping
         if create_all or args.escaping:
@@ -1132,7 +1111,7 @@ def main():
                 created_profiles.append(escaping_profile.id)
                 object_count += 1
 
-            log_success(f"Created syslog profiles with character escaping")
+            log_success("Created syslog profiles with character escaping")
 
         # Bulk Syslog Server Profile creation
         if create_all or args.bulk:
@@ -1151,25 +1130,29 @@ def main():
         if created_profiles:
             log_section("UPDATING SYSLOG SERVER PROFILES")
             log_info("Demonstrating how to update existing syslog server profiles")
-            updated_profile = fetch_and_update_profile(syslog_profiles, created_profiles[0])
+            fetch_and_update_profile(syslog_profiles, created_profiles[0])
 
         # List and filter syslog server profiles
         log_section("LISTING AND FILTERING SYSLOG SERVER PROFILES")
         log_info("Demonstrating how to search and filter syslog server profiles")
-        all_profiles = list_and_filter_profiles(syslog_profiles, folder_name)
+        list_and_filter_profiles(syslog_profiles, folder_name)
 
         # Calculate intermediate execution statistics for the report
         current_time = __import__("time").time()
         execution_time_so_far = current_time - start_time
-        
+
         # Generate CSV report before cleanup if there are objects to report and report generation is not disabled
         if created_profiles and not args.no_report:
             log_section("REPORT GENERATION")
             log_operation_start("Generating syslog server profiles CSV report")
-            report_file = generate_syslog_profile_report(syslog_profiles, created_profiles, execution_time_so_far)
+            report_file = generate_syslog_profile_report(
+                syslog_profiles, created_profiles, execution_time_so_far
+            )
             if report_file:
                 log_success(f"Generated syslog server profiles report: {report_file}")
-                log_info(f"The report contains details of all {len(created_profiles)} syslog server profiles created")
+                log_info(
+                    f"The report contains details of all {len(created_profiles)} syslog server profiles created"
+                )
             else:
                 log_error("Failed to generate syslog server profiles report")
         elif args.no_report:
@@ -1180,10 +1163,16 @@ def main():
         # Clean up the created objects, unless skip_cleanup is true
         log_section("CLEANUP")
         if skip_cleanup:
-            log_info(f"SKIP_CLEANUP is set to true - preserving {len(created_profiles)} syslog server profiles")
-            log_info("To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false")
+            log_info(
+                f"SKIP_CLEANUP is set to true - preserving {len(created_profiles)} syslog server profiles"
+            )
+            log_info(
+                "To clean up these objects, run the script again with SKIP_CLEANUP unset or set to false"
+            )
         else:
-            log_operation_start(f"Cleaning up {len(created_profiles)} created syslog server profiles")
+            log_operation_start(
+                f"Cleaning up {len(created_profiles)} created syslog server profiles"
+            )
             cleanup_syslog_profiles(syslog_profiles, created_profiles)
 
         # Calculate and display final execution statistics
@@ -1192,22 +1181,20 @@ def main():
         minutes, seconds = divmod(execution_time, 60)
 
         log_section("EXECUTION SUMMARY")
-        log_success(f"Example script completed successfully")
+        log_success("Example script completed successfully")
         log_info(f"Total syslog server profiles created: {object_count}")
         log_info(f"Total execution time: {int(minutes)} minutes {int(seconds)} seconds")
-        log_info(
-            f"Average time per object: {execution_time/max(object_count, 1):.2f} seconds"
-        )
+        log_info(f"Average time per object: {execution_time / max(object_count, 1):.2f} seconds")
 
     except AuthenticationError as e:
-        log_error(f"Authentication failed", e.message)
+        log_error("Authentication failed", e.message)
         log_info(f"Status code: {e.http_status_code}")
         log_info("Please verify your credentials in the .env file")
     except KeyboardInterrupt:
         log_warning("Script execution interrupted by user")
         log_info("Note: Some syslog server profiles may not have been cleaned up")
     except Exception as e:
-        log_error(f"Unexpected error", str(e))
+        log_error("Unexpected error", str(e))
         # Print the full stack trace for debugging
         import traceback
 

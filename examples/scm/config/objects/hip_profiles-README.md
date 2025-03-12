@@ -162,22 +162,22 @@ Follow these steps to run the example:
    ```bash
    # Run all examples
    python hip_profile.py
-   
+
    # Demonstrate only creation operations
    python hip_profile.py --create
-   
+
    # Demonstrate only update operations
    python hip_profile.py --update
-   
+
    # Demonstrate only listing operations
    python hip_profile.py --list
-   
+
    # Demonstrate only deletion operations
    python hip_profile.py --delete
-   
+
    # Skip cleaning up created profiles
    python hip_profile.py --skip-cleanup
-   
+
    # Specify a different folder
    python hip_profile.py --folder=Production
    ```
