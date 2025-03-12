@@ -311,13 +311,12 @@ class NatRuleBaseModel(BaseModel):
 
     @field_validator("tag")
     def validate_tags(cls, v):
-        """Validate that only allowed tags are used."""
-        allowed_tags = ["Automation", "Decrypted"]
-        invalid_tags = [tag for tag in v if tag not in allowed_tags]
-        if invalid_tags:
-            raise ValueError(
-                f"Invalid tags: {', '.join(invalid_tags)}. Only 'Automation' and 'Decrypted' tags are allowed."
-            )
+        """Validate tags."""
+        for tag in v:
+            if not tag or not isinstance(tag, str) or not tag.strip():
+                raise ValueError("Tags must be non-empty strings")
+            if not all(c.isalnum() or c in "-_" for c in tag):
+                raise ValueError("Tags should only contain alphanumeric characters, hyphens, or underscores")
         return v
 
     @model_validator(mode="after")
