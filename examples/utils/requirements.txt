@@ -1,0 +1,4 @@
+rich>=13.0.0
+reportlab>=3.6.0
+python-dotenv>=1.0.0
+colorama>=0.4.4  # For Windows ANSI color support

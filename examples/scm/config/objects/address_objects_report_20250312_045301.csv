@@ -1,0 +1,17 @@
+Name,Type,Value,Description,Tags
+network-segment-6e85d2,IPv4 Network,10.10.10.0/24,Updated description for network-segment-6e85d2,"Automation, Corporate, Updated"
+server-host-a6d16e,IPv4 Host,192.168.1.100/32,Example server host address,"Automation, Servers"
+dhcp-range-606c08,IPv4 Range,10.20.30.100-10.20.30.200,Example DHCP address range,"Automation, DHCP"
+ipv6-segment-1a7a42,IPv6 Network,2001:db8:1234::/64,Example IPv6 network segment,"Automation, IPv6"
+website-fqdn-e874fa,FQDN,www.example.com,Example website FQDN address,"Automation, Web"
+bulk-host-1-b498b7,IPv4 Host,10.100.1.1/32,Bulk created host 1,"Automation, Bulk"
+bulk-host-2-0c6ff7,IPv4 Host,10.100.1.2/32,Bulk created host 2,"Automation, Bulk"
+bulk-network-106aa2,IPv4 Network,10.100.2.0/24,Bulk created network,"Automation, Bulk"
+bulk-fqdn-fa346e,FQDN,api.example.com,Bulk created FQDN,"Automation, Bulk"
+
+SUMMARY
+Total Objects Processed,9
+Successfully Retrieved,9
+Failed to Retrieve,0
+Report Generated On,2025-03-12 04:53:01
+Execution Time (so far),48.85 seconds
