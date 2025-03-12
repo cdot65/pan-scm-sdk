@@ -256,7 +256,7 @@ response = client.operations.commit(commit_dict)
 if response.success:
    print(f"Commit job {response.job_id} started successfully")
    print(f"Message: {response.message}")
-   
+
    # Track the job status
    job_status = client.operations.get_job_status(response.job_id)
    print(f"Job status: {job_status.data[0].status_str}")

@@ -21,6 +21,10 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
     - [Managing Address Objects](#managing-address-objects)
         - [Listing Addresses](#listing-addresses)
         - [Creating an Address](#creating-an-address)
+- [Development](#development)
+    - [Setup](#setup)
+    - [Code Quality](#code-quality)
+    - [Pre-commit Hooks](#pre-commit-hooks)
 - [Contributing](#contributing)
 - [License](#license)
 - [Support](#support)
@@ -29,7 +33,7 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 
 - **OAuth2 Authentication**: Securely authenticate with the Strata Cloud Manager API using OAuth2 client credentials
   flow.
-- **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups, 
+- **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups,
   applications, regions, and more.
 - **Data Validation**: Utilize Pydantic models for data validation and serialization.
 - **Exception Handling**: Comprehensive error handling with custom exceptions for API errors.
@@ -126,10 +130,10 @@ print(f"Found {len(nat_rules)} NAT rules with source zone 'trust'")
 if nat_rules:
     client.nat_rule.delete(nat_rules[0].id)
     print(f"Deleted NAT rule: {nat_rules[0].name}")
-    
+
     # Commit the changes
     commit_job = client.commit(
-        folders=["Texas"], 
+        folders=["Texas"],
         description="Deleted NAT rule",
         sync=True
     )
@@ -228,15 +232,71 @@ print(f"Created address with ID: {new_address.id}")
 
 ---
 
+## Development
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/cdot65/pan-scm-sdk.git
+   cd pan-scm-sdk
+   ```
+
+2. Install dependencies and pre-commit hooks:
+   ```bash
+   make setup
+   ```
+
+   Alternatively, you can install manually:
+   ```bash
+   poetry install
+   poetry run pre-commit install
+   ```
+
+### Code Quality
+
+This project uses [ruff](https://github.com/astral-sh/ruff) for linting and formatting:
+
+```bash
+# Run linting checks
+make lint
+
+# Format code
+make format
+
+# Auto-fix linting issues when possible
+make fix
+```
+
+### Pre-commit Hooks
+
+We use pre-commit hooks to ensure code quality before committing:
+
+```bash
+# Run pre-commit hooks on all files
+make pre-commit-all
+```
+
+The following checks run automatically before each commit:
+- ruff linting and formatting
+- Trailing whitespace removal
+- End-of-file fixer
+- YAML/JSON syntax checking
+- Large file detection
+- Python syntax validation
+- Merge conflict detection
+- Private key detection
+
 ## Contributing
 
 We welcome contributions! To contribute:
 
 1. Fork the repository.
 2. Create a new feature branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -m 'Add new feature'`).
-4. Push to your branch (`git push origin feature/your-feature`).
-5. Open a Pull Request.
+3. Make your changes, ensuring all linting and tests pass.
+4. Commit your changes (`git commit -m 'Add new feature'`).
+5. Push to your branch (`git push origin feature/your-feature`).
+6. Open a Pull Request.
 
 Ensure your code adheres to the project's coding standards and includes tests where appropriate.
 

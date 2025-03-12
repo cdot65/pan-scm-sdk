@@ -372,7 +372,7 @@ nat_rules_list = client.nat_rule.list(
 # Iterate and process each NAT rule
 for rule in nat_rules_list:
    print(f"Name: {rule.name}, Service: {rule.service}, Destination: {rule.destination}")
-   
+
    # Check source translation type
    if rule.source_translation:
       if rule.source_translation.dynamic_ip_and_port:
@@ -502,7 +502,7 @@ try:
       "folder": "NAT Rules"
    }
    result = client.nat_rule.create(invalid_nat_rule)
-   
+
 except InvalidObjectError as e:
    print(f"Invalid object error: {e.message}")
    print(f"HTTP status: {e.http_status_code}")
@@ -511,7 +511,7 @@ except InvalidObjectError as e:
 try:
    # Attempt to fetch a NAT rule without specifying a container
    rule = client.nat_rule.fetch(name="some-rule")
-   
+
 except MissingQueryParameterError as e:
    print(f"Missing parameter error: {e.message}")
 
@@ -519,7 +519,7 @@ try:
    # General API error handling
    rule_id = "non-existent-id"
    client.nat_rule.get(rule_id)
-   
+
 except ApiError as e:
    print(f"API error: {e.message}")
    print(f"Status code: {e.http_status_code}")
@@ -576,7 +576,7 @@ The NAT rule configuration uses several nested models for comprehensive validati
 - [NatRuleResponseModel](../../models/network/nat_rule_models.md#natruleresponsemodel) - For representing API responses
 - [SourceTranslation](../../models/network/nat_rule_models.md#sourcetranslation) - Main container for source translation configurations
 - [DynamicIpAndPort](../../models/network/nat_rule_models.md#dynamicipandport) - For dynamic IP and port translation
-- [DynamicIp](../../models/network/nat_rule_models.md#dynamicip) - For dynamic IP translation 
+- [DynamicIp](../../models/network/nat_rule_models.md#dynamicip) - For dynamic IP translation
 - [StaticIp](../../models/network/nat_rule_models.md#staticip) - For static IP translation
 - [DestinationTranslation](../../models/network/nat_rule_models.md#destinationtranslation) - For destination translation configuration
 - [NatRuleMoveModel](../../models/network/nat_rule_models.md#natrrulemovemodel) - For moving NAT rules

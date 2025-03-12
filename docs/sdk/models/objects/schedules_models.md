@@ -34,7 +34,7 @@ The Schedule models use a hierarchical structure to represent different schedule
 | device          | str                 | No*      | None    | Device where schedule is defined. Max length: 64 chars              |
 | id              | UUID                | Yes**    | None    | UUID of the schedule (required only for update and response models) |
 
-\* Exactly one container type (folder/snippet/device) must be provided for create operations  
+\* Exactly one container type (folder/snippet/device) must be provided for create operations
 \** Only required for update and response models
 
 ### Schedule Type Model Attributes
@@ -147,7 +147,7 @@ except ValueError as e:
 # Using model directly
 try:
     from scm.models.objects.schedules import ScheduleTypeModel
-    
+
     schedule_type = ScheduleTypeModel(
         recurring={
             "weekly": {
@@ -192,7 +192,7 @@ except ValueError as e:
 # Using model directly
 try:
     from scm.models.objects.schedules import RecurringScheduleModel
-    
+
     recurring_schedule = RecurringScheduleModel(
         weekly={
             "monday": ["09:00-17:00"]
@@ -234,7 +234,7 @@ except ValueError as e:
 # Using model directly
 try:
     from scm.models.objects.schedules import WeeklyScheduleModel
-    
+
     weekly_schedule = WeeklyScheduleModel(
         monday=["9:00-17:00"]  # Missing leading zero
     )
@@ -271,7 +271,7 @@ except ValueError as e:
 # Using model directly
 try:
     from scm.models.objects.schedules import NonRecurringScheduleModel
-    
+
     non_recurring_schedule = NonRecurringScheduleModel(
         non_recurring=["2025/1/1@09:00-2025/01/01@17:00"]  # Missing leading zeros
     )

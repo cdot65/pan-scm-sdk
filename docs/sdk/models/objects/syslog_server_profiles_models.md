@@ -144,7 +144,7 @@ profile_data = {
     "servers": {
         "primary": {
             "name": "primary",
-            "server": "192.168.1.100", 
+            "server": "192.168.1.100",
             "transport": "UDP",
             "port": 514,
             "format": "BSD",

@@ -114,44 +114,44 @@ The models perform strict validation and will raise `ValueError` in scenarios su
 
 ### Field Validators in `NatRuleBaseModel`
 
-- **ensure_list_of_strings**:  
+- **ensure_list_of_strings**:
   Ensures that fields like `from_`, `to_`, `source`, `destination`, and `tag` are lists of strings. If a single string is provided, it converts it into a list.
 
-- **ensure_unique_items**:  
+- **ensure_unique_items**:
   Ensures that the items in list fields are unique, preventing duplicate entries.
 
-- **validate_tags**:  
+- **validate_tags**:
   Ensures that only allowed tag string values are used.
 
-- **validate_nat64_dns_rewrite_compatibility**:  
+- **validate_nat64_dns_rewrite_compatibility**:
   Ensures that DNS rewrite is not used with NAT64 type rules.
 
-- **validate_bidirectional_nat_compatibility**:  
+- **validate_bidirectional_nat_compatibility**:
   Ensures that bi-directional static NAT is not used with destination translation.
 
 ### Container Validation in `NatRuleCreateModel`
 
-- **validate_container**:  
+- **validate_container**:
   After model initialization, this validator checks that exactly one of the container fields (`folder`, `snippet`, or `device`) is provided. If not, it raises a `ValueError`.
 
 ### Move Configuration Validation in `NatRuleMoveModel`
 
-- **validate_move_configuration**:  
+- **validate_move_configuration**:
   Ensures that when the `destination` is `before` or `after`, the `destination_rule` field is provided. Conversely, if the `destination` is `top` or `bottom`, `destination_rule` must not be provided.
 
 ### DynamicIpAndPort Validation
 
-- **validate_dynamic_ip_and_port**:  
+- **validate_dynamic_ip_and_port**:
   Ensures that either `translated_address` or `interface_address` is provided, but not both.
 
 ### SourceTranslation Validation
 
-- **validate_source_translation**:  
+- **validate_source_translation**:
   Ensures that exactly one source translation type is provided.
 
 ### StaticIp Validation
 
-- **ensure_string_yes_no**:  
+- **ensure_string_yes_no**:
   Ensures that the `bi_directional` field is either 'yes', 'no', or None. Also converts boolean values to 'yes'/'no' strings.
 
 ## Usage Examples

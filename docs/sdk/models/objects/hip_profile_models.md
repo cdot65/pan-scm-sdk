@@ -2,7 +2,7 @@
 
 ## Overview
 
-The HIP Profile models provide a structured way to manage Host Information Profile (HIP) profiles in Palo Alto Networks' 
+The HIP Profile models provide a structured way to manage Host Information Profile (HIP) profiles in Palo Alto Networks'
 Strata Cloud Manager. These models define the match criteria expressions used to associate HIP objects with policy rules,
 enabling dynamic security policy enforcement based on host posture assessments.
 
@@ -18,7 +18,7 @@ enabling dynamic security policy enforcement based on host posture assessments.
 | device           | str                  | No*      | None    | Device where profile is defined. Max length: 64 chars                  |
 | id               | UUID                 | Yes**    | None    | UUID of the HIP profile (required for update/response)                 |
 
-\* Exactly one container type (folder/snippet/device) must be provided for create operations  
+\* Exactly one container type (folder/snippet/device) must be provided for create operations
 \** Only required for update and response models
 
 ## Exceptions

@@ -443,17 +443,17 @@ try:
       "description": "Test server group",
       "tag": ["Test"]
    }
-   
+
    # Create the group using the unified client interface
    new_group = client.address_group.create(group_config)
-   
+
    # Commit changes directly from the client
    result = client.commit(
       folders=["Texas"],
       description="Added test group",
       sync=True
    )
-   
+
    # Check job status directly from the client
    status = client.get_job_status(result.job_id)
 

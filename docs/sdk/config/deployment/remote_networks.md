@@ -170,7 +170,7 @@ ecmp_network = client.remote_networks.create(ecmp_config)
 ```python
 # Fetch by name and folder
 network = client.remote_networks.fetch(
-    name="branch-office-1", 
+    name="branch-office-1",
     folder="Remote Networks"
 )
 print(f"Found network: {network.name}")

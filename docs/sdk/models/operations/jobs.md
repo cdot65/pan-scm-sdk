@@ -370,14 +370,14 @@ while not completed and attempt < max_attempts:
    # Wait between checks
    time.sleep(5)
    attempt += 1
-   
+
    # Get current job status
    status = client.operations.get_job_status(job_id)
    job = status.data[0]
-   
+
    # Print progress
    print(f"Status: {job.status_str} ({job.percent}%)")
-   
+
    # Check if job is completed or failed
    if job.job_status in ["FIN", "FAIL"]:
       completed = True

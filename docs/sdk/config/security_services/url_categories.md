@@ -422,7 +422,7 @@ except MissingQueryParameterError as e:
 3. **Client Usage**
     - Use the unified client interface (`client.url_category`) for simpler code
     - Perform commits directly on the client (`client.commit()`)
-    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`) 
+    - Monitor jobs using client methods (`client.get_job_status()`, `client.list_jobs()`)
     - Initialize the client once and reuse across different object types
 
 4. **Category Types**

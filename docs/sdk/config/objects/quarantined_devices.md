@@ -176,23 +176,23 @@ try:
     # Create the device
     new_device = client.quarantined_devices.create(new_device_data)
     print(f"Created quarantined device: {new_device.host_id}")
-    
+
     # List all quarantined devices
     all_devices = client.quarantined_devices.list()
     print(f"Total quarantined devices: {len(all_devices)}")
-    
+
     # List devices with filters
     filtered_devices = client.quarantined_devices.list(serial_number="PA-987654321")
     print(f"Found {len(filtered_devices)} devices with specified serial number")
-    
+
     # Delete the device we just created
     client.quarantined_devices.delete(new_device.host_id)
     print(f"Deleted quarantined device: {new_device.host_id}")
-    
+
     # Verify deletion
     remaining_devices = client.quarantined_devices.list(host_id=new_device.host_id)
     print(f"Devices remaining after deletion: {len(remaining_devices)}")
-    
+
 except Exception as e:
     print(f"Error: {e}")
 ```

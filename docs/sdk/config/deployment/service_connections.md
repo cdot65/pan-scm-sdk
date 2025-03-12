@@ -370,17 +370,17 @@ try:
       "onboarding_type": "classic",
       "subnets": ["10.0.0.0/24", "192.168.1.0/24"]
    }
-   
+
    # Create the service connection
    new_connection = client.service_connection.create(service_connection_config)
-   
+
    # Commit changes directly from the client
    result = client.commit(
       folders=["Service Connections"],
       description="Added test service connection",
       sync=True
    )
-   
+
    # Check job status directly from the client
    status = client.get_job_status(result.job_id)
 

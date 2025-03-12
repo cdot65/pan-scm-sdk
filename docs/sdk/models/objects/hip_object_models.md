@@ -2,7 +2,7 @@
 
 ## Overview
 
-The HIP Object models provide a structured way to manage Host Information Profile (HIP) objects in Palo Alto Networks' 
+The HIP Object models provide a structured way to manage Host Information Profile (HIP) objects in Palo Alto Networks'
 Strata Cloud Manager. These models support comprehensive host profiling including host information, network details,
 security products, mobile device management, and certificate validation.
 
