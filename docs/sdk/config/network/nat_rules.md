@@ -26,32 +26,32 @@ The `NatRule` class manages NAT rule objects in Palo Alto Networks' Strata Cloud
 
 ## Core Methods
 
-| Method     | Description                                                  | Parameters                                                                                                                                                | Return Type                  |
-|------------|--------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
-| `create()` | Creates a new NAT rule object                                | `data: Dict[str, Any]`, `position: str = "pre"`                                                                                                           | `NatRuleResponseModel`       |
-| `get()`    | Retrieves a NAT rule object by its unique ID                 | `object_id: str`                                                                                                                                          | `NatRuleResponseModel`       |
-| `update()` | Updates an existing NAT rule object                          | `rule: NatRuleUpdateModel`, `position: str = "pre"`                                                                                                       | `NatRuleResponseModel`       |
+| Method     | Description                                                   | Parameters                                                                                                                                                | Return Type                  |
+|------------|---------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| `create()` | Creates a new NAT rule object                                 | `data: Dict[str, Any]`, `position: str = "pre"`                                                                                                           | `NatRuleResponseModel`       |
+| `get()`    | Retrieves a NAT rule object by its unique ID                  | `object_id: str`                                                                                                                                          | `NatRuleResponseModel`       |
+| `update()` | Updates an existing NAT rule object                           | `rule: NatRuleUpdateModel`, `position: str = "pre"`                                                                                                       | `NatRuleResponseModel`       |
 | `list()`   | Lists NAT rule objects with optional filtering and containers | `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`, `position: str = "pre"`, `exact_match: bool = False`, plus additional filters | `List[NatRuleResponseModel]` |
-| `fetch()`  | Fetches a single NAT rule by its name within a container     | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`, `position: str = "pre"`                                          | `NatRuleResponseModel`       |
-| `delete()` | Deletes a NAT rule object by its ID                          | `object_id: str`                                                                                                                                          | `None`                       |
+| `fetch()`  | Fetches a single NAT rule by its name within a container      | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`, `position: str = "pre"`                                          | `NatRuleResponseModel`       |
+| `delete()` | Deletes a NAT rule object by its ID                           | `object_id: str`                                                                                                                                          | `None`                       |
 
 ## NAT Rule Model Attributes
 
-| Attribute                   | Type                 | Required      | Description                                                |
-|-----------------------------|--------------------- |---------------|------------------------------------------------------------|
-| `name`                      | str                  | Yes           | The name of the NAT rule                                  |
-| `id`                        | UUID                 | Yes*          | Unique identifier (response only)                         |
-| `nat_type`                  | NatType              | No            | The type of NAT rule (`ipv4`, `nat64`, `nptv6`)          |
-| `service`                   | str                  | No            | The service associated with the NAT translation           |
-| `destination`               | List[str]            | No            | Destination addresses or subnets for the NAT rule         |
-| `source`                    | List[str]            | No            | Source addresses or subnets for the NAT rule              |
-| `tag`                       | List[str]            | No            | Tags associated with the NAT rule (only 'Automation' and 'Decrypted' allowed) |
-| `disabled`                  | bool                 | No            | Indicates whether the NAT rule is disabled                |
-| `source_translation`        | SourceTranslation    | No            | Source translation configuration                          |
-| `destination_translation`   | DestinationTranslation | No          | Destination translation configuration                     |
-| `folder`                    | str                  | Conditionally | The folder container where the NAT rule is defined        |
-| `snippet`                   | str                  | Conditionally | The snippet container (if applicable)                     |
-| `device`                    | str                  | Conditionally | The device container (if applicable)                      |
+| Attribute                 | Type                   | Required      | Description                                              |
+|---------------------------|------------------------|---------------|----------------------------------------------------------|
+| `name`                    | str                    | Yes           | The name of the NAT rule                                 |
+| `id`                      | UUID                   | Yes*          | Unique identifier (response only)                        |
+| `nat_type`                | NatType                | No            | The type of NAT rule (`ipv4`, `nat64`, `nptv6`)          |
+| `service`                 | str                    | No            | The service associated with the NAT translation          |
+| `destination`             | List[str]              | No            | Destination addresses or subnets for the NAT rule        |
+| `source`                  | List[str]              | No            | Source addresses or subnets for the NAT rule             |
+| `tag`                     | List[str]              | No            | Tags associated with the NAT rule (only strings allowed) |
+| `disabled`                | bool                   | No            | Indicates whether the NAT rule is disabled               |
+| `source_translation`      | SourceTranslation      | No            | Source translation configuration                         |
+| `destination_translation` | DestinationTranslation | No            | Destination translation configuration                    |
+| `folder`                  | str                    | Conditionally | The folder container where the NAT rule is defined       |
+| `snippet`                 | str                    | Conditionally | The snippet container (if applicable)                    |
+| `device`                  | str                    | Conditionally | The device container (if applicable)                     |
 
 *\* The `id` field is assigned by the system and is only present in response objects.*
 
@@ -159,7 +159,7 @@ nat_rule_data = {
 
 In addition to these HTTP exceptions, the model validation may raise `ValueError` for various validation issues, such as:
 
-- Using tags other than 'Automation' and 'Decrypted'
+- Using tags other than strings
 - Using DNS rewrite with NAT64 rule type
 - Using bi-directional static NAT with destination translation
 - Providing invalid source translation configurations
@@ -233,7 +233,7 @@ nat_rule_data = {
    "service": "any",
    "destination": ["any"],
    "source": ["10.0.0.0/24"],
-   "tag": ["Automation"],  # Only "Automation" and "Decrypted" tags allowed
+   "tag": ["Automation"],  # Only string tags allowed
    "disabled": False,
    "source_translation": {
       "dynamic_ip_and_port": {
@@ -540,7 +540,7 @@ except ApiError as e:
    - Use clear and descriptive names for NAT rules
    - Validate IP addresses and subnets for both source and destination
    - Use the appropriate source translation type for your use case
-   - Remember that only 'Automation' and 'Decrypted' tags are allowed
+   - Remember that string tags are allowed
    - Be aware that bi-directional static NAT cannot be used with destination translation
 
 3. **Source Translation Selection**

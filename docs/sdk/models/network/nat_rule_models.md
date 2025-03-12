@@ -10,25 +10,25 @@ The NAT Rule models provide a structured way to represent and validate NAT rule 
 
 This is the base model containing fields common to all NAT rule operations.
 
-| Attribute           | Type                 | Required      | Default    | Description                                                                                                     |
-|---------------------|----------------------|---------------|------------|-----------------------------------------------------------------------------------------------------------------|
-| name                | str                  | Yes           | –          | The name of the NAT rule. Allowed pattern: `^[a-zA-Z0-9_ \.-]+$`.                                               |
-| description         | str                  | No            | None       | A description for the NAT rule.                                                                                 |
-| tag                 | List[str]            | No            | Empty list | Tags associated with the NAT rule. Only 'Automation' and 'Decrypted' tags are allowed.                           |
-| disabled            | bool                 | No            | False      | Indicates whether the NAT rule is disabled.                                                                     |
-| nat_type            | NatType              | No            | `ipv4`     | The type of NAT operation. Allowed values: `ipv4`, `nat64`, `nptv6`.                                            |
-| from_ (alias: from) | List[str]            | No            | `["any"]`  | Source zone(s) for the NAT rule.                                                                                |
-| to_ (alias: to)     | List[str]            | No            | `["any"]`  | Destination zone(s) for the NAT rule.                                                                           |
-| to_interface        | str                  | No            | None       | Destination interface of the original packet.                                                                   |
-| source              | List[str]            | No            | `["any"]`  | Source address(es) for the NAT rule.                                                                            |
-| destination         | List[str]            | No            | `["any"]`  | Destination address(es) for the NAT rule.                                                                       |
-| service             | str                  | No            | `"any"`    | The TCP/UDP service associated with the NAT rule.                                                               |
-| source_translation  | SourceTranslation    | No            | None       | Configuration for source translation.                                                                           |
-| destination_translation | DestinationTranslation | No      | None       | Configuration for destination translation.                                                                      |
-| active_active_device_binding | str         | No            | None       | Active/Active device binding.                                                                                   |
-| folder              | str                  | Conditionally | None       | The folder container where the resource is defined. Must match pattern `^[a-zA-Z\d\-_. ]+$` and be ≤ 64 chars.  |
-| snippet             | str                  | Conditionally | None       | The snippet container where the resource is defined. Must match pattern `^[a-zA-Z\d\-_. ]+$` and be ≤ 64 chars. |
-| device              | str                  | Conditionally | None       | The device container where the resource is defined. Must match pattern `^[a-zA-Z\d\-_. ]+$` and be ≤ 64 chars.  |
+| Attribute                    | Type                   | Required      | Default    | Description                                                                                                     |
+|------------------------------|------------------------|---------------|------------|-----------------------------------------------------------------------------------------------------------------|
+| name                         | str                    | Yes           | –          | The name of the NAT rule. Allowed pattern: `^[a-zA-Z0-9_ \.-]+$`.                                               |
+| description                  | str                    | No            | None       | A description for the NAT rule.                                                                                 |
+| tag                          | List[str]              | No            | Empty list | Tags associated with the NAT rule.                                                                              |
+| disabled                     | bool                   | No            | False      | Indicates whether the NAT rule is disabled.                                                                     |
+| nat_type                     | NatType                | No            | `ipv4`     | The type of NAT operation. Allowed values: `ipv4`, `nat64`, `nptv6`.                                            |
+| from_ (alias: from)          | List[str]              | No            | `["any"]`  | Source zone(s) for the NAT rule.                                                                                |
+| to_ (alias: to)              | List[str]              | No            | `["any"]`  | Destination zone(s) for the NAT rule.                                                                           |
+| to_interface                 | str                    | No            | None       | Destination interface of the original packet.                                                                   |
+| source                       | List[str]              | No            | `["any"]`  | Source address(es) for the NAT rule.                                                                            |
+| destination                  | List[str]              | No            | `["any"]`  | Destination address(es) for the NAT rule.                                                                       |
+| service                      | str                    | No            | `"any"`    | The TCP/UDP service associated with the NAT rule.                                                               |
+| source_translation           | SourceTranslation      | No            | None       | Configuration for source translation.                                                                           |
+| destination_translation      | DestinationTranslation | No            | None       | Configuration for destination translation.                                                                      |
+| active_active_device_binding | str                    | No            | None       | Active/Active device binding.                                                                                   |
+| folder                       | str                    | Conditionally | None       | The folder container where the resource is defined. Must match pattern `^[a-zA-Z\d\-_. ]+$` and be ≤ 64 chars.  |
+| snippet                      | str                    | Conditionally | None       | The snippet container where the resource is defined. Must match pattern `^[a-zA-Z\d\-_. ]+$` and be ≤ 64 chars. |
+| device                       | str                    | Conditionally | None       | The device container where the resource is defined. Must match pattern `^[a-zA-Z\d\-_. ]+$` and be ≤ 64 chars.  |
 
 ### NatRuleCreateModel
 
@@ -104,7 +104,7 @@ The models perform strict validation and will raise `ValueError` in scenarios su
 - When list fields contain duplicate values.
 - When creating a NAT rule (`NatRuleCreateModel`), if not exactly one container (`folder`, `snippet`, or `device`) is provided.
 - When moving a NAT rule (`NatRuleMoveModel`), if `destination_rule` is missing for `before`/`after` destinations or provided when not applicable.
-- When tag values other than 'Automation' and 'Decrypted' are used.
+- When tag values other than strings are used.
 - When DNS rewrite is used with NAT64 rule type.
 - When bi-directional static NAT is used with destination translation in the same rule.
 - When neither translated_address nor interface_address is provided for dynamic_ip_and_port, or if both are provided.
@@ -121,7 +121,7 @@ The models perform strict validation and will raise `ValueError` in scenarios su
   Ensures that the items in list fields are unique, preventing duplicate entries.
 
 - **validate_tags**:  
-  Ensures that only allowed tag values ('Automation' and 'Decrypted') are used.
+  Ensures that only allowed tag string values are used.
 
 - **validate_nat64_dns_rewrite_compatibility**:  
   Ensures that DNS rewrite is not used with NAT64 type rules.
