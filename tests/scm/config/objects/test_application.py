@@ -2,6 +2,7 @@
 
 # Standard library imports
 from unittest.mock import MagicMock
+import uuid
 
 # External libraries
 import pytest
@@ -35,11 +36,18 @@ class TestApplicationBase:
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
         self.client = Application(self.mock_scm, max_limit=5000)  # noqa
+        yield
+        # Reset mock methods after each test
+        self.mock_scm.get.reset_mock()
+        self.mock_scm.post.reset_mock()
+        self.mock_scm.put.reset_mock()
+        self.mock_scm.delete.reset_mock()
 
 
-# -------------------- Test Classes Grouped by Functionality --------------------
+# -------------------- Unit Tests --------------------
 
 
+@pytest.mark.unit
 class TestApplicationMaxLimit(TestApplicationBase):
     """Tests for max_limit functionality."""
 
@@ -85,6 +93,10 @@ class TestApplicationMaxLimit(TestApplicationBase):
         assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
+# -------------------- Integration Tests --------------------
+
+
+@pytest.mark.integration
 class TestApplicationList(TestApplicationBase):
     """Tests for listing Application objects."""
 
@@ -580,6 +592,7 @@ class TestApplicationList(TestApplicationBase):
         assert results[5000].risk == 3
 
 
+@pytest.mark.integration
 class TestApplicationCreate(TestApplicationBase):
     """Tests for creating Application objects."""
 
@@ -600,45 +613,9 @@ class TestApplicationCreate(TestApplicationBase):
         assert created_object.name == test_object.name
         assert created_object.folder == test_object.folder
 
-    def test_create_http_error_no_response_content(self):
-        """Test create method when HTTP error has no response content."""
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_response.status_code = 500
-
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_http_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.create(
-                {
-                    "name": "test",
-                    "category": "general-internet",
-                    "folder": "test",
-                    "technology": "peer-to-peer",
-                    "risk": 5,
-                    "subcategory": "file-sharing",
-                }
-            )
-
-    def test_create_error_handler(self):
-        """Test that ErrorHandler.raise_for_error is called with appropriate arguments."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
-            status_code=500,
-            error_code="API_I00013",
-            message="Error occurred",
-            error_type="Malformed Command",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.fetch(name="test-group", folder="Texas")
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Error occurred"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
 
 
+@pytest.mark.integration
 class TestApplicationGet(TestApplicationBase):
     """Tests for retrieving a specific Application object."""
 
@@ -667,40 +644,9 @@ class TestApplicationGet(TestApplicationBase):
         assert retrieved_object.name == mock_response.name
         assert retrieved_object.folder == mock_response.folder
 
-    def test_get_object_not_present_error(self):
-        """Test error handling when the application is not present."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
-            status_code=404,
-            error_code="API_I00013",
-            message="Object not found",
-            error_type="Object Not Present",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.get(object_id)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
-
-    def test_get_http_error_no_response_content(self):
-        """Test get method when HTTP error has no response content."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_response.status_code = 500
-
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.get(object_id)
 
 
+@pytest.mark.integration
 class TestApplicationUpdate(TestApplicationBase):
     """Tests for updating Application objects."""
 
@@ -742,55 +688,9 @@ class TestApplicationUpdate(TestApplicationBase):
         assert updated_object.technology == mock_response.technology
         assert updated_object.risk == mock_response.risk
 
-    def test_update_malformed_command_error(self):
-        """Test error handling when update fails due to malformed command."""
-        update_data = ApplicationUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="updated-app",
-            description="Updated description",
-            category="networking",
-            subcategory="networking",
-            technology="client-server",
-            risk=2,
-        )
-
-        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
-            status_code=400,
-            error_code="API_I00013",
-            message="Update failed",
-            error_type="Malformed Command",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.update(update_data)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Update failed"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-        )
-
-    def test_update_http_error_no_response_content(self):
-        """Test update method when HTTP error has no response content."""
-        update_data = ApplicationUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test",
-            category="general-internet",
-            subcategory="file-sharing",
-            technology="peer-to-peer",
-            risk=2,
-        )
-
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_response.status_code = 500
-
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.put.side_effect = mock_http_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.update(update_data)
 
 
+@pytest.mark.integration
 class TestApplicationDelete(TestApplicationBase):
     """Tests for deleting Application objects."""
 
@@ -806,40 +706,9 @@ class TestApplicationDelete(TestApplicationBase):
             f"/config/objects/v1/applications/{object_id}"
         )
 
-    def test_delete_object_not_present_error(self):
-        """Test error handling when the application to delete is not present."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
-            status_code=404,
-            error_code="API_I00013",
-            message="Object not found",
-            error_type="Object Not Present",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.delete(object_id)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Object not found"
-        assert (
-            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-        )
-
-    def test_delete_http_error_no_response_content(self):
-        """Test delete method when HTTP error has no response content."""
-        object_id = "123e4567-e89b-12d3-a456-426655440000"
-
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_response.status_code = 500
-
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_http_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.delete(object_id)
 
 
+@pytest.mark.integration
 class TestApplicationFetch(TestApplicationBase):
     """Tests for fetching Application objects by name."""
 
@@ -907,25 +776,213 @@ class TestApplicationFetch(TestApplicationBase):
             in error_msg
         )
 
-    def test_fetch_no_container_provided_error(self):
-        """Test that InvalidObjectError is raised when no container parameter is provided."""
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-app")
+    def test_fetch_missing_id_field_error(self):
+        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
+        mock_response = {
+            "name": "test-app",
+            "folder": "Texas",
+            "category": "general-internet",
+        }
 
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 400 - API error: E003" in error_msg
+        self.mock_scm.get.return_value = mock_response  # noqa
 
-    def test_fetch_multiple_containers_provided_error(self):
-        """Test that InvalidObjectError is raised when multiple container parameters are provided."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(
-                name="test-app",
-                folder="Texas",
-                snippet="TestSnippet",
+            self.client.fetch(name="test-app", folder="Texas")
+
+        error = exc_info.value
+        assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
+        assert error.http_status_code == 500
+        assert "HTTP error: 500 - API error: E003" in str(error)
+
+
+# -------------------- Mock Tests --------------------
+
+
+@pytest.mark.mock
+class TestApplicationCreateErrorHandling(TestApplicationBase):
+    """Mock tests for error handling in create operations."""
+    
+    def test_create_http_error_no_response_content(self):
+        """Test create method when HTTP error has no response content."""
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.post.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.create(
+                {
+                    "name": "test",
+                    "category": "general-internet",
+                    "folder": "test",
+                    "technology": "peer-to-peer",
+                    "risk": 5,
+                    "subcategory": "file-sharing",
+                }
             )
 
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 400 - API error: E003" in error_msg
+    def test_create_error_handler(self):
+        """Test that ErrorHandler.raise_for_error is called with appropriate arguments."""
+        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
+            status_code=500,
+            error_code="API_I00013",
+            message="Error occurred",
+            error_type="Malformed Command",
+        )
+
+        test_data = {
+            "name": "test-app",
+            "category": "general-internet",
+            "folder": "test",
+            "technology": "peer-to-peer",
+            "risk": 5,
+            "subcategory": "file-sharing",
+        }
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.create(test_data)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Error occurred"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        )
+
+
+@pytest.mark.mock
+class TestApplicationGetErrorHandling(TestApplicationBase):
+    """Mock tests for error handling in get operations."""
+    
+    def test_get_object_not_present_error(self):
+        """Test error handling when the application is not present."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.get(object_id)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
+
+    def test_get_http_error_no_response_content(self):
+        """Test get method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.get(object_id)
+
+
+@pytest.mark.mock
+class TestApplicationUpdateErrorHandling(TestApplicationBase):
+    """Mock tests for error handling in update operations."""
+    
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        update_data = ApplicationUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="updated-app",
+            description="Updated description",
+            category="networking",
+            subcategory="networking",
+            technology="client-server",
+            risk=2,
+        )
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.update(update_data)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        )
+
+    def test_update_http_error_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        update_data = ApplicationUpdateApiFactory(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test",
+            category="general-internet",
+            subcategory="file-sharing",
+            technology="peer-to-peer",
+            risk=2,
+        )
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.update(update_data)
+
+
+@pytest.mark.mock
+class TestApplicationDeleteErrorHandling(TestApplicationBase):
+    """Mock tests for error handling in delete operations."""
+    
+    def test_delete_object_not_present_error(self):
+        """Test error handling when the application to delete is not present."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.delete(object_id)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
+
+    def test_delete_http_error_no_response_content(self):
+        """Test delete method when HTTP error has no response content."""
+        object_id = "123e4567-e89b-12d3-a456-426655440000"
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+
+        with pytest.raises(HTTPError):
+            self.client.delete(object_id)
+
+
+@pytest.mark.mock
+class TestApplicationFetchErrorHandling(TestApplicationBase):
+    """Mock tests for error handling in fetch operations."""
 
     def test_fetch_http_error_no_response_content(self):
         """Test that an HTTPError without response content in fetch() re-raises the exception."""
@@ -951,7 +1008,27 @@ class TestApplicationFetch(TestApplicationBase):
         assert error.error_code == "E003"
         assert error.http_status_code == 500
         assert "HTTP error: 500 - API error: E003" in str(error)
+            
+    def test_fetch_no_container_provided_error(self):
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="test-app")
 
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+
+    def test_fetch_multiple_containers_provided_error(self):
+        """Test that InvalidObjectError is raised when multiple container parameters are provided."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(
+                name="test-app",
+                folder="Texas",
+                snippet="TestSnippet",
+            )
+
+        error_msg = str(exc_info.value)
+        assert "HTTP error: 400 - API error: E003" in error_msg
+    
     def test_fetch_error_handler(self):
         """Test error handler behavior in fetch method with properly formatted error response."""
         mock_error_response = MagicMock()
@@ -973,31 +1050,148 @@ class TestApplicationFetch(TestApplicationBase):
         self.mock_scm.get.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError) as exc_info:
-            self.client.list(folder="Texas")
+            self.client.fetch(name="test-app", folder="Texas")
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
         assert (
             error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
         )
 
-    def test_fetch_missing_id_field_error(self):
-        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
-        mock_response = {
-            "name": "test-app",
-            "folder": "Texas",
-            "category": "general-internet",
-        }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+# -------------------- Parametrized Tests --------------------
 
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-app", folder="Texas")
 
-        error = exc_info.value
-        assert isinstance(error, InvalidObjectError)
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "HTTP error: 500 - API error: E003" in str(error)
+@pytest.mark.parametrized
+class TestApplicationParametrized(TestApplicationBase):
+    """Parametrized tests for Application functionality."""
+
+    @pytest.mark.parametrize(
+        "category,subcategory,technology,risk",
+        [
+            ("general-internet", "file-sharing", "peer-to-peer", 5),
+            ("business-systems", "ics-protocols", "client-server", 2),
+            ("web-applications", "social-networking", "browser-based", 3),
+        ]
+    )
+    def test_create_application_types(self, category, subcategory, technology, risk):
+        """Test creating applications with different types."""
+        test_object = ApplicationCreateApiFactory(
+            category=category,
+            subcategory=subcategory,
+            technology=technology,
+            risk=risk
+        )
+        
+        mock_response = ApplicationResponseFactory.from_request(test_object)
+        
+        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
+        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
+        
+        # Verify the application attributes match the expected values
+        assert created_object.category == category
+        assert created_object.subcategory == subcategory 
+        assert created_object.technology == technology
+        assert created_object.risk == risk
+
+
+# -------------------- Functional Tests --------------------
+
+
+@pytest.mark.functional
+def test_application_lifecycle(mock_scm):
+    """Functional test for complete application object lifecycle (CRUD)."""
+    # Setup
+    mock_scm.get = MagicMock()
+    mock_scm.post = MagicMock()
+    mock_scm.put = MagicMock()
+    mock_scm.delete = MagicMock()
+    client = Application(mock_scm, max_limit=5000)
+    
+    # 1. Create application
+    create_data = {
+        "name": "test-app-lifecycle",
+        "folder": "Texas",
+        "category": "web-applications",
+        "subcategory": "social-networking",
+        "technology": "browser-based",
+        "risk": 3,
+        "description": "Lifecycle test application",
+        "ports": ["tcp/443,80"]
+    }
+    
+    app_id = "123e4567-e89b-12d3-a456-426655440000"
+    mock_create_response = {
+        "id": app_id,
+        "name": "test-app-lifecycle",
+        "folder": "Texas",
+        "category": "web-applications",
+        "subcategory": "social-networking",
+        "technology": "browser-based",
+        "risk": 3,
+        "description": "Lifecycle test application",
+        "ports": ["tcp/443,80"]
+    }
+    mock_scm.post.return_value = mock_create_response
+    
+    created = client.create(create_data)
+    assert str(created.id) == app_id
+    assert created.name == "test-app-lifecycle"
+    
+    # 2. List applications
+    mock_list_response = {
+        "data": [mock_create_response],
+        "offset": 0,
+        "total": 1,
+        "limit": 100
+    }
+    mock_scm.get.return_value = mock_list_response
+    
+    apps = client.list(folder="Texas")
+    assert len(apps) == 1
+    assert str(apps[0].id) == app_id
+    
+    # 3. Get specific application
+    mock_scm.get.return_value = mock_create_response
+    
+    retrieved = client.get(app_id)
+    assert str(retrieved.id) == app_id
+    
+    # 4. Update application
+    update_data = ApplicationUpdateApiFactory(
+        id=app_id,
+        name="test-app-lifecycle",
+        folder="Texas",
+        category="web-applications",
+        subcategory="social-networking",
+        technology="browser-based",
+        risk=3,
+        description="Updated lifecycle test application",
+        ports=["tcp/443,80,8080"]
+    )
+    
+    mock_update_response = {
+        "id": app_id,
+        "name": "test-app-lifecycle",
+        "folder": "Texas",
+        "category": "web-applications",
+        "subcategory": "social-networking",
+        "technology": "browser-based",
+        "risk": 3,
+        "description": "Updated lifecycle test application",
+        "ports": ["tcp/443,80,8080"]
+    }
+    mock_scm.put.return_value = mock_update_response
+    
+    updated = client.update(update_data)
+    assert updated.description == "Updated lifecycle test application"
+    assert updated.ports == ["tcp/443,80,8080"]
+    
+    # 5. Delete application
+    mock_scm.delete.return_value = None
+    
+    # Should not raise any exceptions
+    client.delete(app_id)
+    mock_scm.delete.assert_called_once_with(f"/config/objects/v1/applications/{app_id}")
 
 
 # -------------------- End of Test Classes --------------------
