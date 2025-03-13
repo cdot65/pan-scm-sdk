@@ -482,14 +482,26 @@ class SecurityZone(BaseObject):
                 details={"error": "Response is not a dictionary"},
             )
 
+        # Handle the expected format (direct object with 'id' field)
         if "id" in response:
             return SecurityZoneResponseModel(**response)
+        # Handle the alternate format (like list() with 'data' array)
+        elif "data" in response and isinstance(response["data"], list):
+            if not response["data"]:
+                raise InvalidObjectError(
+                    message=f"Security zone '{name}' not found",
+                    error_code="E002",
+                    http_status_code=404,
+                    details={"error": "No matching security zone found"},
+                )
+            # Return the first item in the data array
+            return SecurityZoneResponseModel(**response["data"][0])
         else:
             raise InvalidObjectError(
-                message="Invalid response format: missing 'id' field",
+                message="Invalid response format: expected either 'id' or 'data' field",
                 error_code="E003",
                 http_status_code=500,
-                details={"error": "Response missing 'id' field"},
+                details={"error": "Response has invalid structure"},
             )
 
     def delete(

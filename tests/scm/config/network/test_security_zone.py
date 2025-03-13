@@ -415,13 +415,13 @@ class TestSecurityZone(TestSecurityZoneBase):
 
     def test_fetch_with_invalid_response(self):
         """Test fetch method with invalid response."""
-        # Response without an ID field
+        # Response without an ID field or data field
         self.mock_scm.get.return_value = {"name": "test-zone"}
 
         with pytest.raises(InvalidObjectError) as excinfo:
             self.client.fetch(name="test-zone", folder="Test Folder")
 
-        assert "Response missing 'id' field" in str(excinfo.value)
+        assert "Response has invalid structure" in str(excinfo.value)
 
     def test_fetch_response_errors(self):
         """Test fetch method error handling for invalid responses."""
@@ -431,8 +431,97 @@ class TestSecurityZone(TestSecurityZoneBase):
             self.client.fetch(name="test-zone", folder="Test Folder")
         assert "Response is not a dictionary" in str(excinfo.value)
 
-        # Test list-style response (should have direct object, not list)
-        self.mock_scm.get.return_value = {"data": [{"id": "123", "name": "test-zone"}]}
+        # Test valid data list-style response
+        valid_uuid = str(uuid.uuid4())
+        self.mock_scm.get.return_value = {"data": [{"id": valid_uuid, "name": "test-zone"}]}
+
+        # Should now parse the first object in the data array without raising an exception
+        result = self.client.fetch(name="test-zone", folder="Test Folder")
+        assert isinstance(result, SecurityZoneResponseModel)
+        assert result.id == uuid.UUID(valid_uuid)
+        assert result.name == "test-zone"
+
+        # Test empty data list
+        self.mock_scm.get.return_value = {"data": []}
         with pytest.raises(InvalidObjectError) as excinfo:
             self.client.fetch(name="test-zone", folder="Test Folder")
-        assert "Response missing 'id' field" in str(excinfo.value)
+        assert "No matching security zone found" in str(excinfo.value)
+
+    def test_fetch_with_original_response_format(self, sample_security_zone_dict):
+        """Test fetch method with original response format (direct object with id field)."""
+        # Set up the mock response in the original format
+        self.mock_scm.get.return_value = sample_security_zone_dict
+
+        # Call fetch and verify the result
+        result = self.client.fetch(
+            name=sample_security_zone_dict["name"], folder=sample_security_zone_dict["folder"]
+        )
+
+        # Verify that the response was correctly processed
+        assert isinstance(result, SecurityZoneResponseModel)
+        assert result.id == uuid.UUID(sample_security_zone_dict["id"])
+        assert result.name == sample_security_zone_dict["name"]
+        assert result.folder == sample_security_zone_dict["folder"]
+
+        # Verify API call parameters
+        self.mock_scm.get.assert_called_once()
+        call_args = self.mock_scm.get.call_args
+        assert call_args[0][0] == self.client.ENDPOINT
+        assert call_args[1]["params"]["name"] == sample_security_zone_dict["name"]
+        assert call_args[1]["params"]["folder"] == sample_security_zone_dict["folder"]
+
+    def test_fetch_with_list_response_format(self, sample_security_zone_dict):
+        """Test fetch method with list response format (data array with objects)."""
+        # Create a deep copy to avoid modifying the original
+        zone_data = sample_security_zone_dict.copy()
+
+        # Set up the mock response in the list format (like list() method returns)
+        self.mock_scm.get.return_value = {"data": [zone_data], "limit": 20, "offset": 0, "total": 1}
+
+        # Call fetch and verify the result
+        result = self.client.fetch(name=zone_data["name"], folder=zone_data["folder"])
+
+        # Verify that the response was correctly processed from the data array
+        assert isinstance(result, SecurityZoneResponseModel)
+        assert result.id == uuid.UUID(zone_data["id"])
+        assert result.name == zone_data["name"]
+        assert result.folder == zone_data["folder"]
+
+        # Verify API call parameters
+        self.mock_scm.get.assert_called_once()
+        call_args = self.mock_scm.get.call_args
+        assert call_args[0][0] == self.client.ENDPOINT
+        assert call_args[1]["params"]["name"] == zone_data["name"]
+        assert call_args[1]["params"]["folder"] == zone_data["folder"]
+
+    def test_fetch_with_multiple_objects_in_data(self, sample_security_zone_dict):
+        """Test fetch method when data array contains multiple objects."""
+        # Create two zone dictionaries with different IDs and names
+        zone1 = sample_security_zone_dict.copy()
+        zone1["id"] = str(uuid.uuid4())
+        zone1["name"] = "zone1"
+
+        zone2 = sample_security_zone_dict.copy()
+        zone2["id"] = str(uuid.uuid4())
+        zone2["name"] = "zone2"
+
+        # Set up the mock response with multiple objects in data array
+        self.mock_scm.get.return_value = {
+            "data": [zone1, zone2],
+            "limit": 20,
+            "offset": 0,
+            "total": 2,
+        }
+
+        # Call fetch and verify the result
+        result = self.client.fetch(name=zone1["name"], folder=zone1["folder"])
+
+        # Verify that ONLY the first object in the data array was used
+        assert isinstance(result, SecurityZoneResponseModel)
+        assert result.id == uuid.UUID(zone1["id"])
+        assert result.name == zone1["name"]
+        assert result.folder == zone1["folder"]
+
+        # Ensure we didn't get the second object
+        assert result.name != zone2["name"]
+        assert result.id != uuid.UUID(zone2["id"])
