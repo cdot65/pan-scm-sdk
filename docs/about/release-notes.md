@@ -2,6 +2,17 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.20
+
+**Released:** March 13, 2025
+
+### Fixed
+
+- **Security Zone**: Added temporary workaround for inconsistent API response format in the `fetch()` method
+  - Now supports both direct object response format and list-style data array format
+  - Ensures backward compatibility when API format is corrected
+  - Comprehensive test coverage for both response formats
+
 ## Version 0.3.19
 
 **Released:** March 12, 2025
