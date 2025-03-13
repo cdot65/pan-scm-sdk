@@ -494,6 +494,17 @@ class SecurityZone(BaseObject):
                     http_status_code=404,
                     details={"error": "No matching security zone found"},
                 )
+            if "id" not in response["data"][0]:
+                raise InvalidObjectError(
+                    message="Invalid response format: missing 'id' field in data array",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"error": "Response data item missing 'id' field"},
+                )
+            if len(response["data"]) > 1:
+                self.logger.warning(
+                    f"Multiple security zones found for '{name}'. Using the first one."
+                )
             # Return the first item in the data array
             return SecurityZoneResponseModel(**response["data"][0])
         else:

@@ -447,6 +447,12 @@ class TestSecurityZone(TestSecurityZoneBase):
             self.client.fetch(name="test-zone", folder="Test Folder")
         assert "No matching security zone found" in str(excinfo.value)
 
+        # Test data item without id field
+        self.mock_scm.get.return_value = {"data": [{"name": "test-zone", "folder": "Test Folder"}]}
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="test-zone", folder="Test Folder")
+        assert "Response data item missing 'id' field" in str(excinfo.value)
+
     def test_fetch_with_original_response_format(self, sample_security_zone_dict):
         """Test fetch method with original response format (direct object with id field)."""
         # Set up the mock response in the original format
@@ -494,8 +500,10 @@ class TestSecurityZone(TestSecurityZoneBase):
         assert call_args[1]["params"]["name"] == zone_data["name"]
         assert call_args[1]["params"]["folder"] == zone_data["folder"]
 
-    def test_fetch_with_multiple_objects_in_data(self, sample_security_zone_dict):
+    def test_fetch_with_multiple_objects_in_data(self, sample_security_zone_dict, monkeypatch):
         """Test fetch method when data array contains multiple objects."""
+        from unittest.mock import MagicMock
+
         # Create two zone dictionaries with different IDs and names
         zone1 = sample_security_zone_dict.copy()
         zone1["id"] = str(uuid.uuid4())
@@ -513,6 +521,10 @@ class TestSecurityZone(TestSecurityZoneBase):
             "total": 2,
         }
 
+        # Mock the logger.warning method
+        mock_warning = MagicMock()
+        monkeypatch.setattr(self.client.logger, "warning", mock_warning)
+
         # Call fetch and verify the result
         result = self.client.fetch(name=zone1["name"], folder=zone1["folder"])
 
@@ -525,3 +537,8 @@ class TestSecurityZone(TestSecurityZoneBase):
         # Ensure we didn't get the second object
         assert result.name != zone2["name"]
         assert result.id != uuid.UUID(zone2["id"])
+
+        # Verify that the warning was logged
+        mock_warning.assert_called_once()
+        call_args = mock_warning.call_args[0][0]
+        assert "Multiple security zones found" in call_args
