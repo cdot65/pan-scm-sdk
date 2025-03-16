@@ -19,7 +19,7 @@ and outputs when interacting with the SCM API.
 | device    | str  | No*      | None    | Device where tag is defined. Max length: 64 chars                                          |
 | id        | UUID | Yes**    | None    | UUID of the tag (response only)                                                            |
 
-\* Exactly one container type (folder/snippet/device) must be provided
+\* Exactly one container type (folder/snippet/device) must be provided for create operations
 \** Only required for response model
 
 ## Exceptions
@@ -27,7 +27,7 @@ and outputs when interacting with the SCM API.
 The Tag models can raise the following exceptions during validation:
 
 - **ValueError**: Raised in several scenarios:
-    - When multiple container types (folder/snippet/device) are specified
+    - When multiple container types (folder/snippet/device) are specified for create operations
     - When no container type is specified for create operations
     - When an invalid color name is provided
     - When name pattern validation fails
@@ -45,29 +45,15 @@ For create operations, exactly one container type must be specified:
 <!-- termynal -->
 
 ```python
-# Using dictionary
-from scm.config.objects import Tag
-
-# Error: multiple containers specified
-try:
-    tag_dict = {
-        "name": "invalid-tag",
-        "folder": "Texas",
-        "device": "fw01"  # Can't specify both folder and device
-    }
-    tag = Tag(api_client)
-    response = tag.create(tag_dict)
-except ValueError as e:
-    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-
-# Using model directly
+# This will raise a validation error
 from scm.models.objects import TagCreateModel
 
+# Error: multiple containers specified
 try:
     tag = TagCreateModel(
         name="invalid-tag",
         folder="Texas",
-        device="fw01"
+        device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
@@ -84,26 +70,37 @@ Colors must be one of the predefined values:
 <!-- termynal -->
 
 ```python
-# Using dictionary
-try:
-    tag_dict = {
-        "name": "invalid-tag",
-        "folder": "Texas",
-        "color": "Invalid Color"  # Must be a valid color name
-    }
-    response = tag.create(tag_dict)
-except ValueError as e:
-    print(e)  # "Color must be one of: Azure Blue, Black, Blue, ..."
-
-# Using model directly
+# This will raise a validation error
 try:
     tag = TagCreateModel(
         name="invalid-tag",
         folder="Texas",
-        color="Invalid Color"
+        color="Invalid Color"  # Must be a valid color name
     )
 except ValueError as e:
     print(e)  # "Color must be one of: Azure Blue, Black, Blue, ..."
+```
+
+</div>
+
+### Name Validation
+
+Tag names must match the required pattern:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# This will raise a validation error
+try:
+    tag = TagCreateModel(
+        name="invalid@tag!",  # Contains invalid characters
+        folder="Texas",
+        color="Red"
+    )
+except ValueError as e:
+    print(e)  # "String should match pattern '^[a-zA-Z0-9_ \\.-\\[\\]\\-\\&\\(\\)]+$'"
 ```
 
 </div>
@@ -118,6 +115,8 @@ except ValueError as e:
 
 ```python
 # Using dictionary
+from scm.config.objects import Tag
+
 tag_dict = {
     "name": "production",
     "color": "Red",
@@ -131,15 +130,75 @@ response = tag.create(tag_dict)
 # Using model directly
 from scm.models.objects import TagCreateModel
 
-tag = TagCreateModel(
+tag_model = TagCreateModel(
     name="production",
     color="Red",
     comments="Production environment resources",
     folder="Texas"
 )
 
-payload = tag.model_dump(exclude_unset=True)
+payload = tag_model.model_dump(exclude_unset=True)
 response = tag.create(payload)
+```
+
+</div>
+
+### Creating Tags with Different Colors
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Create multiple tags with different colors
+tag_models = [
+    TagCreateModel(
+        name="development",
+        color="Green",
+        comments="Development environment resources",
+        folder="Texas"
+    ),
+    TagCreateModel(
+        name="staging",
+        color="Yellow",
+        comments="Staging environment resources",
+        folder="Texas"
+    ),
+    TagCreateModel(
+        name="testing",
+        color="Blue",
+        comments="Testing environment resources",
+        folder="Texas"
+    )
+]
+
+# Create each tag
+for tag_model in tag_models:
+    payload = tag_model.model_dump(exclude_unset=True)
+    response = tag.create(payload)
+    print(f"Created tag: {response.name} with color: {response.color}")
+```
+
+</div>
+
+### Creating a Tag in a Snippet
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Create a tag in a snippet instead of a folder
+snippet_tag = TagCreateModel(
+    name="shared-tag",
+    color="Orange",
+    comments="Shared across multiple folders",
+    snippet="Common"  # Using snippet instead of folder
+)
+
+payload = snippet_tag.model_dump(exclude_unset=True)
+response = tag.create(payload)
+print(f"Created tag in snippet: {response.name}")
 ```
 
 </div>
@@ -152,6 +211,8 @@ response = tag.create(payload)
 
 ```python
 # Using dictionary
+from scm.config.objects import Tag
+
 update_dict = {
     "id": "123e4567-e89b-12d3-a456-426655440000",
     "name": "prod-updated",
@@ -159,6 +220,7 @@ update_dict = {
     "comments": "Updated production tag"
 }
 
+tag = Tag(api_client)
 response = tag.update(update_dict)
 
 # Using model directly
@@ -173,6 +235,45 @@ update_tag = TagUpdateModel(
 
 payload = update_tag.model_dump(exclude_unset=True)
 response = tag.update(payload)
+```
+
+</div>
+
+### Retrieving Tags
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get tag by ID
+tag_id = "123e4567-e89b-12d3-a456-426655440000"
+tag_response = tag.get(tag_id)
+print(f"Retrieved tag: {tag_response.name}")
+
+# List tags with filters
+tag_list = tag.list(folder="Texas", color="Red")
+print(f"Found {len(tag_list)} red tags")
+
+# Filter tags by name pattern
+filtered_tags = tag.list(folder="Texas", name="prod")
+for t in filtered_tags:
+    print(f"Tag: {t.name}, Color: {t.color}")
+```
+
+</div>
+
+### Deleting Tags
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Delete tag by ID
+tag_id = "123e4567-e89b-12d3-a456-426655440000"
+tag.delete(tag_id)
+print(f"Deleted tag with ID: {tag_id}")
 ```
 
 </div>

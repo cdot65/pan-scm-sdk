@@ -12,6 +12,8 @@
     - [Retrieving Remote Networks](#retrieving-remote-networks)
     - [Updating Remote Networks](#updating-remote-networks)
     - [Listing Remote Networks](#listing-remote-networks)
+    - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Remote Networks](#deleting-remote-networks)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -67,28 +69,35 @@ The `RemoteNetworks` class provides functionality to manage remote network confi
 
 ## Basic Configuration
 
+The Remote Networks service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
 <div class="termy">
 
 <!-- termynal -->
 ```python
 from scm.client import ScmClient
 
-# Initialize client using the unified client approach
+# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    remote_networks_max_limit=5000  # Optional: set custom max_limit
+    tsg_id="your_tsg_id"
 )
 
-# Access the remote_networks module directly through the client
-# client.remote_networks is automatically initialized for you
+# Access the Remote Networks service directly through the client
+# No need to create a separate RemoteNetworks instance
+networks = client.remote_networks
 ```
 
 </div>
 
-You can also use the traditional approach if preferred:
+### Traditional Service Instantiation (Legacy)
 
+<div class="termy">
+
+<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.deployment import RemoteNetworks
@@ -100,9 +109,14 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize RemoteNetworks object with custom max_limit
-remote_networks = RemoteNetworks(client, max_limit=5000)
+# Initialize RemoteNetworks object explicitly
+networks = RemoteNetworks(client)
 ```
+
+</div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -112,6 +126,15 @@ remote_networks = RemoteNetworks(client, max_limit=5000)
 
 <!-- termynal -->
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
 # Standard remote network configuration
 standard_config = {
     "name": "branch-office-1",
@@ -221,7 +244,7 @@ updated_network = client.remote_networks.update(existing_network)
 
 <!-- termynal -->
 ```python
-# List with direct filter parameters
+# Pass filters directly into the list method
 filtered_networks = client.remote_networks.list(
     folder='Remote Networks',
     regions=['us-east-1'],
@@ -234,7 +257,7 @@ for network in filtered_networks:
     print(f"Region: {network.region}")
     print(f"Subnets: {', '.join(network.subnets)}")
 
-# Define filter parameters as dictionary
+# Define filter parameters as a dictionary
 list_params = {
     "folder": "Remote Networks",
     "regions": ["us-west-2"],
@@ -243,6 +266,94 @@ list_params = {
 
 # List with filters as kwargs
 filtered_networks = client.remote_networks.list(**list_params)
+```
+
+</div>
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `regions`, `license_types`, and `spn_names`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+# Only return remote networks defined exactly in 'Remote Networks'
+exact_networks = client.remote_networks.list(
+   folder='Remote Networks',
+   exact_match=True
+)
+
+for network in exact_networks:
+   print(f"Exact match: {network.name} in {network.folder}")
+
+# Exclude all remote networks from the 'All' folder
+no_all_networks = client.remote_networks.list(
+   folder='Remote Networks',
+   exclude_folders=['All']
+)
+
+for network in no_all_networks:
+   assert network.folder != 'All'
+   print(f"Filtered out 'All': {network.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = client.remote_networks.list(
+   folder='Remote Networks',
+   exact_match=True,
+   exclude_folders=['All'],
+   regions=['us-east-1']
+)
+
+for network in combined_filters:
+   print(f"Combined filters result: {network.name} in {network.folder}")
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+from scm.client import ScmClient
+from scm.config.deployment import RemoteNetworks
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Two options for setting max_limit:
+
+# Option 1: Use the unified client interface but create a custom RemoteNetworks instance with max_limit
+remote_networks_service = RemoteNetworks(client, max_limit=4321)
+all_networks1 = remote_networks_service.list(folder='Remote Networks')
+
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_networks2 = client.remote_networks.list(folder='Remote Networks')
+
+# Both options will auto-paginate through all available objects.
+# The networks are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -277,7 +388,6 @@ commit_params = {
 }
 
 # Commit the changes directly on the client
-# Note: All commit operations should be performed on the client directly
 result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
@@ -291,11 +401,11 @@ print(f"Commit job ID: {result.job_id}")
 
 <!-- termynal -->
 ```python
-# Get status of specific job directly on the client
+# Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs directly on the client
+# List recent jobs directly from the client
 recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
@@ -338,17 +448,17 @@ try:
         "subnets": ["10.0.0.0/24"]
     }
 
-    # Create the network using the unified client
+    # Create the network using the unified client interface
     new_network = client.remote_networks.create(network_config)
 
-    # Commit changes directly on the client
+    # Commit changes directly from the client
     result = client.commit(
         folders=["Remote Networks"],
         description="Added test network",
         sync=True
     )
 
-    # Check job status on the client
+    # Check job status directly from the client
     status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
@@ -368,11 +478,10 @@ except MissingQueryParameterError as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified `ScmClient` approach for simpler code
-    - Access remote networks operations via `client.remote_networks` property
-    - Perform commit operations directly on the client
-    - Monitor jobs directly on the client
-    - Set appropriate max_limit parameters for large datasets using `remote_networks_max_limit`
+    - Use the unified client interface (`client.remote_networks`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
 
 2. **Network Configuration**
     - Use descriptive names for networks and tunnels
@@ -388,26 +497,22 @@ except MissingQueryParameterError as e:
     - Configure appropriate timeouts
     - Document failover scenarios
 
-4. **Performance**
-    - Use appropriate max_limit settings
-    - Implement pagination for large lists
-    - Cache frequently accessed data
-    - Monitor API rate limits
-    - Use efficient filtering
+4. **Container Management**
+    - Always specify the correct folder container
+    - Use consistent folder names across operations
+    - Validate folder existence before operations
 
-5. **Security**
-    - Follow least privilege principle
-    - Validate input data
-    - Secure tunnel configurations
-    - Monitor authentication
-    - Audit configuration changes
+5. **Error Handling**
+    - Implement comprehensive error handling for all operations
+    - Check job status after commits
+    - Handle specific exceptions before generic ones
+    - Log error details for troubleshooting
 
-6. **Error Handling**
-    - Implement comprehensive error handling
-    - Log configuration changes
-    - Monitor commit status
-    - Track job completion
-    - Document error patterns
+6. **Performance**
+    - Use appropriate pagination for list operations
+    - Cache frequently accessed networks
+    - Implement proper retry mechanisms
+    - Monitor timeout settings
 
 ## Full Script Examples
 

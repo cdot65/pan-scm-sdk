@@ -1,31 +1,10 @@
 # Jobs Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-   1. [JobDetails Model](#jobdetails-model)
-   2. [JobStatusData Model](#jobstatusdata-model)
-   3. [JobListItem Model](#joblistitem-model)
-   4. [JobStatusResponse Model](#jobstatusresponse-model)
-   5. [JobListResponse Model](#joblistresponse-model)
-3. [Model Validators](#model-validators)
-   1. [Timestamp Validation](#timestamp-validation)
-   2. [Datetime Serialization](#datetime-serialization)
-4. [Usage Examples](#usage-examples)
-   1. [Working with Job Details](#working-with-job-details)
-   2. [Processing Job Status Data](#processing-job-status-data)
-   3. [Working with Job Lists](#working-with-job-lists)
-   4. [Using Jobs with Unified Client](#using-jobs-with-unified-client)
-   5. [Monitoring Long-Running Jobs](#monitoring-long-running-jobs)
-5. [Best Practices](#best-practices)
-6. [Related Models](#related-models)
-
 ## Overview
 
 The Jobs models provide a structured way to track and monitor job status and details in Palo Alto Networks' Strata Cloud Manager. These models support both individual job status queries and paginated job list responses. The models handle validation and serialization of job data when interacting with the SCM API.
 
-## Model Attributes
+## Attributes
 
 ### JobDetails Model
 
@@ -101,6 +80,14 @@ The Jobs models provide a structured way to track and monitor job status and det
 | total     | int                | Yes      | None    | Total number of jobs available  |
 | limit     | int                | Yes      | None    | Max number of jobs per page     |
 | offset    | int                | Yes      | None    | Current offset in result set    |
+
+## Exceptions
+
+The Jobs models can raise the following exceptions during validation:
+
+- **ValueError**: Raised when required fields are missing or have invalid values
+- **ValidationError**: Raised when field formats or data types are incorrect
+- **TypeError**: Raised when incompatible types are provided
 
 ## Model Validators
 
@@ -392,34 +379,3 @@ if not completed:
 ```
 
 </div>
-
-## Best Practices
-
-1. **Job Monitoring**
-   - Implement timeouts when polling for job completion
-   - Use exponential backoff for job status checks
-   - Check both job_status and result_str for accurate status
-   - Handle job failures gracefully with appropriate error messages
-
-2. **Filtering and Pagination**
-   - Use appropriate limit/offset values for listing jobs
-   - Filter jobs by parent_id to group related operations
-   - Consider job age when listing (recent jobs are usually more relevant)
-   - Use pagination to navigate large result sets efficiently
-
-3. **Error Handling**
-   - Parse job details for specific error messages
-   - Log job failures with sufficient context for troubleshooting
-   - Implement retry logic for transient failures
-   - Provide meaningful feedback to users about job progress
-
-4. **Performance**
-   - Batch job status checks when monitoring multiple jobs
-   - Use appropriate polling intervals (5-10 seconds)
-   - Avoid excessive job status checks
-   - Consider using job notifications when available
-
-## Related Models
-
-- [CandidatePushModel](candidate_push.md) - Used for initiating commit operations
-- [CandidatePushResponseModel](candidate_push.md#response-model-attributes) - Response from commit operations

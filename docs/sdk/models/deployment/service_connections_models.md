@@ -2,9 +2,11 @@
 
 ## Overview
 
-The Service Connection models provide a structured way to manage service connections in Palo Alto Networks' Strata Cloud Manager.
-These models support defining connectivity to cloud service providers with various parameters including BGP configuration,
-protocol settings, QoS, and NAT options. The models handle validation of inputs and outputs when interacting with the SCM API.
+The Service Connection models are a key component in Palo Alto Networks' Strata Cloud Manager SDK, providing a structured way to manage and configure connections to cloud service providers. These models work in tandem with Remote Networks and BGP Routing configurations to establish secure, optimized connectivity between your on-premises infrastructure and cloud resources.
+
+Service Connection models support defining connectivity to cloud service providers with various parameters including BGP configuration, protocol settings, QoS, and NAT options. By utilizing these models, you can programmatically manage and customize your cloud connectivity, ensuring consistent security policies and efficient routing across hybrid and multi-cloud environments.
+
+The models handle validation of inputs and outputs when interacting with the SCM API, offering a robust interface for creating, updating, and managing service connections. This abstraction layer simplifies the complex task of configuring cloud connectivity, allowing for more streamlined and error-resistant network management.
 
 ## Attributes
 
@@ -28,193 +30,163 @@ protocol settings, QoS, and NAT options. The models handle validation of inputs 
 
 \*** Only required for update and response models
 
-## Model Structures
+## Exceptions
 
-### OnboardingType Enum
+The Service Connection models can raise the following exceptions during validation:
 
-Defines the types of onboarding for service connections:
+- **ValueError**: Raised in several scenarios:
+  - When required fields are missing (name, region, ipsec_tunnel)
+  - When name doesn't match the required pattern
+  - When invalid subnet formats are provided
+  - When invalid values are provided for enums (onboarding_type, no_export_community)
+  - When BGP configuration is incomplete or inconsistent
+  - When both IPv4 and IPv6 addresses are used inconsistently
 
-| Value       | Description                     |
-|-------------|---------------------------------|
-| CLASSIC     | Classic onboarding               |
+## Model Validators
 
-### NoExportCommunity Enum
+### Name Validation
 
-Defines the no export community options for service connections:
-
-| Value        | Description                     |
-|--------------|---------------------------------|
-| DISABLED     | No export community disabled     |
-| ENABLED_IN   | No export community enabled for inbound |
-| ENABLED_OUT  | No export community enabled for outbound |
-| ENABLED_BOTH | No export community enabled for both directions |
-
-### BgpPeerModel
-
-Contains the BGP peer configuration for service connections:
-
-| Attribute         | Type   | Required | Description                          |
-|-------------------|--------|----------|--------------------------------------|
-| local_ip_address  | str    | No       | Local IPv4 address for BGP peering   |
-| local_ipv6_address| str    | No       | Local IPv6 address for BGP peering   |
-| peer_ip_address   | str    | No       | Peer IPv4 address for BGP peering    |
-| peer_ipv6_address | str    | No       | Peer IPv6 address for BGP peering    |
-| secret            | str    | No       | BGP authentication secret            |
-
-### BgpProtocolModel
-
-Contains the BGP protocol configuration for service connections:
-
-| Attribute                  | Type  | Required | Description                        |
-|----------------------------|-------|----------|------------------------------------|
-| do_not_export_routes       | bool  | No       | Do not export routes option        |
-| enable                     | bool  | No       | Enable BGP                         |
-| fast_failover              | bool  | No       | Enable fast failover               |
-| local_ip_address           | str   | No       | Local IPv4 address for BGP peering |
-| originate_default_route    | bool  | No       | Originate default route            |
-| peer_as                    | str   | No       | BGP peer AS number                 |
-| peer_ip_address            | str   | No       | Peer IPv4 address for BGP peering  |
-| secret                     | str   | No       | BGP authentication secret          |
-| summarize_mobile_user_routes| bool | No       | Summarize mobile user routes       |
-
-### ProtocolModel
-
-Contains the protocol configuration for service connections:
-
-| Attribute | Type             | Required | Description                |
-|-----------|------------------|----------|----------------------------|
-| bgp       | BgpProtocolModel | No       | BGP protocol configuration |
-
-### QosModel
-
-Contains the QoS configuration for service connections:
-
-| Attribute   | Type  | Required | Description     |
-|-------------|-------|----------|-----------------|
-| enable      | bool  | No       | Enable QoS      |
-| qos_profile | str   | No       | QoS profile name|
-
-## Usage Examples
-
-### Creating a Service Connection
+The name field must match the required pattern:
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Using direct dictionary
-from scm.config.deployment import ServiceConnection
+from scm.models.deployment import ServiceConnectionCreateModel
 
-service_connection_dict = {
+# This will raise a validation error
+try:
+    service_connection = ServiceConnectionCreateModel(
+        name="invalid@name!",  # Contains invalid characters
+        ipsec_tunnel="tunnel1",
+        region="us-east-1"
+    )
+except ValueError as e:
+    print(e)  # "String should match pattern '^[0-9a-zA-Z._\\- ]+$'"
+```
+
+</div>
+
+### Required Fields Validation
+
+Essential fields must be provided:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.models.deployment import ServiceConnectionCreateModel
+
+# This will raise a validation error
+try:
+    service_connection = ServiceConnectionCreateModel(
+        name="valid-name",
+        # Missing required field: ipsec_tunnel
+        region="us-east-1"
+    )
+except ValueError as e:
+    print(e)  # "Field required"
+```
+
+</div>
+
+### Subnet Format Validation
+
+Subnets must be in valid CIDR notation:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.models.deployment import ServiceConnectionCreateModel
+
+# This will raise a validation error
+try:
+    service_connection = ServiceConnectionCreateModel(
+        name="valid-name",
+        ipsec_tunnel="tunnel1",
+        region="us-east-1",
+        subnets=["invalid-subnet"]  # Not in CIDR format
+    )
+except ValueError as e:
+    print(e)  # "Invalid subnet format: 'invalid-subnet'"
+```
+
+</div>
+
+## Usage Examples
+
+### Creating a Basic Service Connection
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+from scm.models.deployment import ServiceConnectionCreateModel
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
+basic_dict = {
     "name": "aws-service-connection",
     "ipsec_tunnel": "aws-ipsec-tunnel",
     "region": "us-east-1",
     "onboarding_type": "classic",
-    "subnets": ["10.0.0.0/24", "192.168.1.0/24"],
-    "bgp_peer": {
-        "local_ip_address": "192.168.1.1",
-        "peer_ip_address": "192.168.1.2",
-    },
-    "protocol": {
-        "bgp": {
-            "enable": True,
-            "peer_as": "65000",
-        }
-    },
-    "source_nat": True
+    "subnets": ["10.0.0.0/24", "192.168.1.0/24"]
 }
 
-service_connection = ServiceConnection(api_client)
-response = service_connection.create(service_connection_dict)
+# Create the service connection using the client
+response = client.service_connection.create(basic_dict)
+print(f"Created service connection: {response.name}")
 
 # Using model directly
-from scm.models.deployment import ServiceConnectionCreateModel
-
-service_connection_obj = ServiceConnectionCreateModel(
-    name="aws-service-connection",
-    ipsec_tunnel="aws-ipsec-tunnel",
+basic_connection = ServiceConnectionCreateModel(
+    name="aws-service-connection-2",
+    ipsec_tunnel="aws-ipsec-tunnel-2",
     region="us-east-1",
     onboarding_type="classic",
-    subnets=["10.0.0.0/24", "192.168.1.0/24"],
-    bgp_peer={
-        "local_ip_address": "192.168.1.1",
-        "peer_ip_address": "192.168.1.2",
-    },
-    protocol={
-        "bgp": {
-            "enable": True,
-            "peer_as": "65000",
-        }
-    },
-    source_nat=True
+    subnets=["10.0.0.0/24", "192.168.1.0/24"]
 )
 
-payload = service_connection_obj.model_dump(exclude_unset=True, by_alias=True)
-response = service_connection.create(payload)
+payload = basic_connection.model_dump(exclude_unset=True)
+response = client.service_connection.create(payload)
+print(f"Created service connection with ID: {response.id}")
 ```
 
 </div>
 
-### Updating a Service Connection
+### Creating a Service Connection with BGP Configuration
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Using dictionary
-from uuid import UUID
-
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "aws-service-connection-updated",
-    "ipsec_tunnel": "aws-ipsec-tunnel",
-    "region": "us-east-1",
-    "onboarding_type": "classic",
-    "subnets": ["10.0.0.0/24", "192.168.1.0/24", "172.16.0.0/24"],
-    "source_nat": False
-}
-
-response = service_connection.update(update_dict)
-
-# Using model directly
-from scm.models.deployment import ServiceConnectionUpdateModel
-
-update_obj = ServiceConnectionUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="aws-service-connection-updated",
-    ipsec_tunnel="aws-ipsec-tunnel",
-    region="us-east-1",
-    onboarding_type="classic",
-    subnets=["10.0.0.0/24", "192.168.1.0/24", "172.16.0.0/24"],
-    source_nat=False
+from scm.models.deployment import (
+    ServiceConnectionCreateModel,
+    BgpPeerModel,
+    ProtocolModel,
+    BgpProtocolModel
 )
 
-payload = update_obj.model_dump(exclude_unset=True, by_alias=True)
-response = service_connection.update(payload)
-```
-
-</div>
-
-### Configuring BGP with Authentication
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# Creating a service connection with BGP authentication
-from scm.models.deployment import ServiceConnectionCreateModel, BgpPeerModel, ProtocolModel, BgpProtocolModel
-
-# Create BGP peer model
+# Create BGP peer configuration
 bgp_peer = BgpPeerModel(
     local_ip_address="192.168.1.1",
     peer_ip_address="192.168.1.2",
     secret="mysecretkey"  # Authentication key
 )
 
-# Create BGP protocol model
+# Create BGP protocol configuration
 bgp_protocol = BgpProtocolModel(
     enable=True,
     peer_as="65000",
@@ -229,7 +201,7 @@ protocol = ProtocolModel(
 )
 
 # Create the service connection model
-service_connection_obj = ServiceConnectionCreateModel(
+bgp_connection = ServiceConnectionCreateModel(
     name="aws-service-connection-bgp",
     ipsec_tunnel="aws-ipsec-tunnel-bgp",
     region="us-east-1",
@@ -240,30 +212,33 @@ service_connection_obj = ServiceConnectionCreateModel(
     source_nat=True
 )
 
-payload = service_connection_obj.model_dump(exclude_unset=True, by_alias=True)
-response = service_connection.create(payload)
+payload = bgp_connection.model_dump(exclude_unset=True)
+response = client.service_connection.create(payload)
+print(f"Created BGP-enabled service connection: {response.name}")
 ```
 
 </div>
 
-### QoS Configuration
+### Creating a Service Connection with QoS Configuration
 
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Creating a service connection with QoS
-from scm.models.deployment import ServiceConnectionCreateModel, QosModel
+from scm.models.deployment import (
+    ServiceConnectionCreateModel,
+    QosModel
+)
 
-# Create QoS model
+# Create QoS configuration
 qos = QosModel(
     enable=True,
     qos_profile="high-priority"
 )
 
 # Create the service connection model
-service_connection_obj = ServiceConnectionCreateModel(
+qos_connection = ServiceConnectionCreateModel(
     name="aws-service-connection-qos",
     ipsec_tunnel="aws-ipsec-tunnel-qos",
     region="us-east-1",
@@ -273,8 +248,100 @@ service_connection_obj = ServiceConnectionCreateModel(
     source_nat=True
 )
 
-payload = service_connection_obj.model_dump(exclude_unset=True, by_alias=True)
-response = service_connection.create(payload)
+payload = qos_connection.model_dump(exclude_unset=True)
+response = client.service_connection.create(payload)
+print(f"Created QoS-enabled service connection: {response.name}")
+```
+
+</div>
+
+### Creating a Service Connection with No Export Community
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.models.deployment import (
+    ServiceConnectionCreateModel,
+    NoExportCommunity
+)
+
+# Create the service connection model with no export community
+community_connection = ServiceConnectionCreateModel(
+    name="aws-service-connection-community",
+    ipsec_tunnel="aws-ipsec-tunnel-community",
+    region="us-east-1",
+    onboarding_type="classic",
+    subnets=["10.0.0.0/24"],
+    no_export_community=NoExportCommunity.ENABLED_BOTH  # Enable in both directions
+)
+
+payload = community_connection.model_dump(exclude_unset=True)
+response = client.service_connection.create(payload)
+print(f"Created service connection with no export community: {response.name}")
+```
+
+</div>
+
+### Updating a Service Connection
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.models.deployment import ServiceConnectionUpdateModel
+from uuid import UUID
+
+# Create update model
+update_connection = ServiceConnectionUpdateModel(
+    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
+    name="aws-service-connection-updated",
+    ipsec_tunnel="aws-ipsec-tunnel",
+    region="us-east-1",
+    onboarding_type="classic",
+    subnets=["10.0.0.0/24", "192.168.1.0/24", "172.16.0.0/24"],  # Added subnet
+    source_nat=True  # Enable source NAT
+)
+
+# Perform update
+payload = update_connection.model_dump(exclude_unset=True)
+response = client.service_connection.update(payload)
+print(f"Updated service connection subnets: {response.subnets}")
+```
+
+</div>
+
+### Retrieving and Listing Service Connections
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get service connection by ID
+connection_id = "123e4567-e89b-12d3-a456-426655440000"
+connection = client.service_connection.get(connection_id)
+print(f"Retrieved service connection: {connection.name}")
+
+# List all service connections
+all_connections = client.service_connection.list()
+print(f"Found {len(all_connections)} service connections")
+
+# Filter service connections by region
+region_connections = client.service_connection.list(region="us-east-1")
+print(f"Found {len(region_connections)} connections in us-east-1 region")
+
+# Process connection information
+for conn in all_connections:
+    print(f"Connection: {conn.name}")
+    print(f"Region: {conn.region}")
+    print(f"Subnets: {conn.subnets}")
+    if conn.bgp_peer:
+        print(f"BGP Peer: {conn.bgp_peer.peer_ip_address}")
+    if conn.qos and conn.qos.enable:
+        print(f"QoS Profile: {conn.qos.qos_profile}")
 ```
 
 </div>

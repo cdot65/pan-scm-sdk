@@ -38,6 +38,7 @@ nav:
           - Deployment:
               - Overview: sdk/config/deployment/index.md
               - Bandwidth Allocations: sdk/config/deployment/bandwidth_allocations.md
+              - BGP Routing: sdk/config/deployment/bgp_routing.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
               - Service Connections: sdk/config/deployment/service_connections.md
           - Network:
@@ -54,6 +55,7 @@ nav:
               - Application: sdk/config/objects/application.md
               - Application Filter: sdk/config/objects/application_filters.md
               - Application Group: sdk/config/objects/application_group.md
+              - Auto Tag Actions: sdk/config/objects/auto_tag_actions.md
               - Dynamic User Group: sdk/config/objects/dynamic_user_group.md
               - External Dynamic List: sdk/config/objects/external_dynamic_lists.md
               - HIP Object: sdk/config/objects/hip_object.md
@@ -80,6 +82,7 @@ nav:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
               - Bandwidth Allocation Models: sdk/models/deployment/bandwidth_allocation_models.md
+              - BGP Routing Models: sdk/models/deployment/bgp_routing_models.md
               - Remote Network Models: sdk/models/deployment/remote_networks_models.md
               - Service Connection Models: sdk/models/deployment/service_connections_models.md
           - Network:
@@ -96,6 +99,7 @@ nav:
               - Application Models: sdk/models/objects/application_models.md
               - Application Filter Models: sdk/models/objects/application_filters_models.md
               - Application Group Models: sdk/models/objects/application_group_models.md
+              - Auto Tag Actions Models: sdk/models/objects/auto_tag_actions_models.md
               - Dynamic User Group Models: sdk/models/objects/dynamic_user_group_models.md
               - External Dynamic List Models: sdk/models/objects/external_dynamic_lists_models.md
               - HIP Object Models: sdk/models/objects/hip_object_models.md

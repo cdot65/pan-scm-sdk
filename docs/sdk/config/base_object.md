@@ -8,14 +8,14 @@
 4. [Exceptions](#exceptions)
 5. [Basic Configuration](#basic-configuration)
 6. [Usage Examples](#usage-examples)
-   1. [Creating Objects](#creating-objects)
-   2. [Retrieving Objects](#retrieving-objects)
-   3. [Updating Objects](#updating-objects)
-   4. [Listing Objects](#listing-objects)
-   5. [Deleting Objects](#deleting-objects)
+    - [Creating Objects](#creating-objects)
+    - [Retrieving Objects](#retrieving-objects)
+    - [Updating Objects](#updating-objects)
+    - [Listing Objects](#listing-objects)
+    - [Deleting Objects](#deleting-objects)
 7. [Managing Configuration Changes](#managing-configuration-changes)
-   1. [Performing Commits](#performing-commits)
-   2. [Monitoring Jobs](#monitoring-jobs)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
 8. [Error Handling](#error-handling)
 9. [Best Practices](#best-practices)
 10. [Full Script Examples](#full-script-examples)
@@ -59,14 +59,17 @@ The `BaseObject` class serves as the foundation for all configuration objects in
 
 ## Basic Configuration
 
+The BaseObject service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
 <div class="termy">
 
 <!-- termynal -->
 ```python
 from scm.client import ScmClient
-from scm.config.objects import BaseObject
 
-# Initialize client using unified approach
+# Initialize client
 client = ScmClient(
    client_id="your_client_id",
    client_secret="your_client_secret",
@@ -75,6 +78,25 @@ client = ScmClient(
 
 # Most objects can be accessed directly through the client
 # Example: client.address, client.service_group, client.security_rule, etc.
+```
+
+</div>
+
+### Traditional Service Instantiation (Legacy)
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+from scm.client import Scm
+from scm.config.objects import BaseObject
+
+# Initialize client
+client = Scm(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
 
 # For custom or extended objects, you can use the BaseObject approach
 class CustomObject(BaseObject):
@@ -85,6 +107,9 @@ custom_obj = CustomObject(client)
 ```
 
 </div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -135,18 +160,6 @@ except InvalidObjectError as e:
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.config.objects import BaseObject
-from scm.exceptions import NotFoundError
-
-# Initialize client and custom object
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-custom_obj = CustomObject(client)
-
 # Get object by ID
 try:
    object_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -164,18 +177,6 @@ except NotFoundError as e:
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.config.objects import BaseObject
-from scm.exceptions import InvalidObjectError
-
-# Initialize client and custom object
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-custom_obj = CustomObject(client)
-
 # Update object data
 update_data = {
    "id": "123e4567-e89b-12d3-a456-426655440000",
@@ -200,18 +201,6 @@ except InvalidObjectError as e:
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.config.objects import BaseObject
-from scm.exceptions import InvalidObjectError
-
-# Initialize client and custom object
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-custom_obj = CustomObject(client)
-
 # Define filter parameters
 list_params = {
    "folder": "Texas",
@@ -230,24 +219,70 @@ except InvalidObjectError as e:
 
 </div>
 
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control 
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+# Only return objects defined exactly in 'Texas'
+exact_objects = custom_obj.list(
+   folder='Texas',
+   exact_match=True
+)
+
+for obj in exact_objects:
+   print(f"Exact match: {obj['name']} in {obj['folder']}")
+
+# Exclude all objects from the 'All' folder
+no_all_objects = custom_obj.list(
+   folder='Texas',
+   exclude_folders=['All']
+)
+
+for obj in no_all_objects:
+   assert obj['folder'] != 'All'
+   print(f"Filtered out 'All': {obj['name']}")
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+# Initialize a custom object with a specified max_limit
+custom_obj = CustomObject(client, max_limit=4321)
+
+# List all objects, which will paginate in chunks of 4321
+all_objects = custom_obj.list(folder='Texas')
+```
+
+</div>
+
 ### Deleting Objects
 
 <div class="termy">
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.config.objects import BaseObject
-from scm.exceptions import NotFoundError
-
-# Initialize client and custom object
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-custom_obj = CustomObject(client)
-
 # Delete object by ID
 try:
    object_id = "123e4567-e89b-12d3-a456-426655440000"
@@ -267,18 +302,6 @@ except NotFoundError as e:
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.config.objects import BaseObject
-from scm.exceptions import InvalidObjectError
-
-# Initialize client and custom object
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-custom_obj = CustomObject(client)
-
 # Prepare commit parameters
 commit_params = {
    "folders": ["Texas"],
@@ -287,9 +310,9 @@ commit_params = {
    "timeout": 300  # 5 minute timeout
 }
 
-# Commit changes
+# Commit changes directly on the client
 try:
-   result = custom_obj.commit(**commit_params)
+   result = client.commit(**commit_params)
    print(f"Commit job ID: {result.job_id}")
 except InvalidObjectError as e:
    print(f"Invalid commit parameters: {e.message}")
@@ -303,30 +326,14 @@ except InvalidObjectError as e:
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.config.objects import BaseObject
-from scm.exceptions import InvalidObjectError
+# Get status of specific job directly from the client
+job_status = client.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
 
-# Initialize client and custom object
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-custom_obj = CustomObject(client)
-
-# Get status of specific job
-try:
-   # Assume result is from a previous commit operation
-   job_status = custom_obj.get_job_status(result.job_id)
-   print(f"Job status: {job_status.data[0].status_str}")
-
-   # List recent jobs
-   recent_jobs = custom_obj.list_jobs(limit=10)
-   for job in recent_jobs.data:
-      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
-except InvalidObjectError as e:
-   print(f"Error checking job status: {e.message}")
+# List recent jobs directly from the client
+recent_jobs = client.list_jobs(limit=10)
+for job in recent_jobs.data:
+   print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -362,14 +369,14 @@ try:
    })
 
    # Commit changes
-   commit_result = custom_obj.commit(
+   commit_result = client.commit(
       folders=["Texas"],
       description="Added test object",
       sync=True
    )
 
    # Check job status
-   status = custom_obj.get_job_status(commit_result.job_id)
+   status = client.get_job_status(commit_result.job_id)
 
 except InvalidObjectError as e:
    print(f"Invalid object data: {e.message}")

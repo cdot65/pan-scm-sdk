@@ -92,6 +92,10 @@ client = ScmClient(
 
 You can also use the traditional approach if preferred:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import HIPObject
@@ -106,6 +110,8 @@ client = Scm(
 # Initialize HIPObject with custom max_limit
 hip_objects = HIPObject(client, max_limit=5000)
 ```
+
+</div>
 
 ## Usage Examples
 
@@ -383,21 +389,21 @@ except MissingQueryParameterError as e:
     - Group related HIP objects
     - Consider inheritance patterns
 
-3. **Performance**
+4. **Performance**
     - Set appropriate max_limit values
     - Use pagination for large lists
     - Cache frequently accessed objects
     - Implement proper retry logic
     - Monitor API response times
 
-4. **Security**
+5. **Security**
     - Follow least privilege principle
     - Validate input data
     - Use secure connection settings
     - Implement proper authentication
     - Monitor security posture changes
 
-5. **Error Handling**
+6. **Error Handling**
     - Implement comprehensive error handling
     - Check job status after commits
     - Log error details

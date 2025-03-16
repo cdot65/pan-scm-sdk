@@ -92,6 +92,10 @@ client = ScmClient(
 
 You can also use the traditional approach if preferred:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import ExternalDynamicLists
@@ -106,6 +110,8 @@ client = Scm(
 # Initialize EDL object
 edls = ExternalDynamicLists(client)
 ```
+
+</div>
 
 ## Usage Examples
 
