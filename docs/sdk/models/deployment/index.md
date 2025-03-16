@@ -9,8 +9,9 @@
 5. [Models by Category](#models-by-category)
    1. [Bandwidth Allocations](#bandwidth-allocations)
    2. [BGP Routing](#bgp-routing)
-   3. [Remote Networks](#remote-networks)
-   4. [Service Connections](#service-connections)
+   3. [Internal DNS Servers](#internal-dns-servers)
+   4. [Remote Networks](#remote-networks)
+   5. [Service Connections](#service-connections)
 6. [Best Practices](#best-practices)
 7. [Related Documentation](#related-documentation)
 
@@ -37,6 +38,7 @@ Deployment models share common patterns:
 - Protocol configuration validation
 - Authentication settings validation
 - Network subnet and routing validation
+- IP address validation for DNS and network configurations
 
 ## Usage Examples
 
@@ -48,6 +50,7 @@ from scm.client import ScmClient
 from scm.models.deployment import (
     BandwidthAllocationCreateModel, 
     BGPRoutingCreateModel, 
+    InternalDnsServersCreateModel,
     RemoteNetworkCreateModel,
     BackboneRoutingEnum
 )
@@ -90,6 +93,18 @@ bgp_routing = BGPRoutingCreateModel(
 bgp_dict = bgp_routing.model_dump(exclude_unset=True)
 result = client.bgp_routing.create(bgp_dict)
 
+# Create internal DNS servers using a model
+dns_server = InternalDnsServersCreateModel(
+   name="main-dns-server",
+   domain_name=["example.com", "internal.example.com"],
+   primary="192.168.1.10",
+   secondary="192.168.1.11"
+)
+
+# Convert the model to a dictionary for the API call
+dns_dict = dns_server.model_dump(exclude_unset=True, by_alias=True)
+result = client.internal_dns_servers.create(dns_dict)
+
 # Create a new remote network using a model
 remote_network = RemoteNetworkCreateModel(
    name="branch-office-nyc",
@@ -122,6 +137,10 @@ result = client.remote_networks.create(network_dict)
 
 - [BGP Routing Models](bgp_routing_models.md) - BGP routing configuration models for global routing preferences
 
+### Internal DNS Servers
+
+- [Internal DNS Servers Models](internal_dns_servers_models.md) - Internal DNS server configuration models for domain resolution
+
 ### Remote Networks
 
 - [Remote Networks Models](remote_networks_models.md) - Remote network connection configurations
@@ -143,19 +162,25 @@ result = client.remote_networks.create(network_dict)
    - Validate CIDR notation for outbound routes before submitting to the API
    - Test routing changes in a non-production environment before deploying
 
-3. **Remote Network Configuration**
+3. **DNS Configuration**
+   - Ensure domain names are properly formatted
+   - Use valid IP addresses for DNS servers
+   - Consider using both primary and secondary DNS servers for redundancy
+   - Test DNS resolution for critical domains
+
+4. **Remote Network Configuration**
    - Ensure region and availability zone settings are properly specified
    - Validate that authentication settings are correctly configured
    - Test deployment configurations in a non-production environment first
    - Document remote network configurations and their intended purpose
 
-4. **Network Subnet Handling**
+5. **Network Subnet Handling**
    - Validate IP subnets before creating remote networks
    - Use CIDR notation consistently for network definitions
    - Be aware of overlapping subnet definitions
    - Ensure proper route configuration between networks
 
-5. **Security Considerations**
+6. **Security Considerations**
    - Securely manage pre-shared keys and other authentication credentials
    - Use certificate-based authentication when possible
    - Implement proper access controls for deployment configurations
@@ -166,5 +191,6 @@ result = client.remote_networks.create(network_dict)
 - [Deployment Configuration](../../config/deployment/index.md) - Working with deployment configurations
 - [Bandwidth Allocations Configuration](../../config/deployment/bandwidth_allocations.md) - Bandwidth allocation operations
 - [BGP Routing Configuration](../../config/deployment/bgp_routing.md) - BGP routing operations
+- [Internal DNS Servers Configuration](../../config/deployment/internal_dns_servers.md) - Internal DNS servers operations
 - [Remote Networks Configuration](../../config/deployment/remote_networks.md) - Remote network operations
 - [Service Connections Configuration](../../config/deployment/service_connections.md) - Service connection operations

@@ -89,6 +89,19 @@ print(f"Address details: {my_address.name}, {my_address.ip_netmask}")
 my_address.description = "Updated via unified client"
 updated_address = client.address.update(my_address)
 
+# Work with Internal DNS Servers
+dns_server = client.internal_dns_servers.create({
+    "name": "main-dns-server",
+    "domain_name": ["example.com", "internal.example.com"],
+    "primary": "192.168.1.10",
+    "secondary": "192.168.1.11"
+})
+print(f"Created DNS server: {dns_server.name}")
+
+# List all DNS servers
+dns_servers = client.internal_dns_servers.list()
+print(f"Found {len(dns_servers)} DNS servers")
+
 # Work with BGP Routing
 bgp_settings = client.bgp_routing.get()
 print(f"Current BGP routing: {bgp_settings.backbone_routing}")
@@ -143,7 +156,7 @@ if nat_rules:
 # Make configuration changes
 client.commit(
     folders=["Texas"],
-    description="Updated address, BGP routing, and removed NAT rule",
+    description="Updated address, DNS servers, BGP routing, and removed NAT rule",
     sync=True
 )
 ```

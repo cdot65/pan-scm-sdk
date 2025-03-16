@@ -37,6 +37,13 @@ from .bgp_routing import (
     BackboneRoutingEnum,
 )
 
+from .internal_dns_servers import (
+    InternalDnsServersBaseModel,
+    InternalDnsServersCreateModel,
+    InternalDnsServersUpdateModel,
+    InternalDnsServersResponseModel,
+)
+
 __all__ = [
     "RemoteNetworkCreateModel",
     "RemoteNetworkUpdateModel",
@@ -63,4 +70,8 @@ __all__ = [
     "DefaultRoutingModel",
     "HotPotatoRoutingModel",
     "BackboneRoutingEnum",
+    "InternalDnsServersBaseModel",
+    "InternalDnsServersCreateModel",
+    "InternalDnsServersUpdateModel",
+    "InternalDnsServersResponseModel",
 ]
