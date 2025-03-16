@@ -1,246 +1,349 @@
 # BGP Routing Models
 
-This page describes the Pydantic models used for BGP routing configuration in the Strata Cloud Manager SDK.
-
 ## Overview
 
-The BGP Routing models are a crucial component of the Strata Cloud Manager SDK, enabling programmatic configuration and management of Border Gateway Protocol (BGP) settings in Prisma SD-WAN environments. These models serve as the interface between your application code and the underlying network infrastructure, allowing for precise control over routing behaviors.
+The BGP Routing models provide a structured way to manage BGP (Border Gateway Protocol) routing configurations in Palo Alto Networks' Strata Cloud Manager. These models define the structure, validation rules, and behavior for BGP routing settings, which control global routing preferences and behaviors for Service Connections.
 
-The BGP Routing models define the data structures for Border Gateway Protocol (BGP) routing configuration in Prisma SD-WAN. These models handle attributes such as:
+BGP routing in Strata Cloud Manager is implemented as a singleton object, meaning there is only one global BGP routing configuration per tenant. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-- BGP autonomous system numbers
-- Router IDs
-- BGP peers
-- Network advertisements
-- Route filtering
-- BGP timers and other protocol parameters
+## Attributes
 
-By utilizing these models, you can create, update, and manage BGP configurations across your network, ensuring consistent and efficient routing policies.
+| Attribute                   | Type                                             | Required     | Default         | Description                                             |
+|----------------------------|--------------------------------------------------|--------------|----------------|---------------------------------------------------------|
+| `routing_preference`        | Union[DefaultRoutingModel, HotPotatoRoutingModel]| Yes*         | None           | The routing preference setting (default or hot potato)   |
+| `backbone_routing`          | BackboneRoutingEnum                              | Yes*         | None           | Controls asymmetric routing options                      |
+| `accept_route_over_SC`      | bool                                             | Yes*         | False          | Whether to accept routes over service connections        |
+| `outbound_routes_for_services`| List[str]                                      | Yes*         | []             | List of outbound routes for services in CIDR format      |
+| `add_host_route_to_ike_peer`| bool                                             | Yes*         | False          | Whether to add host route to IKE peer                    |
+| `withdraw_static_route`     | bool                                             | Yes*         | False          | Whether to withdraw static routes                        |
 
-## Base Models
+\* Required for CreateModel, optional for UpdateModel, required for ResponseModel
 
-### BGPRoutingRequest
+## Enums and Sub-Models
 
-The base request model for BGP routing configurations.
+### BackboneRoutingEnum
 
-```python
-class BGPRoutingRequest(BaseModel):
-    name: str
-    folder: str
-    description: Optional[str] = None
-    local_as_number: int
-    router_id: str
-    peers: List[BGPPeerRequest]
-    networks: Optional[List[BGPNetworkRequest]] = None
-    route_maps: Optional[List[BGPRouteMapRequest]] = None
-    redistribution: Optional[BGPRedistributionRequest] = None
-    timers: Optional[BGPTimerRequest] = None
-```
+The `BackboneRoutingEnum` defines the possible backbone routing options:
 
-### BGPRoutingResponse
+| Value                            | Description                                      |
+|---------------------------------|--------------------------------------------------|
+| `NO_ASYMMETRIC_ROUTING`         | No asymmetric routing allowed                    |
+| `ASYMMETRIC_ROUTING_ONLY`       | Only asymmetric routing allowed                  |
+| `ASYMMETRIC_ROUTING_WITH_LOAD_SHARE` | Asymmetric routing with load sharing enabled |
 
-The response model for BGP routing configurations.
+### DefaultRoutingModel
+
+Model for default routing preference configuration:
 
 ```python
-class BGPRoutingResponse(BaseModel):
-    id: str
-    name: str
-    folder: str
-    description: Optional[str] = None
-    local_as_number: int
-    router_id: str
-    peers: List[BGPPeerResponse]
-    networks: Optional[List[BGPNetworkResponse]] = None
-    route_maps: Optional[List[BGPRouteMapResponse]] = None
-    redistribution: Optional[BGPRedistributionResponse] = None
-    timers: Optional[BGPTimerResponse] = None
-    creation_time: datetime
-    last_modified_time: datetime
+class DefaultRoutingModel(BaseModel):
+    default: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Default routing configuration",
+    )
 ```
 
-## BGP Peer Models
+### HotPotatoRoutingModel
 
-Models for BGP peer configurations.
-
-### BGPPeerRequest
+Model for hot potato routing preference configuration:
 
 ```python
-class BGPPeerRequest(BaseModel):
-    name: str
-    peer_as_number: int
-    peer_ip_address: str
-    description: Optional[str] = None
-    connection_options: Optional[BGPConnectionOptions] = None
-    route_filtering: Optional[BGPRouteFiltering] = None
-    authentication: Optional[BGPAuthentication] = None
+class HotPotatoRoutingModel(BaseModel):
+    hot_potato_routing: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Hot potato routing configuration",
+    )
 ```
 
-### BGPPeerResponse
+## Exceptions
+
+The BGP Routing models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+  - When routing_preference is not a valid type
+  - When no fields are specified for an update
+  - When outbound_routes_for_services contains invalid entries
+  - When backbone_routing is not a valid enum value
+
+## Model Validators
+
+### Routing Preference Type Validation
+
+The models enforce that routing_preference must be either DefaultRoutingModel or HotPotatoRoutingModel:
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
-class BGPPeerResponse(BaseModel):
-    id: str
-    name: str
-    peer_as_number: int
-    peer_ip_address: str
-    description: Optional[str] = None
-    connection_options: Optional[BGPConnectionOptions] = None
-    route_filtering: Optional[BGPRouteFiltering] = None
-    authentication: Optional[BGPAuthentication] = None
-    state: Optional[str] = None
-    status: Optional[str] = None
-    last_state_change: Optional[datetime] = None
+# This will raise a validation error
+from scm.models.deployment import BGPRoutingCreateModel
+
+# Error: invalid routing_preference type
+try:
+    routing_config = BGPRoutingCreateModel(
+        routing_preference="invalid-type",  # Not a valid routing preference type
+        backbone_routing="no-asymmetric-routing",
+        accept_route_over_SC=False
+    )
+except ValueError as e:
+    print(e)  # "routing_preference must be either DefaultRoutingModel or HotPotatoRoutingModel"
 ```
 
-## BGP Network and Route Map Models
+</div>
 
-Models for networks advertised via BGP and route maps for policy-based routing.
+### Update Model Validation
 
-### BGPNetworkRequest
+For update operations, at least one field must be specified:
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
-class BGPNetworkRequest(BaseModel):
-    network: str  # CIDR notation
-    route_map: Optional[str] = None
+# This will raise a validation error
+from scm.models.deployment import BGPRoutingUpdateModel
+
+# Error: no fields specified for update
+try:
+    update_config = BGPRoutingUpdateModel()
+except ValueError as e:
+    print(e)  # "At least one field must be specified for update"
 ```
 
-### BGPNetworkResponse
+</div>
+
+### Outbound Routes Validation
+
+The outbound_routes_for_services field is validated to ensure proper formatting:
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
-class BGPNetworkResponse(BaseModel):
-    id: str
-    network: str
-    route_map: Optional[str] = None
+# This will handle various input formats
+from scm.models.deployment import BGPRoutingCreateModel
+from scm.models.deployment import BackboneRoutingEnum
+
+# Convert single string to list
+config1 = BGPRoutingCreateModel(
+    routing_preference={"default": {}},
+    backbone_routing=BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
+    outbound_routes_for_services="192.168.0.0/24"  # Will be converted to ["192.168.0.0/24"]
+)
+print(config1.outbound_routes_for_services)  # ["192.168.0.0/24"]
+
+# Handle empty list
+config2 = BGPRoutingCreateModel(
+    routing_preference={"default": {}},
+    backbone_routing=BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
+    outbound_routes_for_services=[]  # Empty list is allowed
+)
+print(config2.outbound_routes_for_services)  # []
+
+# Error: invalid type
+try:
+    config3 = BGPRoutingCreateModel(
+        routing_preference={"default": {}},
+        backbone_routing=BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
+        outbound_routes_for_services=123  # Not a list or string
+    )
+except ValueError as e:
+    print(e)  # "outbound_routes_for_services must be a list of strings"
 ```
 
-### BGPRouteMapRequest
-
-```python
-class BGPRouteMapRequest(BaseModel):
-    name: str
-    entries: List[BGPRouteMapEntry]
-```
-
-### BGPRouteMapResponse
-
-```python
-class BGPRouteMapResponse(BaseModel):
-    id: str
-    name: str
-    entries: List[BGPRouteMapEntry]
-```
-
-## Supporting Models
-
-Additional models to support BGP configuration.
-
-### BGPConnectionOptions
-
-```python
-class BGPConnectionOptions(BaseModel):
-    multihop: Optional[bool] = False
-    multihop_ttl: Optional[int] = 1
-    connect_retry_time: Optional[int] = 120
-    hold_time: Optional[int] = 180
-    keepalive_interval: Optional[int] = 60
-    passive: Optional[bool] = False
-```
-
-### BGPRouteFiltering
-
-```python
-class BGPRouteFiltering(BaseModel):
-    inbound_route_map: Optional[str] = None
-    outbound_route_map: Optional[str] = None
-    prefix_list_in: Optional[str] = None
-    prefix_list_out: Optional[str] = None
-    weight: Optional[int] = None
-    maximum_prefixes: Optional[int] = None
-```
-
-### BGPAuthentication
-
-```python
-class BGPAuthentication(BaseModel):
-    auth_type: Literal["MD5", "KEYCHAIN"]
-    key_id: Optional[int] = None
-    key: Optional[str] = None
-    keychain_name: Optional[str] = None
-```
-
-### BGPRedistributionRequest
-
-```python
-class BGPRedistributionRequest(BaseModel):
-    connected: Optional[BGPRedistributionRule] = None
-    static: Optional[BGPRedistributionRule] = None
-    ospf: Optional[BGPRedistributionRule] = None
-```
-
-### BGPRedistributionRule
-
-```python
-class BGPRedistributionRule(BaseModel):
-    enabled: bool = False
-    route_map: Optional[str] = None
-    metric: Optional[int] = None
-```
-
-### BGPTimerRequest
-
-```python
-class BGPTimerRequest(BaseModel):
-    keepalive: int = 60
-    hold_time: int = 180
-    connect_retry: int = 120
-```
+</div>
 
 ## Usage Examples
 
 ### Creating BGP Routing Configuration
 
-```python
-from scm.models.deployment.bgp_routing import BGPRoutingRequest, BGPPeerRequest
+<div class="termy">
 
-# Create BGP peer configuration
-peer = BGPPeerRequest(
-    name="isp-peer-1",
-    peer_as_number=65002,
-    peer_ip_address="192.168.1.1",
-    description="Primary ISP peering"
-)
-
-# Create BGP routing configuration
-bgp_config = BGPRoutingRequest(
-    name="branch-office-bgp",
-    folder="Texas",
-    description="BGP configuration for branch office",
-    local_as_number=65001,
-    router_id="10.0.0.1",
-    peers=[peer],
-    networks=[{"network": "10.1.0.0/16"}]
-)
-
-# Use the model with the SDK
-client.bgp_routing.create(bgp_config)
-```
-
-### Parsing BGP Configuration Response
+<!-- termynal -->
 
 ```python
-from scm.models.deployment.bgp_routing import BGPRoutingResponse
+# Using dictionary approach
+from scm.client import ScmClient
+from scm.models.deployment import BackboneRoutingEnum
 
-# Parse API response into BGP Routing model
-bgp_response = BGPRoutingResponse.parse_obj(api_response_json)
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-# Access model attributes
-print(f"BGP Configuration: {bgp_response.name}")
-print(f"Local AS: {bgp_response.local_as_number}")
+# Create with direct dictionary (automatically converted to models)
+bgp_config = {
+    "routing_preference": {"default": {}},
+    "backbone_routing": BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
+    "accept_route_over_SC": False,
+    "outbound_routes_for_services": ["10.0.0.0/8", "172.16.0.0/12"],
+    "add_host_route_to_ike_peer": False,
+    "withdraw_static_route": False
+}
 
-# Process peers
-for peer in bgp_response.peers:
-    print(f"Peer: {peer.name} (AS {peer.peer_as_number})")
-    print(f"  Status: {peer.status}")
-    if peer.route_filtering:
-        print(f"  Route Map In: {peer.route_filtering.inbound_route_map}")
+result = client.bgp_routing.create(bgp_config)
+
+# Using Pydantic models directly
+from scm.models.deployment import (
+    BGPRoutingCreateModel,
+    DefaultRoutingModel,
+    HotPotatoRoutingModel
+)
+
+# Create with Pydantic model (explicit instantiation)
+bgp_model = BGPRoutingCreateModel(
+    routing_preference=DefaultRoutingModel(),
+    backbone_routing=BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
+    accept_route_over_SC=False,
+    outbound_routes_for_services=["10.0.0.0/8"],
+    add_host_route_to_ike_peer=False,
+    withdraw_static_route=False
+)
+
+# Convert to dictionary for API call
+model_dict = bgp_model.model_dump(exclude_unset=True)
+result = client.bgp_routing.create(model_dict)
 ```
+
+</div>
+
+### Creating with Hot Potato Routing
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using Hot Potato routing preference
+from scm.models.deployment import (
+    BGPRoutingCreateModel,
+    HotPotatoRoutingModel,
+    BackboneRoutingEnum
+)
+
+# Create with Hot Potato routing
+hot_potato_model = BGPRoutingCreateModel(
+    routing_preference=HotPotatoRoutingModel(),
+    backbone_routing=BackboneRoutingEnum.ASYMMETRIC_ROUTING_WITH_LOAD_SHARE,
+    accept_route_over_SC=True,
+    outbound_routes_for_services=["192.168.0.0/16", "10.0.0.0/8"],
+    add_host_route_to_ike_peer=True,
+    withdraw_static_route=False
+)
+
+payload = hot_potato_model.model_dump(exclude_unset=True)
+result = client.bgp_routing.create(payload)
+```
+
+</div>
+
+### Updating BGP Routing Configuration
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Partial updates with only specified fields
+from scm.models.deployment import BGPRoutingUpdateModel, BackboneRoutingEnum
+
+# Update only specific fields
+update_model = BGPRoutingUpdateModel(
+    backbone_routing=BackboneRoutingEnum.ASYMMETRIC_ROUTING_ONLY,
+    accept_route_over_SC=True
+)
+
+# Convert to dictionary, excluding unset fields
+payload = update_model.model_dump(exclude_unset=True)
+result = client.bgp_routing.update(payload)
+
+# Dictionary approach for partial update
+partial_update = {
+    "outbound_routes_for_services": ["172.16.0.0/12", "192.168.0.0/16"],
+    "add_host_route_to_ike_peer": True
+}
+
+result = client.bgp_routing.update(partial_update)
+```
+
+</div>
+
+### Handling Response Models
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Working with response models
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Get current BGP routing configuration
+response = client.bgp_routing.get()
+
+# Determine routing preference type
+if hasattr(response.routing_preference, "default"):
+    print("Using Default routing")
+elif hasattr(response.routing_preference, "hot_potato_routing"):
+    print("Using Hot Potato routing")
+
+# Check backbone routing configuration
+if response.backbone_routing == "no-asymmetric-routing":
+    print("No asymmetric routing allowed")
+elif response.backbone_routing == "asymmetric-routing-only":
+    print("Only asymmetric routing allowed")
+elif response.backbone_routing == "asymmetric-routing-with-load-share":
+    print("Asymmetric routing with load sharing enabled")
+
+# Check if accepting routes over Service Connections
+if response.accept_route_over_SC:
+    print("Accepting routes over Service Connections")
+else:
+    print("Not accepting routes over Service Connections")
+
+# Display outbound routes
+if response.outbound_routes_for_services:
+    print("Outbound routes:")
+    for route in response.outbound_routes_for_services:
+        print(f"  - {route}")
+else:
+    print("No outbound routes configured")
+
+# Check other settings
+print(f"Add host route to IKE peer: {response.add_host_route_to_ike_peer}")
+print(f"Withdraw static route: {response.withdraw_static_route}")
+```
+
+</div>
+
+## Field Serialization
+
+The BGP Routing models include a custom serializer for the `routing_preference` field to ensure it's properly serialized for API requests:
+
+```python
+@field_serializer('routing_preference')
+def serialize_routing_preference(self, value: Optional[Union[DefaultRoutingModel, HotPotatoRoutingModel]]) -> Optional[Dict[str, Any]]:
+    """Serialize routing_preference to correct format for API requests."""
+    if value is None:
+        return None
+        
+    if isinstance(value, DefaultRoutingModel):
+        return {"default": {}}
+    elif isinstance(value, HotPotatoRoutingModel):
+        return {"hot_potato_routing": {}}
+    
+    return None
+```
+
+This serializer ensures that the models are correctly converted to the format expected by the API, regardless of how they were created or modified in your code.

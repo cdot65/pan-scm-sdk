@@ -89,6 +89,19 @@ print(f"Address details: {my_address.name}, {my_address.ip_netmask}")
 my_address.description = "Updated via unified client"
 updated_address = client.address.update(my_address)
 
+# Work with BGP Routing
+bgp_settings = client.bgp_routing.get()
+print(f"Current BGP routing: {bgp_settings.backbone_routing}")
+
+# Update BGP routing preferences
+client.bgp_routing.update({
+    "routing_preference": {"hot_potato_routing": {}},
+    "backbone_routing": "asymmetric-routing-with-load-share",
+    "accept_route_over_SC": True,
+    "outbound_routes_for_services": ["10.0.0.0/8"]
+})
+print("Updated BGP routing settings")
+
 # Work with Security Rules
 security_rule = client.security_rule.fetch(name="allow-web", folder="Texas")
 print(f"Security rule: {security_rule.name}, Action: {security_rule.action}")
@@ -130,7 +143,7 @@ if nat_rules:
 # Make configuration changes
 client.commit(
     folders=["Texas"],
-    description="Updated address and removed NAT rule",
+    description="Updated address, BGP routing, and removed NAT rule",
     sync=True
 )
 ```
