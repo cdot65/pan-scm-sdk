@@ -115,6 +115,13 @@ class BGPRouting(BaseObject):
                         data["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
                     elif "hot_potato_routing" in routing_pref:
                         data["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
+                elif not isinstance(routing_pref, (DefaultRoutingModel, HotPotatoRoutingModel)):
+                    raise InvalidObjectError(
+                        message="Invalid routing_preference format",
+                        error_code="E003",
+                        http_status_code=400,
+                        details={"error": "routing_preference must be a dictionary with 'default' or 'hot_potato_routing', or a valid model instance"},
+                    )
             
             # Validate input data using Pydantic model
             bgp_routing = BGPRoutingCreateModel(**data)
@@ -201,6 +208,13 @@ class BGPRouting(BaseObject):
                         data["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
                     elif "hot_potato_routing" in routing_pref:
                         data["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
+                elif not isinstance(routing_pref, (DefaultRoutingModel, HotPotatoRoutingModel)):
+                    raise InvalidObjectError(
+                        message="Invalid routing_preference format",
+                        error_code="E003",
+                        http_status_code=400,
+                        details={"error": "routing_preference must be a dictionary with 'default' or 'hot_potato_routing', or a valid model instance"},
+                    )
             
             # Validate input data using Pydantic model
             bgp_routing = BGPRoutingUpdateModel(**data)
@@ -273,9 +287,16 @@ class BGPRouting(BaseObject):
             "withdraw_static_route": False
         }
         
-        # Send the reset configuration
-        # Let HTTP errors propagate to caller for proper handling
-        self.api_client.put(
-            self.ENDPOINT,
-            json=default_config,
-        )
+        try:
+            # Send the reset configuration
+            self.api_client.put(
+                self.ENDPOINT,
+                json=default_config,
+            )
+        except Exception as e:
+            raise InvalidObjectError(
+                message=f"Error resetting BGP routing configuration: {str(e)}",
+                error_code="E003",
+                http_status_code=500,
+                details={"error": str(e)},
+            )

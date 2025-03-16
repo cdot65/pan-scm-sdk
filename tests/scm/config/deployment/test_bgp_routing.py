@@ -398,8 +398,11 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.create(test_data)
         
-        # Error should mention validation
-        assert "validation error" in str(exc_info.value) or "Invalid BGP routing configuration" in str(exc_info.value)
+        # It's now caught by the exception handler but the message is different
+        error = exc_info.value
+        assert error.http_status_code == 400
+        assert error.error_code == "E003"
+        assert "routing_preference must be" in str(error)
 
 
 class TestBGPRoutingUpdate(TestBGPRoutingBase):
@@ -525,6 +528,25 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         except InvalidObjectError:
             # If it fails with our custom error type, that's the expected behavior
             pass
+            
+    def test_update_invalid_routing_preference_object(self):
+        """Test updating with an invalid routing_preference object."""
+        # Create an object that would pass the dict validation but not the model validation
+        class InvalidModel:
+            def __init__(self):
+                pass
+                
+        test_data = BGPRoutingFactory.update_model_data()
+        test_data["routing_preference"] = InvalidModel()
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.update(test_data)
+        
+        # Verify it's caught by our improved validation
+        error = exc_info.value
+        assert error.http_status_code == 400
+        assert error.error_code == "E003"
+        assert "routing_preference must be" in str(error)
         
     def test_update_response_with_unknown_routing_preference(self):
         """Test handling response with invalid routing_preference format."""
@@ -667,11 +689,14 @@ class TestBGPRoutingDelete(TestBGPRoutingBase):
             error_type="Server Error",
         )
 
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(InvalidObjectError) as exc_info:
             self.client.delete()
             
-        # Verify the response has the expected status code
-        assert exc_info.value.response.status_code == 500
+        # Verify the error details
+        error = exc_info.value
+        assert error.http_status_code == 500
+        assert error.error_code == "E003"
+        assert "Error resetting BGP routing configuration" in error.message
         
     def test_delete_with_success_response(self):
         """Test delete operation with a success response."""

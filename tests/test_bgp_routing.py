@@ -65,8 +65,15 @@ class TestBGPRouting(unittest.TestCase):
             "withdraw_static_route": True
         }
 
-        # Mock API response - usually the same as the input data
-        mock_response = create_data.copy()
+        # Mock API response that simulates the actual API behavior
+        mock_response = {
+            "routing_preference": {"default": {}},
+            "backbone_routing": "asymmetric-routing-only",
+            "accept_route_over_SC": True,
+            "outbound_routes_for_services": ["10.0.0.0/8"],
+            "add_host_route_to_ike_peer": True,
+            "withdraw_static_route": True
+        }
         self.api_client.put.return_value = mock_response
 
         # Call the method
@@ -222,7 +229,10 @@ class TestBGPRouting(unittest.TestCase):
         create_data = {
             "routing_preference": {"default": {}},
             "backbone_routing": "no-asymmetric-routing",
-            "outbound_routes_for_services": None
+            "outbound_routes_for_services": None,
+            "accept_route_over_SC": False,
+            "add_host_route_to_ike_peer": False,
+            "withdraw_static_route": False
         }
         
         # Complete mock response with all required fields
@@ -241,6 +251,12 @@ class TestBGPRouting(unittest.TestCase):
         
         # Test with empty list
         create_data["outbound_routes_for_services"] = []
+        # Keep all required fields in the data dictionary
+        create_data.update({
+            "accept_route_over_SC": False,
+            "add_host_route_to_ike_peer": False,
+            "withdraw_static_route": False
+        })
         self.api_client.put.return_value = mock_response
         
         result = self.bgp_routing.create(create_data)
