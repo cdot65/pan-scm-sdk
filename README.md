@@ -165,6 +165,7 @@ The unified client provides access to the following services through attribute-b
 | `service_group`                    | Collections of services for simplified policy management        |
 | `syslog_server_profile`            | Syslog server configurations for centralized logging            |
 | `tag`                              | Resource classification and organization labels                 |
+| `auto_tag_actions`                 | Automated tag assignment based on traffic and security events    |
 | **Network**                        |                                                                 |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                   |
 | `ike_gateway`                      | IKE gateways for VPN tunnel endpoints                           |
@@ -172,6 +173,8 @@ The unified client provides access to the following services through attribute-b
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
+| `bandwidth_allocations`            | Bandwidth allocation management for network capacity planning   |
+| `bgp_routing`                      | BGP routing configuration for network connectivity              |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |
