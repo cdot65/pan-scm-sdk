@@ -397,6 +397,58 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
         assert error_response["_errors"][0]["message"] == "Internal Error"
         assert error_response["_errors"][0]["details"]["errorType"] == "Server Error"
 
+    def test_case_insensitive_name_filter_single(self):
+        """Test case-insensitive name filtering with a single value."""
+        # Create sample data with mixed case
+        allocation1 = BandwidthAllocationFactory.response_model_data(
+            name="Region1", 
+            allocated_bandwidth=100
+        )
+        allocation2 = BandwidthAllocationFactory.response_model_data(
+            name="REGION2", 
+            allocated_bandwidth=200
+        )
+        mock_response = BandwidthAllocationFactory.list_response_data(
+            items=[allocation1, allocation2]
+        )
+        
+        self.mock_scm.get.return_value = mock_response
+        
+        # Test case-insensitive filtering
+        filtered = self.client.list(name="region1")
+        assert len(filtered) == 1
+        assert filtered[0].name == "Region1"
+        
+        # Test another case variation
+        filtered = self.client.list(name="REGION1")
+        assert len(filtered) == 1
+        assert filtered[0].name == "Region1"
+
+    def test_case_insensitive_name_filter_list(self):
+        """Test case-insensitive name filtering with a list of values."""
+        # Create sample data with mixed case
+        allocation1 = BandwidthAllocationFactory.response_model_data(
+            name="Region1", 
+            allocated_bandwidth=100
+        )
+        allocation2 = BandwidthAllocationFactory.response_model_data(
+            name="REGION2", 
+            allocated_bandwidth=200
+        )
+        mock_response = BandwidthAllocationFactory.list_response_data(
+            items=[allocation1, allocation2]
+        )
+        
+        self.mock_scm.get.return_value = mock_response
+        
+        # Test case-insensitive filtering with list
+        filtered = self.client.list(name=["region1", "region2"])
+        assert len(filtered) == 2
+        
+        # Mixed case in filter values
+        filtered = self.client.list(name=["REGION1", "Region2"])
+        assert len(filtered) == 2
+
 
 class TestBandwidthAllocationGet(TestBandwidthAllocationBase):
     """Tests for getting a single BandwidthAllocation object."""
@@ -536,6 +588,20 @@ class TestBandwidthAllocationDelete(TestBandwidthAllocationBase):
             self.client.delete("test-region", "")
             
         # No need to check exact error message as it's raising the error from the underlying implementation
+
+    def test_delete_invalid_spn_list_format(self):
+        """Test deleting with invalid spn_name_list format (empty items)."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.delete("test-region", "spn1,,spn2")
+            
+        assert "spn_name_list must be a non-empty" in str(exc_info.value)
+        
+    def test_delete_invalid_spn_list_format_whitespace(self):
+        """Test deleting with invalid spn_name_list format (only whitespace)."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.delete("test-region", "spn1,  ,spn2")
+            
+        assert "spn_name_list must be a non-empty" in str(exc_info.value)
 
     def test_delete_error(self):
         """Test error handling during delete operation."""
