@@ -2,7 +2,11 @@
 
 ## Overview
 
-The Remote Networks models provide a structured way to manage remote network connections in Palo Alto Networks' Strata Cloud Manager. These models support configuration of remote network sites with options for IPsec tunnels, BGP protocol settings, and Equal-Cost Multi-Path (ECMP) load balancing. The models handle validation of inputs and outputs when interacting with the SCM API.
+The Remote Networks models provide a structured way to manage remote network connections in Palo Alto Networks' Strata Cloud Manager. These models are integral to the SD-WAN architecture, working in conjunction with Service Connections and BGP Routing configurations to establish secure and efficient connectivity between branch offices and cloud resources.
+
+These models support configuration of remote network sites with options for IPsec tunnels, BGP protocol settings, and Equal-Cost Multi-Path (ECMP) load balancing. By leveraging these models, you can define and manage the connectivity of distributed network locations, ensuring consistent security policies and optimal routing across your organization's infrastructure.
+
+The models handle validation of inputs and outputs when interacting with the SCM API, providing a robust interface for programmatic management of remote network configurations.
 
 ## Attributes
 

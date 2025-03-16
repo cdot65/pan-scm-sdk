@@ -4,6 +4,8 @@ This page describes the Pydantic models used for BGP routing configuration in th
 
 ## Overview
 
+The BGP Routing models are a crucial component of the Strata Cloud Manager SDK, enabling programmatic configuration and management of Border Gateway Protocol (BGP) settings in Prisma SD-WAN environments. These models serve as the interface between your application code and the underlying network infrastructure, allowing for precise control over routing behaviors.
+
 The BGP Routing models define the data structures for Border Gateway Protocol (BGP) routing configuration in Prisma SD-WAN. These models handle attributes such as:
 
 - BGP autonomous system numbers
@@ -12,6 +14,8 @@ The BGP Routing models define the data structures for Border Gateway Protocol (B
 - Network advertisements
 - Route filtering
 - BGP timers and other protocol parameters
+
+By utilizing these models, you can create, update, and manage BGP configurations across your network, ensuring consistent and efficient routing policies.
 
 ## Base Models
 

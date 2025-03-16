@@ -182,6 +182,7 @@ client = ScmClient(
 
 # Access the Security Zone service directly through the client
 # No need to create a separate SecurityZone instance
+# The ScmClient automatically handles authentication and token refresh
 zones = client.security_zone
 ```
 

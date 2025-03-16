@@ -126,19 +126,23 @@ Here are some common use cases for auto tag actions:
 
 ```python
 # Create an auto tag action for infected hosts
-infected_hosts_tag = client.auto_tag_actions.create({
-    "name": "infected-host-detection",
-    "folder": "Texas",
-    "description": "Tag hosts with confirmed infections",
-    "match_criteria": {
-        "severity": "critical",
-        "threat_type": ["virus", "spyware"],
-        "action_taken": "block"
-    },
-    "action": "add",
-    "tags": ["infected-host", "remediation-required"],
-    "timeout": 604800  # 7 days
-})
+try:
+    infected_hosts_tag = client.auto_tag_actions.create({
+        "name": "infected-host-detection",
+        "folder": "Texas",
+        "description": "Tag hosts with confirmed infections",
+        "match_criteria": {
+            "severity": "critical",
+            "threat_type": ["virus", "spyware"],
+            "action_taken": "block"
+        },
+        "action": "add",
+        "tags": ["infected-host", "remediation-required"],
+        "timeout": 604800  # 7 days
+    })
+    print(f"Auto tag action created: {infected_hosts_tag.name}")
+except ScmApiError as e:
+    print(f"Failed to create auto tag action: {e}")
 ```
 
 ### Tagging High-Risk Applications

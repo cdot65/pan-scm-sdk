@@ -1,10 +1,62 @@
-# BGP Routing
+# BGP Routing Configuration Object
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [BGP Routing Model Attributes](#bgp-routing-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating BGP Routing Configurations](#creating-bgp-routing-configurations)
+    - [Retrieving BGP Routing Configurations](#retrieving-bgp-routing-configurations)
+    - [Updating BGP Routing Configurations](#updating-bgp-routing-configurations)
+    - [Listing BGP Routing Configurations](#listing-bgp-routing-configurations)
+    - [Deleting BGP Routing Configurations](#deleting-bgp-routing-configurations)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
+
+## Overview
 
 The BGP Routing module allows you to configure BGP (Border Gateway Protocol) routing for Prisma SD-WAN service connections and remote networks. This module supports standard BGP configurations including autonomous system numbers, peers, route preferences, and filtering.
 
-## Class Overview
+## Core Methods
 
-The `BGPRouting` class provides functionality to create, update, delete, and fetch BGP routing configurations in Strata Cloud Manager.
+| Method     | Description                                  |
+|------------|----------------------------------------------|
+| `create()` | Creates a new BGP routing configuration      |
+| `get()`    | Retrieves a BGP routing configuration by ID  |
+| `update()` | Updates an existing BGP routing configuration|
+| `delete()` | Deletes a BGP routing configuration          |
+| `list()`   | Lists BGP routing configurations             |
+
+## BGP Routing Model Attributes
+
+| Attribute        | Type       | Description                                   |
+|------------------|------------|-----------------------------------------------|
+| `name`           | string     | Name of the BGP routing configuration         |
+| `folder`         | string     | Folder where the configuration is stored      |
+| `local_as_number`| integer    | Local autonomous system number                |
+| `router_id`      | string     | BGP router ID (usually an IP address)         |
+| `peers`          | array      | List of BGP peer configurations               |
+| `networks`       | array      | List of networks to advertise via BGP         |
+| `route_maps`     | array      | List of route maps for filtering              |
+| `redistribution` | object     | Configuration for route redistribution        |
+| `timers`         | object     | BGP protocol timers                           |
+
+## Exceptions
+
+| Exception                | Description                                        |
+|--------------------------|----------------------------------------------------|
+| `ResourceNotFoundError`  | The specified BGP configuration was not found      |
+| `ValidationError`        | Input payload validation failed                    |
+| `ResourceExistsError`    | A BGP configuration with this name already exists  |
+| `ScmApiError`            | Generic API error                                  |
+
+## Basic Configuration
 
 ```python
 from scm.config.deployment import BGPRouting
@@ -22,6 +74,7 @@ bgp_routing = BGPRouting(client)
 
 # Alternatively, use the unified client pattern
 # Access BGP routing directly through the client
+# The client automatically handles authentication and token refresh
 bgp_config = client.bgp_routing
 ```
 

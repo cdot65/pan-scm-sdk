@@ -20,8 +20,9 @@
     - [Monitoring Jobs](#monitoring-jobs)
 8. [Error Handling](#error-handling)
 9. [Best Practices](#best-practices)
-10. [Full Script Examples](#full-script-examples)
-11. [Related Models](#related-models)
+10. [Advanced Usage](#advanced-usage)
+11. [Full Script Examples](#full-script-examples)
+12. [Related Models](#related-models)
 
 ## Overview
 
@@ -488,6 +489,186 @@ except MissingQueryParameterError as e:
     - Implement proper retry mechanisms
     - Monitor timeout settings
     - Consider bandwidth allocation impacts on overall network performance
+
+## Advanced Usage
+
+The Bandwidth Allocations service supports several advanced use cases beyond basic CRUD operations:
+
+### Bulk Operations
+
+When managing multiple bandwidth allocations, you can optimize your workflow with bulk operations:
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+# Bulk creation of multiple bandwidth allocations
+allocation_configs = [
+    {
+        "name": "region-1-allocation",
+        "allocated_bandwidth": 100,
+        "spn_name_list": ["spn-1", "spn-2"],
+        "qos": {"enabled": True, "profile": "standard"}
+    },
+    {
+        "name": "region-2-allocation",
+        "allocated_bandwidth": 200,
+        "spn_name_list": ["spn-3", "spn-4"],
+        "qos": {"enabled": True, "profile": "high-priority"}
+    },
+    {
+        "name": "region-3-allocation",
+        "allocated_bandwidth": 300,
+        "spn_name_list": ["spn-5", "spn-6"]
+    }
+]
+
+# Create allocations in a single logical operation
+created_allocations = []
+for config in allocation_configs:
+    try:
+        allocation = client.bandwidth_allocation.create(config)
+        created_allocations.append(allocation)
+        print(f"Created {allocation.name}")
+    except Exception as e:
+        print(f"Failed to create {config['name']}: {e}")
+
+# Commit all changes at once
+if created_allocations:
+    client.commit(
+        description=f"Created {len(created_allocations)} bandwidth allocations",
+        sync=True
+    )
+```
+
+</div>
+
+### Integration with Service Connections
+
+Bandwidth allocations can be linked with service connections to ensure proper resource allocation:
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+# Create a bandwidth allocation first
+bw_allocation = client.bandwidth_allocation.create({
+    "name": "cloud-service-allocation",
+    "allocated_bandwidth": 500,
+    "spn_name_list": ["cloud-spn-1", "cloud-spn-2"],
+    "qos": {"enabled": True, "guaranteed_ratio": 0.6}
+})
+
+# Now create a service connection that will use this allocation's SPNs
+service_conn = client.service_connection.create({
+    "name": "aws-connection",
+    "ipsec_tunnel": "aws-tunnel",
+    "region": "us-east-1",
+    "onboarding_type": "classic",
+    "spn_name": "cloud-spn-1",  # Uses SPN from the bandwidth allocation
+    "subnets": ["10.0.0.0/16"]
+})
+
+# Commit both changes
+client.commit(description="Added bandwidth allocation and service connection", sync=True)
+
+# You can also query to find all service connections using a particular SPN
+matching_allocations = client.bandwidth_allocation.list(spn_name_list="cloud-spn-1")
+related_services = client.service_connection.list(spn_name="cloud-spn-1")
+
+print(f"Found {len(matching_allocations)} allocations and {len(related_services)} service connections for cloud-spn-1")
+```
+
+</div>
+
+### Automated Bandwidth Scaling
+
+Create scripts that automatically adjust bandwidth allocations based on traffic patterns:
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+import time
+from datetime import datetime
+
+# Simulate a monitoring process
+def monitor_and_adjust_bandwidth(allocation_name, spn_list):
+    while True:
+        # Get current traffic metrics (simulated in this example)
+        current_usage = get_traffic_metrics(spn_list)  # Implement this function
+        
+        # Get current allocation
+        allocation = client.bandwidth_allocation.fetch(name=allocation_name)
+        
+        # Calculate optimal bandwidth based on usage
+        optimal_bandwidth = calculate_optimal_bandwidth(current_usage)  # Implement this function
+        
+        # Adjust if necessary (with hysteresis to prevent frequent changes)
+        if abs(optimal_bandwidth - allocation.allocated_bandwidth) > 50:  # 50 Mbps threshold
+            print(f"{datetime.now()}: Adjusting bandwidth from {allocation.allocated_bandwidth} to {optimal_bandwidth} Mbps")
+            
+            # Update the bandwidth allocation
+            allocation.allocated_bandwidth = optimal_bandwidth
+            client.bandwidth_allocation.update(allocation.model_dump())
+            
+            # Commit the change
+            client.commit(description=f"Auto-adjusted bandwidth for {allocation_name}", sync=True)
+        
+        # Sleep before next check
+        time.sleep(3600)  # Check every hour
+```
+
+</div>
+
+### Export and Reporting
+
+Generate reports and export bandwidth allocation configurations:
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+import csv
+import json
+
+# Export all bandwidth allocations to CSV
+def export_allocations_to_csv(filename):
+    allocations = client.bandwidth_allocation.list()
+    
+    with open(filename, 'w', newline='') as csvfile:
+        fieldnames = ['name', 'allocated_bandwidth', 'spn_name_list', 'qos_enabled', 'qos_profile', 'guaranteed_ratio']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for allocation in allocations:
+            row = {
+                'name': allocation.name,
+                'allocated_bandwidth': allocation.allocated_bandwidth,
+                'spn_name_list': ','.join(allocation.spn_name_list),
+                'qos_enabled': allocation.qos.enabled if allocation.qos else False,
+                'qos_profile': allocation.qos.profile if allocation.qos and allocation.qos.enabled else 'N/A',
+                'guaranteed_ratio': allocation.qos.guaranteed_ratio if allocation.qos and allocation.qos.enabled else 'N/A'
+            }
+            writer.writerow(row)
+    
+    print(f"Exported {len(allocations)} bandwidth allocations to {filename}")
+
+# Export to JSON for backup or migration
+def export_allocations_to_json(filename):
+    allocations = client.bandwidth_allocation.list()
+    export_data = []
+    
+    for allocation in allocations:
+        export_data.append(allocation.model_dump())
+    
+    with open(filename, 'w') as jsonfile:
+        json.dump(export_data, jsonfile, indent=2)
+    
+    print(f"Exported {len(allocations)} bandwidth allocations to {filename}")
+```
+
+</div>
 
 ## Full Script Examples
 
