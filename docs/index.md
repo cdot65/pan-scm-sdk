@@ -104,6 +104,24 @@ print(f"Found {len(nat_rules)} NAT rules with source zone 'trust'")
 security_zones = client.security_zone.list(folder="Texas")
 print(f"Found {len(security_zones)} security zones")
 
+# Work with Bandwidth Allocations
+bandwidth_allocations = client.bandwidth_allocation.list()
+print(f"Found {len(bandwidth_allocations)} bandwidth allocations")
+
+# Create a new bandwidth allocation
+new_allocation = client.bandwidth_allocation.create({
+    "name": "test-region",
+    "allocated_bandwidth": 100,
+    "spn_name_list": ["spn1", "spn2"],
+    "qos": {
+        "enabled": True,
+        "customized": True,
+        "profile": "test-profile",
+        "guaranteed_ratio": 0.5
+    }
+})
+print(f"Created bandwidth allocation: {new_allocation.name}")
+
 # Delete a NAT rule
 if nat_rules:
     client.nat_rule.delete(nat_rules[0].id)

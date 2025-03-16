@@ -376,6 +376,10 @@ class Scm:
                 "scm.config.objects.application_group",
                 "ApplicationGroup",
             ),
+            "bandwidth_allocation": (
+                "scm.config.deployment.bandwidth_allocations",
+                "BandwidthAllocations",
+            ),
             "dynamic_user_group": (
                 "scm.config.objects.dynamic_user_group",
                 "DynamicUserGroup",

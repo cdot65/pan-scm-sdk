@@ -7,8 +7,9 @@
 3. [Common Model Patterns](#common-model-patterns)
 4. [Usage Examples](#usage-examples)
 5. [Models by Category](#models-by-category)
-   1. [Remote Networks](#remote-networks)
-   2. [Service Connections](#service-connections)
+   1. [Bandwidth Allocations](#bandwidth-allocations)
+   2. [Remote Networks](#remote-networks)
+   3. [Service Connections](#service-connections)
 6. [Best Practices](#best-practices)
 7. [Related Documentation](#related-documentation)
 
@@ -43,7 +44,7 @@ Deployment models share common patterns:
 <!-- termynal -->
 ```python
 from scm.client import ScmClient
-from scm.models.deployment import RemoteNetworkCreateModel, RemoteNetworkUpdateModel
+from scm.models.deployment import BandwidthAllocationCreateModel, RemoteNetworkCreateModel
 
 # Initialize client
 client = ScmClient(
@@ -51,6 +52,23 @@ client = ScmClient(
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
 )
+
+# Create a new bandwidth allocation using a model
+bandwidth_allocation = BandwidthAllocationCreateModel(
+   name="test-region",
+   allocated_bandwidth=100,
+   spn_name_list=["spn1", "spn2"],
+   qos={
+      "enabled": True,
+      "customized": True,
+      "profile": "test-profile",
+      "guaranteed_ratio": 0.5
+   }
+)
+
+# Convert the model to a dictionary for the API call
+allocation_dict = bandwidth_allocation.model_dump(exclude_unset=True)
+result = client.bandwidth_allocation.create(allocation_dict)
 
 # Create a new remote network using a model
 remote_network = RemoteNetworkCreateModel(
@@ -70,23 +88,15 @@ remote_network = RemoteNetworkCreateModel(
 # Convert the model to a dictionary for the API call
 network_dict = remote_network.model_dump(exclude_unset=True)
 result = client.remote_networks.create(network_dict)
-
-# Update an existing remote network using a model
-update_network = RemoteNetworkUpdateModel(
-   id=result.id,
-   name="branch-office-nyc-updated",
-   description="Updated NYC branch office",
-   subnets=["10.1.0.0/16", "10.2.0.0/16"],
-   folder="Remote Networks"
-)
-
-update_dict = update_network.model_dump(exclude_unset=True)
-updated_result = client.remote_networks.update(update_dict)
 ```
 
 </div>
 
 ## Models by Category
+
+### Bandwidth Allocations
+
+- [Bandwidth Allocation Models](bandwidth_allocation_models.md) - Bandwidth allocation models for regions and service node groups
 
 ### Remote Networks
 
@@ -124,5 +134,6 @@ updated_result = client.remote_networks.update(update_dict)
 ## Related Documentation
 
 - [Deployment Configuration](../../config/deployment/index.md) - Working with deployment configurations
+- [Bandwidth Allocations Configuration](../../config/deployment/bandwidth_allocations.md) - Bandwidth allocation operations
 - [Remote Networks Configuration](../../config/deployment/remote_networks.md) - Remote network operations
 - [Service Connections Configuration](../../config/deployment/service_connections.md) - Service connection operations

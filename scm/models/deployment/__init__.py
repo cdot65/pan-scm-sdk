@@ -19,6 +19,14 @@ from .service_connections import (
     QosModel,
 )
 
+from .bandwidth_allocations import (
+    BandwidthAllocationCreateModel,
+    BandwidthAllocationUpdateModel,
+    BandwidthAllocationResponseModel,
+    BandwidthAllocationListResponseModel,
+    QosModel as BandwidthQosModel,
+)
+
 __all__ = [
     "RemoteNetworkCreateModel",
     "RemoteNetworkUpdateModel",
@@ -33,4 +41,9 @@ __all__ = [
     "BgpProtocolModel",
     "ProtocolModel",
     "QosModel",
+    "BandwidthAllocationCreateModel",
+    "BandwidthAllocationUpdateModel",
+    "BandwidthAllocationResponseModel",
+    "BandwidthAllocationListResponseModel",
+    "BandwidthQosModel",
 ]
