@@ -355,7 +355,6 @@ class Scm:
         # Even if the module or class has a plural name, the attribute should be singular
         # Example: "nat_rule" for NATRule in nat_rules.py
         service_imports = {
-            # Objects
             "address": (
                 "scm.config.objects.address",
                 "Address",
@@ -363,6 +362,10 @@ class Scm:
             "address_group": (
                 "scm.config.objects.address_group",
                 "AddressGroup",
+            ),
+            "anti_spyware_profile": (
+                "scm.config.security.anti_spyware_profile",
+                "AntiSpywareProfile",
             ),
             "application": (
                 "scm.config.objects.application",
@@ -379,6 +382,14 @@ class Scm:
             "bandwidth_allocation": (
                 "scm.config.deployment.bandwidth_allocations",
                 "BandwidthAllocations",
+            ),
+            "decryption_profile": (
+                "scm.config.security.decryption_profile",
+                "DecryptionProfile",
+            ),
+            "dns_security_profile": (
+                "scm.config.security.dns_security_profile",
+                "DNSSecurityProfile",
             ),
             "dynamic_user_group": (
                 "scm.config.objects.dynamic_user_group",
@@ -400,13 +411,29 @@ class Scm:
                 "scm.config.objects.http_server_profiles",
                 "HTTPServerProfile",
             ),
-            "internal_dns_servers": (
+            "ike_crypto_profile": (
+                "scm.config.network.ike_crypto_profile",
+                "IKECryptoProfile",
+            ),
+            "ike_gateway": (
+                "scm.config.network.ike_gateway",
+                "IKEGateway",
+            ),
+            "internal_dns_server": (
                 "scm.config.deployment.internal_dns_servers",
                 "InternalDnsServers",
+            ),
+            "ipsec_crypto_profile": (
+                "scm.config.network.ipsec_crypto_profile",
+                "IPsecCryptoProfile",
             ),
             "log_forwarding_profile": (
                 "scm.config.objects.log_forwarding_profile",
                 "LogForwardingProfile",
+            ),
+            "nat_rule": (
+                "scm.config.network.nat_rules",
+                "NatRule",
             ),
             "quarantined_device": (
                 "scm.config.objects.quarantined_devices",
@@ -416,13 +443,29 @@ class Scm:
                 "scm.config.objects.region",
                 "Region",
             ),
+            "remote_network": (
+                "scm.config.deployment.remote_networks",
+                "RemoteNetworks",
+            ),
             "schedule": (
                 "scm.config.objects.schedules",
                 "Schedule",
             ),
+            "security_rule": (
+                "scm.config.security.security_rule",
+                "SecurityRule",
+            ),
+            "security_zone": (
+                "scm.config.network.security_zone",
+                "SecurityZone",
+            ),
             "service": (
                 "scm.config.objects.service",
                 "Service",
+            ),
+            "service_connection": (
+                "scm.config.deployment.service_connections",
+                "ServiceConnection",
             ),
             "service_group": (
                 "scm.config.objects.service_group",
@@ -435,53 +478,6 @@ class Scm:
             "tag": (
                 "scm.config.objects.tag",
                 "Tag",
-            ),
-            # Network
-            "ike_crypto_profile": (
-                "scm.config.network.ike_crypto_profile",
-                "IKECryptoProfile",
-            ),
-            "ike_gateway": (
-                "scm.config.network.ike_gateway",
-                "IKEGateway",
-            ),
-            "ipsec_crypto_profile": (
-                "scm.config.network.ipsec_crypto_profile",
-                "IPsecCryptoProfile",
-            ),
-            "nat_rule": (
-                "scm.config.network.nat_rules",
-                "NatRule",
-            ),
-            "security_zone": (
-                "scm.config.network.security_zone",
-                "SecurityZone",
-            ),
-            # Deployment
-            "remote_network": (
-                "scm.config.deployment.remote_networks",
-                "RemoteNetworks",
-            ),
-            "service_connection": (
-                "scm.config.deployment.service_connections",
-                "ServiceConnection",
-            ),
-            # Security
-            "security_rule": (
-                "scm.config.security.security_rule",
-                "SecurityRule",
-            ),
-            "anti_spyware_profile": (
-                "scm.config.security.anti_spyware_profile",
-                "AntiSpywareProfile",
-            ),
-            "decryption_profile": (
-                "scm.config.security.decryption_profile",
-                "DecryptionProfile",
-            ),
-            "dns_security_profile": (
-                "scm.config.security.dns_security_profile",
-                "DNSSecurityProfile",
             ),
             "url_category": (
                 "scm.config.security.url_categories",
