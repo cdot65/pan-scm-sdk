@@ -10,7 +10,9 @@ configuration objects and data models used to interact with Palo Alto Networks S
 - Configuration
     - [BaseObject](config/base_object.md)
     - Deployment
+        - [Bandwidth Allocations](config/deployment/bandwidth_allocations.md)
         - [Remote Networks](config/deployment/remote_networks.md)
+        - [Service Connections](config/deployment/service_connections.md)
     - Network
         - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
         - [IKE Gateways](config/network/ike_gateway.md)
@@ -46,7 +48,9 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
 - Data Models
     - Deployment
+        - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
         - [Remote Networks](models/deployment/remote_networks_models.md)
+        - [Service Connections](models/deployment/service_connections_models.md)
     - Network
         - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
@@ -146,6 +150,26 @@ if filtered_nat_rules:
     client.nat_rule.delete(rule_to_delete)
     print(f"Deleted NAT rule '{rule_name}' (ID: {rule_to_delete})")
 
+# ===== WORKING WITH BANDWIDTH ALLOCATIONS =====
+
+# List all bandwidth allocations
+allocations = client.bandwidth_allocation.list()
+print(f"Found {len(allocations)} bandwidth allocations")
+
+# Create a new bandwidth allocation
+new_allocation = client.bandwidth_allocation.create({
+    "name": "test-region",
+    "allocated_bandwidth": 100,
+    "spn_name_list": ["spn1", "spn2"],
+    "qos": {
+        "enabled": True,
+        "customized": True,
+        "profile": "test-profile",
+        "guaranteed_ratio": 0.5
+    }
+})
+print(f"Created bandwidth allocation: {new_allocation.name}")
+
 # ===== COMMIT CHANGES =====
 
 # Commit all changes to apply them to the firewall
@@ -192,7 +216,9 @@ The following table shows all services available through the unified client inte
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
+| `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
+| `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |
 | `security_rule`                    | Core security policies controlling network traffic              |
 | `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration   |

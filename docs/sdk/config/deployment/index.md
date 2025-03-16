@@ -13,6 +13,7 @@ This section covers the configuration of SASE deployments provided by the Palo A
 
 ## Available Deployment Objects
 
+- [Bandwidth Allocations](bandwidth_allocations.md) - Configure bandwidth allocations for service node groups and regions
 - [Remote Networks](remote_networks.md) - Configure remote network connections for Prisma Access
 - [Service Connections](service_connections.md) - Configure service connections to cloud service providers
 
@@ -46,6 +47,19 @@ client = ScmClient(
    client_secret="your_client_secret",
    tsg_id="your_tsg_id"
 )
+
+# Create a bandwidth allocation
+client.bandwidth_allocation.create({
+   "name": "test-region",
+   "allocated_bandwidth": 100,
+   "spn_name_list": ["spn1", "spn2"],
+   "qos": {
+      "enabled": True,
+      "customized": True,
+      "profile": "test-profile",
+      "guaranteed_ratio": 0.5
+   }
+})
 
 # Create a remote network
 client.remote_networks.create({

@@ -186,6 +186,19 @@ class BandwidthAllocations(BaseObject):
                     "error": '"spn_name_list" is not allowed to be empty',
                 },
             )
+        
+        # Validate spn_name_list format
+        spn_names = [spn.strip() for spn in spn_name_list.split(',')]
+        if not all(spn_names):
+            raise InvalidObjectError(
+                message="Invalid 'spn_name_list' format",
+                error_code="E003",
+                http_status_code=400,
+                details={
+                    "field": "spn_name_list",
+                    "error": "spn_name_list must be a non-empty, comma-separated list of SPN names",
+                },
+            )
             
         params = {
             "name": name,
@@ -223,12 +236,12 @@ class BandwidthAllocations(BaseObject):
                     return []
                 filtered_allocations = [
                     alloc for alloc in filtered_allocations 
-                    if alloc.name in name_filter
+                    if alloc.name.lower() in [n.lower() for n in name_filter]
                 ]
             else:
                 filtered_allocations = [
                     alloc for alloc in filtered_allocations 
-                    if alloc.name == name_filter
+                    if alloc.name.lower() == name_filter.lower()
                 ]
 
         # Filter by allocated_bandwidth
