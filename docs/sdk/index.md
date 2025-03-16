@@ -12,6 +12,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Deployment
         - [Bandwidth Allocations](config/deployment/bandwidth_allocations.md)
         - [BGP Routing](config/deployment/bgp_routing.md)
+        - [Internal DNS Servers](config/deployment/internal_dns_servers.md)
         - [Remote Networks](config/deployment/remote_networks.md)
         - [Service Connections](config/deployment/service_connections.md)
     - Network
@@ -51,14 +52,15 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Deployment
         - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
         - [BGP Routing Models](models/deployment/bgp_routing_models.md)
-        - [Remote Networks](models/deployment/remote_networks_models.md)
-        - [Service Connections](models/deployment/service_connections_models.md)
+        - [Internal DNS Servers Models](models/deployment/internal_dns_servers_models.md)
+        - [Remote Networks Models](models/deployment/remote_networks_models.md)
+        - [Service Connections Models](models/deployment/service_connections_models.md)
     - Network
         - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
         - [IPsec Crypto Profile Models](models/network/ipsec_crypto_profile_models.md)
-        - [NAT Rules](models/network/nat_rule_models.md)
-        - [Security Zones](models/network/security_zone_models.md)
+        - [NAT Rules Models](models/network/nat_rule_models.md)
+        - [Security Zones Models](models/network/security_zone_models.md)
     - Objects
         - [Address Models](models/objects/address_models.md)
         - [Address Group Models](models/objects/address_group_models.md)
@@ -141,6 +143,21 @@ client.bgp_routing.update({
     "outbound_routes_for_services": ["10.0.0.0/8", "172.16.0.0/12"],
 })
 print("Updated BGP routing settings")
+
+# ===== WORKING WITH INTERNAL DNS SERVERS =====
+
+# Create a new internal DNS server
+dns_server = client.internal_dns_servers.create({
+    "name": "main-dns-server",
+    "domain_name": ["example.com", "internal.example.com"],
+    "primary": "192.168.1.10",
+    "secondary": "192.168.1.11"
+})
+print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
+
+# List all DNS servers
+dns_servers = client.internal_dns_servers.list()
+print(f"Found {len(dns_servers)} DNS servers")
 
 # ===== WORKING WITH SECURITY RULES =====
 
@@ -235,6 +252,7 @@ The following table shows all services available through the unified client inte
 | **Deployment**                     |                                                                 |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                    |
+| `internal_dns_servers`             | DNS server configurations for domain resolution                 |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |

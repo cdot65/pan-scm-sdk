@@ -34,7 +34,7 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 - **OAuth2 Authentication**: Securely authenticate with the Strata Cloud Manager API using OAuth2 client credentials
   flow.
 - **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups,
-  applications, regions, and more.
+  applications, regions, internal DNS servers, and more.
 - **Data Validation**: Utilize Pydantic models for data validation and serialization.
 - **Exception Handling**: Comprehensive error handling with custom exceptions for API errors.
 - **Extensibility**: Designed for easy extension to support additional resources and endpoints.
@@ -108,6 +108,22 @@ web_server.description = "Updated via SDK"
 updated_addr = client.address.update(web_server)
 print(f"Updated address description: {updated_addr.description}")
 
+# === INTERNAL DNS SERVERS ===
+
+# Create a new internal DNS server
+dns_server = client.internal_dns_servers.create({
+    "name": "main-dns-server",
+    "domain_name": ["example.com", "internal.example.com"],
+    "primary": "192.168.1.10",
+    "secondary": "192.168.1.11"
+})
+print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
+
+# List all internal DNS servers
+dns_servers = client.internal_dns_servers.list()
+for server in dns_servers:
+    print(f"DNS Server: {server.name}, Primary: {server.primary}")
+
 # === SECURITY RULES ===
 
 # Fetch a security rule by name
@@ -175,6 +191,7 @@ The unified client provides access to the following services through attribute-b
 | **Deployment**                     |                                                                 |
 | `bandwidth_allocations`            | Bandwidth allocation management for network capacity planning   |
 | `bgp_routing`                      | BGP routing configuration for network connectivity              |
+| `internal_dns_servers`             | Internal DNS server configurations for domain resolution        |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |
@@ -193,6 +210,7 @@ You can also use the traditional pattern where you explicitly create service ins
 ```python
 from scm.client import Scm
 from scm.config.objects import Address
+from scm.config.deployment import InternalDnsServers
 
 # Create an authenticated session with SCM
 api_client = Scm(
@@ -210,6 +228,14 @@ addresses = address.list(folder='Prisma Access')
 # Iterate through the addresses
 for addr in addresses:
     print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
+
+# Create an InternalDnsServers instance
+dns_servers = InternalDnsServers(api_client)
+
+# List all internal DNS servers
+all_dns_servers = dns_servers.list()
+for server in all_dns_servers:
+    print(f"DNS Server: {server.name}, Primary: {server.primary}")
 ```
 
 #### Creating an Address

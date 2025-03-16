@@ -39,6 +39,7 @@ nav:
               - Overview: sdk/config/deployment/index.md
               - Bandwidth Allocations: sdk/config/deployment/bandwidth_allocations.md
               - BGP Routing: sdk/config/deployment/bgp_routing.md
+              - Internal DNS Servers: sdk/config/deployment/internal_dns_servers.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
               - Service Connections: sdk/config/deployment/service_connections.md
           - Network:
@@ -83,6 +84,7 @@ nav:
               - Overview: sdk/models/deployment/index.md
               - Bandwidth Allocation Models: sdk/models/deployment/bandwidth_allocation_models.md
               - BGP Routing Models: sdk/models/deployment/bgp_routing_models.md
+              - Internal DNS Servers Models: sdk/models/deployment/internal_dns_servers_models.md
               - Remote Network Models: sdk/models/deployment/remote_networks_models.md
               - Service Connection Models: sdk/models/deployment/service_connections_models.md
           - Network:

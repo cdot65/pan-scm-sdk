@@ -15,6 +15,7 @@ This section covers the configuration of SASE deployments provided by the Palo A
 
 - [Bandwidth Allocations](bandwidth_allocations.md) - Configure bandwidth allocations for service node groups and regions
 - [BGP Routing](bgp_routing.md) - Configure global BGP routing preferences and behaviors
+- [Internal DNS Servers](internal_dns_servers.md) - Configure internal DNS servers for domain resolution
 - [Remote Networks](remote_networks.md) - Configure remote network connections for Prisma Access
 - [Service Connections](service_connections.md) - Configure service connections to cloud service providers
 
@@ -70,6 +71,14 @@ client.bgp_routing.create({
    "outbound_routes_for_services": ["10.0.0.0/8"],
    "add_host_route_to_ike_peer": False,
    "withdraw_static_route": False
+})
+
+# Create internal DNS servers
+client.internal_dns_servers.create({
+   "name": "main-dns-server",
+   "domain_name": ["example.com", "internal.example.com"],
+   "primary": "192.168.1.10",
+   "secondary": "192.168.1.11"
 })
 
 # Create a remote network
