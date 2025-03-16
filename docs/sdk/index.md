@@ -11,6 +11,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - [BaseObject](config/base_object.md)
     - Deployment
         - [Bandwidth Allocations](config/deployment/bandwidth_allocations.md)
+        - [BGP Routing](config/deployment/bgp_routing.md)
         - [Remote Networks](config/deployment/remote_networks.md)
         - [Service Connections](config/deployment/service_connections.md)
     - Network
@@ -49,6 +50,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
 - Data Models
     - Deployment
         - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
+        - [BGP Routing Models](models/deployment/bgp_routing_models.md)
         - [Remote Networks](models/deployment/remote_networks_models.md)
         - [Service Connections](models/deployment/service_connections_models.md)
     - Network
@@ -125,6 +127,21 @@ web_server.description = "Primary web server updated via unified client"
 updated_address = client.address.update(web_server)
 print(f"Updated address description: {updated_address.description}")
 
+# ===== WORKING WITH BGP ROUTING =====
+
+# Get current BGP routing settings
+bgp_settings = client.bgp_routing.get()
+print(f"Current BGP backbone routing: {bgp_settings.backbone_routing}")
+
+# Update BGP routing preferences
+client.bgp_routing.update({
+    "routing_preference": {"hot_potato_routing": {}},
+    "backbone_routing": "asymmetric-routing-with-load-share",
+    "accept_route_over_SC": True,
+    "outbound_routes_for_services": ["10.0.0.0/8", "172.16.0.0/12"],
+})
+print("Updated BGP routing settings")
+
 # ===== WORKING WITH SECURITY RULES =====
 
 # Fetch a specific security rule
@@ -175,7 +192,7 @@ print(f"Created bandwidth allocation: {new_allocation.name}")
 # Commit all changes to apply them to the firewall
 commit_result = client.commit(
     folders=["Texas"],
-    description="Updated web-server address and removed NAT rule",
+    description="Updated web-server address and BGP routing settings",
     sync=True  # Wait for commit to complete
 )
 
@@ -217,6 +234,7 @@ The following table shows all services available through the unified client inte
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
+| `bgp_routing`                      | Global BGP routing preferences and behaviors                    |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |

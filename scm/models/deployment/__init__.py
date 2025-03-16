@@ -27,6 +27,16 @@ from .bandwidth_allocations import (
     QosModel as BandwidthQosModel,
 )
 
+from .bgp_routing import (
+    BGPRoutingBaseModel,
+    BGPRoutingCreateModel,
+    BGPRoutingUpdateModel,
+    BGPRoutingResponseModel,
+    DefaultRoutingModel,
+    HotPotatoRoutingModel,
+    BackboneRoutingEnum,
+)
+
 __all__ = [
     "RemoteNetworkCreateModel",
     "RemoteNetworkUpdateModel",
@@ -46,4 +56,11 @@ __all__ = [
     "BandwidthAllocationResponseModel",
     "BandwidthAllocationListResponseModel",
     "BandwidthQosModel",
+    "BGPRoutingBaseModel",
+    "BGPRoutingCreateModel",
+    "BGPRoutingUpdateModel",
+    "BGPRoutingResponseModel",
+    "DefaultRoutingModel",
+    "HotPotatoRoutingModel",
+    "BackboneRoutingEnum",
 ]

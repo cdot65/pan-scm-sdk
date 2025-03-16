@@ -8,8 +8,9 @@
 4. [Usage Examples](#usage-examples)
 5. [Models by Category](#models-by-category)
    1. [Bandwidth Allocations](#bandwidth-allocations)
-   2. [Remote Networks](#remote-networks)
-   3. [Service Connections](#service-connections)
+   2. [BGP Routing](#bgp-routing)
+   3. [Remote Networks](#remote-networks)
+   4. [Service Connections](#service-connections)
 6. [Best Practices](#best-practices)
 7. [Related Documentation](#related-documentation)
 
@@ -44,7 +45,12 @@ Deployment models share common patterns:
 <!-- termynal -->
 ```python
 from scm.client import ScmClient
-from scm.models.deployment import BandwidthAllocationCreateModel, RemoteNetworkCreateModel
+from scm.models.deployment import (
+    BandwidthAllocationCreateModel, 
+    BGPRoutingCreateModel, 
+    RemoteNetworkCreateModel,
+    BackboneRoutingEnum
+)
 
 # Initialize client
 client = ScmClient(
@@ -69,6 +75,20 @@ bandwidth_allocation = BandwidthAllocationCreateModel(
 # Convert the model to a dictionary for the API call
 allocation_dict = bandwidth_allocation.model_dump(exclude_unset=True)
 result = client.bandwidth_allocation.create(allocation_dict)
+
+# Create BGP routing configuration using a model
+bgp_routing = BGPRoutingCreateModel(
+   routing_preference={"default": {}},
+   backbone_routing=BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
+   accept_route_over_SC=False,
+   outbound_routes_for_services=["10.0.0.0/8"],
+   add_host_route_to_ike_peer=False,
+   withdraw_static_route=False
+)
+
+# Convert the model to a dictionary for the API call
+bgp_dict = bgp_routing.model_dump(exclude_unset=True)
+result = client.bgp_routing.create(bgp_dict)
 
 # Create a new remote network using a model
 remote_network = RemoteNetworkCreateModel(
@@ -98,6 +118,10 @@ result = client.remote_networks.create(network_dict)
 
 - [Bandwidth Allocation Models](bandwidth_allocation_models.md) - Bandwidth allocation models for regions and service node groups
 
+### BGP Routing
+
+- [BGP Routing Models](bgp_routing_models.md) - BGP routing configuration models for global routing preferences
+
 ### Remote Networks
 
 - [Remote Networks Models](remote_networks_models.md) - Remote network connection configurations
@@ -113,19 +137,25 @@ result = client.remote_networks.create(network_dict)
    - Handle validation errors appropriately for deployment configurations
    - Use model_dump(exclude_unset=True) to avoid sending default values in deployment configurations
 
-2. **Remote Network Configuration**
+2. **BGP Routing Configuration**
+   - Understand the implications of different backbone routing options before changing them
+   - Use the appropriate routing preference model (Default or Hot Potato) for your use case
+   - Validate CIDR notation for outbound routes before submitting to the API
+   - Test routing changes in a non-production environment before deploying
+
+3. **Remote Network Configuration**
    - Ensure region and availability zone settings are properly specified
    - Validate that authentication settings are correctly configured
    - Test deployment configurations in a non-production environment first
    - Document remote network configurations and their intended purpose
 
-3. **Network Subnet Handling**
+4. **Network Subnet Handling**
    - Validate IP subnets before creating remote networks
    - Use CIDR notation consistently for network definitions
    - Be aware of overlapping subnet definitions
    - Ensure proper route configuration between networks
 
-4. **Security Considerations**
+5. **Security Considerations**
    - Securely manage pre-shared keys and other authentication credentials
    - Use certificate-based authentication when possible
    - Implement proper access controls for deployment configurations
@@ -135,5 +165,6 @@ result = client.remote_networks.create(network_dict)
 
 - [Deployment Configuration](../../config/deployment/index.md) - Working with deployment configurations
 - [Bandwidth Allocations Configuration](../../config/deployment/bandwidth_allocations.md) - Bandwidth allocation operations
+- [BGP Routing Configuration](../../config/deployment/bgp_routing.md) - BGP routing operations
 - [Remote Networks Configuration](../../config/deployment/remote_networks.md) - Remote network operations
 - [Service Connections Configuration](../../config/deployment/service_connections.md) - Service connection operations

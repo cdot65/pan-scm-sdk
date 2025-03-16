@@ -14,6 +14,7 @@ This section covers the configuration of SASE deployments provided by the Palo A
 ## Available Deployment Objects
 
 - [Bandwidth Allocations](bandwidth_allocations.md) - Configure bandwidth allocations for service node groups and regions
+- [BGP Routing](bgp_routing.md) - Configure global BGP routing preferences and behaviors
 - [Remote Networks](remote_networks.md) - Configure remote network connections for Prisma Access
 - [Service Connections](service_connections.md) - Configure service connections to cloud service providers
 
@@ -59,6 +60,16 @@ client.bandwidth_allocation.create({
       "profile": "test-profile",
       "guaranteed_ratio": 0.5
    }
+})
+
+# Configure BGP routing (singleton object)
+client.bgp_routing.create({
+   "routing_preference": {"default": {}},
+   "backbone_routing": "no-asymmetric-routing",
+   "accept_route_over_SC": False,
+   "outbound_routes_for_services": ["10.0.0.0/8"],
+   "add_host_route_to_ike_peer": False,
+   "withdraw_static_route": False
 })
 
 # Create a remote network
