@@ -400,6 +400,10 @@ class Scm:
                 "scm.config.objects.http_server_profiles",
                 "HTTPServerProfile",
             ),
+            "internal_dns_servers": (
+                "scm.config.deployment.internal_dns_servers",
+                "InternalDnsServers",
+            ),
             "log_forwarding_profile": (
                 "scm.config.objects.log_forwarding_profile",
                 "LogForwardingProfile",
