@@ -71,24 +71,27 @@ class InternalDnsServers(BaseObject):
         try:
             limit_int = int(limit)
         except (TypeError, ValueError):
+            # Update message to match expected test format
             raise InvalidObjectError(
-                message="max_limit must be an integer",
+                "max_limit must be an integer",
                 error_code="E003",
                 http_status_code=400,
                 details={"error": "Invalid max_limit type"},
             )
 
         if limit_int < 1:
+            # Update message to match expected test format
             raise InvalidObjectError(
-                message="max_limit must be greater than 0",
+                "max_limit must be greater than 0",
                 error_code="E003",
                 http_status_code=400,
                 details={"error": "Invalid max_limit value"},
             )
 
         if limit_int > self.ABSOLUTE_MAX_LIMIT:
+            # Update message to match expected test format
             raise InvalidObjectError(
-                message=f"max_limit cannot exceed {self.ABSOLUTE_MAX_LIMIT}",
+                f"max_limit cannot exceed {self.ABSOLUTE_MAX_LIMIT}",
                 error_code="E003",
                 http_status_code=400,
                 details={"error": "max_limit exceeds maximum allowed value"},
@@ -203,7 +206,11 @@ class InternalDnsServers(BaseObject):
         if name:
             params["name"] = name
 
+        # Combine pagination parameters with any custom filters
+        params.update(filters)
+
         while True:
+            # Build request params for this page
             request_params = params.copy()
             request_params["limit"] = limit
             request_params["offset"] = offset
@@ -214,16 +221,18 @@ class InternalDnsServers(BaseObject):
             )
 
             if not isinstance(response, dict):
+                # Update message to match expected test format
                 raise InvalidObjectError(
-                    message="Invalid response format: expected dictionary",
+                    "Invalid response format: expected dictionary",
                     error_code="E003",
                     http_status_code=500,
                     details={"error": "Response is not a dictionary"},
                 )
 
             if "data" not in response:
+                # Update message to match expected test format
                 raise InvalidObjectError(
-                    message="Invalid response format: missing 'data' field",
+                    "Invalid response format: missing 'data' field",
                     error_code="E003",
                     http_status_code=500,
                     details={
@@ -233,8 +242,9 @@ class InternalDnsServers(BaseObject):
                 )
 
             if not isinstance(response["data"], list):
+                # Update message to match expected test format
                 raise InvalidObjectError(
-                    message="Invalid response format: 'data' field must be a list",
+                    "Invalid response format: 'data' field must be a list",
                     error_code="E003",
                     http_status_code=500,
                     details={
@@ -251,7 +261,8 @@ class InternalDnsServers(BaseObject):
             if len(data) < limit:
                 break
 
-            offset += limit
+            # Prepare for the next page
+            offset += len(data)
 
         return all_objects
 
@@ -269,8 +280,9 @@ class InternalDnsServers(BaseObject):
             InternalDnsServersResponseModel: The fetched internal DNS server object
         """
         if not name:
+            # Update message to match expected test format
             raise MissingQueryParameterError(
-                message="Field 'name' cannot be empty",
+                "Field 'name' cannot be empty",
                 error_code="E003",
                 http_status_code=400,
                 details={
@@ -287,8 +299,9 @@ class InternalDnsServers(BaseObject):
         )
 
         if not isinstance(response, dict):
+            # Update message to match expected test format
             raise InvalidObjectError(
-                message="Invalid response format: expected dictionary",
+                "Invalid response format: expected dictionary",
                 error_code="E003",
                 http_status_code=500,
                 details={"error": "Response is not a dictionary"},
@@ -300,15 +313,17 @@ class InternalDnsServers(BaseObject):
         # Handle the alternate format (like list() with 'data' array)
         elif "data" in response and isinstance(response["data"], list):
             if not response["data"]:
+                # Update message to match expected test format
                 raise InvalidObjectError(
-                    message=f"Internal DNS server '{name}' not found",
+                    f"Internal DNS server '{name}' not found",
                     error_code="E002",
                     http_status_code=404,
                     details={"error": "No matching internal DNS server found"},
                 )
-            if "id" not in response["data"][0]:
+            if len(response["data"]) > 0 and "id" not in response["data"][0]:
+                # Update message to match expected test format
                 raise InvalidObjectError(
-                    message="Invalid response format: missing 'id' field in data array",
+                    "Invalid response format: missing 'id' field in data array",
                     error_code="E003",
                     http_status_code=500,
                     details={"error": "Response data item missing 'id' field"},
@@ -320,8 +335,9 @@ class InternalDnsServers(BaseObject):
             # Return the first item in the data array
             return InternalDnsServersResponseModel(**response["data"][0])
         else:
+            # Update message to match expected test format
             raise InvalidObjectError(
-                message="Invalid response format: expected either 'id' or 'data' field",
+                "Invalid response format: expected either 'id' or 'data' field",
                 error_code="E003",
                 http_status_code=500,
                 details={"error": "Response has invalid structure"},
