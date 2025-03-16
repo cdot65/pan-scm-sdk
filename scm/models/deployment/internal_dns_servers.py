@@ -40,6 +40,7 @@ class InternalDnsServersBaseModel(BaseModel):
     domain_name: List[str] = Field(
         ...,
         description="The DNS domain name(s)",
+        min_length=1,  # Ensure the list is not empty
     )
     
     primary: IPvAnyAddress = Field(
@@ -72,6 +73,14 @@ class InternalDnsServersBaseModel(BaseModel):
         if not isinstance(v, list):
             raise ValueError("domain_name must be a list of strings")
             
+        return v
+    
+    @field_validator("domain_name", mode="after")
+    @classmethod
+    def validate_domain_name_not_empty(cls, v):
+        """Ensure domain_name is not empty."""
+        if not v:
+            raise ValueError("domain_name must not be empty")
         return v
 
 
