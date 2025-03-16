@@ -255,6 +255,18 @@ class TestInternalDnsServers:
         # Check the actual attributes instead of string representation
         assert error.message == "Field 'name' cannot be empty"
         assert error.details == {"field": "name", "error": '"name" is not allowed to be empty'}
+        
+    def test_fetch_response_not_dict(self, dns_servers, api_client):
+        """Test fetch with response that is not a dictionary."""
+        # Set the API client to return a non-dictionary value
+        api_client.get.return_value = "not a dictionary"
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            dns_servers.fetch("test-dns-server")
+        error = exc_info.value
+        # Check the actual attributes instead of string representation
+        assert error.message == "Invalid response format: expected dictionary"
+        assert error.details == {"error": "Response is not a dictionary"}
 
     def test_fetch_data_array_response(self, dns_servers, api_client, sample_dns_server_response):
         """Test fetch with data array response format."""
