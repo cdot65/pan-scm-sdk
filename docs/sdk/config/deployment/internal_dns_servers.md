@@ -12,6 +12,7 @@
     - [Retrieving Internal DNS Servers](#retrieving-internal-dns-servers)
     - [Updating Internal DNS Servers](#updating-internal-dns-servers)
     - [Listing Internal DNS Servers](#listing-internal-dns-servers)
+    - [Filtering Internal DNS Servers](#filtering-internal-dns-servers)
     - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Internal DNS Servers](#deleting-internal-dns-servers)
 7. [Error Handling](#error-handling)
@@ -213,6 +214,37 @@ filtered_dns_servers = client.internal_dns_servers.list(name="main")
 for dns in filtered_dns_servers:
    print(f"Filtered DNS server: {dns.name}")
    print(f"Domain names: {dns.domain_name}")
+```
+
+</div>
+
+### Filtering Internal DNS Servers
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Filter by primary IP address
+primary_ip_filter = client.internal_dns_servers.list(primary="192.168.1.10")
+print(f"DNS servers with primary IP 192.168.1.10: {len(primary_ip_filter)}")
+
+# Filter by domain name (partial match)
+domain_filter = client.internal_dns_servers.list(domain_name="example")
+print(f"DNS servers with 'example' in domain name: {len(domain_filter)}")
+
+# Combine multiple filters
+combined_filter = client.internal_dns_servers.list(
+    primary="192.168.1.10",
+    domain_name="example"
+)
+print(f"DNS servers matching both filters: {len(combined_filter)}")
+
+# Process filtered results
+for dns in combined_filter:
+    print(f"Filtered DNS server: {dns.name}")
+    print(f"Primary IP: {dns.primary}")
+    print(f"Domain names: {dns.domain_name}")
 ```
 
 </div>
