@@ -1,54 +1,75 @@
-# Remote Network Models
+# Remote Networks Models
 
 ## Overview
 
-The Remote Network models provide a structured way to manage remote network configurations in Palo Alto Networks' Strata Cloud Manager.
-These models support both ECMP and non-ECMP configurations, BGP peering options, and various licensing types. The models handle
-validation of inputs and outputs when interacting with the SCM API.
+The Remote Networks models provide a structured way to manage remote network connections in Palo Alto Networks' Strata Cloud Manager. These models support configuration of remote network sites with options for IPsec tunnels, BGP protocol settings, and Equal-Cost Multi-Path (ECMP) load balancing. The models handle validation of inputs and outputs when interacting with the SCM API.
 
 ## Attributes
 
-| Attribute              | Type                  | Required | Default         | Description                                                           |
-|------------------------|-----------------------|----------|-----------------|-----------------------------------------------------------------------|
-| name                   | str                   | Yes      | None            | Name of remote network. Must start with letter, allows [0-9a-zA-Z._-] |
-| region                 | str                   | Yes      | None            | Region where remote network is deployed                               |
-| license_type           | str                   | No       | FWAAS-AGGREGATE | License type (new customers use aggregate licensing)                  |
-| description            | str                   | No       | None            | Description of remote network. Max length: 1023 chars                 |
-| subnets                | List[str]             | No       | None            | List of subnets in remote network                                     |
-| spn_name               | str                   | No*      | None            | Required when license_type is FWAAS-AGGREGATE                         |
-| ecmp_load_balancing    | EcmpLoadBalancingEnum | No       | disable         | Enable or disable ECMP load balancing                                 |
-| ecmp_tunnels           | List[EcmpTunnelModel] | No**     | None            | Required when ecmp_load_balancing is enable. Max 4 tunnels            |
-| ipsec_tunnel           | str                   | No**     | None            | Required when ecmp_load_balancing is disable                          |
-| secondary_ipsec_tunnel | str                   | No       | None            | Optional secondary IPSec tunnel                                       |
-| protocol               | ProtocolModel         | No       | None            | BGP protocol configuration                                            |
-| folder                 | str                   | No***    | None            | Folder where network is defined. Max length: 64 chars                 |
-| snippet                | str                   | No***    | None            | Snippet where network is defined. Max length: 64 chars                |
-| device                 | str                   | No***    | None            | Device where network is defined. Max length: 64 chars                 |
-| id                     | UUID                  | Yes****  | None            | UUID of remote network (response only)                                |
+| Attribute           | Type           | Required  | Default | Description                                                      |
+|---------------------|----------------|-----------|---------|------------------------------------------------------------------|
+| name                | str            | Yes       | None    | Name of the remote network. Pattern: ^[a-zA-Z0-9_ .-]+$          |
+| id                  | UUID           | Yes*      | None    | Unique identifier (*response only)                               |
+| region              | str            | Yes       | None    | AWS region for deployment (e.g., us-east-1)                      |
+| license_type        | str            | Yes       | None    | License type (defaults to FWAAS-AGGREGATE)                       |
+| spn_name            | str            | Yes**     | None    | Service Provider Name (**required for FWAAS)                     |
+| subnets             | List[str]      | No        | []      | List of network subnets                                          |
+| description         | str            | No        | None    | Description of the remote network                                |
+| ecmp_load_balancing | str            | Yes       | None    | ECMP mode (enable/disable)                                       |
+| ecmp_tunnels        | List[Tunnel]   | Yes***    | None    | ECMP tunnel configurations (***if ECMP enabled)                  |
+| ipsec_tunnel        | str            | Yes***    | None    | IPSec tunnel name (***if ECMP disabled)                          |
+| protocol            | Protocol       | No        | None    | BGP protocol configuration                                        |
+| folder              | str            | Yes       | None    | Folder where the remote network is defined                        |
 
-\* Required when license_type is FWAAS-AGGREGATE
-\** Either ecmp_tunnels (when enabled) or ipsec_tunnel (when disabled) must be provided
-\*** Exactly one container type (folder/snippet/device) must be provided for create operations
-\**** Only required for response model
+\* Only required for response model
+\** Required when license_type is FWAAS-AGGREGATE
+\*** One of these is required based on ecmp_load_balancing setting
+
+### Tunnel Model Attributes
+
+| Attribute       | Type     | Required | Default | Description                          |
+|-----------------|----------|----------|---------|--------------------------------------|
+| name            | str      | Yes      | None    | Tunnel name                          |
+| ipsec_tunnel    | str      | Yes      | None    | IPSec tunnel name                    |
+| local_ip_address| str      | Yes      | None    | Local IP address                     |
+| peer_ip_address | str      | Yes      | None    | Peer IP address                      |
+| peer_as         | str      | Yes      | None    | Peer Autonomous System number        |
+
+### Protocol Model Attributes
+
+| Attribute           | Type    | Required | Default | Description                       |
+|---------------------|---------|----------|---------|-----------------------------------|
+| bgp                 | BGP     | No       | None    | BGP protocol configuration        |
+
+### BGP Model Attributes
+
+| Attribute           | Type    | Required | Default | Description                       |
+|---------------------|---------|----------|---------|-----------------------------------|
+| enable              | bool    | No       | None    | Enable BGP                        |
+| local_ip_address    | str     | No       | None    | Local IP address for BGP          |
+| peer_ip_address     | str     | No       | None    | Peer IP address for BGP           |
+| peer_as             | str     | No       | None    | Peer AS number                    |
+| local_as            | str     | No       | None    | Local AS number                   |
+| secret              | str     | No       | None    | BGP authentication secret         |
 
 ## Exceptions
 
-The Remote Network models can raise the following exceptions during validation:
+The Remote Networks models can raise the following exceptions during validation:
 
 - **ValueError**: Raised in several scenarios:
-    - When ecmp_tunnels is not provided when ecmp_load_balancing is enabled
-    - When ipsec_tunnel is not provided when ecmp_load_balancing is disabled
-    - When spn_name is not provided with FWAAS-AGGREGATE license type
-    - When multiple container types are specified for create operations
-    - When no container type is specified for create operations
+    - When ECMP is enabled but ecmp_tunnels is not provided
+    - When ECMP is disabled but ipsec_tunnel is not provided
+    - When license_type is FWAAS-AGGREGATE but spn_name is not provided
     - When name pattern validation fails
-    - When container name pattern validation fails
+    - When subnet format validation fails
+    - When required tunnel attributes are missing
+    - When field length limits are exceeded
 
 ## Model Validators
 
-### Remote Network Logic Validation
+### ECMP Configuration Validation
 
-The models enforce specific logic based on ECMP and license settings:
+The models enforce consistent configuration based on ECMP mode:
 
 <div class="termy">
 
@@ -58,33 +79,40 @@ The models enforce specific logic based on ECMP and license settings:
 # This will raise a validation error
 from scm.models.deployment import RemoteNetworkCreateModel
 
-# Error: missing ecmp_tunnels when ECMP enabled
+# Error: ECMP enabled but tunnels not provided
 try:
-    network = RemoteNetworkCreateModel(
-        name="invalid-network",
+    remote_network = RemoteNetworkCreateModel(
+        name="remote-site-1",
         region="us-east-1",
+        license_type="FWAAS-AGGREGATE",
+        spn_name="us-east-1-spn",
         ecmp_load_balancing="enable",
-        folder="Texas"
+        # ecmp_tunnels missing
+        folder="Remote Networks"
     )
 except ValueError as e:
-    print(e)  # "ecmp_tunnels is required when ecmp_load_balancing is enable"
+    print(e)  # "When ECMP is enabled, ecmp_tunnels must be provided"
 
-# Error: missing ipsec_tunnel when ECMP disabled
+# Error: ECMP disabled but IPsec tunnel not provided
 try:
-    network = RemoteNetworkCreateModel(
-        name="invalid-network",
+    remote_network = RemoteNetworkCreateModel(
+        name="remote-site-1",
         region="us-east-1",
-        folder="Texas"
+        license_type="FWAAS-AGGREGATE",
+        spn_name="us-east-1-spn",
+        ecmp_load_balancing="disable",
+        # ipsec_tunnel missing
+        folder="Remote Networks"
     )
 except ValueError as e:
-    print(e)  # "ipsec_tunnel is required when ecmp_load_balancing is disable"
+    print(e)  # "When ECMP is disabled, ipsec_tunnel must be provided"
 ```
 
 </div>
 
-### Container Type Validation
+### License Type Validation
 
-For create operations, exactly one container type must be specified:
+When using FWAAS-AGGREGATE license type, spn_name is required:
 
 <div class="termy">
 
@@ -93,22 +121,51 @@ For create operations, exactly one container type must be specified:
 ```python
 # This will raise a validation error
 try:
-    network = RemoteNetworkCreateModel(
-        name="invalid-network",
+    remote_network = RemoteNetworkCreateModel(
+        name="remote-site-1",
         region="us-east-1",
+        license_type="FWAAS-AGGREGATE",
+        # spn_name missing
+        ecmp_load_balancing="disable",
         ipsec_tunnel="tunnel1",
-        folder="Texas",
-        device="fw01"  # Can't specify both folder and device
+        folder="Remote Networks"
     )
 except ValueError as e:
-    print(e)  # "Exactly one of 'folder' must be provided."
+    print(e)  # "When license_type is FWAAS-AGGREGATE, spn_name must be provided"
+```
+
+</div>
+
+### Subnet Format Validation
+
+Subnets must follow proper CIDR notation:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# This will raise a validation error
+try:
+    remote_network = RemoteNetworkCreateModel(
+        name="remote-site-1",
+        region="us-east-1",
+        license_type="FWAAS-AGGREGATE",
+        spn_name="us-east-1-spn",
+        ecmp_load_balancing="disable",
+        ipsec_tunnel="tunnel1",
+        subnets=["invalid-subnet"],  # Should be CIDR notation like 192.168.1.0/24
+        folder="Remote Networks"
+    )
+except ValueError as e:
+    print(e)  # "Subnet must be in CIDR notation (e.g., 192.168.1.0/24)"
 ```
 
 </div>
 
 ## Usage Examples
 
-### Creating a Non-ECMP Remote Network
+### Creating a Standard Remote Network
 
 <div class="termy">
 
@@ -116,43 +173,45 @@ except ValueError as e:
 
 ```python
 # Using dictionary
-from scm.config.deployment import RemoteNetwork
+from scm.config.deployment import RemoteNetworks
 
-network_dict = {
-    "name": "branch-office",
+standard_config = {
+    "name": "branch-office-1",
     "region": "us-east-1",
-    "description": "Branch office network",
     "license_type": "FWAAS-AGGREGATE",
-    "spn_name": "branch-spn",
-    "ipsec_tunnel": "tunnel1",
-    "subnets": ["192.168.1.0/24"],
-    "folder": "Texas"
+    "spn_name": "us-east-1-spn",
+    "folder": "Remote Networks",
+    "description": "Branch office VPN connection",
+    "subnets": ["10.0.0.0/24", "10.0.1.0/24"],
+    "ecmp_load_balancing": "disable",
+    "ipsec_tunnel": "branch-1-tunnel"
 }
 
-remote_network = RemoteNetwork(api_client)
-response = remote_network.create(network_dict)
+remote_networks = RemoteNetworks(api_client)
+response = remote_networks.create(standard_config)
 
 # Using model directly
 from scm.models.deployment import RemoteNetworkCreateModel
 
-network = RemoteNetworkCreateModel(
-    name="branch-office",
+standard_network = RemoteNetworkCreateModel(
+    name="branch-office-1",
     region="us-east-1",
-    description="Branch office network",
     license_type="FWAAS-AGGREGATE",
-    spn_name="branch-spn",
-    ipsec_tunnel="tunnel1",
-    subnets=["192.168.1.0/24"],
-    folder="Texas"
+    spn_name="us-east-1-spn",
+    folder="Remote Networks",
+    description="Branch office VPN connection",
+    subnets=["10.0.0.0/24", "10.0.1.0/24"],
+    ecmp_load_balancing="disable",
+    ipsec_tunnel="branch-1-tunnel"
 )
 
-payload = network.model_dump(exclude_unset=True)
-response = remote_network.create(payload)
+payload = standard_network.model_dump(exclude_unset=True)
+response = remote_networks.create(payload)
 ```
 
 </div>
 
-### Creating an ECMP Remote Network
+### Creating an ECMP-Enabled Remote Network
 
 <div class="termy">
 
@@ -160,63 +219,134 @@ response = remote_network.create(payload)
 
 ```python
 # Using dictionary
-ecmp_dict = {
-    "name": "datacenter",
-    "region": "us-west-1",
-    "description": "Datacenter network with ECMP",
+ecmp_config = {
+    "name": "branch-office-2",
+    "region": "us-west-2",
     "license_type": "FWAAS-AGGREGATE",
-    "spn_name": "dc-spn",
+    "spn_name": "us-west-2-spn",
+    "folder": "Remote Networks",
+    "description": "Branch office with ECMP",
+    "subnets": ["172.16.0.0/24", "172.16.1.0/24"],
     "ecmp_load_balancing": "enable",
     "ecmp_tunnels": [
         {
-            "name": "tunnel1",
-            "ipsec_tunnel": "ipsec1",
-            "peer_as": "65000",
-            "peer_ip_address": "10.0.0.1"
+            "name": "tunnel-1",
+            "ipsec_tunnel": "branch-2-tunnel-1",
+            "local_ip_address": "10.0.1.1",
+            "peer_as": "65515",
+            "peer_ip_address": "10.0.1.2"
         },
         {
-            "name": "tunnel2",
-            "ipsec_tunnel": "ipsec2",
-            "peer_as": "65000",
-            "peer_ip_address": "10.0.0.2"
+            "name": "tunnel-2",
+            "ipsec_tunnel": "branch-2-tunnel-2",
+            "local_ip_address": "10.0.2.1",
+            "peer_as": "65515",
+            "peer_ip_address": "10.0.2.2"
         }
-    ],
-    "folder": "Texas"
+    ]
 }
 
-response = remote_network.create(ecmp_dict)
+response = remote_networks.create(ecmp_config)
 
 # Using model directly
-from scm.models.deployment import RemoteNetworkCreateModel, EcmpTunnelModel
+from scm.models.deployment import RemoteNetworkCreateModel, Tunnel
 
 ecmp_tunnels = [
-    EcmpTunnelModel(
-        name="tunnel1",
-        ipsec_tunnel="ipsec1",
-        peer_as="65000",
-        peer_ip_address="10.0.0.1"
+    Tunnel(
+        name="tunnel-1",
+        ipsec_tunnel="branch-2-tunnel-1",
+        local_ip_address="10.0.1.1",
+        peer_as="65515",
+        peer_ip_address="10.0.1.2"
     ),
-    EcmpTunnelModel(
-        name="tunnel2",
-        ipsec_tunnel="ipsec2",
-        peer_as="65000",
-        peer_ip_address="10.0.0.2"
+    Tunnel(
+        name="tunnel-2",
+        ipsec_tunnel="branch-2-tunnel-2",
+        local_ip_address="10.0.2.1",
+        peer_as="65515",
+        peer_ip_address="10.0.2.2"
     )
 ]
 
-network = RemoteNetworkCreateModel(
-    name="datacenter",
-    region="us-west-1",
-    description="Datacenter network with ECMP",
+ecmp_network = RemoteNetworkCreateModel(
+    name="branch-office-2",
+    region="us-west-2",
     license_type="FWAAS-AGGREGATE",
-    spn_name="dc-spn",
+    spn_name="us-west-2-spn",
+    folder="Remote Networks",
+    description="Branch office with ECMP",
+    subnets=["172.16.0.0/24", "172.16.1.0/24"],
     ecmp_load_balancing="enable",
-    ecmp_tunnels=ecmp_tunnels,
-    folder="Texas"
+    ecmp_tunnels=ecmp_tunnels
 )
 
-payload = network.model_dump(exclude_unset=True)
-response = remote_network.create(payload)
+payload = ecmp_network.model_dump(exclude_unset=True)
+response = remote_networks.create(payload)
+```
+
+</div>
+
+### Creating a Remote Network with BGP Protocol
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+bgp_config = {
+    "name": "branch-office-3",
+    "region": "eu-west-1",
+    "license_type": "FWAAS-AGGREGATE",
+    "spn_name": "eu-west-1-spn",
+    "folder": "Remote Networks",
+    "description": "Branch office with BGP",
+    "subnets": ["192.168.1.0/24"],
+    "ecmp_load_balancing": "disable",
+    "ipsec_tunnel": "branch-3-tunnel",
+    "protocol": {
+        "bgp": {
+            "enable": True,
+            "local_ip_address": "10.1.1.1",
+            "peer_ip_address": "10.1.1.2",
+            "peer_as": "65000",
+            "local_as": "65001",
+            "secret": "bgp-auth-key"
+        }
+    }
+}
+
+response = remote_networks.create(bgp_config)
+
+# Using model directly
+from scm.models.deployment import RemoteNetworkCreateModel, Protocol, BGP
+
+bgp = BGP(
+    enable=True,
+    local_ip_address="10.1.1.1",
+    peer_ip_address="10.1.1.2",
+    peer_as="65000",
+    local_as="65001",
+    secret="bgp-auth-key"
+)
+
+protocol = Protocol(bgp=bgp)
+
+bgp_network = RemoteNetworkCreateModel(
+    name="branch-office-3",
+    region="eu-west-1",
+    license_type="FWAAS-AGGREGATE",
+    spn_name="eu-west-1-spn",
+    folder="Remote Networks",
+    description="Branch office with BGP",
+    subnets=["192.168.1.0/24"],
+    ecmp_load_balancing="disable",
+    ipsec_tunnel="branch-3-tunnel",
+    protocol=protocol
+)
+
+payload = bgp_network.model_dump(exclude_unset=True)
+response = remote_networks.create(payload)
 ```
 
 </div>
@@ -230,28 +360,42 @@ response = remote_network.create(payload)
 ```python
 # Using dictionary
 update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "branch-office-updated",
-    "description": "Updated branch office network",
-    "subnets": ["192.168.1.0/24", "192.168.2.0/24"],
-    "ipsec_tunnel": "tunnel2"
+    "name": "branch-office-1",
+    "description": "Updated branch office configuration",
+    "subnets": ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"],  # Added a new subnet
+    "protocol": {
+        "bgp": {
+            "enable": True,
+            "peer_as": "65515",
+            "peer_ip_address": "10.0.0.1",
+            "local_ip_address": "10.0.0.2"
+        }
+    }
 }
 
-response = remote_network.update(update_dict)
+response = remote_networks.update(update_dict)
 
 # Using model directly
-from scm.models.deployment import RemoteNetworkUpdateModel
+from scm.models.deployment import RemoteNetworkUpdateModel, Protocol, BGP
+
+protocol = Protocol(
+    bgp=BGP(
+        enable=True,
+        peer_as="65515",
+        peer_ip_address="10.0.0.1",
+        local_ip_address="10.0.0.2"
+    )
+)
 
 update_network = RemoteNetworkUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="branch-office-updated",
-    description="Updated branch office network",
-    subnets=["192.168.1.0/24", "192.168.2.0/24"],
-    ipsec_tunnel="tunnel2"
+    name="branch-office-1",
+    description="Updated branch office configuration",
+    subnets=["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"],
+    protocol=protocol
 )
 
 payload = update_network.model_dump(exclude_unset=True)
-response = remote_network.update(payload)
+response = remote_networks.update(payload)
 ```
 
 </div>

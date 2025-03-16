@@ -77,6 +77,10 @@ definitions that specify network protocols and ports for use in security policie
 
 ## Basic Configuration
 
+The Service service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
 <div class="termy">
 
 <!-- termynal -->
@@ -84,20 +88,25 @@ definitions that specify network protocols and ports for use in security policie
 ```python
 from scm.client import ScmClient
 
-# Initialize client using the unified client approach
+# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Access the service module directly through the client
-# client.service is automatically initialized for you
+# Access the Service service directly through the client
+# No need to create a separate Service instance
+services = client.service
 ```
 
 </div>
 
-You can also use the traditional approach if preferred:
+### Traditional Service Instantiation (Legacy)
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -110,9 +119,14 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize Service object
+# Initialize Service object explicitly
 services = Service(client)
 ```
+
+</div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -123,6 +137,15 @@ services = Service(client)
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
 # TCP service configuration
 tcp_service = {
     "name": "web-service",
@@ -217,7 +240,7 @@ updated_service = client.service.update(existing_service)
 <!-- termynal -->
 
 ```python
-# List with direct filter parameters
+# Pass filters directly into the list method
 filtered_services = client.service.list(
     folder='Texas',
     protocols=['tcp'],
@@ -232,14 +255,14 @@ for svc in filtered_services:
     elif svc.protocol.udp:
         print(f"UDP Ports: {svc.protocol.udp.port}")
 
-# Define filter parameters as dictionary
+# Define filter parameters as a dictionary
 list_params = {
     "folder": "Texas",
     "protocols": ["udp"],
     "tags": ["DNS"]
 }
 
-# List with filters as kwargs
+# List services with filters as kwargs
 filtered_services = client.service.list(**list_params)
 ```
 
@@ -271,8 +294,8 @@ exact_services = client.service.list(
    exact_match=True
 )
 
-for app in exact_services:
-   print(f"Exact match: {app.name} in {app.folder}")
+for svc in exact_services:
+   print(f"Exact match: {svc.name} in {svc.folder}")
 
 # Exclude all services from the 'All' folder
 no_all_services = client.service.list(
@@ -280,9 +303,9 @@ no_all_services = client.service.list(
    exclude_folders=['All']
 )
 
-for app in no_all_services:
-   assert app.folder != 'All'
-   print(f"Filtered out 'All': {app.name}")
+for svc in no_all_services:
+   assert svc.folder != 'All'
+   print(f"Filtered out 'All': {svc.name}")
 
 # Exclude services that come from 'default' snippet
 no_default_snippet = client.service.list(
@@ -290,9 +313,9 @@ no_default_snippet = client.service.list(
    exclude_snippets=['default']
 )
 
-for app in no_default_snippet:
-   assert app.snippet != 'default'
-   print(f"Filtered out 'default' snippet: {app.name}")
+for svc in no_default_snippet:
+   assert svc.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {svc.name}")
 
 # Exclude services associated with 'DeviceA'
 no_deviceA = client.service.list(
@@ -300,9 +323,9 @@ no_deviceA = client.service.list(
    exclude_devices=['DeviceA']
 )
 
-for app in no_deviceA:
-   assert app.device != 'DeviceA'
-   print(f"Filtered out 'DeviceA': {app.name}")
+for svc in no_deviceA:
+   assert svc.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {svc.name}")
 
 # Combine exact_match with multiple exclusions
 combined_filters = client.service.list(
@@ -313,8 +336,8 @@ combined_filters = client.service.list(
    exclude_devices=['DeviceA']
 )
 
-for app in combined_filters:
-   print(f"Combined filters result: {app.name} in {app.folder}")
+for svc in combined_filters:
+   print(f"Combined filters result: {svc.name} in {svc.folder}")
 ```
 
 </div>
@@ -323,25 +346,35 @@ for app in combined_filters:
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
+**Example:**
+
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Initialize the ScmClient with a custom max_limit for service objects
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+from scm.client import ScmClient
+from scm.config.objects import Service
+
+# Initialize client
 client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    service_max_limit=4321
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
-all_services = client.service.list(folder='Texas')
+# Two options for setting max_limit:
 
-# 'all_services' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Option 1: Use the unified client interface but create a custom Service instance with max_limit
+service_service = Service(client, max_limit=4321)
+all_services1 = service_service.list(folder='Texas')
+
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_services2 = client.service.list(folder='Texas')
+
+# Both options will auto-paginate through all available objects.
+# The services are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -378,7 +411,6 @@ commit_params = {
 }
 
 # Commit the changes directly on the client
-# Note: All commit operations should be performed on the client directly
 result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
@@ -393,11 +425,11 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job directly on the client
+# Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs directly on the client
+# List recent jobs directly from the client
 recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
@@ -445,17 +477,17 @@ try:
         "tag": ["Test"]
     }
 
-    # Create the service using the unified client
+    # Create the service using the unified client interface
     new_service = client.service.create(service_config)
 
-    # Commit changes directly on the client
+    # Commit changes directly from the client
     result = client.commit(
         folders=["Texas"],
         description="Added test service",
         sync=True
     )
 
-    # Check job status on the client
+    # Check job status directly from the client
     status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
@@ -475,11 +507,10 @@ except MissingQueryParameterError as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified `ScmClient` approach for simpler code
-    - Access service operations via `client.service` property
-    - Perform commit operations directly on the client
-    - Monitor jobs directly on the client
-    - Set appropriate max_limit parameters for large datasets
+    - Use the unified client interface (`client.service`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
 
 2. **Protocol Configuration**
     - Define clear port ranges

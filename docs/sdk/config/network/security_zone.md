@@ -1,4 +1,4 @@
-# Security Zones Configuration Object
+# Security Zone Configuration Object
 
 ## Table of Contents
 
@@ -9,12 +9,16 @@
 5. [Exceptions](#exceptions)
 6. [Basic Configuration](#basic-configuration)
 7. [Usage Examples](#usage-examples)
-   1. [Creating Security Zones](#creating-security-zones)
-   2. [Retrieving Security Zones](#retrieving-security-zones)
-   3. [Updating Security Zones](#updating-security-zones)
-   4. [Listing Security Zones](#listing-security-zones)
-   5. [Deleting Security Zones](#deleting-security-zones)
+    - [Creating Security Zones](#creating-security-zones)
+    - [Retrieving Security Zones](#retrieving-security-zones)
+    - [Updating Security Zones](#updating-security-zones)
+    - [Listing Security Zones](#listing-security-zones)
+    - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
+    - [Deleting Security Zones](#deleting-security-zones)
 8. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
 9. [Error Handling](#error-handling)
 10. [Best Practices](#best-practices)
 11. [Full Script Examples](#full-script-examples)
@@ -62,9 +66,6 @@ Security zones can use different network interface types, following a mutual exc
 
 Layer 3 interfaces are the most common type and define routed interfaces.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 security_zone_data = {
    "name": "trust-zone",
@@ -77,15 +78,10 @@ security_zone_data = {
 }
 ```
 
-</div>
-
 ### 2. Layer 2 Interfaces
 
 Layer 2 interfaces operate at the data link layer.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 security_zone_data = {
    "name": "layer2-zone",
@@ -97,15 +93,10 @@ security_zone_data = {
 }
 ```
 
-</div>
-
 ### 3. Virtual Wire Interfaces
 
 Virtual wire interfaces connect two interfaces together.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 security_zone_data = {
    "name": "virtual-wire-zone",
@@ -116,15 +107,10 @@ security_zone_data = {
 }
 ```
 
-</div>
-
 ### 4. Tunnel Interfaces
 
 Tunnel interfaces are used for VPN and other tunneling technologies.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 security_zone_data = {
    "name": "tunnel-zone",
@@ -135,15 +121,10 @@ security_zone_data = {
 }
 ```
 
-</div>
-
 ### 5. TAP Interfaces
 
 TAP interfaces are used for traffic monitoring without affecting the traffic flow.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 security_zone_data = {
    "name": "tap-zone",
@@ -154,15 +135,10 @@ security_zone_data = {
 }
 ```
 
-</div>
-
 ### 6. External Interfaces
 
 External interfaces are used for connecting to external networks.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 security_zone_data = {
    "name": "external-zone",
@@ -173,23 +149,23 @@ security_zone_data = {
 }
 ```
 
-</div>
-
 ## Exceptions
 
 | Exception                    | HTTP Code | Description                                                                   |
 |------------------------------|-----------|-------------------------------------------------------------------------------|
 | `InvalidObjectError`         | 400       | Thrown when provided data or parameters are invalid                           |
 | `MissingQueryParameterError` | 400       | Thrown when required query parameters (e.g., `name` or `folder`) are missing  |
-
-In addition to these HTTP exceptions, the model validation may raise `ValueError` for various validation issues, such as:
-
-- Using invalid container combinations (more than one of `folder`, `snippet`, or `device`)
-- Configuring more than one network interface type for a security zone
-- Using invalid patterns for security zone names
-- Invalid field types or values
+| `NameNotUniqueError`         | 409       | Security zone name already exists                                             |
+| `ObjectNotPresentError`      | 404       | Security zone not found                                                       |
+| `ReferenceNotZeroError`      | 409       | Security zone still referenced                                                |
+| `AuthenticationError`        | 401       | Authentication failed                                                         |
+| `ServerError`                | 500       | Internal server error                                                         |
 
 ## Basic Configuration
+
+The Security Zone service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
 
 <div class="termy">
 
@@ -197,21 +173,21 @@ In addition to these HTTP exceptions, the model validation may raise `ValueError
 ```python
 from scm.client import ScmClient
 
-# Initialize client using the unified client approach
+# Initialize client
 client = ScmClient(
    client_id="your_client_id",
    client_secret="your_client_secret",
-   tsg_id="your_tsg_id",
-   security_zone_max_limit=2500  # Optional: set custom max_limit for security zones
+   tsg_id="your_tsg_id"
 )
 
-# Access the security_zone module directly through the client
-# client.security_zone is automatically initialized for you
+# Access the Security Zone service directly through the client
+# No need to create a separate SecurityZone instance
+zones = client.security_zone
 ```
 
 </div>
 
-You can also use the traditional approach if preferred:
+### Traditional Service Instantiation (Legacy)
 
 <div class="termy">
 
@@ -227,11 +203,14 @@ client = Scm(
    tsg_id="your_tsg_id"
 )
 
-# Initialize SecurityZone object with a custom max_limit (optional)
-security_zone = SecurityZone(client, max_limit=2500)
+# Initialize SecurityZone object explicitly
+zones = SecurityZone(client)
 ```
 
 </div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -294,25 +273,16 @@ print(f"Created Layer 2 security zone with ID: {layer2_zone.id}")
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Retrieve a security zone by name using fetch()
-fetched_zone = client.security_zone.fetch(
+# Fetch by name and folder
+zone = client.security_zone.fetch(
    name="trust-zone",
    folder="Security Zones"
 )
-print(f"Fetched Security Zone: {fetched_zone.name}")
+print(f"Found security zone: {zone.name}")
 
-# Retrieve a security zone by its unique ID using get()
-zone_by_id = client.security_zone.get(fetched_zone.id)
-print(f"Security Zone ID: {zone_by_id.id}, Name: {zone_by_id.name}")
+# Get by ID
+zone_by_id = client.security_zone.get(zone.id)
+print(f"Retrieved security zone: {zone_by_id.name}")
 ```
 
 </div>
@@ -323,42 +293,26 @@ print(f"Security Zone ID: {zone_by_id.id}, Name: {zone_by_id.name}")
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-from scm.models.network import SecurityZoneUpdateModel, NetworkConfig
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Assume we have fetched the existing security zone
+# Fetch existing security zone
 existing_zone = client.security_zone.fetch(
    name="trust-zone",
    folder="Security Zones"
 )
 
-# Create a new network configuration
-network_config = NetworkConfig(
-   layer3=["ethernet1/1", "ethernet1/2", "ethernet1/3"],  # Added a new interface
-   zone_protection_profile="enhanced-security",  # Changed protection profile
-   enable_packet_buffer_protection=True
-)
+# Update specific attributes
+if existing_zone.network and existing_zone.network.layer3:
+    # Add a new interface to the existing list
+    existing_zone.network.layer3.append("ethernet1/3")
+    
+# Update protection profile
+if existing_zone.network:
+    existing_zone.network.zone_protection_profile = "enhanced-security"
 
-# Update with new configuration
-updated_data = {
-   "id": existing_zone.id,
-   "name": existing_zone.name,  # Name must be included in updates
-   "enable_device_identification": True,  # Change this setting
-   "network": network_config,
-   "folder": "Security Zones"
-}
-zone_update = SecurityZoneUpdateModel(**updated_data)
+# Update user identification setting
+existing_zone.enable_device_identification = True
 
-# Update the security zone
-updated_zone = client.security_zone.update(zone_update)
-print(f"Updated Security Zone with new interface configuration")
+# Perform update
+updated_zone = client.security_zone.update(existing_zone)
 ```
 
 </div>
@@ -369,7 +323,125 @@ print(f"Updated Security Zone with new interface configuration")
 
 <!-- termynal -->
 ```python
+# Pass filters directly into the list method
+filtered_zones = client.security_zone.list(
+    folder="Security Zones",
+    enable_user_identification=True
+)
+
+# Process results
+for zone in filtered_zones:
+    print(f"Name: {zone.name}")
+    
+    # Check network configuration
+    if zone.network:
+        if zone.network.layer3:
+            print(f"  Type: Layer 3, Interfaces: {', '.join(zone.network.layer3)}")
+        elif zone.network.layer2:
+            print(f"  Type: Layer 2, Interfaces: {', '.join(zone.network.layer2)}")
+        # Check other network types...
+            
+    # Display user identification status
+    print(f"  User ID Enabled: {zone.enable_user_identification}")
+    print(f"  Device ID Enabled: {zone.enable_device_identification}")
+
+# Define filter parameters as a dictionary
+list_params = {
+    "folder": "Security Zones",
+    "enable_device_identification": False
+}
+
+# List zones with filters as kwargs
+filtered_zones = client.security_zone.list(**list_params)
+```
+
+</div>
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control 
+which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+<div class="termy">
+
+<!-- termynal -->
+```python
+# Only return security zones defined exactly in 'Security Zones'
+exact_zones = client.security_zone.list(
+   folder='Security Zones',
+   exact_match=True
+)
+
+for zone in exact_zones:
+   print(f"Exact match: {zone.name} in {zone.folder}")
+
+# Exclude all security zones from the 'All' folder
+no_all_zones = client.security_zone.list(
+   folder='Security Zones',
+   exclude_folders=['All']
+)
+
+for zone in no_all_zones:
+   assert zone.folder != 'All'
+   print(f"Filtered out 'All': {zone.name}")
+
+# Exclude security zones that come from 'default' snippet
+no_default_snippet = client.security_zone.list(
+   folder='Security Zones',
+   exclude_snippets=['default']
+)
+
+for zone in no_default_snippet:
+   assert zone.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {zone.name}")
+
+# Exclude security zones associated with 'DeviceA'
+no_deviceA = client.security_zone.list(
+   folder='Security Zones',
+   exclude_devices=['DeviceA']
+)
+
+for zone in no_deviceA:
+   assert zone.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {zone.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = client.security_zone.list(
+   folder='Security Zones',
+   exact_match=True,
+   exclude_folders=['All'],
+   exclude_snippets=['default'],
+   exclude_devices=['DeviceA']
+)
+
+for zone in combined_filters:
+   print(f"Combined filters result: {zone.name} in {zone.folder}")
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+**Example:**
+
+<div class="termy">
+
+<!-- termynal -->
+```python
 from scm.client import ScmClient
+from scm.config.network import SecurityZone
 
 # Initialize client
 client = ScmClient(
@@ -378,34 +450,18 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# List security zones in the "Security Zones" folder with additional filtering
-zones_list = client.security_zone.list(
-   folder="Security Zones",
-   enable_user_identification=True  # Filter by user identification status
-)
+# Two options for setting max_limit:
 
-# Iterate and process each security zone
-for zone in zones_list:
-   print(f"Name: {zone.name}")
+# Option 1: Use the unified client interface but create a custom SecurityZone instance with max_limit
+security_zone_service = SecurityZone(client, max_limit=4321)
+all_zones1 = security_zone_service.list(folder='Security Zones')
 
-   # Check network configuration
-   if zone.network:
-      if zone.network.layer3:
-         print(f"  Type: Layer 3, Interfaces: {', '.join(zone.network.layer3)}")
-      elif zone.network.layer2:
-         print(f"  Type: Layer 2, Interfaces: {', '.join(zone.network.layer2)}")
-      elif zone.network.virtual_wire:
-         print(f"  Type: Virtual Wire, Interfaces: {', '.join(zone.network.virtual_wire)}")
-      elif zone.network.tunnel:
-         print("  Type: Tunnel")
-      elif zone.network.tap:
-         print(f"  Type: TAP, Interfaces: {', '.join(zone.network.tap)}")
-      elif zone.network.external:
-         print(f"  Type: External, Interfaces: {', '.join(zone.network.external)}")
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_zones2 = client.security_zone.list(folder='Security Zones')
 
-   # Display user identification status
-   print(f"  User Identification Enabled: {zone.enable_user_identification}")
-   print(f"  Device Identification Enabled: {zone.enable_device_identification}")
+# Both options will auto-paginate through all available objects.
+# The security zones are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -416,79 +472,51 @@ for zone in zones_list:
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Delete a security zone by its unique ID
-zone_id_to_delete = "123e4567-e89b-12d3-a456-426655440000"
-client.security_zone.delete(zone_id_to_delete)
-print(f"Security Zone {zone_id_to_delete} deleted successfully.")
+# Delete by ID
+zone_id = "123e4567-e89b-12d3-a456-426655440000"
+client.security_zone.delete(zone_id)
 ```
 
 </div>
 
 ## Managing Configuration Changes
 
+### Performing Commits
+
 <div class="termy">
 
 <!-- termynal -->
 ```python
-from scm.client import ScmClient
-
-# Initialize client
-client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
-)
-
-# Create a security zone
-security_zone_data = {
-   "name": "dmz-zone",
-   "enable_user_identification": False,
-   "enable_device_identification": False,
-   "network": {
-      "layer3": ["ethernet1/7", "ethernet1/8"],
-      "zone_protection_profile": "strict",
-   },
-   "folder": "Security Zones"
+# Prepare commit parameters
+commit_params = {
+   "folders": ["Security Zones"],
+   "description": "Updated security zones",
+   "sync": True,
+   "timeout": 300  # 5 minute timeout
 }
 
-# Create the security zone
-new_zone = client.security_zone.create(security_zone_data)
-print(f"Created security zone with ID: {new_zone.id}")
+# Commit the changes directly on the client
+result = client.commit(**commit_params)
 
-# Commit the configuration changes
-commit_result = client.operations.commit(
-   description="Added DMZ security zone",
-   folders=["Security Zones"]
-)
+print(f"Commit job ID: {result.job_id}")
+```
 
-# Get the job ID from the commit operation
-job_id = commit_result.id
-print(f"Commit job initiated with ID: {job_id}")
+</div>
 
-# Monitor the job status
-job_result = client.operations.get_job_status(job_id)
-print(f"Job status: {job_result.status}")
+### Monitoring Jobs
 
-# Wait for job completion
-import time
-while job_result.status not in ["FIN", "FAIL"]:
-   time.sleep(5)
-   job_result = client.operations.get_job_status(job_id)
-   print(f"Current job status: {job_result.status}")
+<div class="termy">
 
-if job_result.status == "FIN":
-   print("Security zone changes committed successfully")
-else:
-   print(f"Commit failed: {job_result.details}")
+<!-- termynal -->
+```python
+# Get status of specific job directly from the client
+job_status = client.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs directly from the client
+recent_jobs = client.list_jobs(limit=10)
+for job in recent_jobs.data:
+   print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 </div>
@@ -503,7 +531,9 @@ from scm.client import ScmClient
 from scm.exceptions import (
    InvalidObjectError,
    MissingQueryParameterError,
-   ApiError
+   NameNotUniqueError,
+   ObjectNotPresentError,
+   ReferenceNotZeroError
 )
 
 # Initialize client
@@ -514,37 +544,41 @@ client = ScmClient(
 )
 
 try:
-   # Attempt to create a security zone with multiple network types
-   invalid_zone = {
-      "name": "invalid-zone",
+   # Create security zone configuration
+   zone_config = {
+      "name": "test-zone",
       "network": {
-         "layer3": ["ethernet1/1"],
-         "layer2": ["ethernet1/2"]  # Multiple types are not allowed
+         "layer3": ["ethernet1/10"],
+         "zone_protection_profile": "default"
       },
-      "folder": "Security Zones"
+      "folder": "Security Zones",
+      "description": "Test zone",
+      "enable_user_identification": True
    }
-   result = client.security_zone.create(invalid_zone)
+
+   # Create the security zone using the unified client interface
+   new_zone = client.security_zone.create(zone_config)
+
+   # Commit changes directly from the client
+   result = client.commit(
+      folders=["Security Zones"],
+      description="Added test security zone",
+      sync=True
+   )
+
+   # Check job status directly from the client
+   status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
-   print(f"Invalid object error: {e.message}")
-   print(f"HTTP status: {e.http_status_code}")
-   print(f"Details: {e.details}")
-
-try:
-   # Attempt to fetch a security zone without specifying a container
-   zone = client.security_zone.fetch(name="some-zone")
-
+   print(f"Invalid security zone data: {e.message}")
+except NameNotUniqueError as e:
+   print(f"Security zone name already exists: {e.message}")
+except ObjectNotPresentError as e:
+   print(f"Security zone not found: {e.message}")
+except ReferenceNotZeroError as e:
+   print(f"Security zone still in use: {e.message}")
 except MissingQueryParameterError as e:
-   print(f"Missing parameter error: {e.message}")
-
-try:
-   # General API error handling
-   zone_id = "non-existent-id"
-   client.security_zone.get(zone_id)
-
-except ApiError as e:
-   print(f"API error: {e.message}")
-   print(f"Status code: {e.http_status_code}")
+   print(f"Missing parameter: {e.message}")
 ```
 
 </div>
@@ -552,52 +586,52 @@ except ApiError as e:
 ## Best Practices
 
 1. **Client Usage**
-   - Use the unified `ScmClient` approach for simpler code
-   - Access security zone operations via `client.security_zone` property
-   - Perform commit operations directly on the client
-   - Monitor jobs directly on the client
-   - Set appropriate max_limit parameters for large datasets using `security_zone_max_limit`
+   - Use the unified client interface (`client.security_zone`) for streamlined code
+   - Create a single client instance and reuse it across your application
+   - Perform commit operations directly on the client object (`client.commit()`)
+   - For custom max_limit settings, create a dedicated service instance if needed
 
 2. **Security Zone Configuration**
+   - Choose appropriate network interface types for your deployment scenario
    - Use clear and descriptive names for security zones
    - Configure only one network interface type per zone
-   - Follow the principle of least privilege for user and device access control lists
    - Enable user and device identification only when necessary for policy enforcement
    - Use proper zone protection profiles to secure network segments
 
-3. **Network Type Selection**
-   - Use **Layer 3** for most traditional routed networks
-   - Use **Layer 2** when operating at the data link layer is required
-   - Use **Virtual Wire** for transparent inline deployments
-   - Use **TAP** for passive monitoring without affecting traffic flow
-   - Use **Tunnel** for VPN and other tunnel-based connections
-   - Use **External** for connecting to external networks
+3. **Container Management**
+   - Always specify exactly one container (folder, snippet, or device)
+   - Use consistent container names across operations
+   - Validate container existence before operations
+   - Group related zones logically
 
-4. **Filtering and Container Parameters**
-   - Always provide exactly one container parameter: `folder`, `snippet`, or `device`
-   - Use the `exact_match` parameter if strict container matching is required
-   - Leverage additional filters (e.g., `enable_user_identification`) for precise listings
+4. **Error Handling**
+   - Implement comprehensive error handling for all operations
+   - Check job status after commits
+   - Handle specific exceptions before generic ones
+   - Log error details for troubleshooting
 
-5. **Error Handling**
-   - Implement comprehensive error handling for invalid data and missing parameters
-   - Handle model validation errors for network configurations
-   - Log responses and exceptions to troubleshoot API issues effectively
+5. **Performance**
+   - Use appropriate pagination for list operations
+   - Cache frequently accessed security zones
+   - Implement proper retry mechanisms
+   - Monitor timeout settings
 
-6. **Performance**
-   - Adjust the `max_limit` based on your environment and API rate limits
-   - Utilize pagination effectively when working with large numbers of security zones
+6. **Security**
+   - Follow the least privilege principle for zone configurations
+   - Validate input data before operations
+   - Document security implications
+   - Monitor zone usage in security policies
 
 ## Full Script Examples
 
-Refer to the [security_zone.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/network/security_zone.py) for a complete implementation.
+Refer to
+the [security_zone.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/network/security_zone.py).
 
 ## Related Models
 
-The security zone configuration uses several nested models for comprehensive validation:
-
-- [SecurityZoneCreateModel](../../models/network/security_zone_models.md#securityzonecreatemodel) - For creating new security zones
-- [SecurityZoneUpdateModel](../../models/network/security_zone_models.md#securityzoneupdatemodel) - For updating existing security zones
-- [SecurityZoneResponseModel](../../models/network/security_zone_models.md#securityzoneresponsemodel) - For representing API responses
-- [NetworkConfig](../../models/network/security_zone_models.md#networkconfig) - For configuring network interfaces and properties
-- [UserAcl](../../models/network/security_zone_models.md#useracl) - For user access control lists
-- [DeviceAcl](../../models/network/security_zone_models.md#deviceacl) - For device access control lists
+- [SecurityZoneCreateModel](../../models/network/security_zone_models.md#Overview)
+- [SecurityZoneUpdateModel](../../models/network/security_zone_models.md#Overview)
+- [SecurityZoneResponseModel](../../models/network/security_zone_models.md#Overview)
+- [NetworkConfig](../../models/network/security_zone_models.md#Overview)
+- [UserAcl](../../models/network/security_zone_models.md#Overview)
+- [DeviceAcl](../../models/network/security_zone_models.md#Overview)

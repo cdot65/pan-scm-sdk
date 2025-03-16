@@ -2,90 +2,75 @@
 
 ## Overview
 
-The IKE Gateway models provide a structured way to manage Internet Key Exchange (IKE) gateway configurations in Palo Alto Networks' Strata Cloud Manager. These models handle validation of inputs and outputs when interacting with the SCM API, ensuring that configurations for VPN tunnel endpoints are properly formatted and validated.
+The IKE Gateway models provide a structured way to manage Internet Key Exchange (IKE) gateway configurations in Palo Alto Networks' Strata Cloud Manager. These models support defining IKE configurations for establishing secure VPN connections with peer devices. The models handle validation of inputs and outputs when interacting with the SCM API.
 
 ## Attributes
 
-| Attribute         | Type              | Required | Default | Description                                                                          |
-|-------------------|-------------------|----------|---------|--------------------------------------------------------------------------------------|
-| name              | str               | Yes      | None    | Name of the IKE gateway. Max length: 63 chars. Must match pattern: ^[0-9a-zA-Z._\-]+$ |
-| authentication    | Authentication    | Yes      | None    | Authentication configuration (pre-shared key or certificate)                          |
-| peer_id           | PeerId            | No       | None    | Peer identification configuration                                                     |
-| local_id          | LocalId           | No       | None    | Local identification configuration                                                    |
-| protocol          | Protocol          | Yes      | None    | IKE protocol configuration                                                            |
-| protocol_common   | ProtocolCommon    | No       | None    | Common protocol settings like NAT traversal and fragmentation                         |
-| peer_address      | PeerAddress       | Yes      | None    | Peer address configuration (IP, FQDN, or dynamic)                                     |
-| folder            | str               | No*      | None    | Folder where IKE gateway is defined. Max length: 64 chars                             |
-| snippet           | str               | No*      | None    | Snippet where IKE gateway is defined. Max length: 64 chars                            |
-| device            | str               | No*      | None    | Device where IKE gateway is defined. Max length: 64 chars                             |
-| id                | UUID              | Yes**    | None    | UUID of the IKE gateway (response only)                                               |
+| Attribute        | Type            | Required | Default | Description                                                      |
+|------------------|-----------------|----------|---------|------------------------------------------------------------------|
+| name             | str             | Yes      | None    | Name of the IKE gateway. Max length: 63 chars. Pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| authentication   | Authentication  | Yes      | None    | Authentication configuration (pre-shared key or certificate)      |
+| peer_id          | PeerID          | No       | None    | Peer identification configuration                                 |
+| local_id         | LocalID         | No       | None    | Local identification configuration                                |
+| protocol         | Protocol        | Yes      | None    | IKE protocol version and settings                                 |
+| protocol_common  | ProtocolCommon  | No       | None    | Common protocol settings                                          |
+| peer_address     | PeerAddress     | Yes      | None    | Peer address configuration                                        |
+| local_address    | LocalAddress    | No       | None    | Local address configuration                                       |
+| description      | str             | No       | None    | Description of the IKE gateway. Max length: 1023 chars            |
+| folder           | str             | No*      | None    | Folder where IKE gateway is defined. Max length: 64 chars         |
+| snippet          | str             | No*      | None    | Snippet where IKE gateway is defined. Max length: 64 chars        |
+| device           | str             | No*      | None    | Device where IKE gateway is defined. Max length: 64 chars         |
+| id               | UUID            | Yes**    | None    | UUID of the IKE gateway (response only)                           |
 
 \* Exactly one container type (folder/snippet/device) must be provided for create operations
-\** Only required for response and update models
+\** Only required for response model
 
-## Authentication Models
+### Authentication Model Attributes
 
-IKE Gateway authentication supports either pre-shared key or certificate-based authentication.
+| Attribute  | Type         | Required | Default | Description                                   |
+|------------|--------------|----------|---------|-----------------------------------------------|
+| pre_shared_key | PreSharedKey | No*     | None    | Pre-shared key authentication configuration   |
+| certificate    | Certificate  | No*     | None    | Certificate-based authentication configuration|
 
-### PreSharedKey Model
+\* Exactly one authentication type (pre_shared_key/certificate) must be provided
 
-| Attribute | Type | Required | Default | Description                      |
-|-----------|------|----------|---------|----------------------------------|
-| key       | str  | Yes      | None    | Pre-shared key for authentication |
+### Protocol Model Attributes
 
-### CertificateAuth Model
+| Attribute | Type        | Required | Default | Description                                    |
+|-----------|-------------|----------|---------|------------------------------------------------|
+| version   | str         | Yes      | None    | IKE protocol version (ikev1, ikev2, ikev2-preferred) |
+| ikev1     | IKEv1Config | No       | None    | IKEv1 protocol configuration                   |
+| ikev2     | IKEv2Config | No       | None    | IKEv2 protocol configuration                   |
 
-| Attribute                      | Type    | Required | Default | Description                                 |
-|--------------------------------|---------|----------|---------|---------------------------------------------|
-| allow_id_payload_mismatch      | bool    | No       | None    | Allow ID payload mismatch                   |
-| certificate_profile            | str     | No       | None    | Certificate profile name                    |
-| local_certificate              | dict    | No       | None    | Local certificate configuration             |
-| strict_validation_revocation   | bool    | No       | None    | Enable strict validation revocation         |
-| use_management_as_source       | bool    | No       | None    | Use management interface as source          |
+### PeerAddress Model Attributes
 
-## Protocol Models
+| Attribute | Type | Required | Default | Description                                    |
+|-----------|------|----------|---------|------------------------------------------------|
+| ip        | str  | No*      | None    | Peer IP address                                |
+| fqdn      | str  | No*      | None    | Peer FQDN (Fully Qualified Domain Name)        |
+| dynamic   | dict | No*      | None    | Dynamic peer address configuration             |
 
-### Protocol Model
-
-| Attribute | Type             | Required | Default            | Description                     |
-|-----------|------------------|---------|--------------------|----------------------------------|
-| ikev1     | IKEv1            | No*      | None               | IKEv1 protocol configuration    |
-| ikev2     | IKEv2            | No*      | None               | IKEv2 protocol configuration    |
-| version   | ProtocolVersion  | No       | ikev2-preferred    | IKE protocol version preference |
-
-\* At least one protocol configuration (ikev1 or ikev2) must be provided based on the version
-
-### ProtocolVersion Enum
-
-- `ikev2-preferred`: Prefer IKEv2 but fall back to IKEv1 if needed
-- `ikev1`: Use only IKEv1
-- `ikev2`: Use only IKEv2
-
-## Peer Address Models
-
-The `PeerAddress` model supports three types of peer address configurations:
-
-- `ip`: Static IP address of the peer gateway
-- `fqdn`: Fully qualified domain name of the peer gateway
-- `dynamic`: Dynamic peer gateway configuration (for dynamic IP addresses)
+\* Exactly one peer address type (ip/fqdn/dynamic) must be provided
 
 ## Exceptions
 
 The IKE Gateway models can raise the following exceptions during validation:
 
 - **ValueError**: Raised in several scenarios:
-    - When no authentication method or multiple authentication methods are provided
-    - When multiple peer address types are specified
+    - When neither or multiple authentication types are provided
+    - When neither or multiple peer address types are provided
     - When multiple container types (folder/snippet/device) are specified for create operations
     - When no container type is specified for create operations
-    - When protocol configuration does not match the selected version
+    - When protocol settings are missing required fields based on version
     - When name pattern validation fails
+    - When container field pattern validation fails
+    - When field length limits are exceeded
 
 ## Model Validators
 
-### Authentication Method Validation
+### Authentication Type Validation
 
-The models enforce that exactly one authentication method must be specified:
+The models enforce that exactly one authentication type must be specified:
 
 <div class="termy">
 
@@ -93,47 +78,29 @@ The models enforce that exactly one authentication method must be specified:
 
 ```python
 # This will raise a validation error
-from scm.models.network import IKEGatewayCreateModel
+from scm.models.network import Authentication
 
-# Error: multiple authentication methods provided
+# Error: both authentication types provided
 try:
-    gateway = IKEGatewayCreateModel(
-        name="invalid-gateway",
-        authentication={
-            "pre_shared_key": {"key": "secret-key"},
-            "certificate": {"certificate_profile": "default"}
-        },
-        protocol={
-            "version": "ikev2",
-            "ikev2": {"ike_crypto_profile": "default"}
-        },
-        peer_address={"ip": "203.0.113.1"},
-        folder="VPN"
+    auth = Authentication(
+        pre_shared_key={"key": "secure-key"},
+        certificate={"certificate_profile": "default"}
     )
 except ValueError as e:
-    print(e)  # "Only one authentication method can be configured: pre_shared_key or certificate"
+    print(e)  # "Exactly one of 'pre_shared_key' or 'certificate' must be provided."
 
-# Error: no authentication method provided
+# Error: no authentication type provided
 try:
-    gateway = IKEGatewayCreateModel(
-        name="invalid-gateway",
-        authentication={},
-        protocol={
-            "version": "ikev2",
-            "ikev2": {"ike_crypto_profile": "default"}
-        },
-        peer_address={"ip": "203.0.113.1"},
-        folder="VPN"
-    )
+    auth = Authentication()
 except ValueError as e:
-    print(e)  # "At least one authentication method must be provided: pre_shared_key or certificate"
+    print(e)  # "Exactly one of 'pre_shared_key' or 'certificate' must be provided."
 ```
 
 </div>
 
 ### Peer Address Type Validation
 
-The models enforce that exactly one peer address type must be specified:
+Exactly one peer address type must be specified:
 
 <div class="termy">
 
@@ -141,49 +108,22 @@ The models enforce that exactly one peer address type must be specified:
 
 ```python
 # This will raise a validation error
+from scm.models.network import PeerAddress
+
+# Error: multiple peer address types provided
 try:
-    gateway = IKEGatewayCreateModel(
-        name="invalid-gateway",
-        authentication={"pre_shared_key": {"key": "secret-key"}},
-        protocol={
-            "version": "ikev2",
-            "ikev2": {"ike_crypto_profile": "default"}
-        },
-        peer_address={
-            "ip": "203.0.113.1",
-            "fqdn": "vpn.example.com"  # Can't specify both IP and FQDN
-        },
-        folder="VPN"
+    peer_addr = PeerAddress(
+        ip="192.168.1.1",
+        fqdn="example.com"
     )
 except ValueError as e:
-    print(e)  # "Exactly one peer address type must be configured: ip, fqdn, or dynamic"
-```
+    print(e)  # "Exactly one of 'ip', 'fqdn', or 'dynamic' must be provided."
 
-</div>
-
-### Protocol Configuration Validation
-
-The models ensure that the protocol configuration matches the version selected:
-
-<div class="termy">
-
-<!-- termynal -->
-
-```python
-# This will raise a validation error for mismatched protocol version and configuration
+# Error: no peer address type provided
 try:
-    gateway = IKEGatewayCreateModel(
-        name="invalid-gateway",
-        authentication={"pre_shared_key": {"key": "secret-key"}},
-        protocol={
-            "version": "ikev1",  # Specified IKEv1
-            "ikev2": {"ike_crypto_profile": "default"}  # But only provided IKEv2 config
-        },
-        peer_address={"ip": "203.0.113.1"},
-        folder="VPN"
-    )
+    peer_addr = PeerAddress()
 except ValueError as e:
-    print(e)  # "IKEv1 configuration is required when version is set to ikev1"
+    print(e)  # "Exactly one of 'ip', 'fqdn', or 'dynamic' must be provided."
 ```
 
 </div>
@@ -198,16 +138,16 @@ For create operations, exactly one container type must be specified:
 
 ```python
 # This will raise a validation error
+from scm.models.network import IKEGatewayCreateModel
+
+# Error: multiple containers specified
 try:
-    gateway = IKEGatewayCreateModel(
-        name="invalid-gateway",
-        authentication={"pre_shared_key": {"key": "secret-key"}},
-        protocol={
-            "version": "ikev2",
-            "ikev2": {"ike_crypto_profile": "default"}
-        },
-        peer_address={"ip": "203.0.113.1"},
-        folder="VPN",
+    ike_gateway = IKEGatewayCreateModel(
+        name="gateway1",
+        authentication={"pre_shared_key": {"key": "secure-key"}},
+        protocol={"version": "ikev2"},
+        peer_address={"ip": "192.168.1.1"},
+        folder="Texas",
         device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
@@ -218,7 +158,7 @@ except ValueError as e:
 
 ## Usage Examples
 
-### Creating a Pre-Shared Key IKE Gateway
+### Creating an IKE Gateway with Pre-shared Key
 
 <div class="termy">
 
@@ -228,7 +168,7 @@ except ValueError as e:
 # Using dictionary
 from scm.config.network import IKEGateway
 
-psk_dict = {
+psk_config = {
     "name": "site-a-gateway",
     "authentication": {
         "pre_shared_key": {
@@ -254,45 +194,54 @@ psk_dict = {
     "folder": "VPN"
 }
 
-gateway = IKEGateway(api_client)
-response = gateway.create(psk_dict)
+ike_gateway = IKEGateway(api_client)
+response = ike_gateway.create(psk_config)
 
 # Using model directly
-from scm.models.network import IKEGatewayCreateModel
+from scm.models.network import (
+    IKEGatewayCreateModel, 
+    Authentication, 
+    PreSharedKey,
+    PeerID,
+    Protocol,
+    IKEv2Config,
+    DPD,
+    PeerAddress
+)
 
 psk_gateway = IKEGatewayCreateModel(
     name="site-a-gateway",
-    authentication={
-        "pre_shared_key": {
-            "key": "your-secure-key"
-        }
-    },
-    peer_id={
-        "type": "ipaddr",
-        "id": "203.0.113.1"
-    },
-    protocol={
-        "version": "ikev2",
-        "ikev2": {
-            "ike_crypto_profile": "default",
-            "dpd": {
-                "enable": True
-            }
-        }
-    },
-    peer_address={
-        "ip": "203.0.113.1"
-    },
+    authentication=Authentication(
+        pre_shared_key=PreSharedKey(
+            key="your-secure-key"
+        )
+    ),
+    peer_id=PeerID(
+        type="ipaddr",
+        id="203.0.113.1"
+    ),
+    protocol=Protocol(
+        version="ikev2",
+        ikev2=IKEv2Config(
+            ike_crypto_profile="default",
+            dpd=DPD(
+                enable=True
+            )
+        )
+    ),
+    peer_address=PeerAddress(
+        ip="203.0.113.1"
+    ),
     folder="VPN"
 )
 
 payload = psk_gateway.model_dump(exclude_unset=True)
-response = gateway.create(payload)
+response = ike_gateway.create(payload)
 ```
 
 </div>
 
-### Creating a Certificate-Based IKE Gateway
+### Creating an IKE Gateway with Certificate Authentication
 
 <div class="termy">
 
@@ -300,7 +249,7 @@ response = gateway.create(payload)
 
 ```python
 # Using dictionary
-cert_dict = {
+cert_config = {
     "name": "site-b-gateway",
     "authentication": {
         "certificate": {
@@ -325,38 +274,118 @@ cert_dict = {
     "folder": "VPN"
 }
 
-response = gateway.create(cert_dict)
+response = ike_gateway.create(cert_config)
 
 # Using model directly
-from scm.models.network import IKEGatewayCreateModel
+from scm.models.network import (
+    IKEGatewayCreateModel, 
+    Authentication, 
+    Certificate,
+    LocalCertificate,
+    Protocol,
+    IKEv1Config,
+    IKEv2Config,
+    PeerAddress
+)
 
 cert_gateway = IKEGatewayCreateModel(
     name="site-b-gateway",
-    authentication={
-        "certificate": {
-            "certificate_profile": "default-profile",
-            "local_certificate": {
-                "local_certificate_name": "cert-name"
-            }
-        }
-    },
-    protocol={
-        "version": "ikev2-preferred",
-        "ikev1": {
-            "ike_crypto_profile": "default"
-        },
-        "ikev2": {
-            "ike_crypto_profile": "default"
-        }
-    },
-    peer_address={
-        "fqdn": "vpn.example.com"
-    },
+    authentication=Authentication(
+        certificate=Certificate(
+            certificate_profile="default-profile",
+            local_certificate=LocalCertificate(
+                local_certificate_name="cert-name"
+            )
+        )
+    ),
+    protocol=Protocol(
+        version="ikev2-preferred",
+        ikev1=IKEv1Config(
+            ike_crypto_profile="default"
+        ),
+        ikev2=IKEv2Config(
+            ike_crypto_profile="default"
+        )
+    ),
+    peer_address=PeerAddress(
+        fqdn="vpn.example.com"
+    ),
     folder="VPN"
 )
 
 payload = cert_gateway.model_dump(exclude_unset=True)
-response = gateway.create(payload)
+response = ike_gateway.create(payload)
+```
+
+</div>
+
+### Creating an IKE Gateway with Dynamic Peer Address
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Using dictionary
+dynamic_config = {
+    "name": "dynamic-gateway",
+    "authentication": {
+        "pre_shared_key": {
+            "key": "your-secure-key"
+        }
+    },
+    "protocol": {
+        "version": "ikev2",
+        "ikev2": {
+            "ike_crypto_profile": "default"
+        }
+    },
+    "peer_address": {
+        "dynamic": {}
+    },
+    "local_address": {
+        "interface": "ethernet1/1"
+    },
+    "folder": "VPN"
+}
+
+response = ike_gateway.create(dynamic_config)
+
+# Using model directly
+from scm.models.network import (
+    IKEGatewayCreateModel, 
+    Authentication, 
+    PreSharedKey,
+    Protocol,
+    IKEv2Config,
+    PeerAddress,
+    LocalAddress
+)
+
+dynamic_gateway = IKEGatewayCreateModel(
+    name="dynamic-gateway",
+    authentication=Authentication(
+        pre_shared_key=PreSharedKey(
+            key="your-secure-key"
+        )
+    ),
+    protocol=Protocol(
+        version="ikev2",
+        ikev2=IKEv2Config(
+            ike_crypto_profile="default"
+        )
+    ),
+    peer_address=PeerAddress(
+        dynamic={}
+    ),
+    local_address=LocalAddress(
+        interface="ethernet1/1"
+    ),
+    folder="VPN"
+)
+
+payload = dynamic_gateway.model_dump(exclude_unset=True)
+response = ike_gateway.create(payload)
 ```
 
 </div>
@@ -383,27 +412,32 @@ update_dict = {
     }
 }
 
-response = gateway.update(update_dict)
+response = ike_gateway.update(update_dict)
 
 # Using model directly
-from scm.models.network import IKEGatewayUpdateModel
+from scm.models.network import (
+    IKEGatewayUpdateModel, 
+    PeerID,
+    ProtocolCommon,
+    NatTraversal
+)
 
 update_gateway = IKEGatewayUpdateModel(
     id="123e4567-e89b-12d3-a456-426655440000",
     name="site-a-gateway",
-    peer_id={
-        "type": "ipaddr",
-        "id": "203.0.113.2"  # Updated peer ID
-    },
-    protocol_common={
-        "nat_traversal": {
-            "enable": True
-        }
-    }
+    peer_id=PeerID(
+        type="ipaddr",
+        id="203.0.113.2"
+    ),
+    protocol_common=ProtocolCommon(
+        nat_traversal=NatTraversal(
+            enable=True
+        )
+    )
 )
 
 payload = update_gateway.model_dump(exclude_unset=True)
-response = gateway.update(payload)
+response = ike_gateway.update(payload)
 ```
 
 </div>

@@ -2,38 +2,77 @@
 
 ## Overview
 
-The Service Group models provide a structured way to manage service groups in Palo Alto Networks' Strata Cloud Manager.
-These models support grouping network services together and defining them within folders, snippets, or devices. The
-models handle validation of inputs and outputs when interacting with the SCM API.
+The Service Group models provide a structured way to manage service group objects in Palo Alto Networks' Strata Cloud Manager.
+These models support creating and managing collections of services with either a static list of service references or
+dynamically via tags. The models handle validation of inputs and outputs when interacting with the SCM API.
 
 ## Attributes
 
-| Attribute | Type      | Required | Default | Description                                                                              |
-|-----------|-----------|----------|---------|------------------------------------------------------------------------------------------|
-| name      | str       | Yes      | None    | Name of the service group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
-| members   | List[str] | Yes      | None    | List of service names. Min length: 1, Max length: 1024                                   |
-| tag       | List[str] | No       | None    | List of tags. Each tag max length: 64 chars                                              |
-| folder    | str       | No*      | None    | Folder where group is defined. Max length: 64 chars                                      |
-| snippet   | str       | No*      | None    | Snippet where group is defined. Max length: 64 chars                                     |
-| device    | str       | No*      | None    | Device where group is defined. Max length: 64 chars                                      |
-| id        | UUID      | Yes**    | None    | UUID of the service group (response only)                                                |
+| Attribute    | Type      | Required | Default | Description                                                                       |
+|--------------|-----------|----------|---------|-----------------------------------------------------------------------------------|
+| name         | str       | Yes      | None    | Name of the service group. Max length: 63 chars. Pattern: ^[a-zA-Z0-9_ \.-]+$     |
+| description  | str       | No       | None    | Description of the service group. Max length: 1023 chars                          |
+| members      | List[str] | No*      | None    | List of service members (for static service groups)                               |
+| dynamic      | Dict      | No*      | None    | Dynamic service group configuration with filter expression                         |
+| tag          | List[str] | No       | None    | List of tags                                                                       |
+| folder       | str       | No**     | None    | Folder where service group is defined. Max length: 64 chars                        |
+| snippet      | str       | No**     | None    | Snippet where service group is defined. Max length: 64 chars                       |
+| device       | str       | No**     | None    | Device where service group is defined. Max length: 64 chars                        |
+| id           | UUID      | Yes***   | None    | UUID of the service group (response only)                                         |
 
-\* Exactly one container type (folder/snippet/device) must be provided
-\** Only required for response model
+\* Either members or dynamic must be provided, but not both
+\** Exactly one container type (folder/snippet/device) must be provided for create operations
+\*** Only required for response model
 
 ## Exceptions
 
 The Service Group models can raise the following exceptions during validation:
 
 - **ValueError**: Raised in several scenarios:
-    - When multiple container types (folder/snippet/device) are specified
+    - When neither or both members and dynamic are provided
+    - When multiple container types (folder/snippet/device) are specified for create operations
     - When no container type is specified for create operations
-    - When members list is empty or exceeds maximum length
     - When tag values are not unique in a list
-    - When tag input is neither a string nor a list
-    - When name or container fields don't match required patterns
+    - When name pattern validation fails
+    - When container field pattern validation fails
+    - When field length limits are exceeded
 
 ## Model Validators
+
+### Service Group Type Validation
+
+The models enforce that either members or dynamic configuration must be provided, but not both:
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# This will raise a validation error
+from scm.models.objects import ServiceGroupCreateModel
+
+# Error: both members and dynamic provided
+try:
+    service_group = ServiceGroupCreateModel(
+        name="invalid-group",
+        members=["service1", "service2"],
+        dynamic={"filter": "'tag1' and 'tag2'"},
+        folder="Texas"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'members' or 'dynamic' must be provided."
+
+# Error: neither members nor dynamic provided
+try:
+    service_group = ServiceGroupCreateModel(
+        name="invalid-group",
+        folder="Texas"
+    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'members' or 'dynamic' must be provided."
+```
+
+</div>
 
 ### Container Type Validation
 
@@ -42,31 +81,15 @@ For create operations, exactly one container type must be specified:
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
-# Using dictionary
-from scm.config.objects import ServiceGroup
-
-# Error: multiple containers specified
-try:
-    service_group_dict = {
-        "name": "invalid-group",
-        "members": ["service1", "service2"],
-        "folder": "Texas",
-        "device": "fw01"  # Can't specify both folder and device
-    }
-    service_group = ServiceGroup(api_client)
-    response = service_group.create(service_group_dict)
-except ValueError as e:
-    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-
-# Using model directly
-from scm.models.objects import ServiceGroupCreateModel
-
-# Error: no container specified
+# This will raise a validation error
 try:
     service_group = ServiceGroupCreateModel(
         name="invalid-group",
-        members=["service1", "service2"]
+        members=["service1", "service2"],
+        folder="Texas",
+        device="fw01"  # Can't specify both folder and device
     )
 except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
@@ -81,12 +104,13 @@ Tags must be unique and properly formatted:
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
 # This will raise a validation error for duplicate tags
 try:
     service_group = ServiceGroupCreateModel(
         name="invalid-group",
-        members=["service1"],
+        members=["service1", "service2"],
         folder="Texas",
         tag=["web", "web"]  # Duplicate tags not allowed
     )
@@ -96,7 +120,7 @@ except ValueError as e:
 # This will convert a single string tag to a list
 service_group = ServiceGroupCreateModel(
     name="valid-group",
-    members=["service1"],
+    members=["service1", "service2"],
     folder="Texas",
     tag="web"  # Will be converted to ["web"]
 )
@@ -106,66 +130,78 @@ service_group = ServiceGroupCreateModel(
 
 ## Usage Examples
 
-### Creating a Service Group
+### Creating a Static Service Group
 
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
 # Using dictionary
 from scm.config.objects import ServiceGroup
 
-service_group_dict = {
+static_dict = {
     "name": "web-services",
-    "members": ["http", "https", "web-browsing"],
+    "description": "Common web services",
+    "members": ["HTTP", "HTTPS", "HTTP-ALT"],
     "folder": "Texas",
     "tag": ["web", "production"]
 }
 
 service_group = ServiceGroup(api_client)
-response = service_group.create(service_group_dict)
+response = service_group.create(static_dict)
 
 # Using model directly
 from scm.models.objects import ServiceGroupCreateModel
 
-service_group = ServiceGroupCreateModel(
+static_group = ServiceGroupCreateModel(
     name="web-services",
-    members=["http", "https", "web-browsing"],
+    description="Common web services",
+    members=["HTTP", "HTTPS", "HTTP-ALT"],
     folder="Texas",
     tag=["web", "production"]
 )
 
-payload = service_group.model_dump(exclude_unset=True)
+payload = static_group.model_dump(exclude_unset=True)
 response = service_group.create(payload)
 ```
 
 </div>
 
-### Creating a Service Group in a Snippet
+### Creating a Dynamic Service Group
 
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
 # Using dictionary
-snippet_group_dict = {
+dynamic_dict = {
     "name": "database-services",
-    "members": ["mysql", "postgresql", "mongodb"],
-    "snippet": "Database Config",
-    "tag": ["database", "internal"]
+    "description": "Database services",
+    "dynamic": {
+        "filter": "'database' and 'production'"
+    },
+    "folder": "Texas",
+    "tag": ["database"]
 }
 
-response = service_group.create(snippet_group_dict)
+response = service_group.create(dynamic_dict)
 
 # Using model directly
-snippet_group = ServiceGroupCreateModel(
+from scm.models.objects import ServiceGroupCreateModel, DynamicServiceGroupFilter
+
+dynamic_group = ServiceGroupCreateModel(
     name="database-services",
-    members=["mysql", "postgresql", "mongodb"],
-    snippet="Database Config",
-    tag=["database", "internal"]
+    description="Database services",
+    dynamic=DynamicServiceGroupFilter(
+        filter="'database' and 'production'"
+    ),
+    folder="Texas",
+    tag=["database"]
 )
 
-payload = snippet_group.model_dump(exclude_unset=True)
+payload = dynamic_group.model_dump(exclude_unset=True)
 response = service_group.create(payload)
 ```
 
@@ -176,12 +212,14 @@ response = service_group.create(payload)
 <div class="termy">
 
 <!-- termynal -->
+
 ```python
 # Using dictionary
 update_dict = {
     "id": "123e4567-e89b-12d3-a456-426655440000",
     "name": "web-services-updated",
-    "members": ["http", "https", "web-browsing", "ssl"],
+    "description": "Updated web services",
+    "members": ["HTTP", "HTTPS", "HTTP-ALT", "HTTP2"],
     "tag": ["web", "production", "updated"]
 }
 
@@ -193,7 +231,8 @@ from scm.models.objects import ServiceGroupUpdateModel
 update_group = ServiceGroupUpdateModel(
     id="123e4567-e89b-12d3-a456-426655440000",
     name="web-services-updated",
-    members=["http", "https", "web-browsing", "ssl"],
+    description="Updated web services",
+    members=["HTTP", "HTTPS", "HTTP-ALT", "HTTP2"],
     tag=["web", "production", "updated"]
 )
 

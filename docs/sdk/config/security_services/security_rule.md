@@ -80,6 +80,10 @@ that control traffic flow between zones, applications, and users.
 
 ## Basic Configuration
 
+The Security Rule service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
 <div class="termy">
 
 <!-- termynal -->
@@ -87,24 +91,29 @@ that control traffic flow between zones, applications, and users.
 ```python
 from scm.client import ScmClient
 
-# Initialize client using the unified client approach
+# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Access the security_rule module directly through the client
-# client.security_rule is automatically initialized for you
+# Access the Security Rule service directly through the client
+# No need to create a separate SecurityRule instance
+rules = client.security_rule
 ```
 
 </div>
 
-You can also use the traditional approach if preferred:
+### Traditional Service Instantiation (Legacy)
+
+<div class="termy">
+
+<!-- termynal -->
 
 ```python
 from scm.client import Scm
-from scm.config.security import SecurityRule
+from scm.config.security_services import SecurityRule
 
 # Initialize client
 client = Scm(
@@ -113,9 +122,14 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize SecurityRule object
-security_rules = SecurityRule(client)
+# Initialize SecurityRule object explicitly
+rules = SecurityRule(client)
 ```
+
+</div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -126,6 +140,15 @@ security_rules = SecurityRule(client)
 <!-- termynal -->
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
 # Basic allow rule configuration
 allow_rule = {
     "name": "allow-web",
@@ -224,7 +247,7 @@ updated_rule = client.security_rule.update(existing_rule, rulebase="pre")
 <!-- termynal -->
 
 ```python
-# List with direct filter parameters
+# Pass filters directly into the list method
 filtered_rules = client.security_rule.list(
     folder='Texas',
     rulebase='pre',
@@ -238,7 +261,7 @@ for rule in filtered_rules:
     print(f"Action: {rule.action}")
     print(f"Applications: {rule.application}")
 
-# Define filter parameters as dictionary
+# Define filter parameters as a dictionary
 list_params = {
     "folder": "Texas",
     "rulebase": "pre",
@@ -273,56 +296,61 @@ The `list()` method supports additional parameters to refine your query results 
 <!-- termynal -->
 
 ```python
-# Only return security_rules defined exactly in 'Texas'
-exact_security_rules = client.security_rule.list(
-    folder='Texas',
-    exact_match=True
+# Only return security rules defined exactly in 'Texas'
+exact_rules = client.security_rule.list(
+   folder='Texas',
+   rulebase='pre',
+   exact_match=True
 )
 
-for app in exact_security_rules:
-    print(f"Exact match: {app.name} in {app.folder}")
+for rule in exact_rules:
+   print(f"Exact match: {rule.name} in {rule.folder}")
 
-# Exclude all security_rules from the 'All' folder
-no_all_security_rules = client.security_rule.list(
-    folder='Texas',
-    exclude_folders=['All']
+# Exclude all security rules from the 'All' folder
+no_all_rules = client.security_rule.list(
+   folder='Texas',
+   rulebase='pre',
+   exclude_folders=['All']
 )
 
-for app in no_all_security_rules:
-    assert app.folder != 'All'
-    print(f"Filtered out 'All': {app.name}")
+for rule in no_all_rules:
+   assert rule.folder != 'All'
+   print(f"Filtered out 'All': {rule.name}")
 
-# Exclude security_rules that come from 'default' snippet
+# Exclude security rules that come from 'default' snippet
 no_default_snippet = client.security_rule.list(
-    folder='Texas',
-    exclude_snippets=['default']
+   folder='Texas',
+   rulebase='pre',
+   exclude_snippets=['default']
 )
 
-for app in no_default_snippet:
-    assert app.snippet != 'default'
-    print(f"Filtered out 'default' snippet: {app.name}")
+for rule in no_default_snippet:
+   assert rule.snippet != 'default'
+   print(f"Filtered out 'default' snippet: {rule.name}")
 
-# Exclude security_rules associated with 'DeviceA'
+# Exclude security rules associated with 'DeviceA'
 no_deviceA = client.security_rule.list(
-    folder='Texas',
-    exclude_devices=['DeviceA']
+   folder='Texas',
+   rulebase='pre',
+   exclude_devices=['DeviceA']
 )
 
-for app in no_deviceA:
-    assert app.device != 'DeviceA'
-    print(f"Filtered out 'DeviceA': {app.name}")
+for rule in no_deviceA:
+   assert rule.device != 'DeviceA'
+   print(f"Filtered out 'DeviceA': {rule.name}")
 
 # Combine exact_match with multiple exclusions
 combined_filters = client.security_rule.list(
-    folder='Texas',
-    exact_match=True,
-    exclude_folders=['All'],
-    exclude_snippets=['default'],
-    exclude_devices=['DeviceA']
+   folder='Texas',
+   rulebase='pre',
+   exact_match=True,
+   exclude_folders=['All'],
+   exclude_snippets=['default'],
+   exclude_devices=['DeviceA']
 )
 
-for app in combined_filters:
-    print(f"Combined filters result: {app.name} in {app.folder}")
+for rule in combined_filters:
+   print(f"Combined filters result: {rule.name} in {rule.folder}")
 ```
 
 </div>
@@ -331,25 +359,35 @@ for app in combined_filters:
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
+**Example:**
+
 <div class="termy">
 
 <!-- termynal -->
 
 ```python
-# Initialize the ScmClient with a custom max_limit for security rule objects
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+from scm.client import ScmClient
+from scm.config.security_services import SecurityRule
+
+# Initialize client
 client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    security_rule_max_limit=4321
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
-all_rules = client.security_rule.list(folder='Texas', rulebase='pre')
+# Two options for setting max_limit:
 
-# 'all_rules' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Option 1: Use the unified client interface but create a custom SecurityRule instance with max_limit
+security_rule_service = SecurityRule(client, max_limit=4321)
+all_rules1 = security_rule_service.list(folder='Texas', rulebase='pre')
+
+# Option 2: Use the unified client interface directly
+# This will use the default max_limit (2500)
+all_rules2 = client.security_rule.list(folder='Texas', rulebase='pre')
+
+# Both options will auto-paginate through all available objects.
+# The rules are fetched in chunks according to the max_limit.
 ```
 
 </div>
@@ -419,7 +457,6 @@ commit_params = {
 }
 
 # Commit the changes directly on the client
-# Note: All commit operations should be performed on the client directly
 result = client.commit(**commit_params)
 
 print(f"Commit job ID: {result.job_id}")
@@ -434,11 +471,11 @@ print(f"Commit job ID: {result.job_id}")
 <!-- termynal -->
 
 ```python
-# Get status of specific job directly on the client
+# Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs directly on the client
+# List recent jobs directly from the client
 recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
@@ -483,7 +520,7 @@ try:
         "action": "allow"
     }
 
-    # Create the rule using the unified client
+    # Create the rule using the unified client interface
     new_rule = client.security_rule.create(rule_config, rulebase="pre")
 
     # Move the rule
@@ -493,14 +530,14 @@ try:
     }
     client.security_rule.move(new_rule.id, move_config)
 
-    # Commit changes directly on the client
+    # Commit changes directly from the client
     result = client.commit(
         folders=["Texas"],
         description="Added test rule",
         sync=True
     )
 
-    # Check job status on the client
+    # Check job status directly from the client
     status = client.get_job_status(result.job_id)
 
 except InvalidObjectError as e:
@@ -520,11 +557,10 @@ except MissingQueryParameterError as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified `ScmClient` approach for simpler code
-    - Access security rule operations via `client.security_rule` property
-    - Perform commit operations directly on the client
-    - Monitor jobs directly on the client
-    - Set appropriate max_limit parameters for large datasets
+    - Use the unified client interface (`client.security_rule`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
 
 2. **Rule Organization**
     - Use descriptive rule names
@@ -564,7 +600,7 @@ except MissingQueryParameterError as e:
 ## Full Script Examples
 
 Refer to
-the [security_rule.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/security_rule.py).
+the [security_rule.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security_services/security_rule.py).
 
 ## Related Models
 

@@ -1,28 +1,10 @@
 # Candidate Push Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-   1. [Request Model Attributes](#request-model-attributes)
-   2. [Response Model Attributes](#response-model-attributes)
-3. [Exceptions](#exceptions)
-4. [Model Validators](#model-validators)
-   1. [Folder Validation](#folder-validation)
-   2. [Admin Validation](#admin-validation)
-   3. [Description Validation](#description-validation)
-5. [Usage Examples](#usage-examples)
-   1. [Creating a Commit Request](#creating-a-commit-request)
-   2. [Handling the Response](#handling-the-response)
-   3. [Commit with Unified Client](#commit-with-unified-client)
-6. [Best Practices](#best-practices)
-7. [Related Models](#related-models)
-
 ## Overview
 
 The Candidate Push models provide a structured way to manage configuration commits in Palo Alto Networks' Strata Cloud Manager. These models handle the validation and processing of commit requests, including folder selection, admin authorization, and commit descriptions.
 
-## Model Attributes
+## Attributes
 
 ### Request Model Attributes
 
@@ -319,34 +301,3 @@ else:
 ```
 
 </div>
-
-## Best Practices
-
-1. **Commit Description**
-   - Use descriptive, meaningful commit descriptions
-   - Include ticket/issue numbers for traceability
-   - Mention impacted services or functionality
-   - Keep descriptions under 255 characters
-
-2. **Folder Selection**
-   - Only commit to folders that contain actual changes
-   - Group related changes in the same commit
-   - Consider impacts on other configurations
-   - Use a testing folder before committing to production
-
-3. **Admin Authorization**
-   - Use specific admin accounts rather than "all" when possible
-   - Follow the principle of least privilege
-   - Document which admins are authorized for which folders
-   - Regularly review and update admin privileges
-
-4. **Job Monitoring**
-   - Always check job status after initiating a commit
-   - Implement a timeout for long-running commits
-   - Add retry logic for transient failures
-   - Log commit job details for audit purposes
-
-## Related Models
-
-- [Jobs Models](jobs.md) - Used for tracking commit job status
-- [JobStatusResponse](jobs.md#jobstatusresponse-model) - Job status tracking model

@@ -86,6 +86,10 @@ client = ScmClient(
 
 You can also use the traditional approach if preferred:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import DynamicUserGroup
@@ -100,6 +104,8 @@ client = Scm(
 # Initialize DynamicUserGroup object
 dynamic_user_groups = DynamicUserGroup(client)
 ```
+
+</div>
 
 ## Usage Examples
 

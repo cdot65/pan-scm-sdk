@@ -87,6 +87,10 @@ client = ScmClient(
 
 You can also use the traditional approach if preferred:
 
+<div class="termy">
+
+<!-- termynal -->
+
 ```python
 from scm.client import Scm
 from scm.config.objects import HIPProfile
@@ -101,6 +105,8 @@ client = Scm(
 # Initialize HIPProfile with custom max_limit
 hip_profiles = HIPProfile(client, max_limit=5000)
 ```
+
+</div>
 
 ## Usage Examples
 
