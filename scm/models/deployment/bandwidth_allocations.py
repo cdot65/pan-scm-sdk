@@ -11,22 +11,10 @@ from pydantic import (
 class QosModel(BaseModel):
     """QoS configuration for bandwidth allocations."""
 
-    enabled: Optional[bool] = Field(
-        None, 
-        description="Enable QoS for bandwidth allocation"
-    )
-    customized: Optional[bool] = Field(
-        None, 
-        description="Use customized QoS settings"
-    )
-    profile: Optional[str] = Field(
-        None, 
-        description="QoS profile name"
-    )
-    guaranteed_ratio: Optional[float] = Field(
-        None, 
-        description="Guaranteed ratio for bandwidth"
-    )
+    enabled: Optional[bool] = Field(None, description="Enable QoS for bandwidth allocation")
+    customized: Optional[bool] = Field(None, description="Use customized QoS settings")
+    profile: Optional[str] = Field(None, description="QoS profile name")
+    guaranteed_ratio: Optional[float] = Field(None, description="Guaranteed ratio for bandwidth")
 
 
 class BandwidthAllocationBaseModel(BaseModel):
@@ -52,7 +40,7 @@ class BandwidthAllocationBaseModel(BaseModel):
         description="Bandwidth to allocate in Mbps",
         gt=0,
     )
-    
+
     # Optional fields
     spn_name_list: Optional[List[str]] = Field(
         None,
@@ -68,6 +56,7 @@ class BandwidthAllocationCreateModel(BandwidthAllocationBaseModel):
     """
     Model for creating a new Bandwidth Allocation.
     """
+
     # Unlike other models, bandwidth allocations don't have an ID field
     # They are identified by name and spn_name_list in the API
     pass
@@ -77,6 +66,7 @@ class BandwidthAllocationUpdateModel(BandwidthAllocationBaseModel):
     """
     Model for updating an existing Bandwidth Allocation.
     """
+
     # Unlike other models, bandwidth allocations don't have an ID field
     # Updates are done based on name and spn_name_list
     pass
@@ -86,6 +76,7 @@ class BandwidthAllocationResponseModel(BandwidthAllocationBaseModel):
     """
     Model for Bandwidth Allocation API responses.
     """
+
     # Unlike other models, bandwidth allocations don't include an ID in responses
     # based on the OpenAPI specification
     pass
@@ -95,19 +86,10 @@ class BandwidthAllocationListResponseModel(BaseModel):
     """
     Model for the list response from the Bandwidth Allocations API.
     """
+
     data: List[BandwidthAllocationResponseModel] = Field(
-        ...,
-        description="List of bandwidth allocations"
+        ..., description="List of bandwidth allocations"
     )
-    limit: int = Field(
-        200,
-        description="The maximum number of results per page"
-    )
-    offset: int = Field(
-        0,
-        description="The offset into the list of results returned"
-    )
-    total: int = Field(
-        ...,
-        description="Total number of bandwidth allocations"
-    )
+    limit: int = Field(200, description="The maximum number of results per page")
+    offset: int = Field(0, description="The offset into the list of results returned")
+    total: int = Field(..., description="Total number of bandwidth allocations")

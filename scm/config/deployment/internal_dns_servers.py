@@ -199,9 +199,9 @@ class InternalDnsServers(BaseObject):
         limit = self._max_limit
         offset = 0
         all_objects = []
-        
+
         params = {}
-            
+
         # Add name if provided
         if name:
             params["name"] = name

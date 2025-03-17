@@ -45,12 +45,12 @@ class BGPRouting(BaseObject):
 
         Returns:
             BGPRoutingResponseModel: The current BGP routing configuration
-            
+
         Raises:
             InvalidObjectError: If the response format is invalid
         """
         response = self.api_client.get(self.ENDPOINT)
-        
+
         if not isinstance(response, dict):
             raise InvalidObjectError(
                 message="Invalid response format: expected dictionary",
@@ -58,17 +58,21 @@ class BGPRouting(BaseObject):
                 http_status_code=500,
                 details={"error": "Response is not a dictionary"},
             )
-            
+
         try:
             # Process routing_preference format before validation
             if "routing_preference" in response:
                 routing_pref = response["routing_preference"]
                 if isinstance(routing_pref, dict):
                     if "default" in routing_pref:
-                        response["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
+                        response["routing_preference"] = DefaultRoutingModel(
+                            default=routing_pref["default"]
+                        )
                     elif "hot_potato_routing" in routing_pref:
-                        response["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
-            
+                        response["routing_preference"] = HotPotatoRoutingModel(
+                            hot_potato_routing=routing_pref["hot_potato_routing"]
+                        )
+
             return BGPRoutingResponseModel(**response)
         except Exception as e:
             raise InvalidObjectError(
@@ -85,7 +89,7 @@ class BGPRouting(BaseObject):
         """
         Creates a new BGP routing configuration.
 
-        Note: Since BGP routing is a singleton object, this method is functionally 
+        Note: Since BGP routing is a singleton object, this method is functionally
         equivalent to update() and will replace any existing configuration.
 
         Args:
@@ -93,7 +97,7 @@ class BGPRouting(BaseObject):
 
         Returns:
             BGPRoutingResponseModel: The created BGP routing configuration
-            
+
         Raises:
             InvalidObjectError: If the provided data is invalid
             MissingQueryParameterError: If required fields are missing
@@ -112,17 +116,23 @@ class BGPRouting(BaseObject):
                 routing_pref = data["routing_preference"]
                 if isinstance(routing_pref, dict):
                     if "default" in routing_pref:
-                        data["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
+                        data["routing_preference"] = DefaultRoutingModel(
+                            default=routing_pref["default"]
+                        )
                     elif "hot_potato_routing" in routing_pref:
-                        data["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
+                        data["routing_preference"] = HotPotatoRoutingModel(
+                            hot_potato_routing=routing_pref["hot_potato_routing"]
+                        )
                 elif not isinstance(routing_pref, (DefaultRoutingModel, HotPotatoRoutingModel)):
                     raise InvalidObjectError(
                         message="Invalid routing_preference format",
                         error_code="E003",
                         http_status_code=400,
-                        details={"error": "routing_preference must be a dictionary with 'default' or 'hot_potato_routing', or a valid model instance"},
+                        details={
+                            "error": "routing_preference must be a dictionary with 'default' or 'hot_potato_routing', or a valid model instance"
+                        },
                     )
-            
+
             # Validate input data using Pydantic model
             bgp_routing = BGPRoutingCreateModel(**data)
         except Exception as e:
@@ -132,21 +142,23 @@ class BGPRouting(BaseObject):
                 http_status_code=400,
                 details={"error": str(e)},
             )
-        
+
         # Convert to dict for API request
         payload = bgp_routing.model_dump(exclude_unset=True, exclude_none=True)
-        
+
         # Handle serialization of enum values
-        if "backbone_routing" in payload and isinstance(payload["backbone_routing"], BackboneRoutingEnum):
+        if "backbone_routing" in payload and isinstance(
+            payload["backbone_routing"], BackboneRoutingEnum
+        ):
             payload["backbone_routing"] = payload["backbone_routing"].value
-        
+
         # Send the created object to the remote API as JSON
         # Let HTTP errors propagate to caller for proper handling
         response = self.api_client.put(
             self.ENDPOINT,
             json=payload,
         )
-        
+
         if not isinstance(response, dict):
             raise InvalidObjectError(
                 message="Invalid response format: expected dictionary",
@@ -154,17 +166,21 @@ class BGPRouting(BaseObject):
                 http_status_code=500,
                 details={"error": "Response is not a dictionary"},
             )
-        
+
         try:
             # Process routing_preference format before validation
             if "routing_preference" in response:
                 routing_pref = response["routing_preference"]
                 if isinstance(routing_pref, dict):
                     if "default" in routing_pref:
-                        response["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
+                        response["routing_preference"] = DefaultRoutingModel(
+                            default=routing_pref["default"]
+                        )
                     elif "hot_potato_routing" in routing_pref:
-                        response["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
-                        
+                        response["routing_preference"] = HotPotatoRoutingModel(
+                            hot_potato_routing=routing_pref["hot_potato_routing"]
+                        )
+
             return BGPRoutingResponseModel(**response)
         except Exception as e:
             raise InvalidObjectError(
@@ -186,7 +202,7 @@ class BGPRouting(BaseObject):
 
         Returns:
             BGPRoutingResponseModel: The updated BGP routing configuration
-            
+
         Raises:
             InvalidObjectError: If the provided data is invalid
             MissingQueryParameterError: If required fields are missing
@@ -205,17 +221,23 @@ class BGPRouting(BaseObject):
                 routing_pref = data["routing_preference"]
                 if isinstance(routing_pref, dict):
                     if "default" in routing_pref:
-                        data["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
+                        data["routing_preference"] = DefaultRoutingModel(
+                            default=routing_pref["default"]
+                        )
                     elif "hot_potato_routing" in routing_pref:
-                        data["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
+                        data["routing_preference"] = HotPotatoRoutingModel(
+                            hot_potato_routing=routing_pref["hot_potato_routing"]
+                        )
                 elif not isinstance(routing_pref, (DefaultRoutingModel, HotPotatoRoutingModel)):
                     raise InvalidObjectError(
                         message="Invalid routing_preference format",
                         error_code="E003",
                         http_status_code=400,
-                        details={"error": "routing_preference must be a dictionary with 'default' or 'hot_potato_routing', or a valid model instance"},
+                        details={
+                            "error": "routing_preference must be a dictionary with 'default' or 'hot_potato_routing', or a valid model instance"
+                        },
                     )
-            
+
             # Validate input data using Pydantic model
             bgp_routing = BGPRoutingUpdateModel(**data)
         except Exception as e:
@@ -225,21 +247,23 @@ class BGPRouting(BaseObject):
                 http_status_code=400,
                 details={"error": str(e)},
             )
-        
+
         # Convert to dict for API request
         payload = bgp_routing.model_dump(exclude_unset=True, exclude_none=True)
-        
+
         # Handle serialization of enum values
-        if "backbone_routing" in payload and isinstance(payload["backbone_routing"], BackboneRoutingEnum):
+        if "backbone_routing" in payload and isinstance(
+            payload["backbone_routing"], BackboneRoutingEnum
+        ):
             payload["backbone_routing"] = payload["backbone_routing"].value
-        
+
         # Send the updated object to the remote API as JSON
         # Let HTTP errors propagate to caller for proper handling
         response = self.api_client.put(
             self.ENDPOINT,
             json=payload,
         )
-        
+
         if not isinstance(response, dict):
             raise InvalidObjectError(
                 message="Invalid response format: expected dictionary",
@@ -247,17 +271,21 @@ class BGPRouting(BaseObject):
                 http_status_code=500,
                 details={"error": "Response is not a dictionary"},
             )
-        
+
         try:
             # Process routing_preference format before validation
             if "routing_preference" in response:
                 routing_pref = response["routing_preference"]
                 if isinstance(routing_pref, dict):
                     if "default" in routing_pref:
-                        response["routing_preference"] = DefaultRoutingModel(default=routing_pref["default"])
+                        response["routing_preference"] = DefaultRoutingModel(
+                            default=routing_pref["default"]
+                        )
                     elif "hot_potato_routing" in routing_pref:
-                        response["routing_preference"] = HotPotatoRoutingModel(hot_potato_routing=routing_pref["hot_potato_routing"])
-                        
+                        response["routing_preference"] = HotPotatoRoutingModel(
+                            hot_potato_routing=routing_pref["hot_potato_routing"]
+                        )
+
             return BGPRoutingResponseModel(**response)
         except Exception as e:
             raise InvalidObjectError(
@@ -270,10 +298,10 @@ class BGPRouting(BaseObject):
     def delete(self) -> None:
         """
         Resets the BGP routing configuration to default values.
-        
+
         Note: Since BGP routing is a singleton configuration object, it cannot be truly deleted.
         This method resets the configuration to default values instead.
-        
+
         Raises:
             InvalidObjectError: If there's an error resetting the configuration
         """
@@ -284,9 +312,9 @@ class BGPRouting(BaseObject):
             "accept_route_over_SC": False,
             "outbound_routes_for_services": [],
             "add_host_route_to_ike_peer": False,
-            "withdraw_static_route": False
+            "withdraw_static_route": False,
         }
-        
+
         try:
             # Send the reset configuration
             self.api_client.put(

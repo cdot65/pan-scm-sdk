@@ -7,9 +7,9 @@ from .bgp_routing import BGPRouting
 from .internal_dns_servers import InternalDnsServers
 
 __all__ = [
-    "RemoteNetworks", 
-    "ServiceConnection", 
-    "BandwidthAllocations", 
+    "RemoteNetworks",
+    "ServiceConnection",
+    "BandwidthAllocations",
     "BGPRouting",
     "InternalDnsServers",
 ]

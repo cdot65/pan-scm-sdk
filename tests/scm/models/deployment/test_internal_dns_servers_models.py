@@ -1,10 +1,10 @@
 """Tests for internal DNS server pydantic models."""
 
 import uuid
-import pytest
 from ipaddress import IPv4Address
+
+import pytest
 from pydantic import ValidationError
-import builtins
 
 from scm.models.deployment.internal_dns_servers import (
     InternalDnsServersBaseModel,
@@ -38,14 +38,14 @@ class TestInternalDnsServersBaseModel:
             primary="192.168.1.1",
             secondary="8.8.8.8",
         )
-        
+
         serialized = model.model_dump(exclude_unset=True)
         # Verify primary and secondary are strings in serialized output
         assert isinstance(serialized["primary"], str)
         assert serialized["primary"] == "192.168.1.1"
         assert isinstance(serialized["secondary"], str)
         assert serialized["secondary"] == "8.8.8.8"
-        
+
     def test_ip_address_serialization_none(self):
         """Test IP address serialization when secondary is None."""
         model = InternalDnsServersBaseModel(
@@ -71,7 +71,7 @@ class TestInternalDnsServersBaseModel:
         # First test the before validator directly
         result = InternalDnsServersBaseModel.validate_domain_name(None)
         assert result == []
-        
+
         # Now test the full model validation with None
         with pytest.raises(ValidationError) as exc_info:
             InternalDnsServersBaseModel(
@@ -91,14 +91,14 @@ class TestInternalDnsServersBaseModel:
             )
         assert "domain_name" in str(exc_info.value)
         assert "item" in str(exc_info.value)  # Check for 'at least 1 item' error
-        
+
     def test_domain_name_validator_not_empty(self):
         """Test domain_name_not_empty validator directly."""
         # Test empty list case
         with pytest.raises(ValueError) as exc_info:
             InternalDnsServersBaseModel.validate_domain_name_not_empty([])
         assert "domain_name must not be empty" in str(exc_info.value)
-        
+
         # Test valid case
         result = InternalDnsServersBaseModel.validate_domain_name_not_empty(["example.com"])
         assert result == ["example.com"]
@@ -108,7 +108,7 @@ class TestInternalDnsServersBaseModel:
         with pytest.raises(ValueError) as exc_info:
             InternalDnsServersBaseModel.validate_domain_name(123)  # Not a list or string
         assert "domain_name must be a list of strings" in str(exc_info.value)
-        
+
         # Also test the full model validation
         with pytest.raises(ValidationError):
             InternalDnsServersBaseModel(
@@ -176,26 +176,26 @@ class TestInternalDnsServersCreateModel:
             )
         assert "domain_name" in str(exc_info.value)
         assert "item" in str(exc_info.value)  # Look for min_length validation
-        
+
     def test_create_model_validator(self):
         """Test the create model validator directly."""
         # Create a model with valid domain_name
-        model = InternalDnsServersCreateModel(
+        InternalDnsServersCreateModel(
             name="test-dns-server",
             domain_name=["example.com"],
             primary="192.168.1.1",
         )
-        
+
         # Create a test model with empty domain_name
         test_model = InternalDnsServersCreateModel(
             name="test-dns-server",
             domain_name=["example.com"],
             primary="192.168.1.1",
         )
-        
+
         # Bypass validation by using object.__setattr__
         object.__setattr__(test_model, "domain_name", [])
-        
+
         # Now test the validator directly
         with pytest.raises(ValueError) as exc_info:
             test_model.validate_create_model()
@@ -267,18 +267,18 @@ class TestInternalDnsServersUpdateModel:
             )
         assert "domain_name" in str(exc_info.value)
         assert "empty" in str(exc_info.value).lower()  # Look for 'empty' in error message
-        
+
     def test_update_model_validator_empty_domain(self):
         """Test update model validator directly for empty domain_name."""
         # Create a test model
         test_model = InternalDnsServersUpdateModel(
             id=uuid.uuid4(),
-            name="updated-dns-server", 
+            name="updated-dns-server",
         )
-        
+
         # Bypass validation by using object.__setattr__
         object.__setattr__(test_model, "domain_name", [])
-        
+
         # Now test the validator directly
         with pytest.raises(ValueError) as exc_info:
             test_model.validate_update_model()
@@ -324,7 +324,7 @@ class TestInternalDnsServersResponseModel:
             )
         assert "domain_name" in str(exc_info.value)
         assert "item" in str(exc_info.value)  # Look for min_length validation
-        
+
     def test_response_model_validator_empty_domain(self):
         """Test response model validator directly for empty domain_name."""
         # Create a test model
@@ -334,10 +334,10 @@ class TestInternalDnsServersResponseModel:
             domain_name=["example.com"],
             primary="192.168.1.1",
         )
-        
+
         # Bypass validation by using object.__setattr__
         object.__setattr__(test_model, "domain_name", [])
-        
+
         # Now test the validator directly
         with pytest.raises(ValueError) as exc_info:
             test_model.validate_response_model()

@@ -11,10 +11,10 @@ from pydantic import (
 class NetworkLocationModel(BaseModel):
     """
     Model for Network Location objects.
-    
+
     Network Locations are read-only resources in the Strata Cloud Manager API,
     only supporting list/get operations.
-    
+
     Attributes:
         value (str): The system value of the location (e.g., 'us-west-1')
         display (str): The human-readable display name of the location
@@ -35,19 +35,19 @@ class NetworkLocationModel(BaseModel):
         description="The system value of the location",
         examples=["us-west-1"],
     )
-    
+
     display: str = Field(
         ...,
         description="The location as displayed in the Strata Cloud Manager portal",
         examples=["US West"],
     )
-    
+
     continent: Optional[str] = Field(
         None,
         description="The continent in which the location exists",
         examples=["North America"],
     )
-    
+
     latitude: Optional[float] = Field(
         None,
         ge=-90,
@@ -55,7 +55,7 @@ class NetworkLocationModel(BaseModel):
         description="The latitudinal position of the location",
         examples=[37.38314],
     )
-    
+
     longitude: Optional[float] = Field(
         None,
         ge=-180,
@@ -63,13 +63,13 @@ class NetworkLocationModel(BaseModel):
         description="The longitudinal position of the location",
         examples=[-121.98306],
     )
-    
+
     region: Optional[str] = Field(
         None,
         description="The region code of the location",
         examples=["us-west-1"],
     )
-    
+
     aggregate_region: Optional[str] = Field(
         None,
         description="The aggregate region identifier",

@@ -16,7 +16,7 @@ from scm.models.deployment import NetworkLocationModel
 class NetworkLocations(BaseObject):
     """
     Manages Network Location objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -117,13 +117,13 @@ class NetworkLocations(BaseObject):
                 if not value_filter:
                     return []
                 filtered_locations = [
-                    loc for loc in filtered_locations 
+                    loc
+                    for loc in filtered_locations
                     if loc.value.lower() in [v.lower() for v in value_filter]
                 ]
             else:
                 filtered_locations = [
-                    loc for loc in filtered_locations 
-                    if loc.value.lower() == value_filter.lower()
+                    loc for loc in filtered_locations if loc.value.lower() == value_filter.lower()
                 ]
 
         # Filter by display
@@ -134,12 +134,14 @@ class NetworkLocations(BaseObject):
                 if not display_filter:
                     return []
                 filtered_locations = [
-                    loc for loc in filtered_locations 
+                    loc
+                    for loc in filtered_locations
                     if loc.display.lower() in [d.lower() for d in display_filter]
                 ]
             else:
                 filtered_locations = [
-                    loc for loc in filtered_locations 
+                    loc
+                    for loc in filtered_locations
                     if loc.display.lower() == display_filter.lower()
                 ]
 
@@ -151,12 +153,14 @@ class NetworkLocations(BaseObject):
                 if not region_filter:
                     return []
                 filtered_locations = [
-                    loc for loc in filtered_locations 
+                    loc
+                    for loc in filtered_locations
                     if loc.region and loc.region.lower() in [r.lower() for r in region_filter]
                 ]
             else:
                 filtered_locations = [
-                    loc for loc in filtered_locations 
+                    loc
+                    for loc in filtered_locations
                     if loc.region and loc.region.lower() == region_filter.lower()
                 ]
 
@@ -168,12 +172,15 @@ class NetworkLocations(BaseObject):
                 if not continent_filter:
                     return []
                 filtered_locations = [
-                    loc for loc in filtered_locations 
-                    if loc.continent and loc.continent.lower() in [c.lower() for c in continent_filter]
+                    loc
+                    for loc in filtered_locations
+                    if loc.continent
+                    and loc.continent.lower() in [c.lower() for c in continent_filter]
                 ]
             else:
                 filtered_locations = [
-                    loc for loc in filtered_locations 
+                    loc
+                    for loc in filtered_locations
                     if loc.continent and loc.continent.lower() == continent_filter.lower()
                 ]
 
@@ -185,13 +192,17 @@ class NetworkLocations(BaseObject):
                 if not agg_region_filter:
                     return []
                 filtered_locations = [
-                    loc for loc in filtered_locations 
-                    if loc.aggregate_region and loc.aggregate_region.lower() in [ar.lower() for ar in agg_region_filter]
+                    loc
+                    for loc in filtered_locations
+                    if loc.aggregate_region
+                    and loc.aggregate_region.lower() in [ar.lower() for ar in agg_region_filter]
                 ]
             else:
                 filtered_locations = [
-                    loc for loc in filtered_locations 
-                    if loc.aggregate_region and loc.aggregate_region.lower() == agg_region_filter.lower()
+                    loc
+                    for loc in filtered_locations
+                    if loc.aggregate_region
+                    and loc.aggregate_region.lower() == agg_region_filter.lower()
                 ]
 
         return filtered_locations
@@ -252,7 +263,7 @@ class NetworkLocations(BaseObject):
 
         Returns:
             NetworkLocationModel: The fetched network location object
-            
+
         Raises:
             InvalidObjectError: If the network location is not found
         """
@@ -266,16 +277,13 @@ class NetworkLocations(BaseObject):
                     "error": '"value" is not allowed to be empty',
                 },
             )
-            
+
         # Get all network locations
         all_locations = self.list()
-        
+
         # Find the location with the matching value (case-insensitive)
-        matching_locations = [
-            loc for loc in all_locations
-            if loc.value.lower() == value.lower()
-        ]
-        
+        matching_locations = [loc for loc in all_locations if loc.value.lower() == value.lower()]
+
         if not matching_locations:
             raise InvalidObjectError(
                 message=f"Network location with value '{value}' not found",
@@ -283,10 +291,10 @@ class NetworkLocations(BaseObject):
                 http_status_code=404,
                 details={"error": "Object not found"},
             )
-            
+
         if len(matching_locations) > 1:
             self.logger.warning(
                 f"Multiple network locations found with value '{value}'. Using the first one."
             )
-            
+
         return matching_locations[0]

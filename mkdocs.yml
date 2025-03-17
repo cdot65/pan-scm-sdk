@@ -42,6 +42,9 @@ nav:
               - Internal DNS Servers: sdk/config/deployment/internal_dns_servers.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
               - Service Connections: sdk/config/deployment/service_connections.md
+          - Mobile Agent:
+              - Overview: sdk/config/mobile_agent/index.md
+              - Authentication Settings: sdk/config/mobile_agent/auth_settings.md
           - Network:
               - Overview: sdk/config/network/index.md
               - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
@@ -87,6 +90,9 @@ nav:
               - Internal DNS Servers Models: sdk/models/deployment/internal_dns_servers_models.md
               - Remote Network Models: sdk/models/deployment/remote_networks_models.md
               - Service Connection Models: sdk/models/deployment/service_connections_models.md
+          - Mobile Agent:
+              - Overview: sdk/models/mobile_agent/index.md
+              - Authentication Settings Models: sdk/models/mobile_agent/auth_settings_models.md
           - Network:
               - Overview: sdk/models/network/index.md
               - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md

@@ -379,6 +379,10 @@ class Scm:
                 "scm.config.objects.application_group",
                 "ApplicationGroup",
             ),
+            "auth_settings": (
+                "scm.config.mobile_agent.auth_settings",
+                "AuthSettings",
+            ),
             "bandwidth_allocation": (
                 "scm.config.deployment.bandwidth_allocations",
                 "BandwidthAllocations",

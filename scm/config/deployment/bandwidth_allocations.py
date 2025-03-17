@@ -21,7 +21,7 @@ from scm.models.deployment import (
 class BandwidthAllocations(BaseObject):
     """
     Manages Bandwidth Allocation objects in Palo Alto Networks' Strata Cloud Manager.
-    
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
@@ -112,16 +112,16 @@ class BandwidthAllocations(BaseObject):
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         bandwidth_allocation = BandwidthAllocationCreateModel(**data)
-        
+
         # Convert back to a Python dictionary, removing any unset fields
         payload = bandwidth_allocation.model_dump(exclude_unset=True)
-        
+
         # Send the object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
             json=payload,
         )
-        
+
         # Return the API response as a new Pydantic object
         return BandwidthAllocationResponseModel(**response)
 
@@ -140,16 +140,16 @@ class BandwidthAllocations(BaseObject):
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         bandwidth_allocation = BandwidthAllocationUpdateModel(**data)
-        
+
         # Convert back to a Python dictionary, removing any unset fields
         payload = bandwidth_allocation.model_dump(exclude_unset=True)
-        
+
         # Send the updated object to the remote API as JSON
         response: Dict[str, Any] = self.api_client.put(
             self.ENDPOINT,
             json=payload,
         )
-        
+
         # Return the API response as a new Pydantic object
         return BandwidthAllocationResponseModel(**response)
 
@@ -175,7 +175,7 @@ class BandwidthAllocations(BaseObject):
                     "error": '"name" is not allowed to be empty',
                 },
             )
-            
+
         if not spn_name_list:
             raise MissingQueryParameterError(
                 message="Field 'spn_name_list' cannot be empty",
@@ -186,9 +186,9 @@ class BandwidthAllocations(BaseObject):
                     "error": '"spn_name_list" is not allowed to be empty',
                 },
             )
-        
+
         # Validate spn_name_list format
-        spn_names = [spn.strip() for spn in spn_name_list.split(',')]
+        spn_names = [spn.strip() for spn in spn_name_list.split(",")]
         if not all(spn_names):
             raise InvalidObjectError(
                 message="Invalid 'spn_name_list' format",
@@ -199,12 +199,12 @@ class BandwidthAllocations(BaseObject):
                     "error": "spn_name_list must be a non-empty, comma-separated list of SPN names",
                 },
             )
-            
+
         params = {
             "name": name,
             "spn_name_list": spn_name_list,
         }
-        
+
         self.api_client.delete(
             self.ENDPOINT,
             params=params,
@@ -235,12 +235,14 @@ class BandwidthAllocations(BaseObject):
                 if not name_filter:
                     return []
                 filtered_allocations = [
-                    alloc for alloc in filtered_allocations 
+                    alloc
+                    for alloc in filtered_allocations
                     if alloc.name.lower() in [n.lower() for n in name_filter]
                 ]
             else:
                 filtered_allocations = [
-                    alloc for alloc in filtered_allocations 
+                    alloc
+                    for alloc in filtered_allocations
                     if alloc.name.lower() == name_filter.lower()
                 ]
 
@@ -252,12 +254,14 @@ class BandwidthAllocations(BaseObject):
                 if not bw_filter:
                     return []
                 filtered_allocations = [
-                    alloc for alloc in filtered_allocations 
+                    alloc
+                    for alloc in filtered_allocations
                     if alloc.allocated_bandwidth in bw_filter
                 ]
             else:
                 filtered_allocations = [
-                    alloc for alloc in filtered_allocations 
+                    alloc
+                    for alloc in filtered_allocations
                     if alloc.allocated_bandwidth == bw_filter
                 ]
 
@@ -268,16 +272,18 @@ class BandwidthAllocations(BaseObject):
                 # If the list is empty, no results should be returned
                 if not spn_filter:
                     return []
-                    
+
                 # Check if any of the SPN names in the filter match any in the allocation's list
                 filtered_allocations = [
-                    alloc for alloc in filtered_allocations 
+                    alloc
+                    for alloc in filtered_allocations
                     if alloc.spn_name_list and any(spn in alloc.spn_name_list for spn in spn_filter)
                 ]
             else:
                 # Single string => check if it's in the allocation's spn_name_list
                 filtered_allocations = [
-                    alloc for alloc in filtered_allocations 
+                    alloc
+                    for alloc in filtered_allocations
                     if alloc.spn_name_list and spn_filter in alloc.spn_name_list
                 ]
 
@@ -291,9 +297,10 @@ class BandwidthAllocations(BaseObject):
                     http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
-            
+
             filtered_allocations = [
-                alloc for alloc in filtered_allocations 
+                alloc
+                for alloc in filtered_allocations
                 if alloc.qos and alloc.qos.enabled == qos_enabled
             ]
 
@@ -342,7 +349,7 @@ class BandwidthAllocations(BaseObject):
 
             # Parse the response into a list response model
             list_response = BandwidthAllocationListResponseModel(**response)
-            
+
             all_objects.extend(list_response.data)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -382,11 +389,11 @@ class BandwidthAllocations(BaseObject):
                     "error": '"name" is not allowed to be empty',
                 },
             )
-            
+
         params = {
             "name": name,
         }
-        
+
         response = self.api_client.get(
             self.ENDPOINT,
             params=params,
@@ -405,7 +412,7 @@ class BandwidthAllocations(BaseObject):
             if data:
                 # Return the first matching allocation
                 return BandwidthAllocationResponseModel(**data[0])
-        
+
         return None
 
     def fetch(
@@ -420,12 +427,12 @@ class BandwidthAllocations(BaseObject):
 
         Returns:
             BandwidthAllocationResponseModel: The fetched bandwidth allocation object
-            
+
         Raises:
             InvalidObjectError: If the allocation is not found
         """
         allocation = self.get(name)
-        
+
         if allocation is None:
             raise InvalidObjectError(
                 message=f"Bandwidth allocation with name '{name}' not found",
@@ -433,5 +440,5 @@ class BandwidthAllocations(BaseObject):
                 http_status_code=404,
                 details={"error": "Object not found"},
             )
-            
+
         return allocation

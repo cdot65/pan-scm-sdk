@@ -32,6 +32,7 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     InterfaceAddress,
 )
+
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,
@@ -197,20 +198,12 @@ class NetworkLocationModelFactory(factory.Factory):
     @classmethod
     def build_minimal(cls):
         """Create a minimal valid instance with only required fields."""
-        return cls(
-            value="us-west-1",
-            display="US West"
-        )
+        return cls(value="us-west-1", display="US West")
 
     @classmethod
     def build_with_invalid_coordinates(cls):
         """Create an instance with invalid coordinate values."""
-        return cls(
-            value="us-west-1",
-            display="US West",
-            latitude=100,
-            longitude=200
-        )
+        return cls(value="us-west-1", display="US West", latitude=100, longitude=200)
 
 
 # ----------------------------------------------------------------------------

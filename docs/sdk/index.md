@@ -16,6 +16,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Network Locations](config/deployment/network_locations.md)
         - [Remote Networks](config/deployment/remote_networks.md)
         - [Service Connections](config/deployment/service_connections.md)
+    - Mobile Agent
+        - [Authentication Settings](config/mobile_agent/auth_settings.md)
     - Network
         - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
         - [IKE Gateways](config/network/ike_gateway.md)
@@ -57,6 +59,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Network Locations Models](models/deployment/network_locations.md)
         - [Remote Networks Models](models/deployment/remote_networks_models.md)
         - [Service Connections Models](models/deployment/service_connections_models.md)
+    - Mobile Agent
+        - [Authentication Settings Models](models/mobile_agent/auth_settings_models.md)
     - Network
         - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
@@ -206,27 +210,35 @@ new_allocation = client.bandwidth_allocation.create({
 })
 print(f"Created bandwidth allocation: {new_allocation.name}")
 
-# ===== WORKING WITH NETWORK LOCATIONS =====
+# ===== WORKING WITH AUTHENTICATION SETTINGS =====
 
-# List all network locations
-locations = client.network_location.list()
-print(f"Found {len(locations)} network locations")
+# List all authentication settings
+auth_settings = client.auth_settings.list()
+print(f"Found {len(auth_settings)} authentication settings")
 
-# Filter locations by continent
-us_locations = client.network_location.list(continent="North America")
-print(f"Found {len(us_locations)} locations in North America")
+# Create new authentication settings for Windows
+windows_auth = client.auth_settings.create({
+    "name": "windows_auth",
+    "authentication_profile": "windows-profile",
+    "os": "Windows",
+    "user_credential_or_client_cert_required": True,
+    "folder": "Mobile Users"
+})
+print(f"Created authentication settings: {windows_auth.name}")
 
-# Fetch a specific location by value
-west_coast = client.network_location.fetch("us-west-1")
-print(f"Location: {west_coast.display} ({west_coast.value})")
-print(f"Region: {west_coast.region}, Coordinates: {west_coast.latitude}, {west_coast.longitude}")
+# Move authentication settings to the top of evaluation order
+client.auth_settings.move({
+    "name": "windows_auth",
+    "where": "top"
+})
+print("Moved Windows authentication settings to the top")
 
 # ===== COMMIT CHANGES =====
 
 # Commit all changes to apply them to the firewall
 commit_result = client.commit(
-    folders=["Texas"],
-    description="Updated web-server address and BGP routing settings",
+    folders=["Texas", "Mobile Users"],
+    description="Updated configurations via unified client",
     sync=True  # Wait for commit to complete
 )
 
@@ -266,6 +278,8 @@ The following table shows all services available through the unified client inte
 | `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption                 |
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
+| **Mobile Agent**                   |                                                                 |
+| `auth_settings`                    | GlobalProtect authentication settings by operating system       |
 | **Deployment**                     |                                                                 |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                    |
