@@ -3,7 +3,6 @@
 # Standard library imports
 from enum import Enum
 from typing import Optional
-from uuid import UUID
 
 # External libraries
 from pydantic import (
@@ -86,7 +85,9 @@ class AuthSettingsBaseModel(BaseModel):
     def validate_folder(cls, v):  # noqa
         """Validates that folder is 'Mobile Users' if provided."""
         if v is not None and v != "Mobile Users":
-            raise ValueError("Folder must be 'Mobile Users' for GlobalProtect Authentication Settings")
+            raise ValueError(
+                "Folder must be 'Mobile Users' for GlobalProtect Authentication Settings"
+            )
         return v
 
 
@@ -162,7 +163,9 @@ class AuthSettingsUpdateModel(BaseModel):
     def validate_folder(cls, v):  # noqa
         """Validates that folder is 'Mobile Users' if provided."""
         if v is not None and v != "Mobile Users":
-            raise ValueError("Folder must be 'Mobile Users' for GlobalProtect Authentication Settings")
+            raise ValueError(
+                "Folder must be 'Mobile Users' for GlobalProtect Authentication Settings"
+            )
         return v
 
 
@@ -178,7 +181,7 @@ class MovePosition(str, Enum):
     """Available positions for moving authentication settings."""
 
     BEFORE = "before"
-    AFTER = "after" 
+    AFTER = "after"
     TOP = "top"
     BOTTOM = "bottom"
 
@@ -193,7 +196,7 @@ class AuthSettingsMoveModel(BaseModel):
     Attributes:
         name (str): The name of the authentication settings to move.
         where (MovePosition): The position to move to (before, after, top, bottom).
-        destination (Optional[str]): The name of the destination authentication settings 
+        destination (Optional[str]): The name of the destination authentication settings
                                      (required for before/after).
 
     Error:

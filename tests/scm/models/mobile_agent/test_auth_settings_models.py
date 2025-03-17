@@ -1,8 +1,5 @@
 # tests/scm/models/mobile_agent/test_auth_settings_models.py
 
-from uuid import UUID
-import uuid
-
 # External libraries
 import pytest
 from pydantic import ValidationError
@@ -14,7 +11,6 @@ from scm.models.mobile_agent.auth_settings import (
     AuthSettingsBaseModel,
     AuthSettingsCreateModel,
     AuthSettingsUpdateModel,
-    AuthSettingsResponseModel,
     AuthSettingsMoveModel,
 )
 from tests.scm.models.mobile_agent.factories import (
@@ -60,7 +56,9 @@ class TestAuthSettingsBaseModel:
 
     def test_base_model_minimal(self):
         """Test that a minimal base model can be created."""
-        model = AuthSettingsBaseModelFactory(folder=None, user_credential_or_client_cert_required=None)
+        model = AuthSettingsBaseModelFactory(
+            folder=None, user_credential_or_client_cert_required=None
+        )
         assert model.name is not None
         assert model.authentication_profile is not None
         assert model.os is not None
@@ -97,9 +95,7 @@ class TestAuthSettingsBaseModel:
         """Test validation when folder value is invalid."""
         with pytest.raises(ValueError) as exc_info:
             AuthSettingsBaseModel(
-                name="test-settings",
-                authentication_profile="test-profile",
-                folder="Invalid Folder"
+                name="test-settings", authentication_profile="test-profile", folder="Invalid Folder"
             )
         assert "Folder must be 'Mobile Users'" in str(exc_info.value)
 
@@ -109,7 +105,7 @@ class TestAuthSettingsBaseModel:
             AuthSettingsBaseModel(
                 name="test-settings",
                 authentication_profile="test-profile",
-                folder="Invalid@Folder"  # contains invalid character
+                folder="Invalid@Folder",  # contains invalid character
             )
         assert "folder\n  String should match pattern" in str(exc_info.value)
 
@@ -120,7 +116,10 @@ class TestAuthSettingsBaseModel:
         assert model_dict["name"] == model.name
         assert model_dict["authentication_profile"] == model.authentication_profile
         assert model_dict["os"] == OperatingSystem.WINDOWS
-        assert model_dict["user_credential_or_client_cert_required"] == model.user_credential_or_client_cert_required
+        assert (
+            model_dict["user_credential_or_client_cert_required"]
+            == model.user_credential_or_client_cert_required
+        )
         assert model_dict["folder"] == "Mobile Users"
 
     def test_name_validation_length(self):
@@ -145,7 +144,10 @@ class TestAuthSettingsCreateModel:
         assert model.os == data["os"]
         # This might be None in the model if the field is optional
         if "user_credential_or_client_cert_required" in data:
-            assert model.user_credential_or_client_cert_required == data["user_credential_or_client_cert_required"]
+            assert (
+                model.user_credential_or_client_cert_required
+                == data["user_credential_or_client_cert_required"]
+            )
         assert model.folder == data["folder"]
 
     def test_create_model_invalid_name(self):
@@ -198,7 +200,10 @@ class TestAuthSettingsUpdateModel:
         assert model.os == data["os"]
         # This might be None in the model if the field is optional
         if "user_credential_or_client_cert_required" in data:
-            assert model.user_credential_or_client_cert_required == data["user_credential_or_client_cert_required"]
+            assert (
+                model.user_credential_or_client_cert_required
+                == data["user_credential_or_client_cert_required"]
+            )
         assert model.folder == data["folder"]
 
     def test_update_model_minimal(self):
@@ -235,13 +240,13 @@ class TestAuthSettingsUpdateModel:
             {"user_credential_or_client_cert_required": False},
             {"folder": "Mobile Users"},
         ]
-        
+
         for field_data in fields_to_test:
             data = {}
             data.update(field_data)
-            
+
             model = AuthSettingsUpdateModel(**data)
-            
+
             for key, value in field_data.items():
                 assert getattr(model, key) == value
 
@@ -255,14 +260,16 @@ class TestAuthSettingsResponseModel:
         assert model.name is not None
         assert model.authentication_profile is not None
         assert model.os is not None
-        assert model.user_credential_or_client_cert_required is not None or model.user_credential_or_client_cert_required is None
+        assert (
+            model.user_credential_or_client_cert_required is not None
+            or model.user_credential_or_client_cert_required is None
+        )
         assert model.folder == "Mobile Users"
 
     def test_response_model_minimal(self):
         """Test validation with minimal response data."""
         model = AuthSettingsResponseModelFactory(
-            folder=None, 
-            user_credential_or_client_cert_required=None
+            folder=None, user_credential_or_client_cert_required=None
         )
         assert model.name is not None
         assert model.authentication_profile is not None
@@ -272,13 +279,13 @@ class TestAuthSettingsResponseModel:
     def test_response_model_inheritance(self):
         """Test that ResponseModel inherits properly from BaseModel."""
         model = AuthSettingsResponseModelFactory(os=OperatingSystem.WINDOWS)
-        
+
         # Test that validators from base class are inherited
         assert model.folder == "Mobile Users"
-        
+
         # Test model configuration inheritance
         assert model.model_config["arbitrary_types_allowed"] is True
-        
+
         # Convert to dict and verify
         model_dict = model.model_dump()
         assert model_dict["os"] == OperatingSystem.WINDOWS
@@ -357,14 +364,14 @@ class TestAuthSettingsMoveModel:
         # The error message in the model may contain both 'before' and 'after'
         assert "Destination is required when where is" in str(exc_info.value)
         assert "after" in str(exc_info.value)
-    
+
     def test_move_model_top_with_destination(self):
         """Test validation when destination is provided for top move."""
         data = AuthSettingsMoveModelFactory.build_invalid_top_with_destination()
         with pytest.raises(ValueError) as exc_info:
             AuthSettingsMoveModel(**data)
         assert "Destination should not be provided" in str(exc_info.value)
-    
+
     def test_move_model_bottom_with_destination(self):
         """Test validation when destination is provided for bottom move."""
         data = {

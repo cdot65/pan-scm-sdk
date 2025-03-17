@@ -28,9 +28,7 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "documentation: Tests ensuring examples in documentation work"
     )
-    config.addinivalue_line(
-        "markers", "e2e: End-to-end tests that validate complete workflows"
-    )
+    config.addinivalue_line("markers", "e2e: End-to-end tests that validate complete workflows")
     config.addinivalue_line(
         "markers", "real_api: Tests that interact with the real API (requires credentials)"
     )

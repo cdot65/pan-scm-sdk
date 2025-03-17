@@ -1,19 +1,19 @@
 """Tests for the InternalDnsServers service class."""
 
 import uuid
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from scm.client import Scm
 from scm.config.deployment.internal_dns_servers import InternalDnsServers
-from scm.models.deployment.internal_dns_servers import (
-    InternalDnsServersCreateModel,
-    InternalDnsServersUpdateModel,
-    InternalDnsServersResponseModel,
-)
 from scm.exceptions import (
     InvalidObjectError,
     MissingQueryParameterError,
+)
+from scm.models.deployment.internal_dns_servers import (
+    InternalDnsServersUpdateModel,
+    InternalDnsServersResponseModel,
 )
 
 
@@ -107,7 +107,7 @@ class TestInternalDnsServers:
             "name": "test-dns-server",
             "domain_name": ["example.com", "test.com"],
             "primary": "192.168.1.1",
-            "secondary": "8.8.8.8"
+            "secondary": "8.8.8.8",
         }
 
         result = dns_servers.create(data)
@@ -128,13 +128,13 @@ class TestInternalDnsServers:
         assert result.id == uuid.UUID(sample_dns_server_id)
         assert result.name == "test-dns-server"
 
-    def test_update(self, dns_servers, api_client, sample_dns_server_id, sample_dns_server_response):
+    def test_update(
+        self, dns_servers, api_client, sample_dns_server_id, sample_dns_server_response
+    ):
         """Test updating a DNS server."""
         api_client.put.return_value = sample_dns_server_response
         dns_server = InternalDnsServersUpdateModel(
-            id=sample_dns_server_id,
-            name="updated-dns-server",
-            domain_name=["updated.com"]
+            id=sample_dns_server_id, name="updated-dns-server", domain_name=["updated.com"]
         )
 
         result = dns_servers.update(dns_server)
@@ -158,11 +158,11 @@ class TestInternalDnsServers:
                     "name": "server2",
                     "domain_name": ["example2.com"],
                     "primary": "192.168.1.2",
-                }
+                },
             ],
             "limit": 2500,
             "offset": 0,
-            "total": 2
+            "total": 2,
         }
         api_client.get.return_value = mock_response
 
@@ -176,26 +176,35 @@ class TestInternalDnsServers:
         """Test listing DNS servers with pagination."""
         # First page
         first_response = {
-            "data": [{"id": str(uuid.uuid4()), "name": "server1", "domain_name": ["example1.com"], "primary": "192.168.1.1"}],
+            "data": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "server1",
+                    "domain_name": ["example1.com"],
+                    "primary": "192.168.1.1",
+                }
+            ],
             "limit": 1,
             "offset": 0,
-            "total": 2
+            "total": 2,
         }
         # Second page - make sure offset is correct
         second_response = {
-            "data": [{"id": str(uuid.uuid4()), "name": "server2", "domain_name": ["example2.com"], "primary": "192.168.1.2"}],
+            "data": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "server2",
+                    "domain_name": ["example2.com"],
+                    "primary": "192.168.1.2",
+                }
+            ],
             "limit": 1,
             "offset": 1,
-            "total": 2
+            "total": 2,
         }
         # Empty third page to signal the end
-        third_response = {
-            "data": [],
-            "limit": 1,
-            "offset": 2,
-            "total": 2
-        }
-        
+        third_response = {"data": [], "limit": 1, "offset": 2, "total": 2}
+
         api_client.get.side_effect = [first_response, second_response, third_response]
         dns_servers._max_limit = 1  # Set small limit to force pagination
 
@@ -255,12 +264,12 @@ class TestInternalDnsServers:
         # Check the actual attributes instead of string representation
         assert error.message == "Field 'name' cannot be empty"
         assert error.details == {"field": "name", "error": '"name" is not allowed to be empty'}
-        
+
     def test_fetch_response_not_dict(self, dns_servers, api_client):
         """Test fetch with response that is not a dictionary."""
         # Set the API client to return a non-dictionary value
         api_client.get.return_value = "not a dictionary"
-        
+
         with pytest.raises(InvalidObjectError) as exc_info:
             dns_servers.fetch("test-dns-server")
         error = exc_info.value
@@ -307,7 +316,7 @@ class TestInternalDnsServers:
         sample_response_with_data = {"data": [sample_dns_server_response, second_response]}
         api_client.get.return_value = sample_response_with_data
 
-        with patch.object(dns_servers, 'logger') as mock_logger:
+        with patch.object(dns_servers, "logger") as mock_logger:
             result = dns_servers.fetch("test-dns-server")
             mock_logger.warning.assert_called_once()
 

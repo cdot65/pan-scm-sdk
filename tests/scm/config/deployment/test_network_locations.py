@@ -1,7 +1,6 @@
 # tests/scm/config/deployment/test_network_locations.py
 
 # Standard library imports
-import logging
 from unittest.mock import MagicMock, patch
 
 # External libraries
@@ -129,9 +128,7 @@ class TestNetworkLocationsFilters(TestNetworkLocationsBase):
 
     def test_apply_filters_value_list(self, sample_locations):
         """Test _apply_filters with value filter as list."""
-        result = self.client._apply_filters(
-            sample_locations, {"value": ["us-west-1", "us-east-1"]}
-        )
+        result = self.client._apply_filters(sample_locations, {"value": ["us-west-1", "us-east-1"]})
         assert len(result) == 2
         assert {loc.value for loc in result} == {"us-west-1", "us-east-1"}
 
@@ -148,9 +145,7 @@ class TestNetworkLocationsFilters(TestNetworkLocationsBase):
 
     def test_apply_filters_display_list(self, sample_locations):
         """Test _apply_filters with display filter as list."""
-        result = self.client._apply_filters(
-            sample_locations, {"display": ["US West", "US East"]}
-        )
+        result = self.client._apply_filters(sample_locations, {"display": ["US West", "US East"]})
         assert len(result) == 2
         assert {loc.display for loc in result} == {"US West", "US East"}
 
@@ -167,9 +162,7 @@ class TestNetworkLocationsFilters(TestNetworkLocationsBase):
 
     def test_apply_filters_region_list(self, sample_locations):
         """Test _apply_filters with region filter as list."""
-        result = self.client._apply_filters(
-            sample_locations, {"region": ["us-west2", "us-east4"]}
-        )
+        result = self.client._apply_filters(sample_locations, {"region": ["us-west2", "us-east4"]})
         assert len(result) == 2
         assert {loc.region for loc in result} == {"us-west2", "us-east4"}
 
@@ -180,9 +173,7 @@ class TestNetworkLocationsFilters(TestNetworkLocationsBase):
 
     def test_apply_filters_continent_string(self, sample_locations):
         """Test _apply_filters with continent filter as string."""
-        result = self.client._apply_filters(
-            sample_locations, {"continent": "North America"}
-        )
+        result = self.client._apply_filters(sample_locations, {"continent": "North America"})
         assert len(result) == 2
         assert all(loc.continent == "North America" for loc in result)
 
@@ -201,9 +192,7 @@ class TestNetworkLocationsFilters(TestNetworkLocationsBase):
 
     def test_apply_filters_aggregate_region_string(self, sample_locations):
         """Test _apply_filters with aggregate_region filter as string."""
-        result = self.client._apply_filters(
-            sample_locations, {"aggregate_region": "us-southwest"}
-        )
+        result = self.client._apply_filters(sample_locations, {"aggregate_region": "us-southwest"})
         assert len(result) == 1
         assert result[0].aggregate_region == "us-southwest"
 
@@ -235,9 +224,7 @@ class TestNetworkLocationsFilters(TestNetworkLocationsBase):
 
     def test_apply_filters_case_insensitive(self, sample_locations):
         """Test _apply_filters case insensitivity."""
-        result = self.client._apply_filters(
-            sample_locations, {"continent": "north america"}
-        )
+        result = self.client._apply_filters(sample_locations, {"continent": "north america"})
         assert len(result) == 2
         assert all(loc.continent == "North America" for loc in result)
 
@@ -286,7 +273,7 @@ class TestNetworkLocationsList(TestNetworkLocationsBase):
         """Test list method success."""
         self.mock_scm.get.return_value = sample_api_response
         result = self.client.list()
-        
+
         self.mock_scm.get.assert_called_once_with(
             NetworkLocations.ENDPOINT,
         )
@@ -350,7 +337,7 @@ class TestNetworkLocationsFetch(TestNetworkLocationsBase):
         """Test fetch method success."""
         self.mock_scm.get.return_value = sample_api_response
         result = self.client.fetch("us-west-1")
-        
+
         self.mock_scm.get.assert_called_once_with(
             NetworkLocations.ENDPOINT,
         )
@@ -396,7 +383,7 @@ class TestNetworkLocationsFetch(TestNetworkLocationsBase):
         ]
         self.mock_scm.get.return_value = duplicate_locations
         result = self.client.fetch("duplicate-value")
-        
+
         assert result.value == "duplicate-value"
         assert result.display == "Display 1"  # First match should be returned
         mock_warning.assert_called_once()
