@@ -1,5 +1,8 @@
 # scm/models/deployment/__init__.py
 
+from .agent_versions import (
+    AgentVersionsModel,
+)
 from .auth_settings import (
     OperatingSystem,
     AuthSettingsBaseModel,
@@ -18,4 +21,5 @@ __all__ = [
     "AuthSettingsResponseModel",
     "AuthSettingsMoveModel",
     "MovePosition",
+    "AgentVersionsModel",
 ]

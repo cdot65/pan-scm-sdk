@@ -363,6 +363,10 @@ class Scm:
                 "scm.config.objects.address_group",
                 "AddressGroup",
             ),
+            "agent_versions": (
+                "scm.config.mobile_agent.agent_versions",
+                "AgentVersions",
+            ),
             "anti_spyware_profile": (
                 "scm.config.security.anti_spyware_profile",
                 "AntiSpywareProfile",

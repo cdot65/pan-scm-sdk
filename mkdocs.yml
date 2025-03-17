@@ -1,5 +1,3 @@
-# mkdocs.yml
-
 site_name: Strata Cloud Manager SDK Documentation
 site_description: Python SDK for Palo Alto Networks Strata Cloud Manager.
 site_url: https://cdot65.github.io/pan-scm-sdk/
@@ -45,6 +43,7 @@ nav:
           - Mobile Agent:
               - Overview: sdk/config/mobile_agent/index.md
               - Authentication Settings: sdk/config/mobile_agent/auth_settings.md
+              - Agent Versions: sdk/config/mobile_agent/agent_versions.md
           - Network:
               - Overview: sdk/config/network/index.md
               - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
@@ -93,6 +92,7 @@ nav:
           - Mobile Agent:
               - Overview: sdk/models/mobile_agent/index.md
               - Authentication Settings Models: sdk/models/mobile_agent/auth_settings_models.md
+              - Agent Versions Models: sdk/models/mobile_agent/agent_versions_models.md
           - Network:
               - Overview: sdk/models/network/index.md
               - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md
