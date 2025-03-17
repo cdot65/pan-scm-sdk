@@ -82,7 +82,6 @@ class AuthSettingsResponseModelFactory(Factory):
     class Meta:
         model = AuthSettingsResponseModel
         
-    id = LazyFunction(lambda: uuid.uuid4())
     name = Faker('pystr', min_chars=5, max_chars=30)
     authentication_profile = Faker('pystr', min_chars=5, max_chars=30)
     os = factory.fuzzy.FuzzyChoice(list(OperatingSystem))
@@ -96,7 +95,6 @@ class AuthSettingsUpdateModelFactory(Factory):
     class Meta:
         model = AuthSettingsUpdateModel
         
-    id = LazyFunction(lambda: uuid.uuid4())
     name = Faker('pystr', min_chars=5, max_chars=30)
     authentication_profile = Faker('pystr', min_chars=5, max_chars=30)
     os = factory.fuzzy.FuzzyChoice(list(OperatingSystem))
@@ -108,7 +106,6 @@ class AuthSettingsUpdateModelFactory(Factory):
         """Build valid data for AuthSettingsUpdateModel."""
         model = cls.build()
         return {
-            "id": str(model.id),
             "name": model.name,
             "authentication_profile": model.authentication_profile,
             "os": model.os,
@@ -120,7 +117,6 @@ class AuthSettingsUpdateModelFactory(Factory):
     def build_minimal_update(cls):
         """Build minimal update data for AuthSettingsUpdateModel."""
         return {
-            "id": str(uuid.uuid4()),
             "authentication_profile": fake.pystr(min_chars=5, max_chars=30),
         }
     

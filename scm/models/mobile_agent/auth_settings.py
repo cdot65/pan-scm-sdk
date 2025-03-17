@@ -68,8 +68,8 @@ class AuthSettingsBaseModel(BaseModel):
         default=OperatingSystem.ANY,
         description="The operating system this authentication setting applies to",
     )
-    user_credential_or_client_cert_required: bool = Field(
-        ...,
+    user_credential_or_client_cert_required: Optional[bool] = Field(
+        None,
         description="Whether user credentials or client certificate is required",
     )
 
@@ -113,11 +113,10 @@ class AuthSettingsUpdateModel(BaseModel):
     """
     Represents the update of an existing GlobalProtect Authentication Settings.
 
-    This class defines the structure and validation rules for updating authentication settings,
-    requiring the UUID of the existing resource. Only fields that need to be updated can be provided.
+    This class defines the structure and validation rules for updating authentication settings.
+    Only fields that need to be updated can be provided.
 
     Attributes:
-        id (UUID): The UUID of the authentication settings.
         name (Optional[str]): The name of the authentication settings.
         authentication_profile (Optional[str]): The authentication profile to use.
         os (Optional[OperatingSystem]): The operating system this authentication setting applies to.
@@ -130,13 +129,6 @@ class AuthSettingsUpdateModel(BaseModel):
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
-    )
-
-    # Required ID field
-    id: UUID = Field(
-        ...,
-        description="The UUID of the authentication settings",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
 
     # Optional fields for update
@@ -178,18 +170,8 @@ class AuthSettingsResponseModel(AuthSettingsBaseModel):
     """
     Represents the response model for GlobalProtect Authentication Settings.
 
-    This class defines the structure for authentication settings returned by the API,
-    including the UUID of the resource.
-
-    Attributes:
-        id (UUID): The UUID of the authentication settings.
+    This class defines the structure for authentication settings returned by the API.
     """
-
-    id: UUID = Field(
-        ...,
-        description="The UUID of the authentication settings",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
 
 
 class MovePosition(str, Enum):
