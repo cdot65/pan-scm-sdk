@@ -1,0 +1,459 @@
+# GlobalProtect Authentication Settings
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Authentication Settings Model Attributes](#authentication-settings-model-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Authentication Settings](#creating-authentication-settings)
+    - [Retrieving Authentication Settings](#retrieving-authentication-settings)
+    - [Updating Authentication Settings](#updating-authentication-settings)
+    - [Listing Authentication Settings](#listing-authentication-settings)
+    - [Ordering Authentication Settings](#ordering-authentication-settings)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
+    - [Deleting Authentication Settings](#deleting-authentication-settings)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#full-script-examples)
+11. [Related Models](#related-models)
+
+## Overview
+
+The `AuthSettings` class provides functionality to manage GlobalProtect authentication settings in Palo Alto Networks' Strata Cloud Manager. This
+class inherits from `BaseObject` and provides methods for creating, retrieving, updating, deleting, and reordering authentication settings objects
+for GlobalProtect mobile agent configurations.
+
+## Core Methods
+
+| Method      | Description                                | Parameters                         | Return Type                   |
+|-------------|--------------------------------------------|------------------------------------|------------------------------ |
+| `create()`  | Creates a new authentication settings      | `data: Dict[str, Any]`            | `AuthSettingsResponseModel`   |
+| `get()`     | Retrieves settings by ID                   | `object_id: str`                  | `AuthSettingsResponseModel`   |
+| `update()`  | Updates existing settings                  | `object_id: str, data: Dict[str, Any]` | `AuthSettingsResponseModel` |
+| `delete()`  | Deletes authentication settings            | `object_id: str`                  | `None`                        |
+| `list()`    | Lists settings with filtering              | `folder: str`, `**filters`        | `List[AuthSettingsResponseModel]` |
+| `fetch()`   | Gets settings by name and folder           | `name: str`, `folder: str`        | `AuthSettingsResponseModel`   |
+| `move()`    | Reorders authentication settings           | `move_data: Dict[str, Any]`       | `None`                        |
+
+## Authentication Settings Model Attributes
+
+| Attribute                               | Type               | Required     | Description                                               |
+|-----------------------------------------|--------------------|--------------|-----------------------------------------------------------|
+| `name`                                  | str                | Yes          | Name of the authentication settings (max 63 chars)        |
+| `authentication_profile`                | str                | Yes          | Name of the authentication profile to use                  |
+| `os`                                    | OperatingSystem    | No           | Target operating system (defaults to "Any")               |
+| `user_credential_or_client_cert_required` | bool             | No           | Whether user credentials or client certificate is required |
+| `folder`                                | str                | Yes          | Must be "Mobile Users" for all operations                 |
+
+## Exceptions
+
+| Exception                    | HTTP Code | Description                                   |
+|------------------------------|-----------|-----------------------------------------------|
+| `InvalidObjectError`         | 400       | Invalid settings data or format               |
+| `MissingQueryParameterError` | 400       | Missing required parameters                   |
+| `NameNotUniqueError`         | 409       | Authentication settings name already exists   |
+| `ObjectNotPresentError`      | 404       | Authentication settings not found             |
+| `AuthenticationError`        | 401       | Authentication failed                         |
+| `ServerError`                | 500       | Internal server error                         |
+
+## Basic Configuration
+
+The AuthSettings service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the AuthSettings service directly through the client
+# No need to create a separate AuthSettings instance
+auth_settings = client.auth_settings
+```
+
+</div>
+
+### Traditional Service Instantiation (Legacy)
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import Scm
+from scm.config.mobile_agent import AuthSettings
+
+# Initialize client
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Initialize AuthSettings object explicitly
+auth_settings = AuthSettings(client)
+```
+
+</div>
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
+
+## Usage Examples
+
+### Creating Authentication Settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Prepare authentication settings configuration
+auth_settings_config = {
+   "name": "windows_auth",
+   "authentication_profile": "windows-sso-profile",
+   "os": "Windows",
+   "user_credential_or_client_cert_required": True,
+   "folder": "Mobile Users"  # Must be "Mobile Users"
+}
+
+# Create the authentication settings
+new_auth_settings = client.auth_settings.create(auth_settings_config)
+print(f"Created authentication settings: {new_auth_settings.name}")
+
+# Another example for a different operating system
+ios_auth_config = {
+   "name": "ios_auth",
+   "authentication_profile": "mobile-cert-auth",
+   "os": "iOS",
+   "user_credential_or_client_cert_required": False,
+   "folder": "Mobile Users"
+}
+
+# Create iOS authentication settings
+ios_auth_settings = client.auth_settings.create(ios_auth_config)
+```
+
+</div>
+
+### Retrieving Authentication Settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Fetch by name and folder (folder must be "Mobile Users")
+auth_settings = client.auth_settings.fetch(name="windows_auth", folder="Mobile Users")
+print(f"Found authentication settings: {auth_settings.name}")
+
+# Get by ID
+auth_settings_by_id = client.auth_settings.get(auth_settings.id)
+print(f"Retrieved authentication settings: {auth_settings_by_id.name}")
+```
+
+</div>
+
+### Updating Authentication Settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Prepare update data
+update_data = {
+    "name": "windows_auth_updated",
+    "authentication_profile": "updated-profile",
+    "user_credential_or_client_cert_required": False
+}
+
+# Get the existing settings
+auth_settings = client.auth_settings.fetch(name="windows_auth", folder="Mobile Users")
+
+# Update the settings
+updated_settings = client.auth_settings.update(auth_settings.id, update_data)
+print(f"Updated authentication settings: {updated_settings.name}")
+```
+
+</div>
+
+### Listing Authentication Settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# List all authentication settings (always from "Mobile Users" folder)
+all_settings = client.auth_settings.list()
+
+# Process results
+for setting in all_settings:
+    print(f"Name: {setting.name}, OS: {setting.os}, Profile: {setting.authentication_profile}")
+```
+
+</div>
+
+### Ordering Authentication Settings
+
+The GlobalProtect authentication settings evaluation order is important, as settings are evaluated from top to bottom. The `move()` method allows you to reorder authentication settings in the configuration.
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Move a settings entry to the top of the list
+top_move_config = {
+    "name": "windows_auth",
+    "where": "top"
+}
+client.auth_settings.move(top_move_config)
+
+# Move a settings entry to the bottom of the list
+bottom_move_config = {
+    "name": "android_auth",
+    "where": "bottom"
+}
+client.auth_settings.move(bottom_move_config)
+
+# Move a settings entry before another entry
+before_move_config = {
+    "name": "ios_auth",
+    "where": "before",
+    "destination": "android_auth"
+}
+client.auth_settings.move(before_move_config)
+
+# Move a settings entry after another entry
+after_move_config = {
+    "name": "browser_auth",
+    "where": "after",
+    "destination": "ios_auth"
+}
+client.auth_settings.move(after_move_config)
+```
+
+</div>
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. 
+
+**Example:**
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+from scm.config.mobile_agent import AuthSettings
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+# Two options for setting max_limit:
+
+# Option 1: Create a custom AuthSettings instance with max_limit
+auth_settings_service = AuthSettings(client, max_limit=1000)
+all_settings1 = auth_settings_service.list()
+
+# Option 2: Use the unified client interface directly (uses default max_limit of 2500)
+all_settings2 = client.auth_settings.list()
+```
+
+</div>
+
+### Deleting Authentication Settings
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get the authentication settings
+auth_settings = client.auth_settings.fetch(name="windows_auth", folder="Mobile Users")
+
+# Delete the settings by ID
+client.auth_settings.delete(auth_settings.id)
+print(f"Deleted authentication settings: {auth_settings.name}")
+```
+
+</div>
+
+## Managing Configuration Changes
+
+### Performing Commits
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Prepare commit parameters
+commit_params = {
+   "folders": ["Mobile Users"],
+   "description": "Updated GlobalProtect authentication settings",
+   "sync": True,
+   "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes
+result = client.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
+```
+
+</div>
+
+### Monitoring Jobs
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+# Get status of specific job
+job_status = client.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs
+recent_jobs = client.list_jobs(limit=10)
+for job in recent_jobs.data:
+     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
+```
+
+</div>
+
+## Error Handling
+
+<div class="termy">
+
+<!-- termynal -->
+
+```python
+from scm.client import ScmClient
+from scm.exceptions import (
+   InvalidObjectError,
+   MissingQueryParameterError,
+   NameNotUniqueError,
+   ObjectNotPresentError
+)
+
+# Initialize client
+client = ScmClient(
+   client_id="your_client_id",
+   client_secret="your_client_secret",
+   tsg_id="your_tsg_id"
+)
+
+try:
+   # Create authentication settings
+   auth_settings_config = {
+      "name": "windows_auth",
+      "authentication_profile": "windows-sso-profile",
+      "os": "Windows",
+      "user_credential_or_client_cert_required": True,
+      "folder": "Mobile Users"
+   }
+   
+   new_auth_settings = client.auth_settings.create(auth_settings_config)
+   
+   # Commit changes
+   result = client.commit(
+      folders=["Mobile Users"],
+      description="Added GlobalProtect authentication settings",
+      sync=True
+   )
+   
+   # Check job status
+   status = client.get_job_status(result.job_id)
+
+except InvalidObjectError as e:
+   print(f"Invalid authentication settings data: {e.message}")
+except NameNotUniqueError as e:
+   print(f"Authentication settings name already exists: {e.message}")
+except ObjectNotPresentError as e:
+   print(f"Authentication settings not found: {e.message}")
+except MissingQueryParameterError as e:
+   print(f"Missing parameter: {e.message}")
+```
+
+</div>
+
+## Best Practices
+
+1. **Client Usage**
+    - Use the unified client interface (`client.auth_settings`) for streamlined code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
+    - For custom max_limit settings, create a dedicated service instance if needed
+
+2. **Folder Management**
+    - Always use "Mobile Users" as the folder for authentication settings
+    - Remember that the folder is required for create operations
+
+3. **Error Handling**
+    - Implement comprehensive error handling for all operations
+    - Check job status after commits
+    - Handle specific exceptions before generic ones
+    - Log error details for troubleshooting
+
+4. **Authentication Order**
+    - Consider the evaluation order of authentication settings
+    - Use the move() method to ensure proper ordering of settings
+    - Place more specific OS settings before more general ones
+
+5. **Performance**
+    - Reuse client instances
+    - Implement proper retry mechanisms
+    - Cache frequently accessed objects
+
+6. **Security**
+    - Follow the least privilege principle
+    - Validate input data
+    - Use secure connection settings
+    - Implement proper authentication handling
+
+## Full Script Examples
+
+Refer to
+the [auth_settings.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/mobile_agent/auth_settings.py).
+
+## Related Models
+
+- [AuthSettingsCreateModel](../../models/mobile_agent/auth_settings_models.md#Overview)
+- [AuthSettingsUpdateModel](../../models/mobile_agent/auth_settings_models.md#Overview)
+- [AuthSettingsResponseModel](../../models/mobile_agent/auth_settings_models.md#Overview)
+- [AuthSettingsMoveModel](../../models/mobile_agent/auth_settings_models.md#Overview)
