@@ -2,7 +2,7 @@
 
 # Standard library imports
 from enum import Enum
-from typing import Optional, List
+from typing import Optional
 from uuid import UUID
 
 # External libraries
