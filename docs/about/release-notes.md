@@ -2,6 +2,18 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.21
+
+**Released:** March 16, 2025
+
+### Added
+
+- **Prisma Access Features**:
+  - **Bandwidth Allocations**: Support for managing bandwidth allocation across service provider networks (SPNs)
+  - **BGP Routing**: Support for configuring and managing BGP routing
+  - **Internal DNS Servers**: Support for configuring internal DNS servers
+  - **Network Locations**: Support for managing network locations
+
 ## Version 0.3.20
 
 **Released:** March 13, 2025
