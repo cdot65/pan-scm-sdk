@@ -30,23 +30,23 @@ The `BandwidthAllocations` class provides functionality to manage bandwidth allo
 
 ## Core Methods
 
-| Method     | Description                        | Parameters                                 | Return Type                           |
-|------------|------------------------------------|--------------------------------------------|-----------------------------------------|
-| `create()` | Creates a new bandwidth allocation | `data: Dict[str, Any]`                     | `BandwidthAllocationResponseModel`       |
-| `get()`    | Retrieves an allocation by name    | `name: str`                                | `BandwidthAllocationResponseModel`       |
-| `update()` | Updates an existing allocation     | `data: Dict[str, Any]`                     | `BandwidthAllocationResponseModel`       |
-| `delete()` | Deletes an allocation              | `name: str`, `spn_name_list: str`          | `None`                                   |
-| `list()`   | Lists allocations with filtering   | `**filters`                                | `List[BandwidthAllocationResponseModel]` |
-| `fetch()`  | Gets allocation by name            | `name: str`                                | `BandwidthAllocationResponseModel`       |
+| Method     | Description                        | Parameters                        | Return Type                              |
+|------------|------------------------------------|-----------------------------------|------------------------------------------|
+| `create()` | Creates a new bandwidth allocation | `data: Dict[str, Any]`            | `BandwidthAllocationResponseModel`       |
+| `get()`    | Retrieves an allocation by name    | `name: str`                       | `BandwidthAllocationResponseModel`       |
+| `update()` | Updates an existing allocation     | `data: Dict[str, Any]`            | `BandwidthAllocationResponseModel`       |
+| `delete()` | Deletes an allocation              | `name: str`, `spn_name_list: str` | `None`                                   |
+| `list()`   | Lists allocations with filtering   | `**filters`                       | `List[BandwidthAllocationResponseModel]` |
+| `fetch()`  | Gets allocation by name            | `name: str`                       | `BandwidthAllocationResponseModel`       |
 
 ## Bandwidth Allocation Model Attributes
 
-| Attribute              | Type          | Required | Description                                   |
-|------------------------|---------------|----------|----------------------------------------------|
-| `name`                 | str           | Yes      | Name of the bandwidth allocation region       |
-| `allocated_bandwidth`  | int           | Yes      | Bandwidth amount in Mbps                     |
-| `spn_name_list`        | List[str]     | Yes      | List of service provider network names       |
-| `qos`                  | QoSModel      | No       | Quality of Service settings                   |
+| Attribute             | Type      | Required | Description                             |
+|-----------------------|-----------|----------|-----------------------------------------|
+| `name`                | str       | Yes      | Name of the bandwidth allocation region |
+| `allocated_bandwidth` | int       | Yes      | Bandwidth amount in Mbps                |
+| `spn_name_list`       | List[str] | Yes      | List of service provider network names  |
+| `qos`                 | QoSModel  | No       | Quality of Service settings             |
 
 ### QoS Model Attributes
 

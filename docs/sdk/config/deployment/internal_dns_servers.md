@@ -26,14 +26,14 @@ The `InternalDnsServers` class provides functionality to manage internal DNS ser
 
 ## Core Methods
 
-| Method     | Description                              | Parameters                                 | Return Type                          |
-|------------|------------------------------------------|--------------------------------------------|------------------------------------- |
-| `create()` | Creates a new internal DNS server object | `data: Dict[str, Any]`                     | `InternalDnsServersResponseModel`    |
-| `get()`    | Retrieves a DNS server by ID             | `object_id: str`                           | `InternalDnsServersResponseModel`    |
-| `update()` | Updates an existing DNS server           | `dns_server: InternalDnsServersUpdateModel`| `InternalDnsServersResponseModel`    |
-| `delete()` | Deletes a DNS server                     | `object_id: str`                           | `None`                               |
-| `list()`   | Lists DNS servers with filtering         | `name: str`, `**filters`                   | `List[InternalDnsServersResponseModel]` |
-| `fetch()`  | Gets DNS server by name                  | `name: str`                                | `InternalDnsServersResponseModel`    |
+| Method     | Description                              | Parameters                                  | Return Type                             |
+|------------|------------------------------------------|---------------------------------------------|-----------------------------------------|
+| `create()` | Creates a new internal DNS server object | `data: Dict[str, Any]`                      | `InternalDnsServersResponseModel`       |
+| `get()`    | Retrieves a DNS server by ID             | `object_id: str`                            | `InternalDnsServersResponseModel`       |
+| `update()` | Updates an existing DNS server           | `dns_server: InternalDnsServersUpdateModel` | `InternalDnsServersResponseModel`       |
+| `delete()` | Deletes a DNS server                     | `object_id: str`                            | `None`                                  |
+| `list()`   | Lists DNS servers with filtering         | `name: str`, `**filters`                    | `List[InternalDnsServersResponseModel]` |
+| `fetch()`  | Gets DNS server by name                  | `name: str`                                 | `InternalDnsServersResponseModel`       |
 
 ## Internal DNS Servers Model Attributes
 

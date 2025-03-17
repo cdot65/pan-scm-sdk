@@ -30,31 +30,31 @@ The `SecurityZone` class manages security zone objects in Palo Alto Networks' St
 
 ## Core Methods
 
-| Method     | Description                                                  | Parameters                                                                                                                                                | Return Type                      |
-|------------|--------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| `create()` | Creates a new security zone object                           | `data: Dict[str, Any]`                                                                                                                                     | `SecurityZoneResponseModel`       |
-| `get()`    | Retrieves a security zone object by its unique ID            | `object_id: str`                                                                                                                                          | `SecurityZoneResponseModel`       |
-| `update()` | Updates an existing security zone object                     | `zone: SecurityZoneUpdateModel`                                                                                                                           | `SecurityZoneResponseModel`       |
-| `list()`   | Lists security zone objects with optional filtering          | `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`, `exact_match: bool = False`, plus additional filters                          | `List[SecurityZoneResponseModel]` |
-| `fetch()`  | Fetches a single security zone by its name within a container| `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                                                    | `SecurityZoneResponseModel`       |
-| `delete()` | Deletes a security zone object by its ID                     | `object_id: str`                                                                                                                                          | `None`                           |
+| Method     | Description                                                   | Parameters                                                                                                                       | Return Type                       |
+|------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| `create()` | Creates a new security zone object                            | `data: Dict[str, Any]`                                                                                                           | `SecurityZoneResponseModel`       |
+| `get()`    | Retrieves a security zone object by its unique ID             | `object_id: str`                                                                                                                 | `SecurityZoneResponseModel`       |
+| `update()` | Updates an existing security zone object                      | `zone: SecurityZoneUpdateModel`                                                                                                  | `SecurityZoneResponseModel`       |
+| `list()`   | Lists security zone objects with optional filtering           | `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`, `exact_match: bool = False`, plus additional filters | `List[SecurityZoneResponseModel]` |
+| `fetch()`  | Fetches a single security zone by its name within a container | `name: str`, `folder: Optional[str]`, `snippet: Optional[str]`, `device: Optional[str]`                                          | `SecurityZoneResponseModel`       |
+| `delete()` | Deletes a security zone object by its ID                      | `object_id: str`                                                                                                                 | `None`                            |
 
 ## Security Zone Model Attributes
 
-| Attribute                   | Type                 | Required      | Description                                                |
-|-----------------------------|--------------------- |---------------|------------------------------------------------------------|
-| `name`                      | str                  | Yes           | The name of the security zone                              |
-| `id`                        | UUID                 | Yes*          | Unique identifier (response only)                          |
-| `enable_user_identification`| bool                 | No            | Enables user identification                                |
-| `enable_device_identification`| bool               | No            | Enables device identification                              |
-| `dos_profile`               | str                  | No            | Denial of Service profile name                             |
-| `dos_log_setting`           | str                  | No            | DoS log setting name                                       |
-| `network`                   | NetworkConfig        | No            | Network configuration for the zone                         |
-| `user_acl`                  | UserAcl              | No            | User access control list configuration                     |
-| `device_acl`                | DeviceAcl            | No            | Device access control list configuration                   |
-| `folder`                    | str                  | Conditionally | The folder container where the security zone is defined    |
-| `snippet`                   | str                  | Conditionally | The snippet container (if applicable)                      |
-| `device`                    | str                  | Conditionally | The device container (if applicable)                       |
+| Attribute                      | Type          | Required      | Description                                             |
+|--------------------------------|---------------|---------------|---------------------------------------------------------|
+| `name`                         | str           | Yes           | The name of the security zone                           |
+| `id`                           | UUID          | Yes*          | Unique identifier (response only)                       |
+| `enable_user_identification`   | bool          | No            | Enables user identification                             |
+| `enable_device_identification` | bool          | No            | Enables device identification                           |
+| `dos_profile`                  | str           | No            | Denial of Service profile name                          |
+| `dos_log_setting`              | str           | No            | DoS log setting name                                    |
+| `network`                      | NetworkConfig | No            | Network configuration for the zone                      |
+| `user_acl`                     | UserAcl       | No            | User access control list configuration                  |
+| `device_acl`                   | DeviceAcl     | No            | Device access control list configuration                |
+| `folder`                       | str           | Conditionally | The folder container where the security zone is defined |
+| `snippet`                      | str           | Conditionally | The snippet container (if applicable)                   |
+| `device`                       | str           | Conditionally | The device container (if applicable)                    |
 
 *\* The `id` field is assigned by the system and is only present in response objects.*
 

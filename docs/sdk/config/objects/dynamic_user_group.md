@@ -28,14 +28,14 @@ The `DynamicUserGroup` class provides functionality to manage dynamic user group
 
 ## Core Methods
 
-| Method     | Description                                | Parameters                                  | Return Type                            |
-|------------|--------------------------------------------|---------------------------------------------|----------------------------------------|
-| `create()` | Creates a new dynamic user group object    | `data: Dict[str, Any]`                      | `DynamicUserGroupResponseModel`        |
-| `get()`    | Retrieves a dynamic user group by ID       | `object_id: str`                            | `DynamicUserGroupResponseModel`        |
-| `update()` | Updates an existing dynamic user group     | `dynamic_user_group: DynamicUserGroupUpdateModel` | `DynamicUserGroupResponseModel`  |
-| `delete()` | Deletes a dynamic user group               | `object_id: str`                            | `None`                                 |
-| `list()`   | Lists dynamic user groups with filtering   | `folder: str`, `**filters`                  | `List[DynamicUserGroupResponseModel]`  |
-| `fetch()`  | Gets dynamic user group by name and container | `name: str`, `folder: str`              | `DynamicUserGroupResponseModel`        |
+| Method     | Description                                   | Parameters                                        | Return Type                           |
+|------------|-----------------------------------------------|---------------------------------------------------|---------------------------------------|
+| `create()` | Creates a new dynamic user group object       | `data: Dict[str, Any]`                            | `DynamicUserGroupResponseModel`       |
+| `get()`    | Retrieves a dynamic user group by ID          | `object_id: str`                                  | `DynamicUserGroupResponseModel`       |
+| `update()` | Updates an existing dynamic user group        | `dynamic_user_group: DynamicUserGroupUpdateModel` | `DynamicUserGroupResponseModel`       |
+| `delete()` | Deletes a dynamic user group                  | `object_id: str`                                  | `None`                                |
+| `list()`   | Lists dynamic user groups with filtering      | `folder: str`, `**filters`                        | `List[DynamicUserGroupResponseModel]` |
+| `fetch()`  | Gets dynamic user group by name and container | `name: str`, `folder: str`                        | `DynamicUserGroupResponseModel`       |
 
 ## Dynamic User Group Model Attributes
 
@@ -52,15 +52,15 @@ The `DynamicUserGroup` class provides functionality to manage dynamic user group
 
 ## Exceptions
 
-| Exception                    | HTTP Code | Description                             |
-|------------------------------|-----------|----------------------------------------|
+| Exception                    | HTTP Code | Description                               |
+|------------------------------|-----------|-------------------------------------------|
 | `InvalidObjectError`         | 400       | Invalid dynamic user group data or format |
-| `MissingQueryParameterError` | 400       | Missing required parameters             |
-| `NameNotUniqueError`         | 409       | Dynamic user group name already exists  |
-| `ObjectNotPresentError`      | 404       | Dynamic user group not found            |
-| `ReferenceNotZeroError`      | 409       | Dynamic user group still referenced     |
-| `AuthenticationError`        | 401       | Authentication failed                   |
-| `ServerError`                | 500       | Internal server error                   |
+| `MissingQueryParameterError` | 400       | Missing required parameters               |
+| `NameNotUniqueError`         | 409       | Dynamic user group name already exists    |
+| `ObjectNotPresentError`      | 404       | Dynamic user group not found              |
+| `ReferenceNotZeroError`      | 409       | Dynamic user group still referenced       |
+| `AuthenticationError`        | 401       | Authentication failed                     |
+| `ServerError`                | 500       | Internal server error                     |
 
 ## Basic Configuration
 

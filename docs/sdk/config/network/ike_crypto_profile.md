@@ -121,17 +121,17 @@ print("Profile deleted successfully")
 
 ### IKE Crypto Profile Model
 
-| Field | Type | Description | Required |
-|-------|------|-------------|----------|
-| name | string | Profile name (max 31 chars) | Yes |
-| hash | array | Hashing algorithms (md5, sha1, sha256, sha384, sha512) | Yes |
-| encryption | array | Encryption algorithms (des, 3des, aes-128-cbc, aes-192-cbc, aes-256-cbc, aes-128-gcm, aes-256-gcm) | Yes |
-| dh_group | array | DH Groups (group1, group2, group5, group14, group19, group20) | Yes |
-| lifetime | object | Lifetime configuration (seconds, minutes, hours, or days) | No |
-| authentication_multiple | integer | IKEv2 SA reauthentication interval multiplier (0-50) | No |
-| folder | string | The folder containing the profile | No |
-| snippet | string | The snippet containing the profile | No |
-| device | string | The device containing the profile | No |
+| Field                   | Type    | Description                                                                                        | Required |
+|-------------------------|---------|----------------------------------------------------------------------------------------------------|----------|
+| name                    | string  | Profile name (max 31 chars)                                                                        | Yes      |
+| hash                    | array   | Hashing algorithms (md5, sha1, sha256, sha384, sha512)                                             | Yes      |
+| encryption              | array   | Encryption algorithms (des, 3des, aes-128-cbc, aes-192-cbc, aes-256-cbc, aes-128-gcm, aes-256-gcm) | Yes      |
+| dh_group                | array   | DH Groups (group1, group2, group5, group14, group19, group20)                                      | Yes      |
+| lifetime                | object  | Lifetime configuration (seconds, minutes, hours, or days)                                          | No       |
+| authentication_multiple | integer | IKEv2 SA reauthentication interval multiplier (0-50)                                               | No       |
+| folder                  | string  | The folder containing the profile                                                                  | No       |
+| snippet                 | string  | The snippet containing the profile                                                                 | No       |
+| device                  | string  | The device containing the profile                                                                  | No       |
 
 > **Note:** One of `folder`, `snippet`, or `device` must be provided when creating or updating a profile.
 
