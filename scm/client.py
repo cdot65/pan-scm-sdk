@@ -435,6 +435,10 @@ class Scm:
                 "scm.config.network.nat_rules",
                 "NatRule",
             ),
+            "network_location": (
+                "scm.config.deployment.network_locations",
+                "NetworkLocations",
+            ),
             "quarantined_device": (
                 "scm.config.objects.quarantined_devices",
                 "QuarantinedDevices",

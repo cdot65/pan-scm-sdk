@@ -1,0 +1,186 @@
+site_name: Palo Alto Networks Strata Cloud Manager SDK
+site_description: Python SDK to manage Palo Alto Networks Strata Cloud Manager configurations
+site_url: https://cdot65.github.io/pan-scm-sdk/
+repo_url: https://github.com/cdot65/pan-scm-sdk
+repo_name: pan-scm-sdk
+site_dir: site
+copyright: Copyright &copy; 2023-2024 Calvin Remsburg
+
+theme:
+  name: material
+  logo: images/logo.svg
+  favicon: images/logo.svg
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.instant
+    - navigation.tracking
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
+          selection:
+            docstring_style: google
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+
+# Explicitly set the layout for home page with customizations
+not_in_nav: true
+
+extra_css:
+  - css/termynal.css
+  - css/custom.css
+
+extra_javascript:
+  - js/termynal.js
+  - js/custom.js
+
+# Define the navigation menu
+nav:
+  - Home: index.md
+  - About:
+      - Introduction: about/introduction.md
+      - Contributing: about/contributing.md
+      - Changelog: about/changelog.md
+      - License: about/license.md
+  - API Reference:
+      - Client: api/client.md
+      - Config:
+          - Base Object: api/config/base_object.md
+          - Address: api/config/address.md
+  - SDK:
+      - Overview: sdk/index.md
+      - Auth: sdk/auth.md
+      - Client: sdk/client.md
+      - Configuration:
+          - BaseObject: sdk/config/base_object.md
+          - Deployment:
+              - Overview: sdk/config/deployment/index.md
+              - Bandwidth Allocations: sdk/config/deployment/bandwidth_allocations.md
+              - BGP Routing: sdk/config/deployment/bgp_routing.md
+              - Internal DNS Servers: sdk/config/deployment/internal_dns_servers.md
+              - Network Locations: sdk/config/deployment/network_locations.md
+              - Remote Networks: sdk/config/deployment/remote_networks.md
+              - Service Connections: sdk/config/deployment/service_connections.md
+          - Network:
+              - Overview: sdk/config/network/index.md
+              - IKE Crypto Profile: sdk/config/network/ike_crypto_profile.md
+              - IKE Gateway: sdk/config/network/ike_gateway.md
+              - IPsec Crypto Profile: sdk/config/network/ipsec_crypto_profile.md
+              - NAT Rules: sdk/config/network/nat_rules.md
+              - Security Zone: sdk/config/network/security_zone.md
+          - Objects:
+              - Overview: sdk/config/objects/index.md
+              - Address: sdk/config/objects/address.md
+              - Address Group: sdk/config/objects/address_group.md
+              - Application: sdk/config/objects/application.md
+              - Application Filter: sdk/config/objects/application_filters.md
+              - Application Group: sdk/config/objects/application_group.md
+              - Dynamic User Group: sdk/config/objects/dynamic_user_group.md
+              - External Dynamic List: sdk/config/objects/external_dynamic_lists.md
+              - HIP Object: sdk/config/objects/hip_object.md
+              - HIP Profile: sdk/config/objects/hip_profile.md
+              - HTTP Server Profile: sdk/config/objects/http_server_profiles.md
+              - Log Forwarding Profile: sdk/config/objects/log_forwarding_profile.md
+              - Quarantined Device: sdk/config/objects/quarantined_devices.md
+              - Region: sdk/config/objects/region.md
+              - Schedule: sdk/config/objects/schedules.md
+              - Service: sdk/config/objects/service.md
+              - Service Group: sdk/config/objects/service_group.md
+              - Syslog Server Profile: sdk/config/objects/syslog_server_profiles.md
+              - Tag: sdk/config/objects/tag.md
+          - Security:
+              - Overview: sdk/config/security/index.md
+              - Security Rules: sdk/config/security/security_rules.md
+      - Exceptions: sdk/exceptions.md
+      - Models:
+          - Deployment:
+              - Overview: sdk/models/deployment/index.md
+              - Bandwidth Allocations Models: sdk/models/deployment/bandwidth_allocations.md
+              - BGP Routing Models: sdk/models/deployment/bgp_routing_models.md
+              - Internal DNS Servers Models: sdk/models/deployment/internal_dns_servers_models.md
+              - Network Locations Models: sdk/models/deployment/network_locations.md
+              - Remote Networks Models: sdk/models/deployment/remote_networks_models.md
+              - Service Connections Models: sdk/models/deployment/service_connections_models.md
+          - Network:
+              - Overview: sdk/models/network/index.md
+              - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md
+              - IKE Gateway Models: sdk/models/network/ike_gateway_models.md
+              - IPsec Crypto Profile Models: sdk/models/network/ipsec_crypto_profile_models.md
+              - NAT Rules Models: sdk/models/network/nat_rule_models.md
+              - Security Zones Models: sdk/models/network/security_zone_models.md
+          - Objects:
+              - Overview: sdk/models/objects/index.md
+              - Address Models: sdk/models/objects/address_models.md
+              - Address Group Models: sdk/models/objects/address_group_models.md
+              - Application Models: sdk/models/objects/application_models.md
+              - Application Filter Models: sdk/models/objects/application_filters_models.md
+              - Application Group Models: sdk/models/objects/application_group_models.md
+              - Dynamic User Group Models: sdk/models/objects/dynamic_user_group_models.md
+              - External Dynamic List Models: sdk/models/objects/external_dynamic_lists_models.md
+              - HIP Object Models: sdk/models/objects/hip_object_models.md
+              - HIP Profile Models: sdk/models/objects/hip_profile_models.md
+              - HTTP Server Profile Models: sdk/models/objects/http_server_profiles_models.md
+              - Log Forwarding Profile Models: sdk/models/objects/log_forwarding_profile_models.md
+              - Quarantined Device Models: sdk/models/objects/quarantined_devices_models.md
+              - Region Models: sdk/models/objects/region_models.md
+              - Schedule Models: sdk/models/objects/schedules_models.md
+              - Service Models: sdk/models/objects/service_models.md
+              - Service Group Models: sdk/models/objects/service_group_models.md
+              - Syslog Server Profile Models: sdk/models/objects/syslog_server_profiles_models.md
+              - Tag Models: sdk/models/objects/tag_models.md
+          - Operations:
+              - Overview: sdk/models/operations/index.md
+              - Candidate Push Models: sdk/models/operations/candidate_push.md
+              - Jobs Models: sdk/models/operations/jobs.md
+          - Security:
+              - Overview: sdk/models/security/index.md
+              - Security Rules Models: sdk/models/security/security_rule_models.md
+  - User Guide:
+      - Getting Started: guide/getting-started.md
+      - Configuration Objects: guide/configuration-objects.md
+      - Data Models: guide/data-models.md
+      - Operations: guide/operations.md
+      - Advanced Topics: guide/advanced-topics.md
