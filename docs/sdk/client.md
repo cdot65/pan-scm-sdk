@@ -119,34 +119,51 @@ address_service.create({...})
 The unified client provides access to all service objects in the SDK through attributes:
 
 **Objects**
-- `client.address` - Address objects
-- `client.address_group` - Address Group objects
-- `client.application` - Application objects
-- `client.application_filter` - Application Filters
-- `client.application_group` - Application Group objects
-- `client.dynamic_user_group` - Dynamic User Group objects
-- `client.external_dynamic_list` - External Dynamic Lists
-- `client.hip_object` - HIP Objects
-- `client.hip_profile` - HIP Profiles
-- `client.http_server_profile` - HTTP Server Profiles
-- `client.service` - Service objects
-- `client.service_group` - Service Group objects
-- `client.tag` - Tag objects
+
+- `client.address` - IP addresses, CIDR ranges, and FQDNs for security policies
+- `client.address_group` - Static or dynamic collections of address objects
+- `client.application` - Custom application definitions and signatures
+- `client.application_filter` - Filters for identifying applications by characteristics
+- `client.application_group` - Logical groups of applications for policy application
+- `client.dynamic_user_group` - User groups with dynamic membership criteria
+- `client.external_dynamic_list` - Externally managed lists of IPs, URLs, or domains
+- `client.hip_object` - Host information profile match criteria
+- `client.hip_profile` - Endpoint security compliance profiles
+- `client.http_server_profile` - HTTP server configurations for logging and monitoring
+- `client.log_forwarding_profile` - Configurations for forwarding logs to external systems
+- `client.quarantined_device` - Management of devices blocked from network access
+- `client.region` - Geographic regions for policy control
+- `client.schedule` - Time-based policies and access control
+- `client.service` - Protocol and port definitions for network services
+- `client.service_group` - Collections of services for simplified policy management
+- `client.syslog_server_profile` - Syslog server configurations for centralized logging
+- `client.tag` - Resource classification and organization labels
 
 **Network**
-- `client.nat_rule` - NAT Rules
+
+- `client.ike_crypto_profile` - IKE crypto profiles for VPN tunnels
+- `client.ike_gateway` - IKE gateway configurations for VPN tunnel endpoints
+- `client.ipsec_crypto_profile` - IPsec crypto profiles for VPN tunnel encryption
+- `client.nat_rule` - Network address translation policies for traffic routing
+- `client.security_zone` - Security zones for network segmentation
 
 **Deployment**
-- `client.remote_networks` - Remote Networks
+
+- `client.bandwidth_allocation` - Bandwidth allocation settings for regions and service nodes
+- `client.internal_dns_server` - DNS server configurations for domain resolution
+- `client.network_location` - Geographic network locations for service connectivity
+- `client.remote_network` - Secure branch and remote site connectivity configurations
+- `client.service_connection` - Service connections to cloud service providers
 
 **Security**
-- `client.security_rule` - Security Rules
-- `client.anti_spyware_profile` - Anti-Spyware Profiles
-- `client.decryption_profile` - Decryption Profiles
-- `client.dns_security_profile` - DNS Security Profiles
-- `client.url_category` - URL Categories
-- `client.vulnerability_protection_profile` - Vulnerability Protection Profiles
-- `client.wildfire_antivirus_profile` - WildFire Antivirus Profiles
+
+- `client.security_rule` - Core security policies controlling network traffic
+- `client.anti_spyware_profile` - Protection against spyware, C2 traffic, and data exfiltration
+- `client.decryption_profile` - SSL/TLS traffic inspection configurations
+- `client.dns_security_profile` - Protection against DNS-based threats and tunneling
+- `client.url_category` - Custom URL categorization for web filtering
+- `client.vulnerability_protection_profile` - Defense against known CVEs and exploit attempts
+- `client.wildfire_antivirus_profile` - Cloud-based malware analysis and zero-day protection
 
 ### Core Methods
 

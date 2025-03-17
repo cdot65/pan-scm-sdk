@@ -115,6 +115,16 @@ client.bgp_routing.update({
 })
 print("Updated BGP routing settings")
 
+# Work with Network Locations
+locations = client.network_location.list()
+print(f"Found {len(locations)} network locations")
+
+us_locations = client.network_location.list(continent="North America")
+print(f"Found {len(us_locations)} locations in North America")
+
+west_coast = client.network_location.fetch("us-west-1")
+print(f"Location: {west_coast.display} ({west_coast.value})")
+
 # Work with Security Rules
 security_rule = client.security_rule.fetch(name="allow-web", folder="Texas")
 print(f"Security rule: {security_rule.name}, Action: {security_rule.action}")

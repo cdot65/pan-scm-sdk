@@ -1,12 +1,34 @@
 # scm/models/deployment/__init__.py
 
+from .bandwidth_allocations import (
+    BandwidthAllocationCreateModel,
+    BandwidthAllocationUpdateModel,
+    BandwidthAllocationResponseModel,
+    BandwidthAllocationListResponseModel,
+    QosModel as BandwidthQosModel,
+)
+from .bgp_routing import (
+    BGPRoutingBaseModel,
+    BGPRoutingCreateModel,
+    BGPRoutingUpdateModel,
+    BGPRoutingResponseModel,
+    DefaultRoutingModel,
+    HotPotatoRoutingModel,
+    BackboneRoutingEnum,
+)
+from .internal_dns_servers import (
+    InternalDnsServersBaseModel,
+    InternalDnsServersCreateModel,
+    InternalDnsServersUpdateModel,
+    InternalDnsServersResponseModel,
+)
+from .network_locations import NetworkLocationModel
 from .remote_networks import (
     RemoteNetworkCreateModel,
     RemoteNetworkUpdateModel,
     RemoteNetworkResponseModel,
     EcmpLoadBalancingEnum,
 )
-
 from .service_connections import (
     ServiceConnectionCreateModel,
     ServiceConnectionUpdateModel,
@@ -19,32 +41,8 @@ from .service_connections import (
     QosModel,
 )
 
-from .bandwidth_allocations import (
-    BandwidthAllocationCreateModel,
-    BandwidthAllocationUpdateModel,
-    BandwidthAllocationResponseModel,
-    BandwidthAllocationListResponseModel,
-    QosModel as BandwidthQosModel,
-)
-
-from .bgp_routing import (
-    BGPRoutingBaseModel,
-    BGPRoutingCreateModel,
-    BGPRoutingUpdateModel,
-    BGPRoutingResponseModel,
-    DefaultRoutingModel,
-    HotPotatoRoutingModel,
-    BackboneRoutingEnum,
-)
-
-from .internal_dns_servers import (
-    InternalDnsServersBaseModel,
-    InternalDnsServersCreateModel,
-    InternalDnsServersUpdateModel,
-    InternalDnsServersResponseModel,
-)
-
 __all__ = [
+    "NetworkLocationModel",
     "RemoteNetworkCreateModel",
     "RemoteNetworkUpdateModel",
     "RemoteNetworkResponseModel",

@@ -152,8 +152,8 @@ nat_rule_data = {
 
 ## Exceptions
 
-| Exception                    | HTTP Code | Description                                                                   |
-|------------------------------|-----------|-------------------------------------------------------------------------------|
+| Exception                    | HTTP Code | Description                                                                  |
+|------------------------------|-----------|------------------------------------------------------------------------------|
 | `InvalidObjectError`         | 400       | Thrown when provided data or parameters are invalid                          |
 | `MissingQueryParameterError` | 400       | Thrown when required query parameters (e.g., `name` or `folder`) are missing |
 

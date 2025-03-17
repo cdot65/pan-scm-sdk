@@ -8,6 +8,7 @@ from typing import List, Union, Dict
 import factory
 
 from scm.models.deployment import RemoteNetworkCreateModel
+from scm.models.deployment.network_locations import NetworkLocationModel
 from scm.models.deployment.remote_networks import (
     EcmpLoadBalancingEnum,
     RemoteNetworkUpdateModel,
@@ -31,7 +32,6 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     InterfaceAddress,
 )
-
 # Local SDK imports
 from scm.models.objects import (
     AddressCreateModel,
@@ -173,6 +173,44 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvMlavExceptionEntry,
     WildfireAvRuleBase,
 )
+
+
+# ----------------------------------------------------------------------------
+# Network Location object factories.
+# ----------------------------------------------------------------------------
+
+
+class NetworkLocationModelFactory(factory.Factory):
+    """Factory for creating NetworkLocationModel instances."""
+
+    class Meta:
+        model = NetworkLocationModel
+
+    value = "us-west-1"
+    display = "US West"
+    continent = "North America"
+    latitude = 37.38314
+    longitude = -121.98306
+    region = "us-west-1"
+    aggregate_region = "us-southwest"
+
+    @classmethod
+    def build_minimal(cls):
+        """Create a minimal valid instance with only required fields."""
+        return cls(
+            value="us-west-1",
+            display="US West"
+        )
+
+    @classmethod
+    def build_with_invalid_coordinates(cls):
+        """Create an instance with invalid coordinate values."""
+        return cls(
+            value="us-west-1",
+            display="US West",
+            latitude=100,
+            longitude=200
+        )
 
 
 # ----------------------------------------------------------------------------

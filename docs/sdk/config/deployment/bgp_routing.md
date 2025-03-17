@@ -26,12 +26,12 @@ The `BGPRouting` class provides functionality to manage BGP (Border Gateway Prot
 
 ## Core Methods
 
-| Method     | Description                                  | Parameters            | Return Type              |
-|------------|----------------------------------------------|----------------------|--------------------------|
-| `get()`    | Retrieves current BGP routing settings       | None                 | `BGPRoutingResponseModel`|
-| `create()` | Creates a new BGP routing configuration      | `data: Dict[str, Any]`| `BGPRoutingResponseModel`|
-| `update()` | Updates existing BGP routing configuration   | `data: Dict[str, Any]`| `BGPRoutingResponseModel`|
-| `delete()` | Resets BGP routing configuration to defaults | None                 | None                     |
+| Method     | Description                                  | Parameters             | Return Type               |
+|------------|----------------------------------------------|------------------------|---------------------------|
+| `get()`    | Retrieves current BGP routing settings       | None                   | `BGPRoutingResponseModel` |
+| `create()` | Creates a new BGP routing configuration      | `data: Dict[str, Any]` | `BGPRoutingResponseModel` |
+| `update()` | Updates existing BGP routing configuration   | `data: Dict[str, Any]` | `BGPRoutingResponseModel` |
+| `delete()` | Resets BGP routing configuration to defaults | None                   | None                      |
 
 ## BGP Routing Model Attributes
 

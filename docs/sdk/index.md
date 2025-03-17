@@ -13,6 +13,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Bandwidth Allocations](config/deployment/bandwidth_allocations.md)
         - [BGP Routing](config/deployment/bgp_routing.md)
         - [Internal DNS Servers](config/deployment/internal_dns_servers.md)
+        - [Network Locations](config/deployment/network_locations.md)
         - [Remote Networks](config/deployment/remote_networks.md)
         - [Service Connections](config/deployment/service_connections.md)
     - Network
@@ -53,6 +54,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
         - [BGP Routing Models](models/deployment/bgp_routing_models.md)
         - [Internal DNS Servers Models](models/deployment/internal_dns_servers_models.md)
+        - [Network Locations Models](models/deployment/network_locations.md)
         - [Remote Networks Models](models/deployment/remote_networks_models.md)
         - [Service Connections Models](models/deployment/service_connections_models.md)
     - Network
@@ -204,6 +206,21 @@ new_allocation = client.bandwidth_allocation.create({
 })
 print(f"Created bandwidth allocation: {new_allocation.name}")
 
+# ===== WORKING WITH NETWORK LOCATIONS =====
+
+# List all network locations
+locations = client.network_location.list()
+print(f"Found {len(locations)} network locations")
+
+# Filter locations by continent
+us_locations = client.network_location.list(continent="North America")
+print(f"Found {len(us_locations)} locations in North America")
+
+# Fetch a specific location by value
+west_coast = client.network_location.fetch("us-west-1")
+print(f"Location: {west_coast.display} ({west_coast.value})")
+print(f"Region: {west_coast.region}, Coordinates: {west_coast.latitude}, {west_coast.longitude}")
+
 # ===== COMMIT CHANGES =====
 
 # Commit all changes to apply them to the firewall
@@ -253,6 +270,7 @@ The following table shows all services available through the unified client inte
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                    |
 | `internal_dns_servers`             | DNS server configurations for domain resolution                 |
+| `network_location`                 | Geographic network locations for service connectivity           |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |

@@ -124,6 +124,21 @@ dns_servers = client.internal_dns_servers.list()
 for server in dns_servers:
     print(f"DNS Server: {server.name}, Primary: {server.primary}")
 
+# === NETWORK LOCATIONS ===
+
+# List all network locations
+locations = client.network_location.list()
+print(f"Found {len(locations)} network locations")
+
+# Filter locations by continent
+us_locations = client.network_location.list(continent="North America")
+print(f"Found {len(us_locations)} locations in North America")
+
+# Fetch a specific location
+west_coast = client.network_location.fetch("us-west-1")
+print(f"Location: {west_coast.display} ({west_coast.value})")
+print(f"Region: {west_coast.region}, Coordinates: {west_coast.latitude}, {west_coast.longitude}")
+
 # === SECURITY RULES ===
 
 # Fetch a security rule by name
@@ -189,9 +204,10 @@ The unified client provides access to the following services through attribute-b
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Deployment**                     |                                                                 |
-| `bandwidth_allocations`            | Bandwidth allocation management for network capacity planning   |
+| `bandwidth_allocation`             | Bandwidth allocation management for network capacity planning   |
 | `bgp_routing`                      | BGP routing configuration for network connectivity              |
 | `internal_dns_servers`             | Internal DNS server configurations for domain resolution        |
+| `network_location`                 | Geographic network locations for service connectivity           |
 | `remote_network`                   | Secure branch and remote site connectivity configurations       |
 | `service_connection`               | Service connections to cloud service providers                  |
 | **Security**                       |                                                                 |
@@ -210,7 +226,7 @@ You can also use the traditional pattern where you explicitly create service ins
 ```python
 from scm.client import Scm
 from scm.config.objects import Address
-from scm.config.deployment import InternalDnsServers
+from scm.config.deployment import InternalDnsServers, NetworkLocations
 
 # Create an authenticated session with SCM
 api_client = Scm(
@@ -236,6 +252,14 @@ dns_servers = InternalDnsServers(api_client)
 all_dns_servers = dns_servers.list()
 for server in all_dns_servers:
     print(f"DNS Server: {server.name}, Primary: {server.primary}")
+    
+# Create a NetworkLocations instance
+network_locations = NetworkLocations(api_client)
+
+# List all network locations
+locations = network_locations.list()
+for loc in locations:
+    print(f"Location: {loc.display} ({loc.value}), Region: {loc.region}")
 ```
 
 #### Creating an Address
