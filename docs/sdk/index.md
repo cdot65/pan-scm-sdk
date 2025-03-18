@@ -215,11 +215,11 @@ print(f"Created bandwidth allocation: {new_allocation.name}")
 # ===== WORKING WITH AUTHENTICATION SETTINGS =====
 
 # List all authentication settings
-auth_settings = client.auth_settings.list()
+auth_settings = client.auth_setting.list()
 print(f"Found {len(auth_settings)} authentication settings")
 
 # Create new authentication settings for Windows
-windows_auth = client.auth_settings.create({
+windows_auth = client.auth_setting.create({
     "name": "windows_auth",
     "authentication_profile": "windows-profile",
     "os": "Windows",
@@ -229,7 +229,7 @@ windows_auth = client.auth_settings.create({
 print(f"Created authentication settings: {windows_auth.name}")
 
 # Move authentication settings to the top of evaluation order
-client.auth_settings.move({
+client.auth_setting.move({
     "name": "windows_auth",
     "where": "top"
 })
@@ -238,26 +238,19 @@ print("Moved Windows authentication settings to the top")
 # ===== WORKING WITH AGENT VERSIONS =====
 
 # List all available GlobalProtect agent versions
-agent_versions = client.agent_versions.list()
+agent_versions = client.agent_version.list()
 print(f"Found {len(agent_versions)} GlobalProtect agent versions")
 
 # Filter for specific versions
-filtered_versions = client.agent_versions.list(version="5.3")
+filtered_versions = client.agent_version.list(version="5.3")
 print(f"Found {len(filtered_versions)} versions containing '5.3'")
 
 # Fetch a specific version
 try:
-    version = client.agent_versions.fetch("5.3.0")
+    version = client.agent_version.fetch("5.3.0")
     print(f"Found specific version: {version}")
 except Exception as e:
     print(f"Version not found: {str(e)}")
-
-# Move authentication settings to the top of evaluation order
-client.auth_settings.move({
-    "name": "windows_auth",
-    "where": "top"
-})
-print("Moved Windows authentication settings to the top")
 
 # ===== COMMIT CHANGES =====
 
@@ -305,8 +298,8 @@ The following table shows all services available through the unified client inte
 | `nat_rule`                         | Network address translation policies for traffic routing        |
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Mobile Agent**                   |                                                                 |
-| `auth_settings`                    | GlobalProtect authentication settings by operating system       |
-| `agent_versions`                   | Available GlobalProtect agent versions (read-only)             |
+| `auth_setting`                     | GlobalProtect authentication settings by operating system       |
+| `agent_version`                    | Available GlobalProtect agent versions (read-only)             |
 | **Deployment**                     |                                                                 |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                    |

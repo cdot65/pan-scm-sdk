@@ -64,7 +64,7 @@ client = ScmClient(
 )
 
 # Access the AgentVersions service directly through the client
-agent_versions = client.agent_versions
+agent_versions = client.agent_version
 ```
 
 </div>
@@ -114,7 +114,7 @@ client = ScmClient(
 )
 
 # List all available GlobalProtect agent versions
-versions = client.agent_versions.list()
+versions = client.agent_version.list()
 
 # Print the versions
 print(f"Found {len(versions)} GlobalProtect agent versions:")
@@ -143,7 +143,7 @@ client = ScmClient(
 
 try:
     # Fetch a specific version
-    version = client.agent_versions.fetch("5.3.0")
+    version = client.agent_version.fetch("5.3.0")
     print(f"Found version: {version}")
 except InvalidObjectError:
     print("Version not found")
@@ -168,19 +168,19 @@ client = ScmClient(
 )
 
 # Filter versions by substring
-filtered_versions = client.agent_versions.list(version="5.2")
+filtered_versions = client.agent_version.list(version="5.2")
 print(f"Found {len(filtered_versions)} versions containing '5.2':")
 for version in filtered_versions:
    print(f"- {version}")
 
 # Filter versions by prefix
-prefix_versions = client.agent_versions.list(prefix="5.3")
+prefix_versions = client.agent_version.list(prefix="5.3")
 print(f"Found {len(prefix_versions)} versions starting with '5.3':")
 for version in prefix_versions:
    print(f"- {version}")
 
 # Use multiple filters
-combined_versions = client.agent_versions.list(
+combined_versions = client.agent_version.list(
     version="5.2",
     prefix="5.2.8"
 )
@@ -220,7 +220,7 @@ all_versions1 = agent_versions_service.list()
 
 # Option 2: Use the unified client interface directly
 # This will use the default max_limit (200)
-all_versions2 = client.agent_versions.list()
+all_versions2 = client.agent_version.list()
 
 # Both options will retrieve all available versions,
 # but the first one will do it in larger batches.
@@ -251,7 +251,7 @@ client = ScmClient(
 
 try:
    # Fetch a specific version
-   version = client.agent_versions.fetch("5.3.0")
+   version = client.agent_version.fetch("5.3.0")
    print(f"Found version: {version}")
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
@@ -266,7 +266,7 @@ except Exception as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified client interface (`client.agent_versions`) for streamlined code
+    - Use the unified client interface (`client.agent_version`) for streamlined code
     - Create a single client instance and reuse it across your application
     - For custom max_limit settings, create a dedicated service instance if needed
 

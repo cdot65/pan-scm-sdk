@@ -156,7 +156,7 @@ ios_auth_config = {
 }
 
 # Create iOS authentication settings
-ios_auth_settings = client.auth_settings.create(ios_auth_config)
+ios_auth_settings = client.auth_setting.create(ios_auth_config)
 ```
 
 </div>
@@ -169,11 +169,11 @@ ios_auth_settings = client.auth_settings.create(ios_auth_config)
 
 ```python
 # Fetch by name and folder (folder must be "Mobile Users")
-auth_settings = client.auth_settings.fetch(name="windows_auth", folder="Mobile Users")
+auth_settings = client.auth_setting.fetch(name="windows_auth", folder="Mobile Users")
 print(f"Found authentication settings: {auth_settings.name}")
 
 # Get by ID
-auth_settings_by_id = client.auth_settings.get(auth_settings.id)
+auth_settings_by_id = client.auth_setting.get(auth_settings.id)
 print(f"Retrieved authentication settings: {auth_settings_by_id.name}")
 ```
 
@@ -194,10 +194,10 @@ update_data = {
 }
 
 # Get the existing settings
-auth_settings = client.auth_settings.fetch(name="windows_auth", folder="Mobile Users")
+auth_settings = client.auth_setting.fetch(name="windows_auth", folder="Mobile Users")
 
 # Update the settings
-updated_settings = client.auth_settings.update(auth_settings.id, update_data)
+updated_settings = client.auth_setting.update(auth_settings.id, update_data)
 print(f"Updated authentication settings: {updated_settings.name}")
 ```
 
@@ -211,7 +211,7 @@ print(f"Updated authentication settings: {updated_settings.name}")
 
 ```python
 # List all authentication settings (always from "Mobile Users" folder)
-all_settings = client.auth_settings.list()
+all_settings = client.auth_setting.list()
 
 # Process results
 for setting in all_settings:
@@ -234,14 +234,14 @@ top_move_config = {
     "name": "windows_auth",
     "where": "top"
 }
-client.auth_settings.move(top_move_config)
+client.auth_setting.move(top_move_config)
 
 # Move a settings entry to the bottom of the list
 bottom_move_config = {
     "name": "android_auth",
     "where": "bottom"
 }
-client.auth_settings.move(bottom_move_config)
+client.auth_setting.move(bottom_move_config)
 
 # Move a settings entry before another entry
 before_move_config = {
@@ -249,7 +249,7 @@ before_move_config = {
     "where": "before",
     "destination": "android_auth"
 }
-client.auth_settings.move(before_move_config)
+client.auth_setting.move(before_move_config)
 
 # Move a settings entry after another entry
 after_move_config = {
@@ -257,7 +257,7 @@ after_move_config = {
     "where": "after",
     "destination": "ios_auth"
 }
-client.auth_settings.move(after_move_config)
+client.auth_setting.move(after_move_config)
 ```
 
 </div>
@@ -290,7 +290,7 @@ auth_settings_service = AuthSettings(client, max_limit=1000)
 all_settings1 = auth_settings_service.list()
 
 # Option 2: Use the unified client interface directly (uses default max_limit of 2500)
-all_settings2 = client.auth_settings.list()
+all_settings2 = client.auth_setting.list()
 ```
 
 </div>
@@ -303,10 +303,10 @@ all_settings2 = client.auth_settings.list()
 
 ```python
 # Get the authentication settings
-auth_settings = client.auth_settings.fetch(name="windows_auth", folder="Mobile Users")
+auth_settings = client.auth_setting.fetch(name="windows_auth", folder="Mobile Users")
 
 # Delete the settings by ID
-client.auth_settings.delete(auth_settings.id)
+client.auth_setting.delete(auth_settings.id)
 print(f"Deleted authentication settings: {auth_settings.name}")
 ```
 
@@ -388,7 +388,7 @@ try:
       "folder": "Mobile Users"
    }
    
-   new_auth_settings = client.auth_settings.create(auth_settings_config)
+   new_auth_settings = client.auth_setting.create(auth_settings_config)
    
    # Commit changes
    result = client.commit(
@@ -415,7 +415,7 @@ except MissingQueryParameterError as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified client interface (`client.auth_settings`) for streamlined code
+    - Use the unified client interface (`client.auth_setting`) for streamlined code
     - Create a single client instance and reuse it across your application
     - Perform commit operations directly on the client object (`client.commit()`)
     - For custom max_limit settings, create a dedicated service instance if needed
