@@ -230,6 +230,8 @@ response = edl.update(update_dict)
 
 ## Related Models
 
-- [AuthModel](../../models/objects/external_dynamic_lists_models.md#Overview)
-- [RecurringModels](../../models/objects/external_dynamic_lists_models.md#Overview)
-- [TypeModels](../../models/objects/external_dynamic_lists_models.md#Overview)
+- AuthModel
+- RecurringModels
+- TypeModels
+
+These related models are defined within the same file and described in the Attributes section above.
