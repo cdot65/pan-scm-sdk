@@ -252,6 +252,13 @@ try:
 except Exception as e:
     print(f"Version not found: {str(e)}")
 
+# Move authentication settings to the top of evaluation order
+client.auth_settings.move({
+    "name": "windows_auth",
+    "where": "top"
+})
+print("Moved Windows authentication settings to the top")
+
 # ===== COMMIT CHANGES =====
 
 # Commit all changes to apply them to the firewall

@@ -91,3 +91,13 @@ print(f"Windows versions: {windows_versions}")
    - Validate model data before executing API calls
 
 Select a model from the available models above for detailed documentation on specific model attributes and validation rules.
+
+# Mobile Agent Models
+
+The Mobile Agent models provide data structures for managing GlobalProtect mobile user and agent configurations.
+
+## Authentication Settings
+
+Authentication settings models define the data structures needed for creating, updating, and managing GlobalProtect authentication profiles and settings.
+
+* [Authentication Settings Models](auth_settings_models.md) - Data models for GlobalProtect authentication settings
