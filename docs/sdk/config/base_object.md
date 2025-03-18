@@ -435,6 +435,6 @@ Refer to the [examples](https://github.com/cdot65/pan-scm-sdk/tree/main/examples
 
 ## Related Models
 
-- [JobStatusResponse](/sdk/models/operations/jobs.md)
-- [JobListResponse](/sdk/models/operations/jobs.md)
-- [CandidatePushResponseModel](/sdk/models/operations/candidate_push.md)
+- [JobStatusResponse](../models/operations/jobs.md)
+- [JobListResponse](../models/operations/jobs.md)
+- [CandidatePushResponseModel](../models/operations/candidate_push.md)

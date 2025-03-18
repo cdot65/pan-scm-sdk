@@ -65,7 +65,7 @@ pre-commit-all:
 # Build documentation
 docs:
 	@echo "Building documentation site..."
-	poetry run mkdocs build --strict
+	poetry run mkdocs build --strict --no-directory-urls
 
 # Serve documentation locally
 docs-serve:

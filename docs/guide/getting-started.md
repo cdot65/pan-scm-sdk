@@ -70,4 +70,4 @@ print("Address object deleted")
 
 - Check out the [Configuration Objects](configuration-objects.md) guide to learn more about managing different object types
 - Review the [Data Models](data-models.md) guide to understand the structure of request and response data
-- Explore the [API Reference](/sdk/index.md) for detailed information on all available methods
+- Explore the [API Reference](../sdk/index.md) for detailed information on all available methods

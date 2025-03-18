@@ -45,7 +45,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service Group](config/objects/service_group.md)
         - [Tag](config/objects/tag.md)
     - Security Services
-        - [Anti-Spyware Profile](config/security_services/anti_spyware_profile)
+        - [Anti-Spyware Profile](config/security_services/anti_spyware_profile.md)
         - [Decryption Profile](config/security_services/decryption_profile.md)
         - [DNS Security Profile](config/security_services/dns_security_profile.md)
         - [Security Rule](config/security_services/security_rule.md)
@@ -319,7 +319,7 @@ The following table shows all services available through the unified client inte
 Check out the [Client Module](client.md) documentation for more information on the unified client interface and the available
 services.
 
-For information about specific service objects, proceed to the [Configuration Objects](config/objects/index) section.
+For information about specific service objects, proceed to the [Configuration Objects](config/objects/index.md) section.
 
-To learn more about the data models used by the SDK, proceed to the [Data Models](models/objects/index) section, which
+To learn more about the data models used by the SDK, proceed to the [Data Models](models/objects/index.md) section, which
 explains how the Python dictionaries that are passed into the SDK are structured.

@@ -172,5 +172,5 @@ client = Scm(
 
 ## Next Steps
 
-- Explore the [API Reference](/sdk/index.md) for detailed information on all available methods
+- Explore the [API Reference](../sdk/index.md) for detailed information on all available methods
 - Check the [GitHub repository](https://github.com/cdot65/pan-scm-sdk) for examples and updates

@@ -96,10 +96,10 @@ print(f"Created address: {new_address.name} with ID: {new_address.id}")
 
 For detailed information about specific models, check the model documentation:
 
-- [Address Models](/sdk/models/objects/address_models.md)
-- [Security Zone Models](/sdk/models/network/security_zone_models.md)
-- [NAT Rule Models](/sdk/models/network/nat_rule_models.md)
-- [Security Rule Models](/sdk/models/security_services/security_rule_models.md)
+- [Address Models](../sdk/models/objects/address_models.md)
+- [Security Zone Models](../sdk/models/network/security_zone_models.md)
+- [NAT Rule Models](../sdk/models/network/nat_rule_models.md)
+- [Security Rule Models](../sdk/models/security_services/security_rule_models.md)
 
 ## Next Steps
 

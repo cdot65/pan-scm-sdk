@@ -128,4 +128,4 @@ except Exception as e:
 ## Next Steps
 
 - Check out [Advanced Topics](advanced-topics.md) for pagination, filtering, and error handling
-- Explore the [API Reference](/sdk/index.md) for detailed information on all available methods
+- Explore the [API Reference](../sdk/index.md) for detailed information on all available methods
