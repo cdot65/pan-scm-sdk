@@ -19,7 +19,11 @@
 10. [Best Practices](#best-practices)
 11. [Related Models](#related-models)
 
-## Overview
+## Overview {#Overview}
+<span id="overview"></span>
+<span id="error-handling"></span>
+<span id="best-practices"></span>
+<span id="related-models"></span>
 
 The Application Filters models provide a structured way to manage application filters in Palo Alto Networks' Strata
 Cloud Manager.
@@ -320,7 +324,16 @@ except ValueError as e:
 
 </div>
 
-## Best Practices
+## Error Handling {#error-handling}
+
+Application Filters models implement validation to ensure correct data:
+
+- Container validation ensures exactly one container type (folder/snippet) is specified
+- Name validation enforces length and character constraints
+- Field validation ensures risk levels are within range (1-5)
+- Boolean fields are properly formatted
+
+## Best Practices {#best-practices}
 
 1. **Filter Design**
     - Use descriptive filter names
@@ -347,8 +360,10 @@ except ValueError as e:
     - Update risk criteria periodically
     - Document security implications
 
-## Related Models
+## Related Models {#related-models}
 
-- [ApplicationFiltersCreateModel](../../models/objects/application_filters_models.md#Overview)
-- [ApplicationFiltersUpdateModel](../../models/objects/application_filters_models.md#Overview)
-- [ApplicationFiltersResponseModel](../../models/objects/application_filters_models.md#Overview)
+These models are defined within this module:
+
+- ApplicationFiltersCreateModel - For creating new application filters
+- ApplicationFiltersUpdateModel - For updating existing application filters
+- ApplicationFiltersResponseModel - Response model containing application filter data

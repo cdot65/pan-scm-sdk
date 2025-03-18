@@ -2,7 +2,7 @@
 
 This page describes the Pydantic models used for Auto Tag Actions configuration in the Strata Cloud Manager SDK.
 
-## Overview
+## Overview {#Overview}
 
 Auto Tag Actions models define the data structures for automated tag assignment based on traffic patterns, security events, and other triggers. These models handle attributes such as:
 

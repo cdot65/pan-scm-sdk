@@ -1,4 +1,4 @@
-.PHONY: setup lint format test clean install-hooks
+.PHONY: setup lint format test clean install-hooks docs docs-serve
 
 # Default goal
 .DEFAULT_GOAL := help
@@ -62,6 +62,16 @@ pre-commit-all:
 	@echo "Running pre-commit on all files..."
 	poetry run pre-commit run --all-files
 
+# Build documentation
+docs:
+	@echo "Building documentation site..."
+	poetry run mkdocs build --strict --no-directory-urls
+
+# Serve documentation locally
+docs-serve:
+	@echo "Starting documentation server..."
+	poetry run mkdocs serve
+
 help:
 	@echo "Available commands:"
 	@echo "  setup           - Install dependencies and pre-commit hooks"
@@ -72,6 +82,8 @@ help:
 	@echo "  test            - Run tests"
 	@echo "  test-cov        - Run tests with coverage"
 	@echo "  clean           - Clean cache directories"
+	@echo "  docs            - Build documentation site (with strict validation)"
+	@echo "  docs-serve      - Serve documentation locally for development"
 	@echo "  install-hooks   - Install pre-commit hooks"
 	@echo "  update-hooks    - Update pre-commit hooks to the latest versions"
 	@echo "  pre-commit-all  - Run pre-commit on all files"

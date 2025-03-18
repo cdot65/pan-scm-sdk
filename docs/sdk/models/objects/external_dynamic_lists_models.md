@@ -1,6 +1,6 @@
 # External Dynamic Lists Models
 
-## Overview
+## Overview {#Overview}
 
 The External Dynamic Lists models provide a structured way to manage external dynamic lists in Palo Alto Networks' Strata
 Cloud Manager. These models support various types of dynamic lists including IP, domain, URL, IMSI, and IMEI lists, with
@@ -230,6 +230,8 @@ response = edl.update(update_dict)
 
 ## Related Models
 
-- [AuthModel](../../models/objects/external_dynamic_lists_models.md#Overview)
-- [RecurringModels](../../models/objects/external_dynamic_lists_models.md#Overview)
-- [TypeModels](../../models/objects/external_dynamic_lists_models.md#Overview)
+- AuthModel
+- RecurringModels
+- TypeModels
+
+These related models are defined within the same file and described in the Attributes section above.

@@ -1,6 +1,6 @@
 # Application Group Models
 
-## Overview
+## Overview {#Overview}
 
 The Application Group models provide a structured way to manage application groups in Palo Alto Networks' Strata Cloud
 Manager. These models support grouping applications together and defining them within folders, snippets, or devices. The

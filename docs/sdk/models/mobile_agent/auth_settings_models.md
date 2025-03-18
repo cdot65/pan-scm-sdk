@@ -1,6 +1,6 @@
 # GlobalProtect Authentication Settings Models
 
-## Overview
+## Overview {#Overview}
 
 The GlobalProtect Authentication Settings models provide a structured way to manage authentication settings for mobile users in Palo Alto Networks' Strata Cloud Manager. These models support different operating system configurations and authentication preferences. The models handle validation of inputs and outputs when interacting with the SCM API.
 

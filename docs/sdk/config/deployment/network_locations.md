@@ -327,7 +327,7 @@ network_locations.max_limit = 300
 
 ## Related Models
 
-- [`NetworkLocationModel`](/sdk/models/deployment/network_locations/)
+- [`NetworkLocationModel`](../../models/deployment/network_locations.md)
 
 !!! note "Read-Only Operations"
     The NetworkLocations API only supports read operations (list and fetch). Create, update, and delete operations are not available for this endpoint.

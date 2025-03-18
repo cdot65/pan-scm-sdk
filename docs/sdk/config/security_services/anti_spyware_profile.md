@@ -490,11 +490,10 @@ except MissingQueryParameterError as e:
 
 ## Full Script Examples
 
-Refer to
-the [anti_spyware_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/examples/scm/config/security/anti_spyware_profile.py).
+For examples related to anti-spyware profiles, check the [examples directory](https://github.com/cdot65/pan-scm-sdk/tree/main/examples/scm/config/security_services/).
 
 ## Related Models
 
-- [AntiSpywareProfileCreateModel](../../models/security/anti_spyware_profile_models.md#Overview)
-- [AntiSpywareProfileUpdateModel](../../models/security/anti_spyware_profile_models.md#Overview)
-- [AntiSpywareProfileResponseModel](../../models/security/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileCreateModel](../../models/security_services/anti_spyware_profile_models.md)
+- [AntiSpywareProfileUpdateModel](../../models/security_services/anti_spyware_profile_models.md)
+- [AntiSpywareProfileResponseModel](../../models/security_services/anti_spyware_profile_models.md)

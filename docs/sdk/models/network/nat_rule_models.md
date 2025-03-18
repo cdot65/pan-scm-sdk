@@ -1,6 +1,17 @@
 # NAT Rule Models
 
-## Overview
+## Overview {#Overview}
+
+[comment]: # "Add anchors for the model types"
+<span id="natrulecreatemodel"></span>
+<span id="natruleupdatemodel"></span>
+<span id="natruleresponsemodel"></span>
+<span id="natrrulemovemodel"></span>
+<span id="sourcetranslation"></span>
+<span id="dynamicipandport"></span>
+<span id="dynamicip"></span>
+<span id="staticip"></span>
+<span id="destinationtranslation"></span>
 
 The NAT Rule models provide a structured way to represent and validate NAT rule configuration data for Palo Alto Networks' Strata Cloud Manager. These models support configuration of source and destination address translation with various options including static IP mappings, dynamic IP and port allocation, and DNS rewrite functionality. The models handle validation of inputs and outputs when interacting with the SCM API.
 

@@ -9,7 +9,8 @@
 5. [Usage Examples](#usage-examples)
 6. [Best Practices](#best-practices)
 
-## Overview
+## Overview {#Overview}
+<span id="overview"></span>
 
 The Strata Cloud Manager SDK uses Pydantic models for data validation and serialization for Mobile Agent related resources. These models ensure that the data being sent to and received from the Strata Cloud Manager API adheres to the expected structure and constraints.
 

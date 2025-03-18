@@ -1,6 +1,6 @@
 # IKE Gateway Models
 
-## Overview
+## Overview {#Overview}
 
 The IKE Gateway models provide a structured way to manage Internet Key Exchange (IKE) gateway configurations in Palo Alto Networks' Strata Cloud Manager. These models support defining IKE configurations for establishing secure VPN connections with peer devices. The models handle validation of inputs and outputs when interacting with the SCM API.
 

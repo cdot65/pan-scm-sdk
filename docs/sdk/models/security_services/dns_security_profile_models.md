@@ -1,6 +1,6 @@
 # DNS Security Profile Models
 
-## Overview
+## Overview {#Overview}
 
 The DNS Security Profile models provide a structured way to manage DNS Security profiles in Palo Alto Networks' Strata Cloud Manager. These models support configuration of profiles that protect against DNS-based threats, including domain filtering and DNS sinkhole operations. The models handle validation of inputs and outputs when interacting with the SCM API.
 
