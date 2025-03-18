@@ -1,6 +1,6 @@
 # Dynamic User Group Models
 
-## Overview
+## Overview {#Overview}
 
 The Dynamic User Group models provide a structured way to manage dynamic user groups in Palo Alto Networks' Strata Cloud Manager. These models support defining user groups based on tag-based filters to dynamically associate users with specific groups for policy management. The models handle validation of inputs and outputs when interacting with the SCM API.
 

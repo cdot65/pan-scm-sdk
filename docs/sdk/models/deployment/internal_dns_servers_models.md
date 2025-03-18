@@ -1,6 +1,6 @@
 # Internal DNS Servers Models
 
-## Overview
+## Overview {#Overview}
 
 The Internal DNS Servers models provide a structured way to manage DNS server configurations in Palo Alto Networks' Strata Cloud Manager. These models handle validation of inputs and outputs when interacting with the SCM API for internal DNS server resources.
 

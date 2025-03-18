@@ -9,7 +9,8 @@
 5. [Error Handling](#error-handling)
 6. [Related Documentation](#related-documentation)
 
-## Overview
+## Overview {#Overview}
+<span id="overview"></span>
 
 The `AgentVersions` models provide data structures for GlobalProtect agent version information in the Strata Cloud Manager API. These are read-only models used to represent the available GlobalProtect agent versions.
 

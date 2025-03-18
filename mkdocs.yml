@@ -68,6 +68,7 @@ markdown_extensions:
 # Explicitly set the layout for home page with customizations
 not_in_nav: |
   index.md
+  STYLE_GUIDE.md
 
 extra_css:
   - css/termynal.css

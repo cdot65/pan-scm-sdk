@@ -1,6 +1,6 @@
 # URL Categories Models
 
-## Overview
+## Overview {#Overview}
 
 The URL Categories models provide a structured way to manage URL categories in Palo Alto Networks' Strata Cloud Manager.
 These models support both URL List and Category Match types, which can be defined in folders, snippets, or devices. The

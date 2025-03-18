@@ -1,6 +1,6 @@
 # HIP Profile Models
 
-## Overview
+## Overview {#Overview}
 
 The HIP Profile models provide a structured way to manage Host Information Profile (HIP) profiles in Palo Alto Networks'
 Strata Cloud Manager. These models define the match criteria expressions used to associate HIP objects with policy rules,
@@ -204,5 +204,4 @@ match = '("is-win" and "is-firewall-enabled") or ("is-mac" and "is-mac-firewall-
 
 ## Related Models
 
-- [HIPObjectCreateModel](../../models/objects/hip_object_models.md#Overview)
-- [HIPObjectResponseModel](../../models/objects/hip_object_models.md#Overview)
+- HIP Objects - See [HIP Object Models](../../models/objects/hip_object_models.md)

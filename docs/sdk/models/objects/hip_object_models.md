@@ -1,6 +1,6 @@
 # HIP Object Models
 
-## Overview
+## Overview {#Overview}
 
 The HIP Object models provide a structured way to manage Host Information Profile (HIP) objects in Palo Alto Networks'
 Strata Cloud Manager. These models support comprehensive host profiling including host information, network details,
@@ -199,9 +199,11 @@ response = hip_object.update(update_dict)
 
 ## Related Models
 
-- [HostInfoModel](../../models/objects/hip_object_models.md#Overview)
-- [NetworkInfoModel](../../models/objects/hip_object_models.md#Overview)
-- [PatchManagementModel](../../models/objects/hip_object_models.md#Overview)
-- [DiskEncryptionModel](../../models/objects/hip_object_models.md#Overview)
-- [MobileDeviceModel](../../models/objects/hip_object_models.md#Overview)
-- [CertificateModel](../../models/objects/hip_object_models.md#Overview)
+- HostInfoModel 
+- NetworkInfoModel
+- PatchManagementModel
+- DiskEncryptionModel
+- MobileDeviceModel
+- CertificateModel
+
+These related models are defined within the same file and described in the Attributes section above.

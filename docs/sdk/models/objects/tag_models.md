@@ -1,6 +1,6 @@
 # Tag Models
 
-## Overview
+## Overview {#Overview}
 
 The Tag models provide a structured way to manage tags in Palo Alto Networks' Strata Cloud Manager.
 These models support defining tags with names, colors, and comments that can be applied to various objects
