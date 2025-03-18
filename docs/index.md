@@ -125,6 +125,14 @@ print(f"Found {len(us_locations)} locations in North America")
 west_coast = client.network_location.fetch("us-west-1")
 print(f"Location: {west_coast.display} ({west_coast.value})")
 
+# Work with GlobalProtect Agent Versions (read-only)
+agent_versions = client.agent_versions.list()
+print(f"Found {len(agent_versions)} GlobalProtect agent versions")
+
+# Filter for specific versions
+filtered_versions = client.agent_versions.list(version="5.3")
+print(f"Found {len(filtered_versions)} versions containing '5.3'")
+
 # Work with Security Rules
 security_rule = client.security_rule.fetch(name="allow-web", folder="Texas")
 print(f"Security rule: {security_rule.name}, Action: {security_rule.action}")

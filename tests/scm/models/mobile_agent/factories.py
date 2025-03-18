@@ -2,6 +2,7 @@ import factory.fuzzy
 from factory import Factory, Faker
 from faker import Faker as FakerGenerator
 
+from scm.models.mobile_agent.agent_versions import AgentVersionsModel, AgentVersionModel
 from scm.models.mobile_agent.auth_settings import (
     OperatingSystem,
     MovePosition,
@@ -14,6 +15,35 @@ from scm.models.mobile_agent.auth_settings import (
 
 # Create a single faker instance
 fake = FakerGenerator()
+
+
+class AgentVersionModelFactory(Factory):
+    """Factory for AgentVersionModel."""
+
+    class Meta:
+        model = AgentVersionModel
+
+    version = factory.LazyFunction(
+        lambda: f"{fake.random_int(min=5, max=6)}.{fake.random_int(min=0, max=9)}.{fake.random_int(min=0, max=9)}"
+    )
+    release_date = factory.LazyFunction(
+        lambda: fake.date(pattern="%Y-%m-%d")
+    )
+    is_recommended = factory.fuzzy.FuzzyChoice([True, False, None])
+
+
+class AgentVersionsModelFactory(Factory):
+    """Factory for AgentVersionsModel."""
+
+    class Meta:
+        model = AgentVersionsModel
+
+    agent_versions = factory.LazyFunction(
+        lambda: [
+            f"{fake.random_int(min=5, max=6)}.{fake.random_int(min=0, max=9)}.{fake.random_int(min=0, max=9)}"
+            for _ in range(fake.random_int(min=1, max=5))
+        ]
+    )
 
 
 class AuthSettingsBaseModelFactory(Factory):

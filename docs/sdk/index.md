@@ -18,6 +18,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service Connections](config/deployment/service_connections.md)
     - Mobile Agent
         - [Authentication Settings](config/mobile_agent/auth_settings.md)
+        - [Agent Versions](config/mobile_agent/agent_versions.md)
     - Network
         - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
         - [IKE Gateways](config/network/ike_gateway.md)
@@ -61,6 +62,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Service Connections Models](models/deployment/service_connections_models.md)
     - Mobile Agent
         - [Authentication Settings Models](models/mobile_agent/auth_settings_models.md)
+        - [Agent Versions Models](models/mobile_agent/agent_versions_models.md)
     - Network
         - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
@@ -233,6 +235,30 @@ client.auth_settings.move({
 })
 print("Moved Windows authentication settings to the top")
 
+# ===== WORKING WITH AGENT VERSIONS =====
+
+# List all available GlobalProtect agent versions
+agent_versions = client.agent_versions.list()
+print(f"Found {len(agent_versions)} GlobalProtect agent versions")
+
+# Filter for specific versions
+filtered_versions = client.agent_versions.list(version="5.3")
+print(f"Found {len(filtered_versions)} versions containing '5.3'")
+
+# Fetch a specific version
+try:
+    version = client.agent_versions.fetch("5.3.0")
+    print(f"Found specific version: {version}")
+except Exception as e:
+    print(f"Version not found: {str(e)}")
+
+# Move authentication settings to the top of evaluation order
+client.auth_settings.move({
+    "name": "windows_auth",
+    "where": "top"
+})
+print("Moved Windows authentication settings to the top")
+
 # ===== COMMIT CHANGES =====
 
 # Commit all changes to apply them to the firewall
@@ -280,6 +306,7 @@ The following table shows all services available through the unified client inte
 | `security_zone`                    | Security zones for network segmentation                         |
 | **Mobile Agent**                   |                                                                 |
 | `auth_settings`                    | GlobalProtect authentication settings by operating system       |
+| `agent_versions`                   | Available GlobalProtect agent versions (read-only)             |
 | **Deployment**                     |                                                                 |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                    |
