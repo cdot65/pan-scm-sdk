@@ -39,8 +39,8 @@ theme:
 plugins:
   - search
   - termynal
+  - autorefs
   - mkdocstrings:
-      default_handler: python
       handlers:
         python:
           options:

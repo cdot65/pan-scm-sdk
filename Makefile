@@ -65,12 +65,12 @@ pre-commit-all:
 # Build documentation
 docs:
 	@echo "Building documentation site..."
-	poetry run mkdocs build --strict --no-directory-urls
+	poetry run python .mkdocs-setup.py mkdocs build --strict --no-directory-urls
 
 # Serve documentation locally
 docs-serve:
 	@echo "Starting documentation server..."
-	poetry run mkdocs serve
+	poetry run python .mkdocs-setup.py mkdocs serve
 
 help:
 	@echo "Available commands:"
