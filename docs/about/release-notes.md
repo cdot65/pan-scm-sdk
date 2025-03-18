@@ -2,6 +2,24 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.22
+
+**Released:** March 18, 2025
+
+### Added
+
+- **Mobile Agent Features**:
+  - **Agent Versions**: Support for managing GlobalProtect agent versions 
+  - **Authentication Settings**: Support for configuring GlobalProtect authentication settings
+
+### Fixed
+
+- **API Endpoint Path**: Fixed 404 error in agent_versions API endpoint path by adding missing '/config' prefix
+- **Documentation**: Fixed inconsistencies between code and documentation regarding client service property names
+  - Corrected references from `client.auth_settings` to `client.auth_setting`
+  - Corrected references from `client.agent_versions` to `client.agent_version`
+  - Updated code examples to use correct API client attribute names
+
 ## Version 0.3.21
 
 **Released:** March 16, 2025

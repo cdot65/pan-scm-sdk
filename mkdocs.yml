@@ -1,22 +1,84 @@
-site_name: Strata Cloud Manager SDK Documentation
-site_description: Python SDK for Palo Alto Networks Strata Cloud Manager.
+site_name: Palo Alto Networks Strata Cloud Manager SDK
+site_description: Python SDK to manage Palo Alto Networks Strata Cloud Manager configurations
 site_url: https://cdot65.github.io/pan-scm-sdk/
-repo_name: cdot65/pan-scm-sdk
 repo_url: https://github.com/cdot65/pan-scm-sdk
+repo_name: cdot65/pan-scm-sdk
+site_dir: site
+copyright: Copyright &copy; 2023-2025 Calvin Remsburg
+
 theme:
   name: material
-  language: en
+  logo: images/logo.svg
+  favicon: images/logo.svg
   features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.instant
+    - navigation.tracking
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
 plugins:
   - search
   - termynal
   - mkdocstrings:
+      default_handler: python
       handlers:
         python:
-          rendering:
-            show_source: true
+          options:
+            show_source: false
+          selection:
+            docstring_style: google
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+
+# Explicitly set the layout for home page with customizations
+not_in_nav: true
+
+extra_css:
+  - css/termynal.css
+  - css/custom.css
+
+extra_javascript:
+  - js/termynal.js
+  - js/custom.js
+
+# Define the navigation menu
 nav:
   - Home: index.md
   - About:
@@ -38,6 +100,7 @@ nav:
               - Bandwidth Allocations: sdk/config/deployment/bandwidth_allocations.md
               - BGP Routing: sdk/config/deployment/bgp_routing.md
               - Internal DNS Servers: sdk/config/deployment/internal_dns_servers.md
+              - Network Locations: sdk/config/deployment/network_locations.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
               - Service Connections: sdk/config/deployment/service_connections.md
           - Mobile Agent:
@@ -46,11 +109,11 @@ nav:
               - Agent Versions: sdk/config/mobile_agent/agent_versions.md
           - Network:
               - Overview: sdk/config/network/index.md
-              - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
-              - IKE Gateways: sdk/config/network/ike_gateway.md
-              - IPsec Crypto Profiles: sdk/config/network/ipsec_crypto_profile.md
+              - IKE Crypto Profile: sdk/config/network/ike_crypto_profile.md
+              - IKE Gateway: sdk/config/network/ike_gateway.md
+              - IPsec Crypto Profile: sdk/config/network/ipsec_crypto_profile.md
               - NAT Rules: sdk/config/network/nat_rules.md
-              - Security Zones: sdk/config/network/security_zone.md
+              - Security Zone: sdk/config/network/security_zone.md
           - Objects:
               - Overview: sdk/config/objects/index.md
               - Address: sdk/config/objects/address.md
@@ -68,9 +131,9 @@ nav:
               - Quarantined Device: sdk/config/objects/quarantined_devices.md
               - Region: sdk/config/objects/region.md
               - Schedule: sdk/config/objects/schedules.md
-              - Syslog Server Profile: sdk/config/objects/syslog_server_profiles.md
               - Service: sdk/config/objects/service.md
               - Service Group: sdk/config/objects/service_group.md
+              - Syslog Server Profile: sdk/config/objects/syslog_server_profiles.md
               - Tag: sdk/config/objects/tag.md
           - Security Services:
               - Overview: sdk/config/security_services/index.md
@@ -84,11 +147,12 @@ nav:
       - Data Models:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
-              - Bandwidth Allocation Models: sdk/models/deployment/bandwidth_allocation_models.md
+              - Bandwidth Allocations Models: sdk/models/deployment/bandwidth_allocation_models.md
               - BGP Routing Models: sdk/models/deployment/bgp_routing_models.md
               - Internal DNS Servers Models: sdk/models/deployment/internal_dns_servers_models.md
-              - Remote Network Models: sdk/models/deployment/remote_networks_models.md
-              - Service Connection Models: sdk/models/deployment/service_connections_models.md
+              - Network Locations Models: sdk/models/deployment/network_locations.md
+              - Remote Networks Models: sdk/models/deployment/remote_networks_models.md
+              - Service Connections Models: sdk/models/deployment/service_connections_models.md
           - Mobile Agent:
               - Overview: sdk/models/mobile_agent/index.md
               - Authentication Settings Models: sdk/models/mobile_agent/auth_settings_models.md
@@ -98,7 +162,7 @@ nav:
               - IKE Crypto Profile Models: sdk/models/network/ike_crypto_profile_models.md
               - IKE Gateway Models: sdk/models/network/ike_gateway_models.md
               - IPsec Crypto Profile Models: sdk/models/network/ipsec_crypto_profile_models.md
-              - NAT Rule Models: sdk/models/network/nat_rule_models.md
+              - NAT Rules Models: sdk/models/network/nat_rule_models.md
               - Security Zone Models: sdk/models/network/security_zone_models.md
           - Objects:
               - Overview: sdk/models/objects/index.md
@@ -117,13 +181,14 @@ nav:
               - Quarantined Device Models: sdk/models/objects/quarantined_devices_models.md
               - Region Models: sdk/models/objects/region_models.md
               - Schedule Models: sdk/models/objects/schedules_models.md
-              - Syslog Server Profile Models: sdk/models/objects/syslog_server_profiles_models.md
               - Service Models: sdk/models/objects/service_models.md
               - Service Group Models: sdk/models/objects/service_group_models.md
+              - Syslog Server Profile Models: sdk/models/objects/syslog_server_profiles_models.md
               - Tag Models: sdk/models/objects/tag_models.md
           - Operations:
+              - Overview: sdk/models/operations/index.md
               - Candidate Push Models: sdk/models/operations/candidate_push.md
-              - Job Models: sdk/models/operations/jobs.md
+              - Jobs Models: sdk/models/operations/jobs.md
           - Security Services:
               - Overview: sdk/models/security_services/index.md
               - Anti-Spyware Profile Models: sdk/models/security_services/anti_spyware_profile_models.md
@@ -134,9 +199,9 @@ nav:
               - Vulnerability Protection Profile Models: sdk/models/security_services/vulnerability_protection_profile_models.md
               - WildFire Antivirus Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
       - Exceptions: sdk/exceptions.md
-extra_css:
-  - css/termynal.css
-  - css/custom.css
-extra_javascript:
-  - js/termynal.js
-  - js/custom.js
+  - User Guide:
+      - Getting Started: guide/getting-started.md
+      - Configuration Objects: guide/configuration-objects.md
+      - Data Models: guide/data-models.md
+      - Operations: guide/operations.md
+      - Advanced Topics: guide/advanced-topics.md
