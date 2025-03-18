@@ -495,6 +495,6 @@ the [anti_spyware_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob
 
 ## Related Models
 
-- [AntiSpywareProfileCreateModel](../../models/security/anti_spyware_profile_models.md#Overview)
-- [AntiSpywareProfileUpdateModel](../../models/security/anti_spyware_profile_models.md#Overview)
-- [AntiSpywareProfileResponseModel](../../models/security/anti_spyware_profile_models.md#Overview)
+- [AntiSpywareProfileCreateModel](/sdk/models/security_services/anti_spyware_profile_models.md)
+- [AntiSpywareProfileUpdateModel](/sdk/models/security_services/anti_spyware_profile_models.md)
+- [AntiSpywareProfileResponseModel](/sdk/models/security_services/anti_spyware_profile_models.md)
