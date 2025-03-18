@@ -47,8 +47,6 @@ plugins:
             show_source: false
           selection:
             docstring_style: google
-  - minify:
-      minify_html: true
 
 markdown_extensions:
   - admonition
