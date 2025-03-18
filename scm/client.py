@@ -363,7 +363,7 @@ class Scm:
                 "scm.config.objects.address_group",
                 "AddressGroup",
             ),
-            "agent_versions": (
+            "agent_version": (
                 "scm.config.mobile_agent.agent_versions",
                 "AgentVersions",
             ),
@@ -383,7 +383,7 @@ class Scm:
                 "scm.config.objects.application_group",
                 "ApplicationGroup",
             ),
-            "auth_settings": (
+            "auth_setting": (
                 "scm.config.mobile_agent.auth_settings",
                 "AuthSettings",
             ),
