@@ -23,7 +23,7 @@ class AgentVersions(BaseObject):
             Defaults to 200. Must be between 1 and 1000.
     """
 
-    ENDPOINT = "/mobile-agent/v1/agent-versions"
+    ENDPOINT = "/config/mobile-agent/v1/agent-versions"
     DEFAULT_MAX_LIMIT = 200
     ABSOLUTE_MAX_LIMIT = 1000
 
