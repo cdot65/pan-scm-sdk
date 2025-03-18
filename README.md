@@ -196,9 +196,9 @@ The unified client provides access to the following services through attribute-b
 | `syslog_server_profile`            | Syslog server configurations for centralized logging          |
 | `tag`                              | Resource classification and organization labels               |
 | `auto_tag_actions`                 | Automated tag assignment based on traffic and security events |
-| **Mobile Users**                   |                                                               |
-| `auth_setting`                     | Mobile Users authentication settings                          |
-| `agent_version`                    | Global Protect agent versions                                 |
+| **Mobile Agent**                   |                                                               |
+| `auth_setting`                     | GlobalProtect authentication settings                         |
+| `agent_version`                    | GlobalProtect agent versions (read-only)                      |
 | **Network**                        |                                                               |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                 |
 | `ike_gateway`                      | IKE gateways for VPN tunnel endpoints                         |
