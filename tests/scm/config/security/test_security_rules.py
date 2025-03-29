@@ -1491,34 +1491,50 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
         """Test moving a rule before another rule."""
         source_rule = "123e4567-e89b-12d3-a456-426655440000"
         dest_rule_id = "987fcdeb-54ba-3210-9876-fedcba098765"
-        move_data = SecurityRuleMoveApiFactory.before_rule(
+        move_config = SecurityRuleMoveApiFactory.before_rule(
             dest_rule=dest_rule_id,
             rulebase=SecurityRuleRulebase.PRE,
-        ).model_dump(exclude_none=True)
+        )
+
+        # Get the data as a dictionary
+        move_data = move_config.model_dump(exclude_none=True)
+
+        # Expected data - with destination_rule as string
+        expected_data = move_data.copy()
+        if "destination_rule" in expected_data:
+            expected_data["destination_rule"] = str(expected_data["destination_rule"])
 
         self.mock_scm.post.return_value = None  # noqa
         self.client.move(source_rule, move_data)  # noqa
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{source_rule}:move",
-            json=move_data,
+            json=expected_data,
         )
 
     def test_move_after_rule(self):
         """Test moving a rule after another rule."""
         source_rule = "123e4567-e89b-12d3-a456-426655440000"
         dest_rule_id = "987fcdeb-54ba-3210-9876-fedcba098765"
-        move_data = SecurityRuleMoveApiFactory.after_rule(
+        move_config = SecurityRuleMoveApiFactory.after_rule(
             dest_rule=dest_rule_id,
             rulebase=SecurityRuleRulebase.PRE,
-        ).model_dump(exclude_none=True)
+        )
+
+        # Get the data as a dictionary
+        move_data = move_config.model_dump(exclude_none=True)
+
+        # Expected data - with destination_rule as string
+        expected_data = move_data.copy()
+        if "destination_rule" in expected_data:
+            expected_data["destination_rule"] = str(expected_data["destination_rule"])
 
         self.mock_scm.post.return_value = None  # noqa
         self.client.move(source_rule, move_data)  # noqa
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             f"/config/security/v1/security-rules/{source_rule}:move",
-            json=move_data,
+            json=expected_data,
         )
 
     def test_move_invalid_destination_error(self):
