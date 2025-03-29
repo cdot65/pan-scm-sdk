@@ -2,6 +2,19 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.23
+
+**Released:** March 29, 2025
+
+### Fixed
+
+- **Security Rule Move Operation**: Fixed UUID serialization issue in the `.move()` method of `SecurityRule` class
+  - Previously, when a UUID object was passed as `destination_rule` parameter, JSON serialization would fail
+  - Now properly converts UUID objects to strings before sending to the API
+- **Example Scripts**: Added example script for testing security rule move operations
+  - Demonstrates proper handling of UUID serialization
+  - Includes improved error handling for edge cases
+
 ## Version 0.3.22
 
 **Released:** March 18, 2025
