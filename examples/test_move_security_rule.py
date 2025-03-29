@@ -8,23 +8,19 @@ This script tests the fixed UUID serialization issue in the .move() method.
 import os
 import sys
 from pathlib import Path
-from uuid import UUID
-
-# Third-party imports
-from dotenv import load_dotenv
 
 # Add the project root to the path to allow imports from the scm package
 project_root = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(project_root))
 
+# Third-party imports
+from dotenv import load_dotenv
+
 # SDK imports
 from scm.client import ScmClient
 from scm.exceptions import (
     APIError,
-    InvalidObjectError,
-    NotFoundError,
     AuthenticationError,
-    NameNotUniqueError,
 )
 
 
@@ -103,14 +99,14 @@ def list_security_rules(client, folder):
         sys.exit(1)
 
 
-def move_security_rule(client, rules):
+def move_security_rule(client, rules, folder):
     """
     Move a security rule to a new position
     For this example, we'll move the last rule before the second-to-last rule
     """
     if len(rules) < 2:
         print("Need at least 2 rules to perform a move operation.")
-        return
+        sys.exit(1)
     
     # Select rules for the move operation
     source_rule = rules[-1]  # Last rule
@@ -123,7 +119,7 @@ def move_security_rule(client, rules):
         move_config = {
             "destination": "before",
             "rulebase": "pre",
-            "destination_rule": target_rule.id  # This is a UUID object
+            "destination_rule": str(target_rule.id)  # Convert UUID to string
         }
         
         # Execute the move operation
@@ -154,6 +150,6 @@ if __name__ == "__main__":
     rules = list_security_rules(client, folder)
     
     # Move a rule
-    move_security_rule(client, rules)
+    move_security_rule(client, rules, folder)
     
     print("\nTest completed!")
