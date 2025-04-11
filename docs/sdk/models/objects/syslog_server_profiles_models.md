@@ -68,7 +68,7 @@ The `SyslogServerProfileBaseModel` contains fields common to all syslog server p
 | Attribute | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | name | str | Yes | - | The name of the syslog server profile (max length: 31) |
-| servers | Dict[str, Any] | Yes | - | Dictionary of server configurations |
+| servers | List[SyslogServerModel] | Yes | - | List of server configurations |
 | format | Optional[FormatModel] | No | None | Format settings for different log types |
 | folder | Optional[str] | No | None | The folder in which the resource is defined (max length: 64) |
 | snippet | Optional[str] | No | None | The snippet in which the resource is defined (max length: 64) |
@@ -130,41 +130,50 @@ The `SyslogServerProfileResponseModel` extends the base model and includes the I
 
 ## Usage Examples
 
-### Creating a Basic Syslog Server Profile
+### Creating a Basic Syslog Server Profile with UDP Transport
 
 ```python
 from scm.models.objects.syslog_server_profiles import (
     SyslogServerProfileCreateModel,
-    FormatModel
+    SyslogServerModel
 )
 
-# Create a simple syslog server profile
-profile_data = {
-    "name": "basic-syslog-profile",
-    "servers": {
-        "primary": {
-            "name": "primary",
-            "server": "192.168.1.100",
-            "transport": "UDP",
-            "port": 514,
-            "format": "BSD",
-            "facility": "LOG_USER"
-        }
-    },
-    "folder": "Shared"
-}
+# Define a syslog server configuration
+server = SyslogServerModel(
+    name="primary-syslog",
+    server="192.168.1.100",
+    transport="UDP",
+    port=514,
+    format="BSD",
+    facility="LOG_USER"
+)
 
-# Use the data with the Pydantic model
-syslog_profile = SyslogServerProfileCreateModel(**profile_data)
+# Create a syslog server profile in a folder
+syslog_profile = SyslogServerProfileCreateModel(
+    name="basic-syslog-profile",
+    servers=[server],
+    folder="Shared"
+)
 ```
 
-### Creating a Profile with Multiple Servers and Formatting
+### Creating a Profile with TCP Transport and Custom Formatting
 
 ```python
 from scm.models.objects.syslog_server_profiles import (
     SyslogServerProfileCreateModel,
+    SyslogServerModel,
     FormatModel,
     EscapingModel
+)
+
+# Define a syslog server configuration with TCP transport
+server = SyslogServerModel(
+    name="secure-syslog",
+    server="logs.example.com",
+    transport="TCP",
+    port=1514,
+    format="IETF",
+    facility="LOG_LOCAL0"
 )
 
 # Define format settings with escaping
@@ -178,41 +187,48 @@ format_config = FormatModel(
     system="hostname,$time,$severity,$result"
 )
 
-# Create a profile with multiple servers and formatting
-profile_data = {
-    "name": "advanced-syslog-profile",
-    "servers": {
-        "primary": {
-            "name": "primary",
-            "server": "logs.example.com",
-            "transport": "TCP",
-            "port": 1514,
-            "format": "IETF",
-            "facility": "LOG_LOCAL0"
-        },
-        "backup": {
-            "name": "backup",
-            "server": "backup-logs.example.com",
-            "transport": "TCP",
-            "port": 1514,
-            "format": "IETF",
-            "facility": "LOG_LOCAL1"
-        }
-    },
-    "format": {
-        "traffic": "hostname,$time,$src,$dst,$proto,$sport,$dport",
-        "threat": "hostname,$time,$src,$dst,$threatid,$severity",
-        "system": "hostname,$time,$severity,$result",
-        "escaping": {
-            "escape_character": "\\",
-            "escaped_characters": ",\""
-        }
-    },
-    "folder": "Shared"
-}
+# Create a syslog server profile with formatting in a device
+syslog_profile = SyslogServerProfileCreateModel(
+    name="advanced-syslog-profile",
+    servers=[server],
+    format=format_config,
+    device="My Device"
+)
+```
 
-# Use the data with the Pydantic model
-syslog_profile = SyslogServerProfileCreateModel(**profile_data)
+### Creating a Profile with Multiple Servers
+
+```python
+from scm.models.objects.syslog_server_profiles import (
+    SyslogServerProfileCreateModel,
+    SyslogServerModel
+)
+
+# Define multiple syslog server configurations
+primary_server = SyslogServerModel(
+    name="primary",
+    server="192.168.1.100",
+    transport="TCP",
+    port=1514,
+    format="IETF",
+    facility="LOG_LOCAL0"
+)
+
+backup_server = SyslogServerModel(
+    name="backup",
+    server="192.168.1.101",
+    transport="TCP",
+    port=1514,
+    format="IETF",
+    facility="LOG_LOCAL1"
+)
+
+# Create a syslog server profile with multiple servers in a snippet
+syslog_profile = SyslogServerProfileCreateModel(
+    name="multi-server-profile",
+    servers=[primary_server, backup_server],
+    snippet="My Snippet"
+)
 ```
 
 ### Updating an Existing Syslog Server Profile
@@ -220,53 +236,51 @@ syslog_profile = SyslogServerProfileCreateModel(**profile_data)
 ```python
 from uuid import UUID
 from scm.models.objects.syslog_server_profiles import (
-    SyslogServerProfileUpdateModel
+    SyslogServerProfileUpdateModel,
+    SyslogServerModel,
+    FormatModel
+)
+
+# Define updated server configurations
+updated_server = SyslogServerModel(
+    name="updated-server",
+    server="new-logs.example.com",
+    transport="TCP",
+    port=1514,
+    format="IETF",
+    facility="LOG_LOCAL0"
+)
+
+# Define updated format settings
+updated_format = FormatModel(
+    traffic="$time,$src,$dst,$proto,$rule,$action",
+    threat="$time,$src,$dst,$threatid,$severity,$action"
 )
 
 # Update an existing syslog server profile
-update_data = {
-    "id": UUID("123e4567-e89b-12d3-a456-426655440000"),
-    "name": "updated-syslog-profile",
-    "servers": {
-        "primary": {
-            "name": "primary",
-            "server": "new-logs.example.com",  # Updated server address
-            "transport": "TCP",
-            "port": 1514,
-            "format": "IETF",
-            "facility": "LOG_LOCAL0"
-        }
-    },
-    "folder": "Shared"
-}
-
-# Create update model
-update_profile = SyslogServerProfileUpdateModel(**update_data)
+updated_profile = SyslogServerProfileUpdateModel(
+    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
+    name="updated-profile",
+    servers=[updated_server],
+    format=updated_format
+)
 ```
 
 ## Best Practices
 
 ### Server Configuration
-- Include at least one server in the `servers` dictionary
-- Use TCP transport for critical logs where reliability is important
-- Follow standard syslog configuration practices (port 514 for UDP, 1514 for TCP)
-- Use appropriate syslog facilities based on the log type
+- Use TCP transport for critical logs to ensure reliable delivery
+- Configure appropriate facility values to distinguish log sources
+- Use IETF format for more detailed structured logging
+- Set descriptive server names for easier management
 
 ### Format Configuration
+- Define custom log formats to include only the fields you need
+- Use consistent format templates across log types for easier parsing
+- Configure escaping for logs containing special characters
 - Follow RFC 3164 (BSD) or RFC 5424 (IETF) standards for your syslog messages
-- Use escaping configuration when your logs contain special characters that need escaping
-- Use different format templates for different log types for easier parsing
 
 ### Container Management
 - Always specify exactly one container type (folder, snippet, or device)
 - Use consistent naming conventions for syslog server profiles
-
-### Validation
-- Validate responses using the `SyslogServerProfileResponseModel`
-- Handle validation errors appropriately in your application
-- Ensure server port numbers are within the valid range (1-65535)
-
-## Related Models
-
-- [Log Forwarding Profile Models](log_forwarding_profile_models.md): For configuring log forwarding with syslog servers
-- [HTTP Server Profiles Models](http_server_profiles_models.md): For configuring HTTP-based logging
+- Organize profiles logically by function or application
