@@ -22,10 +22,12 @@ class TestAgentVersions:
     @pytest.fixture
     def agent_versions_service(self, mock_api_client):
         """Create an AgentVersions service instance with a mock API client."""
-        with patch('scm.config.BaseObject.__init__') as mock_init:
+        with patch("scm.config.BaseObject.__init__") as mock_init:
             mock_init.return_value = None  # Skip the real __init__
             service = AgentVersions(mock_api_client)
-            service._max_limit = AgentVersions.DEFAULT_MAX_LIMIT  # Set this manually since we're skipping __init__
+            service._max_limit = (
+                AgentVersions.DEFAULT_MAX_LIMIT
+            )  # Set this manually since we're skipping __init__
             service.logger = Mock()  # Add a mock logger
             service.api_client = mock_api_client  # We need to set this manually
             return service
@@ -134,7 +136,9 @@ class TestAgentVersions:
     def test_apply_filters_case_insensitive(self, agent_versions_service):
         """Test _apply_filters with case-insensitive matching."""
         versions = ["5.3.0", "5.2.8", "5.2.7"]
-        result = agent_versions_service._apply_filters(versions, {"version": "5.2", "prefix": "5.2.7"})
+        result = agent_versions_service._apply_filters(
+            versions, {"version": "5.2", "prefix": "5.2.7"}
+        )
         assert result == ["5.2.7"]
 
     def test_list_no_filters(self, agent_versions_service, mock_api_client):
@@ -181,7 +185,9 @@ class TestAgentVersions:
 
     def test_fetch_multiple_matches(self, agent_versions_service, mock_api_client):
         """Test fetch method with multiple matches (edge case)."""
-        mock_api_client.get.return_value = {"agent_versions": ["5.3.0", "5.3.0"]}  # Duplicate entries
+        mock_api_client.get.return_value = {
+            "agent_versions": ["5.3.0", "5.3.0"]
+        }  # Duplicate entries
         result = agent_versions_service.fetch("5.3.0")
         assert result == "5.3.0"
 
@@ -190,7 +196,7 @@ class TestAgentVersions:
         mock_api_client.get.return_value = {"wrong_key": ["5.3.0", "5.2.8", "5.2.7"]}
         with pytest.raises(Exception):
             agent_versions_service.list()
-            
+
     def test_max_limit_property(self, agent_versions_service):
         """Test max_limit property getter."""
         assert agent_versions_service.max_limit == AgentVersions.DEFAULT_MAX_LIMIT
@@ -199,11 +205,11 @@ class TestAgentVersions:
         """Test max_limit property setter."""
         agent_versions_service.max_limit = 500
         assert agent_versions_service._max_limit == 500
-        
+
     # Create mock init tests separately with custom setup
     def test_init_default_max_limit(self):
         """Test initialization with default max_limit."""
-        with patch('scm.config.BaseObject.__init__') as mock_init:
+        with patch("scm.config.BaseObject.__init__") as mock_init:
             mock_init.return_value = None
             mock_client = Mock()
             service = AgentVersions(mock_client)
@@ -214,7 +220,7 @@ class TestAgentVersions:
 
     def test_init_custom_max_limit(self):
         """Test initialization with custom max_limit."""
-        with patch('scm.config.BaseObject.__init__') as mock_init:
+        with patch("scm.config.BaseObject.__init__") as mock_init:
             mock_init.return_value = None
             mock_client = Mock()
             service = AgentVersions(mock_client)

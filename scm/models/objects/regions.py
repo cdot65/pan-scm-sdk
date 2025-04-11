@@ -5,8 +5,15 @@ from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (BaseModel, ConfigDict, Field, confloat, constr,
-                      field_validator, model_validator)
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    confloat,
+    constr,
+    field_validator,
+    model_validator,
+)
 
 
 class GeoLocation(BaseModel):

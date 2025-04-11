@@ -7,10 +7,14 @@ from typing import Any, Dict
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.deployment import (BackboneRoutingEnum, BGPRoutingCreateModel,
-                                   BGPRoutingResponseModel,
-                                   BGPRoutingUpdateModel, DefaultRoutingModel,
-                                   HotPotatoRoutingModel)
+from scm.models.deployment import (
+    BackboneRoutingEnum,
+    BGPRoutingCreateModel,
+    BGPRoutingResponseModel,
+    BGPRoutingUpdateModel,
+    DefaultRoutingModel,
+    HotPotatoRoutingModel,
+)
 
 
 class BGPRouting(BaseObject):

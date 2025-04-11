@@ -4,10 +4,8 @@
 import pytest
 
 # Local SDK imports
-from scm.models.objects.application_filters import \
-    ApplicationFiltersCreateModel
-from tests.factories import (ApplicationFiltersCreateApiFactory,
-                             ApplicationFiltersCreateModelFactory)
+from scm.models.objects.application_filters import ApplicationFiltersCreateModel
+from tests.factories import ApplicationFiltersCreateApiFactory, ApplicationFiltersCreateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

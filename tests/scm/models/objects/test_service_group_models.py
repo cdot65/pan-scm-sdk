@@ -5,9 +5,11 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import (ServiceGroupCreateModel,
-                                ServiceGroupResponseModel,
-                                ServiceGroupUpdateModel)
+from scm.models.objects import (
+    ServiceGroupCreateModel,
+    ServiceGroupResponseModel,
+    ServiceGroupUpdateModel,
+)
 from tests.factories import ServiceGroupCreateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------

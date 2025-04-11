@@ -9,8 +9,11 @@ import requests
 from scm.client import Scm
 from scm.config.objects import HTTPServerProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import (HTTPServerProfileResponseModel,
-                                HTTPServerProfileUpdateModel, ServerModel)
+from scm.models.objects import (
+    HTTPServerProfileResponseModel,
+    HTTPServerProfileUpdateModel,
+    ServerModel,
+)
 from tests.factories import HTTPServerProfileCreateModelFactory
 
 # Remove all xfail markers to achieve 100% test pass rate

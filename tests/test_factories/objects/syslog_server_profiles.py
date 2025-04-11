@@ -6,9 +6,14 @@ import factory
 from faker import Faker
 
 from scm.models.objects.syslog_server_profiles import (
-    EscapingModel, FormatModel, SyslogServerModel,
-    SyslogServerProfileBaseModel, SyslogServerProfileCreateModel,
-    SyslogServerProfileResponseModel, SyslogServerProfileUpdateModel)
+    EscapingModel,
+    FormatModel,
+    SyslogServerModel,
+    SyslogServerProfileBaseModel,
+    SyslogServerProfileCreateModel,
+    SyslogServerProfileResponseModel,
+    SyslogServerProfileUpdateModel,
+)
 
 fake = Faker()
 
@@ -99,9 +104,7 @@ class SyslogServerProfileBaseFactory(factory.Factory):
         abstract = True
 
     name = factory.Sequence(lambda n: f"syslog-profile-{n}")
-    server = factory.List([
-        factory.SubFactory(SyslogServerModelFactory)
-    ])
+    server = factory.List([factory.SubFactory(SyslogServerModelFactory)])
     format = factory.SubFactory(FormatModelFactory)
 
     # Container fields default to None
@@ -180,7 +183,7 @@ class SyslogServerProfileUpdateModelFactory(SyslogServerProfileBaseFactory):
         """Create an instance with updated server list."""
         updated_servers = [
             SyslogServerModelFactory(name="updated-server-1"),
-            SyslogServerModelFactory(name="updated-server-2", transport="TCP")
+            SyslogServerModelFactory(name="updated-server-2", transport="TCP"),
         ]
         return cls(server=updated_servers, **kwargs)
 

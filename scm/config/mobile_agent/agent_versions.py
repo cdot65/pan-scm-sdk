@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.mobile_agent.agent_versions import (AgentVersionModel,
-                                                    AgentVersionsModel)
+from scm.models.mobile_agent.agent_versions import AgentVersionModel, AgentVersionsModel
 
 
 class AgentVersions(BaseObject):
@@ -32,7 +31,7 @@ class AgentVersions(BaseObject):
     ):
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
-        
+
         # Validate and set max_limit
         self._max_limit = self._validate_max_limit(max_limit)
 
@@ -115,13 +114,13 @@ class AgentVersions(BaseObject):
                 if not version_filter:
                     return []
                 filtered_versions = [
-                    ver for ver in filtered_versions 
+                    ver
+                    for ver in filtered_versions
                     if any(v.lower() in ver.lower() for v in version_filter)
                 ]
             else:
                 filtered_versions = [
-                    ver for ver in filtered_versions 
-                    if version_filter.lower() in ver.lower()
+                    ver for ver in filtered_versions if version_filter.lower() in ver.lower()
                 ]
 
         # Filter by version prefix
@@ -132,12 +131,14 @@ class AgentVersions(BaseObject):
                 if not prefix_filter:
                     return []
                 filtered_versions = [
-                    ver for ver in filtered_versions 
+                    ver
+                    for ver in filtered_versions
                     if any(ver.lower().startswith(p.lower()) for p in prefix_filter)
                 ]
             else:
                 filtered_versions = [
-                    ver for ver in filtered_versions 
+                    ver
+                    for ver in filtered_versions
                     if ver.lower().startswith(prefix_filter.lower())
                 ]
 

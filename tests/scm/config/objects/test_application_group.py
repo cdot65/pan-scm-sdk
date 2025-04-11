@@ -11,9 +11,11 @@ from requests.exceptions import HTTPError
 from scm.config.objects import ApplicationGroup
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ApplicationGroupResponseModel
-from tests.factories import (ApplicationGroupCreateApiFactory,
-                             ApplicationGroupResponseFactory,
-                             ApplicationGroupUpdateApiFactory)
+from tests.factories import (
+    ApplicationGroupCreateApiFactory,
+    ApplicationGroupResponseFactory,
+    ApplicationGroupUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 

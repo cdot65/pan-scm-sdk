@@ -2,8 +2,7 @@ from enum import Enum
 from typing import List, Literal, Optional
 from uuid import UUID
 
-from pydantic import (BaseModel, ConfigDict, Field, constr, field_validator,
-                      model_validator)
+from pydantic import BaseModel, ConfigDict, Field, constr, field_validator, model_validator
 
 
 class NatType(str, Enum):

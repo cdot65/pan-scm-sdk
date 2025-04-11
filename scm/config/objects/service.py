@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import (ServiceCreateModel, ServiceResponseModel,
-                                ServiceUpdateModel)
+from scm.models.objects import ServiceCreateModel, ServiceResponseModel, ServiceUpdateModel
 
 
 class Service(BaseObject):

@@ -6,8 +6,7 @@ from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (BaseModel, ConfigDict, Field, field_validator,
-                      model_validator)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # Regular expression to validate time range in format hh:mm-hh:mm
 # This pattern ensures:

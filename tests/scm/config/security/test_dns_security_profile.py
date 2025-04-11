@@ -11,13 +11,18 @@ from requests.exceptions import HTTPError
 from scm.config.security import DNSSecurityProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.dns_security_profiles import (
-    ActionEnum, DNSSecurityProfileResponseModel, LogLevelEnum,
-    PacketCaptureEnum)
-from tests.factories import (BotnetDomainsFactory,
-                             DNSSecurityCategoryEntryFactory,
-                             DNSSecurityProfileCreateApiFactory,
-                             DNSSecurityProfileResponseFactory,
-                             DNSSecurityProfileUpdateApiFactory)
+    ActionEnum,
+    DNSSecurityProfileResponseModel,
+    LogLevelEnum,
+    PacketCaptureEnum,
+)
+from tests.factories import (
+    BotnetDomainsFactory,
+    DNSSecurityCategoryEntryFactory,
+    DNSSecurityProfileCreateApiFactory,
+    DNSSecurityProfileResponseFactory,
+    DNSSecurityProfileUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 

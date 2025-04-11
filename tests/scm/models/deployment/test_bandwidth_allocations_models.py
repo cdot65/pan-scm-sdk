@@ -4,9 +4,13 @@ import pytest
 from pydantic import ValidationError
 
 from scm.models.deployment.bandwidth_allocations import (
-    BandwidthAllocationBaseModel, BandwidthAllocationCreateModel,
-    BandwidthAllocationListResponseModel, BandwidthAllocationResponseModel,
-    BandwidthAllocationUpdateModel, QosModel)
+    BandwidthAllocationBaseModel,
+    BandwidthAllocationCreateModel,
+    BandwidthAllocationListResponseModel,
+    BandwidthAllocationResponseModel,
+    BandwidthAllocationUpdateModel,
+    QosModel,
+)
 
 
 class TestQosModel:

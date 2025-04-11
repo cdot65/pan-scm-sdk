@@ -5,10 +5,14 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from scm.models.network import (DeviceAcl, NetworkConfig,
-                                SecurityZoneCreateModel,
-                                SecurityZoneResponseModel,
-                                SecurityZoneUpdateModel, UserAcl)
+from scm.models.network import (
+    DeviceAcl,
+    NetworkConfig,
+    SecurityZoneCreateModel,
+    SecurityZoneResponseModel,
+    SecurityZoneUpdateModel,
+    UserAcl,
+)
 
 
 class TestSecurityZoneModels:
