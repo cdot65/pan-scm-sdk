@@ -989,3 +989,117 @@ class TestSyslogServerProfileFilteringAndPagination:
         # Test with none
         params = syslog_server_profile._build_container_params(None, None, None)
         assert params == {}
+
+    def test_direct_apply_filters(self):
+        """Test the _apply_filters method directly with different filters."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Create SyslogServerProfile instance
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        # Create a simple mock object that matches what _apply_filters expects
+        class MockProfile:
+            def __init__(self, servers_dict):
+                self.servers = servers_dict
+        
+        # Create mock profiles with the servers attribute containing transport and format
+        profile1 = MockProfile({"server1": {"transport": "UDP", "format": "BSD"}})
+        profile2 = MockProfile({"server2": {"transport": "TCP", "format": "IETF"}})
+        
+        profiles = [profile1, profile2]
+        
+        # Test with empty filter dict (should return all profiles)
+        filtered = syslog_server_profile._apply_filters(profiles, {})
+        assert len(filtered) == 2
+        
+        # Test with transport filter
+        filtered = syslog_server_profile._apply_filters(profiles, {"transport": ["UDP"]})
+        assert len(filtered) == 1
+        assert filtered[0] == profile1
+        
+        # Test with format filter
+        filtered = syslog_server_profile._apply_filters(profiles, {"format": ["IETF"]})
+        assert len(filtered) == 1
+        assert filtered[0] == profile2
+        
+        # Test with combined filters that match no profiles
+        filtered = syslog_server_profile._apply_filters(profiles, {"transport": ["UDP"], "format": ["IETF"]})
+        assert len(filtered) == 0
+        
+        # Test with non-list transport filter (should raise an exception)
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile._apply_filters(profiles, {"transport": "UDP"})
+        assert exc_info.value.error_code == "E003"
+        
+        # Test with non-list format filter (should raise an exception)
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile._apply_filters(profiles, {"format": "IETF"})
+        assert exc_info.value.error_code == "E003"
+
+    def test_build_container_params_all_none(self):
+        """Test _build_container_params with all None parameters."""
+        api_client = MagicMock(spec=Scm)
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        # Call with all None
+        result = syslog_server_profile._build_container_params(None, None, None)
+        assert result == {}
+
+    def test_list_with_api_error(self):
+        """Test error handling when API call for list fails."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Set up API client to raise an exception
+        api_client.get.side_effect = requests.exceptions.HTTPError(
+            "API connection failed", response=MagicMock(status_code=500)
+        )
+        
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        # Test that the exception is propagated
+        with pytest.raises(requests.exceptions.HTTPError) as exc_info:
+            syslog_server_profile.list(folder="Shared")
+        
+        assert "API connection failed" in str(exc_info.value)
+
+    def test_list_with_pagination_break(self):
+        """Test pagination with exactly limit objects (edge case)."""
+        api_client = MagicMock(spec=Scm)
+        
+        # First response has exactly limit objects
+        profiles_page1 = [
+            SyslogServerProfileResponseModelFactory(name="profile1"),
+            SyslogServerProfileResponseModelFactory(name="profile2")
+        ]
+        mock_response1 = {
+            "data": [model.model_dump(by_alias=True) for model in profiles_page1],
+            "total": 2,
+            "limit": 2,
+            "offset": 0
+        }
+        
+        # Second response is empty to indicate end of results
+        mock_response2 = {
+            "data": [],
+            "total": 2,
+            "limit": 2,
+            "offset": 2
+        }
+        
+        # Set up API client to return these responses
+        api_client.get.side_effect = [mock_response1, mock_response2]
+        
+        # Create SyslogServerProfile instance with small max_limit
+        syslog_server_profile = SyslogServerProfile(api_client, max_limit=2)
+        
+        # Call list method
+        profiles = syslog_server_profile.list(folder="Shared")
+        
+        # Verify results
+        assert len(profiles) == 2
+        assert profiles[0].name == "profile1"
+        assert profiles[1].name == "profile2"
+        
+        # Verify there were 2 API calls (one returned exactly limit objects, 
+        # so pagination continues, but second has no results)
+        assert api_client.get.call_count == 2
