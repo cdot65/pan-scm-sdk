@@ -744,6 +744,144 @@ class TestSyslogServerProfileFilteringAndPagination:
         assert exc_info.value.http_status_code == 400
         assert "Invalid Object" in str(exc_info.value.details)
 
+    def test_exclude_parameters(self):
+        """Test list with exclude parameters."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Create mock response with an empty list
+        mock_response = {"data": [], "total": 0, "limit": 10, "offset": 0}
+        api_client.get.return_value = mock_response
+        
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        # Override the _apply_filters method to verify filters were passed correctly
+        original_apply_filters = syslog_server_profile._apply_filters
+        
+        mock_apply_filters = MagicMock()
+        # Just return the input objects unchanged
+        mock_apply_filters.side_effect = lambda objs, _: objs
+        
+        with patch.object(syslog_server_profile, '_apply_filters', mock_apply_filters):
+            # Call list with exclude parameters
+            syslog_server_profile.list(
+                folder="Shared", 
+                exclude_folders=["Folder1", "Folder2"],
+                exclude_snippets=["Snippet1"],
+                exclude_devices=["Device1"]
+            )
+        
+        # Verify API call - only folder should be in params
+        api_client.get.assert_called_once()
+        args, kwargs = api_client.get.call_args
+        assert args[0] == "/config/objects/v1/syslog-server-profiles"
+        assert "params" in kwargs
+        assert kwargs["params"]["folder"] == "Shared"
+        # These should NOT be in the params because they're not added to the API call
+        assert "exclude_folders" not in kwargs["params"]
+        assert "exclude_snippets" not in kwargs["params"]
+        assert "exclude_devices" not in kwargs["params"]
+
+    def test_exact_match(self):
+        """Test list with exact_match parameter."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Create mock response
+        mock_response = {"data": [], "total": 0, "limit": 10, "offset": 0}
+        api_client.get.return_value = mock_response
+        
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        # Call list with exact_match parameter
+        syslog_server_profile.list(folder="Shared", exact_match=True)
+        
+        # Verify API call - only folder should be in params, not exact_match
+        api_client.get.assert_called_once()
+        args, kwargs = api_client.get.call_args
+        assert args[0] == "/config/objects/v1/syslog-server-profiles"
+        assert "params" in kwargs
+        assert kwargs["params"]["folder"] == "Shared"
+        # exact_match should NOT be in the params because it's not added to the API call
+        assert "exact_match" not in kwargs["params"]
+
+    def test_list_response_invalid_format(self):
+        """Test handling of invalid response format."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Make API return a non-dict response
+        api_client.get.return_value = "Not a dictionary"
+        
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.list(folder="Shared")
+            
+        # Check if the error details match what's in the implementation
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "Response is not a dictionary" in str(exc_info.value.details)
+
+    def test_list_response_missing_data(self):
+        """Test handling of response missing data field."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Make API return a response without 'data' field
+        api_client.get.return_value = {"total": 0, "limit": 10, "offset": 0}
+        
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.list(folder="Shared")
+            
+        # Check if the error details match what's in the implementation
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "data" in str(exc_info.value.details)
+        assert "field missing" in str(exc_info.value.details)
+
+    def test_list_response_data_not_list(self):
+        """Test handling of response with data not a list."""
+        api_client = MagicMock(spec=Scm)
+        
+        # Make API return a response with 'data' not a list
+        api_client.get.return_value = {"data": "Not a list", "total": 0, "limit": 10, "offset": 0}
+        
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.list(folder="Shared")
+            
+        # Check if the error details match what's in the implementation
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+        assert "data" in str(exc_info.value.details)
+        assert "must be a list" in str(exc_info.value.details)
+
+    def test_list_multiple_container_params(self):
+        """Test list with multiple container parameters."""
+        api_client = MagicMock(spec=Scm)
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.list(folder="Shared", snippet="MySnippet")
+            
+        # Check if the error details match what's in the implementation
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+        assert "Invalid container parameters" in str(exc_info.value.details)
+
+    def test_list_no_container_params(self):
+        """Test list with no container parameters."""
+        api_client = MagicMock(spec=Scm)
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.list()
+            
+        # Check if the error details match what's in the implementation
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 400
+        assert "Invalid container parameters" in str(exc_info.value.details)
+
     def test_pagination(self):
         """Test pagination through multiple requests."""
         api_client = MagicMock(spec=Scm)
