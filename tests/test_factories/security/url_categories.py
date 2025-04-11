@@ -134,3 +134,27 @@ class URLCategoriesResponseModelFactory(URLCategoriesBaseFactory):
                 "http.kali.org/kali/pool/main/g/glusterfs/",
             ]
         return cls(list=urls, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model, **kwargs):
+        """Create a response model based on a request model."""
+        # Start with the base fields from the request
+        data = {
+            "name": request_model.name,
+            "description": request_model.description,
+            "list": request_model.list,
+            "type": request_model.type,
+        }
+
+        # Add the container from the request
+        if request_model.folder:
+            data["folder"] = request_model.folder
+        if request_model.snippet:
+            data["snippet"] = request_model.snippet
+        if request_model.device:
+            data["device"] = request_model.device
+
+        # Override with any additional kwargs
+        data.update(kwargs)
+
+        return cls(**data)
