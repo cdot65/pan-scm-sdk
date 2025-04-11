@@ -26,6 +26,8 @@ class ServerModel(BaseModel):
         tls_version (Optional[str]): HTTP server TLS version.
         certificate_profile (Optional[str]): HTTP server certificate profile.
         http_method (Optional[str]): HTTP operation to perform.
+        username (Optional[str]): Username for HTTP server authentication.
+        password (Optional[str]): Password for HTTP server authentication.
     """
 
     name: str = Field(..., description="HTTP server name")
@@ -39,17 +41,39 @@ class ServerModel(BaseModel):
     http_method: Optional[Literal["GET", "POST", "PUT", "DELETE"]] = Field(
         None, description="HTTP operation to perform"
     )
+    username: Optional[str] = Field(None, description="Username for HTTP server authentication")
+    password: Optional[str] = Field(None, description="Password for HTTP server authentication")
 
 
 # PayloadFormat model for HTTP server profile
 class PayloadFormatModel(BaseModel):
     """
     Represents the payload format configuration for a specific log type.
+
+    Attributes:
+        name (Optional[str]): The name of the payload format. Default is "Default".
+        url_format (Optional[str]): The URL path of the HTTP server.
+        headers (Optional[List[Dict[str, str]]]): List of HTTP headers to include in the request.
+        params (Optional[List[Dict[str, str]]]): List of HTTP parameters to include in the request.
+        payload (Optional[str]): The log payload format. Contains log field values.
     """
 
-    # The exact fields in the payload format model are not specified in the OpenAPI spec
-    # but we can define a base model that can be extended if needed
-    model_config = ConfigDict(extra="allow")  # Allow extra fields since spec isn't clear
+    name: Optional[str] = Field(
+        "Default", description="The name of the payload format"
+    )
+    url_format: Optional[str] = Field(
+        None, description="The URL path of the HTTP server"
+    )
+    headers: Optional[List[Dict[str, str]]] = Field(
+        None, description="List of HTTP headers to include in the request"
+    )
+    params: Optional[List[Dict[str, str]]] = Field(
+        None, description="List of HTTP parameters to include in the request"
+    )
+    payload: Optional[str] = Field(
+        None,
+        description="The log payload format containing log field values"
+    )
 
 
 class HTTPServerProfileBaseModel(BaseModel):
@@ -91,9 +115,10 @@ class HTTPServerProfileBaseModel(BaseModel):
         description="Description of the HTTP server profile",
     )
 
+    # Format settings for different log types
     format: Optional[Dict[str, PayloadFormatModel]] = Field(
         None,
-        description="Format settings for different log types",
+        description="Format settings for different log types (config, system, traffic, threat, wildfire, url, data, gtp, sctp, tunnel, auth, userid, iptag, decryption, globalprotect, hip_match, correlation)",
     )
 
     # Container Types
