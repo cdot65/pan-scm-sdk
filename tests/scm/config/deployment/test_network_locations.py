@@ -8,10 +8,7 @@ import pytest
 
 # Local SDK imports
 from scm.config.deployment.network_locations import NetworkLocations
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment import NetworkLocationModel
 
 

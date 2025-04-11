@@ -1,7 +1,8 @@
 # tests/scm/test_unified_client.py
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from scm.client import Scm
 

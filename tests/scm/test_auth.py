@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 # External libraries
 import pytest
 from jwt.exceptions import ExpiredSignatureError, PyJWKClientError
-from requests.exceptions import HTTPError, Timeout, RequestException
+from requests.exceptions import HTTPError, RequestException, Timeout
 
 # Local SDK imports
 from scm.auth import OAuth2Client

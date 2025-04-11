@@ -1,6 +1,7 @@
 # tests/scm/config/network/test_nat_rules.py
 
 from unittest.mock import MagicMock
+
 import pytest
 from pydantic import ValidationError
 from pydantic.v1 import UUID4
@@ -9,18 +10,12 @@ from requests.exceptions import HTTPError
 # Import the NAT Rule SDK and related exceptions
 from scm.config.network.nat_rules import NatRule
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network.nat_rules import (
-    NatRuleResponseModel,
-    NatRuleCreateModel,
-    NatRuleUpdateModel,
-)
-
+from scm.models.network.nat_rules import (NatRuleCreateModel,
+                                          NatRuleResponseModel,
+                                          NatRuleUpdateModel)
 # Import factories for generating test data
-from tests.factories import (
-    NatRuleCreateApiFactory,
-    NatRuleUpdateApiFactory,
-    NatRuleResponseFactory,  # if needed in future
-)
+from tests.factories import NatRuleResponseFactory  # if needed in future
+from tests.factories import NatRuleCreateApiFactory, NatRuleUpdateApiFactory
 
 # Import utility function for simulating HTTP errors
 

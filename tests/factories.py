@@ -2,179 +2,115 @@
 
 # Standard library imports
 import uuid
-from typing import List, Union, Dict
+from typing import Dict, List, Union
 
 # External libraries
 import factory
 
 from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
-from scm.models.deployment.remote_networks import (
-    EcmpLoadBalancingEnum,
-    RemoteNetworkUpdateModel,
-    RemoteNetworkResponseModel,
-    EcmpTunnelModel,
-    PeeringTypeEnum,
-)
+from scm.models.deployment.remote_networks import (EcmpLoadBalancingEnum,
+                                                   EcmpTunnelModel,
+                                                   PeeringTypeEnum,
+                                                   RemoteNetworkResponseModel,
+                                                   RemoteNetworkUpdateModel)
 from scm.models.deployment.service_connections import (
-    ServiceConnectionCreateModel,
-    ServiceConnectionUpdateModel,
-    ServiceConnectionResponseModel,
-)
-from scm.models.network.nat_rules import (
-    NatRuleCreateModel,
-    NatRuleUpdateModel,
-    NatRuleResponseModel,
-    NatRuleMoveModel,
-    NatType,
-    NatMoveDestination,
-    NatRulebase,
-    SourceTranslation,
-    InterfaceAddress,
-)
-
+    ServiceConnectionCreateModel, ServiceConnectionResponseModel,
+    ServiceConnectionUpdateModel)
+from scm.models.network.nat_rules import (InterfaceAddress, NatMoveDestination,
+                                          NatRulebase, NatRuleCreateModel,
+                                          NatRuleMoveModel,
+                                          NatRuleResponseModel,
+                                          NatRuleUpdateModel, NatType,
+                                          SourceTranslation)
 # Local SDK imports
-from scm.models.objects import (
-    AddressCreateModel,
-    AddressUpdateModel,
-    AddressResponseModel,
-    AddressGroupCreateModel,
-    AddressGroupResponseModel,
-    ApplicationCreateModel,
-    ServiceCreateModel,
-    ServiceResponseModel,
-    ServiceUpdateModel,
-    TagResponseModel,
-    TagCreateModel,
-    TagUpdateModel,
-    ApplicationResponseModel,
-    ApplicationUpdateModel,
-    ApplicationFiltersCreateModel,
-    ApplicationFiltersUpdateModel,
-    ApplicationFiltersResponseModel,
-    ApplicationGroupCreateModel,
-    ApplicationGroupResponseModel,
-    ApplicationGroupUpdateModel,
-    ServiceGroupCreateModel,
-    ServiceGroupUpdateModel,
-    ServiceGroupResponseModel,
-    ExternalDynamicListsCreateModel,
-    ExternalDynamicListsResponseModel,
-    HIPObjectCreateModel,
-    HIPObjectResponseModel,
-    HIPObjectUpdateModel,
-    HIPProfileCreateModel,
-    HIPProfileResponseModel,
-    HIPProfileUpdateModel,
-    HTTPServerProfileCreateModel,
-    HTTPServerProfileResponseModel,
-    HTTPServerProfileUpdateModel,
-    LogForwardingProfileCreateModel,
-    LogForwardingProfileResponseModel,
-    LogForwardingProfileUpdateModel,
-    RegionCreateModel,
-    RegionUpdateModel,
-    RegionResponseModel,
-    ScheduleCreateModel,
-    ScheduleUpdateModel,
-    ScheduleResponseModel,
-)
-from scm.models.objects.address_group import (
-    DynamicFilter,
-    AddressGroupUpdateModel,
-)
-from scm.models.objects.hip_object import (
-    EncryptionLocationModel,
-    EncryptionStateIsNot,
-    EncryptionStateIs,
-    DiskEncryptionCriteriaModel,
-    DiskEncryptionModel,
-)
-from scm.models.objects.service import UDPProtocol, TCPProtocol, Override
-from scm.models.security import (
-    DNSSecurityProfileCreateModel,
-    DNSSecurityProfileResponseModel,
-    AntiSpywareProfileResponseModel,
-    AntiSpywareProfileCreateModel,
-    VulnerabilityProfileCreateModel,
-    VulnerabilityProfileResponseModel,
-    SecurityRuleCreateModel,
-    SecurityRuleMoveModel,
-    DecryptionProfileCreateModel,
-    DecryptionProfileResponseModel,
-    URLCategoriesCreateModel,
-)
+from scm.models.objects import (AddressCreateModel, AddressGroupCreateModel,
+                                AddressGroupResponseModel,
+                                AddressResponseModel, AddressUpdateModel,
+                                ApplicationCreateModel,
+                                ApplicationFiltersCreateModel,
+                                ApplicationFiltersResponseModel,
+                                ApplicationFiltersUpdateModel,
+                                ApplicationGroupCreateModel,
+                                ApplicationGroupResponseModel,
+                                ApplicationGroupUpdateModel,
+                                ApplicationResponseModel,
+                                ApplicationUpdateModel,
+                                ExternalDynamicListsCreateModel,
+                                ExternalDynamicListsResponseModel,
+                                HIPObjectCreateModel, HIPObjectResponseModel,
+                                HIPObjectUpdateModel, HIPProfileCreateModel,
+                                HIPProfileResponseModel, HIPProfileUpdateModel,
+                                HTTPServerProfileCreateModel,
+                                HTTPServerProfileResponseModel,
+                                HTTPServerProfileUpdateModel,
+                                LogForwardingProfileCreateModel,
+                                LogForwardingProfileResponseModel,
+                                LogForwardingProfileUpdateModel,
+                                RegionCreateModel, RegionResponseModel,
+                                RegionUpdateModel, ScheduleCreateModel,
+                                ScheduleResponseModel, ScheduleUpdateModel,
+                                ServiceCreateModel, ServiceGroupCreateModel,
+                                ServiceGroupResponseModel,
+                                ServiceGroupUpdateModel, ServiceResponseModel,
+                                ServiceUpdateModel, TagCreateModel,
+                                TagResponseModel, TagUpdateModel)
+from scm.models.objects.address_group import (AddressGroupUpdateModel,
+                                              DynamicFilter)
+from scm.models.objects.hip_object import (DiskEncryptionCriteriaModel,
+                                           DiskEncryptionModel,
+                                           EncryptionLocationModel,
+                                           EncryptionStateIs,
+                                           EncryptionStateIsNot)
+from scm.models.objects.service import Override, TCPProtocol, UDPProtocol
+from scm.models.security import (AntiSpywareProfileCreateModel,
+                                 AntiSpywareProfileResponseModel,
+                                 DecryptionProfileCreateModel,
+                                 DecryptionProfileResponseModel,
+                                 DNSSecurityProfileCreateModel,
+                                 DNSSecurityProfileResponseModel,
+                                 SecurityRuleCreateModel,
+                                 SecurityRuleMoveModel,
+                                 URLCategoriesCreateModel,
+                                 VulnerabilityProfileCreateModel,
+                                 VulnerabilityProfileResponseModel)
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywarePacketCapture,
-    AntiSpywareThreatExceptionBase,
-    AntiSpywareCategory,
-    AntiSpywareSeverity,
-    AntiSpywareProfileUpdateModel,
-    AntiSpywareInlinePolicyAction,
-    AntiSpywareMicaEngineSpywareEnabledEntry,
-    AntiSpywareExemptIpEntry,
-)
+    AntiSpywareCategory, AntiSpywareExemptIpEntry,
+    AntiSpywareInlinePolicyAction, AntiSpywareMicaEngineSpywareEnabledEntry,
+    AntiSpywarePacketCapture, AntiSpywareProfileUpdateModel)
+from scm.models.security.anti_spyware_profiles import \
+    AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel,
-)
+    AntiSpywareSeverity, AntiSpywareThreatExceptionBase)
 from scm.models.security.decryption_profiles import (
-    SSLVersion,
-    DecryptionProfileUpdateModel,
-    SSLNoProxy,
-    SSLInboundProxy,
-    SSLForwardProxy,
-    SSLProtocolSettings,
-)
+    DecryptionProfileUpdateModel, SSLForwardProxy, SSLInboundProxy, SSLNoProxy,
+    SSLProtocolSettings, SSLVersion)
 from scm.models.security.dns_security_profiles import (
-    BotnetDomainsModel,
-    ListActionRequestModel,
-    PacketCaptureEnum,
-    ListEntryBaseModel,
-    WhitelistEntryModel,
-    IPv6AddressEnum,
-    IPv4AddressEnum,
-    SinkholeSettingsModel,
-    LogLevelEnum,
-    ActionEnum,
-    DNSSecurityCategoryEntryModel,
-    DNSSecurityProfileUpdateModel,
-)
-from scm.models.security.security_rules import (
-    SecurityRuleProfileSetting,
-    SecurityRuleRulebase,
-    SecurityRuleMoveDestination,
-    SecurityRuleResponseModel,
-    SecurityRuleAction,
-    SecurityRuleUpdateModel,
-)
-from scm.models.security.url_categories import (
-    URLCategoriesListTypeEnum,
-    URLCategoriesUpdateModel,
-    URLCategoriesResponseModel,
-)
+    ActionEnum, BotnetDomainsModel, DNSSecurityCategoryEntryModel,
+    DNSSecurityProfileUpdateModel, IPv4AddressEnum, IPv6AddressEnum,
+    ListActionRequestModel, ListEntryBaseModel, LogLevelEnum,
+    PacketCaptureEnum, SinkholeSettingsModel, WhitelistEntryModel)
+from scm.models.security.security_rules import (SecurityRuleAction,
+                                                SecurityRuleMoveDestination,
+                                                SecurityRuleProfileSetting,
+                                                SecurityRuleResponseModel,
+                                                SecurityRuleRulebase,
+                                                SecurityRuleUpdateModel)
+from scm.models.security.url_categories import (URLCategoriesListTypeEnum,
+                                                URLCategoriesResponseModel,
+                                                URLCategoriesUpdateModel)
 from scm.models.security.vulnerability_protection_profiles import (
+    VulnerabilityProfileCategory, VulnerabilityProfileExemptIpEntry,
+    VulnerabilityProfileHost, VulnerabilityProfilePacketCapture,
+    VulnerabilityProfileRuleModel, VulnerabilityProfileSeverity,
     VulnerabilityProfileThreatExceptionModel,
-    VulnerabilityProfileRuleModel,
-    VulnerabilityProfileHost,
-    VulnerabilityProfileCategory,
-    VulnerabilityProfileSeverity,
-    VulnerabilityProfileUpdateModel,
-    VulnerabilityProfilePacketCapture,
     VulnerabilityProfileTimeAttribute,
-    VulnerabilityProfileExemptIpEntry,
-    VulnerabilityProfileTimeAttributeTrackBy,
-)
+    VulnerabilityProfileTimeAttributeTrackBy, VulnerabilityProfileUpdateModel)
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAvDirection,
-    WildfireAvAnalysis,
-    WildfireAvProfileCreateModel,
-    WildfireAvProfileResponseModel,
-    WildfireAvProfileUpdateModel,
-    WildfireAvThreatExceptionEntry,
-    WildfireAvMlavExceptionEntry,
-    WildfireAvRuleBase,
-)
-
+    WildfireAvAnalysis, WildfireAvDirection, WildfireAvMlavExceptionEntry,
+    WildfireAvProfileCreateModel, WildfireAvProfileResponseModel,
+    WildfireAvProfileUpdateModel, WildfireAvRuleBase,
+    WildfireAvThreatExceptionEntry)
 
 # ----------------------------------------------------------------------------
 # Network Location object factories.

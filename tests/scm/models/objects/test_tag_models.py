@@ -5,13 +5,8 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import (
-    TagCreateModel,
-    TagUpdateModel,
-    TagResponseModel,
-)
+from scm.models.objects import TagCreateModel, TagResponseModel, TagUpdateModel
 from tests.factories import TagCreateModelFactory, TagUpdateModelFactory
-
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

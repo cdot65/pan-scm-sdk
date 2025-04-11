@@ -9,18 +9,11 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.security import URLCategories
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.security.url_categories import (
-    URLCategoriesResponseModel,
-)
-from tests.factories import (
-    URLCategoriesCreateApiFactory,
-    URLCategoriesUpdateApiFactory,
-    URLCategoriesResponseFactory,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.security.url_categories import URLCategoriesResponseModel
+from tests.factories import (URLCategoriesCreateApiFactory,
+                             URLCategoriesResponseFactory,
+                             URLCategoriesUpdateApiFactory)
 from tests.utils import raise_mock_http_error
 
 

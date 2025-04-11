@@ -1,13 +1,10 @@
 # scm/config/__init__.py
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from scm.client import Scm
-from scm.models.operations import (
-    CandidatePushResponseModel,
-    JobStatusResponse,
-    JobListResponse,
-)
+from scm.models.operations import (CandidatePushResponseModel, JobListResponse,
+                                   JobStatusResponse)
 
 
 class BaseObject:

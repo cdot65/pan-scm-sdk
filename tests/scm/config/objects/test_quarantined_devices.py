@@ -2,18 +2,14 @@
 
 # Standard library imports
 from unittest.mock import MagicMock
+
 import pytest
 from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import QuarantinedDevices
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.objects import (
-    QuarantinedDevicesResponseModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.objects import QuarantinedDevicesResponseModel
 from tests.utils import raise_mock_http_error
 
 

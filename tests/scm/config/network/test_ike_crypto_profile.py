@@ -1,14 +1,13 @@
 """Test the IKE Crypto Profile configuration class."""
 
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
+
 from scm.config.network import IKECryptoProfile
-from scm.models.network import (
-    IKECryptoProfileUpdateModel,
-    IKECryptoProfileResponseModel,
-)
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.network import (IKECryptoProfileResponseModel,
+                                IKECryptoProfileUpdateModel)
 
 
 @pytest.mark.usefixtures("load_env")

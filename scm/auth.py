@@ -7,11 +7,11 @@ from typing import Optional
 # External libraries
 import jwt
 from jwt import PyJWKClient
-from jwt.exceptions import ExpiredSignatureError, DecodeError, PyJWKClientError
+from jwt.exceptions import DecodeError, ExpiredSignatureError, PyJWKClientError
 from oauthlib.oauth2 import BackendApplicationClient
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
-from requests.exceptions import HTTPError, Timeout, RequestException
+from requests.exceptions import HTTPError, RequestException, Timeout
 from requests_oauthlib import OAuth2Session
 from urllib3 import Retry
 

@@ -1,11 +1,8 @@
 # scm/models/deployment/bandwidth_allocations.py
 
 from typing import List, Optional
-from pydantic import (
-    BaseModel,
-    Field,
-    ConfigDict,
-)
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QosModel(BaseModel):

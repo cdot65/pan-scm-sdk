@@ -8,9 +8,7 @@ import pytest
 from scm.client import Scm
 from scm.config.network import IPsecCryptoProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
-    IPsecCryptoProfileResponseModel,
-)
+from scm.models.network import IPsecCryptoProfileResponseModel
 
 
 class TestIPsecCryptoProfile:
@@ -145,7 +143,8 @@ class TestIPsecCryptoProfile:
         }
 
         # Create the update model directly from the update_data
-        from scm.models.network.ipsec_crypto_profile import IPsecCryptoProfileUpdateModel
+        from scm.models.network.ipsec_crypto_profile import \
+            IPsecCryptoProfileUpdateModel
 
         update_model = IPsecCryptoProfileUpdateModel(
             id=UUID(update_data["id"]),

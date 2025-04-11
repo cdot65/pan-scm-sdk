@@ -1,8 +1,8 @@
 # tests/scm/config/objects/test_address.py
 
 # Standard library imports
-from unittest.mock import MagicMock
 import uuid
+from unittest.mock import MagicMock
 
 # External libraries
 import pytest
@@ -10,19 +10,10 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import Address
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.objects import (
-    AddressResponseModel,
-    AddressUpdateModel,
-)
-from tests.factories import (
-    AddressResponseFactory,
-    AddressCreateApiFactory,
-    AddressUpdateApiFactory,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.objects import AddressResponseModel, AddressUpdateModel
+from tests.factories import (AddressCreateApiFactory, AddressResponseFactory,
+                             AddressUpdateApiFactory)
 from tests.utils import raise_mock_http_error
 
 

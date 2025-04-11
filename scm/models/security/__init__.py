@@ -1,42 +1,26 @@
 # scm/models/security/__init__.py
 
-from .anti_spyware_profiles import (
-    AntiSpywareProfileCreateModel,
-    AntiSpywareProfileResponseModel,
-    AntiSpywareProfileUpdateModel,
-)
-from .decryption_profiles import (
-    DecryptionProfileCreateModel,
-    DecryptionProfileResponseModel,
-    DecryptionProfileUpdateModel,
-)
-from .dns_security_profiles import (
-    DNSSecurityProfileCreateModel,
-    DNSSecurityProfileResponseModel,
-    DNSSecurityProfileUpdateModel,
-)
-from .security_rules import (
-    SecurityRuleCreateModel,
-    SecurityRuleResponseModel,
-    SecurityRuleMoveModel,
-    SecurityRuleUpdateModel,
-    SecurityRuleRulebase,
-)
-from .url_categories import (
-    URLCategoriesCreateModel,
-    URLCategoriesUpdateModel,
-    URLCategoriesResponseModel,
-)
+from .anti_spyware_profiles import (AntiSpywareProfileCreateModel,
+                                    AntiSpywareProfileResponseModel,
+                                    AntiSpywareProfileUpdateModel)
+from .decryption_profiles import (DecryptionProfileCreateModel,
+                                  DecryptionProfileResponseModel,
+                                  DecryptionProfileUpdateModel)
+from .dns_security_profiles import (DNSSecurityProfileCreateModel,
+                                    DNSSecurityProfileResponseModel,
+                                    DNSSecurityProfileUpdateModel)
+from .security_rules import (SecurityRuleCreateModel, SecurityRuleMoveModel,
+                             SecurityRuleResponseModel, SecurityRuleRulebase,
+                             SecurityRuleUpdateModel)
+from .url_categories import (URLCategoriesCreateModel,
+                             URLCategoriesResponseModel,
+                             URLCategoriesUpdateModel)
 from .vulnerability_protection_profiles import (
-    VulnerabilityProfileCreateModel,
-    VulnerabilityProfileResponseModel,
-    VulnerabilityProfileUpdateModel,
-)
-from .wildfire_antivirus_profiles import (
-    WildfireAvProfileCreateModel,
-    WildfireAvProfileResponseModel,
-    WildfireAvProfileUpdateModel,
-)
+    VulnerabilityProfileCreateModel, VulnerabilityProfileResponseModel,
+    VulnerabilityProfileUpdateModel)
+from .wildfire_antivirus_profiles import (WildfireAvProfileCreateModel,
+                                          WildfireAvProfileResponseModel,
+                                          WildfireAvProfileUpdateModel)
 
 __all__ = [
     "AntiSpywareProfileCreateModel",

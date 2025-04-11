@@ -9,23 +9,15 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.security import DNSSecurityProfile
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.dns_security_profiles import (
-    DNSSecurityProfileResponseModel,
-    ActionEnum,
-    LogLevelEnum,
-    PacketCaptureEnum,
-)
-from tests.factories import (
-    DNSSecurityProfileCreateApiFactory,
-    DNSSecurityProfileUpdateApiFactory,
-    DNSSecurityProfileResponseFactory,
-    DNSSecurityCategoryEntryFactory,
-    BotnetDomainsFactory,
-)
+    ActionEnum, DNSSecurityProfileResponseModel, LogLevelEnum,
+    PacketCaptureEnum)
+from tests.factories import (BotnetDomainsFactory,
+                             DNSSecurityCategoryEntryFactory,
+                             DNSSecurityProfileCreateApiFactory,
+                             DNSSecurityProfileResponseFactory,
+                             DNSSecurityProfileUpdateApiFactory)
 from tests.utils import raise_mock_http_error
 
 

@@ -1,16 +1,15 @@
 # tests/scm/models/objects/test_dynamic_user_group_models.py
 
 # External libraries
+from uuid import UUID
+
 import pytest
 from pydantic import ValidationError
-from uuid import UUID
 
 # Local SDK imports
 from scm.models.objects.dynamic_user_group import (
-    DynamicUserGroupCreateModel,
-    DynamicUserGroupUpdateModel,
-    DynamicUserGroupResponseModel,
-)
+    DynamicUserGroupCreateModel, DynamicUserGroupResponseModel,
+    DynamicUserGroupUpdateModel)
 
 
 class TestDynamicUserGroupCreateModel:

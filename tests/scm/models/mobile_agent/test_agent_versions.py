@@ -5,8 +5,10 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.mobile_agent.agent_versions import AgentVersionsModel, AgentVersionModel
-from tests.scm.models.mobile_agent.factories import AgentVersionsModelFactory, AgentVersionModelFactory
+from scm.models.mobile_agent.agent_versions import (AgentVersionModel,
+                                                    AgentVersionsModel)
+from tests.scm.models.mobile_agent.factories import (AgentVersionModelFactory,
+                                                     AgentVersionsModelFactory)
 
 
 class TestAgentVersionModel:

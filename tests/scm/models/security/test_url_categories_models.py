@@ -1,21 +1,17 @@
 # tests/scm/models/security/test_url_categories.py
 
 # External libraries
-import pytest
 from uuid import UUID
 
-# Local SDK imports
-from scm.models.security.url_categories import (
-    URLCategoriesCreateModel,
-    URLCategoriesUpdateModel,
-    URLCategoriesResponseModel,
-)
-from tests.test_factories.security.url_categories import (
-    URLCategoriesCreateModelFactory,
-    URLCategoriesUpdateModelFactory,
-    URLCategoriesResponseModelFactory,
-)
+import pytest
 
+# Local SDK imports
+from scm.models.security.url_categories import (URLCategoriesCreateModel,
+                                                URLCategoriesResponseModel,
+                                                URLCategoriesUpdateModel)
+from tests.test_factories.security.url_categories import (
+    URLCategoriesCreateModelFactory, URLCategoriesResponseModelFactory,
+    URLCategoriesUpdateModelFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

@@ -1,15 +1,10 @@
 # scm/models/deployment/remote_networks.py
 
-from typing import Optional, List
-from uuid import UUID
 from enum import Enum
+from typing import List, Optional
+from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class EcmpLoadBalancingEnum(str, Enum):

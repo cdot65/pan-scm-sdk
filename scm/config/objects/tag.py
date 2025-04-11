@@ -2,19 +2,12 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.objects import (
-    TagCreateModel,
-    TagResponseModel,
-    TagUpdateModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.objects import TagCreateModel, TagResponseModel, TagUpdateModel
 from scm.models.objects.tag import Colors
 from scm.utils.tag_colors import normalize_color_name
 

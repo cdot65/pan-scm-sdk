@@ -2,15 +2,13 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.mobile_agent.agent_versions import AgentVersionsModel, AgentVersionModel
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.mobile_agent.agent_versions import (AgentVersionModel,
+                                                    AgentVersionsModel)
 
 
 class AgentVersions(BaseObject):

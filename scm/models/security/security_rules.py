@@ -1,17 +1,11 @@
 # scm/models/security/security_rules.py
 
 from enum import Enum
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-    ConfigDict,
-    constr,
-)
+from pydantic import (BaseModel, ConfigDict, Field, constr, field_validator,
+                      model_validator)
 
 
 # Enums

@@ -9,24 +9,15 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.security import AntiSpywareProfile
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareProfileResponseModel,
-    AntiSpywareSeverity,
-    AntiSpywareCategory,
-    AntiSpywarePacketCapture,
-    AntiSpywareExemptIpEntry,
-)
-from tests.factories import (
-    AntiSpywareProfileCreateApiFactory,
-    AntiSpywareProfileUpdateApiFactory,
-    AntiSpywareProfileResponseFactory,
-    AntiSpywareRuleBaseFactory,
-    AntiSpywareThreatExceptionBaseFactory,
-)
+    AntiSpywareCategory, AntiSpywareExemptIpEntry, AntiSpywarePacketCapture,
+    AntiSpywareProfileResponseModel, AntiSpywareSeverity)
+from tests.factories import (AntiSpywareProfileCreateApiFactory,
+                             AntiSpywareProfileResponseFactory,
+                             AntiSpywareProfileUpdateApiFactory,
+                             AntiSpywareRuleBaseFactory,
+                             AntiSpywareThreatExceptionBaseFactory)
 from tests.utils import raise_mock_http_error
 
 

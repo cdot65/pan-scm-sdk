@@ -1,11 +1,12 @@
 # tests/scm/config/mobile_agent/test_agent_versions.py
 
-import pytest
 from unittest.mock import Mock, patch
 
+import pytest
+
 from scm.config.mobile_agent.agent_versions import AgentVersions
-from scm.models.mobile_agent.agent_versions import AgentVersionsModel
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.mobile_agent.agent_versions import AgentVersionsModel
 
 
 class TestAgentVersions:

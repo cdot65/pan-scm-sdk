@@ -1,14 +1,9 @@
 # scm/models/objects/application.py
 
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ApplicationBaseModel(BaseModel):

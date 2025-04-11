@@ -2,22 +2,16 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.security import (
-    SecurityRuleCreateModel,
-    SecurityRuleUpdateModel,
-    SecurityRuleResponseModel,
-    SecurityRuleMoveModel,
-    SecurityRuleRulebase,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.security import (SecurityRuleCreateModel,
+                                 SecurityRuleMoveModel,
+                                 SecurityRuleResponseModel,
+                                 SecurityRuleRulebase, SecurityRuleUpdateModel)
 
 
 class SecurityRule(BaseObject):

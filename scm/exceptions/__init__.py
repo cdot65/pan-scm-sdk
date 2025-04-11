@@ -1,7 +1,7 @@
 # scm/exceptions/__init__.py
 
 from dataclasses import dataclass
-from typing import Optional, Dict, Any, Type, Union, List
+from typing import Any, Dict, List, Optional, Type, Union
 
 
 @dataclass

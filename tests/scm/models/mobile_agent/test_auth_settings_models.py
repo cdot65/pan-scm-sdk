@@ -5,21 +5,16 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.mobile_agent.auth_settings import (
-    OperatingSystem,
-    MovePosition,
-    AuthSettingsBaseModel,
-    AuthSettingsCreateModel,
-    AuthSettingsUpdateModel,
-    AuthSettingsMoveModel,
-)
+from scm.models.mobile_agent.auth_settings import (AuthSettingsBaseModel,
+                                                   AuthSettingsCreateModel,
+                                                   AuthSettingsMoveModel,
+                                                   AuthSettingsUpdateModel,
+                                                   MovePosition,
+                                                   OperatingSystem)
 from tests.scm.models.mobile_agent.factories import (
-    AuthSettingsBaseModelFactory,
-    AuthSettingsCreateModelFactory,
-    AuthSettingsUpdateModelFactory,
-    AuthSettingsResponseModelFactory,
-    AuthSettingsMoveModelFactory,
-)
+    AuthSettingsBaseModelFactory, AuthSettingsCreateModelFactory,
+    AuthSettingsMoveModelFactory, AuthSettingsResponseModelFactory,
+    AuthSettingsUpdateModelFactory)
 
 
 class TestOperatingSystem:

@@ -2,16 +2,15 @@ import factory.fuzzy
 from factory import Factory, Faker
 from faker import Faker as FakerGenerator
 
-from scm.models.mobile_agent.agent_versions import AgentVersionsModel, AgentVersionModel
-from scm.models.mobile_agent.auth_settings import (
-    OperatingSystem,
-    MovePosition,
-    AuthSettingsBaseModel,
-    AuthSettingsCreateModel,
-    AuthSettingsUpdateModel,
-    AuthSettingsResponseModel,
-    AuthSettingsMoveModel,
-)
+from scm.models.mobile_agent.agent_versions import (AgentVersionModel,
+                                                    AgentVersionsModel)
+from scm.models.mobile_agent.auth_settings import (AuthSettingsBaseModel,
+                                                   AuthSettingsCreateModel,
+                                                   AuthSettingsMoveModel,
+                                                   AuthSettingsResponseModel,
+                                                   AuthSettingsUpdateModel,
+                                                   MovePosition,
+                                                   OperatingSystem)
 
 # Create a single faker instance
 fake = FakerGenerator()

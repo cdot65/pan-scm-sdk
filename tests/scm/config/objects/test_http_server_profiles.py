@@ -1,18 +1,16 @@
 # tests/scm/config/objects/test_http_server_profiles.py
 
-import pytest
-from unittest.mock import MagicMock, patch
 import uuid
+from unittest.mock import MagicMock, patch
+
+import pytest
 import requests
 
 from scm.client import Scm
 from scm.config.objects import HTTPServerProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import (
-    HTTPServerProfileUpdateModel,
-    HTTPServerProfileResponseModel,
-    ServerModel,
-)
+from scm.models.objects import (HTTPServerProfileResponseModel,
+                                HTTPServerProfileUpdateModel, ServerModel)
 from tests.factories import HTTPServerProfileCreateModelFactory
 
 # Remove all xfail markers to achieve 100% test pass rate

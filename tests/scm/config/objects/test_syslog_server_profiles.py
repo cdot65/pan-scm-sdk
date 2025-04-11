@@ -1,8 +1,9 @@
 # tests/scm/config/objects/test_syslog_server_profiles.py
 
-import pytest
-from unittest.mock import MagicMock, patch
 import uuid
+from unittest.mock import MagicMock, patch
+
+import pytest
 import requests
 
 from scm.client import Scm
@@ -11,12 +12,9 @@ from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import SyslogServerProfileResponseModel
 # Import the factories
 from tests.test_factories.objects.syslog_server_profiles import (
-    SyslogServerProfileCreateModelFactory,
-    SyslogServerProfileUpdateModelFactory,
+    SyslogServerModelFactory, SyslogServerProfileCreateModelFactory,
     SyslogServerProfileResponseModelFactory,
-    SyslogServerModelFactory,
-)
-
+    SyslogServerProfileUpdateModelFactory)
 
 # -------------------- Helper functions --------------------
 

@@ -2,19 +2,14 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAvProfileCreateModel,
-    WildfireAvProfileResponseModel,
-    WildfireAvProfileUpdateModel,
-)
+    WildfireAvProfileCreateModel, WildfireAvProfileResponseModel,
+    WildfireAvProfileUpdateModel)
 
 
 class WildfireAntivirusProfile(BaseObject):

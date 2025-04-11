@@ -5,17 +5,12 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from scm.models.deployment import (
-    ServiceConnectionCreateModel,
-    ServiceConnectionUpdateModel,
-    ServiceConnectionResponseModel,
-    OnboardingType,
-    NoExportCommunity,
-    BgpPeerModel,
-    BgpProtocolModel,
-    ProtocolModel,
-    QosModel,
-)
+from scm.models.deployment import (BgpPeerModel, BgpProtocolModel,
+                                   NoExportCommunity, OnboardingType,
+                                   ProtocolModel, QosModel,
+                                   ServiceConnectionCreateModel,
+                                   ServiceConnectionResponseModel,
+                                   ServiceConnectionUpdateModel)
 
 
 class TestServiceConnectionModels:

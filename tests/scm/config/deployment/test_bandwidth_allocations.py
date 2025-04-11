@@ -9,13 +9,8 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.deployment import BandwidthAllocations
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.deployment import (
-    BandwidthAllocationResponseModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.deployment import BandwidthAllocationResponseModel
 from tests.utils import raise_mock_http_error
 
 

@@ -1,14 +1,9 @@
 # scm/models/objects/hip_object.py
 
-from typing import Optional, List, Union, Literal
+from typing import List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class BaseHIPModel(BaseModel):

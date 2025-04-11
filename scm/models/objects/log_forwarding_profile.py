@@ -1,16 +1,11 @@
 # scm/models/objects/log_forwarding_profile.py
 
 # Standard library imports
-from typing import Optional, List, Literal
+from typing import List, Literal, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class MatchListItem(BaseModel):

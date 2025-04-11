@@ -8,11 +8,11 @@ This configuration supports the new test category structure.
 # Standard library imports
 import os
 from unittest.mock import MagicMock
+
 import pytest
 
 # Local SDK imports
 from scm.models.auth import AuthRequestModel
-
 
 # -------------------- Environment Setup --------------------
 

@@ -2,20 +2,15 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.mobile_agent import (
-    AuthSettingsCreateModel,
-    AuthSettingsUpdateModel,
-    AuthSettingsResponseModel,
-    AuthSettingsMoveModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.mobile_agent import (AuthSettingsCreateModel,
+                                     AuthSettingsMoveModel,
+                                     AuthSettingsResponseModel,
+                                     AuthSettingsUpdateModel)
 
 
 class AuthSettings(BaseObject):

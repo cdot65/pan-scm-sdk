@@ -1,14 +1,13 @@
 # tests/test_factories/security/url_categories.py
-import factory
-from faker import Faker
 from uuid import uuid4
 
-from scm.models.security.url_categories import (
-    URLCategoriesCreateModel,
-    URLCategoriesUpdateModel,
-    URLCategoriesResponseModel,
-    URLCategoriesListTypeEnum,
-)
+import factory
+from faker import Faker
+
+from scm.models.security.url_categories import (URLCategoriesCreateModel,
+                                                URLCategoriesListTypeEnum,
+                                                URLCategoriesResponseModel,
+                                                URLCategoriesUpdateModel)
 
 fake = Faker()
 

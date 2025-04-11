@@ -1,9 +1,10 @@
 # tests/conftest.py
 
 import os
-from dotenv import load_dotenv
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+from dotenv import load_dotenv
 
 from scm.client import Scm
 

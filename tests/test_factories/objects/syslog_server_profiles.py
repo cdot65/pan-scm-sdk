@@ -6,14 +6,9 @@ import factory
 from faker import Faker
 
 from scm.models.objects.syslog_server_profiles import (
-    EscapingModel,
-    FormatModel,
-    SyslogServerModel,
-    SyslogServerProfileBaseModel,
-    SyslogServerProfileCreateModel,
-    SyslogServerProfileUpdateModel,
-    SyslogServerProfileResponseModel,
-)
+    EscapingModel, FormatModel, SyslogServerModel,
+    SyslogServerProfileBaseModel, SyslogServerProfileCreateModel,
+    SyslogServerProfileResponseModel, SyslogServerProfileUpdateModel)
 
 fake = Faker()
 

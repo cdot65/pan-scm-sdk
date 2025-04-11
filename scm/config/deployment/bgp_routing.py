@@ -2,22 +2,15 @@
 
 # Standard library imports
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.deployment import (
-    BGPRoutingCreateModel,
-    BGPRoutingUpdateModel,
-    BGPRoutingResponseModel,
-    BackboneRoutingEnum,
-    DefaultRoutingModel,
-    HotPotatoRoutingModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.deployment import (BackboneRoutingEnum, BGPRoutingCreateModel,
+                                   BGPRoutingResponseModel,
+                                   BGPRoutingUpdateModel, DefaultRoutingModel,
+                                   HotPotatoRoutingModel)
 
 
 class BGPRouting(BaseObject):

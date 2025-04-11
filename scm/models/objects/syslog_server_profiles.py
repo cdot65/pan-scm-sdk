@@ -1,17 +1,11 @@
 # scm/models/objects/syslog_server_profiles.py
 
 # Standard library imports
-from typing import Optional, Dict, Literal, Any, List
+from typing import Any, Dict, List, Literal, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-    constr,
-)
+from pydantic import BaseModel, ConfigDict, Field, constr, model_validator
 
 
 class EscapingModel(BaseModel):

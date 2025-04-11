@@ -8,11 +8,8 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.http_server_profiles import (
-    HTTPServerProfileCreateModel,
-    HTTPServerProfileUpdateModel,
-    HTTPServerProfileResponseModel,
-)
-
+    HTTPServerProfileCreateModel, HTTPServerProfileResponseModel,
+    HTTPServerProfileUpdateModel)
 
 # -------------------- Helper Functions --------------------
 

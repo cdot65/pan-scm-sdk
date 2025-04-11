@@ -7,7 +7,6 @@ from pydantic import ValidationError
 # Local SDK imports
 from scm.models.auth import AuthRequestModel
 
-
 # -------------------- Test Classes for Pydantic Models --------------------
 
 
