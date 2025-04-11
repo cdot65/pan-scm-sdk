@@ -547,6 +547,44 @@ class TestSyslogServerProfileListAndFetch:
         assert kwargs["params"].get("device") == device_name
         assert kwargs["params"].get("name") == profile_name
 
+    def test_fetch_invalid_response_format(self):
+        """Test fetch method with invalid response format (not a dictionary)."""
+        api_client = MagicMock(spec=Scm)
+        # Return a list instead of a dictionary to trigger the error
+        api_client.get.return_value = ["not", "a", "dictionary"]
+
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.fetch(name="test-profile", folder="Shared")
+            
+        assert "Invalid response format" in str(exc_info.value.message)
+        assert "expected dictionary" in str(exc_info.value.message)
+        assert "Response is not a dictionary" in str(exc_info.value.details)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
+    def test_fetch_missing_id_field(self):
+        """Test fetch method with response missing 'id' field."""
+        api_client = MagicMock(spec=Scm)
+        # Return a dictionary without an 'id' field
+        api_client.get.return_value = {
+            "name": "test-profile",
+            "folder": "Shared",
+            # 'id' field is missing
+        }
+
+        syslog_server_profile = SyslogServerProfile(api_client)
+        
+        with pytest.raises(InvalidObjectError) as exc_info:
+            syslog_server_profile.fetch(name="test-profile", folder="Shared")
+            
+        assert "Invalid response format" in str(exc_info.value.message)
+        assert "missing 'id' field" in str(exc_info.value.message)
+        assert "Response missing 'id' field" in str(exc_info.value.details)
+        assert exc_info.value.error_code == "E003"
+        assert exc_info.value.http_status_code == 500
+
 
 # -------------------- SyslogServerProfile filtering and pagination tests --------------------
 
