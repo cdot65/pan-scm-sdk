@@ -5,4 +5,12 @@ from tests.test_factories.security.url_categories import (
     URLCategoriesResponseModelFactory,
 )
 
-# Add more imports here as you create more factory modules
+# tests/test_factories/__init__.py (add to existing imports)
+from tests.test_factories.objects.syslog_server_profiles import (
+    EscapingModelFactory,
+    FormatModelFactory,
+    SyslogServerModelFactory,
+    SyslogServerProfileCreateModelFactory,
+    SyslogServerProfileUpdateModelFactory,
+    SyslogServerProfileResponseModelFactory,
+)
