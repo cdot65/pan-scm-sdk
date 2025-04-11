@@ -45,8 +45,19 @@ class MatchListItem(BaseModel):
     filter: Optional[str] = Field(None, description="Filter match criteria", max_length=65535)
     send_http: Optional[List[str]] = Field(None, description="A list of HTTP server profiles")
     send_syslog: Optional[List[str]] = Field(None, description="A list of syslog server profiles")
-    send_to_panorama: Optional[bool] = Field(None, description="Flag to send logs to Panorama")
-    quarantine: Optional[bool] = Field(None, description="Flag to quarantine matching logs")
+    send_to_panorama: Optional[bool] = Field(
+        None, description="Flag to send logs to Panorama"
+    )
+    quarantine: Optional[bool] = Field(
+        False, description="Flag to quarantine matching logs"
+    )
+
+    # Pydantic model configuration to allow for more flexible deserialization
+    model_config = ConfigDict(
+        populate_by_name=True,
+        validate_assignment=True,
+        extra="ignore",  # Ignore extra fields not defined in the model
+    )
 
 
 class LogForwardingProfileBaseModel(BaseModel):
@@ -115,6 +126,7 @@ class LogForwardingProfileBaseModel(BaseModel):
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        extra="ignore",  # Ignore extra fields not defined in the model
     )
 
 
@@ -190,8 +202,8 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
         if self.snippet == "predefined-snippet":
             return self
 
-        # For normal profiles, ensure ID is present
-        if not self.id and self.snippet != "predefined-snippet":
+        # For normal profiles in folders, ensure ID is present
+        if not self.id and self.snippet != "predefined-snippet" and self.folder is not None:
             raise ValueError("ID is required for non-predefined profiles")
 
         return self
