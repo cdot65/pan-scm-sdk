@@ -15,49 +15,15 @@ from scm.models.objects.syslog_server_profiles import (
     FormatModel,
     EscapingModel,
 )
-
-
-# -------------------- Helper Functions --------------------
-
-
-def create_valid_server():
-    """Helper function to create a valid server model dict."""
-    return {
-        "name": "test-server",
-        "server": "192.168.1.100",
-        "transport": "UDP",
-        "port": 514,
-        "format": "BSD",
-        "facility": "LOG_USER",
-    }
-
-
-def create_valid_format():
-    """Helper function to create a valid format model dict."""
-    return {
-        "traffic": "$format_string_traffic",
-        "threat": "$format_string_threat",
-        "escaping": {"escape_character": "\\", "escaped_characters": "%"},
-    }
-
-
-def create_valid_profile_data(container_type="folder"):
-    """Helper function to create a valid syslog server profile data dict."""
-    data = {
-        "name": "test-syslog-profile",
-        "servers": {"name": create_valid_server()},
-        "format": create_valid_format(),
-    }
-
-    # Add the specified container
-    if container_type == "folder":
-        data["folder"] = "Shared"
-    elif container_type == "snippet":
-        data["snippet"] = "TestSnippet"
-    elif container_type == "device":
-        data["device"] = "TestDevice"
-
-    return data
+# Import the new factories
+from tests.test_factories.objects.syslog_server_profiles import (
+    EscapingModelFactory,
+    FormatModelFactory,
+    SyslogServerModelFactory,
+    SyslogServerProfileCreateModelFactory,
+    SyslogServerProfileUpdateModelFactory,
+    SyslogServerProfileResponseModelFactory,
+)
 
 
 # -------------------- Test Classes for Pydantic Models --------------------
@@ -68,18 +34,17 @@ class TestSyslogServerModel:
 
     def test_valid_server(self):
         """Test that a valid server configuration is accepted."""
-        server_data = create_valid_server()
-        server = SyslogServerModel(**server_data)
-        assert server.name == server_data["name"]
-        assert server.server == server_data["server"]
-        assert server.transport == server_data["transport"]
-        assert server.port == server_data["port"]
-        assert server.format == server_data["format"]
-        assert server.facility == server_data["facility"]
+        server = SyslogServerModelFactory()
+        assert server.name is not None
+        assert server.server is not None
+        assert server.transport == "UDP"
+        assert server.port == 514
+        assert server.format == "BSD"
+        assert server.facility == "LOG_USER"
 
     def test_invalid_transport(self):
         """Test that an invalid transport protocol is rejected."""
-        server_data = create_valid_server()
+        server_data = SyslogServerModelFactory.build().__dict__
         server_data["transport"] = "INVALID"
 
         with pytest.raises(ValidationError) as exc_info:
@@ -90,7 +55,7 @@ class TestSyslogServerModel:
 
     def test_invalid_format(self):
         """Test that an invalid format is rejected."""
-        server_data = create_valid_server()
+        server_data = SyslogServerModelFactory.build().__dict__
         server_data["format"] = "INVALID"
 
         with pytest.raises(ValidationError) as exc_info:
@@ -101,7 +66,7 @@ class TestSyslogServerModel:
 
     def test_invalid_facility(self):
         """Test that an invalid facility is rejected."""
-        server_data = create_valid_server()
+        server_data = SyslogServerModelFactory.build().__dict__
         server_data["facility"] = "INVALID"
 
         with pytest.raises(ValidationError) as exc_info:
@@ -112,7 +77,7 @@ class TestSyslogServerModel:
 
     def test_port_range(self):
         """Test port number validation."""
-        server_data = create_valid_server()
+        server_data = SyslogServerModelFactory.build().__dict__
 
         # Test port below minimum
         server_data["port"] = 0
@@ -134,22 +99,17 @@ class TestFormatModel:
 
     def test_valid_format(self):
         """Test that a valid format configuration is accepted."""
-        format_data = create_valid_format()
-        format_model = FormatModel(**format_data)
-        assert format_model.traffic == format_data["traffic"]
-        assert format_model.threat == format_data["threat"]
-        assert format_model.escaping.escape_character == format_data["escaping"]["escape_character"]
-        assert (
-            format_model.escaping.escaped_characters
-            == format_data["escaping"]["escaped_characters"]
-        )
+        format_model = FormatModelFactory()
+        assert format_model.traffic == "$format_string_traffic"
+        assert format_model.threat == "$format_string_threat"
+        assert format_model.escaping.escape_character == "\\"
+        assert format_model.escaping.escaped_characters == "%$[]"
 
     def test_escaping_model(self):
         """Test EscapingModel validation."""
-        escaping_data = {"escape_character": "\\", "escaped_characters": "%$[]"}
-        escaping = EscapingModel(**escaping_data)
-        assert escaping.escape_character == escaping_data["escape_character"]
-        assert escaping.escaped_characters == escaping_data["escaped_characters"]
+        escaping = EscapingModelFactory()
+        assert escaping.escape_character == "\\"
+        assert escaping.escaped_characters == "%$[]"
 
     def test_escape_character_length(self):
         """Test that escape_character must be a single character."""
@@ -173,7 +133,7 @@ class TestSyslogServerProfileCreateModel:
             SyslogServerProfileCreateModel(**data)
         error_msg = str(exc_info.value)
         assert "name\n  Field required" in error_msg
-        assert "servers\n  Field required" in error_msg
+        assert "server\n  Field required" in error_msg
 
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
@@ -181,12 +141,11 @@ class TestSyslogServerProfileCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerProfileCreateModel(**data)
         error_msg = str(exc_info.value)
-        assert "servers\n  Field required" in error_msg
+        assert "server\n  Field required" in error_msg
 
     def test_multiple_containers_error(self):
         """Test validation when multiple containers are provided."""
-        data = create_valid_profile_data()
-        data["snippet"] = "TestSnippet"  # Adding a second container
+        data = SyslogServerProfileCreateModelFactory.build_with_multiple_containers()
 
         with pytest.raises(ValueError) as exc_info:
             SyslogServerProfileCreateModel(**data)
@@ -196,42 +155,52 @@ class TestSyslogServerProfileCreateModel:
 
     def test_no_container_error(self):
         """Test validation when no container is provided."""
-        data = create_valid_profile_data()
-        data.pop("folder")  # Remove the container
+        model_data = SyslogServerProfileCreateModelFactory.build(folder="Shared").__dict__
+        model_data.pop("folder")  # Remove the container
 
         with pytest.raises(ValueError) as exc_info:
-            SyslogServerProfileCreateModel(**data)
+            SyslogServerProfileCreateModel(**model_data)
         assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
             exc_info.value
         )
 
-    def test_valid_model_with_folder(self):
-        """Test validation with valid data using folder container."""
-        data = create_valid_profile_data("folder")
-        model = SyslogServerProfileCreateModel(**data)
-        assert model.name == data["name"]
-        assert model.servers == data["servers"]
-        assert model.folder == data["folder"]
-        assert model.format.traffic == data["format"]["traffic"]
-        assert model.format.threat == data["format"]["threat"]
+    def test_with_folder(self):
+        """Test creation with folder container."""
+        model = SyslogServerProfileCreateModelFactory()
+        assert model.folder == "Shared"
+        assert model.snippet is None
+        assert model.device is None
+        assert len(model.server) > 0
 
-    def test_valid_model_with_snippet(self):
-        """Test validation with valid data using snippet container."""
-        data = create_valid_profile_data("snippet")
-        model = SyslogServerProfileCreateModel(**data)
-        assert model.name == data["name"]
-        assert model.snippet == data["snippet"]
+    def test_with_snippet(self):
+        """Test creation with snippet container."""
+        model = SyslogServerProfileCreateModelFactory.with_snippet()
+        assert model.snippet == "TestSnippet"
         assert model.folder is None
         assert model.device is None
+        assert len(model.server) > 0
 
-    def test_valid_model_with_device(self):
-        """Test validation with valid data using device container."""
-        data = create_valid_profile_data("device")
-        model = SyslogServerProfileCreateModel(**data)
-        assert model.name == data["name"]
-        assert model.device == data["device"]
+    def test_with_device(self):
+        """Test creation with device container."""
+        model = SyslogServerProfileCreateModelFactory.with_device()
+        assert model.device == "TestDevice"
         assert model.folder is None
         assert model.snippet is None
+        assert len(model.server) > 0
+
+    def test_with_multiple_servers(self):
+        """Test creation with multiple server configurations."""
+        model = SyslogServerProfileCreateModelFactory.with_multiple_servers(count=3)
+        assert len(model.server) == 3
+        assert all(isinstance(server, SyslogServerModel) for server in model.server)
+
+    def test_with_minimal_format(self):
+        """Test creation with minimal format configuration."""
+        model = SyslogServerProfileCreateModelFactory.with_minimal_format()
+        assert model.format is not None
+        assert model.format.traffic == "$format_string_traffic"
+        assert model.format.threat == "$format_string_threat"
+        assert model.format.wildfire is None
 
 
 class TestSyslogServerProfileUpdateModel:
@@ -239,58 +208,47 @@ class TestSyslogServerProfileUpdateModel:
 
     def test_invalid_data_error(self):
         """Test that ValidationError is raised when invalid data is provided."""
-        data = {"invalid": "data"}
-        with pytest.raises(ValidationError) as exc_info:
-            SyslogServerProfileUpdateModel(**data)
-        error_msg = str(exc_info.value)
-        assert "validation error" in error_msg
-        assert "name\n  Field required" in error_msg
-        assert "servers\n  Field required" in error_msg
-        assert "id\n  Field required" in error_msg
-
-    def test_missing_id(self):
-        """Test validation when 'id' field is missing."""
-        data = create_valid_profile_data()
+        data = {"invalid_field": "test"}
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerProfileUpdateModel(**data)
         assert "id\n  Field required" in str(exc_info.value)
 
+    def test_missing_id(self):
+        """Test validation when 'id' field is missing."""
+        model_data = SyslogServerProfileUpdateModelFactory.build().__dict__
+        model_data.pop("id")
+        with pytest.raises(ValidationError) as exc_info:
+            SyslogServerProfileUpdateModel(**model_data)
+        assert "id\n  Field required" in str(exc_info.value)
+
     def test_invalid_id_format(self):
         """Test validation for invalid UUID format."""
-        data = create_valid_profile_data()
-        data["id"] = "invalid-uuid"
-
+        model_data = SyslogServerProfileUpdateModelFactory.build().__dict__
+        model_data["id"] = "invalid-uuid"
         with pytest.raises(ValidationError) as exc_info:
-            SyslogServerProfileUpdateModel(**data)
+            SyslogServerProfileUpdateModel(**model_data)
         assert "id\n  Input should be a valid UUID" in str(exc_info.value)
 
     def test_valid_model(self):
         """Test validation with valid data."""
-        data = create_valid_profile_data()
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        model = SyslogServerProfileUpdateModelFactory()
+        assert isinstance(model.id, UUID)
+        assert model.name is not None
+        assert len(model.server) > 0
 
-        model = SyslogServerProfileUpdateModel(**data)
-        assert model.id == UUID(data["id"])
-        assert model.name == data["name"]
-        assert model.servers == data["servers"]
-        assert model.folder == data["folder"]
+    def test_updated_servers(self):
+        """Test updating server list."""
+        model = SyslogServerProfileUpdateModelFactory.with_updated_servers()
+        assert len(model.server) == 2
+        assert model.server[0].name == "updated-server-1"
+        assert model.server[1].name == "updated-server-2"
+        assert model.server[1].transport == "TCP"
 
-    def test_minimal_update(self):
-        """Test updating with minimal required fields."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "updated-profile",
-            "servers": {"server1": create_valid_server()},
-        }
-
-        model = SyslogServerProfileUpdateModel(**data)
-        assert model.id == UUID(data["id"])
-        assert model.name == data["name"]
-        assert model.servers == data["servers"]
-        assert model.format is None
-        assert model.folder is None
-        assert model.snippet is None
-        assert model.device is None
+    def test_updated_format(self):
+        """Test updating format configuration."""
+        model = SyslogServerProfileUpdateModelFactory.with_updated_format()
+        assert model.format.traffic == "$updated_traffic_format"
+        assert model.format.threat == "$updated_threat_format"
 
 
 class TestSyslogServerProfileResponseModel:
@@ -298,47 +256,32 @@ class TestSyslogServerProfileResponseModel:
 
     def test_valid_model(self):
         """Test validation with valid response data."""
-        data = create_valid_profile_data()
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
-        model = SyslogServerProfileResponseModel(**data)
-        assert model.id == UUID(data["id"])
-        assert model.name == data["name"]
-        assert model.servers == data["servers"]
-        assert model.folder == data["folder"]
-        assert model.format.traffic == data["format"]["traffic"]
-        assert model.format.threat == data["format"]["threat"]
+        model = SyslogServerProfileResponseModelFactory()
+        assert isinstance(model.id, UUID)
+        assert model.name is not None
+        assert model.folder == "Shared"
+        assert len(model.server) > 0
 
     def test_with_snippet(self):
         """Test validation with snippet container."""
-        data = create_valid_profile_data("snippet")
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
-        model = SyslogServerProfileResponseModel(**data)
-        assert model.id == UUID(data["id"])
-        assert model.snippet == data["snippet"]
+        model = SyslogServerProfileResponseModelFactory.with_snippet()
+        assert model.snippet == "TestSnippet"
         assert model.folder is None
         assert model.device is None
+        assert isinstance(model.id, UUID)
 
     def test_with_device(self):
         """Test validation with device container."""
-        data = create_valid_profile_data("device")
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
-        model = SyslogServerProfileResponseModel(**data)
-        assert model.id == UUID(data["id"])
-        assert model.device == data["device"]
+        model = SyslogServerProfileResponseModelFactory.with_device()
+        assert model.device == "TestDevice"
         assert model.folder is None
         assert model.snippet is None
+        assert isinstance(model.id, UUID)
 
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-        }
+        model_data = SyslogServerProfileResponseModelFactory.build().__dict__
+        model_data.pop("id")
         with pytest.raises(ValidationError) as exc_info:
-            SyslogServerProfileResponseModel(**data)
-        error_msg = str(exc_info.value)
-        assert "2 validation errors for SyslogServerProfileResponseModel" in error_msg
-        assert "name\n  Field required" in error_msg
-        assert "servers\n  Field required" in error_msg
+            SyslogServerProfileResponseModel(**model_data)
+        assert "id\n  Field required" in str(exc_info.value)

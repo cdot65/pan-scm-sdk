@@ -259,7 +259,7 @@ poetry.lock
 _test_*.py
 
 # ignore openapi specs
-openapi
+# openapi
 
 # ignore all .idea files
 .idea
