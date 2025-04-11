@@ -2,6 +2,30 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.24
+
+**Released:** April 11, 2025
+
+### Added
+
+- **Enhanced Model Flexibility**:
+  - **Syslog Server Profiles**: Refactored models to support greater configuration flexibility
+  - **Log Forwarding Profiles**: Redesigned for improved adaptability to various logging scenarios
+  - **Authentication Fields**: Added support for additional authentication options in security models
+  - **PayloadFormat Model**: Enhanced to support more diverse formatting requirements
+
+### Improved
+
+- **Test Architecture**: 
+  - Implemented factory pattern for security models (Syslog Server Profiles, URL Categories)
+  - Enhanced test coverage and maintainability through standardized test factories
+  - Added comprehensive tests for URL Categories Update and Response models
+
+### Documentation
+
+- **SDK Documentation**: Updated model documentation with enhanced details and usage examples
+- **Code Examples**: Added examples demonstrating the new model capabilities
+
 ## Version 0.3.23
 
 **Released:** March 29, 2025
