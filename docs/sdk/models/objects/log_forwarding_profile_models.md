@@ -16,35 +16,38 @@ The module provides the following Pydantic models:
 
 The `MatchListItem` represents a match profile configuration within a log forwarding profile. It defines the criteria for matching specific log types and where to send the matching logs.
 
-| Attribute   | Type                                                                                    | Required | Default | Description                                 |
-|-------------|-----------------------------------------------------------------------------------------|----------|---------|---------------------------------------------|
-| name        | str                                                                                     | Yes      | -       | Name of the match profile (max length: 63)  |
-| action_desc | Optional[str]                                                                           | No       | None    | Match profile description (max length: 255) |
-| log_type    | Literal["traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption"] | Yes      | -       | Log type for matching                       |
-| filter      | Optional[str]                                                                           | No       | None    | Filter match criteria (max length: 65535)   |
-| send_http   | Optional[List[str]]                                                                     | No       | None    | A list of HTTP server profiles              |
-| send_syslog | Optional[List[str]]                                                                     | No       | None    | A list of syslog server profiles            |
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| name | str | Yes | - | Name of the match profile (max length: 63) |
+| action_desc | Optional[str] | No | None | Match profile description (max length: 255) |
+| log_type | Literal["traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption"] | Yes | - | Log type for matching |
+| filter | Optional[str] | No | None | Filter match criteria (max length: 65535) |
+| send_http | Optional[List[str]] | No | None | A list of HTTP server profiles |
+| send_syslog | Optional[List[str]] | No | None | A list of syslog server profiles |
+| send_to_panorama | Optional[bool] | No | None | Flag to send logs to Panorama |
+| quarantine | Optional[bool] | No | False | Flag to quarantine matching logs |
 
 ## LogForwardingProfileBaseModel
 
 The `LogForwardingProfileBaseModel` contains fields common to all log forwarding profile CRUD operations.
 
-| Attribute   | Type                          | Required | Default | Description                                                   |
-|-------------|-------------------------------|----------|---------|---------------------------------------------------------------|
-| name        | str                           | Yes      | -       | The name of the log forwarding profile (max length: 63)       |
-| description | Optional[str]                 | No       | None    | Log forwarding profile description (max length: 255)          |
-| match_list  | Optional[List[MatchListItem]] | No       | None    | List of match profile configurations                          |
-| folder      | Optional[str]                 | No       | None    | The folder in which the resource is defined (max length: 64)  |
-| snippet     | Optional[str]                 | No       | None    | The snippet in which the resource is defined (max length: 64) |
-| device      | Optional[str]                 | No       | None    | The device in which the resource is defined (max length: 64)  |
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| name | str | Yes | - | The name of the log forwarding profile (max length: 63) |
+| description | Optional[str] | No | None | Log forwarding profile description (max length: 255) |
+| match_list | Optional[List[MatchListItem]] | No | None | List of match profile configurations |
+| enhanced_application_logging | Optional[bool] | No | None | Flag for enhanced application logging |
+| folder | Optional[str] | No | None | The folder in which the resource is defined (max length: 64) |
+| snippet | Optional[str] | No | None | The snippet in which the resource is defined (max length: 64) |
+| device | Optional[str] | No | None | The device in which the resource is defined (max length: 64) |
 
 ## LogForwardingProfileCreateModel
 
 The `LogForwardingProfileCreateModel` extends the base model and includes validation to ensure that exactly one container type is provided.
 
-| Attribute                                           | Type | Required | Default | Description |
-|-----------------------------------------------------|------|----------|---------|-------------|
-| *All attributes from LogForwardingProfileBaseModel* |      |          |         |             |
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| *All attributes from LogForwardingProfileBaseModel* |  |  |  |  |
 
 ### Container Type Validation
 
@@ -78,19 +81,38 @@ def validate_container_type(self) -> "LogForwardingProfileCreateModel":
 
 The `LogForwardingProfileUpdateModel` extends the base model and adds the ID field required for updating existing log forwarding profiles.
 
-| Attribute                                           | Type | Required | Default | Description                            |
-|-----------------------------------------------------|------|----------|---------|----------------------------------------|
-| id                                                  | UUID | Yes      | -       | The UUID of the log forwarding profile |
-| *All attributes from LogForwardingProfileBaseModel* |      |          |         |                                        |
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| id | UUID | Yes | - | The UUID of the log forwarding profile |
+| *All attributes from LogForwardingProfileBaseModel* |  |  |  |  |
 
 ## LogForwardingProfileResponseModel
 
 The `LogForwardingProfileResponseModel` extends the base model and includes the ID field returned in API responses.
 
-| Attribute                                           | Type | Required | Default | Description                            |
-|-----------------------------------------------------|------|----------|---------|----------------------------------------|
-| id                                                  | UUID | Yes      | -       | The UUID of the log forwarding profile |
-| *All attributes from LogForwardingProfileBaseModel* |      |          |         |                                        |
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| id | Optional[UUID] | No | None | The UUID of the log forwarding profile (not required for predefined snippets) |
+| *All attributes from LogForwardingProfileBaseModel* |  |  |  |  |
+
+### ID Validation for Non-Predefined Profiles
+
+The response model includes a validator to ensure that non-predefined profiles have an ID:
+
+```python
+@model_validator(mode="after")
+def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
+    """Validates that non-predefined profiles have an ID."""
+    # Skip validation if snippet is "predefined-snippet"
+    if self.snippet == "predefined-snippet":
+        return self
+
+    # For normal profiles in folders, ensure ID is present
+    if not self.id and self.snippet != "predefined-snippet" and self.folder is not None:
+        raise ValueError("ID is required for non-predefined profiles")
+
+    return self
+```
 
 ## Usage Examples
 
@@ -167,7 +189,9 @@ updated_match = MatchListItem(
     log_type="wildfire",
     filter="file_type eq pdf",
     send_http=["updated-http-profile"],
-    send_syslog=["updated-syslog-profile"]
+    send_syslog=["updated-syslog-profile"],
+    send_to_panorama=True,
+    quarantine=True
 )
 
 # Update an existing log forwarding profile
@@ -176,6 +200,7 @@ updated_profile = LogForwardingProfileUpdateModel(
     name="updated-profile",
     description="Updated log forwarding profile",
     match_list=[updated_match],
+    enhanced_application_logging=True
 )
 ```
 
@@ -186,17 +211,10 @@ updated_profile = LogForwardingProfileUpdateModel(
 - Configure appropriate log destinations (HTTP servers or syslog servers)
 - Consider using both HTTP and syslog servers for critical logs
 - Set descriptive names and action descriptions for better management
+- Enable quarantine for suspicious events that require investigation
+- Use send_to_panorama for logs that should be centrally stored
 
 ### Container Management
 - Always specify exactly one container type (folder, snippet, or device)
 - Use consistent naming conventions for log forwarding profiles
 - Organize profiles logically by function or application
-
-### Validation
-- Validate responses using the `LogForwardingProfileResponseModel`
-- Handle validation errors appropriately in your application
-- Verify that referenced HTTP or syslog servers exist before creating profiles
-
-## Related Models
-
-- [HTTP Server Profiles Models](http_server_profiles_models.md): For defining HTTP servers used as log destinations

@@ -26,12 +26,20 @@ The `ServerModel` represents a server configuration within an HTTP server profil
 | tls_version | Optional[Literal["1.0", "1.1", "1.2", "1.3"]] | No | None | HTTP server TLS version |
 | certificate_profile | Optional[str] | No | None | HTTP server certificate profile |
 | http_method | Optional[Literal["GET", "POST", "PUT", "DELETE"]] | No | None | HTTP operation to perform |
+| username | Optional[str] | No | None | Username for HTTP server authentication |
+| password | Optional[str] | No | None | Password for HTTP server authentication |
 
 ## PayloadFormatModel
 
 The `PayloadFormatModel` represents the payload format configuration for a specific log type.
 
-This is a flexible model that allows extra fields since the exact fields in the payload format model are not fully specified in the OpenAPI specification.
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| name | Optional[str] | No | "Default" | The name of the payload format |
+| url_format | Optional[str] | No | None | The URL path of the HTTP server |
+| headers | Optional[List[Dict[str, str]]] | No | None | List of HTTP headers to include in the request |
+| params | Optional[List[Dict[str, str]]] | No | None | List of HTTP parameters to include in the request |
+| payload | Optional[str] | No | None | The log payload format containing log field values |
 
 ## HTTPServerProfileBaseModel
 
@@ -196,14 +204,17 @@ updated_profile = HTTPServerProfileUpdateModel(
 - Include at least one server in the `server` list
 - Use HTTPS with TLS 1.2 or higher for secure communication
 - Configure appropriate certificate profiles when using HTTPS
+- Set authentication credentials when required by your HTTP servers
+
+### Format Configuration
+- Define specific format settings for each log type when needed
+- Include any necessary HTTP headers and parameters
+- Design payload formats to match your log analysis system requirements
 
 ### Container Management
 - Always specify exactly one container type (folder, snippet, or device)
 - Use consistent naming conventions for HTTP server profiles
-
-### Validation
-- Validate responses using the `HTTPServerProfileResponseModel`
-- Handle validation errors appropriately in your application
+- Organize profiles logically by function or application
 
 ## Related Models
 
