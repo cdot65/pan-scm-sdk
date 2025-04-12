@@ -17,12 +17,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
           pip install poetry
           poetry install
+
+      - name: Run Code Quality Checks
+        run: |
+          make quality
 
       - name: Run Tests with Coverage
         env:
@@ -30,7 +34,7 @@ jobs:
           CLIENT_SECRET: fake_client_secret
           TSG_ID: fake_tsg_id
         run: |
-          poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing
+          make test-cov
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

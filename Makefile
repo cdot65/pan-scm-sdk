@@ -59,7 +59,8 @@ test:
 # Run tests with coverage
 test-cov:
 	@echo "Running tests with coverage..."
-	poetry run pytest --cov=scm tests/
+	poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing tests/
+
 
 # Clean caches
 clean:
