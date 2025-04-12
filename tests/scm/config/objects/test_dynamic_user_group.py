@@ -10,8 +10,7 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.objects import DynamicUserGroup
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import (DynamicUserGroupResponseModel,
-                                DynamicUserGroupUpdateModel)
+from scm.models.objects import DynamicUserGroupResponseModel, DynamicUserGroupUpdateModel
 from tests.utils import raise_mock_http_error
 
 

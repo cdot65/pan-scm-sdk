@@ -118,11 +118,7 @@ class SyslogServerProfileBaseModel(BaseModel):
     """
 
     # Required fields
-    name: str = Field(
-        ...,
-        description="The name of the syslog server profile",
-        max_length=31
-    )
+    name: str = Field(..., description="The name of the syslog server profile", max_length=31)
 
     # Server configurations - can be a dict or list in API
     server: List[SyslogServerModel] = Field(..., description="Syslog server configurations")

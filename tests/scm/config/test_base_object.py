@@ -6,8 +6,7 @@ import pytest
 
 from scm.client import Scm
 from scm.config import BaseObject
-from scm.models.operations import (CandidatePushResponseModel, JobListResponse,
-                                   JobStatusResponse)
+from scm.models.operations import CandidatePushResponseModel, JobListResponse, JobStatusResponse
 
 
 @pytest.mark.usefixtures("load_env")

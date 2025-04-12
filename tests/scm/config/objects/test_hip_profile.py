@@ -11,9 +11,11 @@ from requests.exceptions import HTTPError
 from scm.config.objects import HIPProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import HIPProfileResponseModel
-from tests.factories import (HIPProfileCreateApiFactory,
-                             HIPProfileResponseFactory,
-                             HIPProfileUpdateApiFactory)
+from tests.factories import (
+    HIPProfileCreateApiFactory,
+    HIPProfileResponseFactory,
+    HIPProfileUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 

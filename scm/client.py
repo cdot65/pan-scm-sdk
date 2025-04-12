@@ -14,9 +14,12 @@ from requests.exceptions import HTTPError
 from scm.auth import OAuth2Client
 from scm.exceptions import APIError, ErrorHandler
 from scm.models.auth import AuthRequestModel
-from scm.models.operations import (CandidatePushRequestModel,
-                                   CandidatePushResponseModel, JobListResponse,
-                                   JobStatusResponse)
+from scm.models.operations import (
+    CandidatePushRequestModel,
+    CandidatePushResponseModel,
+    JobListResponse,
+    JobStatusResponse,
+)
 
 
 class Scm:

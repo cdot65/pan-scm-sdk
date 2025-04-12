@@ -8,10 +8,13 @@ from uuid import UUID
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.security import (SecurityRuleCreateModel,
-                                 SecurityRuleMoveModel,
-                                 SecurityRuleResponseModel,
-                                 SecurityRuleRulebase, SecurityRuleUpdateModel)
+from scm.models.security import (
+    SecurityRuleCreateModel,
+    SecurityRuleMoveModel,
+    SecurityRuleResponseModel,
+    SecurityRuleRulebase,
+    SecurityRuleUpdateModel,
+)
 
 
 class SecurityRule(BaseObject):

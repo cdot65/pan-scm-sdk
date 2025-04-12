@@ -7,8 +7,11 @@ import pytest
 from pydantic import ValidationError
 
 from scm.models.deployment.internal_dns_servers import (
-    InternalDnsServersBaseModel, InternalDnsServersCreateModel,
-    InternalDnsServersResponseModel, InternalDnsServersUpdateModel)
+    InternalDnsServersBaseModel,
+    InternalDnsServersCreateModel,
+    InternalDnsServersResponseModel,
+    InternalDnsServersUpdateModel,
+)
 
 
 class TestInternalDnsServersBaseModel:

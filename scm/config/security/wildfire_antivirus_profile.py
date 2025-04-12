@@ -8,8 +8,10 @@ from typing import Any, Dict, List, Optional
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAvProfileCreateModel, WildfireAvProfileResponseModel,
-    WildfireAvProfileUpdateModel)
+    WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel,
+    WildfireAvProfileUpdateModel,
+)
 
 
 class WildfireAntivirusProfile(BaseObject):

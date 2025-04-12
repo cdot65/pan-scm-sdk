@@ -5,9 +5,12 @@ from uuid import uuid4
 import factory
 from faker import Faker
 
-from scm.models.objects.address import (AddressBaseModel, AddressCreateModel,
-                                        AddressResponseModel,
-                                        AddressUpdateModel)
+from scm.models.objects.address import (
+    AddressBaseModel,
+    AddressCreateModel,
+    AddressResponseModel,
+    AddressUpdateModel,
+)
 
 fake = Faker()
 

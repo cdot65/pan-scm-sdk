@@ -7,9 +7,11 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.deployment import (InternalDnsServersCreateModel,
-                                   InternalDnsServersResponseModel,
-                                   InternalDnsServersUpdateModel)
+from scm.models.deployment import (
+    InternalDnsServersCreateModel,
+    InternalDnsServersResponseModel,
+    InternalDnsServersUpdateModel,
+)
 
 
 class InternalDnsServers(BaseObject):

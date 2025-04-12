@@ -4,8 +4,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import (BaseModel, ConfigDict, Field, field_validator,
-                      model_validator)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # Enums

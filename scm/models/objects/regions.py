@@ -5,8 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (BaseModel, ConfigDict, Field, field_validator,
-                      model_validator)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class GeoLocation(BaseModel):
@@ -19,16 +18,10 @@ class GeoLocation(BaseModel):
     """
 
     latitude: float = Field(
-        ...,
-        description="The latitudinal position of the region",
-        ge=-90,
-        le=90
+        ..., description="The latitudinal position of the region", ge=-90, le=90
     )
     longitude: float = Field(
-        ...,
-        description="The longitudinal position of the region",
-        ge=-180,
-        le=180
+        ..., description="The longitudinal position of the region", ge=-180, le=180
     )
 
 
@@ -56,10 +49,7 @@ class RegionBaseModel(BaseModel):
 
     # Required fields
     name: str = Field(
-        ...,
-        description="The name of the region",
-        pattern=r"^[ a-zA-Z\d._-]+$",
-        max_length=31
+        ..., description="The name of the region", pattern=r"^[ a-zA-Z\d._-]+$", max_length=31
     )
 
     # Optional fields

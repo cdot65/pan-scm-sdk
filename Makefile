@@ -41,11 +41,11 @@ fix:
 	poetry run ruff check --fix scm tests
 
 # Run all code quality checks
-quality: isort lint flake8 mypy format
+quality: lint flake8 mypy format
 	@echo "All code quality checks complete!"
 
 # Run basic code quality checks (skip mypy)
-quality-basic: isort lint flake8 format
+quality-basic: lint flake8 format
 	@echo "Basic code quality checks complete!"
 
 # Run both linting and formatting
@@ -105,8 +105,8 @@ help:
 	@echo "  mypy            - Run type checking with mypy"
 	@echo "  format          - Format code with ruff"
 	@echo "  fix             - Auto-fix linting issues with ruff"
-	@echo "  quality         - Run all code quality checks (isort, lint, flake8, mypy, format)"
-	@echo "  quality-basic   - Run basic code quality checks (isort, lint, flake8, format)"
+	@echo "  quality         - Run all code quality checks (lint, flake8, mypy, format)"
+	@echo "  quality-basic   - Run basic code quality checks (lint, flake8, format)"
 	@echo "  lint-format     - Run both linting and formatting"
 	@echo "  test            - Run tests"
 	@echo "  test-cov        - Run tests with coverage"
