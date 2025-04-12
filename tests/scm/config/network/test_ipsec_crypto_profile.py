@@ -8,9 +8,7 @@ import pytest
 from scm.client import Scm
 from scm.config.network import IPsecCryptoProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
-    IPsecCryptoProfileResponseModel,
-)
+from scm.models.network import IPsecCryptoProfileResponseModel
 
 
 class TestIPsecCryptoProfile:

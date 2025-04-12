@@ -10,18 +10,11 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import Tag
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import TagResponseModel, TagUpdateModel
 
 # Import factories
-from tests.factories import (
-    TagCreateApiFactory,
-    TagUpdateApiFactory,
-    TagResponseFactory,
-)
+from tests.factories import TagCreateApiFactory, TagResponseFactory, TagUpdateApiFactory
 from tests.utils import raise_mock_http_error
 
 

@@ -1,28 +1,21 @@
 # tests/scm/models/objects/test_schedules_models.py
 
 # External libraries
-import pytest
-from pydantic import ValidationError
 from uuid import UUID
 
-# Local SDK imports
-from scm.models.objects import (
-    ScheduleCreateModel,
-    ScheduleUpdateModel,
-    ScheduleResponseModel,
-)
-from scm.models.objects.schedules import (
-    WeeklyScheduleModel,
-    DailyScheduleModel,
-    RecurringScheduleModel,
-    NonRecurringScheduleModel,
-    ScheduleTypeModel,
-)
-from tests.factories import (
-    ScheduleCreateModelFactory,
-    ScheduleUpdateModelFactory,
-)
+import pytest
+from pydantic import ValidationError
 
+# Local SDK imports
+from scm.models.objects import ScheduleCreateModel, ScheduleResponseModel, ScheduleUpdateModel
+from scm.models.objects.schedules import (
+    DailyScheduleModel,
+    NonRecurringScheduleModel,
+    RecurringScheduleModel,
+    ScheduleTypeModel,
+    WeeklyScheduleModel,
+)
+from tests.factories import ScheduleCreateModelFactory, ScheduleUpdateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

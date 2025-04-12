@@ -1,8 +1,8 @@
 # tests/scm/config/objects/test_address_group.py
 
 # Standard library imports
-from unittest.mock import MagicMock
 import uuid
+from unittest.mock import MagicMock
 
 # External libraries
 import pytest
@@ -10,10 +10,7 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import AddressGroup
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import AddressGroupResponseModel
 from tests.factories import (
     AddressGroupCreateApiFactory,

@@ -2,7 +2,7 @@
 
 # Standard library imports
 import uuid
-from typing import List, Union, Dict
+from typing import Dict, List, Union
 
 # External libraries
 import factory
@@ -11,53 +11,41 @@ from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
 from scm.models.deployment.remote_networks import (
     EcmpLoadBalancingEnum,
-    RemoteNetworkUpdateModel,
-    RemoteNetworkResponseModel,
     EcmpTunnelModel,
     PeeringTypeEnum,
+    RemoteNetworkResponseModel,
+    RemoteNetworkUpdateModel,
 )
 from scm.models.deployment.service_connections import (
     ServiceConnectionCreateModel,
-    ServiceConnectionUpdateModel,
     ServiceConnectionResponseModel,
+    ServiceConnectionUpdateModel,
 )
 from scm.models.network.nat_rules import (
-    NatRuleCreateModel,
-    NatRuleUpdateModel,
-    NatRuleResponseModel,
-    NatRuleMoveModel,
-    NatType,
+    InterfaceAddress,
     NatMoveDestination,
     NatRulebase,
+    NatRuleCreateModel,
+    NatRuleMoveModel,
+    NatRuleResponseModel,
+    NatRuleUpdateModel,
+    NatType,
     SourceTranslation,
-    InterfaceAddress,
 )
 
 # Local SDK imports
 from scm.models.objects import (
-    AddressCreateModel,
-    AddressUpdateModel,
-    AddressResponseModel,
     AddressGroupCreateModel,
     AddressGroupResponseModel,
     ApplicationCreateModel,
-    ServiceCreateModel,
-    ServiceResponseModel,
-    ServiceUpdateModel,
-    TagResponseModel,
-    TagCreateModel,
-    TagUpdateModel,
-    ApplicationResponseModel,
-    ApplicationUpdateModel,
     ApplicationFiltersCreateModel,
-    ApplicationFiltersUpdateModel,
     ApplicationFiltersResponseModel,
+    ApplicationFiltersUpdateModel,
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
-    ServiceGroupCreateModel,
-    ServiceGroupUpdateModel,
-    ServiceGroupResponseModel,
+    ApplicationResponseModel,
+    ApplicationUpdateModel,
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
     HIPObjectCreateModel,
@@ -73,108 +61,109 @@ from scm.models.objects import (
     LogForwardingProfileResponseModel,
     LogForwardingProfileUpdateModel,
     RegionCreateModel,
-    RegionUpdateModel,
     RegionResponseModel,
+    RegionUpdateModel,
     ScheduleCreateModel,
-    ScheduleUpdateModel,
     ScheduleResponseModel,
+    ScheduleUpdateModel,
+    ServiceCreateModel,
+    ServiceGroupCreateModel,
+    ServiceGroupResponseModel,
+    ServiceGroupUpdateModel,
+    ServiceResponseModel,
+    ServiceUpdateModel,
+    TagCreateModel,
+    TagResponseModel,
+    TagUpdateModel,
 )
-from scm.models.objects.address_group import (
-    DynamicFilter,
-    AddressGroupUpdateModel,
-)
+from scm.models.objects.address_group import AddressGroupUpdateModel, DynamicFilter
 from scm.models.objects.hip_object import (
-    EncryptionLocationModel,
-    EncryptionStateIsNot,
-    EncryptionStateIs,
     DiskEncryptionCriteriaModel,
     DiskEncryptionModel,
+    EncryptionLocationModel,
+    EncryptionStateIs,
+    EncryptionStateIsNot,
 )
-from scm.models.objects.service import UDPProtocol, TCPProtocol, Override
+from scm.models.objects.service import Override, TCPProtocol, UDPProtocol
 from scm.models.security import (
-    DNSSecurityProfileCreateModel,
-    DNSSecurityProfileResponseModel,
-    AntiSpywareProfileResponseModel,
     AntiSpywareProfileCreateModel,
-    VulnerabilityProfileCreateModel,
-    VulnerabilityProfileResponseModel,
-    SecurityRuleCreateModel,
-    SecurityRuleMoveModel,
+    AntiSpywareProfileResponseModel,
     DecryptionProfileCreateModel,
     DecryptionProfileResponseModel,
-    URLCategoriesCreateModel,
+    DNSSecurityProfileCreateModel,
+    DNSSecurityProfileResponseModel,
+    SecurityRuleCreateModel,
+    SecurityRuleMoveModel,
+    VulnerabilityProfileCreateModel,
+    VulnerabilityProfileResponseModel,
 )
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywarePacketCapture,
-    AntiSpywareThreatExceptionBase,
     AntiSpywareCategory,
-    AntiSpywareSeverity,
-    AntiSpywareProfileUpdateModel,
+    AntiSpywareExemptIpEntry,
     AntiSpywareInlinePolicyAction,
     AntiSpywareMicaEngineSpywareEnabledEntry,
-    AntiSpywareExemptIpEntry,
+    AntiSpywarePacketCapture,
+    AntiSpywareProfileUpdateModel,
 )
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywareRuleBaseModel as AntiSpywareRuleBaseModel,
 )
+from scm.models.security.anti_spyware_profiles import (
+    AntiSpywareSeverity,
+    AntiSpywareThreatExceptionBase,
+)
 from scm.models.security.decryption_profiles import (
-    SSLVersion,
     DecryptionProfileUpdateModel,
-    SSLNoProxy,
-    SSLInboundProxy,
     SSLForwardProxy,
+    SSLInboundProxy,
+    SSLNoProxy,
     SSLProtocolSettings,
+    SSLVersion,
 )
 from scm.models.security.dns_security_profiles import (
-    BotnetDomainsModel,
-    ListActionRequestModel,
-    PacketCaptureEnum,
-    ListEntryBaseModel,
-    WhitelistEntryModel,
-    IPv6AddressEnum,
-    IPv4AddressEnum,
-    SinkholeSettingsModel,
-    LogLevelEnum,
     ActionEnum,
+    BotnetDomainsModel,
     DNSSecurityCategoryEntryModel,
     DNSSecurityProfileUpdateModel,
+    IPv4AddressEnum,
+    IPv6AddressEnum,
+    ListActionRequestModel,
+    ListEntryBaseModel,
+    LogLevelEnum,
+    PacketCaptureEnum,
+    SinkholeSettingsModel,
+    WhitelistEntryModel,
 )
 from scm.models.security.security_rules import (
-    SecurityRuleProfileSetting,
-    SecurityRuleRulebase,
-    SecurityRuleMoveDestination,
-    SecurityRuleResponseModel,
     SecurityRuleAction,
+    SecurityRuleMoveDestination,
+    SecurityRuleProfileSetting,
+    SecurityRuleResponseModel,
+    SecurityRuleRulebase,
     SecurityRuleUpdateModel,
 )
-from scm.models.security.url_categories import (
-    URLCategoriesListTypeEnum,
-    URLCategoriesUpdateModel,
-    URLCategoriesResponseModel,
-)
 from scm.models.security.vulnerability_protection_profiles import (
-    VulnerabilityProfileThreatExceptionModel,
-    VulnerabilityProfileRuleModel,
-    VulnerabilityProfileHost,
     VulnerabilityProfileCategory,
-    VulnerabilityProfileSeverity,
-    VulnerabilityProfileUpdateModel,
-    VulnerabilityProfilePacketCapture,
-    VulnerabilityProfileTimeAttribute,
     VulnerabilityProfileExemptIpEntry,
+    VulnerabilityProfileHost,
+    VulnerabilityProfilePacketCapture,
+    VulnerabilityProfileRuleModel,
+    VulnerabilityProfileSeverity,
+    VulnerabilityProfileThreatExceptionModel,
+    VulnerabilityProfileTimeAttribute,
     VulnerabilityProfileTimeAttributeTrackBy,
+    VulnerabilityProfileUpdateModel,
 )
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAvDirection,
     WildfireAvAnalysis,
+    WildfireAvDirection,
+    WildfireAvMlavExceptionEntry,
     WildfireAvProfileCreateModel,
     WildfireAvProfileResponseModel,
     WildfireAvProfileUpdateModel,
-    WildfireAvThreatExceptionEntry,
-    WildfireAvMlavExceptionEntry,
     WildfireAvRuleBase,
+    WildfireAvThreatExceptionEntry,
 )
-
 
 # ----------------------------------------------------------------------------
 # Network Location object factories.
@@ -204,334 +193,6 @@ class NetworkLocationModelFactory(factory.Factory):
     def build_with_invalid_coordinates(cls):
         """Create an instance with invalid coordinate values."""
         return cls(value="us-west-1", display="US West", latitude=100, longitude=200)
-
-
-# ----------------------------------------------------------------------------
-# Address object factories.
-# ----------------------------------------------------------------------------
-
-
-# SDK tests against SCM API
-class AddressCreateApiFactory(factory.Factory):
-    """Factory for creating AddressCreateModel instances with different address types."""
-
-    class Meta:
-        model = AddressCreateModel
-
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    tag = [
-        "test-tag",
-        "environment-prod",
-    ]
-
-    # Address types default to None
-    ip_netmask = None
-    ip_range = None
-    ip_wildcard = None
-    fqdn = None
-
-    @classmethod
-    def with_ip_netmask(cls, ip_netmask="192.168.1.1/32", **kwargs):
-        return cls(ip_netmask=ip_netmask, **kwargs)
-
-    @classmethod
-    def with_fqdn(cls, fqdn="example.com", **kwargs):
-        return cls(fqdn=fqdn, **kwargs)
-
-    @classmethod
-    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
-        return cls(ip_range=ip_range, **kwargs)
-
-    @classmethod
-    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
-        return cls(ip_wildcard=ip_wildcard, **kwargs)
-
-    @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
-
-
-class AddressUpdateApiFactory(factory.Factory):
-    """Factory for creating AddressUpdateModel instances."""
-
-    class Meta:
-        model = AddressUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = factory.Faker("sentence")
-    tag = ["updated-tag"]
-
-    # Address types default to None
-    ip_netmask = None
-    ip_range = None
-    ip_wildcard = None
-    fqdn = None
-
-    @classmethod
-    def with_ip_netmask(cls, ip_netmask="192.168.1.100/32", **kwargs):
-        return cls(ip_netmask=ip_netmask, **kwargs)
-
-    @classmethod
-    def with_fqdn(cls, fqdn="example.com", **kwargs):
-        return cls(fqdn=fqdn, **kwargs)
-
-    @classmethod
-    def with_ip_range(cls, ip_range="192.168.0.1-192.168.0.10", **kwargs):
-        return cls(ip_range=ip_range, **kwargs)
-
-    @classmethod
-    def with_ip_wildcard(cls, ip_wildcard="10.20.1.0/0.0.248.255", **kwargs):
-        return cls(ip_wildcard=ip_wildcard, **kwargs)
-
-    @classmethod
-    def with_snippet(cls, **kwargs):
-        return cls(folder=None, snippet="TestSnippet", **kwargs)
-
-    @classmethod
-    def with_device(cls, **kwargs):
-        return cls(folder=None, device="TestDevice", **kwargs)
-
-
-class AddressResponseFactory(factory.Factory):
-    """Factory for creating AddressResponseModel instances."""
-
-    class Meta:
-        model = AddressResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = factory.Faker("sentence")
-    tag = ["response-tag"]
-    folder = "Texas"
-
-    # No defaults for ip_netmask, ip_range, ip_wildcard, fqdn here
-    ip_netmask = None
-    ip_range = None
-    ip_wildcard = None
-    fqdn = None
-
-    @classmethod
-    def with_ip_netmask(
-        cls,
-        ip_netmask="192.168.1.1/32",
-        **kwargs,
-    ):
-        # Clears out other fields to ensure only one type is set
-        return cls(
-            ip_netmask=ip_netmask,
-            ip_range=None,
-            ip_wildcard=None,
-            fqdn=None,
-            **kwargs,
-        )
-
-    @classmethod
-    def with_fqdn(
-        cls,
-        fqdn="example.com",
-        **kwargs,
-    ):
-        return cls(
-            fqdn=fqdn,
-            ip_netmask=None,
-            ip_range=None,
-            ip_wildcard=None,
-            **kwargs,
-        )
-
-    @classmethod
-    def with_ip_range(
-        cls,
-        ip_range="192.168.0.1-192.168.0.10",
-        **kwargs,
-    ):
-        return cls(
-            ip_range=ip_range,
-            ip_netmask=None,
-            ip_wildcard=None,
-            fqdn=None,
-            **kwargs,
-        )
-
-    @classmethod
-    def with_ip_wildcard(
-        cls,
-        ip_wildcard="10.20.1.0/0.0.248.255",
-        **kwargs,
-    ):
-        return cls(
-            ip_wildcard=ip_wildcard,
-            ip_netmask=None,
-            ip_range=None,
-            fqdn=None,
-            **kwargs,
-        )
-
-    @classmethod
-    def with_snippet(
-        cls,
-        **kwargs,
-    ):
-        return cls(
-            folder=None,
-            snippet="TestSnippet",
-            **kwargs,
-        )
-
-    @classmethod
-    def with_device(
-        cls,
-        **kwargs,
-    ):
-        return cls(
-            folder=None,
-            device="TestDevice",
-            **kwargs,
-        )
-
-    @classmethod
-    def from_request(
-        cls,
-        request_model: AddressCreateModel,
-        **kwargs,
-    ):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class AddressCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for AddressCreateModel."""
-
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = factory.Faker("sentence")
-    tag = [
-        "test-tag",
-        "environment-prod",
-    ]
-
-    # We intentionally omit the address type fields to simulate missing them
-
-    @classmethod
-    def build_without_type(cls):
-        """Return a data dict without the required address type fields."""
-        return cls(
-            name="Test123",
-            folder="Texas",
-            # No address type fields provided
-        )
-
-    @classmethod
-    def build_with_multiple_types(cls):
-        """Return a data dict multiple type fields."""
-        return cls(
-            name="Test123",
-            folder="Texas",
-            ip_netmask="1.1.1.1/32",
-            fqdn="example.com",
-        )
-
-    @classmethod
-    def build_with_no_containers(cls):
-        """Return a data dict without any containers."""
-        return cls(
-            name="Test123",
-            fqdn="example.com",
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict multiple containers."""
-        return cls(
-            name="Test123",
-            folder="Texas",
-            snippet="this will fail",
-            fqdn="example.com",
-        )
-
-    @classmethod
-    def build_valid(cls):
-        """Return a data dict with all the expected attributes."""
-        return cls(
-            name="Test123",
-            ip_netmask="10.5.0.11",
-            folder="Texas",
-            tag=["Python", "Automation"],
-            description="This is a test",
-        )
-
-
-class AddressUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for AddressCreateModel."""
-
-    name = factory.Sequence(lambda n: f"address_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    tag = [
-        "test-tag",
-        "environment-prod",
-    ]
-
-    # We intentionally omit the address type fields to simulate missing them
-
-    @classmethod
-    def build_without_type(cls):
-        """Return a data dict without the required address type fields."""
-        return cls(
-            name="Test123",
-            folder="Texas",
-            # No address type fields provided
-        )
-
-    @classmethod
-    def build_with_multiple_types(cls):
-        """Return a data dict multiple type fields."""
-        return cls(
-            name="Test123",
-            folder="Texas",
-            ip_netmask="1.1.1.1/32",
-            fqdn="example.com",
-        )
-
-    @classmethod
-    def build_with_no_containers(cls):
-        """Return a data dict without any containers."""
-        return cls(
-            name="Test123",
-            fqdn="example.com",
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict multiple containers."""
-        return cls(
-            name="Test123",
-            folder="Texas",
-            snippet="this will fail",
-            fqdn="example.com",
-        )
-
-    @classmethod
-    def build_valid(cls):
-        """Return a data dict with all the expected attributes."""
-        return cls(
-            id="12345678-1234-5678-1234-567812345678",
-            name="Test123",
-            ip_netmask="10.5.0.11",
-            folder="Texas",
-            tag=["Python", "Automation"],
-            description="This is a test",
-        )
 
 
 # ----------------------------------------------------------------------------
@@ -4091,265 +3752,6 @@ class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
             name="UpdatedProfile",
             description="Updated description",
             botnet_domains={"sinkhole": {"ipv4_address": "127.0.0.1", "ipv6_address": "::1"}},
-        )
-
-    @classmethod
-    def build_with_invalid_fields(cls):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            id="invalid-uuid",
-            name="@invalid-name",
-            botnet_domains={"dns_security_categories": [{"name": "malware", "action": "invalid"}]},
-        )
-
-    @classmethod
-    def build_minimal_update(cls):
-        """Return a data dict with minimal valid update fields."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            description="Updated description",
-        )
-
-
-# ----------------------------------------------------------------------------
-# URL Categories factories.
-# ----------------------------------------------------------------------------
-
-
-# SDK tests against SCM API
-class URLCategoriesCreateApiFactory(factory.Factory):
-    """Factory for creating URLCategoriesCreateModel instances."""
-
-    class Meta:
-        model = URLCategoriesCreateModel
-
-    name = factory.Sequence(lambda n: f"url_categories_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    list = factory.List([factory.Faker("word") for _ in range(3)])
-    type = URLCategoriesListTypeEnum.url_list
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_empty_list(cls, **kwargs):
-        """Create an instance with empty list."""
-        return cls(list=[], **kwargs)
-
-    @classmethod
-    def with_category_match(cls, **kwargs):
-        """Create an instance with category match."""
-        return cls(
-            type=URLCategoriesListTypeEnum.category_match,
-            list=[
-                "hacking",
-                "low-risk",
-            ],
-            **kwargs,
-        )
-
-    @classmethod
-    def with_invalid_type(cls, **kwargs):
-        """Create an instance with category match."""
-        return cls(
-            type="invalid-type",
-            **kwargs,
-        )
-
-
-class URLCategoriesUpdateApiFactory(factory.Factory):
-    """Factory for creating URLCategoriesUpdateModel instances."""
-
-    class Meta:
-        model = URLCategoriesUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"url_categories_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    list = factory.List([factory.Faker("word") for _ in range(3)])
-    type = URLCategoriesListTypeEnum.url_list
-
-    @classmethod
-    def with_updated_list(cls, **kwargs):
-        """Create an instance with an updated list."""
-        updates_list = factory.List([factory.Faker("word") for _ in range(3)])
-        return cls(
-            list=updates_list,
-            **kwargs,
-        )
-
-    @classmethod
-    def with_category_match(cls, **kwargs):
-        """Create an instance with category match."""
-        return cls(
-            type=URLCategoriesListTypeEnum.category_match,
-            list=cls.list.append(factory.Faker("word")),  # noqa
-            **kwargs,
-        )
-
-    @classmethod
-    def with_invalid_type(cls, **kwargs):
-        """Create an instance with category match."""
-        return cls(
-            type="invalid-type",
-            **kwargs,
-        )
-
-
-class URLCategoriesResponseFactory(factory.Factory):
-    """Factory for creating URLCategoriesResponseModel instances."""
-
-    class Meta:
-        model = URLCategoriesResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"url_categories_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    list = [
-        "http.kali.org/kali/dists/kali-rolling/InRelease",
-    ]
-    type = URLCategoriesListTypeEnum.url_list
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: URLCategoriesCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class URLCategoriesCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for URLCategoriesCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"url_categories_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    list = [
-        factory.Faker("word"),
-        factory.Faker("word"),
-        factory.Faker("word"),
-    ]
-    type = URLCategoriesListTypeEnum.url_list
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestProfile",
-            folder="Texas",
-            list=[
-                factory.Faker("word"),
-                factory.Faker("word"),
-                factory.Faker("word"),
-            ],
-            type=URLCategoriesListTypeEnum.url_list,
-        )
-
-    @classmethod
-    def build_valid_category_match(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestProfile",
-            folder="Texas",
-            list=[
-                factory.Faker("word"),
-                factory.Faker("word"),
-                factory.Faker("word"),
-            ],
-            type=URLCategoriesListTypeEnum.category_match,
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls):
-        """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-name#",
-            folder="Texas",
-            description=factory.Faker("sentence"),
-            list=[
-                "test1",
-                "test2",
-                "test3",
-            ],
-            type=URLCategoriesListTypeEnum.url_list,
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="TestProfile",
-            folder="Texas",
-            snippet="TestSnippet",
-            description=factory.Faker("sentence"),
-            list=[
-                "test1",
-                "test2",
-                "test3",
-                "test4",
-            ],
-            type=URLCategoriesListTypeEnum.url_list,
-        )
-
-    @classmethod
-    def build_with_invalid_type(cls):
-        """Return a data dict with invalid type."""
-        return cls(
-            name="TestProfile",
-            folder="Texas",
-            type="invalid-type",
-            description=factory.Faker("sentence"),
-            list=[
-                factory.Faker("word"),
-                factory.Faker("word"),
-                factory.Faker("word"),
-            ],
-        )
-
-
-class URLCategoriesUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for URLCategoriesUpdateModel validation testing."""
-
-    id = "123e4567-e89b-12d3-a456-426655440000"
-    name = factory.Sequence(lambda n: f"url_categories_{n}")
-    folder = "Texas"
-    list = [
-        factory.Faker("word"),
-        factory.Faker("word"),
-        factory.Faker("word"),
-    ]
-    type = URLCategoriesListTypeEnum.url_list
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating a DNS security profile."""
-        return cls(
-            name="Updated URL Categories",
-            description="Updated description",
         )
 
     @classmethod

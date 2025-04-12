@@ -1,12 +1,8 @@
 from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class HashAlgorithm(str, Enum):

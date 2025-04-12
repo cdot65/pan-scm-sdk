@@ -8,21 +8,20 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.security.dns_security_profiles import (
-    DNSSecurityProfileCreateModel,
-    DNSSecurityProfileUpdateModel,
-    DNSSecurityProfileResponseModel,
     ActionEnum,
-    ListActionRequestModel,
+    DNSSecurityProfileCreateModel,
+    DNSSecurityProfileResponseModel,
+    DNSSecurityProfileUpdateModel,
     ListActionBaseModel,
+    ListActionRequestModel,
 )
 from tests.factories import (
+    DNSSecurityProfileCreateApiFactory,
     DNSSecurityProfileCreateModelFactory,
-    DNSSecurityProfileUpdateModelFactory,
     DNSSecurityProfileResponseFactory,
     DNSSecurityProfileUpdateApiFactory,
-    DNSSecurityProfileCreateApiFactory,
+    DNSSecurityProfileUpdateModelFactory,
 )
-
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

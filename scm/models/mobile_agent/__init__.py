@@ -1,16 +1,14 @@
 # scm/models/deployment/__init__.py
 
-from .agent_versions import (
-    AgentVersionsModel,
-)
+from .agent_versions import AgentVersionsModel
 from .auth_settings import (
-    OperatingSystem,
     AuthSettingsBaseModel,
     AuthSettingsCreateModel,
-    AuthSettingsUpdateModel,
-    AuthSettingsResponseModel,
-    MovePosition,
     AuthSettingsMoveModel,
+    AuthSettingsResponseModel,
+    AuthSettingsUpdateModel,
+    MovePosition,
+    OperatingSystem,
 )
 
 __all__ = [

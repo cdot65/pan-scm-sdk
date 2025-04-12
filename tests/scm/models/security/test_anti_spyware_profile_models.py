@@ -6,24 +6,23 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareProfileCreateModel,
-    AntiSpywareProfileUpdateModel,
-    AntiSpywareProfileResponseModel,
-    AntiSpywareRuleBaseModel,
-    AntiSpywareThreatExceptionBase,
     AntiSpywareActionRequest,
     AntiSpywareActionResponse,
     AntiSpywareBlockIpAction,
     AntiSpywareCategory,
-    AntiSpywareSeverity,
-    AntiSpywarePacketCapture,
     AntiSpywareExemptIpEntry,
+    AntiSpywarePacketCapture,
+    AntiSpywareProfileCreateModel,
+    AntiSpywareProfileResponseModel,
+    AntiSpywareProfileUpdateModel,
+    AntiSpywareRuleBaseModel,
+    AntiSpywareSeverity,
+    AntiSpywareThreatExceptionBase,
 )
 from tests.factories import (
     AntiSpywareProfileCreateModelFactory,
     AntiSpywareProfileUpdateModelFactory,
 )
-
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

@@ -1,24 +1,22 @@
 # tests/scm/config/objects/test_external_dynamic_lists.py
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
 
 from scm.config.objects.external_dynamic_lists import ExternalDynamicLists
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects.external_dynamic_lists import (
-    ExternalDynamicListsResponseModel,
     ExternalDynamicListsCreateModel,
+    ExternalDynamicListsResponseModel,
     ExternalDynamicListsUpdateModel,
 )
 from tests.factories import (
     ExternalDynamicListsCreateApiFactory,
-    ExternalDynamicListsUpdateApiFactory,
     ExternalDynamicListsResponseFactory,
+    ExternalDynamicListsUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error
 

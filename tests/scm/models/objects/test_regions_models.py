@@ -6,16 +6,12 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects import (
-    RegionCreateModel,
-    RegionUpdateModel,
-    RegionResponseModel,
     GeoLocation,
+    RegionCreateModel,
+    RegionResponseModel,
+    RegionUpdateModel,
 )
-from tests.factories import (
-    RegionCreateModelFactory,
-    RegionUpdateModelFactory,
-)
-
+from tests.factories import RegionCreateModelFactory, RegionUpdateModelFactory
 
 # -------------------- Test Classes for GeoLocation Model --------------------
 

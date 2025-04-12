@@ -4,12 +4,7 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # Enums
@@ -84,9 +79,7 @@ class URLCategoriesCreateModel(URLCategoriesBaseModel):
             field for field in container_fields if getattr(self, field) is not None
         ]
         if len(provided_containers) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 

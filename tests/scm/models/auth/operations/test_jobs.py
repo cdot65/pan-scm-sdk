@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from scm.models.operations.jobs import JobStatusData, JobListItem
+from scm.models.operations.jobs import JobListItem, JobStatusData
 
 
 class TestJobStatusData:

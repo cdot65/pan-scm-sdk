@@ -9,16 +9,11 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.deployment import RemoteNetworks
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.deployment import (
-    RemoteNetworkResponseModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.deployment import RemoteNetworkResponseModel
 from tests.factories import (
-    RemoteNetworkResponseFactory,
     RemoteNetworkCreateApiFactory,
+    RemoteNetworkResponseFactory,
     RemoteNetworkUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error

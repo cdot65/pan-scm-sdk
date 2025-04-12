@@ -1,17 +1,10 @@
 # scm/models/security/security_rules.py
 
 from enum import Enum
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-    ConfigDict,
-    constr,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # Enums
@@ -67,9 +60,8 @@ class SecurityRuleBaseModel(BaseModel):
         arbitrary_types_allowed=True,
     )
 
-    name: constr(pattern=r"^[a-zA-Z0-9_ \.-]+$") = Field(
-        ...,
-        description="The name of the security rule",
+    name: str = Field(
+        ..., description="The name of the security rule", pattern=r"^[a-zA-Z0-9_ \.-]+$"
     )
     disabled: bool = Field(False, description="Is the security rule disabled?")
     description: Optional[str] = Field(None, description="The description of the security rule")

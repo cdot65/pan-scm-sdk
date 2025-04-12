@@ -1,26 +1,27 @@
 # tests/scm/models/network/test_ipsec_crypto_profile_models.py
 
-import pytest
-from pydantic import ValidationError
 from uuid import UUID
 
+import pytest
+from pydantic import ValidationError
+
 from scm.models.network import (
-    IPsecCryptoProfileCreateModel,
-    IPsecCryptoProfileUpdateModel,
-    IPsecCryptoProfileResponseModel,
-    DhGroup,
-    EspEncryption,
     AhAuthentication,
-    LifetimeSeconds,
-    LifetimeMinutes,
-    LifetimeHours,
-    LifetimeDays,
+    AhConfig,
+    DhGroup,
+    EspConfig,
+    EspEncryption,
+    IPsecCryptoProfileCreateModel,
+    IPsecCryptoProfileResponseModel,
+    IPsecCryptoProfileUpdateModel,
+    LifesizeGB,
     LifesizeKB,
     LifesizeMB,
-    LifesizeGB,
     LifesizeTB,
-    EspConfig,
-    AhConfig,
+    LifetimeDays,
+    LifetimeHours,
+    LifetimeMinutes,
+    LifetimeSeconds,
 )
 
 
@@ -316,14 +317,14 @@ class TestIPsecCryptoProfileModels:
         """Test the process_lifetime_and_lifesize validator directly."""
         from scm.models.network.ipsec_crypto_profile import (
             IPsecCryptoProfileBaseModel,
-            LifetimeSeconds,
-            LifetimeMinutes,
-            LifetimeHours,
-            LifetimeDays,
+            LifesizeGB,
             LifesizeKB,
             LifesizeMB,
-            LifesizeGB,
             LifesizeTB,
+            LifetimeDays,
+            LifetimeHours,
+            LifetimeMinutes,
+            LifetimeSeconds,
         )
 
         # Test validator with non-dict input

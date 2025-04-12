@@ -5,12 +5,12 @@ from pydantic import ValidationError
 
 from scm.models.deployment.bgp_routing import (
     BackboneRoutingEnum,
-    DefaultRoutingModel,
-    HotPotatoRoutingModel,
     BGPRoutingBaseModel,
     BGPRoutingCreateModel,
-    BGPRoutingUpdateModel,
     BGPRoutingResponseModel,
+    BGPRoutingUpdateModel,
+    DefaultRoutingModel,
+    HotPotatoRoutingModel,
 )
 
 

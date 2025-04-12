@@ -9,16 +9,11 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import HIPProfile
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.objects import (
-    HIPProfileResponseModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.objects import HIPProfileResponseModel
 from tests.factories import (
-    HIPProfileResponseFactory,
     HIPProfileCreateApiFactory,
+    HIPProfileResponseFactory,
     HIPProfileUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error

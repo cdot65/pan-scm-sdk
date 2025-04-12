@@ -1,16 +1,11 @@
 # scm/models/objects/http_server_profiles.py
 
 # Standard library imports
-from typing import Optional, List, Dict, Literal
+from typing import Dict, List, Literal, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # Server model for HTTP server profile
@@ -58,12 +53,8 @@ class PayloadFormatModel(BaseModel):
         payload (Optional[str]): The log payload format. Contains log field values.
     """
 
-    name: Optional[str] = Field(
-        "Default", description="The name of the payload format"
-    )
-    url_format: Optional[str] = Field(
-        None, description="The URL path of the HTTP server"
-    )
+    name: Optional[str] = Field("Default", description="The name of the payload format")
+    url_format: Optional[str] = Field(None, description="The URL path of the HTTP server")
     headers: Optional[List[Dict[str, str]]] = Field(
         None, description="List of HTTP headers to include in the request"
     )
@@ -71,8 +62,7 @@ class PayloadFormatModel(BaseModel):
         None, description="List of HTTP parameters to include in the request"
     )
     payload: Optional[str] = Field(
-        None,
-        description="The log payload format containing log field values"
+        None, description="The log payload format containing log field values"
     )
 
 

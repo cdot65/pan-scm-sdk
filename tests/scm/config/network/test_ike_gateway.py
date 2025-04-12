@@ -1,16 +1,13 @@
 """Tests for the IKE Gateway service class."""
 
-import pytest
 from unittest.mock import MagicMock
 from uuid import UUID
 
+import pytest
+
 from scm.config.network import IKEGateway
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
-    IKEGatewayResponseModel,
-    IKEGatewayUpdateModel,
-)
-
+from scm.models.network import IKEGatewayResponseModel, IKEGatewayUpdateModel
 
 # Test data
 MOCK_IKE_GATEWAY = {

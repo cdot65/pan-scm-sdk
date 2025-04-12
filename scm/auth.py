@@ -7,11 +7,11 @@ from typing import Optional
 # External libraries
 import jwt
 from jwt import PyJWKClient
-from jwt.exceptions import ExpiredSignatureError, DecodeError, PyJWKClientError
+from jwt.exceptions import DecodeError, ExpiredSignatureError, PyJWKClientError
 from oauthlib.oauth2 import BackendApplicationClient
 from requests import Response, Session
 from requests.adapters import HTTPAdapter
-from requests.exceptions import HTTPError, Timeout, RequestException
+from requests.exceptions import HTTPError, RequestException, Timeout
 from requests_oauthlib import OAuth2Session
 from urllib3 import Retry
 
@@ -94,7 +94,8 @@ class OAuth2Client:
             response: Optional[Response] = e.response
             if response is not None and response.content:
                 ErrorHandler.raise_for_error(response.json(), response.status_code)
-            # raise APIError(f"HTTP error during session creation: {str(e)}") from e
+            # If we get here, we need to raise an error to maintain the return type
+            raise APIError(f"HTTP error during session creation: {str(e)}") from e
         except Exception as e:
             logger.error(f"Unexpected error during token fetch: {str(e)}")
             raise APIError(f"Failed to create session: {str(e)}") from e

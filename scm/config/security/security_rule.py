@@ -2,21 +2,18 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security import (
     SecurityRuleCreateModel,
-    SecurityRuleUpdateModel,
-    SecurityRuleResponseModel,
     SecurityRuleMoveModel,
+    SecurityRuleResponseModel,
     SecurityRuleRulebase,
+    SecurityRuleUpdateModel,
 )
 
 
@@ -742,10 +739,10 @@ class SecurityRule(BaseObject):
         """
         rule_id_str = str(rule_id)
         move_config = SecurityRuleMoveModel(**data)
-        
+
         # Get the dictionary representation of the model
         payload = move_config.model_dump(exclude_none=True)
-        
+
         # Convert UUID to string for JSON serialization if present
         if payload.get("destination_rule") is not None:
             payload["destination_rule"] = str(payload["destination_rule"])

@@ -7,10 +7,9 @@ from pydantic import ValidationError
 # Local SDK imports
 from scm.models.objects import (
     ApplicationCreateModel,
-    ApplicationUpdateModel,
     ApplicationResponseModel,
+    ApplicationUpdateModel,
 )
-
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

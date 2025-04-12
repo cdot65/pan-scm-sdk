@@ -1,14 +1,9 @@
 # scm/models/objects/external_dynamic_lists.py
 
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    ConfigDict,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class FiveMinuteRecurringModel(BaseModel):

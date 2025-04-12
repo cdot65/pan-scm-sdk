@@ -1,16 +1,17 @@
 """Test models for IKE crypto profiles."""
 
-import pytest
 from uuid import UUID
+
+import pytest
 from pydantic import ValidationError
 
 from scm.models.network import (
-    IKECryptoProfileCreateModel,
-    IKECryptoProfileUpdateModel,
-    IKECryptoProfileResponseModel,
-    HashAlgorithm,
-    EncryptionAlgorithm,
     DHGroup,
+    EncryptionAlgorithm,
+    HashAlgorithm,
+    IKECryptoProfileCreateModel,
+    IKECryptoProfileResponseModel,
+    IKECryptoProfileUpdateModel,
 )
 
 

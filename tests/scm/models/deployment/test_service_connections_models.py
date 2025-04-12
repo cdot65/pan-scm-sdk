@@ -6,15 +6,15 @@ import pytest
 from pydantic import ValidationError
 
 from scm.models.deployment import (
-    ServiceConnectionCreateModel,
-    ServiceConnectionUpdateModel,
-    ServiceConnectionResponseModel,
-    OnboardingType,
-    NoExportCommunity,
     BgpPeerModel,
     BgpProtocolModel,
+    NoExportCommunity,
+    OnboardingType,
     ProtocolModel,
     QosModel,
+    ServiceConnectionCreateModel,
+    ServiceConnectionResponseModel,
+    ServiceConnectionUpdateModel,
 )
 
 

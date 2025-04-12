@@ -1,19 +1,11 @@
 # scm/models/objects/regions.py
 
 # Standard library imports
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-    ConfigDict,
-    constr,
-    confloat,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class GeoLocation(BaseModel):
@@ -25,13 +17,11 @@ class GeoLocation(BaseModel):
         longitude (float): The longitudinal position of the region (-180 to 180).
     """
 
-    latitude: confloat(ge=-90, le=90) = Field(
-        ...,
-        description="The latitudinal position of the region",
+    latitude: float = Field(
+        ..., description="The latitudinal position of the region", ge=-90, le=90
     )
-    longitude: confloat(ge=-180, le=180) = Field(
-        ...,
-        description="The longitudinal position of the region",
+    longitude: float = Field(
+        ..., description="The longitudinal position of the region", ge=-180, le=180
     )
 
 
@@ -58,9 +48,8 @@ class RegionBaseModel(BaseModel):
     """
 
     # Required fields
-    name: constr(pattern=r"^[ a-zA-Z\d._-]+$", max_length=31) = Field(
-        ...,
-        description="The name of the region",
+    name: str = Field(
+        ..., description="The name of the region", pattern=r"^[ a-zA-Z\d._-]+$", max_length=31
     )
 
     # Optional fields
@@ -82,19 +71,25 @@ class RegionBaseModel(BaseModel):
     )
 
     # Container Types
-    folder: Optional[constr(pattern=r"^[a-zA-Z\d\-_. ]+$", max_length=64)] = Field(
+    folder: Optional[str] = Field(
         None,
         description="The folder in which the resource is defined",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
         examples=["Global"],
     )
-    snippet: Optional[constr(pattern=r"^[a-zA-Z\d\-_. ]+$", max_length=64)] = Field(
+    snippet: Optional[str] = Field(
         None,
         description="The snippet in which the resource is defined",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
         examples=["My Snippet"],
     )
-    device: Optional[constr(pattern=r"^[a-zA-Z\d\-_. ]+$", max_length=64)] = Field(
+    device: Optional[str] = Field(
         None,
         description="The device in which the resource is defined",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
         examples=["My Device"],
     )
 

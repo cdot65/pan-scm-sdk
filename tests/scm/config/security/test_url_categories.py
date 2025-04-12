@@ -9,17 +9,12 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.security import URLCategories
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.security.url_categories import (
-    URLCategoriesResponseModel,
-)
-from tests.factories import (
-    URLCategoriesCreateApiFactory,
-    URLCategoriesUpdateApiFactory,
-    URLCategoriesResponseFactory,
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.security.url_categories import URLCategoriesResponseModel
+from tests.test_factories import (
+    URLCategoriesCreateModelFactory,
+    URLCategoriesResponseModelFactory,
+    URLCategoriesUpdateModelFactory,
 )
 from tests.utils import raise_mock_http_error
 
@@ -90,7 +85,7 @@ class TestURLCategoriesList(TestURLCategoriesBase):
 
     def test_list_valid(self):
         """Test listing all objects successfully."""
-        test_object = URLCategoriesResponseFactory.build()
+        test_object = URLCategoriesResponseModelFactory.build()
         mock_response = {
             "data": [
                 test_object.model_dump(),
@@ -181,7 +176,7 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         """Test behavior with empty filter lists."""
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="profile1",
                     folder="Texas",
                     list=[
@@ -204,7 +199,7 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         # Mock response for successful case
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="profile1",
                     folder="Texas",
                     list=[
@@ -311,11 +306,11 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         """
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_in_texas",
                     folder="Texas",
                 ).model_dump(),
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_in_all",
                     folder="All",
                 ).model_dump(),
@@ -336,11 +331,11 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         """
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_in_texas",
                     folder="Texas",
                 ).model_dump(),
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_in_all",
                     folder="All",
                 ).model_dump(),
@@ -358,12 +353,12 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         """
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_with_default_snippet",
                     folder="Texas",
                     snippet="default",
                 ).model_dump(),
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_with_special_snippet",
                     folder="Texas",
                     snippet="special",
@@ -382,13 +377,13 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         """
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_with_default_snippet",
                     folder="Texas",
                     snippet="default",
                     device="DeviceA",
                 ).model_dump(),
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_with_special_snippet",
                     folder="Texas",
                     snippet="special",
@@ -408,12 +403,12 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         """
         mock_response = {
             "data": [
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_with_default_snippet",
                     folder="Texas",
                     snippet="default",
                 ).model_dump(),
-                URLCategoriesResponseFactory(
+                URLCategoriesResponseModelFactory(
                     name="addr_with_special_snippet",
                     folder="Texas",
                     snippet="special",
@@ -445,7 +440,7 @@ class TestURLCategoriesList(TestURLCategoriesBase):
 
         # Create test data for three pages with different URL categories
         first_page = [
-            URLCategoriesResponseFactory(
+            URLCategoriesResponseModelFactory(
                 name=f"custom-block-page1-{i}",
                 folder="Texas",
                 type="URL List",
@@ -458,7 +453,7 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         ]
 
         second_page = [
-            URLCategoriesResponseFactory(
+            URLCategoriesResponseModelFactory(
                 name=f"custom-alert-page2-{i}",
                 folder="Texas",
                 type="URL List",
@@ -471,7 +466,7 @@ class TestURLCategoriesList(TestURLCategoriesBase):
         ]
 
         third_page = [
-            URLCategoriesResponseFactory(
+            URLCategoriesResponseModelFactory(
                 name=f"custom-allow-page3-{i}",
                 folder="Texas",
                 type="URL List",
@@ -548,8 +543,8 @@ class TestURLCategoriesCreate(TestURLCategoriesBase):
 
     def test_create_valid_object(self):
         """Test creating an object with valid data."""
-        test_object = URLCategoriesCreateApiFactory.build()
-        mock_response = URLCategoriesResponseFactory.from_request(test_object)
+        test_object = URLCategoriesCreateModelFactory.build()
+        mock_response = URLCategoriesResponseModelFactory.from_request(test_object)
 
         self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
         created_object = self.client.create(test_object.model_dump())
@@ -620,7 +615,7 @@ class TestURLCategoriesGet(TestURLCategoriesBase):
 
     def test_get_valid_object(self):
         """Test retrieving a specific object."""
-        mock_response = URLCategoriesResponseFactory.build()
+        mock_response = URLCategoriesResponseModelFactory.build()
 
         self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
         retrieved_object = self.client.get(str(mock_response.id))
@@ -694,14 +689,14 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
 
     def test_update_valid_object(self):
         """Test updating an object with valid data."""
-        update_data = URLCategoriesUpdateApiFactory.with_updated_list(
+        update_data = URLCategoriesUpdateModelFactory.with_updated_list(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-category",
             description="Updated URL category",
         )
 
         # Create mock response
-        mock_response = URLCategoriesResponseFactory.from_request(update_data)
+        mock_response = URLCategoriesResponseModelFactory.from_request(update_data)
         self.mock_scm.put.return_value = mock_response.model_dump()
 
         # Perform update
@@ -729,7 +724,7 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
 
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
-        update_data = URLCategoriesUpdateApiFactory.build()
+        update_data = URLCategoriesUpdateModelFactory.build()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
@@ -746,7 +741,7 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
-        update_data = URLCategoriesUpdateApiFactory.build()
+        update_data = URLCategoriesUpdateModelFactory.build()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
             status_code=404,
@@ -764,7 +759,7 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
         # Create test data using factory
-        update_data = URLCategoriesUpdateApiFactory(
+        update_data = URLCategoriesUpdateModelFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
             botnet_domains={},
@@ -786,7 +781,7 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
     def test_update_generic_exception_handling(self):
         """Test handling of a generic exception during update."""
         # Create test data as Pydantic model
-        update_data = URLCategoriesUpdateApiFactory(
+        update_data = URLCategoriesUpdateModelFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
             botnet_domains={},
@@ -801,7 +796,7 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
     def test_update_server_error(self):
         """Test handling of server errors during update."""
         # Create test data
-        update_data = URLCategoriesUpdateApiFactory.build()
+        update_data = URLCategoriesUpdateModelFactory.build()
 
         # Use utility function to simulate server error
         self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
@@ -912,7 +907,7 @@ class TestURLCategoriesFetch(TestURLCategoriesBase):
 
     def test_fetch_valid_object(self):
         """Test retrieving an object by its name using the `fetch` method."""
-        mock_response_model = URLCategoriesResponseFactory.build()
+        mock_response_model = URLCategoriesResponseModelFactory.build()
         mock_response_data = mock_response_model.model_dump()
 
         # Set the mock to return the response data directly

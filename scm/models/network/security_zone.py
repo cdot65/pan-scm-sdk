@@ -1,12 +1,8 @@
 from enum import Enum
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from uuid import UUID
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-)
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class NetworkInterfaceType(str, Enum):

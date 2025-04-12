@@ -1,16 +1,9 @@
 # scm/models/objects/address_group.py
 
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-    ConfigDict,
-    constr,
-)
+from pydantic import BaseModel, ConfigDict, Field, constr, field_validator, model_validator
 
 TagString = constr(max_length=64)
 

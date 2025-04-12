@@ -6,9 +6,7 @@ import pytest
 
 from scm.config.mobile_agent import AuthSettings
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.mobile_agent import (
-    AuthSettingsResponseModel,
-)
+from scm.models.mobile_agent import AuthSettingsResponseModel
 
 
 class TestAuthSettings:

@@ -5,23 +5,20 @@ import importlib
 import logging
 import sys
 import time
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 # External libraries
 from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.auth import OAuth2Client
-from scm.exceptions import (
-    APIError,
-    ErrorHandler,
-)
+from scm.exceptions import APIError, ErrorHandler
 from scm.models.auth import AuthRequestModel
 from scm.models.operations import (
     CandidatePushRequestModel,
     CandidatePushResponseModel,
-    JobStatusResponse,
     JobListResponse,
+    JobStatusResponse,
 )
 
 

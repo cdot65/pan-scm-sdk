@@ -8,28 +8,27 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.network.nat_rules import (
-    NatRuleCreateModel,
-    NatRuleUpdateModel,
-    NatRuleResponseModel,
-    NatRuleMoveModel,
-    NatType,
+    BiDirectional,
     NatMoveDestination,
     NatRulebase,
+    NatRuleCreateModel,
+    NatRuleMoveModel,
+    NatRuleResponseModel,
+    NatRuleUpdateModel,
+    NatType,
     SourceTranslation,
     StaticIp,
-    BiDirectional,
 )
 from tests.factories import (
-    NatRuleCreateModelFactory,
-    NatRuleUpdateModelFactory,
-    NatRuleMoveModelFactory,
-    NatRuleCreateApiFactory,
-    NatRuleResponseFactory,
     InterfaceAddressFactory,
-    SourceTranslationFactory,
+    NatRuleCreateApiFactory,
+    NatRuleCreateModelFactory,
+    NatRuleMoveModelFactory,
+    NatRuleResponseFactory,
     NatRuleUpdateApiFactory,
+    NatRuleUpdateModelFactory,
+    SourceTranslationFactory,
 )
-
 
 # -------------------- Test Classes for Pydantic Models --------------------
 
@@ -273,7 +272,7 @@ class TestSourceTranslation:
         field validator runs.
         """
         # Directly test the validator function
-        from scm.models.network.nat_rules import StaticIp, BiDirectional
+        from scm.models.network.nat_rules import BiDirectional, StaticIp
 
         # Test with None
         result = StaticIp.convert_boolean_to_enum(None)

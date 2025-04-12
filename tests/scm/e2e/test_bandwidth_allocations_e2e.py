@@ -10,9 +10,7 @@ import unittest
 import pytest
 
 from scm.config.deployment import BandwidthAllocations
-from scm.models.deployment import (
-    BandwidthAllocationResponseModel,
-)
+from scm.models.deployment import BandwidthAllocationResponseModel
 from tests.scm.mock_scm import MockScm
 
 

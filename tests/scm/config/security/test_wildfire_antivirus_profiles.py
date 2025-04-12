@@ -8,21 +8,15 @@ from pydantic import ValidationError as PydanticValidationError
 from requests import HTTPError
 
 from scm.config.security.wildfire_antivirus_profile import WildfireAntivirusProfile
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAvProfileCreateModel,
-    WildfireAvProfileResponseModel,
     WildfireAvAnalysis,
     WildfireAvDirection,
+    WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel,
 )
 from scm.utils.logging import setup_logger
-from tests.factories import (
-    WildfireAvProfileResponseFactory,
-    WildfireAvProfileUpdateApiFactory,
-)
+from tests.factories import WildfireAvProfileResponseFactory, WildfireAvProfileUpdateApiFactory
 from tests.utils import raise_mock_http_error
 
 logger = setup_logger(__name__, logging.DEBUG)

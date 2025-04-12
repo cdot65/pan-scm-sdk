@@ -1,15 +1,16 @@
 # tests/scm/models/objects/test_external_dynamic_lists.py
 
 import pytest
+
 from scm.models.objects.external_dynamic_lists import (
     ExternalDynamicListsCreateModel,
-    ExternalDynamicListsUpdateModel,
     ExternalDynamicListsResponseModel,
+    ExternalDynamicListsUpdateModel,
 )
 from tests.factories import (
     ExternalDynamicListsCreateModelFactory,
-    ExternalDynamicListsUpdateModelFactory,
     ExternalDynamicListsResponseModelFactory,
+    ExternalDynamicListsUpdateModelFactory,
 )
 
 

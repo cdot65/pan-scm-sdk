@@ -1,11 +1,8 @@
 # scm/models/mobile_agent/agent_versions.py
 
 from typing import List, Optional
-from pydantic import (
-    BaseModel,
-    Field,
-    ConfigDict,
-)
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AgentVersionModel(BaseModel):

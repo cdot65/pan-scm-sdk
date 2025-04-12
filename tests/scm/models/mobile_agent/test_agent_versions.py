@@ -5,8 +5,11 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.mobile_agent.agent_versions import AgentVersionsModel, AgentVersionModel
-from tests.scm.models.mobile_agent.factories import AgentVersionsModelFactory, AgentVersionModelFactory
+from scm.models.mobile_agent.agent_versions import AgentVersionModel, AgentVersionsModel
+from tests.scm.models.mobile_agent.factories import (
+    AgentVersionModelFactory,
+    AgentVersionsModelFactory,
+)
 
 
 class TestAgentVersionModel:
@@ -17,11 +20,11 @@ class TestAgentVersionModel:
         model = AgentVersionModelFactory()
         assert model.version is not None
         assert isinstance(model.version, str)
-        
+
         # Optional fields may be None
         if model.release_date is not None:
             assert isinstance(model.release_date, str)
-        
+
         assert isinstance(model.is_recommended, bool) or model.is_recommended is None
 
     def test_model_minimal(self):
@@ -33,11 +36,7 @@ class TestAgentVersionModel:
 
     def test_model_complete(self):
         """Test creation with all fields."""
-        data = {
-            "version": "5.3.0",
-            "release_date": "2023-05-15",
-            "is_recommended": True
-        }
+        data = {"version": "5.3.0", "release_date": "2023-05-15", "is_recommended": True}
         model = AgentVersionModel(**data)
         assert model.version == data["version"]
         assert model.release_date == data["release_date"]
@@ -52,28 +51,24 @@ class TestAgentVersionModel:
     def test_model_assignment_validation(self):
         """Test that assignment validation works."""
         model = AgentVersionModel(version="5.3.0")
-        
+
         # Valid assignment
         model.version = "5.2.8"
         assert model.version == "5.2.8"
-        
+
         # Valid optional field assignment
         model.release_date = "2023-06-20"
         assert model.release_date == "2023-06-20"
-        
+
         model.is_recommended = True
         assert model.is_recommended is True
 
     def test_model_dump(self):
         """Test serialization to dictionary."""
-        data = {
-            "version": "5.3.0",
-            "release_date": "2023-05-15",
-            "is_recommended": True
-        }
+        data = {"version": "5.3.0", "release_date": "2023-05-15", "is_recommended": True}
         model = AgentVersionModel(**data)
         model_dict = model.model_dump()
-        
+
         assert model_dict["version"] == data["version"]
         assert model_dict["release_date"] == data["release_date"]
         assert model_dict["is_recommended"] == data["is_recommended"]
@@ -138,11 +133,11 @@ class TestAgentVersionsModel:
     def test_model_assignment_validation(self):
         """Test that assignment validation works."""
         model = AgentVersionsModelFactory(agent_versions=["5.3.0"])
-        
+
         # Valid assignment
         model.agent_versions = ["5.2.8", "5.2.7"]
         assert model.agent_versions == ["5.2.8", "5.2.7"]
-        
+
         # Invalid assignment should raise ValidationError
         with pytest.raises(ValidationError):
             model.agent_versions = "not-a-list"

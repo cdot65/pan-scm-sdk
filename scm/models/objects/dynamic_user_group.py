@@ -1,18 +1,11 @@
 # scm/models/objects/dynamic_user_group.py
 
 # Standard library imports
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-    ConfigDict,
-    constr,
-)
+from pydantic import BaseModel, ConfigDict, Field, constr, field_validator, model_validator
 
 TagString = constr(max_length=127)
 

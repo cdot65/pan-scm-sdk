@@ -9,16 +9,11 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import ServiceGroup
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.objects import (
-    ServiceGroupResponseModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.objects import ServiceGroupResponseModel
 from tests.factories import (
-    ServiceGroupResponseFactory,
     ServiceGroupCreateApiFactory,
+    ServiceGroupResponseFactory,
     ServiceGroupUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error

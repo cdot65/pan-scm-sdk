@@ -2,14 +2,11 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment import (
     RemoteNetworkCreateModel,
     RemoteNetworkResponseModel,
@@ -257,9 +254,11 @@ class RemoteNetworks(BaseObject):
         # ecmp_load_balancing
         if "ecmp_load_balancing" in filters:
             ecmp_value = filters["ecmp_load_balancing"]
-            # ecmp_load_balancing is an enum, but .value is a string
             filtered = [
-                rn for rn in filtered if match_field(rn.ecmp_load_balancing.value, ecmp_value)
+                rn
+                for rn in filtered
+                if rn.ecmp_load_balancing is not None
+                and match_field(rn.ecmp_load_balancing.value, ecmp_value)
             ]
 
         # ipsec_tunnel

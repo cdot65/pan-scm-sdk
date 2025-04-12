@@ -2,7 +2,7 @@
 
 from typing import List
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CandidatePushRequestModel(BaseModel):

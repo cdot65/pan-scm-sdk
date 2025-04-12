@@ -2,27 +2,24 @@
 
 # Standard library imports
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import (
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
     ExternalDynamicListsUpdateModel,
 )
 from scm.models.objects.external_dynamic_lists import (
+    DomainType,
+    ImeiType,
+    ImsiType,
+    IpType,
     PredefinedIpType,
     PredefinedUrlType,
-    IpType,
-    DomainType,
     UrlType,
-    ImsiType,
-    ImeiType,
 )
 
 

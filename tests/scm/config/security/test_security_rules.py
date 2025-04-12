@@ -11,25 +11,22 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.security import SecurityRule
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.security_rules import (
-    SecurityRuleResponseModel,
     SecurityRuleAction,
-    SecurityRuleRulebase,
-    SecurityRuleProfileSetting,
     SecurityRuleCreateModel,
-    SecurityRuleMoveModel,
     SecurityRuleMoveDestination,
+    SecurityRuleMoveModel,
+    SecurityRuleProfileSetting,
+    SecurityRuleResponseModel,
+    SecurityRuleRulebase,
 )
 from tests.factories import (
     SecurityRuleCreateApiFactory,
-    SecurityRuleUpdateApiFactory,
-    SecurityRuleResponseFactory,
-    SecurityRuleProfileSettingFactory,
     SecurityRuleMoveApiFactory,
+    SecurityRuleProfileSettingFactory,
+    SecurityRuleResponseFactory,
+    SecurityRuleUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error
 

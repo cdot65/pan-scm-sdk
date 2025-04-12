@@ -5,22 +5,9 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import (
-    ServiceCreateModel,
-    ServiceUpdateModel,
-    ServiceResponseModel,
-)
-from scm.models.objects.service import (
-    Protocol,
-    TCPProtocol,
-    UDPProtocol,
-    Override,
-)
-from tests.factories import (
-    ServiceCreateModelFactory,
-    ServiceUpdateModelFactory,
-)
-
+from scm.models.objects import ServiceCreateModel, ServiceResponseModel, ServiceUpdateModel
+from scm.models.objects.service import Override, Protocol, TCPProtocol, UDPProtocol
+from tests.factories import ServiceCreateModelFactory, ServiceUpdateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

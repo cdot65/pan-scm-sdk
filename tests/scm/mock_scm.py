@@ -7,6 +7,7 @@ in any test file that needs to mock the Scm client.
 """
 
 from unittest.mock import MagicMock
+
 from scm.client import Scm
 
 

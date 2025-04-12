@@ -9,16 +9,11 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import HIPObject
-from scm.exceptions import (
-    InvalidObjectError,
-    MissingQueryParameterError,
-)
-from scm.models.objects import (
-    HIPObjectResponseModel,
-)
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.models.objects import HIPObjectResponseModel
 from tests.factories import (
-    HIPObjectResponseFactory,
     HIPObjectCreateApiFactory,
+    HIPObjectResponseFactory,
     HIPObjectUpdateApiFactory,
 )
 from tests.utils import raise_mock_http_error

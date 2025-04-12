@@ -1,18 +1,18 @@
 """Tests for the IKE Gateway models."""
 
+from uuid import UUID
+
 import pytest
 from pydantic import ValidationError
-from uuid import UUID
 
 from scm.models.network import (
     IKEGatewayCreateModel,
-    IKEGatewayUpdateModel,
     IKEGatewayResponseModel,
-    PeerIdType,
+    IKEGatewayUpdateModel,
     LocalIdType,
+    PeerIdType,
     ProtocolVersion,
 )
-
 
 # Test data
 VALID_IKE_GATEWAY = {

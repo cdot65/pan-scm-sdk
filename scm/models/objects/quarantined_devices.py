@@ -4,11 +4,7 @@
 from typing import Optional
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-)
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QuarantinedDevicesBaseModel(BaseModel):

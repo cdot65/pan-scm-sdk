@@ -17,15 +17,15 @@ from .dns_security_profiles import (
 )
 from .security_rules import (
     SecurityRuleCreateModel,
-    SecurityRuleResponseModel,
     SecurityRuleMoveModel,
-    SecurityRuleUpdateModel,
+    SecurityRuleResponseModel,
     SecurityRuleRulebase,
+    SecurityRuleUpdateModel,
 )
 from .url_categories import (
     URLCategoriesCreateModel,
-    URLCategoriesUpdateModel,
     URLCategoriesResponseModel,
+    URLCategoriesUpdateModel,
 )
 from .vulnerability_protection_profiles import (
     VulnerabilityProfileCreateModel,

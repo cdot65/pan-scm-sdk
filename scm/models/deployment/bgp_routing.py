@@ -1,15 +1,15 @@
 # scm/models/deployment/bgp_routing.py
 
-from typing import Optional, List, Dict, Any, Union
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import (
     BaseModel,
-    Field,
     ConfigDict,
+    Field,
+    field_serializer,
     field_validator,
     model_validator,
-    field_serializer,
 )
 
 

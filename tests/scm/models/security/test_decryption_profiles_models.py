@@ -9,16 +9,15 @@ from pydantic import ValidationError
 # Local SDK imports
 from scm.models.security.decryption_profiles import (
     DecryptionProfileCreateModel,
-    DecryptionProfileUpdateModel,
     DecryptionProfileResponseModel,
+    DecryptionProfileUpdateModel,
     SSLVersion,
 )
 from tests.factories import (
     DecryptionProfileCreateModelFactory,
-    DecryptionProfileUpdateModelFactory,
     DecryptionProfileResponseFactory,
+    DecryptionProfileUpdateModelFactory,
 )
-
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

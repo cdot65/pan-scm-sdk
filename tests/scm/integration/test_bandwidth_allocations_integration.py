@@ -5,15 +5,12 @@ These tests verify that the different components of the SDK
 work together correctly to handle bandwidth allocations.
 """
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from scm.client import ScmClient
-from scm.models.deployment import (
-    BandwidthAllocationCreateModel,
-    BandwidthAllocationResponseModel,
-)
+from scm.models.deployment import BandwidthAllocationCreateModel, BandwidthAllocationResponseModel
 
 
 @pytest.mark.integration

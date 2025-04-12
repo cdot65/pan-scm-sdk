@@ -1,17 +1,11 @@
 # scm/models/objects/syslog_server_profiles.py
 
 # Standard library imports
-from typing import Optional, Dict, Literal, Any, List
+from typing import List, Literal, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    Field,
-    model_validator,
-    ConfigDict,
-    constr,
-)
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class EscapingModel(BaseModel):
@@ -58,9 +52,7 @@ class FormatModel(BaseModel):
         correlation (Optional[str]): Format for correlation logs.
     """
 
-    escaping: Optional[EscapingModel] = Field(
-        None, description="Character escaping configuration"
-    )
+    escaping: Optional[EscapingModel] = Field(None, description="Character escaping configuration")
     traffic: Optional[str] = Field(None, description="Format for traffic logs")
     threat: Optional[str] = Field(None, description="Format for threat logs")
     wildfire: Optional[str] = Field(None, description="Format for wildfire logs")
@@ -75,9 +67,7 @@ class FormatModel(BaseModel):
     decryption: Optional[str] = Field(None, description="Format for decryption logs")
     config: Optional[str] = Field(None, description="Format for configuration logs")
     system: Optional[str] = Field(None, description="Format for system logs")
-    globalprotect: Optional[str] = Field(
-        None, description="Format for GlobalProtect logs"
-    )
+    globalprotect: Optional[str] = Field(None, description="Format for GlobalProtect logs")
     hip_match: Optional[str] = Field(None, description="Format for HIP match logs")
     correlation: Optional[str] = Field(None, description="Format for correlation logs")
 
@@ -128,14 +118,10 @@ class SyslogServerProfileBaseModel(BaseModel):
     """
 
     # Required fields
-    name: constr(max_length=31) = Field(
-        ..., description="The name of the syslog server profile"
-    )
+    name: str = Field(..., description="The name of the syslog server profile", max_length=31)
 
     # Server configurations - can be a dict or list in API
-    server: List[SyslogServerModel] = Field(
-        ..., description="Syslog server configurations"
-    )
+    server: List[SyslogServerModel] = Field(..., description="Syslog server configurations")
 
     # Optional fields
     format: Optional[FormatModel] = Field(
@@ -197,13 +183,9 @@ class SyslogServerProfileCreateModel(SyslogServerProfileBaseModel):
             "snippet",
             "device",
         ]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
         return self
 
 
