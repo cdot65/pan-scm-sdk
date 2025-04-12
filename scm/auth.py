@@ -94,7 +94,8 @@ class OAuth2Client:
             response: Optional[Response] = e.response
             if response is not None and response.content:
                 ErrorHandler.raise_for_error(response.json(), response.status_code)
-            # raise APIError(f"HTTP error during session creation: {str(e)}") from e
+            # If we get here, we need to raise an error to maintain the return type
+            raise APIError(f"HTTP error during session creation: {str(e)}") from e
         except Exception as e:
             logger.error(f"Unexpected error during token fetch: {str(e)}")
             raise APIError(f"Failed to create session: {str(e)}") from e

@@ -5,7 +5,7 @@ from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (BaseModel, ConfigDict, Field, confloat, field_validator,
+from pydantic import (BaseModel, ConfigDict, Field, field_validator,
                       model_validator)
 
 
@@ -18,13 +18,17 @@ class GeoLocation(BaseModel):
         longitude (float): The longitudinal position of the region (-180 to 180).
     """
 
-    latitude: confloat(ge=-90, le=90) = Field(
+    latitude: float = Field(
         ...,
         description="The latitudinal position of the region",
+        ge=-90,
+        le=90
     )
-    longitude: confloat(ge=-180, le=180) = Field(
+    longitude: float = Field(
         ...,
         description="The longitudinal position of the region",
+        ge=-180,
+        le=180
     )
 
 
