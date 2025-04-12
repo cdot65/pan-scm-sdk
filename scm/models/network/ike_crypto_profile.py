@@ -101,10 +101,6 @@ class IKECryptoProfileBaseModel(BaseModel):
         pattern=r"^[0-9a-zA-Z._-]+$",
         max_length=31,
     )
-    description: Optional[str] = Field(
-        None,
-        description="Description of the IKE crypto profile",
-    )
     hash: List[HashAlgorithm] = Field(
         ...,
         description="Hashing algorithms",
@@ -186,7 +182,3 @@ class IKECryptoProfileResponseModel(IKECryptoProfileBaseModel):
         description="The UUID of the IKE crypto profile",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
-
-    # Exclude description field from model_fields - API doesn't return it
-    # Use exclude=True so it doesn't appear in model_fields but still can be passed to init
-    description: Optional[str] = Field(None, exclude=True)

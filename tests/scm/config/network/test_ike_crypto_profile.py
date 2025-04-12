@@ -141,8 +141,8 @@ class TestIKECryptoProfileUpdate(TestIKECryptoProfileBase):
 
         # Create an update model
         update_data = sample_profile_response.copy()
-        # Add description for update model
-        update_data["description"] = "Updated test profile"
+        # Update hash algorithm for the update
+        update_data["hash"] = ["sha384", "sha512"]
         update_model = IKECryptoProfileUpdateModel(**update_data)
 
         result = ike_crypto_profile.update(update_model)
@@ -155,8 +155,10 @@ class TestIKECryptoProfileUpdate(TestIKECryptoProfileBase):
             == "/config/network/v1/ike-crypto-profiles/123e4567-e89b-12d3-a456-426655440000"
         )
         assert "id" not in call_args[1]["json"], "ID should not be in the request payload"
-        # Verify description is in the update payload
-        assert "description" in call_args[1]["json"], "Description should be in the request payload"
+        # Verify hash algorithms were updated in the payload
+        assert call_args[1]["json"]["hash"] == ["sha384", "sha512"], (
+            "Hash should be updated in the request payload"
+        )
 
         assert isinstance(result, IKECryptoProfileResponseModel)
         assert result.name == "test-profile"
