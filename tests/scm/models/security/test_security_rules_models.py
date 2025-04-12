@@ -7,23 +7,19 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.security.security_rules import (
-    SecurityRuleAction,
-    SecurityRuleCreateModel,
-    SecurityRuleMoveDestination,
-    SecurityRuleMoveModel,
-    SecurityRuleProfileSetting,
-    SecurityRuleResponseModel,
-    SecurityRuleUpdateModel,
-)
-from tests.factories import (
-    SecurityRuleCreateApiFactory,
-    SecurityRuleCreateModelFactory,
-    SecurityRuleMoveApiFactory,
-    SecurityRuleMoveModelFactory,
-    SecurityRuleResponseFactory,
-    SecurityRuleUpdateModelFactory,
-)
+from scm.models.security.security_rules import (SecurityRuleAction,
+                                                SecurityRuleCreateModel,
+                                                SecurityRuleMoveDestination,
+                                                SecurityRuleMoveModel,
+                                                SecurityRuleProfileSetting,
+                                                SecurityRuleResponseModel,
+                                                SecurityRuleUpdateModel)
+from tests.factories import (SecurityRuleCreateApiFactory,
+                             SecurityRuleCreateModelFactory,
+                             SecurityRuleMoveApiFactory,
+                             SecurityRuleMoveModelFactory,
+                             SecurityRuleResponseFactory,
+                             SecurityRuleUpdateModelFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

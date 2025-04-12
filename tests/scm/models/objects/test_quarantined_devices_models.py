@@ -3,12 +3,9 @@
 # Standard library imports
 import pytest
 
-from scm.models.objects import (
-    QuarantinedDevicesCreateModel,
-    QuarantinedDevicesListParamsModel,
-    QuarantinedDevicesResponseModel,
-)
-
+from scm.models.objects import (QuarantinedDevicesCreateModel,
+                                QuarantinedDevicesListParamsModel,
+                                QuarantinedDevicesResponseModel)
 # Local SDK imports
 from scm.models.objects.quarantined_devices import QuarantinedDevicesBaseModel
 

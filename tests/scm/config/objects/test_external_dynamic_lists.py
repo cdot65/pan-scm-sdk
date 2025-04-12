@@ -9,15 +9,11 @@ from requests.exceptions import HTTPError
 from scm.config.objects.external_dynamic_lists import ExternalDynamicLists
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects.external_dynamic_lists import (
-    ExternalDynamicListsCreateModel,
-    ExternalDynamicListsResponseModel,
-    ExternalDynamicListsUpdateModel,
-)
-from tests.factories import (
-    ExternalDynamicListsCreateApiFactory,
-    ExternalDynamicListsResponseFactory,
-    ExternalDynamicListsUpdateApiFactory,
-)
+    ExternalDynamicListsCreateModel, ExternalDynamicListsResponseModel,
+    ExternalDynamicListsUpdateModel)
+from tests.factories import (ExternalDynamicListsCreateApiFactory,
+                             ExternalDynamicListsResponseFactory,
+                             ExternalDynamicListsUpdateApiFactory)
 from tests.utils import raise_mock_http_error
 
 

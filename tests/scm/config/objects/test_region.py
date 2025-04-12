@@ -11,7 +11,8 @@ from requests.exceptions import HTTPError
 from scm.config.objects import Region
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import RegionResponseModel
-from tests.factories import RegionCreateApiFactory, RegionResponseFactory, RegionUpdateApiFactory
+from tests.factories import (RegionCreateApiFactory, RegionResponseFactory,
+                             RegionUpdateApiFactory)
 from tests.utils import raise_mock_http_error
 
 

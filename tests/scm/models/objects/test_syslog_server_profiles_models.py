@@ -8,23 +8,14 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.syslog_server_profiles import (
-    EscapingModel,
-    FormatModel,
-    SyslogServerModel,
-    SyslogServerProfileCreateModel,
-    SyslogServerProfileResponseModel,
-    SyslogServerProfileUpdateModel,
-)
-
+    EscapingModel, SyslogServerModel, SyslogServerProfileCreateModel,
+    SyslogServerProfileResponseModel, SyslogServerProfileUpdateModel)
 # Import the new factories
 from tests.test_factories.objects.syslog_server_profiles import (
-    EscapingModelFactory,
-    FormatModelFactory,
-    SyslogServerModelFactory,
+    EscapingModelFactory, FormatModelFactory, SyslogServerModelFactory,
     SyslogServerProfileCreateModelFactory,
     SyslogServerProfileResponseModelFactory,
-    SyslogServerProfileUpdateModelFactory,
-)
+    SyslogServerProfileUpdateModelFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

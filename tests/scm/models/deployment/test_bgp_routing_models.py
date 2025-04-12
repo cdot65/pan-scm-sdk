@@ -3,15 +3,13 @@
 import pytest
 from pydantic import ValidationError
 
-from scm.models.deployment.bgp_routing import (
-    BackboneRoutingEnum,
-    BGPRoutingBaseModel,
-    BGPRoutingCreateModel,
-    BGPRoutingResponseModel,
-    BGPRoutingUpdateModel,
-    DefaultRoutingModel,
-    HotPotatoRoutingModel,
-)
+from scm.models.deployment.bgp_routing import (BackboneRoutingEnum,
+                                               BGPRoutingBaseModel,
+                                               BGPRoutingCreateModel,
+                                               BGPRoutingResponseModel,
+                                               BGPRoutingUpdateModel,
+                                               DefaultRoutingModel,
+                                               HotPotatoRoutingModel)
 
 
 class TestBackboneRoutingEnum:

@@ -5,7 +5,8 @@ from enum import Enum
 from typing import Optional
 
 # External libraries
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, field_validator,
+                      model_validator)
 
 
 class OperatingSystem(str, Enum):

@@ -7,15 +7,15 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import ScheduleCreateModel, ScheduleResponseModel, ScheduleUpdateModel
-from scm.models.objects.schedules import (
-    DailyScheduleModel,
-    NonRecurringScheduleModel,
-    RecurringScheduleModel,
-    ScheduleTypeModel,
-    WeeklyScheduleModel,
-)
-from tests.factories import ScheduleCreateModelFactory, ScheduleUpdateModelFactory
+from scm.models.objects import (ScheduleCreateModel, ScheduleResponseModel,
+                                ScheduleUpdateModel)
+from scm.models.objects.schedules import (DailyScheduleModel,
+                                          NonRecurringScheduleModel,
+                                          RecurringScheduleModel,
+                                          ScheduleTypeModel,
+                                          WeeklyScheduleModel)
+from tests.factories import (ScheduleCreateModelFactory,
+                             ScheduleUpdateModelFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

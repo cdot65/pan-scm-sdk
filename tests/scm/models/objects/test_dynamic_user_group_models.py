@@ -8,10 +8,8 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.dynamic_user_group import (
-    DynamicUserGroupCreateModel,
-    DynamicUserGroupResponseModel,
-    DynamicUserGroupUpdateModel,
-)
+    DynamicUserGroupCreateModel, DynamicUserGroupResponseModel,
+    DynamicUserGroupUpdateModel)
 
 
 class TestDynamicUserGroupCreateModel:

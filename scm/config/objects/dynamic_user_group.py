@@ -7,11 +7,9 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import (
-    DynamicUserGroupCreateModel,
-    DynamicUserGroupResponseModel,
-    DynamicUserGroupUpdateModel,
-)
+from scm.models.objects import (DynamicUserGroupCreateModel,
+                                DynamicUserGroupResponseModel,
+                                DynamicUserGroupUpdateModel)
 
 
 class DynamicUserGroup(BaseObject):

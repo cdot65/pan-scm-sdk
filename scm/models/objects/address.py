@@ -5,7 +5,8 @@ from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import BaseModel, ConfigDict, Field, constr, field_validator, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, constr, field_validator,
+                      model_validator)
 
 TagString = constr(max_length=64)
 

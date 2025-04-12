@@ -10,14 +10,11 @@ from scm.client import Scm
 from scm.config.objects import SyslogServerProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import SyslogServerProfileResponseModel
-
 # Import the factories
 from tests.test_factories.objects.syslog_server_profiles import (
-    SyslogServerModelFactory,
-    SyslogServerProfileCreateModelFactory,
+    SyslogServerModelFactory, SyslogServerProfileCreateModelFactory,
     SyslogServerProfileResponseModelFactory,
-    SyslogServerProfileUpdateModelFactory,
-)
+    SyslogServerProfileUpdateModelFactory)
 
 # -------------------- Helper functions --------------------
 
@@ -724,8 +721,6 @@ class TestSyslogServerProfileFilteringAndPagination:
         syslog_server_profile = SyslogServerProfile(api_client)
 
         # Override the _apply_filters method to check list type and raise exception if needed
-        original_apply_filters = syslog_server_profile._apply_filters
-
         def patched_apply_filters(profiles, filters):
             if "transport" in filters and not isinstance(filters["transport"], list):
                 raise InvalidObjectError(
@@ -734,7 +729,7 @@ class TestSyslogServerProfileFilteringAndPagination:
                     http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
-            return original_apply_filters(profiles, filters)
+            return profiles
 
         # Apply the patch
         with patch.object(
@@ -760,8 +755,6 @@ class TestSyslogServerProfileFilteringAndPagination:
         syslog_server_profile = SyslogServerProfile(api_client)
 
         # Override the _apply_filters method to check list type and raise exception if needed
-        original_apply_filters = syslog_server_profile._apply_filters
-
         def patched_apply_filters(profiles, filters):
             if "format" in filters and not isinstance(filters["format"], list):
                 raise InvalidObjectError(
@@ -770,7 +763,7 @@ class TestSyslogServerProfileFilteringAndPagination:
                     http_status_code=400,
                     details={"errorType": "Invalid Object"},
                 )
-            return original_apply_filters(profiles, filters)
+            return profiles
 
         # Apply the patch
         with patch.object(
@@ -795,8 +788,6 @@ class TestSyslogServerProfileFilteringAndPagination:
         syslog_server_profile = SyslogServerProfile(api_client)
 
         # Override the _apply_filters method to verify filters were passed correctly
-        original_apply_filters = syslog_server_profile._apply_filters
-
         mock_apply_filters = MagicMock()
         # Just return the input objects unchanged
         mock_apply_filters.side_effect = lambda objs, _: objs
@@ -1138,3 +1129,11 @@ class TestSyslogServerProfileFilteringAndPagination:
         # Verify there were 2 API calls (one returned exactly limit objects,
         # so pagination continues, but second has no results)
         assert api_client.get.call_count == 2
+
+        # First call should use offset=0
+        args1, kwargs1 = api_client.get.call_args_list[0]
+        assert kwargs1["params"]["offset"] == 0
+
+        # Second call should use offset=2
+        args2, kwargs2 = api_client.get.call_args_list[1]
+        assert kwargs2["params"]["offset"] == 2

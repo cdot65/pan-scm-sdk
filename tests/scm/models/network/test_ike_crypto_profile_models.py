@@ -5,14 +5,10 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from scm.models.network import (
-    DHGroup,
-    EncryptionAlgorithm,
-    HashAlgorithm,
-    IKECryptoProfileCreateModel,
-    IKECryptoProfileResponseModel,
-    IKECryptoProfileUpdateModel,
-)
+from scm.models.network import (DHGroup, EncryptionAlgorithm, HashAlgorithm,
+                                IKECryptoProfileCreateModel,
+                                IKECryptoProfileResponseModel,
+                                IKECryptoProfileUpdateModel)
 
 
 class TestIKECryptoProfileModels:

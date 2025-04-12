@@ -6,7 +6,8 @@ import pytest
 
 from scm.config.network import IKECryptoProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import IKECryptoProfileResponseModel, IKECryptoProfileUpdateModel
+from scm.models.network import (IKECryptoProfileResponseModel,
+                                IKECryptoProfileUpdateModel)
 
 
 @pytest.mark.usefixtures("load_env")

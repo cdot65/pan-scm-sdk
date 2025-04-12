@@ -1,4 +1,4 @@
-.PHONY: setup lint format test clean install-hooks docs docs-serve
+.PHONY: setup lint format test clean install-hooks docs docs-serve isort flake8 mypy quality quality-basic
 
 # Default goal
 .DEFAULT_GOAL := help
@@ -10,20 +10,43 @@ setup:
 	@echo "Installing pre-commit hooks..."
 	poetry run pre-commit install
 
+# Run isort to sort imports
+isort:
+	@echo "Running isort to sort imports..."
+	poetry run isort scm tests
+
 # Run linting with ruff
 lint:
-	@echo "Running linting checks..."
+	@echo "Running linting checks with ruff..."
 	poetry run ruff check scm tests
+
+# Run linting with flake8
+flake8:
+	@echo "Running linting checks with flake8..."
+	poetry run flake8 scm tests
+
+# Run type checking with mypy
+mypy:
+	@echo "Running type checking with mypy..."
+	poetry run mypy scm tests
 
 # Run formatting with ruff
 format:
-	@echo "Running code formatter..."
+	@echo "Running code formatter with ruff..."
 	poetry run ruff format scm tests
 
 # Check and auto-fix with ruff
 fix:
-	@echo "Auto-fixing linting issues..."
+	@echo "Auto-fixing linting issues with ruff..."
 	poetry run ruff check --fix scm tests
+
+# Run all code quality checks
+quality: isort lint flake8 mypy format
+	@echo "All code quality checks complete!"
+
+# Run basic code quality checks (skip mypy)
+quality-basic: isort lint flake8 format
+	@echo "Basic code quality checks complete!"
 
 # Run both linting and formatting
 lint-format: lint format
@@ -43,6 +66,7 @@ clean:
 	@echo "Cleaning cache directories..."
 	rm -rf .pytest_cache
 	rm -rf .ruff_cache
+	rm -rf .mypy_cache
 	rm -rf htmlcov
 	rm -rf .coverage
 	find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -75,9 +99,14 @@ docs-serve:
 help:
 	@echo "Available commands:"
 	@echo "  setup           - Install dependencies and pre-commit hooks"
+	@echo "  isort           - Sort imports with isort"
 	@echo "  lint            - Run linting checks with ruff"
+	@echo "  flake8          - Run linting checks with flake8"
+	@echo "  mypy            - Run type checking with mypy"
 	@echo "  format          - Format code with ruff"
 	@echo "  fix             - Auto-fix linting issues with ruff"
+	@echo "  quality         - Run all code quality checks (isort, lint, flake8, mypy, format)"
+	@echo "  quality-basic   - Run basic code quality checks (isort, lint, flake8, format)"
 	@echo "  lint-format     - Run both linting and formatting"
 	@echo "  test            - Run tests"
 	@echo "  test-cov        - Run tests with coverage"

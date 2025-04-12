@@ -3,8 +3,10 @@
 import pytest
 from pydantic import ValidationError
 
-from scm.models.deployment.remote_networks import RemoteNetworkCreateModel, RemoteNetworkUpdateModel
-from tests.factories import RemoteNetworkCreateModelDictFactory, RemoteNetworkUpdateModelDictFactory
+from scm.models.deployment.remote_networks import (RemoteNetworkCreateModel,
+                                                   RemoteNetworkUpdateModel)
+from tests.factories import (RemoteNetworkCreateModelDictFactory,
+                             RemoteNetworkUpdateModelDictFactory)
 
 
 class TestRemoteNetworkCreateModel:

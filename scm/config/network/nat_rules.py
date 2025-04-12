@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import NatRuleCreateModel, NatRuleResponseModel, NatRuleUpdateModel
+from scm.models.network import (NatRuleCreateModel, NatRuleResponseModel,
+                                NatRuleUpdateModel)
 
 
 class NatRule(BaseObject):

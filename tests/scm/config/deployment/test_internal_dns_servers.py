@@ -9,9 +9,7 @@ from scm.client import Scm
 from scm.config.deployment.internal_dns_servers import InternalDnsServers
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment.internal_dns_servers import (
-    InternalDnsServersResponseModel,
-    InternalDnsServersUpdateModel,
-)
+    InternalDnsServersResponseModel, InternalDnsServersUpdateModel)
 
 
 @pytest.fixture

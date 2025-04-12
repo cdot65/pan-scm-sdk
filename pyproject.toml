@@ -45,6 +45,7 @@ rich = "^13.9.4"
 ruff = "^0.9.10"  # Replaces Black for formatting and enhances linting
 isort = "^6.0.1"
 mypy = "^1.15.0"
+types-requests = "^2.32.0.20250328"
 
 [tool.ruff]
 line-length = 100

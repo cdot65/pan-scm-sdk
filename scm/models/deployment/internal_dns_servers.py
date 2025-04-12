@@ -3,15 +3,8 @@
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    IPvAnyAddress,
-    field_serializer,
-    field_validator,
-    model_validator,
-)
+from pydantic import (BaseModel, ConfigDict, Field, IPvAnyAddress,
+                      field_serializer, field_validator, model_validator)
 
 
 class InternalDnsServersBaseModel(BaseModel):

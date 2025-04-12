@@ -8,10 +8,8 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.log_forwarding_profile import (
-    LogForwardingProfileCreateModel,
-    LogForwardingProfileResponseModel,
-    LogForwardingProfileUpdateModel,
-)
+    LogForwardingProfileCreateModel, LogForwardingProfileResponseModel,
+    LogForwardingProfileUpdateModel)
 
 # -------------------- Helper Functions --------------------
 

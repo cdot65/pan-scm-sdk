@@ -6,16 +6,10 @@ from uuid import UUID
 import pytest
 
 # Local SDK imports
-from scm.models.security.url_categories import (
-    URLCategoriesCreateModel,
-    URLCategoriesResponseModel,
-    URLCategoriesUpdateModel,
-)
+from scm.models.security.url_categories import URLCategoriesCreateModel
 from tests.test_factories.security.url_categories import (
-    URLCategoriesCreateModelFactory,
-    URLCategoriesResponseModelFactory,
-    URLCategoriesUpdateModelFactory,
-)
+    URLCategoriesCreateModelFactory, URLCategoriesResponseModelFactory,
+    URLCategoriesUpdateModelFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

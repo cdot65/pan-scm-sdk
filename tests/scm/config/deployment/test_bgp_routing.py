@@ -10,12 +10,9 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.deployment import BGPRouting
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.deployment import (
-    BackboneRoutingEnum,
-    BGPRoutingResponseModel,
-    DefaultRoutingModel,
-    HotPotatoRoutingModel,
-)
+from scm.models.deployment import (BackboneRoutingEnum,
+                                   BGPRoutingResponseModel,
+                                   DefaultRoutingModel, HotPotatoRoutingModel)
 from tests.utils import raise_mock_http_error
 
 

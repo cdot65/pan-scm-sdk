@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import IKEGatewayCreateModel, IKEGatewayResponseModel, IKEGatewayUpdateModel
+from scm.models.network import (IKEGatewayCreateModel, IKEGatewayResponseModel,
+                                IKEGatewayUpdateModel)
 
 
 class IKEGateway(BaseObject):

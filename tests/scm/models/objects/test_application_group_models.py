@@ -5,11 +5,9 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import (
-    ApplicationGroupCreateModel,
-    ApplicationGroupResponseModel,
-    ApplicationGroupUpdateModel,
-)
+from scm.models.objects import (ApplicationGroupCreateModel,
+                                ApplicationGroupResponseModel,
+                                ApplicationGroupUpdateModel)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

@@ -5,17 +5,12 @@ import pytest
 from requests.exceptions import HTTPError
 
 from scm.client import Scm
-from scm.exceptions import (
-    APIError,
-    BadRequestError,
-    ConflictError,
-    ErrorHandler,
-    InvalidObjectError,
-    MalformedCommandError,
-    ObjectNotPresentError,
-    ServerError,
-)
-from scm.models.operations import CandidatePushResponseModel, JobListResponse, JobStatusResponse
+from scm.exceptions import (APIError, BadRequestError, ConflictError,
+                            ErrorHandler, InvalidObjectError,
+                            MalformedCommandError, ObjectNotPresentError,
+                            ServerError)
+from scm.models.operations import (CandidatePushResponseModel, JobListResponse,
+                                   JobStatusResponse)
 from tests.utils import raise_mock_http_error
 
 

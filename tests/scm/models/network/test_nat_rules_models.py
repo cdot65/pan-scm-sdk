@@ -7,28 +7,18 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.network.nat_rules import (
-    BiDirectional,
-    NatMoveDestination,
-    NatRulebase,
-    NatRuleCreateModel,
-    NatRuleMoveModel,
-    NatRuleResponseModel,
-    NatRuleUpdateModel,
-    NatType,
-    SourceTranslation,
-    StaticIp,
-)
-from tests.factories import (
-    InterfaceAddressFactory,
-    NatRuleCreateApiFactory,
-    NatRuleCreateModelFactory,
-    NatRuleMoveModelFactory,
-    NatRuleResponseFactory,
-    NatRuleUpdateApiFactory,
-    NatRuleUpdateModelFactory,
-    SourceTranslationFactory,
-)
+from scm.models.network.nat_rules import (BiDirectional, NatMoveDestination,
+                                          NatRulebase, NatRuleCreateModel,
+                                          NatRuleMoveModel,
+                                          NatRuleResponseModel,
+                                          NatRuleUpdateModel, NatType,
+                                          SourceTranslation, StaticIp)
+from tests.factories import (InterfaceAddressFactory, NatRuleCreateApiFactory,
+                             NatRuleCreateModelFactory,
+                             NatRuleMoveModelFactory, NatRuleResponseFactory,
+                             NatRuleUpdateApiFactory,
+                             NatRuleUpdateModelFactory,
+                             SourceTranslationFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

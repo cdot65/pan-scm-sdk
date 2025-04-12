@@ -3,7 +3,8 @@
 from typing import Any, Dict, List, Optional
 
 from scm.client import Scm
-from scm.models.operations import CandidatePushResponseModel, JobListResponse, JobStatusResponse
+from scm.models.operations import (CandidatePushResponseModel, JobListResponse,
+                                   JobStatusResponse)
 
 
 class BaseObject:

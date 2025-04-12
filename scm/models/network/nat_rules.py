@@ -2,7 +2,8 @@ from enum import Enum
 from typing import List, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, constr, field_validator, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, field_validator,
+                      model_validator)
 
 
 class NatType(str, Enum):
@@ -181,7 +182,10 @@ class DestinationTranslation(BaseModel):
 
     translated_address: Optional[str] = Field(None, description="Translated destination IP address")
     translated_port: Optional[int] = Field(
-        None, description="Translated destination port", ge=1, le=65535
+        None,
+        description="Translated destination port",
+        ge=1,
+        le=65535,
     )
     dns_rewrite: Optional[DnsRewrite] = Field(None, description="DNS rewrite configuration")
     # The API doesn't accept 'distribution' directly in the destination_translation object
@@ -197,9 +201,10 @@ class NatRuleBaseModel(BaseModel):
         arbitrary_types_allowed=True,
     )
 
-    name: constr(pattern=r"^[a-zA-Z0-9_ \.-]+$") = Field(
+    name: str = Field(
         ...,
         description="The name of the NAT rule",
+        pattern=r"^[a-zA-Z0-9_ \.-]+$",
     )
     description: Optional[str] = Field(
         None,
@@ -244,14 +249,17 @@ class NatRuleBaseModel(BaseModel):
         description="The TCP/UDP service",
     )
     source_translation: Optional[SourceTranslation] = Field(
-        None, description="Source translation configuration"
+        None,
+        description="Source translation configuration",
     )
     destination_translation: Optional[DestinationTranslation] = Field(
-        None, description="Destination translation configuration"
+        None,
+        description="Destination translation configuration",
     )
     # Distribution configuration should be added at the top level for load balancing
     active_active_device_binding: Optional[str] = Field(
-        None, description="Active/Active device binding"
+        None,
+        description="Active/Active device binding",
     )
 
     # Container fields

@@ -10,12 +10,9 @@ from requests.exceptions import HTTPError
 # Import the NAT Rule SDK and related exceptions
 from scm.config.network.nat_rules import NatRule
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network.nat_rules import (
-    NatRuleCreateModel,
-    NatRuleResponseModel,
-    NatRuleUpdateModel,
-)
-
+from scm.models.network.nat_rules import (NatRuleCreateModel,
+                                          NatRuleResponseModel,
+                                          NatRuleUpdateModel)
 # Import factories for generating test data
 from tests.factories import NatRuleResponseFactory  # if needed in future
 from tests.factories import NatRuleCreateApiFactory, NatRuleUpdateApiFactory

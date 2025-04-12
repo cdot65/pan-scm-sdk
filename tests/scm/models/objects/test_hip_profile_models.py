@@ -7,8 +7,10 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import HIPProfileCreateModel, HIPProfileResponseModel, HIPProfileUpdateModel
-from tests.factories import HIPProfileCreateModelFactory, HIPProfileUpdateModelFactory
+from scm.models.objects import (HIPProfileCreateModel, HIPProfileResponseModel,
+                                HIPProfileUpdateModel)
+from tests.factories import (HIPProfileCreateModelFactory,
+                             HIPProfileUpdateModelFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

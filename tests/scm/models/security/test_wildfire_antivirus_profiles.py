@@ -8,20 +8,14 @@ from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.security.wildfire_antivirus_profiles import (
-    WildfireAvAnalysis,
-    WildfireAvDirection,
-    WildfireAvProfileCreateModel,
-    WildfireAvProfileResponseModel,
-    WildfireAvProfileUpdateModel,
-)
-from tests.factories import (
-    WildfireAvProfileCreateApiFactory,
-    WildfireAvProfileCreateModelFactory,
-    WildfireAvProfileResponseFactory,
-    WildfireAvProfileUpdateApiFactory,
-    WildfireAvProfileUpdateModelFactory,
-    WildfireAvRuleBaseFactory,
-)
+    WildfireAvAnalysis, WildfireAvDirection, WildfireAvProfileCreateModel,
+    WildfireAvProfileResponseModel, WildfireAvProfileUpdateModel)
+from tests.factories import (WildfireAvProfileCreateApiFactory,
+                             WildfireAvProfileCreateModelFactory,
+                             WildfireAvProfileResponseFactory,
+                             WildfireAvProfileUpdateApiFactory,
+                             WildfireAvProfileUpdateModelFactory,
+                             WildfireAvRuleBaseFactory)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

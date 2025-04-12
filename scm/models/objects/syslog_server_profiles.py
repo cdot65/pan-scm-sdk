@@ -1,11 +1,11 @@
 # scm/models/objects/syslog_server_profiles.py
 
 # Standard library imports
-from typing import Any, Dict, List, Literal, Optional
+from typing import List, Literal, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import BaseModel, ConfigDict, Field, constr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class EscapingModel(BaseModel):
@@ -118,7 +118,11 @@ class SyslogServerProfileBaseModel(BaseModel):
     """
 
     # Required fields
-    name: constr(max_length=31) = Field(..., description="The name of the syslog server profile")
+    name: str = Field(
+        ...,
+        description="The name of the syslog server profile",
+        max_length=31
+    )
 
     # Server configurations - can be a dict or list in API
     server: List[SyslogServerModel] = Field(..., description="Syslog server configurations")

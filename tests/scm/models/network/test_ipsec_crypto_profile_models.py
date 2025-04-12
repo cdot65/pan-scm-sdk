@@ -5,24 +5,13 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from scm.models.network import (
-    AhAuthentication,
-    AhConfig,
-    DhGroup,
-    EspConfig,
-    EspEncryption,
-    IPsecCryptoProfileCreateModel,
-    IPsecCryptoProfileResponseModel,
-    IPsecCryptoProfileUpdateModel,
-    LifesizeGB,
-    LifesizeKB,
-    LifesizeMB,
-    LifesizeTB,
-    LifetimeDays,
-    LifetimeHours,
-    LifetimeMinutes,
-    LifetimeSeconds,
-)
+from scm.models.network import (AhAuthentication, AhConfig, DhGroup, EspConfig,
+                                EspEncryption, IPsecCryptoProfileCreateModel,
+                                IPsecCryptoProfileResponseModel,
+                                IPsecCryptoProfileUpdateModel, LifesizeGB,
+                                LifesizeKB, LifesizeMB, LifesizeTB,
+                                LifetimeDays, LifetimeHours, LifetimeMinutes,
+                                LifetimeSeconds)
 
 
 class TestIPsecCryptoProfileModels:
@@ -316,16 +305,9 @@ class TestIPsecCryptoProfileModels:
     def test_process_lifetime_and_lifesize_validator(self):
         """Test the process_lifetime_and_lifesize validator directly."""
         from scm.models.network.ipsec_crypto_profile import (
-            IPsecCryptoProfileBaseModel,
-            LifesizeGB,
-            LifesizeKB,
-            LifesizeMB,
-            LifesizeTB,
-            LifetimeDays,
-            LifetimeHours,
-            LifetimeMinutes,
-            LifetimeSeconds,
-        )
+            IPsecCryptoProfileBaseModel, LifesizeGB, LifesizeKB, LifesizeMB,
+            LifesizeTB, LifetimeDays, LifetimeHours, LifetimeMinutes,
+            LifetimeSeconds)
 
         # Test validator with non-dict input
         values = "not-a-dict"

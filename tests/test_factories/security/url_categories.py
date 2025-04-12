@@ -4,12 +4,10 @@ from uuid import uuid4
 import factory
 from faker import Faker
 
-from scm.models.security.url_categories import (
-    URLCategoriesCreateModel,
-    URLCategoriesListTypeEnum,
-    URLCategoriesResponseModel,
-    URLCategoriesUpdateModel,
-)
+from scm.models.security.url_categories import (URLCategoriesCreateModel,
+                                                URLCategoriesListTypeEnum,
+                                                URLCategoriesResponseModel,
+                                                URLCategoriesUpdateModel)
 
 fake = Faker()
 
@@ -158,3 +156,6 @@ class URLCategoriesResponseModelFactory(URLCategoriesBaseFactory):
         data.update(kwargs)
 
         return cls(**data)
+
+
+# End of file

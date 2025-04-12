@@ -7,11 +7,9 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
-    SecurityZoneCreateModel,
-    SecurityZoneResponseModel,
-    SecurityZoneUpdateModel,
-)
+from scm.models.network import (SecurityZoneCreateModel,
+                                SecurityZoneResponseModel,
+                                SecurityZoneUpdateModel)
 
 
 class SecurityZone(BaseObject):

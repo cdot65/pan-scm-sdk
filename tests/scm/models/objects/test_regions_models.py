@@ -5,12 +5,8 @@ import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import (
-    GeoLocation,
-    RegionCreateModel,
-    RegionResponseModel,
-    RegionUpdateModel,
-)
+from scm.models.objects import (GeoLocation, RegionCreateModel,
+                                RegionResponseModel, RegionUpdateModel)
 from tests.factories import RegionCreateModelFactory, RegionUpdateModelFactory
 
 # -------------------- Test Classes for GeoLocation Model --------------------

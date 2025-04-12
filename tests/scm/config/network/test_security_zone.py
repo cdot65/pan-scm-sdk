@@ -7,11 +7,9 @@ import pytest
 
 from scm.config.network import SecurityZone
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.network import (
-    SecurityZoneCreateModel,
-    SecurityZoneResponseModel,
-    SecurityZoneUpdateModel,
-)
+from scm.models.network import (SecurityZoneCreateModel,
+                                SecurityZoneResponseModel,
+                                SecurityZoneUpdateModel)
 
 
 @pytest.fixture

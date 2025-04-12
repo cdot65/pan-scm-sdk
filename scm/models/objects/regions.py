@@ -5,15 +5,8 @@ from typing import List, Optional
 from uuid import UUID
 
 # External libraries
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    confloat,
-    constr,
-    field_validator,
-    model_validator,
-)
+from pydantic import (BaseModel, ConfigDict, Field, confloat, field_validator,
+                      model_validator)
 
 
 class GeoLocation(BaseModel):
@@ -58,9 +51,11 @@ class RegionBaseModel(BaseModel):
     """
 
     # Required fields
-    name: constr(pattern=r"^[ a-zA-Z\d._-]+$", max_length=31) = Field(
+    name: str = Field(
         ...,
         description="The name of the region",
+        pattern=r"^[ a-zA-Z\d._-]+$",
+        max_length=31
     )
 
     # Optional fields
@@ -82,19 +77,25 @@ class RegionBaseModel(BaseModel):
     )
 
     # Container Types
-    folder: Optional[constr(pattern=r"^[a-zA-Z\d\-_. ]+$", max_length=64)] = Field(
+    folder: Optional[str] = Field(
         None,
         description="The folder in which the resource is defined",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
         examples=["Global"],
     )
-    snippet: Optional[constr(pattern=r"^[a-zA-Z\d\-_. ]+$", max_length=64)] = Field(
+    snippet: Optional[str] = Field(
         None,
         description="The snippet in which the resource is defined",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
         examples=["My Snippet"],
     )
-    device: Optional[constr(pattern=r"^[a-zA-Z\d\-_. ]+$", max_length=64)] = Field(
+    device: Optional[str] = Field(
         None,
         description="The device in which the resource is defined",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
         examples=["My Device"],
     )
 

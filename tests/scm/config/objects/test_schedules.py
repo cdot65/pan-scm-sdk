@@ -5,13 +5,13 @@ import uuid
 from unittest.mock import MagicMock
 
 import pytest
-
 # External libraries
 from pydantic import ValidationError
 
 # Local SDK imports
 from scm.config.objects import Schedule
-from scm.exceptions import APIError, InvalidObjectError, MissingQueryParameterError
+from scm.exceptions import (APIError, InvalidObjectError,
+                            MissingQueryParameterError)
 from scm.models.objects import ScheduleResponseModel, ScheduleUpdateModel
 from tests.factories import ScheduleResponseFactory
 

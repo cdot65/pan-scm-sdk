@@ -1,70 +1,29 @@
 # scm/models/network/__init__.py
 
-from .ike_crypto_profile import (
-    DHGroup,
-    EncryptionAlgorithm,
-    HashAlgorithm,
-    IKECryptoProfileCreateModel,
-    IKECryptoProfileResponseModel,
-    IKECryptoProfileUpdateModel,
-    LifetimeDays,
-    LifetimeHours,
-    LifetimeMinutes,
-    LifetimeSeconds,
-)
-from .ike_gateway import (
-    Authentication,
-    IKEGatewayCreateModel,
-    IKEGatewayResponseModel,
-    IKEGatewayUpdateModel,
-    LocalId,
-    LocalIdType,
-    PeerAddress,
-    PeerId,
-    PeerIdType,
-    Protocol,
-    ProtocolCommon,
-    ProtocolVersion,
-)
+from .ike_crypto_profile import (DHGroup, EncryptionAlgorithm, HashAlgorithm,
+                                 IKECryptoProfileCreateModel,
+                                 IKECryptoProfileResponseModel,
+                                 IKECryptoProfileUpdateModel, LifetimeDays,
+                                 LifetimeHours, LifetimeMinutes,
+                                 LifetimeSeconds)
+from .ike_gateway import (Authentication, IKEGatewayCreateModel,
+                          IKEGatewayResponseModel, IKEGatewayUpdateModel,
+                          LocalId, LocalIdType, PeerAddress, PeerId,
+                          PeerIdType, Protocol, ProtocolCommon,
+                          ProtocolVersion)
 from .ipsec_crypto_profile import (  # These are already imported from ike_crypto_profile; LifetimeSeconds,; LifetimeMinutes,; LifetimeHours,; LifetimeDays,
-    AhAuthentication,
-    AhConfig,
-    DhGroup,
-    EspAuthentication,
-    EspConfig,
-    EspEncryption,
-    IPsecCryptoProfileBaseModel,
-    IPsecCryptoProfileCreateModel,
-    IPsecCryptoProfileResponseModel,
-    IPsecCryptoProfileUpdateModel,
-    LifesizeGB,
-    LifesizeKB,
-    LifesizeMB,
-    LifesizeTB,
-)
-from .nat_rules import (
-    DestinationTranslation,
-    DistributionMethod,
-    DnsRewrite,
-    DnsRewriteDirection,
-    DynamicIp,
-    DynamicIpAndPort,
-    InterfaceAddress,
-    NatRuleCreateModel,
-    NatRuleResponseModel,
-    NatRuleUpdateModel,
-    SourceTranslation,
-    StaticIp,
-)
-from .security_zone import (
-    DeviceAcl,
-    NetworkConfig,
-    NetworkInterfaceType,
-    SecurityZoneCreateModel,
-    SecurityZoneResponseModel,
-    SecurityZoneUpdateModel,
-    UserAcl,
-)
+    AhAuthentication, AhConfig, DhGroup, EspAuthentication, EspConfig,
+    EspEncryption, IPsecCryptoProfileBaseModel, IPsecCryptoProfileCreateModel,
+    IPsecCryptoProfileResponseModel, IPsecCryptoProfileUpdateModel, LifesizeGB,
+    LifesizeKB, LifesizeMB, LifesizeTB)
+from .nat_rules import (DestinationTranslation, DistributionMethod, DnsRewrite,
+                        DnsRewriteDirection, DynamicIp, DynamicIpAndPort,
+                        InterfaceAddress, NatRuleCreateModel,
+                        NatRuleResponseModel, NatRuleUpdateModel,
+                        SourceTranslation, StaticIp)
+from .security_zone import (DeviceAcl, NetworkConfig, NetworkInterfaceType,
+                            SecurityZoneCreateModel, SecurityZoneResponseModel,
+                            SecurityZoneUpdateModel, UserAcl)
 
 __all__ = [
     # IKE Crypto Profile

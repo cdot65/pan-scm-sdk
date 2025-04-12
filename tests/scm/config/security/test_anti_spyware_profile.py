@@ -11,19 +11,13 @@ from requests.exceptions import HTTPError
 from scm.config.security import AntiSpywareProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareCategory,
-    AntiSpywareExemptIpEntry,
-    AntiSpywarePacketCapture,
-    AntiSpywareProfileResponseModel,
-    AntiSpywareSeverity,
-)
-from tests.factories import (
-    AntiSpywareProfileCreateApiFactory,
-    AntiSpywareProfileResponseFactory,
-    AntiSpywareProfileUpdateApiFactory,
-    AntiSpywareRuleBaseFactory,
-    AntiSpywareThreatExceptionBaseFactory,
-)
+    AntiSpywareCategory, AntiSpywareExemptIpEntry, AntiSpywarePacketCapture,
+    AntiSpywareProfileResponseModel, AntiSpywareSeverity)
+from tests.factories import (AntiSpywareProfileCreateApiFactory,
+                             AntiSpywareProfileResponseFactory,
+                             AntiSpywareProfileUpdateApiFactory,
+                             AntiSpywareRuleBaseFactory,
+                             AntiSpywareThreatExceptionBaseFactory)
 from tests.utils import raise_mock_http_error
 
 
