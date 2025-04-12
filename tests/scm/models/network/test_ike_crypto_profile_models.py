@@ -151,7 +151,7 @@ class TestIKECryptoProfileModels:
         assert profile.folder == "test-folder"
 
         # Test description is excluded from model fields but still accessible
-        assert profile.model_fields["description"].exclude is True
+        assert IKECryptoProfileResponseModel.model_fields["description"].exclude is True
 
         # Test missing required ID
         invalid_data = {
