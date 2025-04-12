@@ -248,24 +248,76 @@ class TestOAuth2Client:
         with pytest.raises(APIError):
             OAuth2Client(auth_request)
 
-    # def test_create_session_http_error(self, auth_request):
-    #     """Test session creation with HTTP error."""
-    #     # Simulate an HTTPError during token fetching
-    #     self.mock_session.fetch_token.side_effect = raise_mock_http_error(
-    #         status_code=401,
-    #         error_code="E016",
-    #         message="{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016",
-    #         error_type="Invalid Credential",
-    #     )
-    #
-    #     with pytest.raises(APIError) as exc_info:
-    #         OAuth2Client(auth_request)
-    #
-    #     # Check if APIError was raised with the expected message
-    #     assert (
-    #         "{'errorType': 'Invalid Credential'} - HTTP error: 401 - API error: E016"
-    #         in str(exc_info.value)
-    #     )
+    def test_session_network_error(self, auth_request):
+        """Test error handling when a network error occurs during session creation."""
+        # Mock the session's fetch_token method to raise a ConnectionError
+        self.mock_session.fetch_token.side_effect = ConnectionError("Network connection error")
+
+        # Create a new client instance that will trigger the error
+        with pytest.raises(APIError) as exc_info:
+            OAuth2Client(auth_request)
+
+        # Verify that an APIError was raised
+        assert "Network error during session creation" in exc_info.value.message
+        assert "Network connection error" in exc_info.value.message
+
+    def test_session_http_error(self, auth_request):
+        """Test error handling when an HTTP error occurs during session creation."""
+        # Create a proper error response format that matches what ErrorHandler expects
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        mock_response.content = True  # Content exists flag
+
+        # Set up a mock response JSON that the error handler can parse
+        mock_response.json.return_value = {
+            "_errors": [
+                {
+                    "code": "E016",
+                    "message": "Invalid Credential",
+                    "details": {"errorType": "Invalid Credential"},
+                }
+            ]
+        }
+
+        # Create HTTP error with the mocked response
+        http_error = HTTPError("HTTP Server Error", response=mock_response)
+        self.mock_session.fetch_token.side_effect = http_error
+
+        # Create a new client instance that will trigger the error
+        with pytest.raises(APIError) as exc_info:
+            OAuth2Client(auth_request)
+
+        # The validation should be on the message attribute, not the string representation
+        assert (
+            "Invalid Credential" in exc_info.value.message
+            or "HTTP error during session creation" in exc_info.value.message
+        )
+
+    def test_session_http_error_no_content(self, auth_request):
+        """Test error handling when an HTTP error occurs without response content."""
+        # Create a mock response with no content
+        mock_response = MagicMock()
+        mock_response.status_code = 500
+        mock_response.content = False  # No content flag
+
+        # Create HTTP error with the mocked response
+        http_error = HTTPError("Empty HTTP Server Error", response=mock_response)
+        self.mock_session.fetch_token.side_effect = http_error
+
+        # Create a new client instance that will trigger the error
+        with pytest.raises(APIError) as exc_info:
+            OAuth2Client(auth_request)
+
+        # Verify the direct APIError message is used
+        assert "HTTP error during session creation" in exc_info.value.message
+        assert "Empty HTTP Server Error" in exc_info.value.message
+
+    def test_session_generic_error(self, auth_request):
+        """Test error handling when a generic error occurs during session creation."""
+        self.mock_session.fetch_token.side_effect = Exception("Test error")
+
+        with pytest.raises(APIError):
+            OAuth2Client(auth_request)
 
     def test_token_expires_soon_no_token(self, auth_request):
         """Test token expiration check with no token available."""
