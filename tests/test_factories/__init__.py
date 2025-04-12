@@ -6,6 +6,14 @@ from tests.test_factories.objects.address import (
     AddressUpdateApiFactory,
     AddressUpdateModelFactory,
 )
+from tests.test_factories.objects.address_group import (
+    AddressGroupBaseFactory,
+    AddressGroupCreateApiFactory,
+    AddressGroupCreateModelFactory,
+    AddressGroupResponseFactory,
+    AddressGroupUpdateApiFactory,
+    AddressGroupUpdateModelFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -35,4 +43,10 @@ __all__ = [
     "AddressResponseFactory",
     "AddressCreateModelFactory",
     "AddressUpdateModelFactory",
+    "AddressGroupBaseFactory",
+    "AddressGroupCreateApiFactory",
+    "AddressGroupUpdateApiFactory",
+    "AddressGroupResponseFactory",
+    "AddressGroupCreateModelFactory",
+    "AddressGroupUpdateModelFactory",
 ]
