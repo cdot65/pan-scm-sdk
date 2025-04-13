@@ -4,7 +4,6 @@ from uuid import uuid4
 
 import factory
 from faker import Faker
-
 from scm.models.objects.application_filters import (
     ApplicationFiltersBaseModel,
     ApplicationFiltersCreateModel,
@@ -24,7 +23,7 @@ class ApplicationFiltersBaseFactory(factory.Factory):
         abstract = True
 
     name = factory.Sequence(lambda n: f"application_filters_{n}")
-    
+
     # Optional category fields
     category = None
     sub_category = None
@@ -32,7 +31,7 @@ class ApplicationFiltersBaseFactory(factory.Factory):
     risk = None
     saas_certifications = None
     saas_risk = None
-    
+
     # Boolean attributes with explicit defaults
     evasive = False
     used_by_malware = False
@@ -43,7 +42,7 @@ class ApplicationFiltersBaseFactory(factory.Factory):
     pervasive = False
     is_saas = False
     new_appid = False
-    
+
     # Field that was missing in original (found in OpenAPI spec)
     excessive_bandwidth_use = False
     exclude = None
@@ -69,35 +68,35 @@ class ApplicationFiltersCreateApiFactory(ApplicationFiltersBaseFactory):
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
         """Create an instance with snippet container."""
         return cls(folder=None, snippet=snippet, **kwargs)
-    
+
     @classmethod
     def with_categories(cls, categories=None, **kwargs):
         """Create an instance with specific categories."""
         if categories is None:
             categories = ["business-systems", "collaboration"]
         return cls(category=categories, **kwargs)
-    
+
     @classmethod
     def with_subcategories(cls, subcategories=None, **kwargs):
         """Create an instance with specific subcategories."""
         if subcategories is None:
             subcategories = ["email", "file-sharing"]
         return cls(sub_category=subcategories, **kwargs)
-    
+
     @classmethod
     def with_technologies(cls, technologies=None, **kwargs):
         """Create an instance with specific technologies."""
         if technologies is None:
             technologies = ["client-server", "peer-to-peer"]
         return cls(technology=technologies, **kwargs)
-    
+
     @classmethod
     def with_risks(cls, risks=None, **kwargs):
         """Create an instance with specific risk levels."""
         if risks is None:
             risks = [1, 3, 5]
         return cls(risk=risks, **kwargs)
-    
+
     @classmethod
     def with_all_boolean_flags(cls, value=True, **kwargs):
         """Create an instance with all boolean flags set to specified value."""
@@ -129,19 +128,19 @@ class ApplicationFiltersUpdateApiFactory(ApplicationFiltersBaseFactory):
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
         """Create an instance with snippet container."""
         return cls(folder=None, snippet=snippet, **kwargs)
-    
+
     @classmethod
     def with_folder(cls, folder="Texas", **kwargs):
         """Create an instance with folder container."""
         return cls(folder=folder, snippet=None, **kwargs)
-    
+
     @classmethod
     def with_categories(cls, categories=None, **kwargs):
         """Create an instance with specific categories."""
         if categories is None:
             categories = ["business-systems", "collaboration"]
         return cls(category=categories, **kwargs)
-    
+
     @classmethod
     def with_boolean_updates(cls, value=True, **kwargs):
         """Create an instance updating all boolean flags."""
@@ -188,6 +187,7 @@ class ApplicationFiltersResponseFactory(ApplicationFiltersBaseFactory):
 # Application Filters model factories for Pydantic validation testing.
 # ----------------------------------------------------------------------------
 
+
 class ApplicationFiltersCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for ApplicationFiltersCreateModel validation testing."""
 
@@ -202,7 +202,7 @@ class ApplicationFiltersCreateModelFactory(factory.DictFactory):
     snippet = None
     tag = ["test-tag", "environment-prod"]
     exclude = ["app1", "app2"]
-    
+
     # Boolean attributes
     evasive = False
     used_by_malware = False
@@ -251,7 +251,7 @@ class ApplicationFiltersUpdateModelFactory(factory.DictFactory):
     snippet = None
     tag = ["test-tag", "environment-prod"]
     exclude = ["app3", "app4"]
-    
+
     # Boolean attributes
     evasive = True
     used_by_malware = False
@@ -315,7 +315,7 @@ class ApplicationFiltersResponseModelFactory(factory.DictFactory):
     snippet = None
     tag = ["test-tag", "environment-prod"]
     exclude = ["app1", "app2"]
-    
+
     # Boolean attributes
     evasive = False
     used_by_malware = False

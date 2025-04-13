@@ -6,6 +6,7 @@ from typing import Dict, List, Union
 
 # External libraries
 import factory
+
 from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
 from scm.models.deployment.remote_networks import (
@@ -31,17 +32,12 @@ from scm.models.network.nat_rules import (
     NatType,
     SourceTranslation,
 )
+
 # Local SDK imports
 from scm.models.objects import (
-    ApplicationCreateModel,
-    ApplicationFiltersCreateModel,
-    ApplicationFiltersResponseModel,
-    ApplicationFiltersUpdateModel,
     ApplicationGroupCreateModel,
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
-    ApplicationResponseModel,
-    ApplicationUpdateModel,
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
     HIPObjectCreateModel,
@@ -159,7 +155,6 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvRuleBase,
     WildfireAvThreatExceptionEntry,
 )
-
 
 # ----------------------------------------------------------------------------
 # Network Location object factories.
@@ -767,9 +762,7 @@ class HIPObjectCreateApiFactory(factory.Factory):
     disk_encryption = {
         "criteria": {
             "is_installed": True,
-            "encrypted_locations": [
-                {"name": "C:", "encryption_state": {"is": "encrypted"}}
-            ],
+            "encrypted_locations": [{"name": "C:", "encryption_state": {"is": "encrypted"}}],
         },
         "exclude_vendor": False,
     }
@@ -805,9 +798,7 @@ class HIPObjectUpdateApiFactory(factory.Factory):
     disk_encryption = {
         "criteria": {
             "is_installed": True,
-            "encrypted_locations": [
-                {"name": "C:", "encryption_state": {"is": "encrypted"}}
-            ],
+            "encrypted_locations": [{"name": "C:", "encryption_state": {"is": "encrypted"}}],
         },
         "exclude_vendor": False,
     }
@@ -835,9 +826,7 @@ class HIPObjectUpdateApiFactory(factory.Factory):
             )
 
         # Create and add new location
-        new_location = EncryptionLocationModel(
-            name=location, encryption_state={"is": "encrypted"}
-        )
+        new_location = EncryptionLocationModel(name=location, encryption_state={"is": "encrypted"})
 
         # Access via model attributes
         base_instance.disk_encryption.criteria.encrypted_locations.append(new_location)
@@ -858,9 +847,7 @@ class HIPObjectResponseFactory(factory.Factory):
     disk_encryption = {
         "criteria": {
             "is_installed": True,
-            "encrypted_locations": [
-                {"name": "C:", "encryption_state": {"is": "encrypted"}}
-            ],
+            "encrypted_locations": [{"name": "C:", "encryption_state": {"is": "encrypted"}}],
         },
         "exclude_vendor": False,
     }
@@ -934,9 +921,7 @@ class HIPObjectCreateModelFactory(factory.DictFactory):
             disk_encryption={
                 "criteria": {
                     "is_installed": True,
-                    "encrypted_locations": [
-                        {"name": "C:", "encryption_state": "invalid"}
-                    ],
+                    "encrypted_locations": [{"name": "C:", "encryption_state": "invalid"}],
                 }
             },
         )
@@ -972,11 +957,7 @@ class HIPObjectUpdateModelFactory(factory.DictFactory):
             id="invalid-uuid",
             name="@invalid-name",
             disk_encryption={
-                "criteria": {
-                    "encrypted_locations": [
-                        {"name": "C:", "encryption_state": "invalid"}
-                    ]
-                }
+                "criteria": {"encrypted_locations": [{"name": "C:", "encryption_state": "invalid"}]}
             },
         )
 
@@ -1899,9 +1880,7 @@ class AntiSpywareRuleBaseFactory(factory.Factory):
         return cls(severity=severities, **kwargs)
 
     @classmethod
-    def with_category(
-        cls, category: AntiSpywareCategory = AntiSpywareCategory.botnet, **kwargs
-    ):
+    def with_category(cls, category: AntiSpywareCategory = AntiSpywareCategory.botnet, **kwargs):
         """Create an instance with a specific category."""
         return cls(category=category, **kwargs)
 
@@ -1914,17 +1893,13 @@ class AntiSpywareThreatExceptionBaseFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"exception_{n}")
     packet_capture = AntiSpywarePacketCapture.single_packet
-    exempt_ip = factory.LazyAttribute(
-        lambda _: [AntiSpywareExemptIpEntry(name="192.168.1.1")]
-    )
+    exempt_ip = factory.LazyAttribute(lambda _: [AntiSpywareExemptIpEntry(name="192.168.1.1")])
     notes = "Test exception"
 
     @classmethod
     def with_multiple_exempt_ips(cls, ips: list[str], **kwargs):
         """Create an instance with multiple exempt IPs."""
-        return cls(
-            exempt_ip=[AntiSpywareExemptIpEntry(name=ip) for ip in ips], **kwargs
-        )
+        return cls(exempt_ip=[AntiSpywareExemptIpEntry(name=ip) for ip in ips], **kwargs)
 
 
 # SDK tests against SCM API
@@ -1939,9 +1914,7 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
     folder = "Texas"
     cloud_inline_analysis = False
     rules = factory.LazyAttribute(lambda _: [AntiSpywareRuleBaseFactory()])
-    threat_exception = factory.LazyAttribute(
-        lambda _: [AntiSpywareThreatExceptionBaseFactory()]
-    )
+    threat_exception = factory.LazyAttribute(lambda _: [AntiSpywareThreatExceptionBaseFactory()])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -1961,13 +1934,9 @@ class AntiSpywareProfileCreateApiFactory(factory.Factory):
         return cls(mica_engine_spyware_enabled=entries, **kwargs)
 
     @classmethod
-    def with_inline_exceptions(
-        cls, urls: list[str] = None, ips: list[str] = None, **kwargs
-    ):
+    def with_inline_exceptions(cls, urls: list[str] = None, ips: list[str] = None, **kwargs):
         """Create a profile with inline exceptions."""
-        return cls(
-            inline_exception_edl_url=urls, inline_exception_ip_address=ips, **kwargs
-        )
+        return cls(inline_exception_edl_url=urls, inline_exception_ip_address=ips, **kwargs)
 
 
 class AntiSpywareProfileUpdateApiFactory(factory.Factory):
@@ -1980,9 +1949,7 @@ class AntiSpywareProfileUpdateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"profile_{n}")
     description = factory.Faker("sentence")
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)]
-    )
+    threat_exception = factory.List([factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)])
 
     @classmethod
     def with_cloud_inline_analysis(cls, enabled: bool = True, **kwargs):
@@ -2007,9 +1974,7 @@ class AntiSpywareProfileResponseFactory(factory.Factory):
     folder = "Texas"
     cloud_inline_analysis = False
     rules = factory.List([factory.SubFactory(AntiSpywareRuleBaseFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)]
-    )
+    threat_exception = factory.List([factory.SubFactory(AntiSpywareThreatExceptionBaseFactory)])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -2586,9 +2551,7 @@ class SecurityRuleUpdateApiFactory(factory.Factory):
     rulebase = None
 
     @classmethod
-    def with_action_update(
-        cls, action: SecurityRuleAction = SecurityRuleAction.deny, **kwargs
-    ):
+    def with_action_update(cls, action: SecurityRuleAction = SecurityRuleAction.deny, **kwargs):
         """Create an instance updating only the action."""
         return cls(action=action, **kwargs)
 
@@ -2934,9 +2897,7 @@ class BotnetDomainsFactory(factory.Factory):
     class Meta:
         model = BotnetDomainsModel
 
-    dns_security_categories = factory.List(
-        [factory.SubFactory(DNSSecurityCategoryEntryFactory)]
-    )
+    dns_security_categories = factory.List([factory.SubFactory(DNSSecurityCategoryEntryFactory)])
     lists = factory.List([factory.SubFactory(ListEntryBaseFactory)])
     sinkhole = factory.SubFactory(SinkholeSettingsFactory)
     whitelist = factory.List([factory.SubFactory(WhitelistEntryFactory)])
@@ -3077,9 +3038,7 @@ class DNSSecurityProfileCreateModelFactory(factory.DictFactory):
             name="TestProfile",
             folder="Texas",
             botnet_domains={
-                "dns_security_categories": [
-                    {"name": "malware", "action": "invalid-action"}
-                ]
+                "dns_security_categories": [{"name": "malware", "action": "invalid-action"}]
             },
         )
 
@@ -3097,9 +3056,7 @@ class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             name="UpdatedProfile",
             description="Updated description",
-            botnet_domains={
-                "sinkhole": {"ipv4_address": "127.0.0.1", "ipv6_address": "::1"}
-            },
+            botnet_domains={"sinkhole": {"ipv4_address": "127.0.0.1", "ipv6_address": "::1"}},
         )
 
     @classmethod
@@ -3108,9 +3065,7 @@ class DNSSecurityProfileUpdateModelFactory(factory.DictFactory):
         return cls(
             id="invalid-uuid",
             name="@invalid-name",
-            botnet_domains={
-                "dns_security_categories": [{"name": "malware", "action": "invalid"}]
-            },
+            botnet_domains={"dns_security_categories": [{"name": "malware", "action": "invalid"}]},
         )
 
     @classmethod
@@ -3476,12 +3431,8 @@ class WildfireAvProfileCreateApiFactory(factory.Factory):
     folder = "Texas"
     packet_capture = False
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List(
-        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
-    )
-    threat_exception = factory.List(
-        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
-    )
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -3509,12 +3460,8 @@ class WildfireAvProfileUpdateApiFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
     description = factory.Faker("sentence")
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List(
-        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
-    )
-    threat_exception = factory.List(
-        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
-    )
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
 
     @classmethod
     def with_packet_capture(cls, enabled: bool = True, **kwargs):
@@ -3534,12 +3481,8 @@ class WildfireAvProfileResponseFactory(factory.Factory):
     folder = "Texas"
     packet_capture = False
     rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List(
-        [factory.SubFactory(WildfireAvMlavExceptionEntryFactory)]
-    )
-    threat_exception = factory.List(
-        [factory.SubFactory(WildfireAvThreatExceptionEntryFactory)]
-    )
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
@@ -3732,9 +3675,7 @@ class SourceTranslationFactory(factory.Factory):
             "translated_address": "192.168.1.100",
             "bi_directional": "yes" if kwargs.pop("bi_directional", False) else "no",
         }
-        return cls(
-            dynamic_ip_and_port=None, dynamic_ip=None, static_ip=static_ip, **kwargs
-        )
+        return cls(dynamic_ip_and_port=None, dynamic_ip=None, static_ip=static_ip, **kwargs)
 
     @classmethod
     def with_dynamic_ip(cls, **kwargs):
@@ -3743,9 +3684,7 @@ class SourceTranslationFactory(factory.Factory):
             "translated_address": ["192.168.1.100", "192.168.1.101"],
             "fallback_type": None,
         }
-        return cls(
-            dynamic_ip_and_port=None, dynamic_ip=dynamic_ip, static_ip=None, **kwargs
-        )
+        return cls(dynamic_ip_and_port=None, dynamic_ip=dynamic_ip, static_ip=None, **kwargs)
 
     @classmethod
     def with_dynamic_ip_and_port(cls, **kwargs):
@@ -4103,9 +4042,7 @@ class HIPProfileUpdateApiFactory(factory.Factory):
     match = "Any of the members of (hipobject1)"
 
     @classmethod
-    def with_updated_match(
-        cls, match: str = "All of the members of (hipobject2)", **kwargs
-    ):
+    def with_updated_match(cls, match: str = "All of the members of (hipobject2)", **kwargs):
         """Create an instance with an updated match expression."""
         return cls(match=match, **kwargs)
 
@@ -5040,9 +4977,7 @@ class RegionUpdateApiFactory(factory.Factory):
     address = ["192.168.1.0/24", "10.0.0.0/8"]
 
     @classmethod
-    def with_updated_geo_location(
-        cls, lat: float = 40.7128, long: float = -74.0060, **kwargs
-    ):
+    def with_updated_geo_location(cls, lat: float = 40.7128, long: float = -74.0060, **kwargs):
         """Create an instance with updated geo_location."""
         return cls(geo_location={"latitude": lat, "longitude": long}, **kwargs)
 

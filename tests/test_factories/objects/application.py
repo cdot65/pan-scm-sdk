@@ -182,6 +182,7 @@ class ApplicationResponseFactory(ApplicationBaseFactory):
 # Application model factories for Pydantic validation testing.
 # ----------------------------------------------------------------------------
 
+
 class ApplicationCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for ApplicationCreateModel validation testing."""
 

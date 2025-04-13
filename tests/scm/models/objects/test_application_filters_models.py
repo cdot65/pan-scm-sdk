@@ -7,14 +7,14 @@ from pydantic import ValidationError
 # Local SDK imports
 from scm.models.objects.application_filters import (
     ApplicationFiltersCreateModel,
-    ApplicationFiltersUpdateModel,
     ApplicationFiltersResponseModel,
+    ApplicationFiltersUpdateModel,
 )
 from tests.test_factories.objects.application_filters import (
     ApplicationFiltersCreateApiFactory,
     ApplicationFiltersCreateModelFactory,
-    ApplicationFiltersUpdateModelFactory,
     ApplicationFiltersResponseModelFactory,
+    ApplicationFiltersUpdateModelFactory,
 )
 
 # -------------------- Test Classes for Pydantic Models --------------------
@@ -30,14 +30,14 @@ class TestApplicationFilterCreateModel:
         assert model.name.startswith("application_filters_")
         assert model.folder == "Texas"
         assert model.snippet is None
-        
+
     def test_application_filters_create_model_multiple_containers(self):
         """Test validation when multiple containers are provided."""
         data = ApplicationFiltersCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValidationError) as exc_info:
             ApplicationFiltersCreateModel(**data)
         assert "Exactly one of 'folder' or 'snippet' must be provided" in str(exc_info.value)
-    
+
     def test_application_filters_create_model_no_containers(self):
         """Test validation when no containers are provided."""
         data = ApplicationFiltersCreateModelFactory.build_with_no_containers()
@@ -56,7 +56,7 @@ class TestApplicationFilterCreateModel:
         model = ApplicationFiltersCreateApiFactory.with_snippet()
         assert model.snippet == "TestSnippet"
         assert model.folder is None
-    
+
     def test_application_filters_create_model_with_boolean_flags(self):
         """Test creation with all boolean flags set."""
         model = ApplicationFiltersCreateApiFactory.with_all_boolean_flags()
@@ -81,14 +81,14 @@ class TestApplicationFilterUpdateModel:
         model = ApplicationFiltersUpdateModel(**data)
         assert model.name.startswith("application_filters_updated_")
         assert model.id is not None
-    
+
     def test_application_filters_update_model_minimal(self):
         """Test validation with minimal update data."""
         data = ApplicationFiltersUpdateModelFactory.build_minimal_update()
         model = ApplicationFiltersUpdateModel(**data)
         assert model.name == "MinimalUpdate"
         assert model.id is not None
-    
+
     def test_application_filters_update_model_invalid_fields(self):
         """Test validation with invalid fields."""
         data = ApplicationFiltersUpdateModelFactory.build_with_invalid_fields()
@@ -100,7 +100,7 @@ class TestApplicationFilterUpdateModel:
 
 class TestApplicationFilterResponseModel:
     """Tests for Application Filter Response model validation."""
-    
+
     def test_application_filters_response_model_valid(self):
         """Test validation with valid response data."""
         data = ApplicationFiltersResponseModelFactory.build_valid()
