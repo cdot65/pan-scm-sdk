@@ -78,6 +78,17 @@ from tests.test_factories.objects.hip_profile import (
     HIPProfileUpdateApiFactory,
     HIPProfileUpdateModelFactory,
 )
+from tests.test_factories.objects.http_server_profiles import (
+    HTTPServerProfileBaseFactory,
+    HTTPServerProfileCreateApiFactory,
+    HTTPServerProfileCreateModelFactory,
+    HTTPServerProfileResponseFactory,
+    HTTPServerProfileResponseModelFactory,
+    HTTPServerProfileUpdateApiFactory,
+    HTTPServerProfileUpdateModelFactory,
+    PayloadFormatModelFactory,
+    ServerModelFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -159,6 +170,16 @@ __all__ = [
     "HIPProfileCreateModelFactory",
     "HIPProfileUpdateModelFactory",
     "HIPProfileResponseModelFactory",
+    # HTTP Server Profiles
+    "HTTPServerProfileBaseFactory",
+    "HTTPServerProfileCreateApiFactory",
+    "HTTPServerProfileUpdateApiFactory",
+    "HTTPServerProfileResponseFactory",
+    "HTTPServerProfileCreateModelFactory",
+    "HTTPServerProfileUpdateModelFactory",
+    "HTTPServerProfileResponseModelFactory",
+    "PayloadFormatModelFactory",
+    "ServerModelFactory",
     # Syslog Server Profiles
     "EscapingModelFactory",
     "FormatModelFactory",

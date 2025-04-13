@@ -1,6 +1,5 @@
 # tests/scm/config/objects/test_http_server_profiles.py
 
-import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,7 +13,10 @@ from scm.models.objects import (
     HTTPServerProfileUpdateModel,
     ServerModel,
 )
-from tests.factories import HTTPServerProfileCreateModelFactory
+from tests.test_factories.objects.http_server_profiles import (
+    HTTPServerProfileResponseFactory,
+    ServerModelFactory,
+)
 
 # Remove all xfail markers to achieve 100% test pass rate
 
@@ -24,20 +26,17 @@ from tests.factories import HTTPServerProfileCreateModelFactory
 
 def create_sample_http_server_profile_response():
     """Create a sample HTTP server profile response dictionary."""
-    return {
-        "id": str(uuid.uuid4()),
-        "name": "test-http-profile",
-        "server": [
-            {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
-        ],
-        "tag_registration": True,
-        "format": {
+    return HTTPServerProfileResponseFactory(
+        name="test-http-profile",
+        server=[ServerModelFactory(protocol="HTTP", port=80)],
+        tag_registration=True,
+        format={
             "traffic": {},
             "threat": {},
             "url": {},
         },
-        "folder": "Security Profiles",
-    }
+        folder="Security Profiles",
+    ).model_dump()
 
 
 # -------------------- HTTPServerProfile validation tests --------------------
@@ -100,10 +99,26 @@ class TestHTTPServerProfileOperations:
         NOTE: This test now runs with mocks to ensure functionality and test coverage.
         """
         api_client = MagicMock(spec=Scm)
-        api_client.post.return_value = create_sample_http_server_profile_response()
+        api_client.post.return_value = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         http_server_profile = HTTPServerProfile(api_client)
-        data = HTTPServerProfileCreateModelFactory.build_valid()
+        data = {
+            "name": "test-http-profile",
+            "server": [
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+            ],
+            "folder": "Test Folder",
+        }
         response = http_server_profile.create(data)
 
         # Verify the result
@@ -130,7 +145,13 @@ class TestHTTPServerProfileOperations:
         )
 
         http_server_profile = HTTPServerProfile(api_client)
-        data = HTTPServerProfileCreateModelFactory.build_valid()
+        data = {
+            "name": "test-http-profile",
+            "server": [
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+            ],
+            "folder": "Test Folder",
+        }
 
         with pytest.raises(Exception) as exc_info:
             http_server_profile.create(data)
@@ -145,7 +166,13 @@ class TestHTTPServerProfileOperations:
         api_client.post.side_effect = Exception("Generic error")
 
         http_server_profile = HTTPServerProfile(api_client)
-        data = HTTPServerProfileCreateModelFactory.build_valid()
+        data = {
+            "name": "test-http-profile",
+            "server": [
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+            ],
+            "folder": "Test Folder",
+        }
 
         with pytest.raises(Exception) as exc_info:
             http_server_profile.create(data)
@@ -161,7 +188,18 @@ class TestHTTPServerProfileOperations:
 
         with patch("logging.Logger.error") as mock_log:
             http_server_profile = HTTPServerProfile(api_client)
-            data = HTTPServerProfileCreateModelFactory.build_valid()
+            data = {
+                "name": "test-http-profile",
+                "server": [
+                    {
+                        "name": "test-server",
+                        "address": "192.168.1.100",
+                        "protocol": "HTTP",
+                        "port": 80,
+                    }
+                ],
+                "folder": "Test Folder",
+            }
 
             with pytest.raises(Exception):
                 http_server_profile.create(data)
@@ -184,7 +222,13 @@ class TestHTTPServerProfileOperations:
         )
 
         http_server_profile = HTTPServerProfile(api_client)
-        data = HTTPServerProfileCreateModelFactory.build_valid()
+        data = {
+            "name": "test-http-profile",
+            "server": [
+                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+            ],
+            "folder": "Test Folder",
+        }
 
         with pytest.raises(requests.exceptions.HTTPError) as exc_info:
             http_server_profile.create(data)
@@ -193,7 +237,17 @@ class TestHTTPServerProfileOperations:
     def test_get(self):
         """Test getting an HTTP server profile by ID."""
         api_client = MagicMock(spec=Scm)
-        mock_response = create_sample_http_server_profile_response()
+        mock_response = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
@@ -218,7 +272,17 @@ class TestHTTPServerProfileOperations:
         NOTE: This test no longer skipped but now runs with appropriate mocking to improve coverage.
         """
         api_client = MagicMock(spec=Scm)
-        mock_response = create_sample_http_server_profile_response()
+        mock_response = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
         api_client.put.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
@@ -279,9 +343,28 @@ class TestHTTPServerProfileListAndFetch:
     def test_list_with_folder(self):
         """Test listing HTTP server profiles in a folder."""
         api_client = MagicMock(spec=Scm)
-        profile1 = create_sample_http_server_profile_response()
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "another-profile"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
+        profile2 = HTTPServerProfileResponseFactory(
+            name="another-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
         mock_response = {
             "data": [profile1, profile2],
             "limit": 200,
@@ -308,9 +391,17 @@ class TestHTTPServerProfileListAndFetch:
     def test_list_with_snippet(self):
         """Test listing HTTP server profiles in a snippet."""
         api_client = MagicMock(spec=Scm)
-        profile1 = create_sample_http_server_profile_response()
-        profile1["folder"] = None
-        profile1["snippet"] = "TestSnippet"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            snippet="TestSnippet",
+        ).model_dump()
         mock_response = {
             "data": [profile1],
             "limit": 200,
@@ -336,9 +427,17 @@ class TestHTTPServerProfileListAndFetch:
     def test_list_with_device(self):
         """Test listing HTTP server profiles in a device."""
         api_client = MagicMock(spec=Scm)
-        profile1 = create_sample_http_server_profile_response()
-        profile1["folder"] = None
-        profile1["device"] = "TestDevice"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            device="TestDevice",
+        ).model_dump()
         mock_response = {
             "data": [profile1],
             "limit": 200,
@@ -386,11 +485,28 @@ class TestHTTPServerProfileListAndFetch:
     def test_list_with_filtering(self):
         """Test listing HTTP server profiles with filtering."""
         api_client = MagicMock(spec=Scm)
-        profile1 = create_sample_http_server_profile_response()
-        profile1["tag_registration"] = True
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "another-profile"
-        profile2["tag_registration"] = False
+        profile1 = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
+        profile2 = HTTPServerProfileResponseFactory(
+            name="another-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=False,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         mock_response = {
             "data": [profile1, profile2],
@@ -413,27 +529,56 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
 
         # Profile 1: HTTP with tag_registration=True
-        profile1 = create_sample_http_server_profile_response()
-        profile1["tag_registration"] = True
-        profile1["server"][0]["protocol"] = "HTTP"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         # Profile 2: HTTP with tag_registration=False
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "profile2"
-        profile2["tag_registration"] = False
-        profile2["server"][0]["protocol"] = "HTTP"
+        profile2 = HTTPServerProfileResponseFactory(
+            name="profile2",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=False,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         # Profile 3: HTTPS with tag_registration=True
-        profile3 = create_sample_http_server_profile_response()
-        profile3["name"] = "profile3"
-        profile3["tag_registration"] = True
-        profile3["server"][0]["protocol"] = "HTTPS"
+        profile3 = HTTPServerProfileResponseFactory(
+            name="profile3",
+            server=[ServerModelFactory(protocol="HTTPS", port=443)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         # Profile 4: HTTPS with tag_registration=False
-        profile4 = create_sample_http_server_profile_response()
-        profile4["name"] = "profile4"
-        profile4["tag_registration"] = False
-        profile4["server"][0]["protocol"] = "HTTPS"
+        profile4 = HTTPServerProfileResponseFactory(
+            name="profile4",
+            server=[ServerModelFactory(protocol="HTTPS", port=443)],
+            tag_registration=False,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         mock_response = {
             "data": [profile1, profile2, profile3, profile4],
@@ -461,7 +606,7 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
         # Need to return a valid response for the first API call
         api_client.get.return_value = {
-            "data": [create_sample_http_server_profile_response()],
+            "data": [HTTPServerProfileResponseFactory().model_dump()],
             "limit": 200,
             "offset": 0,
             "total": 1,
@@ -478,13 +623,30 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
 
         # Profile with HTTP server
-        profile1 = create_sample_http_server_profile_response()
-        profile1["server"][0]["protocol"] = "HTTP"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         # Profile with HTTPS server
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "https-profile"
-        profile2["server"][0]["protocol"] = "HTTPS"
+        profile2 = HTTPServerProfileResponseFactory(
+            name="https-profile",
+            server=[ServerModelFactory(protocol="HTTPS", port=443)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         mock_response = {
             "data": [profile1, profile2],
@@ -507,7 +669,7 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
         # Need to return a valid response for the first API call
         api_client.get.return_value = {
-            "data": [create_sample_http_server_profile_response()],
+            "data": [HTTPServerProfileResponseFactory().model_dump()],
             "limit": 200,
             "offset": 0,
             "total": 1,
@@ -525,9 +687,32 @@ class TestHTTPServerProfileListAndFetch:
         http_server_profile = HTTPServerProfile(api_client)
 
         # Create sample profiles
-        profile1 = HTTPServerProfileResponseModel(**create_sample_http_server_profile_response())
-        profile2 = HTTPServerProfileResponseModel(**create_sample_http_server_profile_response())
-        profile2.tag_registration = False
+        profile1 = HTTPServerProfileResponseModel(
+            **HTTPServerProfileResponseFactory(
+                name="test-http-profile",
+                server=[ServerModelFactory(protocol="HTTP", port=80)],
+                tag_registration=True,
+                format={
+                    "traffic": {},
+                    "threat": {},
+                    "url": {},
+                },
+                folder="Security Profiles",
+            ).model_dump()
+        )
+        profile2 = HTTPServerProfileResponseModel(
+            **HTTPServerProfileResponseFactory(
+                name="another-profile",
+                server=[ServerModelFactory(protocol="HTTP", port=80)],
+                tag_registration=False,
+                format={
+                    "traffic": {},
+                    "threat": {},
+                    "url": {},
+                },
+                folder="Security Profiles",
+            ).model_dump()
+        )
 
         # Test tag_registration filter
         filtered = http_server_profile._apply_filters(
@@ -558,7 +743,17 @@ class TestHTTPServerProfileListAndFetch:
     def test_fetch(self):
         """Test fetching a single HTTP server profile by name."""
         api_client = MagicMock(spec=Scm)
-        mock_response = create_sample_http_server_profile_response()
+        mock_response = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
@@ -579,9 +774,17 @@ class TestHTTPServerProfileListAndFetch:
     def test_fetch_with_snippet(self):
         """Test fetching a HTTP server profile in a snippet container."""
         api_client = MagicMock(spec=Scm)
-        mock_response = create_sample_http_server_profile_response()
-        mock_response["folder"] = None
-        mock_response["snippet"] = "TestSnippet"
+        mock_response = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            snippet="TestSnippet",
+        ).model_dump()
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
@@ -602,9 +805,17 @@ class TestHTTPServerProfileListAndFetch:
     def test_fetch_with_device(self):
         """Test fetching a HTTP server profile in a device container."""
         api_client = MagicMock(spec=Scm)
-        mock_response = create_sample_http_server_profile_response()
-        mock_response["folder"] = None
-        mock_response["device"] = "TestDevice"
+        mock_response = HTTPServerProfileResponseFactory(
+            name="test-http-profile",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            device="TestDevice",
+        ).model_dump()
         api_client.get.return_value = mock_response
 
         http_server_profile = HTTPServerProfile(api_client)
@@ -708,10 +919,28 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
 
         # First response with 2 items (limit=2)
-        profile1 = create_sample_http_server_profile_response()
-        profile1["name"] = "profile1"
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "profile2"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="profile1",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
+        profile2 = HTTPServerProfileResponseFactory(
+            name="profile2",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         first_response = {
             "data": [profile1, profile2],
@@ -721,8 +950,17 @@ class TestHTTPServerProfileListAndFetch:
         }
 
         # Second response with 1 item
-        profile3 = create_sample_http_server_profile_response()
-        profile3["name"] = "profile3"
+        profile3 = HTTPServerProfileResponseFactory(
+            name="profile3",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",
+        ).model_dump()
 
         second_response = {
             "data": [profile3],
@@ -764,21 +1002,53 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
 
         # Create test profiles
-        profile1 = create_sample_http_server_profile_response()
-        profile1["name"] = "profile1"
-        profile1["folder"] = "Folder1"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="profile1",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Folder1",
+        ).model_dump()
 
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "profile2"
-        profile2["folder"] = "Folder2"
+        profile2 = HTTPServerProfileResponseFactory(
+            name="profile2",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Folder2",
+        ).model_dump()
 
-        profile3 = create_sample_http_server_profile_response()
-        profile3["name"] = "profile3"
-        profile3["snippet"] = "Snippet1"
+        profile3 = HTTPServerProfileResponseFactory(
+            name="profile3",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            snippet="Snippet1",
+        ).model_dump()
 
-        profile4 = create_sample_http_server_profile_response()
-        profile4["name"] = "profile4"
-        profile4["device"] = "Device1"
+        profile4 = HTTPServerProfileResponseFactory(
+            name="profile4",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            device="Device1",
+        ).model_dump()
 
         mock_response = {
             "data": [profile1, profile2, profile3, profile4],
@@ -817,21 +1087,53 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
 
         # Create test profiles
-        profile1 = create_sample_http_server_profile_response()
-        profile1["name"] = "profile1"
-        profile1["folder"] = "Folder1"
+        profile1 = HTTPServerProfileResponseFactory(
+            name="profile1",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Folder1",
+        ).model_dump()
 
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "profile2"
-        profile2["folder"] = "Folder2"
+        profile2 = HTTPServerProfileResponseFactory(
+            name="profile2",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Folder2",
+        ).model_dump()
 
-        profile3 = create_sample_http_server_profile_response()
-        profile3["name"] = "profile3"
-        profile3["snippet"] = "Snippet1"
+        profile3 = HTTPServerProfileResponseFactory(
+            name="profile3",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            snippet="Snippet1",
+        ).model_dump()
 
-        profile4 = create_sample_http_server_profile_response()
-        profile4["name"] = "profile4"
-        profile4["device"] = "Device1"
+        profile4 = HTTPServerProfileResponseFactory(
+            name="profile4",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            device="Device1",
+        ).model_dump()
 
         mock_response = {
             "data": [profile1, profile2, profile3, profile4],
@@ -859,7 +1161,7 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
         # Need valid response for initial get
         api_client.get.return_value = {
-            "data": [create_sample_http_server_profile_response()],
+            "data": [HTTPServerProfileResponseFactory().model_dump()],
             "limit": 200,
             "offset": 0,
             "total": 1,
@@ -881,13 +1183,29 @@ class TestHTTPServerProfileListAndFetch:
         api_client = MagicMock(spec=Scm)
 
         # Create test profiles with different folder values
-        profile1 = create_sample_http_server_profile_response()
-        profile1["name"] = "profile1"
-        profile1["folder"] = "Security Profiles"  # Exact match
+        profile1 = HTTPServerProfileResponseFactory(
+            name="profile1",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Security Profiles",  # Exact match
+        ).model_dump()
 
-        profile2 = create_sample_http_server_profile_response()
-        profile2["name"] = "profile2"
-        profile2["folder"] = "Other Folder"  # Different folder
+        profile2 = HTTPServerProfileResponseFactory(
+            name="profile2",
+            server=[ServerModelFactory(protocol="HTTP", port=80)],
+            tag_registration=True,
+            format={
+                "traffic": {},
+                "threat": {},
+                "url": {},
+            },
+            folder="Other Folder",  # Different folder
+        ).model_dump()
 
         mock_response = {
             "data": [profile1, profile2],
