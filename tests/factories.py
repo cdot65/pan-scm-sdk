@@ -5,7 +5,7 @@ import uuid
 from typing import Dict, List, Union
 
 # External libraries
-import factory
+import factory  # type: ignore
 
 from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
@@ -35,15 +35,6 @@ from scm.models.network.nat_rules import (
 
 # Local SDK imports
 from scm.models.objects import (
-    ApplicationCreateModel,
-    ApplicationFiltersCreateModel,
-    ApplicationFiltersResponseModel,
-    ApplicationFiltersUpdateModel,
-    ApplicationGroupCreateModel,
-    ApplicationGroupResponseModel,
-    ApplicationGroupUpdateModel,
-    ApplicationResponseModel,
-    ApplicationUpdateModel,
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
     HIPObjectCreateModel,
@@ -190,636 +181,6 @@ class NetworkLocationModelFactory(factory.Factory):
     def build_with_invalid_coordinates(cls):
         """Create an instance with invalid coordinate values."""
         return cls(value="us-west-1", display="US West", latitude=100, longitude=200)
-
-
-# ----------------------------------------------------------------------------
-# Address Group object factories.
-# ----------------------------------------------------------------------------
-
-
-# Sub factories
-class ApplicationCreateApiFactory(factory.Factory):
-    """Factory for creating ApplicationCreateModel instances."""
-
-    class Meta:
-        model = ApplicationCreateModel
-
-    name = factory.Sequence(lambda n: f"application_{n}")
-    description = factory.Faker("sentence")
-    category = "general-internet"
-    subcategory = "file-sharing"
-    technology = "client-server"
-    risk = 1
-    ports = ["tcp/80,443", "udp/3478"]
-    folder = "Prisma Access"
-    snippet = None
-
-    # Boolean attributes with explicit defaults
-    evasive = False
-    pervasive = False
-    excessive_bandwidth_use = False
-    used_by_malware = False
-    transfers_files = False
-    has_known_vulnerabilities = False
-    tunnels_other_apps = False
-    prone_to_misuse = False
-    no_certifications = False
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, **kwargs)
-
-    @classmethod
-    def with_high_risk(cls, **kwargs):
-        """Create an instance with high risk level."""
-        return cls(risk=5, **kwargs)
-
-    @classmethod
-    def with_all_boolean_flags(cls, value: bool = True, **kwargs):
-        """Create an instance with all boolean flags set to specified value."""
-        return cls(
-            evasive=value,
-            pervasive=value,
-            excessive_bandwidth_use=value,
-            used_by_malware=value,
-            transfers_files=value,
-            has_known_vulnerabilities=value,
-            tunnels_other_apps=value,
-            prone_to_misuse=value,
-            no_certifications=value,
-            **kwargs,
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls, **kwargs):
-        """Return an instance with invalid name pattern."""
-        return cls(name="invalid@name#here", **kwargs)
-
-    @classmethod
-    def build_with_invalid_risk(cls, **kwargs):
-        """Return an instance with invalid risk value."""
-        return cls(risk=-1, **kwargs)
-
-
-class ApplicationUpdateApiFactory(factory.Factory):
-    """Factory for creating ApplicationUpdateModel instances."""
-
-    class Meta:
-        model = ApplicationUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    # All fields are optional for partial updates
-    name = None
-    description = None
-    category = None
-    subcategory = None
-    technology = None
-    risk = None
-    ports = None
-
-    # Boolean attributes
-    evasive = None
-    pervasive = None
-    excessive_bandwidth_use = None
-    used_by_malware = None
-    transfers_files = None
-    has_known_vulnerabilities = None
-    tunnels_other_apps = None
-    prone_to_misuse = None
-    no_certifications = None
-
-    @classmethod
-    def with_risk_update(cls, risk: int = 3, **kwargs):
-        """Create an instance updating only the risk level."""
-        return cls(risk=risk, **kwargs)
-
-    @classmethod
-    def with_boolean_updates(cls, **kwargs):
-        """Create an instance updating all boolean flags."""
-        return cls(
-            evasive=True,
-            pervasive=True,
-            excessive_bandwidth_use=True,
-            used_by_malware=True,
-            transfers_files=True,
-            has_known_vulnerabilities=True,
-            tunnels_other_apps=True,
-            prone_to_misuse=True,
-            no_certifications=True,
-            **kwargs,
-        )
-
-
-class ApplicationResponseFactory(factory.Factory):
-    """Factory for creating ApplicationResponseModel instances."""
-
-    class Meta:
-        model = ApplicationResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_{n}")
-    description = factory.Faker("paragraph", nb_sentences=5)
-    category = "general-internet"
-    subcategory = "file-sharing"
-    technology = "client-server"
-    risk = 1
-    ports = ["tcp/80,443", "udp/3478"]
-    folder = "Prisma Access"
-    snippet = None
-
-    # Boolean attributes
-    evasive = False
-    pervasive = False
-    excessive_bandwidth_use = False
-    used_by_malware = False
-    transfers_files = False
-    has_known_vulnerabilities = False
-    tunnels_other_apps = False
-    prone_to_misuse = False
-    no_certifications = False
-
-    @classmethod
-    def with_long_description(cls, length: int = 4000, **kwargs):
-        """Create an instance with a description near the maximum length."""
-        return cls(description="A" * length, **kwargs)
-
-    @classmethod
-    def with_unknown_app(cls, **kwargs):
-        """Create an instance for unknown-tcp application type."""
-        return cls(
-            name="unknown-tcp",
-            subcategory=None,
-            technology=None,
-            risk=1,
-            **kwargs,
-        )
-
-    @classmethod
-    def from_request(
-        cls,
-        request_model: ApplicationCreateModel,
-        **kwargs,
-    ):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class ApplicationCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"application_{n}")
-    description = factory.Faker("sentence")
-    category = "general-internet"
-    subcategory = "file-sharing"
-    technology = "client-server"
-    risk = 1
-    ports = ["tcp/80,443", "udp/3478"]
-    folder = "Prisma Access"
-    snippet = None
-
-    @classmethod
-    def build_with_invalid_ports(cls, **kwargs):
-        """Return a data dict with invalid port format."""
-        return cls(ports=["invalid-port-format"], **kwargs)
-
-    @classmethod
-    def build_with_invalid_folder(cls, **kwargs):
-        """Return a data dict with invalid folder pattern."""
-        return cls(folder="Invalid@Folder#Pattern", **kwargs)
-
-
-class ApplicationUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationUpdateModel validation testing."""
-
-    id = "123e4567-e89b-12d3-a456-426655440000"
-    name = None
-    description = None
-    category = None
-    subcategory = None
-    technology = None
-    risk = None
-    ports = None
-
-    @classmethod
-    def build_with_invalid_fields(cls, **kwargs):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            name="invalid@name",
-            risk=-1,
-            ports=["invalid-port"],
-            folder="Invalid@Folder",
-            **kwargs,
-        )
-
-
-# ----------------------------------------------------------------------------
-# Application Filters object factories.
-# ----------------------------------------------------------------------------
-
-
-# SDK tests against SCM API
-class ApplicationFiltersCreateApiFactory(factory.Factory):
-    """Factory for creating ApplicationFiltersCreateModel instances."""
-
-    class Meta:
-        model = ApplicationFiltersCreateModel
-
-    name = factory.Sequence(lambda n: f"application_filters_{n}")
-    folder = None
-    snippet = None
-
-    @classmethod
-    def with_folder(cls, folder: str = "Texas", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=folder, snippet=None, device=None, **kwargs)
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-
-class ApplicationFiltersUpdateApiFactory(factory.Factory):
-    """Factory for creating ApplicationFiltersUpdateModel instances."""
-
-    class Meta:
-        model = ApplicationFiltersUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    folder = None
-    snippet = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-
-class ApplicationFiltersResponseFactory(factory.Factory):
-    """Factory for creating ApplicationFiltersResponseModel instances."""
-
-    class Meta:
-        model = ApplicationFiltersResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: ApplicationFiltersCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class ApplicationFiltersCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationFiltersCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestApplicationFilter",
-            members=["app1", "app2"],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls):
-        """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-name#",
-            members=["app1"],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_empty_members(cls):
-        """Return a data dict with empty members list."""
-        return cls(
-            name="TestGroup",
-            members=[],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_invalid_folder(cls):
-        """Return a data dict with invalid folder pattern."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-            folder="Invalid@Folder#",
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-            folder="Texas",
-            snippet="TestSnippet",
-        )
-
-    @classmethod
-    def build_with_no_container(cls):
-        """Return a data dict without any container."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-        )
-
-
-class ApplicationFiltersUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationFiltersUpdateModel validation testing."""
-
-    id = "123e4567-e89b-12d3-a456-426655440000"
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = None
-    snippet = None
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating an application group."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="UpdatedGroup",
-            members=["updated-app1", "updated-app2"],
-            folder="UpdatedFolder",
-        )
-
-    @classmethod
-    def build_with_invalid_fields(cls):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            id="invalid-uuid",
-            name="@invalid-name",
-            members=[],
-            folder="Invalid@Folder",
-        )
-
-    @classmethod
-    def build_minimal_update(cls):
-        """Return a data dict with minimal valid update fields."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            members=["new-app"],
-        )
-
-
-# ----------------------------------------------------------------------------
-# Application Group object factories.
-# ----------------------------------------------------------------------------
-
-
-# SDK tests against SCM API
-class ApplicationGroupCreateApiFactory(factory.Factory):
-    """Factory for creating ApplicationGroupCreateModel instances."""
-
-    class Meta:
-        model = ApplicationGroupCreateModel
-
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-    @classmethod
-    def with_single_member(cls, member: str = "single-app", **kwargs):
-        """Create an instance with a single member."""
-        return cls(members=[member], **kwargs)
-
-
-class ApplicationGroupUpdateApiFactory(factory.Factory):
-    """Factory for creating ApplicationGroupUpdateModel instances."""
-
-    class Meta:
-        model = ApplicationGroupUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = None
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-
-class ApplicationGroupResponseFactory(factory.Factory):
-    """Factory for creating ApplicationGroupResponseModel instances."""
-
-    class Meta:
-        model = ApplicationGroupResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: ApplicationGroupCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class ApplicationGroupCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationGroupCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-    device = None
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestApplicationGroup",
-            members=["app1", "app2"],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls):
-        """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-name#",
-            members=["app1"],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_empty_members(cls):
-        """Return a data dict with empty members list."""
-        return cls(
-            name="TestGroup",
-            members=[],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_invalid_folder(cls):
-        """Return a data dict with invalid folder pattern."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-            folder="Invalid@Folder#",
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-            folder="Texas",
-            snippet="TestSnippet",
-        )
-
-    @classmethod
-    def build_with_no_container(cls):
-        """Return a data dict without any container."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-        )
-
-
-class ApplicationGroupUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationGroupUpdateModel validation testing."""
-
-    id = "123e4567-e89b-12d3-a456-426655440000"
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = None
-    snippet = None
-    device = None
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating an application group."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="UpdatedGroup",
-            members=["updated-app1", "updated-app2"],
-            folder="UpdatedFolder",
-        )
-
-    @classmethod
-    def build_with_invalid_fields(cls):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            id="invalid-uuid",
-            name="@invalid-name",
-            members=[],
-            folder="Invalid@Folder",
-        )
-
-    @classmethod
-    def build_minimal_update(cls):
-        """Return a data dict with minimal valid update fields."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            members=["new-app"],
-        )
 
 
 # ----------------------------------------------------------------------------
@@ -4063,7 +3424,10 @@ class SourceTranslationFactory(factory.Factory):
         model = SourceTranslation
 
     # Need to explicitly set one of the three source translation types
-    dynamic_ip_and_port = {"type": "dynamic_ip_and_port", "translated_address": ["10.0.0.1"]}
+    dynamic_ip_and_port = {
+        "type": "dynamic_ip_and_port",
+        "translated_address": ["10.0.0.1"],
+    }
     dynamic_ip = None
     static_ip = None
 
@@ -4103,7 +3467,10 @@ class SourceTranslationFactory(factory.Factory):
             "translated_address": kwargs.pop("translated_address", ["192.168.1.100"]),
         }
         return cls(
-            dynamic_ip_and_port=dynamic_ip_and_port, dynamic_ip=None, static_ip=None, **kwargs
+            dynamic_ip_and_port=dynamic_ip_and_port,
+            dynamic_ip=None,
+            static_ip=None,
+            **kwargs,
         )
 
     @classmethod
@@ -4145,7 +3512,10 @@ class NatRuleCreateApiFactory(factory.Factory):
     @classmethod
     def with_source_translation(cls, **kwargs):
         """Create an instance with source translation."""
-        return cls(source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(), **kwargs)
+        return cls(
+            source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(),
+            **kwargs,
+        )
 
     @classmethod
     def with_custom_zones(cls, from_zones: List[str], to_zones: List[str], **kwargs):
@@ -4185,7 +3555,10 @@ class NatRuleUpdateApiFactory(factory.Factory):
     @classmethod
     def with_source_translation(cls, **kwargs):
         """Create an instance with source translation."""
-        return cls(source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(), **kwargs)
+        return cls(
+            source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(),
+            **kwargs,
+        )
 
     @classmethod
     def with_zones_update(cls, from_zones: List[str], to_zones: List[str], **kwargs):
@@ -4215,7 +3588,10 @@ class NatRuleResponseFactory(factory.Factory):
     @classmethod
     def with_source_translation(cls, **kwargs):
         """Create an instance with source translation."""
-        return cls(source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(), **kwargs)
+        return cls(
+            source_translation=SourceTranslationFactory.with_dynamic_ip_and_port(),
+            **kwargs,
+        )
 
     @classmethod
     def from_request(cls, request_model: NatRuleCreateModel, **kwargs):
@@ -4577,7 +3953,14 @@ class HTTPServerProfileCreateApiFactory(factory.Factory):
 
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
     server = factory.List(
-        [{"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}]
+        [
+            {
+                "name": "test-server",
+                "address": "192.168.1.100",
+                "protocol": "HTTP",
+                "port": 80,
+            }
+        ]
     )
     tag_registration = True
     format = {
@@ -4628,7 +4011,14 @@ class HTTPServerProfileUpdateApiFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
     server = factory.List(
-        [{"name": "updated-server", "address": "192.168.1.200", "protocol": "HTTP", "port": 8080}]
+        [
+            {
+                "name": "updated-server",
+                "address": "192.168.1.200",
+                "protocol": "HTTP",
+                "port": 8080,
+            }
+        ]
     )
     tag_registration = True
     format = {
@@ -4660,7 +4050,14 @@ class HTTPServerProfileResponseFactory(factory.Factory):
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
     server = factory.List(
-        [{"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}]
+        [
+            {
+                "name": "test-server",
+                "address": "192.168.1.100",
+                "protocol": "HTTP",
+                "port": 80,
+            }
+        ]
     )
     tag_registration = True
     format = {
@@ -4701,7 +4098,14 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for HTTPServerProfileCreateModel."""
 
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
-    server = [{"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}]
+    server = [
+        {
+            "name": "test-server",
+            "address": "192.168.1.100",
+            "protocol": "HTTP",
+            "port": 80,
+        }
+    ]
     tag_registration = True
     format = {
         "traffic": {},
@@ -4718,7 +4122,12 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestHTTPServerProfile",
             server=[
-                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80},
+                {
+                    "name": "test-server",
+                    "address": "192.168.1.100",
+                    "protocol": "HTTP",
+                    "port": 80,
+                },
                 {
                     "name": "test-https-server",
                     "address": "secure.example.com",
@@ -4744,7 +4153,12 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestHTTPServerProfile",
             server=[
-                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+                {
+                    "name": "test-server",
+                    "address": "192.168.1.100",
+                    "protocol": "HTTP",
+                    "port": 80,
+                }
             ],
             folder="Security Profiles",
             snippet="TestSnippet",
@@ -4756,7 +4170,12 @@ class HTTPServerProfileCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestHTTPServerProfile",
             server=[
-                {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
+                {
+                    "name": "test-server",
+                    "address": "192.168.1.100",
+                    "protocol": "HTTP",
+                    "port": 80,
+                }
             ],
             folder=None,
             snippet=None,
@@ -4785,7 +4204,12 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
     id = "123e4567-e89b-12d3-a456-426655440000"
     name = factory.Sequence(lambda n: f"http_server_profile_{n}")
     server = [
-        {"name": "updated-server", "address": "192.168.1.200", "protocol": "HTTP", "port": 8080}
+        {
+            "name": "updated-server",
+            "address": "192.168.1.200",
+            "protocol": "HTTP",
+            "port": 8080,
+        }
     ]
     tag_registration = True
     format = {
@@ -4829,7 +4253,12 @@ class HTTPServerProfileUpdateModelFactory(factory.DictFactory):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="MinimalUpdate",
             server=[
-                {"name": "minimal-server", "address": "10.0.0.1", "protocol": "HTTP", "port": 80}
+                {
+                    "name": "minimal-server",
+                    "address": "10.0.0.1",
+                    "protocol": "HTTP",
+                    "port": 80,
+                }
             ],
         )
 
@@ -6015,11 +5444,7 @@ class ScheduleUpdateApiFactory(factory.Factory):
     @classmethod
     def with_daily_schedule(cls, **kwargs):
         """Create an instance with daily schedule."""
-        schedule_type = {
-            "recurring": {
-                "daily": ["10:00-18:00"]  # Updated time range
-            }
-        }
+        schedule_type = {"recurring": {"daily": ["10:00-18:00"]}}  # Updated time range
         return cls(schedule_type=schedule_type, **kwargs)
 
     @classmethod

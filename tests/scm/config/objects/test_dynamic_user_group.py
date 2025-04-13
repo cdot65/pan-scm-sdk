@@ -10,132 +10,13 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.objects import DynamicUserGroup
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import DynamicUserGroupResponseModel, DynamicUserGroupUpdateModel
+from scm.models.objects import DynamicUserGroupResponseModel
+from tests.test_factories.objects.dynamic_user_group import (
+    DynamicUserGroupCreateApiFactory,
+    DynamicUserGroupResponseFactory,
+    DynamicUserGroupUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
-
-
-# Define test factories for DynamicUserGroup
-class DynamicUserGroupCreateApiFactory:
-    """Factory for creating dynamic user group data for API tests."""
-
-    @staticmethod
-    def with_folder(name="test_group", folder="Texas", **kwargs):
-        """Create a dynamic user group with folder."""
-        data = {
-            "name": name,
-            "filter": "'tag.criticality.high'",
-            "folder": folder,
-            **kwargs,
-        }
-        return data
-
-    @staticmethod
-    def with_snippet(name="test_group", snippet="TestSnippet", **kwargs):
-        """Create a dynamic user group with snippet."""
-        data = {
-            "name": name,
-            "filter": "'tag.criticality.high'",
-            "snippet": snippet,
-            **kwargs,
-        }
-        return data
-
-    @staticmethod
-    def with_device(name="test_group", device="TestDevice", **kwargs):
-        """Create a dynamic user group with device."""
-        data = {
-            "name": name,
-            "filter": "'tag.criticality.high'",
-            "device": device,
-            **kwargs,
-        }
-        return data
-
-
-class DynamicUserGroupUpdateApiFactory:
-    """Factory for creating dynamic user group update data for API tests."""
-
-    @staticmethod
-    def with_folder(
-        group_id="123e4567-e89b-12d3-a456-426655440000", name="updated_group", **kwargs
-    ):
-        """Create update data for a dynamic user group."""
-        # Create a Pydantic model instead of a dict
-        data = {
-            "id": group_id,
-            "name": name,
-            "filter": "'tag.criticality.medium'",
-            **kwargs,
-        }
-        return DynamicUserGroupUpdateModel(**data)
-
-
-class DynamicUserGroupResponseFactory:
-    """Factory for creating dynamic user group response data."""
-
-    @staticmethod
-    def with_folder(
-        group_id="123e4567-e89b-12d3-a456-426655440000",
-        name="test_group",
-        folder="Texas",
-        **kwargs,
-    ):
-        """Create a response model with folder container."""
-        data = {
-            "id": group_id,
-            "name": name,
-            "filter": "'tag.criticality.high'",
-            "folder": folder,
-            **kwargs,
-        }
-        return data
-
-    @staticmethod
-    def with_snippet(
-        group_id="123e4567-e89b-12d3-a456-426655440000",
-        name="test_group",
-        snippet="TestSnippet",
-        **kwargs,
-    ):
-        """Create a response model with snippet container."""
-        data = {
-            "id": group_id,
-            "name": name,
-            "filter": "'tag.criticality.high'",
-            "snippet": snippet,
-            **kwargs,
-        }
-        return data
-
-    @staticmethod
-    def with_device(
-        group_id="123e4567-e89b-12d3-a456-426655440000",
-        name="test_group",
-        device="TestDevice",
-        **kwargs,
-    ):
-        """Create a response model with device container."""
-        data = {
-            "id": group_id,
-            "name": name,
-            "filter": "'tag.criticality.high'",
-            "device": device,
-            **kwargs,
-        }
-        return data
-
-    @staticmethod
-    def from_request(request_data):
-        """Create a response model based on a request data."""
-        # Create a new dict to avoid modifying the original
-        if isinstance(request_data, DynamicUserGroupUpdateModel):
-            data = request_data.model_dump()
-        else:
-            data = request_data.copy()
-
-        if "id" not in data:
-            data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-        return data
 
 
 @pytest.mark.usefixtures("load_env")

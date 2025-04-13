@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-import factory
+import factory  # type: ignore
 from faker import Faker
 
 from scm.models.objects.address import (
