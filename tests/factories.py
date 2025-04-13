@@ -6,7 +6,6 @@ from typing import Dict, List, Union
 
 # External libraries
 import factory  # type: ignore
-
 from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
 from scm.models.deployment.remote_networks import (
@@ -35,9 +34,6 @@ from scm.models.network.nat_rules import (
 
 # Local SDK imports
 from scm.models.objects import (
-    ApplicationGroupCreateModel,
-    ApplicationGroupResponseModel,
-    ApplicationGroupUpdateModel,
     ExternalDynamicListsCreateModel,
     ExternalDynamicListsResponseModel,
     HIPObjectCreateModel,
@@ -156,6 +152,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvThreatExceptionEntry,
 )
 
+
 # ----------------------------------------------------------------------------
 # Network Location object factories.
 # ----------------------------------------------------------------------------
@@ -184,230 +181,6 @@ class NetworkLocationModelFactory(factory.Factory):
     def build_with_invalid_coordinates(cls):
         """Create an instance with invalid coordinate values."""
         return cls(value="us-west-1", display="US West", latitude=100, longitude=200)
-
-
-# ----------------------------------------------------------------------------
-# Application Group object factories.
-# ----------------------------------------------------------------------------
-
-
-# SDK tests against SCM API
-class ApplicationGroupCreateApiFactory(factory.Factory):
-    """Factory for creating ApplicationGroupCreateModel instances."""
-
-    class Meta:
-        model = ApplicationGroupCreateModel
-
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-    @classmethod
-    def with_single_member(cls, member: str = "single-app", **kwargs):
-        """Create an instance with a single member."""
-        return cls(members=[member], **kwargs)
-
-
-class ApplicationGroupUpdateApiFactory(factory.Factory):
-    """Factory for creating ApplicationGroupUpdateModel instances."""
-
-    class Meta:
-        model = ApplicationGroupUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = None
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-
-class ApplicationGroupResponseFactory(factory.Factory):
-    """Factory for creating ApplicationGroupResponseModel instances."""
-
-    class Meta:
-        model = ApplicationGroupResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-    device = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, device=None, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, snippet=None, device=device, **kwargs)
-
-    @classmethod
-    def with_members(cls, members: list[str], **kwargs):
-        """Create an instance with specific members."""
-        return cls(members=members, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: ApplicationGroupCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class ApplicationGroupCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationGroupCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = "Texas"
-    snippet = None
-    device = None
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestApplicationGroup",
-            members=["app1", "app2"],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls):
-        """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-name#",
-            members=["app1"],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_empty_members(cls):
-        """Return a data dict with empty members list."""
-        return cls(
-            name="TestGroup",
-            members=[],
-            folder="Texas",
-        )
-
-    @classmethod
-    def build_with_invalid_folder(cls):
-        """Return a data dict with invalid folder pattern."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-            folder="Invalid@Folder#",
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-            folder="Texas",
-            snippet="TestSnippet",
-        )
-
-    @classmethod
-    def build_with_no_container(cls):
-        """Return a data dict without any container."""
-        return cls(
-            name="TestGroup",
-            members=["app1"],
-        )
-
-
-class ApplicationGroupUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for ApplicationGroupUpdateModel validation testing."""
-
-    id = "123e4567-e89b-12d3-a456-426655440000"
-    name = factory.Sequence(lambda n: f"application_group_{n}")
-    members = [
-        "office365-consumer-access",
-        "office365-enterprise-access",
-    ]
-    folder = None
-    snippet = None
-    device = None
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating an application group."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="UpdatedGroup",
-            members=["updated-app1", "updated-app2"],
-            folder="UpdatedFolder",
-        )
-
-    @classmethod
-    def build_with_invalid_fields(cls):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            id="invalid-uuid",
-            name="@invalid-name",
-            members=[],
-            folder="Invalid@Folder",
-        )
-
-    @classmethod
-    def build_minimal_update(cls):
-        """Return a data dict with minimal valid update fields."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            members=["new-app"],
-        )
 
 
 # ----------------------------------------------------------------------------
