@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import factory  # type: ignore
 from faker import Faker
+
 from scm.models.objects.hip_object import (
     CertificateAttributeModel,
     CertificateModel,

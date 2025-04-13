@@ -41,7 +41,7 @@ fix:
 	poetry run ruff check --fix scm tests
 
 # Run all code quality checks
-quality: lint flake8 mypy format
+quality: format lint flake8 mypy
 	@echo "All code quality checks complete!"
 
 # Run basic code quality checks (skip mypy)
