@@ -57,6 +57,15 @@ from tests.test_factories.objects.hip_object import (
     HIPObjectUpdateApiFactory,
     HIPObjectUpdateModelFactory,
 )
+from tests.test_factories.objects.hip_profile import (
+    HIPProfileBaseFactory,
+    HIPProfileCreateApiFactory,
+    HIPProfileCreateModelFactory,
+    HIPProfileResponseFactory,
+    HIPProfileResponseModelFactory,
+    HIPProfileUpdateApiFactory,
+    HIPProfileUpdateModelFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -134,4 +143,12 @@ __all__ = [
     "HIPObjectCreateModelFactory",
     "HIPObjectUpdateModelFactory",
     "HIPObjectResponseModelFactory",
+    # HIP Profiles
+    "HIPProfileBaseFactory",
+    "HIPProfileCreateApiFactory",
+    "HIPProfileUpdateApiFactory",
+    "HIPProfileResponseFactory",
+    "HIPProfileCreateModelFactory",
+    "HIPProfileUpdateModelFactory",
+    "HIPProfileResponseModelFactory",
 ]
