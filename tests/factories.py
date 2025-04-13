@@ -5,7 +5,7 @@ import uuid
 from typing import Dict, List, Union
 
 # External libraries
-import factory
+import factory  # type: ignore
 
 from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
