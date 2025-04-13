@@ -12,8 +12,8 @@ from scm.models.objects import (
 )
 from tests.test_factories.objects.application_group import (
     ApplicationGroupCreateModelFactory,
-    ApplicationGroupUpdateModelFactory,
     ApplicationGroupResponseFactory,
+    ApplicationGroupUpdateModelFactory,
 )
 
 # -------------------- Test Classes for Pydantic Models --------------------

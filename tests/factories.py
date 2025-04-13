@@ -6,6 +6,7 @@ from typing import Dict, List, Union
 
 # External libraries
 import factory  # type: ignore
+
 from scm.models.deployment import RemoteNetworkCreateModel
 from scm.models.deployment.network_locations import NetworkLocationModel
 from scm.models.deployment.remote_networks import (
@@ -151,7 +152,6 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvRuleBase,
     WildfireAvThreatExceptionEntry,
 )
-
 
 # ----------------------------------------------------------------------------
 # Network Location object factories.
