@@ -1,4 +1,13 @@
 # tests/test_factories/__init__.py
+# Import deployment related factories
+from tests.test_factories.deployment.remote_networks import (
+    RemoteNetworkBaseFactory,
+    RemoteNetworkCreateApiFactory,
+    RemoteNetworkCreateModelFactory,
+    RemoteNetworkResponseFactory,
+    RemoteNetworkUpdateApiFactory,
+    RemoteNetworkUpdateModelFactory,
+)
 from tests.test_factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,
@@ -119,6 +128,14 @@ from tests.test_factories.objects.syslog_server_profiles import (
     SyslogServerProfileResponseModelFactory,
     SyslogServerProfileUpdateModelFactory,
 )
+from tests.test_factories.objects.tag import (
+    TagBaseFactory,
+    TagCreateApiFactory,
+    TagCreateModelFactory,
+    TagResponseFactory,
+    TagUpdateApiFactory,
+    TagUpdateModelFactory,
+)
 from tests.test_factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
@@ -236,4 +253,18 @@ __all__ = [
     "URLCategoriesCreateModelFactory",
     "URLCategoriesUpdateModelFactory",
     "URLCategoriesResponseModelFactory",
+    # Tag factories
+    "TagBaseFactory",
+    "TagCreateApiFactory",
+    "TagCreateModelFactory",
+    "TagResponseFactory",
+    "TagUpdateApiFactory",
+    "TagUpdateModelFactory",
+    # Deployment - Remote Networks factories
+    "RemoteNetworkBaseFactory",
+    "RemoteNetworkCreateApiFactory",
+    "RemoteNetworkCreateModelFactory",
+    "RemoteNetworkResponseFactory",
+    "RemoteNetworkUpdateApiFactory",
+    "RemoteNetworkUpdateModelFactory",
 ]
