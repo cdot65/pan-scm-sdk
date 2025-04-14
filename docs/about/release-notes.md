@@ -2,6 +2,30 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.25
+
+**Released:** April 14, 2025
+
+### Improved
+
+- **Test Architecture**:
+  - Comprehensive reorganization of test factories into dedicated directories
+  - Implemented specialized factories for numerous components:
+    - Security profiles (Anti-spyware, DNS Security, Decryption, WildFire Antivirus)
+    - Network components (Remote Networks, Internal DNS Servers, BGP Routing)
+    - Object configurations (Tags, Services, Service Groups, Schedules)
+    - Security rules and policies
+  - Enhanced test modularity and maintainability through standardized factory patterns
+  - Improved code organization with consistent import structure
+  - Removed legacy and redundant factory classes
+
+### Fixed
+
+- **Code Quality**:
+  - Standardized import formatting across test modules
+  - Improved code organization with dedicated test utility modules
+  - Enhanced mypy configuration for better type checking of test modules
+
 ## Version 0.3.24
 
 **Released:** April 11, 2025
@@ -16,7 +40,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 
 ### Improved
 
-- **Test Architecture**: 
+- **Test Architecture**:
   - Implemented factory pattern for security models (Syslog Server Profiles, URL Categories)
   - Enhanced test coverage and maintainability through standardized test factories
   - Added comprehensive tests for URL Categories Update and Response models
@@ -46,7 +70,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 ### Added
 
 - **Mobile Agent Features**:
-  - **Agent Versions**: Support for managing GlobalProtect agent versions 
+  - **Agent Versions**: Support for managing GlobalProtect agent versions
   - **Authentication Settings**: Support for configuring GlobalProtect authentication settings
 
 ### Fixed
