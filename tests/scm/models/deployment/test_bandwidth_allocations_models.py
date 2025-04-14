@@ -11,6 +11,12 @@ from scm.models.deployment.bandwidth_allocations import (
     BandwidthAllocationUpdateModel,
     QosModel,
 )
+from tests.test_factories.deployment.bandwidth_allocations import (
+    BandwidthAllocationCreateModelFactory,
+    BandwidthAllocationResponseModelFactory,
+    BandwidthAllocationUpdateModelFactory,
+    QosModelFactory,
+)
 
 
 class TestQosModel:
@@ -18,12 +24,7 @@ class TestQosModel:
 
     def test_valid_model_creation(self):
         """Test creating model with valid data."""
-        data = {
-            "enabled": True,
-            "customized": True,
-            "profile": "test-profile",
-            "guaranteed_ratio": 0.5,
-        }
+        data = QosModelFactory.build_valid()
         model = QosModel(**data)
         assert model.enabled == data["enabled"]
         assert model.customized == data["customized"]
@@ -54,17 +55,7 @@ class TestBandwidthAllocationBaseModel:
 
     def test_valid_model_creation(self):
         """Test creating model with valid data."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 100,
-            "spn_name_list": ["spn1", "spn2"],
-            "qos": {
-                "enabled": True,
-                "customized": True,
-                "profile": "test-profile",
-                "guaranteed_ratio": 0.5,
-            },
-        }
+        data = BandwidthAllocationCreateModelFactory.build_with_qos()
         model = BandwidthAllocationBaseModel(**data)
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
@@ -85,7 +76,7 @@ class TestBandwidthAllocationBaseModel:
 
     def test_invalid_name_pattern(self):
         """Test validation fails with invalid name pattern."""
-        data = {"name": "invalid@name#", "allocated_bandwidth": 100}
+        data = BandwidthAllocationCreateModelFactory.build_with_invalid_name()
         with pytest.raises(ValidationError) as exc_info:
             BandwidthAllocationBaseModel(**data)
 
@@ -96,7 +87,7 @@ class TestBandwidthAllocationBaseModel:
 
     def test_negative_bandwidth(self):
         """Test validation fails with negative bandwidth."""
-        data = {"name": "test-region", "allocated_bandwidth": -100}
+        data = BandwidthAllocationCreateModelFactory.build_with_invalid_bandwidth()
         with pytest.raises(ValidationError) as exc_info:
             BandwidthAllocationBaseModel(**data)
 
@@ -122,11 +113,7 @@ class TestBandwidthAllocationCreateModel:
 
     def test_valid_model_creation(self):
         """Test creating model with valid data."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 100,
-            "spn_name_list": ["spn1", "spn2"],
-        }
+        data = BandwidthAllocationCreateModelFactory.build_valid()
         model = BandwidthAllocationCreateModel(**data)
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
@@ -134,16 +121,12 @@ class TestBandwidthAllocationCreateModel:
 
     def test_with_qos(self):
         """Test creating model with QoS data."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 100,
-            "qos": {"enabled": True, "profile": "test-profile"},
-        }
+        data = BandwidthAllocationCreateModelFactory.build_with_qos()
         model = BandwidthAllocationCreateModel(**data)
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
         assert model.qos.enabled is True
-        assert model.qos.profile == "test-profile"
+        assert model.qos.profile == data["qos"]["profile"]
 
 
 class TestBandwidthAllocationUpdateModel:
@@ -151,11 +134,7 @@ class TestBandwidthAllocationUpdateModel:
 
     def test_valid_model_update(self):
         """Test updating model with valid data."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 200,
-            "spn_name_list": ["spn3", "spn4"],
-        }
+        data = BandwidthAllocationUpdateModelFactory.build_valid()
         model = BandwidthAllocationUpdateModel(**data)
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
@@ -163,7 +142,7 @@ class TestBandwidthAllocationUpdateModel:
 
     def test_partial_update(self):
         """Test updating just some fields."""
-        data = {"name": "test-region", "allocated_bandwidth": 300}
+        data = BandwidthAllocationUpdateModelFactory.build_partial()
         model = BandwidthAllocationUpdateModel(**data)
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
@@ -175,16 +154,12 @@ class TestBandwidthAllocationResponseModel:
 
     def test_valid_response_model(self):
         """Test creating response model with valid data."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 100,
-            "spn_name_list": ["spn1", "spn2"],
-            "qos": {
-                "enabled": True,
-                "customized": False,
-                "profile": "default-profile",
-                "guaranteed_ratio": 0.8,
-            },
+        data = BandwidthAllocationResponseModelFactory.build_valid()
+        data["qos"] = {
+            "enabled": True,
+            "customized": False,
+            "profile": "default-profile",
+            "guaranteed_ratio": 0.8,
         }
         model = BandwidthAllocationResponseModel(**data)
         assert model.name == data["name"]
@@ -197,7 +172,7 @@ class TestBandwidthAllocationResponseModel:
 
     def test_minimal_response(self):
         """Test response with minimal fields."""
-        data = {"name": "test-region", "allocated_bandwidth": 100}
+        data = BandwidthAllocationResponseModelFactory.build_minimal()
         model = BandwidthAllocationResponseModel(**data)
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
@@ -210,39 +185,27 @@ class TestBandwidthAllocationListResponseModel:
 
     def test_valid_list_response_model(self):
         """Test creating list response model with valid data."""
-        data = {
-            "data": [
-                {"name": "region1", "allocated_bandwidth": 100, "spn_name_list": ["spn1", "spn2"]},
-                {
-                    "name": "region2",
-                    "allocated_bandwidth": 200,
-                    "spn_name_list": ["spn3", "spn4"],
-                    "qos": {"enabled": True, "profile": "custom-profile"},
-                },
-            ],
-            "limit": 100,
-            "offset": 0,
-            "total": 2,
-        }
+        data = BandwidthAllocationResponseModelFactory.build_list_response()
         model = BandwidthAllocationListResponseModel(**data)
-        assert len(model.data) == 2
-        assert model.data[0].name == "region1"
-        assert model.data[1].name == "region2"
-        assert model.limit == 100
-        assert model.offset == 0
-        assert model.total == 2
+        assert len(model.data) == len(data["data"])
+        assert model.limit == data["limit"]
+        assert model.offset == data["offset"]
+        assert model.total == data["total"]
 
     def test_default_limit_and_offset(self):
         """Test list response model with default limit and offset."""
-        data = {"data": [], "total": 0}
+        data = BandwidthAllocationResponseModelFactory.build_list_response()
+        del data["limit"]
+        del data["offset"]
         model = BandwidthAllocationListResponseModel(**data)
         assert model.limit == 200  # Default value
         assert model.offset == 0  # Default value
-        assert model.total == 0
+        assert len(model.data) == len(data["data"])
+        assert model.total == data["total"]
 
     def test_empty_data_list(self):
         """Test list response with empty data list."""
-        data = {"data": [], "limit": 200, "offset": 0, "total": 0}
+        data = BandwidthAllocationResponseModelFactory.build_list_response(count=0)
         model = BandwidthAllocationListResponseModel(**data)
         assert len(model.data) == 0
         assert model.total == 0

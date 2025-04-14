@@ -16,54 +16,12 @@ from scm.models.deployment import (
     DefaultRoutingModel,
     HotPotatoRoutingModel,
 )
+from tests.test_factories.deployment.bgp_routing import (
+    BGPRoutingCreateApiFactory,
+    BGPRoutingResponseFactory,
+    BGPRoutingUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
-
-
-# Create factory for our tests
-class BGPRoutingFactory:
-    """Factory for creating BGP routing test data."""
-
-    @classmethod
-    def create_model_data(cls, **kwargs):
-        """Create data for create model."""
-        data = {
-            "backbone_routing": "no-asymmetric-routing",
-            "routing_preference": {"default": {}},
-            "accept_route_over_SC": False,
-            "outbound_routes_for_services": ["10.0.0.0/24"],
-            "add_host_route_to_ike_peer": False,
-            "withdraw_static_route": False,
-        }
-        data.update(kwargs)
-        return data
-
-    @classmethod
-    def update_model_data(cls, **kwargs):
-        """Create data for update model."""
-        data = {
-            "backbone_routing": "asymmetric-routing-only",
-            "routing_preference": {"hot_potato_routing": {}},
-            "accept_route_over_SC": True,
-            "outbound_routes_for_services": ["192.168.1.0/24", "10.0.0.0/24"],
-            "add_host_route_to_ike_peer": True,
-            "withdraw_static_route": True,
-        }
-        data.update(kwargs)
-        return data
-
-    @classmethod
-    def response_model_data(cls, **kwargs):
-        """Create data for response model."""
-        data = {
-            "backbone_routing": "no-asymmetric-routing",
-            "routing_preference": {"default": {}},
-            "accept_route_over_SC": False,
-            "outbound_routes_for_services": ["10.0.0.0/24"],
-            "add_host_route_to_ike_peer": False,
-            "withdraw_static_route": False,
-        }
-        data.update(kwargs)
-        return data
 
 
 @pytest.mark.usefixtures("load_env")
@@ -86,7 +44,7 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
 
     def test_get_valid(self):
         """Test getting BGP routing settings successfully."""
-        mock_response = BGPRoutingFactory.response_model_data()
+        mock_response = BGPRoutingResponseFactory()
         self.mock_scm.get.return_value = mock_response
 
         bgp_routing = self.client.get()
@@ -102,9 +60,7 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
 
     def test_get_with_hot_potato_routing(self):
         """Test getting BGP routing settings with hot potato routing."""
-        mock_response = BGPRoutingFactory.response_model_data(
-            routing_preference={"hot_potato_routing": {}}
-        )
+        mock_response = BGPRoutingResponseFactory(routing_preference={"hot_potato_routing": {}})
         self.mock_scm.get.return_value = mock_response
 
         bgp_routing = self.client.get()
@@ -150,7 +106,7 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
 
     def test_get_invalid_routing_preference(self):
         """Test handling an unknown routing_preference format."""
-        mock_response = BGPRoutingFactory.response_model_data()
+        mock_response = BGPRoutingResponseFactory()
         # Set an invalid routing preference format
         mock_response["routing_preference"] = {"unknown_type": {}}
         self.mock_scm.get.return_value = mock_response
@@ -169,7 +125,7 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
 
     def test_get_none_routing_preference(self):
         """Test handling a None routing_preference value."""
-        mock_response = BGPRoutingFactory.response_model_data()
+        mock_response = BGPRoutingResponseFactory()
         # Remove routing_preference to simulate an API that doesn't return it
         mock_response.pop("routing_preference")
         self.mock_scm.get.return_value = mock_response
@@ -185,8 +141,8 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_valid(self):
         """Test creating BGP routing settings successfully."""
-        test_data = BGPRoutingFactory.create_model_data()
-        mock_response = BGPRoutingFactory.response_model_data()
+        test_data = BGPRoutingCreateApiFactory()
+        mock_response = BGPRoutingResponseFactory()
 
         self.mock_scm.put.return_value = mock_response
         bgp_routing = self.client.create(test_data)
@@ -210,12 +166,8 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_with_hot_potato_routing(self):
         """Test creating BGP routing with hot potato routing."""
-        test_data = BGPRoutingFactory.create_model_data(
-            routing_preference={"hot_potato_routing": {}}
-        )
-        mock_response = BGPRoutingFactory.response_model_data(
-            routing_preference={"hot_potato_routing": {}}
-        )
+        test_data = BGPRoutingCreateApiFactory(routing_preference={"hot_potato_routing": {}})
+        mock_response = BGPRoutingResponseFactory(routing_preference={"hot_potato_routing": {}})
 
         self.mock_scm.put.return_value = mock_response
         bgp_routing = self.client.create(test_data)
@@ -243,7 +195,7 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_response_not_dict(self):
         """Test handling when response is not a dictionary."""
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
         self.mock_scm.put.return_value = "not a dictionary"
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -253,7 +205,7 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_error(self):
         """Test error handling during create operation."""
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
             status_code=400,
@@ -270,13 +222,13 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_invalid_routing_preference(self):
         """Test creating with an invalid routing_preference format."""
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
         # Set an invalid routing preference format
         test_data["routing_preference"] = {"unknown_type": {}}
 
         # Different implementations might handle this differently
         # Set a basic mock response for success case
-        mock_response = BGPRoutingFactory.response_model_data()
+        mock_response = BGPRoutingResponseFactory()
         self.mock_scm.put.return_value = mock_response
 
         try:
@@ -290,8 +242,8 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_response_with_unknown_routing_preference(self):
         """Test handling response with invalid routing_preference format."""
-        test_data = BGPRoutingFactory.create_model_data()
-        mock_response = BGPRoutingFactory.response_model_data()
+        test_data = BGPRoutingCreateApiFactory()
+        mock_response = BGPRoutingResponseFactory()
         # Set an invalid routing preference format in the response
         mock_response["routing_preference"] = {"unknown_type": {}}
         self.mock_scm.put.return_value = mock_response
@@ -309,7 +261,7 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_response_with_broken_model(self):
         """Test creating with a response that will break in model validation."""
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
 
         # Create a response object missing required fields - this should fail validation
         mock_response = {
@@ -332,11 +284,9 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
 
     def test_create_with_enum_instance(self):
         """Test creating with an actual enum instance instead of string."""
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
         test_data["backbone_routing"] = BackboneRoutingEnum.ASYMMETRIC_ROUTING_ONLY
-        mock_response = BGPRoutingFactory.response_model_data(
-            backbone_routing="asymmetric-routing-only"
-        )
+        mock_response = BGPRoutingResponseFactory(backbone_routing="asymmetric-routing-only")
 
         self.mock_scm.put.return_value = mock_response
         self.client.create(test_data)
@@ -349,9 +299,9 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
     def test_create_with_routing_preference_model_instances(self):
         """Test creating with routing_preference as model instances."""
         # Test with DefaultRoutingModel
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
         test_data["routing_preference"] = DefaultRoutingModel()
-        self.mock_scm.put.return_value = BGPRoutingFactory.response_model_data()
+        self.mock_scm.put.return_value = BGPRoutingResponseFactory()
 
         result = self.client.create(test_data)
         assert isinstance(result, BGPRoutingResponseModel)
@@ -363,11 +313,10 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         assert "default" in payload["routing_preference"]
 
         # Test with HotPotatoRoutingModel
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
         test_data["routing_preference"] = HotPotatoRoutingModel()
-        mock_response = BGPRoutingFactory.response_model_data(
-            routing_preference={"hot_potato_routing": {}}
-        )
+        mock_response = BGPRoutingResponseFactory(routing_preference={"hot_potato_routing": {}})
+
         self.mock_scm.put.return_value = mock_response
 
         result = self.client.create(test_data)
@@ -388,7 +337,7 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
             def __init__(self):
                 pass
 
-        test_data = BGPRoutingFactory.create_model_data()
+        test_data = BGPRoutingCreateApiFactory()
         test_data["routing_preference"] = InvalidModel()
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -406,8 +355,8 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
 
     def test_update_valid(self):
         """Test updating BGP routing settings successfully."""
-        test_data = BGPRoutingFactory.update_model_data()
-        mock_response = BGPRoutingFactory.response_model_data(
+        test_data = BGPRoutingUpdateApiFactory()
+        mock_response = BGPRoutingResponseFactory(
             backbone_routing="asymmetric-routing-only",
             routing_preference={"hot_potato_routing": {}},
             accept_route_over_SC=True,
@@ -443,7 +392,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
     def test_update_partial(self):
         """Test updating only some fields."""
         test_data = {"backbone_routing": "asymmetric-routing-only", "accept_route_over_SC": True}
-        mock_response = BGPRoutingFactory.response_model_data(
+        mock_response = BGPRoutingResponseFactory(
             backbone_routing="asymmetric-routing-only", accept_route_over_SC=True
         )
 
@@ -474,7 +423,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
 
     def test_update_response_not_dict(self):
         """Test handling when response is not a dictionary."""
-        test_data = BGPRoutingFactory.update_model_data()
+        test_data = BGPRoutingUpdateApiFactory()
         self.mock_scm.put.return_value = "not a dictionary"
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -484,7 +433,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
 
     def test_update_error(self):
         """Test error handling during update operation."""
-        test_data = BGPRoutingFactory.update_model_data()
+        test_data = BGPRoutingUpdateApiFactory()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
             status_code=400,
@@ -501,13 +450,13 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
 
     def test_update_invalid_routing_preference(self):
         """Test updating with an invalid routing_preference format."""
-        test_data = BGPRoutingFactory.update_model_data()
+        test_data = BGPRoutingUpdateApiFactory()
         # Set an invalid routing preference format
         test_data["routing_preference"] = {"unknown_type": {}}
 
         # Different implementations might handle this differently
         # Set a basic mock response for success case
-        mock_response = BGPRoutingFactory.response_model_data()
+        mock_response = BGPRoutingResponseFactory()
         self.mock_scm.put.return_value = mock_response
 
         try:
@@ -527,7 +476,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
             def __init__(self):
                 pass
 
-        test_data = BGPRoutingFactory.update_model_data()
+        test_data = BGPRoutingUpdateApiFactory()
         test_data["routing_preference"] = InvalidModel()
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -541,8 +490,8 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
 
     def test_update_response_with_unknown_routing_preference(self):
         """Test handling response with invalid routing_preference format."""
-        test_data = BGPRoutingFactory.update_model_data()
-        mock_response = BGPRoutingFactory.response_model_data()
+        test_data = BGPRoutingUpdateApiFactory()
+        mock_response = BGPRoutingResponseFactory()
         # Set an invalid routing preference format in the response
         mock_response["routing_preference"] = {"unknown_type": {}}
         self.mock_scm.put.return_value = mock_response
@@ -564,7 +513,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
             "backbone_routing": "asymmetric-routing-only",
             "outbound_routes_for_services": "10.0.0.0/24",  # String instead of list
         }
-        mock_response = BGPRoutingFactory.response_model_data(
+        mock_response = BGPRoutingResponseFactory(
             backbone_routing="asymmetric-routing-only",
             outbound_routes_for_services=["10.0.0.0/24"],  # Should be converted to list
         )
@@ -584,7 +533,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
     def test_update_with_enum_backbone_routing(self):
         """Test updating with an enum instance for backbone_routing."""
         test_data = {"backbone_routing": BackboneRoutingEnum.ASYMMETRIC_ROUTING_WITH_LOAD_SHARE}
-        mock_response = BGPRoutingFactory.response_model_data(
+        mock_response = BGPRoutingResponseFactory(
             backbone_routing="asymmetric-routing-with-load-share"
         )
 
@@ -610,9 +559,10 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         }
 
         # Mock response with the expected format
-        mock_response = BGPRoutingFactory.response_model_data(
+        mock_response = BGPRoutingResponseFactory(
             backbone_routing="no-asymmetric-routing", routing_preference={"default": {}}
         )
+
         self.mock_scm.put.return_value = mock_response
 
         # This should cover line 201 where default routing preference is processed
@@ -630,7 +580,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
 
     def test_update_response_with_broken_model(self):
         """Test updating with a response that will break in model validation."""
-        test_data = BGPRoutingFactory.update_model_data()
+        test_data = BGPRoutingUpdateApiFactory()
 
         # Create a response object missing required fields - this should fail validation
         mock_response = {

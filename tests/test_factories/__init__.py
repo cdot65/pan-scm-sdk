@@ -1,4 +1,32 @@
 # tests/test_factories/__init__.py
+# Import deployment related factories
+from tests.test_factories.deployment.bandwidth_allocations import (
+    BandwidthAllocationBaseFactory,
+    BandwidthAllocationCreateApiFactory,
+    BandwidthAllocationCreateModelFactory,
+    BandwidthAllocationResponseFactory,
+    BandwidthAllocationUpdateApiFactory,
+    QosModelFactory,
+)
+from tests.test_factories.deployment.bgp_routing import (
+    BGPRoutingBaseFactory,
+    BGPRoutingCreateApiFactory,
+    BGPRoutingCreateModelFactory,
+    BGPRoutingResponseFactory,
+    BGPRoutingResponseModelFactory,
+    BGPRoutingUpdateApiFactory,
+    BGPRoutingUpdateModelFactory,
+    DefaultRoutingModelFactory,
+    HotPotatoRoutingModelFactory,
+)
+from tests.test_factories.deployment.remote_networks import (
+    RemoteNetworkBaseFactory,
+    RemoteNetworkCreateApiFactory,
+    RemoteNetworkCreateModelFactory,
+    RemoteNetworkResponseFactory,
+    RemoteNetworkUpdateApiFactory,
+    RemoteNetworkUpdateModelFactory,
+)
 from tests.test_factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,
@@ -119,6 +147,14 @@ from tests.test_factories.objects.syslog_server_profiles import (
     SyslogServerProfileResponseModelFactory,
     SyslogServerProfileUpdateModelFactory,
 )
+from tests.test_factories.objects.tag import (
+    TagBaseFactory,
+    TagCreateApiFactory,
+    TagCreateModelFactory,
+    TagResponseFactory,
+    TagUpdateApiFactory,
+    TagUpdateModelFactory,
+)
 from tests.test_factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
@@ -126,6 +162,23 @@ from tests.test_factories.security.url_categories import (
 )
 
 __all__ = [
+    # Bandwidth allocation factories
+    "BandwidthAllocationBaseFactory",
+    "BandwidthAllocationCreateApiFactory",
+    "BandwidthAllocationCreateModelFactory",
+    "BandwidthAllocationResponseFactory",
+    "BandwidthAllocationUpdateApiFactory",
+    "QosModelFactory",
+    # BGP Routing factories
+    "BGPRoutingBaseFactory",
+    "BGPRoutingCreateApiFactory",
+    "BGPRoutingCreateModelFactory",
+    "BGPRoutingResponseFactory",
+    "BGPRoutingResponseModelFactory",
+    "BGPRoutingUpdateApiFactory",
+    "BGPRoutingUpdateModelFactory",
+    "DefaultRoutingModelFactory",
+    "HotPotatoRoutingModelFactory",
     # Quarantined devices factories
     "QuarantinedDevicesBaseFactory",
     "QuarantinedDevicesCreateApiFactory",
@@ -236,4 +289,18 @@ __all__ = [
     "URLCategoriesCreateModelFactory",
     "URLCategoriesUpdateModelFactory",
     "URLCategoriesResponseModelFactory",
+    # Tag factories
+    "TagBaseFactory",
+    "TagCreateApiFactory",
+    "TagCreateModelFactory",
+    "TagResponseFactory",
+    "TagUpdateApiFactory",
+    "TagUpdateModelFactory",
+    # Deployment - Remote Networks factories
+    "RemoteNetworkBaseFactory",
+    "RemoteNetworkCreateApiFactory",
+    "RemoteNetworkCreateModelFactory",
+    "RemoteNetworkResponseFactory",
+    "RemoteNetworkUpdateApiFactory",
+    "RemoteNetworkUpdateModelFactory",
 ]

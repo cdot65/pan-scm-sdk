@@ -12,6 +12,11 @@ from scm.models.deployment.internal_dns_servers import (
     InternalDnsServersResponseModel,
     InternalDnsServersUpdateModel,
 )
+from tests.test_factories.deployment.internal_dns_servers import (
+    InternalDnsServersCreateModelFactory,
+    InternalDnsServersResponseModelFactory,
+    InternalDnsServersUpdateModelFactory,
+)
 
 
 class TestInternalDnsServersBaseModel:
@@ -155,12 +160,8 @@ class TestInternalDnsServersCreateModel:
 
     def test_valid_create_model(self):
         """Test creating a valid create model."""
-        model = InternalDnsServersCreateModel(
-            name="test-dns-server",
-            domain_name=["example.com", "test.com"],
-            primary="192.168.1.1",
-            secondary="8.8.8.8",
-        )
+        model_data = InternalDnsServersCreateModelFactory.build_valid()
+        model = InternalDnsServersCreateModel(**model_data)
         assert model.name == "test-dns-server"
         assert model.domain_name == ["example.com", "test.com"]
         assert model.primary == IPv4Address("192.168.1.1")
@@ -169,29 +170,19 @@ class TestInternalDnsServersCreateModel:
     def test_empty_domain_name(self):
         """Test validation fails with empty domain_name list."""
         with pytest.raises(ValidationError) as exc_info:
-            InternalDnsServersCreateModel(
-                name="test-dns-server",
-                domain_name=[],
-                primary="192.168.1.1",
-            )
+            model_data = InternalDnsServersCreateModelFactory.build_with_empty_domain_name()
+            InternalDnsServersCreateModel(**model_data)
         assert "domain_name" in str(exc_info.value)
         assert "item" in str(exc_info.value)  # Look for min_length validation
 
     def test_create_model_validator(self):
         """Test the create model validator directly."""
         # Create a model with valid domain_name
-        InternalDnsServersCreateModel(
-            name="test-dns-server",
-            domain_name=["example.com"],
-            primary="192.168.1.1",
-        )
+        model_data = InternalDnsServersCreateModelFactory.build_valid()
+        InternalDnsServersCreateModel(**model_data)
 
-        # Create a test model with empty domain_name
-        test_model = InternalDnsServersCreateModel(
-            name="test-dns-server",
-            domain_name=["example.com"],
-            primary="192.168.1.1",
-        )
+        # Create a test model with valid data
+        test_model = InternalDnsServersCreateModel(**model_data)
 
         # Bypass validation by using object.__setattr__
         object.__setattr__(test_model, "domain_name", [])
@@ -203,11 +194,8 @@ class TestInternalDnsServersCreateModel:
 
     def test_secondary_optional(self):
         """Test that secondary field is optional."""
-        model = InternalDnsServersCreateModel(
-            name="test-dns-server",
-            domain_name=["example.com"],
-            primary="192.168.1.1",
-        )
+        model_data = InternalDnsServersCreateModelFactory.build_without_secondary()
+        model = InternalDnsServersCreateModel(**model_data)
         assert model.secondary is None
 
 
@@ -217,26 +205,23 @@ class TestInternalDnsServersUpdateModel:
     def test_valid_update_model(self):
         """Test creating a valid update model with all fields."""
         test_id = uuid.uuid4()
-        model = InternalDnsServersUpdateModel(
-            id=test_id,
-            name="updated-dns-server",
-            domain_name=["example.com", "updated.com"],
-            primary="192.168.1.2",
-            secondary="8.8.4.4",
-        )
+        model_data = InternalDnsServersUpdateModelFactory.build_valid(id=test_id)
+        model = InternalDnsServersUpdateModel(**model_data)
         assert model.id == test_id
         assert model.name == "updated-dns-server"
-        assert model.domain_name == ["example.com", "updated.com"]
-        assert model.primary == IPv4Address("192.168.1.2")
+        assert model.domain_name == ["updated.example.com", "updated.test.com"]
+        assert model.primary == IPv4Address("192.168.2.1")
         assert model.secondary == IPv4Address("8.8.4.4")
 
     def test_minimal_update_model(self):
         """Test creating an update model with only required fields and one update field."""
         test_id = uuid.uuid4()
-        model = InternalDnsServersUpdateModel(
+        model_data = InternalDnsServersUpdateModelFactory.build_partial(
+            ["name"],
             id=test_id,
             name="updated-dns-server",
         )
+        model = InternalDnsServersUpdateModel(**model_data)
         assert model.id == test_id
         assert model.name == "updated-dns-server"
         assert model.domain_name is None
@@ -246,35 +231,34 @@ class TestInternalDnsServersUpdateModel:
     def test_missing_required_id(self):
         """Test validation fails when id is missing."""
         with pytest.raises(ValidationError):
-            InternalDnsServersUpdateModel(
-                name="updated-dns-server",
-            )
+            # Remove id from the data
+            model_data = InternalDnsServersUpdateModelFactory.build_valid()
+            del model_data["id"]
+            InternalDnsServersUpdateModel(**model_data)
 
     def test_no_update_fields(self):
         """Test validation fails when no update fields are provided."""
         with pytest.raises(ValidationError) as exc_info:
-            InternalDnsServersUpdateModel(
-                id=uuid.uuid4(),
-            )
+            model_data = InternalDnsServersUpdateModelFactory.build_empty()
+            InternalDnsServersUpdateModel(**model_data)
         assert "At least one field must be specified for update" in str(exc_info.value)
 
     def test_empty_domain_name(self):
         """Test validation fails with empty domain_name list."""
         with pytest.raises(ValidationError) as exc_info:
-            InternalDnsServersUpdateModel(
-                id=uuid.uuid4(),
-                domain_name=[],
-            )
+            model_data = InternalDnsServersUpdateModelFactory.build_with_empty_domain_name()
+            InternalDnsServersUpdateModel(**model_data)
         assert "domain_name" in str(exc_info.value)
         assert "empty" in str(exc_info.value).lower()  # Look for 'empty' in error message
 
     def test_update_model_validator_empty_domain(self):
         """Test update model validator directly for empty domain_name."""
-        # Create a test model
-        test_model = InternalDnsServersUpdateModel(
-            id=uuid.uuid4(),
+        # Create a test model with valid data
+        model_data = InternalDnsServersUpdateModelFactory.build_partial(
+            ["name"],
             name="updated-dns-server",
         )
+        test_model = InternalDnsServersUpdateModel(**model_data)
 
         # Bypass validation by using object.__setattr__
         object.__setattr__(test_model, "domain_name", [])
@@ -291,13 +275,8 @@ class TestInternalDnsServersResponseModel:
     def test_valid_response_model(self):
         """Test creating a valid response model."""
         test_id = uuid.uuid4()
-        model = InternalDnsServersResponseModel(
-            id=test_id,
-            name="test-dns-server",
-            domain_name=["example.com", "test.com"],
-            primary="192.168.1.1",
-            secondary="8.8.8.8",
-        )
+        model_data = InternalDnsServersResponseModelFactory.build_valid(id=test_id)
+        model = InternalDnsServersResponseModel(**model_data)
         assert model.id == test_id
         assert model.name == "test-dns-server"
         assert model.domain_name == ["example.com", "test.com"]
@@ -307,33 +286,25 @@ class TestInternalDnsServersResponseModel:
     def test_missing_required_id(self):
         """Test validation fails when id is missing."""
         with pytest.raises(ValidationError):
-            InternalDnsServersResponseModel(
-                name="test-dns-server",
-                domain_name=["example.com"],
-                primary="192.168.1.1",
-            )
+            # Remove id from the data
+            model_data = InternalDnsServersResponseModelFactory.build_valid()
+            del model_data["id"]
+            InternalDnsServersResponseModel(**model_data)
 
     def test_empty_domain_name(self):
         """Test validation fails with empty domain_name list."""
         with pytest.raises(ValidationError) as exc_info:
-            InternalDnsServersResponseModel(
-                id=uuid.uuid4(),
-                name="test-dns-server",
-                domain_name=[],
-                primary="192.168.1.1",
-            )
+            model_data = InternalDnsServersResponseModelFactory.build_valid()
+            model_data["domain_name"] = []
+            InternalDnsServersResponseModel(**model_data)
         assert "domain_name" in str(exc_info.value)
         assert "item" in str(exc_info.value)  # Look for min_length validation
 
     def test_response_model_validator_empty_domain(self):
         """Test response model validator directly for empty domain_name."""
-        # Create a test model
-        test_model = InternalDnsServersResponseModel(
-            id=uuid.uuid4(),
-            name="test-dns-server",
-            domain_name=["example.com"],
-            primary="192.168.1.1",
-        )
+        # Create a test model with valid data
+        model_data = InternalDnsServersResponseModelFactory.build_valid()
+        test_model = InternalDnsServersResponseModel(**model_data)
 
         # Bypass validation by using object.__setattr__
         object.__setattr__(test_model, "domain_name", [])
