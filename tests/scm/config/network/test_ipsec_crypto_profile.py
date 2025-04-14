@@ -143,7 +143,9 @@ class TestIPsecCryptoProfile:
         }
 
         # Create the update model directly from the update_data
-        from scm.models.network.ipsec_crypto_profile import IPsecCryptoProfileUpdateModel
+        from scm.models.network.ipsec_crypto_profile import (
+            IPsecCryptoProfileUpdateModel,
+        )
 
         update_model = IPsecCryptoProfileUpdateModel(
             id=UUID(update_data["id"]),

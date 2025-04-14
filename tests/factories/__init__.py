@@ -1,6 +1,6 @@
-# tests/test_factories/__init__.py
+# tests/factories/__init__.py
 # Import deployment related factories
-from tests.test_factories.deployment.bandwidth_allocations import (
+from tests.factories.deployment.bandwidth_allocations import (
     BandwidthAllocationBaseFactory,
     BandwidthAllocationCreateApiFactory,
     BandwidthAllocationCreateModelFactory,
@@ -8,7 +8,7 @@ from tests.test_factories.deployment.bandwidth_allocations import (
     BandwidthAllocationUpdateApiFactory,
     QosModelFactory,
 )
-from tests.test_factories.deployment.bgp_routing import (
+from tests.factories.deployment.bgp_routing import (
     BGPRoutingBaseFactory,
     BGPRoutingCreateApiFactory,
     BGPRoutingCreateModelFactory,
@@ -19,7 +19,7 @@ from tests.test_factories.deployment.bgp_routing import (
     DefaultRoutingModelFactory,
     HotPotatoRoutingModelFactory,
 )
-from tests.test_factories.deployment.remote_networks import (
+from tests.factories.deployment.remote_networks import (
     RemoteNetworkBaseFactory,
     RemoteNetworkCreateApiFactory,
     RemoteNetworkCreateModelFactory,
@@ -27,14 +27,44 @@ from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkUpdateApiFactory,
     RemoteNetworkUpdateModelFactory,
 )
-from tests.test_factories.objects.address import (
+from tests.factories.deployment.service_connections import (
+    BgpPeerModelFactory,
+    BgpProtocolModelFactory,
+    ProtocolModelFactory,
+)
+from tests.factories.deployment.service_connections import (
+    QosModelFactory as ServiceConnectionQosModelFactory,
+)
+from tests.factories.deployment.service_connections import (
+    ServiceConnectionBaseFactory,
+    ServiceConnectionCreateApiFactory,
+    ServiceConnectionCreateModelFactory,
+    ServiceConnectionResponseFactory,
+    ServiceConnectionResponseModelFactory,
+    ServiceConnectionUpdateApiFactory,
+    ServiceConnectionUpdateModelFactory,
+)
+
+# Import network related factories
+from tests.factories.network import (
+    InterfaceAddressFactory,
+    NatRuleCreateApiFactory,
+    NatRuleCreateModelFactory,
+    NatRuleMoveApiFactory,
+    NatRuleMoveModelFactory,
+    NatRuleResponseFactory,
+    NatRuleUpdateApiFactory,
+    NatRuleUpdateModelFactory,
+    SourceTranslationFactory,
+)
+from tests.factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,
     AddressResponseFactory,
     AddressUpdateApiFactory,
     AddressUpdateModelFactory,
 )
-from tests.test_factories.objects.address_group import (
+from tests.factories.objects.address_group import (
     AddressGroupBaseFactory,
     AddressGroupCreateApiFactory,
     AddressGroupCreateModelFactory,
@@ -42,7 +72,7 @@ from tests.test_factories.objects.address_group import (
     AddressGroupUpdateApiFactory,
     AddressGroupUpdateModelFactory,
 )
-from tests.test_factories.objects.application_filters import (
+from tests.factories.objects.application_filters import (
     ApplicationFiltersBaseFactory,
     ApplicationFiltersCreateApiFactory,
     ApplicationFiltersCreateModelFactory,
@@ -51,7 +81,7 @@ from tests.test_factories.objects.application_filters import (
     ApplicationFiltersUpdateApiFactory,
     ApplicationFiltersUpdateModelFactory,
 )
-from tests.test_factories.objects.application_group import (
+from tests.factories.objects.application_group import (
     ApplicationGroupBaseFactory,
     ApplicationGroupCreateApiFactory,
     ApplicationGroupCreateModelFactory,
@@ -59,7 +89,7 @@ from tests.test_factories.objects.application_group import (
     ApplicationGroupUpdateApiFactory,
     ApplicationGroupUpdateModelFactory,
 )
-from tests.test_factories.objects.dynamic_user_group import (
+from tests.factories.objects.dynamic_user_group import (
     DynamicUserGroupBaseFactory,
     DynamicUserGroupCreateApiFactory,
     DynamicUserGroupCreateModelFactory,
@@ -67,7 +97,7 @@ from tests.test_factories.objects.dynamic_user_group import (
     DynamicUserGroupUpdateApiFactory,
     DynamicUserGroupUpdateModelFactory,
 )
-from tests.test_factories.objects.external_dynamic_lists import (
+from tests.factories.objects.external_dynamic_lists import (
     ExternalDynamicListsBaseFactory,
     ExternalDynamicListsCreateApiFactory,
     ExternalDynamicListsCreateModelFactory,
@@ -76,7 +106,7 @@ from tests.test_factories.objects.external_dynamic_lists import (
     ExternalDynamicListsUpdateApiFactory,
     ExternalDynamicListsUpdateModelFactory,
 )
-from tests.test_factories.objects.hip_object import (
+from tests.factories.objects.hip_object import (
     HIPObjectBaseFactory,
     HIPObjectCreateApiFactory,
     HIPObjectCreateModelFactory,
@@ -85,7 +115,7 @@ from tests.test_factories.objects.hip_object import (
     HIPObjectUpdateApiFactory,
     HIPObjectUpdateModelFactory,
 )
-from tests.test_factories.objects.hip_profile import (
+from tests.factories.objects.hip_profile import (
     HIPProfileBaseFactory,
     HIPProfileCreateApiFactory,
     HIPProfileCreateModelFactory,
@@ -94,7 +124,7 @@ from tests.test_factories.objects.hip_profile import (
     HIPProfileUpdateApiFactory,
     HIPProfileUpdateModelFactory,
 )
-from tests.test_factories.objects.http_server_profiles import (
+from tests.factories.objects.http_server_profiles import (
     HTTPServerProfileBaseFactory,
     HTTPServerProfileCreateApiFactory,
     HTTPServerProfileCreateModelFactory,
@@ -105,7 +135,7 @@ from tests.test_factories.objects.http_server_profiles import (
     PayloadFormatModelFactory,
     ServerModelFactory,
 )
-from tests.test_factories.objects.log_forwarding_profile import (
+from tests.factories.objects.log_forwarding_profile import (
     LogForwardingProfileBaseFactory,
     LogForwardingProfileCreateApiFactory,
     LogForwardingProfileCreateModelFactory,
@@ -115,14 +145,14 @@ from tests.test_factories.objects.log_forwarding_profile import (
     LogForwardingProfileUpdateModelFactory,
     MatchListItemFactory,
 )
-from tests.test_factories.objects.quarantined_devices import (
+from tests.factories.objects.quarantined_devices import (
     QuarantinedDevicesBaseFactory,
     QuarantinedDevicesCreateApiFactory,
     QuarantinedDevicesCreateFactory,
     QuarantinedDevicesListParamsFactory,
     QuarantinedDevicesResponseFactory,
 )
-from tests.test_factories.objects.region import (
+from tests.factories.objects.region import (
     RegionBaseFactory,
     RegionCreateApiFactory,
     RegionCreateModelFactory,
@@ -131,7 +161,7 @@ from tests.test_factories.objects.region import (
     RegionUpdateApiFactory,
     RegionUpdateModelFactory,
 )
-from tests.test_factories.objects.schedules import (
+from tests.factories.objects.schedules import (
     ScheduleBaseFactory,
     ScheduleCreateApiFactory,
     ScheduleCreateModelFactory,
@@ -139,7 +169,7 @@ from tests.test_factories.objects.schedules import (
     ScheduleUpdateApiFactory,
     ScheduleUpdateModelFactory,
 )
-from tests.test_factories.objects.syslog_server_profiles import (
+from tests.factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
     SyslogServerModelFactory,
@@ -147,7 +177,7 @@ from tests.test_factories.objects.syslog_server_profiles import (
     SyslogServerProfileResponseModelFactory,
     SyslogServerProfileUpdateModelFactory,
 )
-from tests.test_factories.objects.tag import (
+from tests.factories.objects.tag import (
     TagBaseFactory,
     TagCreateApiFactory,
     TagCreateModelFactory,
@@ -155,13 +185,28 @@ from tests.test_factories.objects.tag import (
     TagUpdateApiFactory,
     TagUpdateModelFactory,
 )
-from tests.test_factories.security.url_categories import (
+from tests.factories.security import (
+    AntiSpywareProfileBaseFactory,
+    AntiSpywareProfileCreateApiFactory,
+    AntiSpywareProfileCreateModelFactory,
+    AntiSpywareProfileResponseFactory,
+    AntiSpywareProfileUpdateApiFactory,
+    AntiSpywareProfileUpdateModelFactory,
+)
+from tests.factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
     URLCategoriesUpdateModelFactory,
 )
 
 __all__ = [
+    # AntiSpyware Profile factories
+    "AntiSpywareProfileBaseFactory",
+    "AntiSpywareProfileCreateApiFactory",
+    "AntiSpywareProfileCreateModelFactory",
+    "AntiSpywareProfileResponseFactory",
+    "AntiSpywareProfileUpdateApiFactory",
+    "AntiSpywareProfileUpdateModelFactory",
     # Bandwidth allocation factories
     "BandwidthAllocationBaseFactory",
     "BandwidthAllocationCreateApiFactory",
@@ -289,6 +334,18 @@ __all__ = [
     "URLCategoriesCreateModelFactory",
     "URLCategoriesUpdateModelFactory",
     "URLCategoriesResponseModelFactory",
+    # Service Connection factories
+    "BgpPeerModelFactory",
+    "BgpProtocolModelFactory",
+    "ProtocolModelFactory",
+    "ServiceConnectionQosModelFactory",
+    "ServiceConnectionBaseFactory",
+    "ServiceConnectionCreateApiFactory",
+    "ServiceConnectionCreateModelFactory",
+    "ServiceConnectionResponseFactory",
+    "ServiceConnectionResponseModelFactory",
+    "ServiceConnectionUpdateApiFactory",
+    "ServiceConnectionUpdateModelFactory",
     # Tag factories
     "TagBaseFactory",
     "TagCreateApiFactory",
@@ -303,4 +360,14 @@ __all__ = [
     "RemoteNetworkResponseFactory",
     "RemoteNetworkUpdateApiFactory",
     "RemoteNetworkUpdateModelFactory",
+    # Network factories
+    "InterfaceAddressFactory",
+    "NatRuleCreateApiFactory",
+    "NatRuleCreateModelFactory",
+    "NatRuleMoveApiFactory",
+    "NatRuleMoveModelFactory",
+    "NatRuleResponseFactory",
+    "NatRuleUpdateApiFactory",
+    "NatRuleUpdateModelFactory",
+    "SourceTranslationFactory",
 ]

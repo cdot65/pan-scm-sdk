@@ -1,12 +1,12 @@
-# tests/test_factories/objects/__init__.py
-from tests.test_factories.objects.address import (
+# tests/factories/objects/__init__.py
+from tests.factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,
     AddressResponseFactory,
     AddressUpdateApiFactory,
     AddressUpdateModelFactory,
 )
-from tests.test_factories.objects.address_group import (
+from tests.factories.objects.address_group import (
     AddressGroupBaseFactory,
     AddressGroupCreateApiFactory,
     AddressGroupCreateModelFactory,
@@ -14,7 +14,7 @@ from tests.test_factories.objects.address_group import (
     AddressGroupUpdateApiFactory,
     AddressGroupUpdateModelFactory,
 )
-from tests.test_factories.objects.application_filters import (
+from tests.factories.objects.application_filters import (
     ApplicationFiltersBaseFactory,
     ApplicationFiltersCreateApiFactory,
     ApplicationFiltersCreateModelFactory,
@@ -23,7 +23,7 @@ from tests.test_factories.objects.application_filters import (
     ApplicationFiltersUpdateApiFactory,
     ApplicationFiltersUpdateModelFactory,
 )
-from tests.test_factories.objects.application_group import (
+from tests.factories.objects.application_group import (
     ApplicationGroupBaseFactory,
     ApplicationGroupCreateApiFactory,
     ApplicationGroupCreateModelFactory,
@@ -31,7 +31,7 @@ from tests.test_factories.objects.application_group import (
     ApplicationGroupUpdateApiFactory,
     ApplicationGroupUpdateModelFactory,
 )
-from tests.test_factories.objects.dynamic_user_group import (
+from tests.factories.objects.dynamic_user_group import (
     DynamicUserGroupBaseFactory,
     DynamicUserGroupCreateApiFactory,
     DynamicUserGroupCreateModelFactory,
@@ -39,7 +39,7 @@ from tests.test_factories.objects.dynamic_user_group import (
     DynamicUserGroupUpdateApiFactory,
     DynamicUserGroupUpdateModelFactory,
 )
-from tests.test_factories.objects.external_dynamic_lists import (
+from tests.factories.objects.external_dynamic_lists import (
     ExternalDynamicListsBaseFactory,
     ExternalDynamicListsCreateApiFactory,
     ExternalDynamicListsCreateModelFactory,
@@ -48,7 +48,7 @@ from tests.test_factories.objects.external_dynamic_lists import (
     ExternalDynamicListsUpdateApiFactory,
     ExternalDynamicListsUpdateModelFactory,
 )
-from tests.test_factories.objects.hip_object import (
+from tests.factories.objects.hip_object import (
     CertificateAttributeFactory,
     CertificateFactory,
     DiskEncryptionFactory,
@@ -69,7 +69,7 @@ from tests.test_factories.objects.hip_object import (
     StrIsFactory,
     StrIsNotFactory,
 )
-from tests.test_factories.objects.hip_profile import (
+from tests.factories.objects.hip_profile import (
     HIPProfileBaseFactory,
     HIPProfileCreateApiFactory,
     HIPProfileCreateModelFactory,
@@ -78,7 +78,7 @@ from tests.test_factories.objects.hip_profile import (
     HIPProfileUpdateApiFactory,
     HIPProfileUpdateModelFactory,
 )
-from tests.test_factories.objects.http_server_profiles import (
+from tests.factories.objects.http_server_profiles import (
     HTTPServerProfileBaseFactory,
     HTTPServerProfileCreateApiFactory,
     HTTPServerProfileCreateModelFactory,
@@ -89,7 +89,7 @@ from tests.test_factories.objects.http_server_profiles import (
     PayloadFormatModelFactory,
     ServerModelFactory,
 )
-from tests.test_factories.objects.log_forwarding_profile import (
+from tests.factories.objects.log_forwarding_profile import (
     LogForwardingProfileBaseFactory,
     LogForwardingProfileCreateApiFactory,
     LogForwardingProfileCreateModelFactory,
@@ -99,14 +99,14 @@ from tests.test_factories.objects.log_forwarding_profile import (
     LogForwardingProfileUpdateModelFactory,
     MatchListItemFactory,
 )
-from tests.test_factories.objects.quarantined_devices import (
+from tests.factories.objects.quarantined_devices import (
     QuarantinedDevicesBaseFactory,
     QuarantinedDevicesCreateApiFactory,
     QuarantinedDevicesCreateFactory,
     QuarantinedDevicesListParamsFactory,
     QuarantinedDevicesResponseFactory,
 )
-from tests.test_factories.objects.region import (
+from tests.factories.objects.region import (
     RegionBaseFactory,
     RegionCreateApiFactory,
     RegionCreateModelFactory,
@@ -115,7 +115,7 @@ from tests.test_factories.objects.region import (
     RegionUpdateApiFactory,
     RegionUpdateModelFactory,
 )
-from tests.test_factories.objects.schedules import (
+from tests.factories.objects.schedules import (
     ScheduleBaseFactory,
     ScheduleCreateApiFactory,
     ScheduleCreateModelFactory,
@@ -123,7 +123,7 @@ from tests.test_factories.objects.schedules import (
     ScheduleUpdateApiFactory,
     ScheduleUpdateModelFactory,
 )
-from tests.test_factories.objects.syslog_server_profiles import (
+from tests.factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
     SyslogServerModelFactory,

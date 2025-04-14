@@ -10,8 +10,11 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.security import DecryptionProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.security.decryption_profiles import DecryptionProfileResponseModel, SSLVersion
-from tests.factories import (
+from scm.models.security.decryption_profiles import (
+    DecryptionProfileResponseModel,
+    SSLVersion,
+)
+from tests.factories.security.decryption_profile import (
     DecryptionProfileCreateApiFactory,
     DecryptionProfileResponseFactory,
     DecryptionProfileUpdateApiFactory,

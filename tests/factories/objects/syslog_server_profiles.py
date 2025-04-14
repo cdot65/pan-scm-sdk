@@ -1,4 +1,4 @@
-# tests/test_factories/objects/syslog_server_profiles.py
+# tests/factories/objects/syslog_server_profiles.py
 
 from uuid import uuid4
 

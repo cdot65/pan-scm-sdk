@@ -16,7 +16,7 @@ from scm.models.security.dns_security_profiles import (
     LogLevelEnum,
     PacketCaptureEnum,
 )
-from tests.factories import (
+from tests.factories.security import (
     BotnetDomainsFactory,
     DNSSecurityCategoryEntryFactory,
     DNSSecurityProfileCreateApiFactory,

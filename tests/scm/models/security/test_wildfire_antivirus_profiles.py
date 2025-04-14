@@ -2,9 +2,10 @@
 
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.security.wildfire_antivirus_profiles import (
@@ -14,7 +15,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileResponseModel,
     WildfireAvProfileUpdateModel,
 )
-from tests.factories import (
+from tests.factories.security import (
     WildfireAvProfileCreateApiFactory,
     WildfireAvProfileCreateModelFactory,
     WildfireAvProfileResponseFactory,

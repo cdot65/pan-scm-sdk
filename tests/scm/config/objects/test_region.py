@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import Region
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import RegionResponseModel
-from tests.test_factories.objects.region import (
+from tests.factories.objects.region import (
     RegionCreateApiFactory,
     RegionResponseFactory,
     RegionUpdateApiFactory,

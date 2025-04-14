@@ -1,19 +1,18 @@
 # tests/scm/config/objects/test_schedules.py
 
 # Standard library imports
-import uuid
 from unittest.mock import MagicMock
-
-import pytest
+import uuid
 
 # External libraries
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.config.objects import Schedule
 from scm.exceptions import APIError, InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ScheduleResponseModel, ScheduleUpdateModel
-from tests.test_factories.objects.schedules import ScheduleResponseFactory
+from tests.factories.objects.schedules import ScheduleResponseFactory
 
 
 @pytest.mark.usefixtures("load_env")

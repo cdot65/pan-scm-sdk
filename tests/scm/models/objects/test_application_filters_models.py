@@ -1,8 +1,8 @@
 # tests/scm/models/objects/test_application_filters_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects.application_filters import (
@@ -10,7 +10,7 @@ from scm.models.objects.application_filters import (
     ApplicationFiltersResponseModel,
     ApplicationFiltersUpdateModel,
 )
-from tests.test_factories.objects.application_filters import (
+from tests.factories.objects.application_filters import (
     ApplicationFiltersCreateApiFactory,
     ApplicationFiltersCreateModelFactory,
     ApplicationFiltersResponseModelFactory,

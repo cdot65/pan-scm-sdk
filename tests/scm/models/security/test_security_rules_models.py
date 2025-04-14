@@ -2,9 +2,10 @@
 import uuid
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.security.security_rules import (
@@ -16,7 +17,7 @@ from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleUpdateModel,
 )
-from tests.factories import (
+from tests.factories.security import (
     SecurityRuleCreateApiFactory,
     SecurityRuleCreateModelFactory,
     SecurityRuleMoveApiFactory,

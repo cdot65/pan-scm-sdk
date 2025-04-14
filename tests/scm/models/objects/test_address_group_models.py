@@ -1,13 +1,16 @@
 # tests/scm/models/objects/test_address_group.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects import AddressGroupCreateModel, AddressGroupUpdateModel
 from scm.models.objects.address_group import DynamicFilter
-from tests.test_factories import AddressGroupCreateModelFactory, AddressGroupUpdateModelFactory
+from tests.factories import (
+    AddressGroupCreateModelFactory,
+    AddressGroupUpdateModelFactory,
+)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

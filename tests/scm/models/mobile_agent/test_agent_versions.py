@@ -1,8 +1,8 @@
 # tests/scm/models/mobile_agent/test_agent_versions.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.mobile_agent.agent_versions import AgentVersionModel, AgentVersionsModel

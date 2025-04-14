@@ -2,9 +2,10 @@
 
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.network.nat_rules import (
@@ -19,7 +20,7 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     StaticIp,
 )
-from tests.factories import (
+from tests.factories.network import (
     InterfaceAddressFactory,
     NatRuleCreateApiFactory,
     NatRuleCreateModelFactory,

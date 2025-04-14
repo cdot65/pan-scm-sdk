@@ -1,4 +1,4 @@
-# tests/test_factories/objects/tag.py
+# tests/factories/objects/tag.py
 
 # Standard library imports
 from typing import Any, Dict, Union
@@ -9,7 +9,12 @@ import factory
 from faker import Faker
 
 # Local SDK imports
-from scm.models.objects.tag import TagBaseModel, TagCreateModel, TagResponseModel, TagUpdateModel
+from scm.models.objects.tag import (
+    TagBaseModel,
+    TagCreateModel,
+    TagResponseModel,
+    TagUpdateModel,
+)
 
 fake = Faker()
 

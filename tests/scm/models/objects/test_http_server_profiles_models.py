@@ -2,9 +2,10 @@
 
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.http_server_profiles import (
@@ -12,7 +13,7 @@ from scm.models.objects.http_server_profiles import (
     HTTPServerProfileResponseModel,
     HTTPServerProfileUpdateModel,
 )
-from tests.test_factories.objects.http_server_profiles import (
+from tests.factories.objects.http_server_profiles import (
     HTTPServerProfileCreateModelFactory,
     HTTPServerProfileResponseModelFactory,
     HTTPServerProfileUpdateModelFactory,

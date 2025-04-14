@@ -1,10 +1,12 @@
 # tests/scm/models/deployment/test_network_locations_models.py
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.deployment.network_locations import NetworkLocationModel
-from tests.test_factories.deployment.network_locations import NetworkLocationModelFactory
+from tests.factories.deployment.network_locations import (
+    NetworkLocationModelFactory,
+)
 
 
 class TestNetworkLocationModel:

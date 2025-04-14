@@ -7,7 +7,7 @@ import pytest
 
 # Local SDK imports
 from scm.models.security.url_categories import URLCategoriesCreateModel
-from tests.test_factories.security.url_categories import (
+from tests.factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
     URLCategoriesUpdateModelFactory,

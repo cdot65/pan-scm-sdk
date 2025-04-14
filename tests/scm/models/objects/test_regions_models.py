@@ -1,8 +1,8 @@
 # tests/scm/models/objects/test_regions_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects import (
@@ -11,7 +11,7 @@ from scm.models.objects import (
     RegionResponseModel,
     RegionUpdateModel,
 )
-from tests.test_factories.objects.region import (
+from tests.factories.objects.region import (
     RegionCreateModelFactory,
     RegionResponseFactory,
     RegionResponseModelFactory,

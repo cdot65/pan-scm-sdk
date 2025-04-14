@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import HIPProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import HIPProfileResponseModel
-from tests.test_factories.objects.hip_profile import (
+from tests.factories.objects.hip_profile import (
     HIPProfileCreateApiFactory,
     HIPProfileResponseFactory,
     HIPProfileUpdateApiFactory,

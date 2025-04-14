@@ -1,4 +1,4 @@
-# tests/test_factories/objects/schedules.py
+# tests/factories/objects/schedules.py
 
 from typing import Dict, List, Optional
 from uuid import uuid4

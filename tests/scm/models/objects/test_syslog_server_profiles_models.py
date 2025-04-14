@@ -2,9 +2,10 @@
 
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.syslog_server_profiles import (
@@ -16,7 +17,7 @@ from scm.models.objects.syslog_server_profiles import (
 )
 
 # Import the new factories
-from tests.test_factories.objects.syslog_server_profiles import (
+from tests.factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
     SyslogServerModelFactory,

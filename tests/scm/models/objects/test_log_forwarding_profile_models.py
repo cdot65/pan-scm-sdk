@@ -2,9 +2,10 @@
 
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.objects.log_forwarding_profile import (
@@ -12,7 +13,7 @@ from scm.models.objects.log_forwarding_profile import (
     LogForwardingProfileResponseModel,
     LogForwardingProfileUpdateModel,
 )
-from tests.test_factories.objects.log_forwarding_profile import (
+from tests.factories.objects.log_forwarding_profile import (
     LogForwardingProfileCreateModelFactory,
     LogForwardingProfileResponseModelFactory,
     LogForwardingProfileUpdateModelFactory,

@@ -1,4 +1,4 @@
-# tests/test_factories/security/url_categories.py
+# tests/factories/security/url_categories.py
 from uuid import uuid4
 
 import factory  # type: ignore

@@ -1,10 +1,11 @@
-# tests/scm/models/security/test_dns_security_profiles.py
+# tests/scm/models/security/test_dns_security_profiles_models.py
 
 from uuid import UUID
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.security.dns_security_profiles import (
@@ -15,7 +16,7 @@ from scm.models.security.dns_security_profiles import (
     ListActionBaseModel,
     ListActionRequestModel,
 )
-from tests.factories import (
+from tests.factories.security import (
     DNSSecurityProfileCreateApiFactory,
     DNSSecurityProfileCreateModelFactory,
     DNSSecurityProfileResponseFactory,

@@ -1,4 +1,4 @@
-# tests/test_factories/objects/quarantined_devices.py
+# tests/factories/objects/quarantined_devices.py
 
 # Standard library imports
 from typing import Any, Dict

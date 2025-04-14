@@ -1,8 +1,8 @@
 # tests/scm/models/objects/test_application_group_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects import (
@@ -10,7 +10,7 @@ from scm.models.objects import (
     ApplicationGroupResponseModel,
     ApplicationGroupUpdateModel,
 )
-from tests.test_factories.objects.application_group import (
+from tests.factories.objects.application_group import (
     ApplicationGroupCreateModelFactory,
     ApplicationGroupResponseFactory,
     ApplicationGroupUpdateModelFactory,

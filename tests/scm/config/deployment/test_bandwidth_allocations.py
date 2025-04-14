@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.deployment import BandwidthAllocations
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment import BandwidthAllocationResponseModel
-from tests.test_factories.deployment.bandwidth_allocations import (
+from tests.factories.deployment.bandwidth_allocations import (
     BandwidthAllocationCreateApiFactory,
     BandwidthAllocationResponseFactory,
     BandwidthAllocationUpdateApiFactory,

@@ -1,4 +1,4 @@
-# tests/test_factories/objects/application_group.py
+# tests/factories/objects/application_group.py
 
 from uuid import uuid4
 

@@ -1,12 +1,13 @@
 # tests/scm/config/security/test_security_rules.py
 
 # Standard library imports
-import uuid
 from unittest.mock import MagicMock
+import uuid
+
+from pydantic import ValidationError
 
 # External libraries
 import pytest
-from pydantic import ValidationError
 from requests.exceptions import HTTPError
 
 # Local SDK imports
@@ -21,7 +22,7 @@ from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleRulebase,
 )
-from tests.factories import (
+from tests.factories.security import (
     SecurityRuleCreateApiFactory,
     SecurityRuleMoveApiFactory,
     SecurityRuleProfileSettingFactory,

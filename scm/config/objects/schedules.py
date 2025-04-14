@@ -7,7 +7,11 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import ScheduleCreateModel, ScheduleResponseModel, ScheduleUpdateModel
+from scm.models.objects import (
+    ScheduleCreateModel,
+    ScheduleResponseModel,
+    ScheduleUpdateModel,
+)
 
 
 class Schedule(BaseObject):

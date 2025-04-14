@@ -196,8 +196,8 @@ class ServiceConnection(BaseObject):
         all_objects = []
 
         # Folder is required for service-connections API (from OpenAPI spec)
-        params = dict(filters)
-        params["folder"] = "Service Connections"  # Always set folder parameter
+        base_params = dict(filters)
+        base_params["folder"] = "Service Connections"  # Always set folder parameter
 
         # Add name filter if provided
         if name:
@@ -220,9 +220,10 @@ class ServiceConnection(BaseObject):
                     error_code="E003",
                     http_status_code=400,
                 )
-            params["name"] = name.strip()
+            base_params["name"] = name.strip()
 
         while True:
+            params = base_params.copy()
             params["limit"] = limit
             params["offset"] = offset
 

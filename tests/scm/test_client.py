@@ -15,7 +15,11 @@ from scm.exceptions import (
     ObjectNotPresentError,
     ServerError,
 )
-from scm.models.operations import CandidatePushResponseModel, JobListResponse, JobStatusResponse
+from scm.models.operations import (
+    CandidatePushResponseModel,
+    JobListResponse,
+    JobStatusResponse,
+)
 from tests.utils import raise_mock_http_error
 
 

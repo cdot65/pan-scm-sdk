@@ -3,9 +3,10 @@
 # Standard library imports
 from unittest.mock import MagicMock
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 from requests.exceptions import HTTPError
 
 # Local SDK imports
@@ -14,7 +15,7 @@ from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import TagResponseModel, TagUpdateModel
 
 # Import factories
-from tests.test_factories.objects.tag import (
+from tests.factories.objects.tag import (
     TagCreateApiFactory,
     TagResponseFactory,
     TagUpdateApiFactory,

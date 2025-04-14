@@ -1,10 +1,10 @@
-# tests/scm/config/security/test_wildfire_antivirus_profile.py
+# tests/scm/config/security/test_wildfire_antivirus_profiles.py
 
 import logging
 from unittest.mock import MagicMock
 
-import pytest
 from pydantic import ValidationError as PydanticValidationError
+import pytest
 from requests import HTTPError
 
 from scm.config.security.wildfire_antivirus_profile import WildfireAntivirusProfile
@@ -16,7 +16,10 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileResponseModel,
 )
 from scm.utils.logging import setup_logger
-from tests.factories import WildfireAvProfileResponseFactory, WildfireAvProfileUpdateApiFactory
+from tests.factories.security import (
+    WildfireAvProfileResponseFactory,
+    WildfireAvProfileUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 logger = setup_logger(__name__, logging.DEBUG)

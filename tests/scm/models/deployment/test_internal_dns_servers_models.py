@@ -1,10 +1,10 @@
 """Tests for internal DNS server pydantic models."""
 
-import uuid
 from ipaddress import IPv4Address
+import uuid
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.deployment.internal_dns_servers import (
     InternalDnsServersBaseModel,
@@ -12,7 +12,7 @@ from scm.models.deployment.internal_dns_servers import (
     InternalDnsServersResponseModel,
     InternalDnsServersUpdateModel,
 )
-from tests.test_factories.deployment.internal_dns_servers import (
+from tests.factories.deployment.internal_dns_servers import (
     InternalDnsServersCreateModelFactory,
     InternalDnsServersResponseModelFactory,
     InternalDnsServersUpdateModelFactory,

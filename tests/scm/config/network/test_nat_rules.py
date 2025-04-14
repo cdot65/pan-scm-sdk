@@ -2,9 +2,9 @@
 
 from unittest.mock import MagicMock
 
-import pytest
 from pydantic import ValidationError
 from pydantic.v1 import UUID4
+import pytest
 from requests.exceptions import HTTPError
 
 # Import the NAT Rule SDK and related exceptions
@@ -15,10 +15,11 @@ from scm.models.network.nat_rules import (
     NatRuleResponseModel,
     NatRuleUpdateModel,
 )
-
-# Import factories for generating test data
-from tests.factories import NatRuleResponseFactory  # if needed in future
-from tests.factories import NatRuleCreateApiFactory, NatRuleUpdateApiFactory
+from tests.factories.network import (
+    NatRuleCreateApiFactory,
+    NatRuleResponseFactory,
+    NatRuleUpdateApiFactory,
+)
 
 # Import utility function for simulating HTTP errors
 

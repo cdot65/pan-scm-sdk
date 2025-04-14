@@ -1,8 +1,8 @@
 # tests/scm/models/auth/test_auth_request_model.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.auth import AuthRequestModel
