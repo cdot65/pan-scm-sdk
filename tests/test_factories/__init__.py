@@ -103,6 +103,14 @@ from tests.test_factories.objects.region import (
     RegionUpdateApiFactory,
     RegionUpdateModelFactory,
 )
+from tests.test_factories.objects.schedules import (
+    ScheduleBaseFactory,
+    ScheduleCreateApiFactory,
+    ScheduleCreateModelFactory,
+    ScheduleResponseFactory,
+    ScheduleUpdateApiFactory,
+    ScheduleUpdateModelFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -217,6 +225,13 @@ __all__ = [
     "RegionCreateModelFactory",
     "RegionUpdateModelFactory",
     "RegionResponseModelFactory",
+    # Schedules
+    "ScheduleBaseFactory",
+    "ScheduleCreateApiFactory",
+    "ScheduleUpdateApiFactory",
+    "ScheduleResponseFactory",
+    "ScheduleCreateModelFactory",
+    "ScheduleUpdateModelFactory",
     # Security - URL Categories
     "URLCategoriesCreateModelFactory",
     "URLCategoriesUpdateModelFactory",

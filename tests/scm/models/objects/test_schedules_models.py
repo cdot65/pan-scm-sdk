@@ -15,7 +15,10 @@ from scm.models.objects.schedules import (
     ScheduleTypeModel,
     WeeklyScheduleModel,
 )
-from tests.test_factories.objects.schedules import ScheduleCreateModelFactory, ScheduleUpdateModelFactory
+from tests.test_factories.objects.schedules import (
+    ScheduleCreateModelFactory,
+    ScheduleUpdateModelFactory,
+)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 
