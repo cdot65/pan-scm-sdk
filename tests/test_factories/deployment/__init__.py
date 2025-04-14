@@ -28,6 +28,11 @@ from tests.test_factories.deployment.internal_dns_servers import (
     InternalDnsServersUpdateApiFactory,
     InternalDnsServersUpdateModelFactory,
 )
+from tests.test_factories.deployment.network_locations import (
+    NetworkLocationApiFactory,
+    NetworkLocationBaseFactory,
+    NetworkLocationModelFactory,
+)
 from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkBaseFactory,
     RemoteNetworkCreateApiFactory,
@@ -63,6 +68,10 @@ __all__ = [
     "InternalDnsServersCreateModelFactory",
     "InternalDnsServersUpdateModelFactory",
     "InternalDnsServersResponseModelFactory",
+    # Network Locations factories
+    "NetworkLocationApiFactory",
+    "NetworkLocationBaseFactory",
+    "NetworkLocationModelFactory",
     # Remote Networks factories
     "RemoteNetworkBaseFactory",
     "RemoteNetworkCreateApiFactory",

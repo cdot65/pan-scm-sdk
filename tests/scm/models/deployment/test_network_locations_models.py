@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from scm.models.deployment.network_locations import NetworkLocationModel
+from tests.test_factories.deployment.network_locations import NetworkLocationModelFactory
 
 
 class TestNetworkLocationModel:
@@ -11,15 +12,7 @@ class TestNetworkLocationModel:
 
     def test_valid_model_creation(self):
         """Test creating a valid model with all required fields."""
-        data = {
-            "value": "us-west-1",
-            "display": "US West",
-            "continent": "North America",
-            "latitude": 37.38314,
-            "longitude": -121.98306,
-            "region": "us-west-1",
-            "aggregate_region": "us-southwest",
-        }
+        data = NetworkLocationModelFactory.build_valid()
         model = NetworkLocationModel(**data)
         assert model.value == "us-west-1"
         assert model.display == "US West"
@@ -31,7 +24,8 @@ class TestNetworkLocationModel:
 
     def test_minimal_model_creation(self):
         """Test creating a model with only required fields."""
-        model = NetworkLocationModel(value="us-west-1", display="US West")
+        data = NetworkLocationModelFactory.build_minimal()
+        model = NetworkLocationModel(**data)
         assert model.value == "us-west-1"
         assert model.display == "US West"
         assert model.continent is None
@@ -44,12 +38,14 @@ class TestNetworkLocationModel:
         """Test validation fails when required fields are missing."""
         # Missing 'value'
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(display="US West")
+            data = NetworkLocationModelFactory.build_missing_required("value")
+            NetworkLocationModel(**data)
         assert "value\n  Field required" in str(exc_info.value)
 
         # Missing 'display'
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="us-west-1")
+            data = NetworkLocationModelFactory.build_missing_required("display")
+            NetworkLocationModel(**data)
         assert "display\n  Field required" in str(exc_info.value)
 
         # Missing both required fields
@@ -61,95 +57,101 @@ class TestNetworkLocationModel:
     def test_latitude_validation(self):
         """Test latitude field validation."""
         # Valid minimum value
-        model = NetworkLocationModel(value="test", display="Test", latitude=-90)
+        data = NetworkLocationModelFactory.build_minimal(latitude=-90)
+        model = NetworkLocationModel(**data)
         assert model.latitude == -90
 
         # Valid maximum value
-        model = NetworkLocationModel(value="test", display="Test", latitude=90)
+        data = NetworkLocationModelFactory.build_minimal(latitude=90)
+        model = NetworkLocationModel(**data)
         assert model.latitude == 90
 
         # Valid value within range
-        model = NetworkLocationModel(value="test", display="Test", latitude=45.123)
+        data = NetworkLocationModelFactory.build_minimal(latitude=45.123)
+        model = NetworkLocationModel(**data)
         assert model.latitude == 45.123
 
         # Invalid: exceeds maximum
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display="Test", latitude=90.1)
+            data = NetworkLocationModelFactory.build_with_invalid_latitude(latitude=90.1)
+            NetworkLocationModel(**data)
         assert "latitude\n  Input should be less than or equal to 90" in str(exc_info.value)
 
         # Invalid: below minimum
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display="Test", latitude=-90.1)
+            data = NetworkLocationModelFactory.build_with_invalid_latitude(latitude=-90.1)
+            NetworkLocationModel(**data)
         assert "latitude\n  Input should be greater than or equal to -90" in str(exc_info.value)
 
     def test_longitude_validation(self):
         """Test longitude field validation."""
         # Valid minimum value
-        model = NetworkLocationModel(value="test", display="Test", longitude=-180)
+        data = NetworkLocationModelFactory.build_minimal(longitude=-180)
+        model = NetworkLocationModel(**data)
         assert model.longitude == -180
 
         # Valid maximum value
-        model = NetworkLocationModel(value="test", display="Test", longitude=180)
+        data = NetworkLocationModelFactory.build_minimal(longitude=180)
+        model = NetworkLocationModel(**data)
         assert model.longitude == 180
 
         # Valid value within range
-        model = NetworkLocationModel(value="test", display="Test", longitude=45.123)
+        data = NetworkLocationModelFactory.build_minimal(longitude=45.123)
+        model = NetworkLocationModel(**data)
         assert model.longitude == 45.123
 
         # Invalid: exceeds maximum
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display="Test", longitude=180.1)
+            data = NetworkLocationModelFactory.build_with_invalid_longitude(longitude=180.1)
+            NetworkLocationModel(**data)
         assert "longitude\n  Input should be less than or equal to 180" in str(exc_info.value)
 
         # Invalid: below minimum
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display="Test", longitude=-180.1)
+            data = NetworkLocationModelFactory.build_with_invalid_longitude(longitude=-180.1)
+            NetworkLocationModel(**data)
         assert "longitude\n  Input should be greater than or equal to -180" in str(exc_info.value)
 
-    def test_model_serialization(self):
-        """Test model serialization to dictionary."""
-        data = {
-            "value": "us-west-1",
-            "display": "US West",
-            "continent": "North America",
-            "latitude": 37.38314,
-            "longitude": -121.98306,
-            "region": "us-west-1",
-            "aggregate_region": "us-southwest",
-        }
+    def test_serialization(self):
+        """Test model serialization to dict."""
+        data = NetworkLocationModelFactory.build_valid()
         model = NetworkLocationModel(**data)
-        model_dict = model.model_dump()
+        serialized = model.model_dump()
+        assert serialized["value"] == "us-west-1"
+        assert serialized["display"] == "US West"
+        assert serialized["continent"] == "North America"
+        assert serialized["latitude"] == 37.38314
+        assert serialized["longitude"] == -121.98306
+        assert serialized["region"] == "us-west-1"
+        assert serialized["aggregate_region"] == "us-southwest"
 
-        assert model_dict["value"] == "us-west-1"
-        assert model_dict["display"] == "US West"
-        assert model_dict["continent"] == "North America"
-        assert model_dict["latitude"] == 37.38314
-        assert model_dict["longitude"] == -121.98306
-        assert model_dict["region"] == "us-west-1"
-        assert model_dict["aggregate_region"] == "us-southwest"
+    def test_serialization_with_none_values(self):
+        """Test model serialization with None values."""
+        data = NetworkLocationModelFactory.build_minimal()
+        model = NetworkLocationModel(**data)
+        serialized = model.model_dump()
+        assert serialized["continent"] is None
+        assert serialized["latitude"] is None
+        assert serialized["longitude"] is None
+        assert serialized["region"] is None
+        assert serialized["aggregate_region"] is None
 
-        # Test with exclude_none option
-        minimal_model = NetworkLocationModel(value="us-west-1", display="US West")
-        minimal_dict = minimal_model.model_dump(exclude_none=True)
-        assert "value" in minimal_dict
-        assert "display" in minimal_dict
-        assert "continent" not in minimal_dict
-        assert "latitude" not in minimal_dict
-        assert "longitude" not in minimal_dict
-        assert "region" not in minimal_dict
-        assert "aggregate_region" not in minimal_dict
+    def test_serialization_exclude_none(self):
+        """Test model serialization with exclude_none=True."""
+        data = NetworkLocationModelFactory.build_minimal()
+        model = NetworkLocationModel(**data)
+        serialized = model.model_dump(exclude_none=True)
+        assert "continent" not in serialized
+        assert "latitude" not in serialized
+        assert "longitude" not in serialized
+        assert "region" not in serialized
+        assert "aggregate_region" not in serialized
+        assert "value" in serialized
+        assert "display" in serialized
 
     def test_model_with_none_values(self):
         """Test model with explicit None values for optional fields."""
-        data = {
-            "value": "us-west-1",
-            "display": "US West",
-            "continent": None,
-            "latitude": None,
-            "longitude": None,
-            "region": None,
-            "aggregate_region": None,
-        }
+        data = NetworkLocationModelFactory.build_with_none_values()
         model = NetworkLocationModel(**data)
         assert model.value == "us-west-1"
         assert model.display == "US West"
@@ -161,13 +163,7 @@ class TestNetworkLocationModel:
 
     def test_empty_string_values(self):
         """Test model with empty string values."""
-        data = {
-            "value": "us-west-1",
-            "display": "US West",
-            "continent": "",
-            "region": "",
-            "aggregate_region": "",
-        }
+        data = NetworkLocationModelFactory.build_with_empty_strings()
         model = NetworkLocationModel(**data)
         assert model.value == "us-west-1"
         assert model.display == "US West"
@@ -179,22 +175,26 @@ class TestNetworkLocationModel:
         """Test validation fails with invalid types."""
         # Invalid latitude type
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display="Test", latitude="invalid")
+            data = NetworkLocationModelFactory.build_with_invalid_latitude_type()
+            NetworkLocationModel(**data)
         assert "latitude\n  Input should be a valid number" in str(exc_info.value)
 
         # Invalid longitude type
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display="Test", longitude="invalid")
+            data = NetworkLocationModelFactory.build_with_invalid_longitude_type()
+            NetworkLocationModel(**data)
         assert "longitude\n  Input should be a valid number" in str(exc_info.value)
 
         # Invalid value type
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value=123, display="Test")
+            data = NetworkLocationModelFactory.build_with_invalid_value_type()
+            NetworkLocationModel(**data)
         assert "value\n  Input should be a valid string" in str(exc_info.value)
 
         # Invalid display type
         with pytest.raises(ValidationError) as exc_info:
-            NetworkLocationModel(value="test", display=123)
+            data = NetworkLocationModelFactory.build_with_invalid_display_type()
+            NetworkLocationModel(**data)
         assert "display\n  Input should be a valid string" in str(exc_info.value)
 
     def test_model_config_options(self):
