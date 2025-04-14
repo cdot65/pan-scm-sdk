@@ -172,6 +172,14 @@ from tests.test_factories.objects.tag import (
     TagUpdateApiFactory,
     TagUpdateModelFactory,
 )
+from tests.test_factories.security import (
+    AntiSpywareProfileBaseFactory,
+    AntiSpywareProfileCreateApiFactory,
+    AntiSpywareProfileCreateModelFactory,
+    AntiSpywareProfileResponseFactory,
+    AntiSpywareProfileUpdateApiFactory,
+    AntiSpywareProfileUpdateModelFactory,
+)
 from tests.test_factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
@@ -179,6 +187,13 @@ from tests.test_factories.security.url_categories import (
 )
 
 __all__ = [
+    # AntiSpyware Profile factories
+    "AntiSpywareProfileBaseFactory",
+    "AntiSpywareProfileCreateApiFactory",
+    "AntiSpywareProfileCreateModelFactory",
+    "AntiSpywareProfileResponseFactory",
+    "AntiSpywareProfileUpdateApiFactory",
+    "AntiSpywareProfileUpdateModelFactory",
     # Bandwidth allocation factories
     "BandwidthAllocationBaseFactory",
     "BandwidthAllocationCreateApiFactory",
