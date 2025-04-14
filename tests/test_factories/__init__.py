@@ -8,6 +8,17 @@ from tests.test_factories.deployment.bandwidth_allocations import (
     BandwidthAllocationUpdateApiFactory,
     QosModelFactory,
 )
+from tests.test_factories.deployment.bgp_routing import (
+    BGPRoutingBaseFactory,
+    BGPRoutingCreateApiFactory,
+    BGPRoutingCreateModelFactory,
+    BGPRoutingResponseFactory,
+    BGPRoutingResponseModelFactory,
+    BGPRoutingUpdateApiFactory,
+    BGPRoutingUpdateModelFactory,
+    DefaultRoutingModelFactory,
+    HotPotatoRoutingModelFactory,
+)
 from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkBaseFactory,
     RemoteNetworkCreateApiFactory,
@@ -158,6 +169,16 @@ __all__ = [
     "BandwidthAllocationResponseFactory",
     "BandwidthAllocationUpdateApiFactory",
     "QosModelFactory",
+    # BGP Routing factories
+    "BGPRoutingBaseFactory",
+    "BGPRoutingCreateApiFactory",
+    "BGPRoutingCreateModelFactory",
+    "BGPRoutingResponseFactory",
+    "BGPRoutingResponseModelFactory",
+    "BGPRoutingUpdateApiFactory",
+    "BGPRoutingUpdateModelFactory",
+    "DefaultRoutingModelFactory",
+    "HotPotatoRoutingModelFactory",
     # Quarantined devices factories
     "QuarantinedDevicesBaseFactory",
     "QuarantinedDevicesCreateApiFactory",
