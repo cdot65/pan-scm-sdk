@@ -14,7 +14,11 @@ from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import TagResponseModel, TagUpdateModel
 
 # Import factories
-from tests.factories import TagCreateApiFactory, TagResponseFactory, TagUpdateApiFactory
+from tests.test_factories.objects.tag import (
+    TagCreateApiFactory,
+    TagResponseFactory,
+    TagUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 

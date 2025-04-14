@@ -1,12 +1,12 @@
-# tests/scm/models/objects/test_tag.py
+# tests/scm/models/objects/test_tag_models.py
 
 # External libraries
 import pytest
 from pydantic import ValidationError
 
 # Local SDK imports
-from scm.models.objects import TagCreateModel, TagResponseModel, TagUpdateModel
-from tests.factories import TagCreateModelFactory, TagUpdateModelFactory
+from scm.models.objects.tag import TagCreateModel, TagResponseModel, TagUpdateModel
+from tests.test_factories.objects.tag import TagCreateModelFactory, TagUpdateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 
