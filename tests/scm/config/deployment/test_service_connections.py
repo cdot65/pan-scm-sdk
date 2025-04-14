@@ -8,7 +8,7 @@ import pytest
 from scm.config.deployment import ServiceConnection
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment import ServiceConnectionResponseModel
-from tests.test_factories.deployment import (
+from tests.factories.deployment import (
     ServiceConnectionCreateApiFactory,
     ServiceConnectionCreateModelFactory,
     ServiceConnectionResponseFactory,

@@ -12,7 +12,7 @@ from scm.models.objects import (
     LogForwardingProfileResponseModel,
     LogForwardingProfileUpdateModel,
 )
-from tests.test_factories.objects.log_forwarding_profile import (
+from tests.factories.objects.log_forwarding_profile import (
     LogForwardingProfileCreateApiFactory,
     LogForwardingProfileResponseFactory,
     LogForwardingProfileUpdateApiFactory,

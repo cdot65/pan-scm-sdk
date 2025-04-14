@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import Application
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ApplicationResponseModel
-from tests.test_factories.objects.application import (
+from tests.factories.objects.application import (
     ApplicationCreateApiFactory,
     ApplicationResponseFactory,
     ApplicationUpdateApiFactory,

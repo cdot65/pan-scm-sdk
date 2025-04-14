@@ -16,7 +16,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileResponseModel,
 )
 from scm.utils.logging import setup_logger
-from tests.test_factories.security import (
+from tests.factories.security import (
     WildfireAvProfileResponseFactory,
     WildfireAvProfileUpdateApiFactory,
 )

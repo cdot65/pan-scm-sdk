@@ -1,5 +1,5 @@
-# tests/test_factories/security/__init__.py
-from tests.test_factories.security.anti_spyware_profile import (
+# tests/factories/security/__init__.py
+from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileBaseFactory,
     AntiSpywareProfileCreateApiFactory,
     AntiSpywareProfileCreateModelFactory,
@@ -7,14 +7,14 @@ from tests.test_factories.security.anti_spyware_profile import (
     AntiSpywareProfileUpdateApiFactory,
     AntiSpywareProfileUpdateModelFactory,
 )
-from tests.test_factories.security.decryption_profile import (
+from tests.factories.security.decryption_profile import (
     DecryptionProfileCreateApiFactory,
     DecryptionProfileCreateModelFactory,
     DecryptionProfileResponseFactory,
     DecryptionProfileUpdateApiFactory,
     DecryptionProfileUpdateModelFactory,
 )
-from tests.test_factories.security.dns_security_profile import (
+from tests.factories.security.dns_security_profile import (
     BotnetDomainsFactory,
     DNSSecurityCategoryEntryFactory,
     DNSSecurityProfileCreateApiFactory,
@@ -27,7 +27,7 @@ from tests.test_factories.security.dns_security_profile import (
     SinkholeSettingsFactory,
     WhitelistEntryFactory,
 )
-from tests.test_factories.security.security_rule import (
+from tests.factories.security.security_rule import (
     SecurityRuleCreateApiFactory,
     SecurityRuleCreateModelFactory,
     SecurityRuleMoveApiFactory,
@@ -37,12 +37,12 @@ from tests.test_factories.security.security_rule import (
     SecurityRuleUpdateApiFactory,
     SecurityRuleUpdateModelFactory,
 )
-from tests.test_factories.security.url_categories import (
+from tests.factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
     URLCategoriesUpdateModelFactory,
 )
-from tests.test_factories.security.vulnerability_protection_profile import (
+from tests.factories.security.vulnerability_protection_profile import (
     VulnerabilityProfileCreateApiFactory,
     VulnerabilityProfileCreateModelFactory,
     VulnerabilityProfileExemptIpEntryFactory,
@@ -53,7 +53,7 @@ from tests.test_factories.security.vulnerability_protection_profile import (
     VulnerabilityProfileUpdateApiFactory,
     VulnerabilityProfileUpdateModelFactory,
 )
-from tests.test_factories.security.wildfire_antivirus_profile import (
+from tests.factories.security.wildfire_antivirus_profile import (
     WildfireAvMlavExceptionEntryFactory,
     WildfireAvProfileCreateApiFactory,
     WildfireAvProfileCreateModelFactory,

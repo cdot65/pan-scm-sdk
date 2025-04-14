@@ -12,7 +12,7 @@ from scm.models.deployment.internal_dns_servers import (
     InternalDnsServersResponseModel,
     InternalDnsServersUpdateModel,
 )
-from tests.test_factories.deployment.internal_dns_servers import (
+from tests.factories.deployment.internal_dns_servers import (
     InternalDnsServersCreateModelFactory,
     InternalDnsServersResponseModelFactory,
     InternalDnsServersUpdateModelFactory,

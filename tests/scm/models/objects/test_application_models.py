@@ -10,7 +10,7 @@ from scm.models.objects import (
     ApplicationResponseModel,
     ApplicationUpdateModel,
 )
-from tests.test_factories.objects.application import (
+from tests.factories.objects.application import (
     ApplicationCreateModelFactory,
     ApplicationResponseModelFactory,
     ApplicationUpdateModelFactory,

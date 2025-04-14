@@ -15,7 +15,7 @@ from scm.models.deployment import (
     ServiceConnectionResponseModel,
     ServiceConnectionUpdateModel,
 )
-from tests.test_factories.deployment import (
+from tests.factories.deployment import (
     BgpPeerModelFactory,
     BgpProtocolModelFactory,
     ProtocolModelFactory,

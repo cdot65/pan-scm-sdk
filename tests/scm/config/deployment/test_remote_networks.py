@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.deployment import RemoteNetworks
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment import RemoteNetworkResponseModel
-from tests.test_factories.deployment.remote_networks import (
+from tests.factories.deployment.remote_networks import (
     RemoteNetworkCreateApiFactory,
     RemoteNetworkResponseFactory,
     RemoteNetworkUpdateApiFactory,

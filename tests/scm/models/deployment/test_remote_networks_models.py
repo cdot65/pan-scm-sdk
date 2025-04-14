@@ -7,7 +7,7 @@ from scm.models.deployment.remote_networks import (
     RemoteNetworkCreateModel,
     RemoteNetworkUpdateModel,
 )
-from tests.test_factories.deployment.remote_networks import (
+from tests.factories.deployment.remote_networks import (
     RemoteNetworkCreateModelFactory,
     RemoteNetworkUpdateModelFactory,
 )

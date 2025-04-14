@@ -1,4 +1,4 @@
-# tests/test_factories/objects/http_server_profiles.py
+# tests/factories/objects/http_server_profiles.py
 
 from typing import Dict
 from uuid import uuid4

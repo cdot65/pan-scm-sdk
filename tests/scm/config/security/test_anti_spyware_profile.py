@@ -13,7 +13,7 @@ from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.anti_spyware_profiles import (
     AntiSpywareProfileResponseModel,
 )
-from tests.test_factories.security.anti_spyware_profile import (
+from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileCreateApiFactory,
     AntiSpywareProfileResponseFactory,
     AntiSpywareProfileUpdateApiFactory,

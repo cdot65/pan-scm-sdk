@@ -1,4 +1,4 @@
-# tests/test_factories/objects/service_group.py
+# tests/factories/objects/service_group.py
 
 # Standard library imports
 from typing import Any, Dict, Union

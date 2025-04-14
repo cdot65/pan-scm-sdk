@@ -12,7 +12,7 @@ from scm.models.deployment.bgp_routing import (
     DefaultRoutingModel,
     HotPotatoRoutingModel,
 )
-from tests.test_factories.deployment.bgp_routing import (
+from tests.factories.deployment.bgp_routing import (
     BGPRoutingCreateModelFactory,
     BGPRoutingResponseModelFactory,
     BGPRoutingUpdateModelFactory,

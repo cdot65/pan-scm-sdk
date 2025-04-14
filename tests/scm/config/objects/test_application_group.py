@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import ApplicationGroup
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ApplicationGroupResponseModel
-from tests.test_factories.objects.application_group import (
+from tests.factories.objects.application_group import (
     ApplicationGroupCreateApiFactory,
     ApplicationGroupResponseFactory,
     ApplicationGroupUpdateApiFactory,

@@ -1,4 +1,4 @@
-# tests/test_factories/objects/tag.py
+# tests/factories/objects/tag.py
 
 # Standard library imports
 from typing import Any, Dict, Union

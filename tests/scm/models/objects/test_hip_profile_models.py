@@ -13,7 +13,7 @@ from scm.models.objects import (
     HIPProfileResponseModel,
     HIPProfileUpdateModel,
 )
-from tests.test_factories.objects.hip_profile import (
+from tests.factories.objects.hip_profile import (
     HIPProfileCreateModelFactory,
     HIPProfileResponseModelFactory,
     HIPProfileUpdateModelFactory,

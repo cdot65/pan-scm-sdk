@@ -6,7 +6,7 @@ import pytest
 
 # Local SDK imports
 from scm.models.objects.tag import TagCreateModel, TagResponseModel, TagUpdateModel
-from tests.test_factories.objects.tag import (
+from tests.factories.objects.tag import (
     TagCreateModelFactory,
     TagUpdateModelFactory,
 )

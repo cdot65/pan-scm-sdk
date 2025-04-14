@@ -1,4 +1,4 @@
-# tests/test_factories/objects/address.py
+# tests/factories/objects/address.py
 
 from uuid import uuid4
 

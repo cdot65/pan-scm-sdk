@@ -12,7 +12,7 @@ from scm.models.objects.dynamic_user_group import (
     DynamicUserGroupResponseModel,
     DynamicUserGroupUpdateModel,
 )
-from tests.test_factories.objects.dynamic_user_group import (
+from tests.factories.objects.dynamic_user_group import (
     DynamicUserGroupCreateModelFactory,
     DynamicUserGroupUpdateModelFactory,
 )

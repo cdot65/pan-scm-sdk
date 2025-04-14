@@ -7,7 +7,7 @@ import pytest
 # Local SDK imports
 from scm.models.objects import AddressGroupCreateModel, AddressGroupUpdateModel
 from scm.models.objects.address_group import DynamicFilter
-from tests.test_factories import (
+from tests.factories import (
     AddressGroupCreateModelFactory,
     AddressGroupUpdateModelFactory,
 )

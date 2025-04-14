@@ -10,7 +10,7 @@ from scm.models.objects.application_filters import (
     ApplicationFiltersResponseModel,
     ApplicationFiltersUpdateModel,
 )
-from tests.test_factories.objects.application_filters import (
+from tests.factories.objects.application_filters import (
     ApplicationFiltersCreateApiFactory,
     ApplicationFiltersCreateModelFactory,
     ApplicationFiltersResponseModelFactory,

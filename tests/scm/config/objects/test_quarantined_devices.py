@@ -10,7 +10,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import QuarantinedDevices
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import QuarantinedDevicesResponseModel
-from tests.test_factories.objects.quarantined_devices import (
+from tests.factories.objects.quarantined_devices import (
     QuarantinedDevicesCreateApiFactory,
     QuarantinedDevicesResponseFactory,
 )

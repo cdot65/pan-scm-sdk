@@ -15,7 +15,7 @@ from scm.models.network.nat_rules import (
     NatRuleResponseModel,
     NatRuleUpdateModel,
 )
-from tests.test_factories.network import (
+from tests.factories.network import (
     NatRuleCreateApiFactory,
     NatRuleResponseFactory,
     NatRuleUpdateApiFactory,

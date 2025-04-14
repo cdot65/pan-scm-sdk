@@ -17,7 +17,7 @@ from scm.models.objects.syslog_server_profiles import (
 )
 
 # Import the new factories
-from tests.test_factories.objects.syslog_server_profiles import (
+from tests.factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
     SyslogServerModelFactory,

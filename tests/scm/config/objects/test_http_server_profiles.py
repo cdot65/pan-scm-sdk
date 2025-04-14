@@ -13,7 +13,7 @@ from scm.models.objects import (
     HTTPServerProfileUpdateModel,
     ServerModel,
 )
-from tests.test_factories.objects.http_server_profiles import (
+from tests.factories.objects.http_server_profiles import (
     HTTPServerProfileResponseFactory,
     ServerModelFactory,
 )

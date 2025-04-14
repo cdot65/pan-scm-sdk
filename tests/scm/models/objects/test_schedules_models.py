@@ -19,7 +19,7 @@ from scm.models.objects.schedules import (
     ScheduleTypeModel,
     WeeklyScheduleModel,
 )
-from tests.test_factories.objects.schedules import (
+from tests.factories.objects.schedules import (
     ScheduleCreateModelFactory,
     ScheduleUpdateModelFactory,
 )

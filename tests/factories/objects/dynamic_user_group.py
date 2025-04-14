@@ -1,4 +1,4 @@
-# tests/test_factories/objects/dynamic_user_group.py
+# tests/factories/objects/dynamic_user_group.py
 
 
 import factory  # type: ignore

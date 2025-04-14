@@ -1,6 +1,6 @@
-# tests/test_factories/deployment/__init__.py
+# tests/factories/deployment/__init__.py
 
-from tests.test_factories.deployment.bandwidth_allocations import (
+from tests.factories.deployment.bandwidth_allocations import (
     BandwidthAllocationBaseFactory,
     BandwidthAllocationCreateApiFactory,
     BandwidthAllocationCreateModelFactory,
@@ -8,7 +8,7 @@ from tests.test_factories.deployment.bandwidth_allocations import (
     BandwidthAllocationUpdateApiFactory,
     QosModelFactory,
 )
-from tests.test_factories.deployment.bgp_routing import (
+from tests.factories.deployment.bgp_routing import (
     BGPRoutingBaseFactory,
     BGPRoutingCreateApiFactory,
     BGPRoutingCreateModelFactory,
@@ -19,7 +19,7 @@ from tests.test_factories.deployment.bgp_routing import (
     DefaultRoutingModelFactory,
     HotPotatoRoutingModelFactory,
 )
-from tests.test_factories.deployment.internal_dns_servers import (
+from tests.factories.deployment.internal_dns_servers import (
     InternalDnsServersBaseFactory,
     InternalDnsServersCreateApiFactory,
     InternalDnsServersCreateModelFactory,
@@ -28,12 +28,12 @@ from tests.test_factories.deployment.internal_dns_servers import (
     InternalDnsServersUpdateApiFactory,
     InternalDnsServersUpdateModelFactory,
 )
-from tests.test_factories.deployment.network_locations import (
+from tests.factories.deployment.network_locations import (
     NetworkLocationApiFactory,
     NetworkLocationBaseFactory,
     NetworkLocationModelFactory,
 )
-from tests.test_factories.deployment.remote_networks import (
+from tests.factories.deployment.remote_networks import (
     RemoteNetworkBaseFactory,
     RemoteNetworkCreateApiFactory,
     RemoteNetworkCreateModelFactory,
@@ -41,15 +41,15 @@ from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkUpdateApiFactory,
     RemoteNetworkUpdateModelFactory,
 )
-from tests.test_factories.deployment.service_connections import (
+from tests.factories.deployment.service_connections import (
     BgpPeerModelFactory,
     BgpProtocolModelFactory,
     ProtocolModelFactory,
 )
-from tests.test_factories.deployment.service_connections import (
+from tests.factories.deployment.service_connections import (
     QosModelFactory as ServiceConnectionQosModelFactory,
 )
-from tests.test_factories.deployment.service_connections import (
+from tests.factories.deployment.service_connections import (
     ServiceConnectionBaseFactory,
     ServiceConnectionCreateApiFactory,
     ServiceConnectionCreateModelFactory,

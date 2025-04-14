@@ -10,7 +10,7 @@ from scm.models.objects import (
     ServiceGroupResponseModel,
     ServiceGroupUpdateModel,
 )
-from tests.test_factories.objects.service_group import ServiceGroupCreateModelFactory
+from tests.factories.objects.service_group import ServiceGroupCreateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

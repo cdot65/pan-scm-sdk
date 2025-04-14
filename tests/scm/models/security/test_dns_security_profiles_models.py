@@ -16,7 +16,7 @@ from scm.models.security.dns_security_profiles import (
     ListActionBaseModel,
     ListActionRequestModel,
 )
-from tests.test_factories.security import (
+from tests.factories.security import (
     DNSSecurityProfileCreateApiFactory,
     DNSSecurityProfileCreateModelFactory,
     DNSSecurityProfileResponseFactory,

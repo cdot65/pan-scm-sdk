@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import DynamicUserGroup
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import DynamicUserGroupResponseModel
-from tests.test_factories.objects.dynamic_user_group import (
+from tests.factories.objects.dynamic_user_group import (
     DynamicUserGroupCreateApiFactory,
     DynamicUserGroupResponseFactory,
     DynamicUserGroupUpdateApiFactory,

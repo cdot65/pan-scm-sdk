@@ -11,7 +11,7 @@ from scm.models.deployment.bandwidth_allocations import (
     BandwidthAllocationUpdateModel,
     QosModel,
 )
-from tests.test_factories.deployment.bandwidth_allocations import (
+from tests.factories.deployment.bandwidth_allocations import (
     BandwidthAllocationCreateModelFactory,
     BandwidthAllocationResponseModelFactory,
     BandwidthAllocationUpdateModelFactory,

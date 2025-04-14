@@ -10,7 +10,7 @@ from scm.models.objects import (
 
 # Local SDK imports
 from scm.models.objects.quarantined_devices import QuarantinedDevicesBaseModel
-from tests.test_factories.objects.quarantined_devices import (
+from tests.factories.objects.quarantined_devices import (
     QuarantinedDevicesBaseFactory,
     QuarantinedDevicesCreateFactory,
     QuarantinedDevicesListParamsFactory,

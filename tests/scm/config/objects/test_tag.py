@@ -15,7 +15,7 @@ from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import TagResponseModel, TagUpdateModel
 
 # Import factories
-from tests.test_factories.objects.tag import (
+from tests.factories.objects.tag import (
     TagCreateApiFactory,
     TagResponseFactory,
     TagUpdateApiFactory,

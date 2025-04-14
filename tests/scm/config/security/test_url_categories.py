@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.security import URLCategories
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.security.url_categories import URLCategoriesResponseModel
-from tests.test_factories import (
+from tests.factories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
     URLCategoriesUpdateModelFactory,

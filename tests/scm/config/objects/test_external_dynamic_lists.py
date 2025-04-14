@@ -13,7 +13,7 @@ from scm.models.objects.external_dynamic_lists import (
     ExternalDynamicListsResponseModel,
     ExternalDynamicListsUpdateModel,
 )
-from tests.test_factories.objects.external_dynamic_lists import (
+from tests.factories.objects.external_dynamic_lists import (
     ExternalDynamicListsCreateApiFactory,
     ExternalDynamicListsResponseFactory,
     ExternalDynamicListsUpdateApiFactory,

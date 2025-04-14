@@ -19,7 +19,7 @@ from scm.models.security.anti_spyware_profiles import (
     AntiSpywareSeverity,
     AntiSpywareThreatExceptionBase,
 )
-from tests.test_factories.security.anti_spyware_profile import (
+from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileCreateModelFactory,
     AntiSpywareProfileUpdateModelFactory,
 )

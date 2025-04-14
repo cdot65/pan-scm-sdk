@@ -1,6 +1,6 @@
 """Network factories for testing."""
 
-from tests.test_factories.network.nat_rules import (
+from tests.factories.network.nat_rules import (
     InterfaceAddressFactory,
     NatRuleCreateApiFactory,
     NatRuleCreateModelFactory,

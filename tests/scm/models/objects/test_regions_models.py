@@ -11,7 +11,7 @@ from scm.models.objects import (
     RegionResponseModel,
     RegionUpdateModel,
 )
-from tests.test_factories.objects.region import (
+from tests.factories.objects.region import (
     RegionCreateModelFactory,
     RegionResponseFactory,
     RegionResponseModelFactory,

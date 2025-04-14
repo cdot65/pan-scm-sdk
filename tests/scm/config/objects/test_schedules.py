@@ -12,7 +12,7 @@ import pytest
 from scm.config.objects import Schedule
 from scm.exceptions import APIError, InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ScheduleResponseModel, ScheduleUpdateModel
-from tests.test_factories.objects.schedules import ScheduleResponseFactory
+from tests.factories.objects.schedules import ScheduleResponseFactory
 
 
 @pytest.mark.usefixtures("load_env")

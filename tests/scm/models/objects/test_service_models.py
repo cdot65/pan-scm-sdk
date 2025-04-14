@@ -11,7 +11,7 @@ from scm.models.objects import (
     ServiceUpdateModel,
 )
 from scm.models.objects.service import Override, Protocol, TCPProtocol, UDPProtocol
-from tests.test_factories.objects.service import (
+from tests.factories.objects.service import (
     ServiceCreateModelFactory,
     ServiceUpdateModelFactory,
 )

@@ -22,7 +22,7 @@ from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleRulebase,
 )
-from tests.test_factories.security import (
+from tests.factories.security import (
     SecurityRuleCreateApiFactory,
     SecurityRuleMoveApiFactory,
     SecurityRuleProfileSettingFactory,

@@ -1,4 +1,4 @@
-# tests/test_factories/security/anti_spyware_profile.py
+# tests/factories/security/anti_spyware_profile.py
 
 from uuid import uuid4
 

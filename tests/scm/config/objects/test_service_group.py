@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import ServiceGroup
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ServiceGroupResponseModel
-from tests.test_factories.objects.service_group import (
+from tests.factories.objects.service_group import (
     ServiceGroupCreateApiFactory,
     ServiceGroupResponseFactory,
     ServiceGroupUpdateApiFactory,
