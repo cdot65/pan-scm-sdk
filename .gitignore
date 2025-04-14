@@ -226,6 +226,9 @@ atlassian-ide-plugin.xml
 # SonarLint plugin
 .idea/sonarlint/
 
+# Inspection profiles
+.idea/inspectionProfiles/
+
 # Editor-based Rest Client
 .idea/httpRequests
 
@@ -266,3 +269,6 @@ _test_*.py
 /docs/sdk/config/objects/failure.json
 /examples/scm/config/objects/task.md
 /CLAUDE
+
+# ignore Claude-specific files
+CLAUDE.md

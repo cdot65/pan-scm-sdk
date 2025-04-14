@@ -13,7 +13,7 @@ from pydantic import ValidationError
 from scm.config.objects import Schedule
 from scm.exceptions import APIError, InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import ScheduleResponseModel, ScheduleUpdateModel
-from tests.factories import ScheduleResponseFactory
+from tests.test_factories.objects.schedules import ScheduleResponseFactory
 
 
 @pytest.mark.usefixtures("load_env")
