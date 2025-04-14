@@ -3,9 +3,12 @@
 
 import factory  # type: ignore
 from faker import Faker
+from uuid import uuid4
 
 from scm.models.objects.dynamic_user_group import (
     DynamicUserGroupBaseModel,
+    DynamicUserGroupCreateModel,
+    DynamicUserGroupResponseModel,
     DynamicUserGroupUpdateModel,
 )
 
@@ -28,9 +31,12 @@ class DynamicUserGroupBaseFactory(factory.Factory):
     filter = "tag1 and tag2"
     description = fake.sentence()
     tag = ["test-tag", "environment-prod"]
-    folder = "Texas"
+    folder = None
     snippet = None
     device = None
+
+
+# API Factory Classes - These return dictionaries for API testing
 
 
 class DynamicUserGroupCreateApiFactory:
@@ -199,7 +205,7 @@ class DynamicUserGroupResponseFactory:
             **kwargs,
         }
         return data
-
+        
     @classmethod
     def with_device(
         cls,
@@ -217,11 +223,6 @@ class DynamicUserGroupResponseFactory:
             **kwargs,
         }
         return data
-
-    @classmethod
-    def with_filter(cls, filter_expression="tag1 or tag2", **kwargs):
-        """Create a response dict with a specific filter expression."""
-        return cls.with_folder(filter=filter_expression, **kwargs)
 
     @classmethod
     def from_request(cls, request_data):
@@ -242,8 +243,11 @@ class DynamicUserGroupResponseFactory:
 # ----------------------------------------------------------------------------
 
 
-class DynamicUserGroupCreateModelFactory(factory.DictFactory):
+class DynamicUserGroupCreateModelFactory(factory.Factory):
     """Factory for creating data dicts for DynamicUserGroupCreateModel validation testing."""
+
+    class Meta:
+        model = dict
 
     name = factory.Sequence(lambda n: f"dynamic_user_group_{n}")
     filter = "tag1 and tag2"
@@ -254,116 +258,82 @@ class DynamicUserGroupCreateModelFactory(factory.DictFactory):
     device = None
 
     @classmethod
-    def build_valid(cls):
+    def build_valid(cls, **kwargs):
         """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestDynamicUserGroup",
-            filter="tag1 and tag2",
-            folder="Texas",
-            description="This is a test dynamic user group",
-            tag=["test-tag", "environment-prod"],
-        )
+        return cls(**kwargs)
 
     @classmethod
-    def build_with_invalid_name(cls):
+    def build_with_invalid_name(cls, **kwargs):
         """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-name#",
-            filter="tag1 and tag2",
-            folder="Texas",
-        )
+        return cls(name="invalid@name", **kwargs)
 
     @classmethod
-    def build_with_empty_filter(cls):
+    def build_with_empty_filter(cls, **kwargs):
         """Return a data dict with empty filter."""
-        return cls(
-            name="TestGroup",
-            filter="",
-            folder="Texas",
-        )
+        return cls(filter="", **kwargs)
 
     @classmethod
-    def build_with_invalid_folder(cls):
+    def build_with_invalid_folder(cls, **kwargs):
         """Return a data dict with invalid folder pattern."""
-        return cls(
-            name="TestGroup",
-            filter="tag1 and tag2",
-            folder="Invalid@Folder#",
-        )
+        return cls(folder="Invalid@Folder", **kwargs)
 
     @classmethod
-    def build_with_multiple_containers(cls):
+    def build_with_multiple_containers(cls, **kwargs):
         """Return a data dict with multiple containers."""
-        return cls(
-            name="TestGroup",
-            filter="tag1 and tag2",
-            folder="Texas",
-            snippet="TestSnippet",
-        )
+        return cls(folder="Texas", snippet="TestSnippet", **kwargs)
 
     @classmethod
-    def build_with_no_container(cls):
+    def build_with_no_container(cls, **kwargs):
         """Return a data dict without any container."""
-        return cls(
-            name="TestGroup",
-            filter="tag1 and tag2",
-            folder=None,
-            snippet=None,
-            device=None,
-        )
+        return cls(folder=None, snippet=None, device=None, **kwargs)
 
     @classmethod
-    def build_with_duplicate_tags(cls):
+    def build_with_duplicate_tags(cls, **kwargs):
         """Return a data dict with duplicate tags."""
-        return cls(
-            name="TestGroup",
-            filter="tag1 and tag2",
-            folder="Texas",
-            tag=["duplicate-tag", "duplicate-tag"],
-        )
+        return cls(tag=["duplicate", "duplicate"], **kwargs)
 
 
-class DynamicUserGroupUpdateModelFactory:
+class DynamicUserGroupUpdateModelFactory(factory.Factory):
     """Factory for creating data dicts for DynamicUserGroupUpdateModel validation testing."""
+    
+    class Meta:
+        model = dict
+        
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = "test-dynamic-user-group"
+    filter = "tag1 and tag2"
+    description = fake.sentence()
+    tag = ["test-tag", "environment-prod"]
+    folder = "Texas"
 
     @classmethod
-    def build_valid(cls):
+    def build_valid(cls, **kwargs):
         """Return a valid data dict for updating a dynamic user group."""
-        return {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "updated-group",
-            "filter": "'tag.User.Admin'",
-            "description": "Updated dynamic user group",
-            "folder": "Shared",
-            "tag": ["updated-tag"],
-        }
+        return cls(**kwargs)
 
     @classmethod
-    def build_with_invalid_fields(cls):
+    def build_with_invalid_fields(cls, **kwargs):
         """Return a data dict with multiple invalid fields."""
-        return {
-            "id": "invalid-uuid-format",
-            "name": "invalid@name",
-            "filter": "",
-            "tag": "tag1,tag2",  # Invalid tag format
-        }
+        return cls(
+            id="not-a-uuid",
+            name="invalid@name",
+            filter="",
+            **kwargs,
+        )
 
     @classmethod
-    def build_minimal_update(cls):
+    def build_minimal_update(cls, **kwargs):
         """Return a data dict with minimal fields required for update."""
-        return {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "MinimalUpdate",
-            "filter": "minimal_tag1 or minimal_tag2",
-        }
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="MinimalUpdate",
+            filter="minimal_tag",
+            description=None,
+            tag=None,
+            **kwargs,
+        )
 
     @classmethod
-    def build_with_duplicate_tags(cls):
+    def build_with_duplicate_tags(cls, **kwargs):
         """Return a data dict with duplicate tags."""
-        return {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "updated-group",
-            "filter": "'tag.User.Admin'",
-            "folder": "Test-Folder",
-            "tag": ["duplicate-tag", "duplicate-tag"],
-        }
+        return cls(tag=["duplicate", "duplicate"], **kwargs)
