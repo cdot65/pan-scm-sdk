@@ -19,6 +19,15 @@ from tests.test_factories.deployment.bgp_routing import (
     DefaultRoutingModelFactory,
     HotPotatoRoutingModelFactory,
 )
+from tests.test_factories.deployment.internal_dns_servers import (
+    InternalDnsServersBaseFactory,
+    InternalDnsServersCreateApiFactory,
+    InternalDnsServersCreateModelFactory,
+    InternalDnsServersResponseFactory,
+    InternalDnsServersResponseModelFactory,
+    InternalDnsServersUpdateApiFactory,
+    InternalDnsServersUpdateModelFactory,
+)
 from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkBaseFactory,
     RemoteNetworkCreateApiFactory,
@@ -46,6 +55,14 @@ __all__ = [
     "BGPRoutingResponseModelFactory",
     "DefaultRoutingModelFactory",
     "HotPotatoRoutingModelFactory",
+    # Internal DNS Servers factories
+    "InternalDnsServersBaseFactory",
+    "InternalDnsServersCreateApiFactory",
+    "InternalDnsServersResponseFactory",
+    "InternalDnsServersUpdateApiFactory",
+    "InternalDnsServersCreateModelFactory",
+    "InternalDnsServersUpdateModelFactory",
+    "InternalDnsServersResponseModelFactory",
     # Remote Networks factories
     "RemoteNetworkBaseFactory",
     "RemoteNetworkCreateApiFactory",
