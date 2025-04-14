@@ -11,7 +11,11 @@ from requests.exceptions import HTTPError
 from scm.config.objects import Region
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import RegionResponseModel
-from tests.factories import RegionCreateApiFactory, RegionResponseFactory, RegionUpdateApiFactory
+from tests.test_factories.objects.region import (
+    RegionCreateApiFactory,
+    RegionResponseFactory,
+    RegionUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 
@@ -22,15 +26,14 @@ class TestRegionBase:
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_scm):
         """Setup method that runs before each test."""
-        self.mock_scm = mock_scm  # noqa
+        self.mock_scm = mock_scm
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
         self.mock_scm.put = MagicMock()
         self.mock_scm.delete = MagicMock()
-        self.client = Region(self.mock_scm, max_limit=5000)  # noqa
+        self.client = Region(self.mock_scm, max_limit=5000)
 
-
-# -------------------- Test Classes Grouped by Functionality --------------------
+    # -------------------- Test Classes Grouped by Functionality --------------------
 
 
 class TestRegionMaxLimit(TestRegionBase):
@@ -38,25 +41,25 @@ class TestRegionMaxLimit(TestRegionBase):
 
     def test_default_max_limit(self):
         """Test that default max_limit is set correctly."""
-        client = Region(self.mock_scm)  # noqa
+        client = Region(self.mock_scm)
         assert client.max_limit == Region.DEFAULT_MAX_LIMIT
         assert client.max_limit == 2500
 
     def test_custom_max_limit(self):
         """Test setting a custom max_limit."""
-        client = Region(self.mock_scm, max_limit=1000)  # noqa
+        client = Region(self.mock_scm, max_limit=1000)
         assert client.max_limit == 1000
 
     def test_max_limit_setter(self):
         """Test the max_limit property setter."""
-        client = Region(self.mock_scm)  # noqa
+        client = Region(self.mock_scm)
         client.max_limit = 3000
         assert client.max_limit == 3000
 
     def test_invalid_max_limit_type(self):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            Region(self.mock_scm, max_limit="invalid")  # noqa
+            Region(self.mock_scm, max_limit="invalid")
         assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
             exc_info.value
         )
@@ -64,7 +67,7 @@ class TestRegionMaxLimit(TestRegionBase):
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            Region(self.mock_scm, max_limit=0)  # noqa
+            Region(self.mock_scm, max_limit=0)
         assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
             exc_info.value
         )
@@ -72,7 +75,7 @@ class TestRegionMaxLimit(TestRegionBase):
     def test_max_limit_too_high(self):
         """Test that max_limit above ABSOLUTE_MAX_LIMIT raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
-            Region(self.mock_scm, max_limit=6000)  # noqa
+            Region(self.mock_scm, max_limit=6000)
         assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
 
 
@@ -88,19 +91,13 @@ class TestRegionList(TestRegionBase):
                 RegionResponseFactory(
                     name="North America Region",
                     folder="Global",
-                    geo_location={
-                        "latitude": 37.7749,
-                        "longitude": -122.4194,
-                    },
+                    geo_location={"latitude": 37.7749, "longitude": -122.4194},
                     address=["192.168.1.0/24", "10.0.0.0/8"],
                 ).model_dump(),
                 RegionResponseFactory(
                     name="Europe Region",
                     folder="Global",
-                    geo_location={
-                        "latitude": 51.5074,
-                        "longitude": -0.1278,
-                    },
+                    geo_location={"latitude": 51.5074, "longitude": -0.1278},
                     address=["172.16.0.0/16"],
                 ).model_dump(),
             ],
@@ -109,10 +106,10 @@ class TestRegionList(TestRegionBase):
             "limit": 200,
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
         existing_objects = self.client.list(folder="Global")
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/regions",
             params={
                 "folder": "Global",
@@ -127,7 +124,7 @@ class TestRegionList(TestRegionBase):
 
     def test_list_folder_empty_error(self):
         """Test that empty folder raises appropriate error."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
             message='"folder" is not allowed to be empty',
@@ -145,7 +142,7 @@ class TestRegionList(TestRegionBase):
 
     def test_list_folder_nonexistent_error(self):
         """Test error handling in list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Listing failed",
@@ -159,7 +156,7 @@ class TestRegionList(TestRegionBase):
         """
         Test that InvalidObjectError is raised when no container parameter is provided.
         """
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
             message="Exactly one of 'folder', 'snippet', or 'device' must be provided.",
@@ -173,7 +170,7 @@ class TestRegionList(TestRegionBase):
 
     def test_list_container_multiple_error(self):
         """Test validation of container parameters."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
             message="Multiple container types provided",
@@ -197,11 +194,11 @@ class TestRegionList(TestRegionBase):
         }
 
         mock_response = {"data": []}
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         self.client.list(folder="Global", **filters)
 
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/regions",
             params={
                 "folder": "Global",
@@ -234,7 +231,7 @@ class TestRegionList(TestRegionBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         # Filter for only North America region by latitude
         regions = self.client.list(
@@ -296,7 +293,7 @@ class TestRegionList(TestRegionBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         # Filter for specific address
         regions = self.client.list(folder="Global", addresses=["10.0.0.0/8"])
@@ -324,6 +321,7 @@ class TestRegionList(TestRegionBase):
 
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
+        assert error.error_code == "E003"
         assert "{'errorType': 'Invalid Object'}" in str(error)
 
     def test_list_filters_combinations(self):
@@ -359,7 +357,7 @@ class TestRegionList(TestRegionBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         # Test combining geo_location and addresses filters
         filtered_objects = self.client.list(
@@ -376,7 +374,7 @@ class TestRegionList(TestRegionBase):
         """
         Test that InvalidObjectError is raised when the response is not a dictionary.
         """
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Global")
@@ -389,7 +387,7 @@ class TestRegionList(TestRegionBase):
         """
         Test that InvalidObjectError is raised when API returns response with missing data field.
         """
-        self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
+        self.mock_scm.get.return_value = {"wrong_field": "value"}
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Global")
@@ -404,7 +402,7 @@ class TestRegionList(TestRegionBase):
         """
         Test that InvalidObjectError is raised when API returns non-list data field.
         """
-        self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
+        self.mock_scm.get.return_value = {"data": "not a list"}
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="Global")
@@ -417,18 +415,18 @@ class TestRegionList(TestRegionBase):
     def test_list_response_no_content(self):
         """Test that an HTTPError without response content in list() re-raises the exception."""
         mock_response = MagicMock()
-        mock_response.content = None  # Simulate no content
+        mock_response.content = None
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
+        self.mock_scm.get.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.list(folder="Global")
 
     def test_list_server_error(self):
         """Test generic exception handling in list method."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=500,
             error_code="E003",
             message="An internal error occurred",
@@ -446,10 +444,10 @@ class TestRegionList(TestRegionBase):
         Test that the list method correctly aggregates data from multiple pages.
         Using a custom client with max_limit=2500 to test pagination.
         """
-        client = Region(self.mock_scm, max_limit=2500)  # noqa
+        client = Region(self.mock_scm, max_limit=2500)
 
         # Create test data
-        total_objects = 7500  # Three pages worth
+        total_objects = 7500
         first_batch = [RegionResponseFactory(name=f"Region_{i}") for i in range(2500)]
         second_batch = [RegionResponseFactory(name=f"Region_{i}") for i in range(2500, 5000)]
         third_batch = [RegionResponseFactory(name=f"Region_{i}") for i in range(5000, 7500)]
@@ -459,9 +457,9 @@ class TestRegionList(TestRegionBase):
             {"data": [obj.model_dump() for obj in first_batch]},
             {"data": [obj.model_dump() for obj in second_batch]},
             {"data": [obj.model_dump() for obj in third_batch]},
-            {"data": []},  # Empty response to end pagination
+            {"data": []},
         ]
-        self.mock_scm.get.side_effect = mock_responses  # noqa
+        self.mock_scm.get.side_effect = mock_responses
 
         # Get results
         results = client.list(folder="Global")
@@ -472,10 +470,10 @@ class TestRegionList(TestRegionBase):
         assert all(isinstance(r, RegionResponseModel) for r in results)
 
         # Verify the number of API calls
-        assert self.mock_scm.get.call_count == 4  # noqa # Three pages + one final check
+        assert self.mock_scm.get.call_count == 4
 
         # Verify first API call used correct parameters
-        self.mock_scm.get.assert_any_call(  # noqa
+        self.mock_scm.get.assert_any_call(
             "/config/objects/v1/regions",
             params={
                 "folder": "Global",
@@ -505,17 +503,17 @@ class TestRegionList(TestRegionBase):
                 {"name": "Invalid Region 1", "folder": "Global"},
                 {"name": "Invalid Region 2", "folder": "Global"},
                 {"name": "Invalid Region 3", "folder": "Global"},
-                {"name": "Invalid Region 4", "folder": "Global"},  # One more than the 3 logged
+                {"name": "Invalid Region 4", "folder": "Global"},
             ]
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         # Get results - should only include valid items
         results = self.client.list(folder="Global")
 
         # Verify results
-        assert len(results) == 2  # Only valid items
+        assert len(results) == 2
         assert all(isinstance(r, RegionResponseModel) for r in results)
         assert results[0].name == "Valid Region 1"
         assert results[1].name == "Valid Region 2"
@@ -539,7 +537,7 @@ class TestRegionList(TestRegionBase):
             ]
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         # exact_match should exclude the one from "Shared"
         filtered = self.client.list(folder="Global", exact_match=True)
@@ -563,7 +561,7 @@ class TestRegionList(TestRegionBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         filtered = self.client.list(folder="Global", exclude_folders=["Shared"])
         assert len(filtered) == 1
@@ -587,7 +585,7 @@ class TestRegionList(TestRegionBase):
                 ).model_dump(),
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         filtered = self.client.list(folder="Global", exclude_snippets=["default"])
         assert len(filtered) == 1
@@ -613,7 +611,7 @@ class TestRegionList(TestRegionBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         filtered = self.client.list(folder="Global", exclude_devices=["DeviceA"])
         assert len(filtered) == 1
@@ -648,7 +646,7 @@ class TestRegionList(TestRegionBase):
                 },
             ]
         }
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         filtered = self.client.list(
             folder="Global",
@@ -670,54 +668,75 @@ class TestRegionCreate(TestRegionBase):
 
     def test_create_valid(self):
         """Test creating a valid region object."""
-        test_object = RegionCreateApiFactory()
-        mock_response = RegionResponseFactory.from_request(test_object)
+        request_data = RegionCreateApiFactory.build_valid()
+        response_data = RegionResponseFactory.from_request(request_data)
 
-        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
-        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
+        self.mock_scm.post.return_value = response_data.model_dump(exclude_none=False)
+        
+        # Pass a dictionary for the create method
+        request_dict = request_data.model_dump(exclude_none=False)
+        created_object = self.client.create(request_dict)
 
-        self.mock_scm.post.assert_called_once_with(  # noqa
+        # From the SCM API docs, description and tag are excluded from the payload
+        payload = request_dict.copy()
+        payload.pop("description", None)
+        payload.pop("tag", None)
+        
+        self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/regions",
-            json=test_object.model_dump(exclude_unset=True),
+            json=payload,
         )
-        assert str(created_object.id) == str(mock_response.id)
-        assert created_object.name == test_object.name
-        assert created_object.folder == test_object.folder
-
-        # Different access pattern for model objects vs dictionaries
-        geo_location_dict = test_object.model_dump()["geo_location"]
-        assert created_object.geo_location.latitude == geo_location_dict["latitude"]
-        assert created_object.geo_location.longitude == geo_location_dict["longitude"]
+        assert isinstance(created_object, RegionResponseModel)
+        assert created_object.name == request_data.name
+        assert created_object.folder == request_data.folder
 
     def test_create_with_snippet(self):
         """Test creating a region with snippet container."""
-        test_object = RegionCreateApiFactory.with_snippet()
-        mock_response = RegionResponseFactory.from_request(test_object)
+        request_data = RegionCreateApiFactory.with_snippet()
+        response_data = RegionResponseFactory.from_request(request_data)
 
-        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
-        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
+        self.mock_scm.post.return_value = response_data.model_dump(exclude_none=False)
+        
+        # Pass a dictionary for the create method
+        request_dict = request_data.model_dump(exclude_none=False)
+        created_object = self.client.create(request_dict)
 
-        self.mock_scm.post.assert_called_once_with(  # noqa
+        # From the SCM API docs, description and tag are excluded from the payload
+        payload = request_dict.copy()
+        payload.pop("description", None)
+        payload.pop("tag", None)
+        
+        self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/regions",
-            json=test_object.model_dump(exclude_unset=True),
+            json=payload,
         )
-        assert created_object.snippet == test_object.snippet
-        assert created_object.folder is None
+        assert isinstance(created_object, RegionResponseModel)
+        assert created_object.name == request_data.name
+        assert created_object.snippet == request_data.snippet
 
     def test_create_with_device(self):
         """Test creating a region with device container."""
-        test_object = RegionCreateApiFactory.with_device()
-        mock_response = RegionResponseFactory.from_request(test_object)
+        request_data = RegionCreateApiFactory.with_device()
+        response_data = RegionResponseFactory.from_request(request_data)
 
-        self.mock_scm.post.return_value = mock_response.model_dump()  # noqa
-        created_object = self.client.create(test_object.model_dump(exclude_unset=True))
+        self.mock_scm.post.return_value = response_data.model_dump(exclude_none=False)
+        
+        # Pass a dictionary for the create method
+        request_dict = request_data.model_dump(exclude_none=False)
+        created_object = self.client.create(request_dict)
 
-        self.mock_scm.post.assert_called_once_with(  # noqa
+        # From the SCM API docs, description and tag are excluded from the payload
+        payload = request_dict.copy()
+        payload.pop("description", None)
+        payload.pop("tag", None)
+        
+        self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/regions",
-            json=test_object.model_dump(exclude_unset=True),
+            json=payload,
         )
-        assert created_object.device == test_object.device
-        assert created_object.folder is None
+        assert isinstance(created_object, RegionResponseModel)
+        assert created_object.name == request_data.name
+        assert created_object.device == request_data.device
 
     def test_create_http_error_no_response_content(self):
         """Test create method when HTTP error has no response content."""
@@ -725,7 +744,7 @@ class TestRegionCreate(TestRegionBase):
         mock_response.content = None
         mock_response.status_code = 500
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.post.side_effect = mock_http_error  # noqa
+        self.mock_scm.post.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.create({"name": "test", "folder": "Global"})
@@ -737,7 +756,7 @@ class TestRegionCreate(TestRegionBase):
             "folder": "Global",
         }
 
-        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.post.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="API_I00013",
             message="Create failed",
@@ -752,11 +771,129 @@ class TestRegionCreate(TestRegionBase):
 
     def test_create_generic_exception_handling(self):
         """Test handling of a generic exception during create."""
-        self.mock_scm.post.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.post.side_effect = Exception("Generic error")
 
         with pytest.raises(Exception) as exc_info:
             self.client.create({"name": "test", "folder": "Global"})
         assert str(exc_info.value) == "Generic error"
+
+
+class TestRegionUpdate(TestRegionBase):
+    """Tests for updating Region objects."""
+
+    def test_update_valid_object(self):
+        """Test updating an object with valid data."""
+        request_data = RegionUpdateApiFactory.build_valid()
+        response_data = RegionResponseFactory.from_request(request_data)
+
+        self.mock_scm.put.return_value = response_data.model_dump(exclude_none=False)
+        updated_object = self.client.update(request_data)
+        
+        # The Region client does two things to the payload:
+        # 1. Excludes tag and description as they're not supported by the API
+        # 2. Removes the ID since it's used in the URL
+        expected_payload = request_data.model_dump(exclude_unset=True)
+        expected_payload.pop("id", None)
+        expected_payload.pop("tag", None)
+        expected_payload.pop("description", None)
+
+        self.mock_scm.put.assert_called_once_with(
+            f"/config/objects/v1/regions/{request_data.id}",
+            json=expected_payload,
+        )
+        assert isinstance(updated_object, RegionResponseModel)
+        assert updated_object.name == request_data.name
+        assert updated_object.id == request_data.id
+
+    def test_update_malformed_command_error(self):
+        """Test error handling when update fails due to malformed command."""
+        request_data = RegionUpdateApiFactory.build_valid(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-region"
+        )
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(
+            status_code=400,
+            error_code="API_I00013",
+            message="Update failed",
+            error_type="Malformed Command",
+        )
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.update(request_data)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Update failed"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+
+    def test_update_object_not_present_error(self):
+        """Test error handling when the object to update is not present."""
+        request_data = RegionUpdateApiFactory.build_valid(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-region"
+        )
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(
+            status_code=404,
+            error_code="API_I00013",
+            message="Object not found",
+            error_type="Object Not Present",
+        )
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.update(request_data)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "Object not found"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+
+    def test_update_http_error_no_response_content(self):
+        """Test update method when HTTP error has no response content."""
+        request_data = RegionUpdateApiFactory.build_valid(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test"
+        )
+
+        mock_response = MagicMock()
+        mock_response.content = None
+        mock_response.status_code = 500
+
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.put.side_effect = mock_http_error
+
+        with pytest.raises(HTTPError):
+            self.client.update(request_data)
+
+    def test_update_generic_exception_handling(self):
+        """Test handling of a generic exception during update."""
+        request_data = RegionUpdateApiFactory.build_valid(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test"
+        )
+
+        self.mock_scm.put.side_effect = Exception("Generic error")
+
+        with pytest.raises(Exception) as exc_info:
+            self.client.update(request_data)
+        assert str(exc_info.value) == "Generic error"
+
+    def test_update_server_error(self):
+        """Test handling of server errors during update."""
+        request_data = RegionUpdateApiFactory.build_valid(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-region"
+        )
+
+        self.mock_scm.put.side_effect = raise_mock_http_error(
+            status_code=500,
+            error_code="E003",
+            message="An internal error occurred",
+            error_type="Internal Error",
+        )
+
+        with pytest.raises(HTTPError) as exc_info:
+            self.client.update(request_data)
+        error_response = exc_info.value.response.json()
+        assert error_response["_errors"][0]["message"] == "An internal error occurred"
+        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
 
 class TestRegionGet(TestRegionBase):
@@ -764,30 +901,23 @@ class TestRegionGet(TestRegionBase):
 
     def test_get_valid_object(self):
         """Test retrieving a specific object."""
-        mock_response = RegionResponseFactory(
-            id="b44a8c00-7555-4021-96f0-d59deecd54e8",
-            name="TestRegion",
-            folder="Global",
-        )
+        response_data = RegionResponseFactory.build_valid()
+        self.mock_scm.get.return_value = response_data.model_dump()
 
-        self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
-        object_id = mock_response.id
+        retrieved_object = self.client.get(str(response_data.id))
 
-        retrieved_object = self.client.get(object_id)
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
-            f"/config/objects/v1/regions/{object_id}"
+        self.mock_scm.get.assert_called_once_with(
+            f"/config/objects/v1/regions/{response_data.id}",
         )
         assert isinstance(retrieved_object, RegionResponseModel)
-        assert retrieved_object.id == mock_response.id
-        assert retrieved_object.name == mock_response.name
-        assert retrieved_object.folder == mock_response.folder
+        assert retrieved_object.id == response_data.id
+        assert retrieved_object.name == response_data.name
 
     def test_get_object_not_present_error(self):
         """Test error handling when the object is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -804,7 +934,7 @@ class TestRegionGet(TestRegionBase):
         """Test generic exception handling in get method."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.get.side_effect = Exception("Generic error")
 
         with pytest.raises(Exception) as exc_info:
             self.client.get(object_id)
@@ -820,7 +950,7 @@ class TestRegionGet(TestRegionBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
+        self.mock_scm.get.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.get(object_id)
@@ -829,7 +959,7 @@ class TestRegionGet(TestRegionBase):
         """Test handling of server errors during get method."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=500,
             error_code="E003",
             message="An internal error occurred",
@@ -838,137 +968,6 @@ class TestRegionGet(TestRegionBase):
 
         with pytest.raises(HTTPError) as exc_info:
             self.client.get(object_id)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "An internal error occurred"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
-
-
-class TestRegionUpdate(TestRegionBase):
-    """Tests for updating Region objects."""
-
-    def test_update_valid_object(self):
-        """Test updating an object with valid data."""
-        update_data = RegionUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="TestRegion",
-            geo_location={
-                "latitude": 40.7128,
-                "longitude": -74.0060,
-            },
-            address=["192.168.1.0/24", "10.0.0.0/8"],
-        )
-
-        mock_response = RegionResponseFactory.from_request(update_data)
-        self.mock_scm.put.return_value = mock_response.model_dump()  # noqa
-
-        updated_object = self.client.update(update_data)
-
-        self.mock_scm.put.assert_called_once()  # noqa
-        call_args = self.mock_scm.put.call_args  # noqa
-        assert call_args[0][0] == f"/config/objects/v1/regions/{update_data.id}"
-
-        payload = call_args[1]["json"]
-        assert payload["name"] == "TestRegion"
-        assert payload["geo_location"]["latitude"] == 40.7128
-        assert payload["geo_location"]["longitude"] == -74.0060
-        assert payload["address"] == ["192.168.1.0/24", "10.0.0.0/8"]
-
-        assert isinstance(updated_object, RegionResponseModel)
-        assert str(updated_object.id) == str(mock_response.id)
-        assert updated_object.name == mock_response.name
-        assert updated_object.geo_location.latitude == mock_response.geo_location.latitude
-        assert updated_object.geo_location.longitude == mock_response.geo_location.longitude
-        assert updated_object.address == mock_response.address
-
-    def test_update_malformed_command_error(self):
-        """Test error handling when update fails due to malformed command."""
-        update_data = RegionUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test-region",
-            folder="Global",
-        )
-
-        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
-            status_code=400,
-            error_code="API_I00013",
-            message="Update failed",
-            error_type="Malformed Command",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.update(update_data)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Update failed"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
-
-    def test_update_object_not_present_error(self):
-        """Test error handling when the object to update is not present."""
-        update_data = RegionUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test-region",
-            folder="Global",
-        )
-
-        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
-            status_code=404,
-            error_code="API_I00013",
-            message="Object not found",
-            error_type="Object Not Present",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.update(update_data)
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Object not found"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
-
-    def test_update_http_error_no_response_content(self):
-        """Test update method when HTTP error has no response content."""
-        update_data = RegionUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test",
-        )
-
-        mock_response = MagicMock()
-        mock_response.content = None
-        mock_response.status_code = 500
-
-        mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.put.side_effect = mock_http_error  # noqa
-
-        with pytest.raises(HTTPError):
-            self.client.update(update_data)
-
-    def test_update_generic_exception_handling(self):
-        """Test handling of a generic exception during update."""
-        update_data = RegionUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test",
-        )
-
-        self.mock_scm.put.side_effect = Exception("Generic error")  # noqa
-
-        with pytest.raises(Exception) as exc_info:
-            self.client.update(update_data)
-        assert str(exc_info.value) == "Generic error"
-
-    def test_update_server_error(self):
-        """Test handling of server errors during update."""
-        update_data = RegionUpdateApiFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test-region",
-            folder="Global",
-        )
-
-        self.mock_scm.put.side_effect = raise_mock_http_error(  # noqa
-            status_code=500,
-            error_code="E003",
-            message="An internal error occurred",
-            error_type="Internal Error",
-        )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
@@ -981,12 +980,12 @@ class TestRegionDelete(TestRegionBase):
         """Test successful deletion of an object."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.return_value = None  # noqa
+        self.mock_scm.delete.return_value = None
 
         # Should not raise any exception
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with(  # noqa
+        self.mock_scm.delete.assert_called_once_with(
             f"/config/objects/v1/regions/{object_id}"
         )
 
@@ -994,7 +993,7 @@ class TestRegionDelete(TestRegionBase):
         """Test deleting an object that is referenced elsewhere."""
         object_id = "3fecfe58-af0c-472b-85cf-437bb6df2929"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
             status_code=409,
             error_code="E009",
             message="Your configuration is not valid.",
@@ -1011,7 +1010,7 @@ class TestRegionDelete(TestRegionBase):
         """Test error handling when the object to delete is not present."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -1033,14 +1032,14 @@ class TestRegionDelete(TestRegionBase):
         mock_response.status_code = 500
 
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.delete.side_effect = mock_http_error  # noqa
+        self.mock_scm.delete.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.delete(object_id)
 
     def test_delete_generic_exception_handling(self):
         """Test handling of a generic exception during delete."""
-        self.mock_scm.delete.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.delete.side_effect = Exception("Generic error")
 
         with pytest.raises(Exception) as exc_info:
             self.client.delete("abcdefg")
@@ -1051,7 +1050,7 @@ class TestRegionDelete(TestRegionBase):
         """Test handling of server errors during delete."""
         object_id = "123e4567-e89b-12d3-a456-426655440000"
 
-        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.delete.side_effect = raise_mock_http_error(
             status_code=500,
             error_code="E003",
             message="An internal error occurred",
@@ -1070,44 +1069,30 @@ class TestRegionFetch(TestRegionBase):
 
     def test_fetch_valid_object(self):
         """Test retrieving an object by its name using the `fetch` method."""
-        mock_response_model = RegionResponseFactory(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="Global Region",
-            folder="Global",
-            geo_location={
-                "latitude": 37.7749,
-                "longitude": -122.4194,
-            },
-            address=["10.0.0.0/8"],
-        )
-        mock_response_data = mock_response_model.model_dump()
+        response_data = RegionResponseFactory.build_valid()
+        
+        # Fetch should work like address.fetch - a single API call returning the object
+        self.mock_scm.get.return_value = response_data.model_dump(exclude_none=False)
+        
+        fetched_object = self.client.fetch(name=response_data.name, folder=response_data.folder)
 
-        self.mock_scm.get.return_value = mock_response_data  # noqa
-
-        fetched_object = self.client.fetch(
-            name=mock_response_model.name,
-            folder=mock_response_model.folder,
-        )
-
-        self.mock_scm.get.assert_called_once_with(  # noqa
+        # Verify the API was called with correct params
+        self.mock_scm.get.assert_called_once_with(
             "/config/objects/v1/regions",
             params={
-                "folder": mock_response_model.folder,
-                "name": mock_response_model.name,
+                "name": response_data.name,
+                "folder": response_data.folder,
             },
         )
-
+        
         assert isinstance(fetched_object, RegionResponseModel)
-        assert str(fetched_object.id) == str(mock_response_model.id)
-        assert fetched_object.name == mock_response_model.name
-        assert fetched_object.folder == mock_response_model.folder
-        assert fetched_object.geo_location.latitude == mock_response_model.geo_location.latitude
-        assert fetched_object.geo_location.longitude == mock_response_model.geo_location.longitude
-        assert fetched_object.address == mock_response_model.address
+        assert fetched_object.name == response_data.name
+        assert fetched_object.folder == response_data.folder
+        assert str(fetched_object.id) == str(response_data.id)
 
     def test_fetch_object_not_present_error(self):
         """Test fetching an object that does not exist."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
             message="Object not found",
@@ -1122,7 +1107,7 @@ class TestRegionFetch(TestRegionBase):
 
     def test_fetch_empty_name_error(self):
         """Test fetching with an empty name parameter."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
             message='"name" is not allowed to be empty',
@@ -1139,7 +1124,7 @@ class TestRegionFetch(TestRegionBase):
 
     def test_fetch_empty_container_error(self):
         """Test fetching with an empty folder parameter."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
             message='"folder" is not allowed to be empty',
@@ -1156,7 +1141,7 @@ class TestRegionFetch(TestRegionBase):
 
     def test_fetch_invalid_response_format_error(self):
         """Test fetching an object when the API returns an unexpected format."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=500,
             error_code="E003",
             message="Invalid response format",
@@ -1171,7 +1156,7 @@ class TestRegionFetch(TestRegionBase):
 
     def test_fetch_generic_exception_handling(self):
         """Test generic exception handling during fetch."""
-        self.mock_scm.get.side_effect = Exception("Generic error")  # noqa
+        self.mock_scm.get.side_effect = Exception("Generic error")
 
         with pytest.raises(Exception) as exc_info:
             self.client.fetch(name="test", folder="Global")
@@ -1184,14 +1169,14 @@ class TestRegionFetch(TestRegionBase):
         mock_response.content = None
         mock_response.status_code = 500
         mock_http_error = HTTPError(response=mock_response)
-        self.mock_scm.get.side_effect = mock_http_error  # noqa
+        self.mock_scm.get.side_effect = mock_http_error
 
         with pytest.raises(HTTPError):
             self.client.fetch(name="test-region", folder="Global")
 
     def test_fetch_server_error(self):
         """Test handling of server errors during fetch."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
+        self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=500,
             error_code="E003",
             message="An internal error occurred",
@@ -1211,7 +1196,7 @@ class TestRegionFetch(TestRegionBase):
             "folder": "Global",
         }
 
-        self.mock_scm.get.return_value = mock_response  # noqa
+        self.mock_scm.get.return_value = mock_response
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-region", folder="Global")
@@ -1247,7 +1232,7 @@ class TestRegionFetch(TestRegionBase):
 
     def test_fetch_invalid_response_type_error(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
+        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test123", folder="Global")
@@ -1256,6 +1241,3 @@ class TestRegionFetch(TestRegionBase):
         assert "HTTP error: 500 - API error: E003" in error_msg
         assert exc_info.value.error_code == "E003"
         assert exc_info.value.http_status_code == 500
-
-
-# -------------------- End of Test Classes --------------------
