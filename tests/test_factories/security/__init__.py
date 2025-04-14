@@ -53,6 +53,16 @@ from tests.test_factories.security.vulnerability_protection_profile import (
     VulnerabilityProfileUpdateApiFactory,
     VulnerabilityProfileUpdateModelFactory,
 )
+from tests.test_factories.security.wildfire_antivirus_profile import (
+    WildfireAvMlavExceptionEntryFactory,
+    WildfireAvProfileCreateApiFactory,
+    WildfireAvProfileCreateModelFactory,
+    WildfireAvProfileResponseFactory,
+    WildfireAvProfileUpdateApiFactory,
+    WildfireAvProfileUpdateModelFactory,
+    WildfireAvRuleBaseFactory,
+    WildfireAvThreatExceptionEntryFactory,
+)
 
 # Explicitly export these factories
 __all__ = [
@@ -98,4 +108,12 @@ __all__ = [
     "VulnerabilityProfileUpdateApiFactory",
     "VulnerabilityProfileUpdateModelFactory",
     "WhitelistEntryFactory",
+    "WildfireAvMlavExceptionEntryFactory",
+    "WildfireAvProfileCreateApiFactory",
+    "WildfireAvProfileCreateModelFactory",
+    "WildfireAvProfileResponseFactory",
+    "WildfireAvProfileUpdateApiFactory",
+    "WildfireAvProfileUpdateModelFactory",
+    "WildfireAvRuleBaseFactory",
+    "WildfireAvThreatExceptionEntryFactory",
 ]

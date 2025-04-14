@@ -1,4 +1,4 @@
-# tests/scm/config/security/test_wildfire_antivirus_profile.py
+# tests/scm/config/security/test_wildfire_antivirus_profiles.py
 
 import logging
 from unittest.mock import MagicMock
@@ -16,7 +16,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileResponseModel,
 )
 from scm.utils.logging import setup_logger
-from tests.factories import (
+from tests.test_factories.security import (
     WildfireAvProfileResponseFactory,
     WildfireAvProfileUpdateApiFactory,
 )

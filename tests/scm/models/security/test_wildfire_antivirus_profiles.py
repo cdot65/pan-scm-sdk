@@ -15,7 +15,7 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvProfileResponseModel,
     WildfireAvProfileUpdateModel,
 )
-from tests.factories import (
+from tests.test_factories.security import (
     WildfireAvProfileCreateApiFactory,
     WildfireAvProfileCreateModelFactory,
     WildfireAvProfileResponseFactory,
