@@ -18,7 +18,6 @@ from tests.test_factories.objects.region import (
     RegionUpdateModelFactory,
 )
 
-
 # -------------------- Test Classes for GeoLocation Model --------------------
 
 
@@ -85,9 +84,8 @@ class TestRegionCreateModel:
         data = RegionCreateModelFactory.build_with_multiple_containers()
         with pytest.raises(ValueError) as exc_info:
             RegionCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_region_create_model_no_container_provided(self):
@@ -95,9 +93,8 @@ class TestRegionCreateModel:
         data = RegionCreateModelFactory.build_without_container()
         with pytest.raises(ValueError) as exc_info:
             RegionCreateModel(**data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
+            exc_info.value
         )
 
     def test_address_field_accepts_string(self):

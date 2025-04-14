@@ -672,7 +672,7 @@ class TestRegionCreate(TestRegionBase):
         response_data = RegionResponseFactory.from_request(request_data)
 
         self.mock_scm.post.return_value = response_data.model_dump(exclude_none=False)
-        
+
         # Pass a dictionary for the create method
         request_dict = request_data.model_dump(exclude_none=False)
         created_object = self.client.create(request_dict)
@@ -681,7 +681,7 @@ class TestRegionCreate(TestRegionBase):
         payload = request_dict.copy()
         payload.pop("description", None)
         payload.pop("tag", None)
-        
+
         self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/regions",
             json=payload,
@@ -696,7 +696,7 @@ class TestRegionCreate(TestRegionBase):
         response_data = RegionResponseFactory.from_request(request_data)
 
         self.mock_scm.post.return_value = response_data.model_dump(exclude_none=False)
-        
+
         # Pass a dictionary for the create method
         request_dict = request_data.model_dump(exclude_none=False)
         created_object = self.client.create(request_dict)
@@ -705,7 +705,7 @@ class TestRegionCreate(TestRegionBase):
         payload = request_dict.copy()
         payload.pop("description", None)
         payload.pop("tag", None)
-        
+
         self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/regions",
             json=payload,
@@ -720,7 +720,7 @@ class TestRegionCreate(TestRegionBase):
         response_data = RegionResponseFactory.from_request(request_data)
 
         self.mock_scm.post.return_value = response_data.model_dump(exclude_none=False)
-        
+
         # Pass a dictionary for the create method
         request_dict = request_data.model_dump(exclude_none=False)
         created_object = self.client.create(request_dict)
@@ -729,7 +729,7 @@ class TestRegionCreate(TestRegionBase):
         payload = request_dict.copy()
         payload.pop("description", None)
         payload.pop("tag", None)
-        
+
         self.mock_scm.post.assert_called_once_with(
             "/config/objects/v1/regions",
             json=payload,
@@ -788,7 +788,7 @@ class TestRegionUpdate(TestRegionBase):
 
         self.mock_scm.put.return_value = response_data.model_dump(exclude_none=False)
         updated_object = self.client.update(request_data)
-        
+
         # The Region client does two things to the payload:
         # 1. Excludes tag and description as they're not supported by the API
         # 2. Removes the ID since it's used in the URL
@@ -808,8 +808,7 @@ class TestRegionUpdate(TestRegionBase):
     def test_update_malformed_command_error(self):
         """Test error handling when update fails due to malformed command."""
         request_data = RegionUpdateApiFactory.build_valid(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test-region"
+            id="123e4567-e89b-12d3-a456-426655440000", name="test-region"
         )
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
@@ -828,8 +827,7 @@ class TestRegionUpdate(TestRegionBase):
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
         request_data = RegionUpdateApiFactory.build_valid(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test-region"
+            id="123e4567-e89b-12d3-a456-426655440000", name="test-region"
         )
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
@@ -848,8 +846,7 @@ class TestRegionUpdate(TestRegionBase):
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
         request_data = RegionUpdateApiFactory.build_valid(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test"
+            id="123e4567-e89b-12d3-a456-426655440000", name="test"
         )
 
         mock_response = MagicMock()
@@ -865,8 +862,7 @@ class TestRegionUpdate(TestRegionBase):
     def test_update_generic_exception_handling(self):
         """Test handling of a generic exception during update."""
         request_data = RegionUpdateApiFactory.build_valid(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test"
+            id="123e4567-e89b-12d3-a456-426655440000", name="test"
         )
 
         self.mock_scm.put.side_effect = Exception("Generic error")
@@ -878,8 +874,7 @@ class TestRegionUpdate(TestRegionBase):
     def test_update_server_error(self):
         """Test handling of server errors during update."""
         request_data = RegionUpdateApiFactory.build_valid(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="test-region"
+            id="123e4567-e89b-12d3-a456-426655440000", name="test-region"
         )
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
@@ -985,9 +980,7 @@ class TestRegionDelete(TestRegionBase):
         # Should not raise any exception
         self.client.delete(object_id)
 
-        self.mock_scm.delete.assert_called_once_with(
-            f"/config/objects/v1/regions/{object_id}"
-        )
+        self.mock_scm.delete.assert_called_once_with(f"/config/objects/v1/regions/{object_id}")
 
     def test_delete_referenced_object(self):
         """Test deleting an object that is referenced elsewhere."""
@@ -1070,10 +1063,10 @@ class TestRegionFetch(TestRegionBase):
     def test_fetch_valid_object(self):
         """Test retrieving an object by its name using the `fetch` method."""
         response_data = RegionResponseFactory.build_valid()
-        
+
         # Fetch should work like address.fetch - a single API call returning the object
         self.mock_scm.get.return_value = response_data.model_dump(exclude_none=False)
-        
+
         fetched_object = self.client.fetch(name=response_data.name, folder=response_data.folder)
 
         # Verify the API was called with correct params
@@ -1084,7 +1077,7 @@ class TestRegionFetch(TestRegionBase):
                 "folder": response_data.folder,
             },
         )
-        
+
         assert isinstance(fetched_object, RegionResponseModel)
         assert fetched_object.name == response_data.name
         assert fetched_object.folder == response_data.folder

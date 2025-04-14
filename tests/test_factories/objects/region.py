@@ -81,7 +81,7 @@ class RegionCreateApiFactory(RegionBaseFactory):
             device=device,
             **kwargs,
         )
-        
+
     @classmethod
     def build_with_invalid_name(cls, **kwargs):
         """Create a RegionCreateModel instance with an invalid name."""
@@ -90,7 +90,7 @@ class RegionCreateApiFactory(RegionBaseFactory):
             folder="Global",
             **kwargs,
         )
-        
+
     @classmethod
     def build_with_invalid_geo_location(cls, **kwargs):
         """Create a RegionCreateModel instance with invalid geo_location."""
@@ -99,7 +99,7 @@ class RegionCreateApiFactory(RegionBaseFactory):
             folder="Global",
             **kwargs,
         )
-        
+
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
         """Create a RegionCreateModel instance with multiple containers."""
@@ -110,7 +110,7 @@ class RegionCreateApiFactory(RegionBaseFactory):
             device=None,
             **kwargs,
         )
-        
+
     @classmethod
     def build_without_container(cls, **kwargs):
         """Create a RegionCreateModel instance without any container."""
@@ -170,7 +170,7 @@ class RegionUpdateApiFactory(RegionBaseFactory):
     def build_with_invalid_id(cls, **kwargs):
         """Create a RegionUpdateModel instance with an invalid UUID format."""
         return cls(id="not-a-uuid", **kwargs)
-        
+
     @classmethod
     def build_minimal_update(cls, **kwargs):
         """Create a minimal RegionUpdateModel with only required fields."""
@@ -257,6 +257,7 @@ class RegionResponseFactory(RegionBaseFactory):
 # Region model factories for Pydantic validation testing.
 # ----------------------------------------------------------------------------
 
+
 class RegionCreateModelFactory:
     """Factory for creating data dicts for RegionCreateModel validation testing."""
 
@@ -297,7 +298,7 @@ class RegionCreateModelFactory:
             "device": None,
         }
         return {**data, **kwargs}
-        
+
     @classmethod
     def build_with_invalid_name(cls, **kwargs):
         """Return a data dict with an invalid name."""
@@ -312,7 +313,7 @@ class RegionCreateModelFactory:
             "device": None,
         }
         return {**data, **kwargs}
-        
+
     @classmethod
     def build_with_invalid_geo_location(cls, **kwargs):
         """Return a data dict with invalid geo_location."""
@@ -386,7 +387,7 @@ class RegionUpdateModelFactory:
             "device": None,
         }
         return {**data, **kwargs}
-        
+
     @classmethod
     def build_minimal_update(cls, **kwargs):
         """Return a data dict with only the required fields."""
