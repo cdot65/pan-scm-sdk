@@ -28,7 +28,7 @@ flake8:
 # Run type checking with mypy
 mypy:
 	@echo "Running type checking with mypy..."
-	poetry run mypy scm tests
+	poetry run mypy --config-file mypy.ini scm tests
 
 # Run formatting with ruff
 format:
@@ -60,7 +60,6 @@ test:
 test-cov:
 	@echo "Running tests with coverage..."
 	poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing tests/
-
 
 # Clean caches
 clean:
