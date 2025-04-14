@@ -17,7 +17,7 @@ from scm.models.security.security_rules import (
     SecurityRuleResponseModel,
     SecurityRuleUpdateModel,
 )
-from tests.factories import (
+from tests.test_factories.security import (
     SecurityRuleCreateApiFactory,
     SecurityRuleCreateModelFactory,
     SecurityRuleMoveApiFactory,

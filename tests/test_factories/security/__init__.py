@@ -27,6 +27,16 @@ from tests.test_factories.security.dns_security_profile import (
     SinkholeSettingsFactory,
     WhitelistEntryFactory,
 )
+from tests.test_factories.security.security_rule import (
+    SecurityRuleCreateApiFactory,
+    SecurityRuleCreateModelFactory,
+    SecurityRuleMoveApiFactory,
+    SecurityRuleMoveModelFactory,
+    SecurityRuleProfileSettingFactory,
+    SecurityRuleResponseFactory,
+    SecurityRuleUpdateApiFactory,
+    SecurityRuleUpdateModelFactory,
+)
 from tests.test_factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
@@ -55,6 +65,14 @@ __all__ = [
     "DNSSecurityProfileUpdateModelFactory",
     "ListActionRequestFactory",
     "ListEntryBaseFactory",
+    "SecurityRuleCreateApiFactory",
+    "SecurityRuleCreateModelFactory",
+    "SecurityRuleMoveApiFactory",
+    "SecurityRuleMoveModelFactory",
+    "SecurityRuleProfileSettingFactory",
+    "SecurityRuleResponseFactory",
+    "SecurityRuleUpdateApiFactory",
+    "SecurityRuleUpdateModelFactory",
     "SinkholeSettingsFactory",
     "URLCategoriesCreateModelFactory",
     "URLCategoriesResponseModelFactory",
