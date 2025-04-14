@@ -7,7 +7,6 @@ from faker import Faker
 
 from scm.models.objects.service import (
     Override,
-    Protocol,
     ServiceBaseModel,
     ServiceCreateModel,
     ServiceResponseModel,
@@ -59,7 +58,7 @@ class TCPProtocolFactory(factory.Factory):
     def with_source_port(cls, port="80,443", source_port="1024-2048", **kwargs):
         """Create a TCPProtocol instance with source port specified."""
         return cls(port=port, source_port=source_port, **kwargs)
-    
+
     @classmethod
     def with_timeout_edge_cases(cls, min_timeouts=False, max_timeouts=False, **kwargs):
         """Create a TCPProtocol instance with edge case timeout values."""
@@ -69,7 +68,7 @@ class TCPProtocolFactory(factory.Factory):
             override = OverrideFactory.with_maximum_timeouts()
         else:
             override = OverrideFactory()
-        
+
         return cls(override=override, **kwargs)
 
 
@@ -97,7 +96,7 @@ class UDPProtocolFactory(factory.Factory):
             override = OverrideFactory.with_maximum_timeouts()
         else:
             override = OverrideFactory(timeout=30)  # UDP default is 30s
-        
+
         return cls(override=override, **kwargs)
 
 
@@ -149,7 +148,14 @@ class ServiceCreateApiFactory(ServiceBaseFactory):
         return cls(protocol={"tcp": {"port": port, "source_port": source_port}}, **kwargs)
 
     @classmethod
-    def with_tcp_overrides(cls, port="80,443", timeout=3600, halfclose_timeout=120, timewait_timeout=15, **kwargs):
+    def with_tcp_overrides(
+        cls,
+        port="80,443",
+        timeout=3600,
+        halfclose_timeout=120,
+        timewait_timeout=15,
+        **kwargs,
+    ):
         """Create a ServiceCreateModel instance with TCP protocol and override settings."""
         override = {}
         if timeout is not None:
@@ -229,10 +235,18 @@ class ServiceCreateApiFactory(ServiceBaseFactory):
         if min_timeouts:
             override = {"timeout": 1, "halfclose_timeout": 1, "timewait_timeout": 1}
         elif max_timeouts:
-            override = {"timeout": 604800, "halfclose_timeout": 604800, "timewait_timeout": 600}
+            override = {
+                "timeout": 604800,
+                "halfclose_timeout": 604800,
+                "timewait_timeout": 600,
+            }
         else:
-            override = {"timeout": 3600, "halfclose_timeout": 120, "timewait_timeout": 15}
-        
+            override = {
+                "timeout": 3600,
+                "halfclose_timeout": 120,
+                "timewait_timeout": 15,
+            }
+
         return cls(protocol={"tcp": {"port": "80,443", "override": override}}, **kwargs)
 
 
@@ -259,7 +273,14 @@ class ServiceUpdateApiFactory(ServiceBaseFactory):
         return cls(protocol={"tcp": {"port": port, "source_port": source_port}}, **kwargs)
 
     @classmethod
-    def with_tcp_overrides(cls, port="80,443", timeout=3600, halfclose_timeout=120, timewait_timeout=15, **kwargs):
+    def with_tcp_overrides(
+        cls,
+        port="80,443",
+        timeout=3600,
+        halfclose_timeout=120,
+        timewait_timeout=15,
+        **kwargs,
+    ):
         """Create a ServiceUpdateModel instance with TCP protocol and override settings."""
         override = {}
         if timeout is not None:
@@ -403,10 +424,10 @@ class ServiceResponseFactory(ServiceBaseFactory):
         """Create a response model based on a request model."""
         # Convert request model to dict, excluding unset values
         request_dict = request_model.model_dump(exclude_unset=True)
-        
+
         # Combine with any provided kwargs
         combined_kwargs = {**request_dict, **kwargs}
-        
+
         # Create and return the response model
         return cls(**combined_kwargs)
 
@@ -459,8 +480,8 @@ class ServiceCreateModelFactory(factory.Factory):
     def build_with_multiple_containers(cls, **kwargs):
         """Return a data dict with multiple containers."""
         data = cls(
-            folder="Texas", 
-            snippet="TestSnippet", 
+            folder="Texas",
+            snippet="TestSnippet",
             device=None,
             protocol={"tcp": {"port": "80,443"}},
             **kwargs,
@@ -519,10 +540,18 @@ class ServiceCreateModelFactory(factory.Factory):
         if min_timeouts:
             override = {"timeout": 1, "halfclose_timeout": 1, "timewait_timeout": 1}
         elif max_timeouts:
-            override = {"timeout": 604800, "halfclose_timeout": 604800, "timewait_timeout": 600}
+            override = {
+                "timeout": 604800,
+                "halfclose_timeout": 604800,
+                "timewait_timeout": 600,
+            }
         else:
-            override = {"timeout": 3600, "halfclose_timeout": 120, "timewait_timeout": 15}
-        
+            override = {
+                "timeout": 3600,
+                "halfclose_timeout": 120,
+                "timewait_timeout": 15,
+            }
+
         data = cls(
             protocol={"tcp": {"port": "80,443", "override": override}},
             **kwargs,
