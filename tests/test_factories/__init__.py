@@ -1,5 +1,13 @@
 # tests/test_factories/__init__.py
 # Import deployment related factories
+from tests.test_factories.deployment.bandwidth_allocations import (
+    BandwidthAllocationBaseFactory,
+    BandwidthAllocationCreateApiFactory,
+    BandwidthAllocationCreateModelFactory,
+    BandwidthAllocationResponseFactory,
+    BandwidthAllocationUpdateApiFactory,
+    QosModelFactory,
+)
 from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkBaseFactory,
     RemoteNetworkCreateApiFactory,
@@ -143,6 +151,13 @@ from tests.test_factories.security.url_categories import (
 )
 
 __all__ = [
+    # Bandwidth allocation factories
+    "BandwidthAllocationBaseFactory",
+    "BandwidthAllocationCreateApiFactory",
+    "BandwidthAllocationCreateModelFactory",
+    "BandwidthAllocationResponseFactory",
+    "BandwidthAllocationUpdateApiFactory",
+    "QosModelFactory",
     # Quarantined devices factories
     "QuarantinedDevicesBaseFactory",
     "QuarantinedDevicesCreateApiFactory",

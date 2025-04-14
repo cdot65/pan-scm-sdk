@@ -11,58 +11,15 @@ from requests.exceptions import HTTPError
 from scm.config.deployment import BandwidthAllocations
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.deployment import BandwidthAllocationResponseModel
+from tests.test_factories.deployment.bandwidth_allocations import (
+    BandwidthAllocationCreateApiFactory,
+    BandwidthAllocationResponseFactory,
+    BandwidthAllocationUpdateApiFactory,
+)
 from tests.utils import raise_mock_http_error
 
 
 # Create factories for our tests
-class BandwidthAllocationFactory:
-    """Factory for creating bandwidth allocation test data."""
-
-    @classmethod
-    def create_model_data(cls, **kwargs):
-        """Create data for create model."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 100,
-            "spn_name_list": ["spn1", "spn2"],
-        }
-        data.update(kwargs)
-        return data
-
-    @classmethod
-    def update_model_data(cls, **kwargs):
-        """Create data for update model."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 200,
-            "spn_name_list": ["spn3", "spn4"],
-        }
-        data.update(kwargs)
-        return data
-
-    @classmethod
-    def response_model_data(cls, **kwargs):
-        """Create data for response model."""
-        data = {
-            "name": "test-region",
-            "allocated_bandwidth": 100,
-            "spn_name_list": ["spn1", "spn2"],
-        }
-        data.update(kwargs)
-        return data
-
-    @classmethod
-    def list_response_data(cls, items=None, limit=200, offset=0, total=None):
-        """Create data for list response."""
-        if items is None:
-            items = [cls.response_model_data(), cls.response_model_data(name="test-region-2")]
-
-        if total is None:
-            total = len(items)
-
-        return {"data": items, "limit": limit, "offset": offset, "total": total}
-
-
 @pytest.mark.usefixtures("load_env")
 class TestBandwidthAllocationBase:
     """Base class for BandwidthAllocation tests."""
@@ -126,8 +83,8 @@ class TestBandwidthAllocationCreate(TestBandwidthAllocationBase):
 
     def test_create_valid(self):
         """Test creating a valid bandwidth allocation."""
-        test_data = BandwidthAllocationFactory.create_model_data()
-        mock_response = BandwidthAllocationFactory.response_model_data()
+        test_data = BandwidthAllocationCreateApiFactory()
+        mock_response = BandwidthAllocationResponseFactory()
 
         self.mock_scm.post.return_value = mock_response
         created_object = self.client.create(test_data)
@@ -143,7 +100,7 @@ class TestBandwidthAllocationCreate(TestBandwidthAllocationBase):
 
     def test_create_with_qos(self):
         """Test creating a bandwidth allocation with QoS settings."""
-        test_data = BandwidthAllocationFactory.create_model_data(
+        test_data = BandwidthAllocationCreateApiFactory(
             qos={
                 "enabled": True,
                 "customized": True,
@@ -151,7 +108,7 @@ class TestBandwidthAllocationCreate(TestBandwidthAllocationBase):
                 "guaranteed_ratio": 0.5,
             }
         )
-        mock_response = BandwidthAllocationFactory.response_model_data(
+        mock_response = BandwidthAllocationResponseFactory(
             qos={
                 "enabled": True,
                 "customized": True,
@@ -173,7 +130,7 @@ class TestBandwidthAllocationCreate(TestBandwidthAllocationBase):
 
     def test_create_error(self):
         """Test error handling during creation."""
-        test_data = BandwidthAllocationFactory.create_model_data()
+        test_data = BandwidthAllocationCreateApiFactory()
 
         self.mock_scm.post.side_effect = raise_mock_http_error(
             status_code=400,
@@ -195,8 +152,8 @@ class TestBandwidthAllocationUpdate(TestBandwidthAllocationBase):
 
     def test_update_valid(self):
         """Test updating a valid bandwidth allocation."""
-        test_data = BandwidthAllocationFactory.update_model_data()
-        mock_response = BandwidthAllocationFactory.response_model_data(
+        test_data = BandwidthAllocationUpdateApiFactory()
+        mock_response = BandwidthAllocationResponseFactory(
             name=test_data["name"],
             allocated_bandwidth=test_data["allocated_bandwidth"],
             spn_name_list=test_data["spn_name_list"],
@@ -216,7 +173,7 @@ class TestBandwidthAllocationUpdate(TestBandwidthAllocationBase):
 
     def test_update_with_qos(self):
         """Test updating a bandwidth allocation with QoS settings."""
-        test_data = BandwidthAllocationFactory.update_model_data(
+        test_data = BandwidthAllocationUpdateApiFactory(
             qos={
                 "enabled": True,
                 "customized": False,
@@ -224,7 +181,7 @@ class TestBandwidthAllocationUpdate(TestBandwidthAllocationBase):
                 "guaranteed_ratio": 0.7,
             }
         )
-        mock_response = BandwidthAllocationFactory.response_model_data(
+        mock_response = BandwidthAllocationResponseFactory(
             name=test_data["name"],
             allocated_bandwidth=test_data["allocated_bandwidth"],
             spn_name_list=test_data["spn_name_list"],
@@ -250,7 +207,7 @@ class TestBandwidthAllocationUpdate(TestBandwidthAllocationBase):
 
     def test_update_error(self):
         """Test error handling during update."""
-        test_data = BandwidthAllocationFactory.update_model_data()
+        test_data = BandwidthAllocationUpdateApiFactory()
 
         self.mock_scm.put.side_effect = raise_mock_http_error(
             status_code=400,
@@ -272,7 +229,7 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
 
     def test_list_valid(self):
         """Test listing bandwidth allocations."""
-        mock_response = BandwidthAllocationFactory.list_response_data()
+        mock_response = BandwidthAllocationResponseFactory.list_response()
 
         self.mock_scm.get.return_value = mock_response
         allocations = self.client.list()
@@ -293,8 +250,8 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
     def test_list_with_pagination(self):
         """Test listing with pagination."""
         # Create responses for two pages
-        page1 = BandwidthAllocationFactory.list_response_data(
-            items=[BandwidthAllocationFactory.response_model_data(name="region1")], total=2
+        page1 = BandwidthAllocationResponseFactory.list_response(
+            items=[BandwidthAllocationResponseFactory(name="region1")], total=2
         )
 
         # Set up mock to return page1 first, then empty page to stop pagination
@@ -324,7 +281,7 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
 
     def test_list_empty(self):
         """Test listing with no results."""
-        mock_response = BandwidthAllocationFactory.list_response_data(items=[], total=0)
+        mock_response = BandwidthAllocationResponseFactory.list_response(items=[], total=0)
 
         self.mock_scm.get.return_value = mock_response
         allocations = self.client.list()
@@ -334,13 +291,13 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
     def test_list_with_filters(self):
         """Test listing with filters applied."""
         # Create sample data
-        allocation1 = BandwidthAllocationFactory.response_model_data(
+        allocation1 = BandwidthAllocationResponseFactory(
             name="region1", allocated_bandwidth=100, spn_name_list=["spn1", "spn2"]
         )
-        allocation2 = BandwidthAllocationFactory.response_model_data(
+        allocation2 = BandwidthAllocationResponseFactory(
             name="region2", allocated_bandwidth=200, spn_name_list=["spn3"]
         )
-        mock_response = BandwidthAllocationFactory.list_response_data(
+        mock_response = BandwidthAllocationResponseFactory.list_response(
             items=[allocation1, allocation2]
         )
 
@@ -384,13 +341,9 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
     def test_case_insensitive_name_filter_single(self):
         """Test case-insensitive name filtering with a single value."""
         # Create sample data with mixed case
-        allocation1 = BandwidthAllocationFactory.response_model_data(
-            name="Region1", allocated_bandwidth=100
-        )
-        allocation2 = BandwidthAllocationFactory.response_model_data(
-            name="REGION2", allocated_bandwidth=200
-        )
-        mock_response = BandwidthAllocationFactory.list_response_data(
+        allocation1 = BandwidthAllocationResponseFactory(name="Region1", allocated_bandwidth=100)
+        allocation2 = BandwidthAllocationResponseFactory(name="REGION2", allocated_bandwidth=200)
+        mock_response = BandwidthAllocationResponseFactory.list_response(
             items=[allocation1, allocation2]
         )
 
@@ -409,13 +362,9 @@ class TestBandwidthAllocationList(TestBandwidthAllocationBase):
     def test_case_insensitive_name_filter_list(self):
         """Test case-insensitive name filtering with a list of values."""
         # Create sample data with mixed case
-        allocation1 = BandwidthAllocationFactory.response_model_data(
-            name="Region1", allocated_bandwidth=100
-        )
-        allocation2 = BandwidthAllocationFactory.response_model_data(
-            name="REGION2", allocated_bandwidth=200
-        )
-        mock_response = BandwidthAllocationFactory.list_response_data(
+        allocation1 = BandwidthAllocationResponseFactory(name="Region1", allocated_bandwidth=100)
+        allocation2 = BandwidthAllocationResponseFactory(name="REGION2", allocated_bandwidth=200)
+        mock_response = BandwidthAllocationResponseFactory.list_response(
             items=[allocation1, allocation2]
         )
 
@@ -436,8 +385,8 @@ class TestBandwidthAllocationGet(TestBandwidthAllocationBase):
     def test_get_valid(self):
         """Test getting a bandwidth allocation by name."""
         allocation_name = "test-region"
-        mock_response = BandwidthAllocationFactory.list_response_data(
-            items=[BandwidthAllocationFactory.response_model_data(name=allocation_name)]
+        mock_response = BandwidthAllocationResponseFactory.list_response(
+            items=[BandwidthAllocationResponseFactory(name=allocation_name)]
         )
 
         self.mock_scm.get.return_value = mock_response
@@ -453,7 +402,7 @@ class TestBandwidthAllocationGet(TestBandwidthAllocationBase):
     def test_get_not_found(self):
         """Test getting a nonexistent bandwidth allocation."""
         allocation_name = "nonexistent-region"
-        mock_response = BandwidthAllocationFactory.list_response_data(items=[])
+        mock_response = BandwidthAllocationResponseFactory.list_response(items=[])
 
         self.mock_scm.get.return_value = mock_response
         allocation = self.client.get(allocation_name)
@@ -502,8 +451,8 @@ class TestBandwidthAllocationFetch(TestBandwidthAllocationBase):
     def test_fetch_valid(self):
         """Test fetching a bandwidth allocation by name."""
         allocation_name = "test-region"
-        mock_response = BandwidthAllocationFactory.list_response_data(
-            items=[BandwidthAllocationFactory.response_model_data(name=allocation_name)]
+        mock_response = BandwidthAllocationResponseFactory.list_response(
+            items=[BandwidthAllocationResponseFactory(name=allocation_name)]
         )
 
         self.mock_scm.get.return_value = mock_response
@@ -519,7 +468,7 @@ class TestBandwidthAllocationFetch(TestBandwidthAllocationBase):
     def test_fetch_not_found(self):
         """Test fetching a nonexistent bandwidth allocation."""
         allocation_name = "nonexistent-region"
-        mock_response = BandwidthAllocationFactory.list_response_data(items=[])
+        mock_response = BandwidthAllocationResponseFactory.list_response(items=[])
 
         self.mock_scm.get.return_value = mock_response
 
@@ -606,12 +555,8 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
     def test_filter_by_name(self):
         """Test filtering by name."""
         allocations = [
-            BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(name="region1")
-            ),
-            BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(name="region2")
-            ),
+            BandwidthAllocationResponseModel(**BandwidthAllocationResponseFactory(name="region1")),
+            BandwidthAllocationResponseModel(**BandwidthAllocationResponseFactory(name="region2")),
         ]
 
         # Single string filter
@@ -635,14 +580,10 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
         """Test filtering by allocated_bandwidth."""
         allocations = [
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
-                    name="region1", allocated_bandwidth=100
-                )
+                **BandwidthAllocationResponseFactory(name="region1", allocated_bandwidth=100)
             ),
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
-                    name="region2", allocated_bandwidth=200
-                )
+                **BandwidthAllocationResponseFactory(name="region2", allocated_bandwidth=200)
             ),
         ]
 
@@ -667,14 +608,10 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
         """Test filtering by spn_name_list."""
         allocations = [
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
-                    name="region1", spn_name_list=["spn1", "spn2"]
-                )
+                **BandwidthAllocationResponseFactory(name="region1", spn_name_list=["spn1", "spn2"])
             ),
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
-                    name="region2", spn_name_list=["spn3"]
-                )
+                **BandwidthAllocationResponseFactory(name="region2", spn_name_list=["spn3"])
             ),
         ]
 
@@ -699,17 +636,17 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
         """Test filtering by qos_enabled."""
         allocations = [
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
+                **BandwidthAllocationResponseFactory(
                     name="region1", qos={"enabled": True, "profile": "profile1"}
                 )
             ),
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
+                **BandwidthAllocationResponseFactory(
                     name="region2", qos={"enabled": False, "profile": "profile2"}
                 )
             ),
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(name="region3", qos=None)
+                **BandwidthAllocationResponseFactory(name="region3", qos=None)
             ),
         ]
 
@@ -731,7 +668,7 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
         """Test applying multiple filters simultaneously."""
         allocations = [
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
+                **BandwidthAllocationResponseFactory(
                     name="region1",
                     allocated_bandwidth=100,
                     spn_name_list=["spn1", "spn2"],
@@ -739,7 +676,7 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
                 )
             ),
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
+                **BandwidthAllocationResponseFactory(
                     name="region2",
                     allocated_bandwidth=200,
                     spn_name_list=["spn3"],
@@ -775,12 +712,10 @@ class TestBandwidthAllocationFilters(TestBandwidthAllocationBase):
         """Test filtering when some allocations have None for optional fields."""
         allocations = [
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(name="region1", spn_name_list=None)
+                **BandwidthAllocationResponseFactory(name="region1", spn_name_list=None)
             ),
             BandwidthAllocationResponseModel(
-                **BandwidthAllocationFactory.response_model_data(
-                    name="region2", spn_name_list=["spn3"]
-                )
+                **BandwidthAllocationResponseFactory(name="region2", spn_name_list=["spn3"])
             ),
         ]
 
