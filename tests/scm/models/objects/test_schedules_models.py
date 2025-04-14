@@ -15,7 +15,10 @@ from scm.models.objects.schedules import (
     ScheduleTypeModel,
     WeeklyScheduleModel,
 )
-from tests.factories import ScheduleCreateModelFactory, ScheduleUpdateModelFactory
+from tests.test_factories.objects.schedules import (
+    ScheduleCreateModelFactory,
+    ScheduleUpdateModelFactory,
+)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 
@@ -158,16 +161,24 @@ class TestNonRecurringScheduleModel:
             NonRecurringScheduleModel(non_recurring=["2025/01/01@09:60-2025/01/01@17:00"])
 
         # Test with missing leading zero in month
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as exc_info:
             NonRecurringScheduleModel(non_recurring=["2025/1/01@09:00-2025/01/01@17:00"])
+        assert "Month must use leading zeros" in str(exc_info.value)
 
         # Test with missing leading zero in day
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as exc_info:
             NonRecurringScheduleModel(non_recurring=["2025/01/1@09:00-2025/01/01@17:00"])
+        assert "Day must use leading zeros" in str(exc_info.value)
+
+        # Test with missing leading zero in hours
+        with pytest.raises(ValueError) as exc_info:
+            NonRecurringScheduleModel(non_recurring=["2025/01/01@9:00-2025/01/01@17:00"])
+        assert "Hours must use leading zeros" in str(exc_info.value)
 
         # Test with missing leading zero in minutes
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as exc_info:
             NonRecurringScheduleModel(non_recurring=["2025/01/01@09:0-2025/01/01@17:00"])
+        assert "Minutes must use leading zeros" in str(exc_info.value)
 
         # Test with invalid separator (using - instead of /)
         with pytest.raises(ValueError):
