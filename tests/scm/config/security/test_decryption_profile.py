@@ -14,7 +14,7 @@ from scm.models.security.decryption_profiles import (
     DecryptionProfileResponseModel,
     SSLVersion,
 )
-from tests.factories import (
+from tests.test_factories.security.decryption_profile import (
     DecryptionProfileCreateApiFactory,
     DecryptionProfileResponseFactory,
     DecryptionProfileUpdateApiFactory,

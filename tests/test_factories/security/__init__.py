@@ -7,6 +7,13 @@ from tests.test_factories.security.anti_spyware_profile import (
     AntiSpywareProfileUpdateApiFactory,
     AntiSpywareProfileUpdateModelFactory,
 )
+from tests.test_factories.security.decryption_profile import (
+    DecryptionProfileCreateApiFactory,
+    DecryptionProfileCreateModelFactory,
+    DecryptionProfileResponseFactory,
+    DecryptionProfileUpdateApiFactory,
+    DecryptionProfileUpdateModelFactory,
+)
 from tests.test_factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
     URLCategoriesResponseModelFactory,
@@ -21,6 +28,11 @@ __all__ = [
     "AntiSpywareProfileResponseFactory",
     "AntiSpywareProfileUpdateApiFactory",
     "AntiSpywareProfileUpdateModelFactory",
+    "DecryptionProfileCreateApiFactory",
+    "DecryptionProfileUpdateApiFactory",
+    "DecryptionProfileResponseFactory",
+    "DecryptionProfileCreateModelFactory",
+    "DecryptionProfileUpdateModelFactory",
     "URLCategoriesCreateModelFactory",
     "URLCategoriesResponseModelFactory",
     "URLCategoriesUpdateModelFactory",
