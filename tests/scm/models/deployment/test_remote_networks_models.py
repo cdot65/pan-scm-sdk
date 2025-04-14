@@ -4,7 +4,10 @@ import pytest
 from pydantic import ValidationError
 
 from scm.models.deployment.remote_networks import RemoteNetworkCreateModel, RemoteNetworkUpdateModel
-from tests.factories import RemoteNetworkCreateModelDictFactory, RemoteNetworkUpdateModelDictFactory
+from tests.test_factories.deployment.remote_networks import (
+    RemoteNetworkCreateModelFactory,
+    RemoteNetworkUpdateModelFactory,
+)
 
 
 class TestRemoteNetworkCreateModel:
@@ -12,7 +15,7 @@ class TestRemoteNetworkCreateModel:
 
     def test_valid_model_creation(self):
         """Test creating model with valid data."""
-        data = RemoteNetworkCreateModelDictFactory.build_valid()
+        data = RemoteNetworkCreateModelFactory.build_valid()
         model = RemoteNetworkCreateModel(**data)
         assert model.name == data["name"]
         assert model.region == data["region"]
@@ -20,7 +23,7 @@ class TestRemoteNetworkCreateModel:
 
     def test_ecmp_enabled_validation(self):
         """Test validation fails when ecmp_load_balancing=enable but no ecmp_tunnels provided."""
-        data = RemoteNetworkCreateModelDictFactory.build_valid()
+        data = RemoteNetworkCreateModelFactory.build_valid()
         data["ecmp_load_balancing"] = "enable"
         data["ecmp_tunnels"] = None
         with pytest.raises(ValueError) as exc_info:
@@ -32,7 +35,7 @@ class TestRemoteNetworkCreateModel:
         Test validation fails when ecmp_load_balancing=disable (the default),
         but ipsec_tunnel is not provided.
         """
-        data = RemoteNetworkCreateModelDictFactory.build_valid()
+        data = RemoteNetworkCreateModelFactory.build_valid()
         # ecmp_load_balancing is disable by default, so just ensure ipsec_tunnel is None
         data["ipsec_tunnel"] = None
 
@@ -44,42 +47,42 @@ class TestRemoteNetworkCreateModel:
 
     def test_no_container(self):
         """Test validation fails when no container field is provided at all."""
-        data = RemoteNetworkCreateModelDictFactory.build_no_container()
+        data = RemoteNetworkCreateModelFactory.build_no_container()
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkCreateModel(**data)
         assert "Exactly one of 'folder' must be provided" in str(exc_info.value)
 
     def test_missing_spn_name(self):
         """Test validation fails when license_type=FWAAS-AGGREGATE but spn_name is missing."""
-        data = RemoteNetworkCreateModelDictFactory.without_spn_name()
+        data = RemoteNetworkCreateModelFactory.without_spn_name()
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkCreateModel(**data)
         assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(exc_info.value)
 
     def test_ecmp_tunnels_limit(self):
         """Test validation of max_length=4 for ecmp_tunnels."""
-        data = RemoteNetworkCreateModelDictFactory.build_ecmp_enabled(ecmp_count=5)
+        data = RemoteNetworkCreateModelFactory.build_ecmp_enabled(ecmp_count=5)
         with pytest.raises(ValidationError) as exc_info:
             RemoteNetworkCreateModel(**data)
         assert "List should have at most 4 items after validation, not 5" in str(exc_info.value)
 
     def test_valid_ecmp_config(self):
         """Test valid ECMP configuration passes validation."""
-        data = RemoteNetworkCreateModelDictFactory.build_ecmp_enabled()
+        data = RemoteNetworkCreateModelFactory.build_ecmp_enabled()
         model = RemoteNetworkCreateModel(**data)
         assert model.ecmp_load_balancing == "enable"
         assert len(model.ecmp_tunnels) > 0
 
     def test_invalid_peering_type(self):
         """Test validation with invalid peering type."""
-        data = RemoteNetworkCreateModelDictFactory.build_valid()
+        data = RemoteNetworkCreateModelFactory.build_valid()
         data["protocol"] = {"bgp": {"peering_type": "invalid"}}
         with pytest.raises(ValidationError):
             RemoteNetworkCreateModel(**data)
 
     def test_name_pattern_validation(self):
         """Test name field pattern validation."""
-        data = RemoteNetworkCreateModelDictFactory.build_valid()
+        data = RemoteNetworkCreateModelFactory.build_valid()
         data["name"] = "@invalid-name"
         with pytest.raises(ValidationError):
             RemoteNetworkCreateModel(**data)
@@ -90,7 +93,7 @@ class TestRemoteNetworkUpdateModel:
 
     def test_valid_model_update(self):
         """Test updating model with valid data."""
-        data = RemoteNetworkUpdateModelDictFactory.build_valid()
+        data = RemoteNetworkUpdateModelFactory.build_valid()
         model = RemoteNetworkUpdateModel(**data)
         assert str(model.id) == data["id"]
         assert model.name == data["name"]
@@ -98,7 +101,7 @@ class TestRemoteNetworkUpdateModel:
 
     def test_ecmp_enabled_validation(self):
         """Test validation fails when ecmp_load_balancing=enable but no ecmp_tunnels are provided."""
-        data = RemoteNetworkUpdateModelDictFactory.build_valid()
+        data = RemoteNetworkUpdateModelFactory.build_valid()
         data["ecmp_load_balancing"] = "enable"
         data["ecmp_tunnels"] = None
         with pytest.raises(ValueError) as exc_info:
@@ -107,7 +110,7 @@ class TestRemoteNetworkUpdateModel:
 
     def test_missing_spn_name(self):
         """Test validation fails when license_type=FWAAS-AGGREGATE but spn_name is missing."""
-        data = RemoteNetworkUpdateModelDictFactory.without_spn_name()
+        data = RemoteNetworkUpdateModelFactory.without_spn_name()
         with pytest.raises(ValueError) as exc_info:
             RemoteNetworkUpdateModel(**data)
         assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(exc_info.value)
@@ -117,7 +120,7 @@ class TestRemoteNetworkUpdateModel:
         Test validation fails when ecmp_load_balancing=disable (the default),
         but ipsec_tunnel is not provided on update.
         """
-        data = RemoteNetworkUpdateModelDictFactory.build_valid()
+        data = RemoteNetworkUpdateModelFactory.build_valid()
         data["ipsec_tunnel"] = None
 
         with pytest.raises(ValueError) as exc_info:
