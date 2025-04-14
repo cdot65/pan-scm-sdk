@@ -89,6 +89,16 @@ from tests.test_factories.objects.http_server_profiles import (
     PayloadFormatModelFactory,
     ServerModelFactory,
 )
+from tests.test_factories.objects.log_forwarding_profile import (
+    LogForwardingProfileBaseFactory,
+    LogForwardingProfileCreateApiFactory,
+    LogForwardingProfileCreateModelFactory,
+    LogForwardingProfileResponseFactory,
+    LogForwardingProfileResponseModelFactory,
+    LogForwardingProfileUpdateApiFactory,
+    LogForwardingProfileUpdateModelFactory,
+    MatchListItemFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -180,6 +190,15 @@ __all__ = [
     "HTTPServerProfileResponseModelFactory",
     "PayloadFormatModelFactory",
     "ServerModelFactory",
+    # Log Forwarding Profiles
+    "LogForwardingProfileBaseFactory",
+    "LogForwardingProfileCreateApiFactory",
+    "LogForwardingProfileUpdateApiFactory",
+    "LogForwardingProfileResponseFactory",
+    "LogForwardingProfileCreateModelFactory",
+    "LogForwardingProfileUpdateModelFactory",
+    "LogForwardingProfileResponseModelFactory",
+    "MatchListItemFactory",
     # Syslog Server Profiles
     "EscapingModelFactory",
     "FormatModelFactory",
