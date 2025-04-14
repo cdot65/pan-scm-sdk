@@ -1,8 +1,8 @@
 # tests/scm/models/objects/test_address.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects import AddressCreateModel, AddressUpdateModel

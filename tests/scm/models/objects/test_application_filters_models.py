@@ -1,8 +1,8 @@
 # tests/scm/models/objects/test_application_filters_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects.application_filters import (

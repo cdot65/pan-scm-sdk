@@ -1,8 +1,8 @@
 # tests/scm/models/security/test_anti_spyware_profile_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.security.anti_spyware_profiles import (

@@ -2,12 +2,17 @@
 
 from uuid import UUID
 
-# External libraries
-import pytest
 from pydantic import ValidationError
 
+# External libraries
+import pytest
+
 # Local SDK imports
-from scm.models.objects import HIPProfileCreateModel, HIPProfileResponseModel, HIPProfileUpdateModel
+from scm.models.objects import (
+    HIPProfileCreateModel,
+    HIPProfileResponseModel,
+    HIPProfileUpdateModel,
+)
 from tests.test_factories.objects.hip_profile import (
     HIPProfileCreateModelFactory,
     HIPProfileResponseModelFactory,

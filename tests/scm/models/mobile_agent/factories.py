@@ -1,5 +1,5 @@
-import factory.fuzzy  # type: ignore
 from factory import Factory, Faker  # type: ignore
+import factory.fuzzy  # type: ignore
 from faker import Faker as FakerGenerator
 
 from scm.models.mobile_agent.agent_versions import AgentVersionModel, AgentVersionsModel

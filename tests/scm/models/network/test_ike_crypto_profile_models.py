@@ -2,8 +2,8 @@
 
 from uuid import UUID
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.network import (
     DHGroup,

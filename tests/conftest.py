@@ -3,8 +3,8 @@
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
 from dotenv import load_dotenv
+import pytest
 
 from scm.client import Scm
 

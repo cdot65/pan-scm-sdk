@@ -27,6 +27,23 @@ from tests.test_factories.deployment.remote_networks import (
     RemoteNetworkUpdateApiFactory,
     RemoteNetworkUpdateModelFactory,
 )
+from tests.test_factories.deployment.service_connections import (
+    BgpPeerModelFactory,
+    BgpProtocolModelFactory,
+    ProtocolModelFactory,
+)
+from tests.test_factories.deployment.service_connections import (
+    QosModelFactory as ServiceConnectionQosModelFactory,
+)
+from tests.test_factories.deployment.service_connections import (
+    ServiceConnectionBaseFactory,
+    ServiceConnectionCreateApiFactory,
+    ServiceConnectionCreateModelFactory,
+    ServiceConnectionResponseFactory,
+    ServiceConnectionResponseModelFactory,
+    ServiceConnectionUpdateApiFactory,
+    ServiceConnectionUpdateModelFactory,
+)
 from tests.test_factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,
@@ -289,6 +306,18 @@ __all__ = [
     "URLCategoriesCreateModelFactory",
     "URLCategoriesUpdateModelFactory",
     "URLCategoriesResponseModelFactory",
+    # Service Connection factories
+    "BgpPeerModelFactory",
+    "BgpProtocolModelFactory",
+    "ProtocolModelFactory",
+    "ServiceConnectionQosModelFactory",
+    "ServiceConnectionBaseFactory",
+    "ServiceConnectionCreateApiFactory",
+    "ServiceConnectionCreateModelFactory",
+    "ServiceConnectionResponseFactory",
+    "ServiceConnectionResponseModelFactory",
+    "ServiceConnectionUpdateApiFactory",
+    "ServiceConnectionUpdateModelFactory",
     # Tag factories
     "TagBaseFactory",
     "TagCreateApiFactory",

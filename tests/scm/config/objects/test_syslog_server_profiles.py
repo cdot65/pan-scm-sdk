@@ -1,7 +1,7 @@
 # tests/scm/config/objects/test_syslog_server_profiles.py
 
-import uuid
 from unittest.mock import MagicMock, patch
+import uuid
 
 import pytest
 import requests

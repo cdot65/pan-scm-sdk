@@ -1,7 +1,7 @@
 """Tests for the InternalDnsServers service class."""
 
-import uuid
 from unittest.mock import MagicMock, patch
+import uuid
 
 import pytest
 

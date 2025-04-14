@@ -1,7 +1,7 @@
 # tests/scm/models/deployment/test_bgp_routing_models.py
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.deployment.bgp_routing import (
     BackboneRoutingEnum,

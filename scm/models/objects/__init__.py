@@ -6,7 +6,11 @@ from .address_group import (
     AddressGroupResponseModel,
     AddressGroupUpdateModel,
 )
-from .application import ApplicationCreateModel, ApplicationResponseModel, ApplicationUpdateModel
+from .application import (
+    ApplicationCreateModel,
+    ApplicationResponseModel,
+    ApplicationUpdateModel,
+)
 from .application_filters import (
     ApplicationFiltersCreateModel,
     ApplicationFiltersResponseModel,
@@ -27,8 +31,16 @@ from .external_dynamic_lists import (
     ExternalDynamicListsResponseModel,
     ExternalDynamicListsUpdateModel,
 )
-from .hip_object import HIPObjectCreateModel, HIPObjectResponseModel, HIPObjectUpdateModel
-from .hip_profile import HIPProfileCreateModel, HIPProfileResponseModel, HIPProfileUpdateModel
+from .hip_object import (
+    HIPObjectCreateModel,
+    HIPObjectResponseModel,
+    HIPObjectUpdateModel,
+)
+from .hip_profile import (
+    HIPProfileCreateModel,
+    HIPProfileResponseModel,
+    HIPProfileUpdateModel,
+)
 from .http_server_profiles import (
     HTTPServerProfileCreateModel,
     HTTPServerProfileResponseModel,
@@ -46,7 +58,12 @@ from .quarantined_devices import (
     QuarantinedDevicesListParamsModel,
     QuarantinedDevicesResponseModel,
 )
-from .regions import GeoLocation, RegionCreateModel, RegionResponseModel, RegionUpdateModel
+from .regions import (
+    GeoLocation,
+    RegionCreateModel,
+    RegionResponseModel,
+    RegionUpdateModel,
+)
 from .schedules import ScheduleCreateModel, ScheduleResponseModel, ScheduleUpdateModel
 from .service import ServiceCreateModel, ServiceResponseModel, ServiceUpdateModel
 from .service_group import (

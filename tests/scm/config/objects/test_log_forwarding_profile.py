@@ -8,7 +8,10 @@ import requests
 from scm.client import Scm
 from scm.config.objects import LogForwardingProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.objects import LogForwardingProfileResponseModel, LogForwardingProfileUpdateModel
+from scm.models.objects import (
+    LogForwardingProfileResponseModel,
+    LogForwardingProfileUpdateModel,
+)
 from tests.test_factories.objects.log_forwarding_profile import (
     LogForwardingProfileCreateApiFactory,
     LogForwardingProfileResponseFactory,

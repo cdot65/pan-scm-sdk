@@ -1,7 +1,7 @@
 # tests/scm/models/deployment/test_bandwidth_allocations_models.py
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.deployment.bandwidth_allocations import (
     BandwidthAllocationBaseModel,

@@ -1,13 +1,12 @@
 # tests/scm/config/objects/test_schedules.py
 
 # Standard library imports
-import uuid
 from unittest.mock import MagicMock
-
-import pytest
+import uuid
 
 # External libraries
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.config.objects import Schedule

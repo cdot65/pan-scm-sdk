@@ -1,8 +1,8 @@
 # tests/scm/config/objects/test_address.py
 
 # Standard library imports
-import uuid
 from unittest.mock import MagicMock
+import uuid
 
 # External libraries
 import pytest

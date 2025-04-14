@@ -41,11 +41,11 @@ fix:
 	poetry run ruff check --fix scm tests
 
 # Run all code quality checks
-quality: format lint flake8 mypy
+quality: isort fix format lint flake8 mypy
 	@echo "All code quality checks complete!"
 
 # Run basic code quality checks (skip mypy)
-quality-basic: lint flake8 format
+quality-basic: isort fix lint flake8 format
 	@echo "Basic code quality checks complete!"
 
 # Run both linting and formatting

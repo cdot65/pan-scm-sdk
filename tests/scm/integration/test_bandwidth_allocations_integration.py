@@ -10,7 +10,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scm.client import ScmClient
-from scm.models.deployment import BandwidthAllocationCreateModel, BandwidthAllocationResponseModel
+from scm.models.deployment import (
+    BandwidthAllocationCreateModel,
+    BandwidthAllocationResponseModel,
+)
 
 
 @pytest.mark.integration

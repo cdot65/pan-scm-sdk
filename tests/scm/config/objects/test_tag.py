@@ -3,9 +3,10 @@
 # Standard library imports
 from unittest.mock import MagicMock
 
+from pydantic import ValidationError
+
 # External libraries
 import pytest
-from pydantic import ValidationError
 from requests.exceptions import HTTPError
 
 # Local SDK imports

@@ -1,8 +1,8 @@
 """Test factories for Internal DNS Servers deployment objects."""
 
 # Standard library imports
-import uuid
 from typing import Any, Dict, List, Union
+import uuid
 
 # External libraries
 import factory  # type: ignore

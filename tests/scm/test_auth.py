@@ -4,9 +4,10 @@
 import time
 from unittest.mock import MagicMock, patch
 
+from jwt.exceptions import ExpiredSignatureError, PyJWKClientError
+
 # External libraries
 import pytest
-from jwt.exceptions import ExpiredSignatureError, PyJWKClientError
 from requests.exceptions import HTTPError, RequestException, Timeout
 
 # Local SDK imports

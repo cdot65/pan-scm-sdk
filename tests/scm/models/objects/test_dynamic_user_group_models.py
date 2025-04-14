@@ -3,8 +3,8 @@
 # External libraries
 from uuid import UUID
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.objects.dynamic_user_group import (

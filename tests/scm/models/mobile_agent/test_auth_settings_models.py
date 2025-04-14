@@ -1,8 +1,8 @@
 # tests/scm/models/mobile_agent/test_auth_settings_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.mobile_agent.auth_settings import (

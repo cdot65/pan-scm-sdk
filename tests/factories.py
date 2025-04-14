@@ -1,8 +1,8 @@
 # tests/factories.py
 
 # Standard library imports
-import uuid
 from typing import Dict, List, Union
+import uuid
 
 # External libraries
 import factory  # type: ignore

@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock
 
-import pytest
 from pydantic import ValidationError
+import pytest
 from requests.exceptions import HTTPError
 
 from scm.config.objects.external_dynamic_lists import ExternalDynamicLists

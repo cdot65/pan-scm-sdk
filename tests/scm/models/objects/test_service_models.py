@@ -1,11 +1,15 @@
 # tests/scm/models/objects/test_service_models.py
 
 # External libraries
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
-from scm.models.objects import ServiceCreateModel, ServiceResponseModel, ServiceUpdateModel
+from scm.models.objects import (
+    ServiceCreateModel,
+    ServiceResponseModel,
+    ServiceUpdateModel,
+)
 from scm.models.objects.service import Override, Protocol, TCPProtocol, UDPProtocol
 from tests.test_factories.objects.service import (
     ServiceCreateModelFactory,
