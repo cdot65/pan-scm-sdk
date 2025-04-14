@@ -1,4 +1,4 @@
-# tests/scm/models/security/test_dns_security_profiles.py
+# tests/scm/models/security/test_dns_security_profiles_models.py
 
 from uuid import UUID
 
@@ -16,7 +16,7 @@ from scm.models.security.dns_security_profiles import (
     ListActionBaseModel,
     ListActionRequestModel,
 )
-from tests.factories import (
+from tests.test_factories.security import (
     DNSSecurityProfileCreateApiFactory,
     DNSSecurityProfileCreateModelFactory,
     DNSSecurityProfileResponseFactory,
