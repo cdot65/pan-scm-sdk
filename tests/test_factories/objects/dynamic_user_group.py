@@ -3,12 +3,9 @@
 
 import factory  # type: ignore
 from faker import Faker
-from uuid import uuid4
 
 from scm.models.objects.dynamic_user_group import (
     DynamicUserGroupBaseModel,
-    DynamicUserGroupCreateModel,
-    DynamicUserGroupResponseModel,
     DynamicUserGroupUpdateModel,
 )
 
@@ -205,7 +202,7 @@ class DynamicUserGroupResponseFactory:
             **kwargs,
         }
         return data
-        
+
     @classmethod
     def with_device(
         cls,
@@ -295,10 +292,10 @@ class DynamicUserGroupCreateModelFactory(factory.Factory):
 
 class DynamicUserGroupUpdateModelFactory(factory.Factory):
     """Factory for creating data dicts for DynamicUserGroupUpdateModel validation testing."""
-    
+
     class Meta:
         model = dict
-        
+
     id = "123e4567-e89b-12d3-a456-426655440000"
     name = "test-dynamic-user-group"
     filter = "tag1 and tag2"
