@@ -3,14 +3,16 @@
 # Standard library imports
 import pytest
 
-from scm.models.objects import (
-    QuarantinedDevicesCreateModel,
-    QuarantinedDevicesListParamsModel,
-    QuarantinedDevicesResponseModel,
-)
+from scm.models.objects import QuarantinedDevicesCreateModel, QuarantinedDevicesResponseModel
 
 # Local SDK imports
 from scm.models.objects.quarantined_devices import QuarantinedDevicesBaseModel
+from tests.test_factories.objects.quarantined_devices import (
+    QuarantinedDevicesBaseFactory,
+    QuarantinedDevicesCreateFactory,
+    QuarantinedDevicesListParamsFactory,
+    QuarantinedDevicesResponseFactory,
+)
 
 
 class TestQuarantinedDevicesBaseModel:
@@ -20,18 +22,15 @@ class TestQuarantinedDevicesBaseModel:
 
     def test_valid_model(self):
         """Test with valid required fields."""
-        model = QuarantinedDevicesBaseModel(host_id="test-host-id")
-        assert model.host_id == "test-host-id"
+        model = QuarantinedDevicesBaseFactory.build(serial_number=None)
+        assert model.host_id is not None
         assert model.serial_number is None
 
     def test_model_with_all_fields(self):
         """Test with all fields provided."""
-        model = QuarantinedDevicesBaseModel(
-            host_id="test-host-id",
-            serial_number="test-serial-number",
-        )
-        assert model.host_id == "test-host-id"
-        assert model.serial_number == "test-serial-number"
+        model = QuarantinedDevicesBaseFactory.build()
+        assert model.host_id is not None
+        assert model.serial_number is not None
 
     def test_model_missing_required_fields(self):
         """Test that missing required fields raises validation error."""
@@ -47,18 +46,15 @@ class TestQuarantinedDevicesCreateModel:
 
     def test_valid_model(self):
         """Test with valid required fields."""
-        model = QuarantinedDevicesCreateModel(host_id="test-host-id")
-        assert model.host_id == "test-host-id"
+        model = QuarantinedDevicesCreateFactory.build(serial_number=None)
+        assert model.host_id is not None
         assert model.serial_number is None
 
     def test_model_with_all_fields(self):
         """Test with all fields provided."""
-        model = QuarantinedDevicesCreateModel(
-            host_id="test-host-id",
-            serial_number="test-serial-number",
-        )
-        assert model.host_id == "test-host-id"
-        assert model.serial_number == "test-serial-number"
+        model = QuarantinedDevicesCreateFactory.build()
+        assert model.host_id is not None
+        assert model.serial_number is not None
 
     def test_model_missing_required_fields(self):
         """Test that missing required fields raises validation error."""
@@ -74,18 +70,15 @@ class TestQuarantinedDevicesResponseModel:
 
     def test_valid_model(self):
         """Test with valid required fields."""
-        model = QuarantinedDevicesResponseModel(host_id="test-host-id")
-        assert model.host_id == "test-host-id"
+        model = QuarantinedDevicesResponseFactory.build(serial_number=None)
+        assert model.host_id is not None
         assert model.serial_number is None
 
     def test_model_with_all_fields(self):
         """Test with all fields provided."""
-        model = QuarantinedDevicesResponseModel(
-            host_id="test-host-id",
-            serial_number="test-serial-number",
-        )
-        assert model.host_id == "test-host-id"
-        assert model.serial_number == "test-serial-number"
+        model = QuarantinedDevicesResponseFactory.build()
+        assert model.host_id is not None
+        assert model.serial_number is not None
 
     def test_model_missing_required_fields(self):
         """Test that missing required fields raises validation error."""
@@ -101,27 +94,26 @@ class TestQuarantinedDevicesListParamsModel:
 
     def test_empty_model(self):
         """Test with no fields provided."""
-        model = QuarantinedDevicesListParamsModel()
+        model = QuarantinedDevicesListParamsFactory.build()
         assert model.host_id is None
         assert model.serial_number is None
 
     def test_model_with_host_id(self):
         """Test with only host_id provided."""
-        model = QuarantinedDevicesListParamsModel(host_id="test-host-id")
-        assert model.host_id == "test-host-id"
+        model = QuarantinedDevicesListParamsFactory.with_host_id("test-host")
+        assert model.host_id == "test-host"
         assert model.serial_number is None
 
     def test_model_with_serial_number(self):
         """Test with only serial_number provided."""
-        model = QuarantinedDevicesListParamsModel(serial_number="test-serial-number")
+        model = QuarantinedDevicesListParamsFactory.with_serial_number("test-serial")
         assert model.host_id is None
-        assert model.serial_number == "test-serial-number"
+        assert model.serial_number == "test-serial"
 
     def test_model_with_all_fields(self):
         """Test with all fields provided."""
-        model = QuarantinedDevicesListParamsModel(
-            host_id="test-host-id",
-            serial_number="test-serial-number",
+        model = QuarantinedDevicesListParamsFactory.with_all_filters(
+            host_id="test-host", serial_number="test-serial"
         )
-        assert model.host_id == "test-host-id"
-        assert model.serial_number == "test-serial-number"
+        assert model.host_id == "test-host"
+        assert model.serial_number == "test-serial"

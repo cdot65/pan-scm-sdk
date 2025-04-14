@@ -99,6 +99,13 @@ from tests.test_factories.objects.log_forwarding_profile import (
     LogForwardingProfileUpdateModelFactory,
     MatchListItemFactory,
 )
+from tests.test_factories.objects.quarantined_devices import (
+    QuarantinedDevicesBaseFactory,
+    QuarantinedDevicesCreateApiFactory,
+    QuarantinedDevicesCreateFactory,
+    QuarantinedDevicesListParamsFactory,
+    QuarantinedDevicesResponseFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -199,6 +206,12 @@ __all__ = [
     "LogForwardingProfileUpdateModelFactory",
     "LogForwardingProfileResponseModelFactory",
     "MatchListItemFactory",
+    # Quarantined Devices
+    "QuarantinedDevicesBaseFactory",
+    "QuarantinedDevicesCreateApiFactory",
+    "QuarantinedDevicesCreateFactory",
+    "QuarantinedDevicesListParamsFactory",
+    "QuarantinedDevicesResponseFactory",
     # Syslog Server Profiles
     "EscapingModelFactory",
     "FormatModelFactory",

@@ -87,6 +87,13 @@ from tests.test_factories.objects.log_forwarding_profile import (
     LogForwardingProfileUpdateModelFactory,
     MatchListItemFactory,
 )
+from tests.test_factories.objects.quarantined_devices import (
+    QuarantinedDevicesBaseFactory,
+    QuarantinedDevicesCreateApiFactory,
+    QuarantinedDevicesCreateFactory,
+    QuarantinedDevicesListParamsFactory,
+    QuarantinedDevicesResponseFactory,
+)
 from tests.test_factories.objects.syslog_server_profiles import (
     EscapingModelFactory,
     FormatModelFactory,
@@ -102,10 +109,12 @@ from tests.test_factories.security.url_categories import (
 )
 
 __all__ = [
-    # Security - URL Categories
-    "URLCategoriesCreateModelFactory",
-    "URLCategoriesUpdateModelFactory",
-    "URLCategoriesResponseModelFactory",
+    # Quarantined devices factories
+    "QuarantinedDevicesBaseFactory",
+    "QuarantinedDevicesCreateApiFactory",
+    "QuarantinedDevicesCreateFactory",
+    "QuarantinedDevicesListParamsFactory",
+    "QuarantinedDevicesResponseFactory",
     # Syslog Server Profiles
     "EscapingModelFactory",
     "FormatModelFactory",
@@ -191,4 +200,8 @@ __all__ = [
     "HIPProfileCreateModelFactory",
     "HIPProfileUpdateModelFactory",
     "HIPProfileResponseModelFactory",
+    # Security - URL Categories
+    "URLCategoriesCreateModelFactory",
+    "URLCategoriesUpdateModelFactory",
+    "URLCategoriesResponseModelFactory",
 ]
