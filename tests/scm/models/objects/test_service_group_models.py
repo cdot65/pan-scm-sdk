@@ -1,4 +1,4 @@
-# tests/scm/models/objects/test_service_models.py
+# tests/scm/models/objects/test_service_group_models.py
 
 # External libraries
 import pytest
@@ -10,7 +10,7 @@ from scm.models.objects import (
     ServiceGroupResponseModel,
     ServiceGroupUpdateModel,
 )
-from tests.factories import ServiceGroupCreateModelFactory
+from tests.test_factories.objects.service_group import ServiceGroupCreateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 
