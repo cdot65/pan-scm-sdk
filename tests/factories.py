@@ -20,22 +20,6 @@ from scm.models.network.nat_rules import (
 )
 
 # Local SDK imports
-from scm.models.security import (
-    VulnerabilityProfileCreateModel,
-    VulnerabilityProfileResponseModel,
-)
-from scm.models.security.vulnerability_protection_profiles import (
-    VulnerabilityProfileCategory,
-    VulnerabilityProfileExemptIpEntry,
-    VulnerabilityProfileHost,
-    VulnerabilityProfilePacketCapture,
-    VulnerabilityProfileRuleModel,
-    VulnerabilityProfileSeverity,
-    VulnerabilityProfileThreatExceptionModel,
-    VulnerabilityProfileTimeAttribute,
-    VulnerabilityProfileTimeAttributeTrackBy,
-    VulnerabilityProfileUpdateModel,
-)
 from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvAnalysis,
     WildfireAvDirection,
@@ -46,551 +30,6 @@ from scm.models.security.wildfire_antivirus_profiles import (
     WildfireAvRuleBase,
     WildfireAvThreatExceptionEntry,
 )
-
-# ----------------------------------------------------------------------------
-# Vulnerability Profile object factories.
-# ----------------------------------------------------------------------------
-
-
-# Sub factories
-class VulnerabilityProfileExemptIpEntryFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileExemptIpEntry instances."""
-
-    class Meta:
-        model = VulnerabilityProfileExemptIpEntry
-
-    name = "192.168.1.1"
-
-    @classmethod
-    def with_custom_ip(cls, ip: str = "10.0.0.1", **kwargs):
-        """Create an instance with a custom IP address."""
-        return cls(name=ip, **kwargs)
-
-
-class VulnerabilityProfileTimeAttributeFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileTimeAttribute instances."""
-
-    class Meta:
-        model = VulnerabilityProfileTimeAttribute
-
-    interval = 60
-    threshold = 10
-    track_by = "source"
-
-
-class VulnerabilityProfileRuleModelFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileRuleModel instances."""
-
-    class Meta:
-        model = VulnerabilityProfileRuleModel
-
-    name = factory.Sequence(lambda n: f"rule_{n}")
-    severity = [VulnerabilityProfileSeverity.critical]
-    category = VulnerabilityProfileCategory.any
-    host = VulnerabilityProfileHost.any
-    packet_capture = VulnerabilityProfilePacketCapture.disable
-    threat_name = "any"  # Add the default threat_name here
-    action = None
-    cve = ["any"]
-    vendor_id = ["any"]
-
-    @classmethod
-    def with_threat_name(cls, threat_name: str = "custom_threat", **kwargs):
-        """Create an instance with a specific threat name."""
-        return cls(threat_name=threat_name, **kwargs)
-
-
-class VulnerabilityProfileThreatExceptionModelFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileThreatExceptionModel instances."""
-
-    class Meta:
-        model = VulnerabilityProfileThreatExceptionModel
-
-    name = factory.Sequence(lambda n: f"exception_{n}")
-    packet_capture = VulnerabilityProfilePacketCapture.single_packet
-    exempt_ip = None
-    time_attribute = None
-    notes = "Test threat exception"
-
-    # Remove threat_name related methods as they belong to RuleModel
-    @classmethod
-    def with_exempt_ips(cls, ips: List[str], **kwargs):
-        """Create an instance with exempt IPs."""
-        return cls(
-            exempt_ip=[VulnerabilityProfileExemptIpEntry(name=ip) for ip in ips],
-            **kwargs,
-        )
-
-    @classmethod
-    def with_time_attribute(
-        cls,
-        interval=60,
-        threshold=10,
-        track_by=VulnerabilityProfileTimeAttributeTrackBy.source,
-        **kwargs,
-    ):
-        """Create an instance with time attribute settings."""
-        return cls(
-            time_attribute=VulnerabilityProfileTimeAttribute(
-                interval=interval, threshold=threshold, track_by=track_by
-            ),
-            **kwargs,
-        )
-
-
-# SDK tests against SCM API
-class VulnerabilityProfileCreateApiFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileCreateModel instances."""
-
-    class Meta:
-        model = VulnerabilityProfileCreateModel
-
-    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
-    threat_exception = None
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create a profile with snippet container."""
-        return cls(folder=None, snippet=snippet, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create a profile with device container."""
-        return cls(folder=None, device=device, **kwargs)
-
-    @classmethod
-    def with_multiple_rules(cls, rules_count: int = 3, **kwargs):
-        """Create a profile with multiple rules."""
-        rules = [VulnerabilityProfileRuleModelFactory() for _ in range(rules_count)]
-        return cls(rules=rules, **kwargs)
-
-
-class VulnerabilityProfileUpdateApiFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileUpdateModel instances."""
-
-    class Meta:
-        model = VulnerabilityProfileUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
-    description = factory.Faker("sentence")
-    rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
-    )
-
-    @classmethod
-    def with_empty_rules(cls, **kwargs):
-        """Create an instance with no rules."""
-        return cls(rules=[], **kwargs)
-
-
-class VulnerabilityProfileResponseFactory(factory.Factory):
-    """Factory for creating VulnerabilityProfileResponseModel instances."""
-
-    class Meta:
-        model = VulnerabilityProfileResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    rules = factory.List([factory.SubFactory(VulnerabilityProfileRuleModelFactory)])
-    threat_exception = factory.List(
-        [factory.SubFactory(VulnerabilityProfileThreatExceptionModelFactory)]
-    )
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create a profile with snippet container."""
-        return cls(folder=None, snippet=snippet, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create a profile with device container."""
-        return cls(folder=None, device=device, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: VulnerabilityProfileCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class VulnerabilityProfileCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for VulnerabilityProfileCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    rules = []
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="valid-profile-name",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "severity": [VulnerabilityProfileSeverity.critical],
-                    "category": VulnerabilityProfileCategory.any,
-                    "host": VulnerabilityProfileHost.any,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="valid-profile-name",
-            folder="Texas",
-            snippet="test123",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "severity": [VulnerabilityProfileSeverity.critical],
-                    "category": VulnerabilityProfileCategory.any,
-                    "host": VulnerabilityProfileHost.any,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls):
-        """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-profile-name",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "severity": [VulnerabilityProfileSeverity.critical],
-                    "category": VulnerabilityProfileCategory.any,
-                    "host": VulnerabilityProfileHost.any,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_invalid_rules(cls):
-        """Return a data dict with invalid rules structure."""
-        return cls(
-            name="TestProfile",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "severity": ["invalid"],
-                    "category": "invalid",
-                    "host": "invalid",
-                }
-            ],
-        )
-
-
-class VulnerabilityProfileUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for VulnerabilityProfileUpdateModel validation testing."""
-
-    id = "12345678-1234-5678-1234-567812345678"
-    name = factory.Sequence(lambda n: f"vulnerability_profile_{n}")
-    description = factory.Faker("sentence")
-    rules = []
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating a profile."""
-        return cls(
-            name="valid-profile-name",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "severity": [VulnerabilityProfileSeverity.critical],
-                    "category": VulnerabilityProfileCategory.any,
-                    "host": VulnerabilityProfileHost.any,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_invalid_fields(cls):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            id="invalid-uuid",
-            name="@invalid-name",
-            rules=[{"invalid": "rule"}],
-        )
-
-    @classmethod
-    def build_minimal_update(cls):
-        """Return a data dict with minimal valid update fields."""
-        return cls(
-            id="12345678-1234-5678-1234-567812345678",
-            description="Updated description",
-        )
-
-
-# ----------------------------------------------------------------------------
-# Wildfire Antivirus Profile object factories.
-# ----------------------------------------------------------------------------
-
-
-# Sub factories
-class WildfireAvRuleBaseFactory(factory.Factory):
-    """Factory for creating WildfireAvRuleBase instances."""
-
-    class Meta:
-        model = WildfireAvRuleBase
-
-    name = factory.Sequence(lambda n: f"rule_{n}")
-    analysis = WildfireAvAnalysis.public_cloud
-    application = ["any"]
-    direction = WildfireAvDirection.both
-    file_type = ["any"]
-
-    @classmethod
-    def with_specific_analysis(cls, analysis: WildfireAvAnalysis, **kwargs):
-        """Create an instance with a specific analysis type."""
-        return cls(analysis=analysis, **kwargs)
-
-    @classmethod
-    def with_specific_direction(cls, direction: WildfireAvDirection, **kwargs):
-        """Create an instance with a specific direction."""
-        return cls(direction=direction, **kwargs)
-
-
-class WildfireAvMlavExceptionEntryFactory(factory.Factory):
-    """Factory for creating WildfireAvMlavExceptionEntry instances."""
-
-    class Meta:
-        model = WildfireAvMlavExceptionEntry
-
-    name = factory.Sequence(lambda n: f"mlav_exception_{n}")
-    description = factory.Faker("sentence")
-    filename = factory.Sequence(lambda n: f"file_{n}.txt")
-
-
-class WildfireAvThreatExceptionEntryFactory(factory.Factory):
-    """Factory for creating WildfireAvThreatExceptionEntry instances."""
-
-    class Meta:
-        model = WildfireAvThreatExceptionEntry
-
-    name = factory.Sequence(lambda n: f"threat_exception_{n}")
-    notes = factory.Faker("sentence")
-
-
-# SDK tests against SCM API
-class WildfireAvProfileCreateApiFactory(factory.Factory):
-    """Factory for creating WildfireAvProfileCreateModel instances."""
-
-    class Meta:
-        model = WildfireAvProfileCreateModel
-
-    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    packet_capture = False
-    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
-    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, device=device, **kwargs)
-
-    @classmethod
-    def with_packet_capture(cls, enabled: bool = True, **kwargs):
-        """Create an instance with packet capture enabled/disabled."""
-        return cls(packet_capture=enabled, **kwargs)
-
-
-class WildfireAvProfileUpdateApiFactory(factory.Factory):
-    """Factory for creating WildfireAvProfileUpdateModel instances."""
-
-    class Meta:
-        model = WildfireAvProfileUpdateModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
-    description = factory.Faker("sentence")
-    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
-    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
-
-    @classmethod
-    def with_packet_capture(cls, enabled: bool = True, **kwargs):
-        """Create an instance with packet capture enabled/disabled."""
-        return cls(packet_capture=enabled, **kwargs)
-
-
-class WildfireAvProfileResponseFactory(factory.Factory):
-    """Factory for creating WildfireAvProfileResponseModel instances."""
-
-    class Meta:
-        model = WildfireAvProfileResponseModel
-
-    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
-    description = factory.Faker("sentence")
-    folder = "Texas"
-    packet_capture = False
-    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
-    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
-    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
-
-    @classmethod
-    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """Create an instance with snippet container."""
-        return cls(folder=None, snippet=snippet, **kwargs)
-
-    @classmethod
-    def with_device(cls, device: str = "TestDevice", **kwargs):
-        """Create an instance with device container."""
-        return cls(folder=None, device=device, **kwargs)
-
-    @classmethod
-    def from_request(cls, request_model: WildfireAvProfileCreateModel, **kwargs):
-        """Create a response model based on a request model."""
-        data = request_model.model_dump()
-        data["id"] = str(uuid.uuid4())
-        data.update(kwargs)
-        return cls(**data)
-
-
-# Pydantic modeling tests
-class WildfireAvProfileCreateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for WildfireAvProfileCreateModel validation testing."""
-
-    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
-    folder = "Texas"
-    rules = []
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict with all expected attributes."""
-        return cls(
-            name="TestWildfireProfile",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "direction": WildfireAvDirection.both,
-                    "analysis": WildfireAvAnalysis.public_cloud,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_invalid_name(cls):
-        """Return a data dict with invalid name pattern."""
-        return cls(
-            name="@invalid-name#",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "direction": WildfireAvDirection.both,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_multiple_containers(cls):
-        """Return a data dict with multiple containers."""
-        return cls(
-            name="TestWildfireProfile",
-            folder="Texas",
-            snippet="TestSnippet",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "direction": WildfireAvDirection.both,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_no_container(cls):
-        """Return a data dict without any container."""
-        return cls(
-            name="TestWildfireProfile",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "direction": WildfireAvDirection.both,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_invalid_rule(cls):
-        """Return a data dict with an invalid rule."""
-        return cls(
-            name="TestWildfireProfile",
-            folder="Texas",
-            rules=[
-                {
-                    "name": "TestRule",
-                    "direction": "invalid-direction",
-                }
-            ],
-        )
-
-
-class WildfireAvProfileUpdateModelFactory(factory.DictFactory):
-    """Factory for creating data dicts for WildfireAvProfileUpdateModel validation testing."""
-
-    id = "123e4567-e89b-12d3-a456-426655440000"
-    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
-    rules = []
-
-    @classmethod
-    def build_valid(cls):
-        """Return a valid data dict for updating a Wildfire Antivirus Profile."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            name="UpdatedWildfireProfile",
-            rules=[
-                {
-                    "name": "UpdatedRule",
-                    "direction": WildfireAvDirection.download,
-                }
-            ],
-        )
-
-    @classmethod
-    def build_with_invalid_fields(cls):
-        """Return a data dict with multiple invalid fields."""
-        return cls(
-            id="invalid-uuid",
-            name="@invalid-name",
-            rules=[{"invalid": "rule"}],
-        )
-
-    @classmethod
-    def build_minimal_update(cls):
-        """Return a data dict with minimal valid update fields."""
-        return cls(
-            id="123e4567-e89b-12d3-a456-426655440000",
-            description="Updated description",
-        )
-
 
 # ----------------------------------------------------------------------------
 # NAT factories for SDK usage (model-based)
@@ -960,4 +399,257 @@ class NatRuleMoveModelFactory(factory.DictFactory):
             source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination=NatMoveDestination.BEFORE,
             rulebase=NatRulebase.PRE,
+        )
+
+
+# ----------------------------------------------------------------------------
+# Wildfire Antivirus Profile object factories.
+# ----------------------------------------------------------------------------
+
+
+# Sub factories
+class WildfireAvRuleBaseFactory(factory.Factory):
+    """Factory for creating WildfireAvRuleBase instances."""
+
+    class Meta:
+        model = WildfireAvRuleBase
+
+    name = factory.Sequence(lambda n: f"rule_{n}")
+    analysis = WildfireAvAnalysis.public_cloud
+    application = ["any"]
+    direction = WildfireAvDirection.both
+    file_type = ["any"]
+
+    @classmethod
+    def with_specific_analysis(cls, analysis: WildfireAvAnalysis, **kwargs):
+        """Create an instance with a specific analysis type."""
+        return cls(analysis=analysis, **kwargs)
+
+    @classmethod
+    def with_specific_direction(cls, direction: WildfireAvDirection, **kwargs):
+        """Create an instance with a specific direction."""
+        return cls(direction=direction, **kwargs)
+
+
+class WildfireAvMlavExceptionEntryFactory(factory.Factory):
+    """Factory for creating WildfireAvMlavExceptionEntry instances."""
+
+    class Meta:
+        model = WildfireAvMlavExceptionEntry
+
+    name = factory.Sequence(lambda n: f"mlav_exception_{n}")
+    description = factory.Faker("sentence")
+    filename = factory.Sequence(lambda n: f"file_{n}.txt")
+
+
+class WildfireAvThreatExceptionEntryFactory(factory.Factory):
+    """Factory for creating WildfireAvThreatExceptionEntry instances."""
+
+    class Meta:
+        model = WildfireAvThreatExceptionEntry
+
+    name = factory.Sequence(lambda n: f"threat_exception_{n}")
+    notes = factory.Faker("sentence")
+
+
+# SDK tests against SCM API
+class WildfireAvProfileCreateApiFactory(factory.Factory):
+    """Factory for creating WildfireAvProfileCreateModel instances."""
+
+    class Meta:
+        model = WildfireAvProfileCreateModel
+
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    packet_capture = False
+    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, device=device, **kwargs)
+
+    @classmethod
+    def with_packet_capture(cls, enabled: bool = True, **kwargs):
+        """Create an instance with packet capture enabled/disabled."""
+        return cls(packet_capture=enabled, **kwargs)
+
+
+class WildfireAvProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating WildfireAvProfileUpdateModel instances."""
+
+    class Meta:
+        model = WildfireAvProfileUpdateModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    description = factory.Faker("sentence")
+    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
+
+    @classmethod
+    def with_packet_capture(cls, enabled: bool = True, **kwargs):
+        """Create an instance with packet capture enabled/disabled."""
+        return cls(packet_capture=enabled, **kwargs)
+
+
+class WildfireAvProfileResponseFactory(factory.Factory):
+    """Factory for creating WildfireAvProfileResponseModel instances."""
+
+    class Meta:
+        model = WildfireAvProfileResponseModel
+
+    id = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    description = factory.Faker("sentence")
+    folder = "Texas"
+    packet_capture = False
+    rules = factory.List([factory.SubFactory(WildfireAvRuleBaseFactory)])
+    mlav_exception = factory.List([factory.SubFactory(WildfireAvMlavExceptionEntryFactory)])
+    threat_exception = factory.List([factory.SubFactory(WildfireAvThreatExceptionEntryFactory)])
+
+    @classmethod
+    def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
+        """Create an instance with snippet container."""
+        return cls(folder=None, snippet=snippet, **kwargs)
+
+    @classmethod
+    def with_device(cls, device: str = "TestDevice", **kwargs):
+        """Create an instance with device container."""
+        return cls(folder=None, device=device, **kwargs)
+
+    @classmethod
+    def from_request(cls, request_model: WildfireAvProfileCreateModel, **kwargs):
+        """Create a response model based on a request model."""
+        data = request_model.model_dump()
+        data["id"] = str(uuid.uuid4())
+        data.update(kwargs)
+        return cls(**data)
+
+
+# Pydantic modeling tests
+class WildfireAvProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for WildfireAvProfileCreateModel validation testing."""
+
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    folder = "Texas"
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict with all expected attributes."""
+        return cls(
+            name="TestWildfireProfile",
+            folder="Texas",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                    "analysis": WildfireAvAnalysis.public_cloud,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_name(cls):
+        """Return a data dict with invalid name pattern."""
+        return cls(
+            name="@invalid-name#",
+            folder="Texas",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_multiple_containers(cls):
+        """Return a data dict with multiple containers."""
+        return cls(
+            name="TestWildfireProfile",
+            folder="Texas",
+            snippet="TestSnippet",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_no_container(cls):
+        """Return a data dict without any container."""
+        return cls(
+            name="TestWildfireProfile",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": WildfireAvDirection.both,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_rule(cls):
+        """Return a data dict with an invalid rule."""
+        return cls(
+            name="TestWildfireProfile",
+            folder="Texas",
+            rules=[
+                {
+                    "name": "TestRule",
+                    "direction": "invalid-direction",
+                }
+            ],
+        )
+
+
+class WildfireAvProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating data dicts for WildfireAvProfileUpdateModel validation testing."""
+
+    id = "123e4567-e89b-12d3-a456-426655440000"
+    name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
+    rules = []
+
+    @classmethod
+    def build_valid(cls):
+        """Return a valid data dict for updating a Wildfire Antivirus Profile."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="UpdatedWildfireProfile",
+            rules=[
+                {
+                    "name": "UpdatedRule",
+                    "direction": WildfireAvDirection.download,
+                }
+            ],
+        )
+
+    @classmethod
+    def build_with_invalid_fields(cls):
+        """Return a data dict with multiple invalid fields."""
+        return cls(
+            id="invalid-uuid",
+            name="@invalid-name",
+            rules=[{"invalid": "rule"}],
+        )
+
+    @classmethod
+    def build_minimal_update(cls):
+        """Return a data dict with minimal valid update fields."""
+        return cls(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            description="Updated description",
         )

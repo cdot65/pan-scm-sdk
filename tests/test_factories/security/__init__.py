@@ -42,6 +42,17 @@ from tests.test_factories.security.url_categories import (
     URLCategoriesResponseModelFactory,
     URLCategoriesUpdateModelFactory,
 )
+from tests.test_factories.security.vulnerability_protection_profile import (
+    VulnerabilityProfileCreateApiFactory,
+    VulnerabilityProfileCreateModelFactory,
+    VulnerabilityProfileExemptIpEntryFactory,
+    VulnerabilityProfileResponseFactory,
+    VulnerabilityProfileRuleModelFactory,
+    VulnerabilityProfileThreatExceptionModelFactory,
+    VulnerabilityProfileTimeAttributeFactory,
+    VulnerabilityProfileUpdateApiFactory,
+    VulnerabilityProfileUpdateModelFactory,
+)
 
 # Explicitly export these factories
 __all__ = [
@@ -77,5 +88,14 @@ __all__ = [
     "URLCategoriesCreateModelFactory",
     "URLCategoriesResponseModelFactory",
     "URLCategoriesUpdateModelFactory",
+    "VulnerabilityProfileCreateApiFactory",
+    "VulnerabilityProfileCreateModelFactory",
+    "VulnerabilityProfileExemptIpEntryFactory",
+    "VulnerabilityProfileResponseFactory",
+    "VulnerabilityProfileRuleModelFactory",
+    "VulnerabilityProfileThreatExceptionModelFactory",
+    "VulnerabilityProfileTimeAttributeFactory",
+    "VulnerabilityProfileUpdateApiFactory",
+    "VulnerabilityProfileUpdateModelFactory",
     "WhitelistEntryFactory",
 ]
