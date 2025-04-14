@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 from scm.config.objects import HIPObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import HIPObjectResponseModel
-from tests.factories import (
+from tests.test_factories.objects.hip_object import (
     HIPObjectCreateApiFactory,
     HIPObjectResponseFactory,
     HIPObjectUpdateApiFactory,

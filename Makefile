@@ -28,7 +28,7 @@ flake8:
 # Run type checking with mypy
 mypy:
 	@echo "Running type checking with mypy..."
-	poetry run mypy scm tests
+	poetry run mypy --config-file mypy.ini scm tests
 
 # Run formatting with ruff
 format:
@@ -41,7 +41,7 @@ fix:
 	poetry run ruff check --fix scm tests
 
 # Run all code quality checks
-quality: lint flake8 mypy format
+quality: format lint flake8 mypy
 	@echo "All code quality checks complete!"
 
 # Run basic code quality checks (skip mypy)
@@ -60,7 +60,6 @@ test:
 test-cov:
 	@echo "Running tests with coverage..."
 	poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing tests/
-
 
 # Clean caches
 clean:

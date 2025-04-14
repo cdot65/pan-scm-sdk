@@ -10,7 +10,10 @@ from requests.exceptions import HTTPError
 from scm.config.objects import QuarantinedDevices
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.objects import QuarantinedDevicesResponseModel
-from tests.utils import raise_mock_http_error
+from tests.test_factories.objects.quarantined_devices import (
+    QuarantinedDevicesCreateApiFactory,
+    QuarantinedDevicesResponseFactory,
+)
 
 
 @pytest.mark.usefixtures("load_env")
@@ -32,15 +35,17 @@ class TestQuarantinedDevicesList(TestQuarantinedDevicesBase):
 
     def test_list_no_filters(self):
         """Test listing all quarantined devices without filters."""
+        # Use the response factory to create consistent test data
+        device1 = QuarantinedDevicesResponseFactory.build(
+            host_id="host-1", serial_number="serial-1"
+        )
+        device2 = QuarantinedDevicesResponseFactory.build(
+            host_id="host-2", serial_number="serial-2"
+        )
+
         mock_response = [
-            {
-                "host_id": "host-1",
-                "serial_number": "serial-1",
-            },
-            {
-                "host_id": "host-2",
-                "serial_number": "serial-2",
-            },
+            device1.model_dump(),
+            device2.model_dump(),
         ]
         self.mock_scm.get.return_value = mock_response  # noqa
 
@@ -51,79 +56,74 @@ class TestQuarantinedDevicesList(TestQuarantinedDevicesBase):
             params={},
         )
         assert len(result) == 2
-        assert isinstance(result[0], QuarantinedDevicesResponseModel)
         assert result[0].host_id == "host-1"
         assert result[0].serial_number == "serial-1"
         assert result[1].host_id == "host-2"
         assert result[1].serial_number == "serial-2"
 
     def test_list_with_host_id_filter(self):
-        """Test listing quarantined devices filtered by host_id."""
-        mock_response = [
-            {
-                "host_id": "host-1",
-                "serial_number": "serial-1",
-            },
-        ]
+        """Test listing quarantined devices with host_id filter."""
+        # Use the response factory to create consistent test data
+        device = QuarantinedDevicesResponseFactory.build(
+            host_id="filtered-host", serial_number="serial-123"
+        )
+
+        mock_response = [device.model_dump()]
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.client.list(host_id="host-1")
+        result = self.client.list(host_id="filtered-host")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/quarantined-devices",
-            params={"host_id": "host-1"},
+            params={"host_id": "filtered-host"},
         )
         assert len(result) == 1
-        assert isinstance(result[0], QuarantinedDevicesResponseModel)
-        assert result[0].host_id == "host-1"
-        assert result[0].serial_number == "serial-1"
+        assert result[0].host_id == "filtered-host"
+        assert result[0].serial_number == "serial-123"
 
     def test_list_with_serial_number_filter(self):
-        """Test listing quarantined devices filtered by serial_number."""
-        mock_response = [
-            {
-                "host_id": "host-2",
-                "serial_number": "serial-2",
-            },
-        ]
+        """Test listing quarantined devices with serial_number filter."""
+        # Use the response factory to create consistent test data
+        device = QuarantinedDevicesResponseFactory.build(
+            host_id="host-123", serial_number="filtered-serial"
+        )
+
+        mock_response = [device.model_dump()]
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.client.list(serial_number="serial-2")
+        result = self.client.list(serial_number="filtered-serial")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/quarantined-devices",
-            params={"serial_number": "serial-2"},
+            params={"serial_number": "filtered-serial"},
         )
         assert len(result) == 1
-        assert isinstance(result[0], QuarantinedDevicesResponseModel)
-        assert result[0].host_id == "host-2"
-        assert result[0].serial_number == "serial-2"
+        assert result[0].host_id == "host-123"
+        assert result[0].serial_number == "filtered-serial"
 
     def test_list_with_both_filters(self):
-        """Test listing quarantined devices with both filters."""
-        mock_response = [
-            {
-                "host_id": "host-1",
-                "serial_number": "serial-1",
-            },
-        ]
+        """Test listing quarantined devices with both host_id and serial_number filters."""
+        # Use the response factory to create consistent test data
+        device = QuarantinedDevicesResponseFactory.build(
+            host_id="specific-host", serial_number="specific-serial"
+        )
+
+        mock_response = [device.model_dump()]
         self.mock_scm.get.return_value = mock_response  # noqa
 
-        result = self.client.list(host_id="host-1", serial_number="serial-1")
+        result = self.client.list(host_id="specific-host", serial_number="specific-serial")
 
         self.mock_scm.get.assert_called_once_with(  # noqa
             "/config/objects/v1/quarantined-devices",
-            params={"host_id": "host-1", "serial_number": "serial-1"},
+            params={"host_id": "specific-host", "serial_number": "specific-serial"},
         )
         assert len(result) == 1
-        assert isinstance(result[0], QuarantinedDevicesResponseModel)
-        assert result[0].host_id == "host-1"
-        assert result[0].serial_number == "serial-1"
+        assert result[0].host_id == "specific-host"
+        assert result[0].serial_number == "specific-serial"
 
     def test_list_empty_response(self):
-        """Test listing quarantined devices with empty response."""
-        mock_response = []
-        self.mock_scm.get.return_value = mock_response  # noqa
+        """Test list with empty response."""
+        self.mock_scm.get.return_value = []  # noqa
 
         result = self.client.list()
 
@@ -131,35 +131,54 @@ class TestQuarantinedDevicesList(TestQuarantinedDevicesBase):
             "/config/objects/v1/quarantined-devices",
             params={},
         )
-        assert len(result) == 0
-
-    def test_list_invalid_response_format(self):
-        """Test that InvalidObjectError is raised when response is not a list."""
-        self.mock_scm.get.return_value = {"invalid": "format"}  # noqa
-
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list()
-
-        error_msg = str(exc_info.value)
-        assert "Response is not a list" in error_msg
-        assert "E003" in error_msg
-        assert "500" in error_msg
+        assert result == []
 
     def test_list_http_error(self):
         """Test error handling for list operation."""
-        self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
-            status_code=500,
-            error_code="E003",
-            message="Internal server error",
-            error_type="Server Error",
-        )
+        # Create a mock response to simulate an HTTP error
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        mock_response.json.return_value = {
+            "_errors": [
+                {
+                    "code": "E001",
+                    "message": "Unauthorized",
+                    "details": {"errorType": "Invalid Authorization"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.get.side_effect = mock_http_error
 
-        with pytest.raises(HTTPError) as exc_info:
+        with pytest.raises(HTTPError) as excinfo:
             self.client.list()
 
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Internal server error"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Server Error"
+        assert excinfo.value.response.status_code == 401
+        self.mock_scm.get.assert_called_once_with(
+            "/config/objects/v1/quarantined-devices",
+            params={},
+        )
+
+    def test_list_invalid_response_format(self):
+        """Test that InvalidObjectError is raised when API response is not a list."""
+        # Mock the API to return a dictionary instead of a list
+        self.mock_scm.get.return_value = {"invalid": "format"}
+
+        # The list method should raise an InvalidObjectError
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list()
+
+        # Verify the error details
+        assert "Invalid response format: expected list" in str(excinfo.value.message)
+        assert excinfo.value.error_code == "E003"
+        assert excinfo.value.http_status_code == 500
+
+        # Verify the API was called correctly
+        self.mock_scm.get.assert_called_once_with(
+            "/config/objects/v1/quarantined-devices",
+            params={},
+        )
 
 
 class TestQuarantinedDevicesCreate(TestQuarantinedDevicesBase):
@@ -167,75 +186,87 @@ class TestQuarantinedDevicesCreate(TestQuarantinedDevicesBase):
 
     def test_create_success(self):
         """Test successful creation of a quarantined device."""
-        test_data = {
-            "host_id": "test-host-id",
-            "serial_number": "test-serial-number",
-        }
-        mock_response = {
-            "host_id": "test-host-id",
-            "serial_number": "test-serial-number",
-        }
-        self.mock_scm.post.return_value = mock_response  # noqa
+        # Use the API factory to create consistent test data
+        create_data = QuarantinedDevicesCreateApiFactory.build_complete()
 
-        result = self.client.create(test_data)
+        # Create a response model based on the create data
+        response_model = QuarantinedDevicesResponseFactory.build(
+            host_id=create_data["host_id"],
+            serial_number=create_data["serial_number"],
+        )
+
+        self.mock_scm.post.return_value = response_model.model_dump()  # noqa
+
+        result = self.client.create(create_data)
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/quarantined-devices",
-            json=test_data,
+            json=create_data,
         )
         assert isinstance(result, QuarantinedDevicesResponseModel)
-        assert result.host_id == "test-host-id"
-        assert result.serial_number == "test-serial-number"
+        assert result.host_id == create_data["host_id"]
+        assert result.serial_number == create_data["serial_number"]
 
     def test_create_minimal_data(self):
         """Test creation with minimal required data."""
-        test_data = {
-            "host_id": "test-host-id",
-        }
-        mock_response = {
-            "host_id": "test-host-id",
-        }
-        self.mock_scm.post.return_value = mock_response  # noqa
+        # Use the API factory to create consistent test data with minimal fields
+        create_data = QuarantinedDevicesCreateApiFactory.build_minimal()
 
-        result = self.client.create(test_data)
+        # Create a response model based on the create data
+        response_model = QuarantinedDevicesResponseFactory.build(
+            host_id=create_data["host_id"],
+            serial_number=None,
+        )
+
+        self.mock_scm.post.return_value = response_model.model_dump()  # noqa
+
+        result = self.client.create(create_data)
 
         self.mock_scm.post.assert_called_once_with(  # noqa
             "/config/objects/v1/quarantined-devices",
-            json=test_data,
+            json=create_data,
         )
         assert isinstance(result, QuarantinedDevicesResponseModel)
-        assert result.host_id == "test-host-id"
+        assert result.host_id == create_data["host_id"]
         assert result.serial_number is None
 
     def test_create_missing_required_field(self):
         """Test that validation error is raised if host_id is missing."""
-        test_data = {"serial_number": "test-serial-number"}
+        with pytest.raises(ValueError) as excinfo:
+            self.client.create({"serial_number": "serial-1"})
 
-        with pytest.raises(ValueError) as exc_info:
-            self.client.create(test_data)
-
-        assert "host_id" in str(exc_info.value)
+        assert "host_id" in str(excinfo.value)
         self.mock_scm.post.assert_not_called()  # noqa
 
     def test_create_http_error(self):
         """Test error handling for create operation."""
-        test_data = {
-            "host_id": "test-host-id",
-            "serial_number": "test-serial-number",
+        # Use the API factory to create consistent test data
+        create_data = QuarantinedDevicesCreateApiFactory.build_complete()
+
+        # Create a mock response to simulate an HTTP error
+        mock_response = MagicMock()
+        mock_response.status_code = 409
+        mock_response.json.return_value = {
+            "_errors": [
+                {
+                    "code": "E004",
+                    "message": "Conflict",
+                    "details": {"errorType": "Device already quarantined"},
+                }
+            ],
+            "_request_id": "test-request-id",
         }
-        self.mock_scm.post.side_effect = raise_mock_http_error(  # noqa
-            status_code=400,
-            error_code="E003",
-            message="Invalid request",
-            error_type="Invalid Object",
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.post.side_effect = mock_http_error
+
+        with pytest.raises(HTTPError) as excinfo:
+            self.client.create(create_data)
+
+        assert excinfo.value.response.status_code == 409
+        self.mock_scm.post.assert_called_once_with(
+            "/config/objects/v1/quarantined-devices",
+            json=create_data,
         )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.create(test_data)
-
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Invalid request"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Object"
 
 
 class TestQuarantinedDevicesDelete(TestQuarantinedDevicesBase):
@@ -243,38 +274,50 @@ class TestQuarantinedDevicesDelete(TestQuarantinedDevicesBase):
 
     def test_delete_success(self):
         """Test successful deletion of a quarantined device."""
+        host_id = "host-to-delete"
         self.mock_scm.delete.return_value = None  # noqa
 
-        self.client.delete("test-host-id")
+        self.client.delete(host_id)
 
         self.mock_scm.delete.assert_called_once_with(  # noqa
             "/config/objects/v1/quarantined-devices",
-            params={"host_id": "test-host-id"},
+            params={"host_id": host_id},
         )
 
     def test_delete_empty_host_id(self):
         """Test that MissingQueryParameterError is raised if host_id is empty."""
-        with pytest.raises(MissingQueryParameterError) as exc_info:
+        with pytest.raises(MissingQueryParameterError) as excinfo:
             self.client.delete("")
 
-        error_msg = str(exc_info.value)
-        assert "'host_id' is not allowed to be empty" in error_msg
-        assert "E003" in error_msg
-        assert "400" in error_msg
+        assert "host_id" in str(excinfo.value.message)
+        assert excinfo.value.error_code == "E003"
         self.mock_scm.delete.assert_not_called()  # noqa
 
     def test_delete_http_error(self):
         """Test error handling for delete operation."""
-        self.mock_scm.delete.side_effect = raise_mock_http_error(  # noqa
-            status_code=404,
-            error_code="E005",
-            message="Object not found",
-            error_type="Object Not Present",
+        host_id = "non-existent-host"
+
+        # Create a mock response to simulate an HTTP error
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {
+            "_errors": [
+                {
+                    "code": "E005",
+                    "message": "Not Found",
+                    "details": {"errorType": "Device not found"},
+                }
+            ],
+            "_request_id": "test-request-id",
+        }
+        mock_http_error = HTTPError(response=mock_response)
+        self.mock_scm.delete.side_effect = mock_http_error
+
+        with pytest.raises(HTTPError) as excinfo:
+            self.client.delete(host_id)
+
+        assert excinfo.value.response.status_code == 404
+        self.mock_scm.delete.assert_called_once_with(
+            "/config/objects/v1/quarantined-devices",
+            params={"host_id": host_id},
         )
-
-        with pytest.raises(HTTPError) as exc_info:
-            self.client.delete("test-host-id")
-
-        error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Object not found"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"

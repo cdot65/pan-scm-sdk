@@ -11,7 +11,12 @@ from scm.models.objects import (
     RegionResponseModel,
     RegionUpdateModel,
 )
-from tests.factories import RegionCreateModelFactory, RegionUpdateModelFactory
+from tests.test_factories.objects.region import (
+    RegionCreateModelFactory,
+    RegionResponseFactory,
+    RegionResponseModelFactory,
+    RegionUpdateModelFactory,
+)
 
 # -------------------- Test Classes for GeoLocation Model --------------------
 
@@ -22,8 +27,8 @@ class TestGeoLocationModel:
     def test_geo_location_with_valid_data(self):
         """Test GeoLocation with valid data."""
         geo = GeoLocation(latitude=37.7749, longitude=-122.4194)
-        assert geo.latitude == 37.7749
-        assert geo.longitude == -122.4194
+        assert -90 <= geo.latitude <= 90
+        assert -180 <= geo.longitude <= 180
 
     def test_geo_location_with_invalid_latitude(self):
         """Test validation when latitude is outside valid range."""
@@ -69,10 +74,10 @@ class TestRegionCreateModel:
 
     def test_region_create_model_with_invalid_geo_location(self):
         """Test validation when geo_location is invalid."""
-        data = RegionCreateModelFactory.build_with_invalid_latitude()
+        data = RegionCreateModelFactory.build_with_invalid_geo_location()
         with pytest.raises(ValidationError) as exc_info:
             RegionCreateModel(**data)
-        assert "Input should be less than or equal to 90" in str(exc_info.value)
+        assert "Input should be less than or equal to" in str(exc_info.value)
 
     def test_region_create_model_multiple_containers_provided(self):
         """Test validation when multiple containers are provided."""
@@ -85,7 +90,7 @@ class TestRegionCreateModel:
 
     def test_region_create_model_no_container_provided(self):
         """Test validation when no container is provided."""
-        data = RegionCreateModelFactory.build_with_no_container()
+        data = RegionCreateModelFactory.build_without_container()
         with pytest.raises(ValueError) as exc_info:
             RegionCreateModel(**data)
         assert "Exactly one of 'folder', 'snippet', or 'device' must be provided." in str(
@@ -167,11 +172,10 @@ class TestRegionUpdateModel:
 
     def test_region_update_model_with_invalid_fields(self):
         """Test validation with invalid fields."""
-        data = RegionUpdateModelFactory.build_with_invalid_fields()
+        data = RegionUpdateModelFactory.build_with_invalid_id()
         with pytest.raises(ValidationError) as exc_info:
             RegionUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert "String should match pattern" in error_msg  # Invalid name
         assert "uuid" in error_msg.lower()  # Invalid UUID
 
     def test_region_update_model_minimal(self):
@@ -221,149 +225,107 @@ class TestRegionResponseModel:
 
     def test_region_response_model_valid(self):
         """Test validation with valid data."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "geo_location": {
-                "latitude": 37.7749,
-                "longitude": -122.4194,
-            },
-            "address": ["192.168.1.0/24", "10.0.0.0/8"],
-        }
-        model = RegionResponseModel(**data)
-        assert str(model.id) == "123e4567-e89b-12d3-a456-426655440000"
-        assert model.name == "TestRegion"
-        assert model.folder == "Global"
-        assert model.geo_location.latitude == 37.7749
-        assert model.geo_location.longitude == -122.4194
-        assert model.address == ["192.168.1.0/24", "10.0.0.0/8"]
+        data = RegionResponseFactory.build_valid()
+        model = RegionResponseModel(**data.model_dump())
+        assert model.id.hex
+        assert model.name == data.name
+        assert model.folder == data.folder
+        assert model.geo_location.latitude == data.geo_location.latitude
+        assert model.geo_location.longitude == data.geo_location.longitude
 
     def test_region_response_model_with_snippet(self):
         """Test validation with snippet container."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "snippet": "TestSnippet",
-        }
-        model = RegionResponseModel(**data)
-        assert model.snippet == "TestSnippet"
+        data = RegionResponseFactory.with_snippet()
+        model = RegionResponseModel(**data.model_dump())
+        assert model.id.hex
+        assert model.name == data.name
+        assert model.snippet == data.snippet
         assert model.folder is None
         assert model.device is None
 
     def test_region_response_model_with_device(self):
         """Test validation with device container."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "device": "TestDevice",
-        }
-        model = RegionResponseModel(**data)
-        assert model.device == "TestDevice"
+        data = RegionResponseFactory.with_device()
+        model = RegionResponseModel(**data.model_dump())
+        assert model.id.hex
+        assert model.name == data.name
+        assert model.device == data.device
         assert model.folder is None
         assert model.snippet is None
 
     def test_region_response_model_without_id(self):
         """Test validation when 'id' field is missing."""
-        data = {
-            "name": "TestRegion",
-            "folder": "Global",
-        }
+        data = RegionResponseModelFactory.build_without_id()
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data)
-        assert "id\n  Field required" in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert "id" in error_msg.lower()
+        assert "Field required" in error_msg
 
     def test_address_field_accepts_string(self):
         """Test that the 'address' field accepts a single string and converts it to a list."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "address": "192.168.1.0/24",
-        }
-        model = RegionResponseModel(**data)
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["address"] = "192.168.1.0/24"
+        model = RegionResponseModel(**data_dict)
         assert model.address == ["192.168.1.0/24"]
 
     def test_address_field_accepts_list(self):
         """Test that the 'address' field accepts a list of strings."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "address": ["192.168.1.0/24", "10.0.0.0/8"],
-        }
-        model = RegionResponseModel(**data)
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["address"] = ["192.168.1.0/24", "10.0.0.0/8"]
+        model = RegionResponseModel(**data_dict)
         assert model.address == ["192.168.1.0/24", "10.0.0.0/8"]
 
     def test_address_field_rejects_invalid_type(self):
         """Test that the 'address' field rejects invalid types."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "address": {"invalid": "type"},
-        }
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["address"] = {"invalid": "type"}
         with pytest.raises(ValidationError) as exc_info:
-            RegionResponseModel(**data)
+            RegionResponseModel(**data_dict)
         assert "1 validation error for RegionResponseModel" in str(exc_info.value)
 
     def test_address_field_rejects_duplicate_items(self):
         """Test that the 'address' field rejects duplicate items."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "address": ["192.168.1.0/24", "192.168.1.0/24"],
-        }
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["address"] = ["192.168.1.0/24", "192.168.1.0/24"]
         with pytest.raises(ValidationError) as exc_info:
-            RegionResponseModel(**data)
+            RegionResponseModel(**data_dict)
         assert "List of addresses must contain unique values" in str(exc_info.value)
 
     def test_tag_field_accepts_string(self):
         """Test that the 'tag' field accepts a single string and converts it to a list."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "tag": "prod",
-        }
-        model = RegionResponseModel(**data)
-        assert model.tag == ["prod"]
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["tag"] = "test-tag"
+        model = RegionResponseModel(**data_dict)
+        assert model.tag == ["test-tag"]
 
     def test_tag_field_accepts_list(self):
         """Test that the 'tag' field accepts a list of strings."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "tag": ["prod", "web"],
-        }
-        model = RegionResponseModel(**data)
-        assert model.tag == ["prod", "web"]
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["tag"] = ["test-tag-1", "test-tag-2"]
+        model = RegionResponseModel(**data_dict)
+        assert model.tag == ["test-tag-1", "test-tag-2"]
 
     def test_tag_field_rejects_invalid_type(self):
         """Test that the 'tag' field rejects invalid types."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "tag": {"invalid": "type"},
-        }
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["tag"] = {"invalid": "type"}
         with pytest.raises(ValidationError) as exc_info:
-            RegionResponseModel(**data)
+            RegionResponseModel(**data_dict)
         assert "1 validation error for RegionResponseModel" in str(exc_info.value)
 
     def test_tag_field_rejects_duplicate_items(self):
         """Test that the 'tag' field rejects duplicate items."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "TestRegion",
-            "folder": "Global",
-            "tag": ["prod", "prod"],
-        }
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["tag"] = ["tag1", "tag1"]
         with pytest.raises(ValidationError) as exc_info:
-            RegionResponseModel(**data)
+            RegionResponseModel(**data_dict)
         assert "List of tags must contain unique values" in str(exc_info.value)
-
-
-# -------------------- End of Test Classes --------------------

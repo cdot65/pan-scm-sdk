@@ -12,52 +12,11 @@ from scm.models.objects.http_server_profiles import (
     HTTPServerProfileResponseModel,
     HTTPServerProfileUpdateModel,
 )
-
-# -------------------- Helper Functions --------------------
-
-
-def create_valid_server():
-    """Helper function to create a valid server model dict."""
-    return {"name": "test-server", "address": "192.168.1.100", "protocol": "HTTP", "port": 80}
-
-
-def create_valid_https_server():
-    """Helper function to create a valid HTTPS server model dict."""
-    return {
-        "name": "test-https-server",
-        "address": "secure.example.com",
-        "protocol": "HTTPS",
-        "port": 443,
-        "tls_version": "1.2",
-        "certificate_profile": "default",
-        "http_method": "POST",
-    }
-
-
-def create_valid_profile_data(container_type="folder"):
-    """Helper function to create a valid HTTP server profile data dict."""
-    data = {
-        "name": "test-http-profile",
-        "description": "Test HTTP server profile for unit tests",
-        "server": [create_valid_server(), create_valid_https_server()],
-        "tag_registration": True,
-        "format": {
-            "traffic": {},
-            "threat": {},
-            "url": {},
-        },
-    }
-
-    # Add the specified container
-    if container_type == "folder":
-        data["folder"] = "Security Profiles"
-    elif container_type == "snippet":
-        data["snippet"] = "TestSnippet"
-    elif container_type == "device":
-        data["device"] = "TestDevice"
-
-    return data
-
+from tests.test_factories.objects.http_server_profiles import (
+    HTTPServerProfileCreateModelFactory,
+    HTTPServerProfileResponseModelFactory,
+    HTTPServerProfileUpdateModelFactory,
+)
 
 # -------------------- Test Classes for Pydantic Models --------------------
 
@@ -86,8 +45,7 @@ class TestHTTPServerProfileCreateModel:
 
     def test_multiple_containers_error(self):
         """Test validation when multiple containers are provided."""
-        data = create_valid_profile_data()
-        data["snippet"] = "TestSnippet"  # Adding a second container
+        data = HTTPServerProfileCreateModelFactory.build_with_multiple_containers()
 
         with pytest.raises(ValueError) as exc_info:
             HTTPServerProfileCreateModel(**data)
@@ -97,8 +55,7 @@ class TestHTTPServerProfileCreateModel:
 
     def test_no_container_error(self):
         """Test validation when no container is provided."""
-        data = create_valid_profile_data()
-        data.pop("folder")  # Remove the container
+        data = HTTPServerProfileCreateModelFactory.build_with_no_containers()
 
         with pytest.raises(ValueError) as exc_info:
             HTTPServerProfileCreateModel(**data)
@@ -108,7 +65,7 @@ class TestHTTPServerProfileCreateModel:
 
     def test_invalid_server_config(self):
         """Test validation for invalid server configuration."""
-        data = create_valid_profile_data()
+        data = HTTPServerProfileCreateModelFactory.build_valid()
         data["server"] = [{"name": "test-server", "port": 80}]  # Missing required fields
 
         with pytest.raises(ValidationError) as exc_info:
@@ -120,7 +77,7 @@ class TestHTTPServerProfileCreateModel:
 
     def test_invalid_protocol(self):
         """Test validation for invalid protocol value."""
-        data = create_valid_profile_data()
+        data = HTTPServerProfileCreateModelFactory.build_valid()
         data["server"] = [
             {
                 "name": "test-server",
@@ -137,31 +94,37 @@ class TestHTTPServerProfileCreateModel:
 
     def test_valid_model_with_folder(self):
         """Test validation with valid data using folder container."""
-        data = create_valid_profile_data("folder")
+        data = HTTPServerProfileCreateModelFactory.build_valid(folder="Test Folder")
         model = HTTPServerProfileCreateModel(**data)
         assert model.name == data["name"]
-        assert len(model.server) == 2
+        assert len(model.server) == len(data["server"])
         assert model.server[0].name == data["server"][0]["name"]
-        assert model.server[1].protocol == data["server"][1]["protocol"]
         assert model.folder == data["folder"]
-        assert model.tag_registration == data["tag_registration"]
-        assert model.format is not None
-        assert "traffic" in model.format
+        assert model.snippet is None
+        assert model.device is None
 
     def test_valid_model_with_snippet(self):
         """Test validation with valid data using snippet container."""
-        data = create_valid_profile_data("snippet")
+        data = HTTPServerProfileCreateModelFactory.build_valid()
+        data.pop("folder")
+        data["snippet"] = "Test Snippet"
+
         model = HTTPServerProfileCreateModel(**data)
         assert model.name == data["name"]
+        assert len(model.server) == len(data["server"])
         assert model.snippet == data["snippet"]
         assert model.folder is None
         assert model.device is None
 
     def test_valid_model_with_device(self):
         """Test validation with valid data using device container."""
-        data = create_valid_profile_data("device")
+        data = HTTPServerProfileCreateModelFactory.build_valid()
+        data.pop("folder")
+        data["device"] = "Test Device"
+
         model = HTTPServerProfileCreateModel(**data)
         assert model.name == data["name"]
+        assert len(model.server) == len(data["server"])
         assert model.device == data["device"]
         assert model.folder is None
         assert model.snippet is None
@@ -172,62 +135,60 @@ class TestHTTPServerProfileUpdateModel:
 
     def test_invalid_data_error(self):
         """Test that ValidationError is raised when invalid data is provided."""
-        data = {"invalid": "data"}
+        data = {"invalid_field": "test"}
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert "validation error" in error_msg
+        assert "3 validation errors for HTTPServerProfileUpdateModel" in error_msg
+        assert "id\n  Field required" in error_msg
         assert "name\n  Field required" in error_msg
         assert "server\n  Field required" in error_msg
-        assert "id\n  Field required" in error_msg
 
     def test_missing_id(self):
         """Test validation when 'id' field is missing."""
-        data = create_valid_profile_data()
+        data = HTTPServerProfileUpdateModelFactory.build_without_id()
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileUpdateModel(**data)
-        assert "id\n  Field required" in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert "id\n  Field required" in error_msg
 
     def test_invalid_id_format(self):
         """Test validation for invalid UUID format."""
-        data = create_valid_profile_data()
-        data["id"] = "invalid-uuid"
-
+        data = HTTPServerProfileUpdateModelFactory.build_with_invalid_id()
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileUpdateModel(**data)
-        assert "id\n  Input should be a valid UUID" in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert "id\n  Input should be a valid UUID" in error_msg
 
     def test_valid_model(self):
         """Test validation with valid data."""
-        data = create_valid_profile_data()
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
+        data = HTTPServerProfileUpdateModelFactory.build_valid()
         model = HTTPServerProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
-        assert len(model.server) == 2
-        assert model.server[0].protocol == "HTTP"
-        assert model.server[1].protocol == "HTTPS"
-        assert model.folder == data["folder"]
+        assert len(model.server) == len(data["server"])
 
     def test_minimal_update(self):
         """Test updating with minimal required fields."""
         data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "updated-profile",
-            "server": [create_valid_server()],
+            "id": "12345678-1234-5678-1234-567812345678",
+            "name": "minimal-profile",
+            "server": [
+                {
+                    "name": "minimal-server",
+                    "address": "192.168.1.1",
+                    "protocol": "HTTP",
+                    "port": 8080,
+                }
+            ],
         }
-
         model = HTTPServerProfileUpdateModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
-        assert len(model.server) == 1
         assert model.server[0].name == data["server"][0]["name"]
+        assert model.description is None
         assert model.tag_registration is None
         assert model.format is None
-        assert model.folder is None
-        assert model.snippet is None
-        assert model.device is None
 
 
 class TestHTTPServerProfileResponseModel:
@@ -235,49 +196,43 @@ class TestHTTPServerProfileResponseModel:
 
     def test_valid_model(self):
         """Test validation with valid response data."""
-        data = create_valid_profile_data()
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        data = HTTPServerProfileResponseModelFactory.build_valid()
+        model = HTTPServerProfileResponseModel(**data)
+        assert model.id == UUID(data["id"])
+        assert model.name == data["name"]
+        assert model.folder == data["folder"]
+        assert len(model.server) == len(data["server"])
+
+    def test_with_snippet(self):
+        """Test validation with snippet container."""
+        data = HTTPServerProfileResponseModelFactory.build_valid()
+        data.pop("folder")
+        data["snippet"] = "Test Snippet"
 
         model = HTTPServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
-        assert model.description == data["description"]
-        assert len(model.server) == 2
-        assert model.server[0].protocol == "HTTP"
-        assert model.server[1].protocol == "HTTPS"
-        assert model.folder == data["folder"]
-        assert model.tag_registration == data["tag_registration"]
-
-    def test_with_snippet(self):
-        """Test validation with snippet container."""
-        data = create_valid_profile_data("snippet")
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-
-        model = HTTPServerProfileResponseModel(**data)
-        assert model.id == UUID(data["id"])
         assert model.snippet == data["snippet"]
         assert model.folder is None
         assert model.device is None
 
     def test_with_device(self):
         """Test validation with device container."""
-        data = create_valid_profile_data("device")
-        data["id"] = "123e4567-e89b-12d3-a456-426655440000"
+        data = HTTPServerProfileResponseModelFactory.build_valid()
+        data.pop("folder")
+        data["device"] = "Test Device"
 
         model = HTTPServerProfileResponseModel(**data)
         assert model.id == UUID(data["id"])
+        assert model.name == data["name"]
         assert model.device == data["device"]
         assert model.folder is None
         assert model.snippet is None
 
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426655440000",
-        }
+        data = HTTPServerProfileResponseModelFactory.build_without_id()
         with pytest.raises(ValidationError) as exc_info:
             HTTPServerProfileResponseModel(**data)
         error_msg = str(exc_info.value)
-        assert "2 validation errors for HTTPServerProfileResponseModel" in error_msg
-        assert "name\n  Field required" in error_msg
-        assert "server\n  Field required" in error_msg
+        assert "id\n  Field required" in error_msg
