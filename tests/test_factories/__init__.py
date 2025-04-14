@@ -44,6 +44,19 @@ from tests.test_factories.deployment.service_connections import (
     ServiceConnectionUpdateApiFactory,
     ServiceConnectionUpdateModelFactory,
 )
+
+# Import network related factories
+from tests.test_factories.network import (
+    InterfaceAddressFactory,
+    NatRuleCreateApiFactory,
+    NatRuleCreateModelFactory,
+    NatRuleMoveApiFactory,
+    NatRuleMoveModelFactory,
+    NatRuleResponseFactory,
+    NatRuleUpdateApiFactory,
+    NatRuleUpdateModelFactory,
+    SourceTranslationFactory,
+)
 from tests.test_factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,
@@ -347,4 +360,14 @@ __all__ = [
     "RemoteNetworkResponseFactory",
     "RemoteNetworkUpdateApiFactory",
     "RemoteNetworkUpdateModelFactory",
+    # Network factories
+    "InterfaceAddressFactory",
+    "NatRuleCreateApiFactory",
+    "NatRuleCreateModelFactory",
+    "NatRuleMoveApiFactory",
+    "NatRuleMoveModelFactory",
+    "NatRuleResponseFactory",
+    "NatRuleUpdateApiFactory",
+    "NatRuleUpdateModelFactory",
+    "SourceTranslationFactory",
 ]

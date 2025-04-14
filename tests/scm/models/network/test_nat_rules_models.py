@@ -20,7 +20,7 @@ from scm.models.network.nat_rules import (
     SourceTranslation,
     StaticIp,
 )
-from tests.factories import (
+from tests.test_factories.network import (
     InterfaceAddressFactory,
     NatRuleCreateApiFactory,
     NatRuleCreateModelFactory,

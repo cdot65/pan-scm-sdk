@@ -15,10 +15,11 @@ from scm.models.network.nat_rules import (
     NatRuleResponseModel,
     NatRuleUpdateModel,
 )
-from tests.factories import NatRuleCreateApiFactory, NatRuleUpdateApiFactory
-
-# Import factories for generating test data
-from tests.factories import NatRuleResponseFactory  # if needed in future
+from tests.test_factories.network import (
+    NatRuleCreateApiFactory,
+    NatRuleResponseFactory,
+    NatRuleUpdateApiFactory,
+)
 
 # Import utility function for simulating HTTP errors
 
