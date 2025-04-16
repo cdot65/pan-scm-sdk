@@ -48,6 +48,7 @@ mypy = "^1.15.0"
 types-requests = "^2.32.0.20250328"
 types-oauthlib = "^3.2.0.20250408"
 types-requests-oauthlib = "^2.0.0.20250306"
+mkdocs-linkcheck = "^1.0.6"
 
 [tool.ruff]
 line-length = 100

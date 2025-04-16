@@ -404,6 +404,10 @@ class Scm:
                 "scm.config.objects.external_dynamic_lists",
                 "ExternalDynamicLists",
             ),
+            "folder": (
+                "scm.config.setup.folder",
+                "Folder",
+            ),
             "hip_object": (
                 "scm.config.objects.hip_object",
                 "HIPObject",
