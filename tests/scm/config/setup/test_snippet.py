@@ -165,6 +165,19 @@ class TestSnippetGet(TestSnippetBase):
         # Assert the client was called correctly
         mock_scm_client.get.assert_called_once_with(f"/config/setup/v1/snippets/{snippet_id}")
 
+    def test_get_with_general_exception(self, snippet_service, mock_scm_client):
+        """Test get with a non-404 exception to cover line 105."""
+        object_id = "123e4567-e89b-12d3-a456-426614174000"
+        
+        # Create a non-404 error
+        error = APIError("General server error")
+        error.http_status_code = 500
+        mock_scm_client.get.side_effect = error
+        
+        # Should re-raise the error
+        with pytest.raises(APIError):
+            snippet_service.get(object_id)
+
 
 class TestSnippetFetch(TestSnippetBase):
     """Tests for Snippet.fetch method."""
@@ -214,6 +227,59 @@ class TestSnippetFetch(TestSnippetBase):
         with patch.object(snippet_service, "list", return_value=mock_response):
             with pytest.raises(APIError):
                 snippet_service.fetch("test_snippet")
+
+    def test_fetch_with_model_validation_error(self, snippet_service, mock_scm_client):
+        """Test handling of model validation errors in fetch method (line 264)."""
+        # Setup a response that will fail model validation
+        mock_response = {"id": "123", "invalid_field": True}
+        mock_scm_client.get.return_value = mock_response
+        
+        # Mock the model_validate method to raise a ValueError during validation
+        with patch('scm.models.setup.snippet_models.SnippetResponseModel.model_validate', 
+                  side_effect=ValueError("Model validation error")):
+            # This should be handled gracefully
+            result = snippet_service.fetch("test_snippet")
+            assert result is None
+
+    def test_fetch_fallback_lines_253_256(self, snippet_service, mock_scm_client):
+        """Directly testing lines 253-256 in fetch method."""
+        # Setup a 404 error for the get request
+        error = APIError("Not found")
+        error.http_status_code = 404
+        mock_scm_client.get.side_effect = error
+        
+        # Setup the list method to return empty list
+        with patch.object(snippet_service, 'list', return_value=[]):
+            result = snippet_service.fetch("test_name")
+            assert result is None
+
+    def test_fetch_with_single_match(self, snippet_service, mock_scm_client):
+        """Test the fetch method when list returns single match to cover line 262."""
+        # Setup mock client to raise 404 when trying to get directly
+        error = APIError("Not found")
+        error.http_status_code = 404
+        mock_scm_client.get.side_effect = error
+        
+        # Create a mock response for the fallback list
+        mock_snippet = SnippetResponseFactory.build(name="test_snippet")
+        mock_response = SnippetResponseModel.model_validate(mock_snippet)
+        
+        # Setup list method to return exactly one match
+        with patch.object(snippet_service, 'list', return_value=[mock_response]):
+            # Call fetch with the name
+            result = snippet_service.fetch("test_snippet")
+            
+            # Result should be the mock response
+            assert result == mock_response
+
+    def test_fetch_with_type_error(self, snippet_service, mock_scm_client):
+        """Test fetch method with response that causes a TypeError during model validation."""
+        # Setup a response that will cause error during model validation
+        mock_scm_client.get.return_value = {"id": 12345}  # ID should be a string, numeric will cause validation error
+        
+        # This should be handled gracefully - verify it doesn't crash
+        result = snippet_service.fetch("test_snippet")
+        assert result is None
 
 
 class TestSnippetList(TestSnippetBase):
@@ -360,6 +426,32 @@ class TestSnippetUpdate(TestSnippetBase):
         # Assert the result is a SnippetResponseModel
         assert isinstance(result, SnippetResponseModel)
 
+    def test_update_with_all_parameters(self, snippet_service, mock_scm_client):
+        """Test updating snippet with all parameters to cover line 144."""
+        # Setup
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        mock_response = SnippetResponseFactory.build()
+        mock_scm_client.put.return_value = mock_response
+        
+        # Call update with all parameters
+        result = snippet_service.update(
+            snippet_id=snippet_id,
+            name="updated_snippet",
+            description="Updated description",
+            labels=["updated", "tags"],
+            enable_prefix=True
+        )
+        
+        # Verify result
+        assert isinstance(result, SnippetResponseModel)
+        
+        # Verify the request payload contained all parameters
+        request_json = mock_scm_client.put.call_args[1]["json"]
+        assert "name" in request_json
+        assert "description" in request_json
+        assert "labels" in request_json
+        assert "enable_prefix" in request_json
+
     def test_update_nonexistent_snippet(self, snippet_service, mock_scm_client):
         """Test updating a snippet that doesn't exist."""
         # Setup mock client to raise APIError with 404 status
@@ -374,6 +466,19 @@ class TestSnippetUpdate(TestSnippetBase):
                 snippet_id=snippet_id,
                 name="updated_name",
             )
+
+    def test_update_with_nonexistent_raising_non404(self, snippet_service, mock_scm_client):
+        """Test update with a non-404 exception to cover line 159."""
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        
+        # Create a non-404 error
+        error = APIError("General server error")
+        error.http_status_code = 500
+        mock_scm_client.put.side_effect = error
+        
+        # Should re-raise the error
+        with pytest.raises(APIError):
+            snippet_service.update(snippet_id=snippet_id, name="updated_name")
 
     def test_update_without_fields(self, snippet_service):
         """Test updating a snippet without providing any fields to update."""
@@ -414,6 +519,19 @@ class TestSnippetDelete(TestSnippetBase):
         with pytest.raises(ObjectNotPresentError):
             snippet_service.delete(snippet_id)
 
+    def test_delete_with_nonexistent_raising_non404(self, snippet_service, mock_scm_client):
+        """Test delete with a non-404 exception to cover line 178."""
+        object_id = "123e4567-e89b-12d3-a456-426614174000"
+        
+        # Create a non-404 error
+        error = APIError("General server error")
+        error.http_status_code = 500
+        mock_scm_client.delete.side_effect = error
+        
+        # Should re-raise the error
+        with pytest.raises(APIError):
+            snippet_service.delete(object_id)
+
 
 class TestSnippetFolderAssociations(TestSnippetBase):
     """Tests for Snippet folder association methods."""
@@ -444,6 +562,21 @@ class TestSnippetFolderAssociations(TestSnippetBase):
         # Disassociate the folder
         with pytest.raises(NotImplementedError):
             snippet_service.disassociate_folder(snippet_id, folder_id)
+
+    def test_disassociate_folder_with_api_error(self, snippet_service, mock_scm_client):
+        """Test disassociate_folder method with API error to cover lines 439-457."""
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "abcdef12-3456-7890-abcd-ef1234567890"
+        
+        # Mock the API client to raise an exception
+        mock_scm_client.delete.side_effect = ValueError("API error")
+        
+        # This should raise a NotImplementedError
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.disassociate_folder(snippet_id, folder_id)
+        
+        # Verify the error message
+        assert "Disassociating snippets from folders is not yet implemented" in str(excinfo.value)
 
 
 class TestSnippetValidation(TestSnippetBase):
@@ -503,3 +636,140 @@ class TestSnippetValidation(TestSnippetBase):
 
         # None is valid
         assert snippet_service._validate_labels(None) is None
+
+    def test_line_411_validate_labels(self, snippet_service):
+        """Test _validate_labels with non-string values to cover line 411."""
+        # Create labels with a non-string item to trigger the validation code
+        labels = ["valid", 123, "also_valid"]
+        
+        # Call validate_labels - should raise InvalidObjectError
+        with pytest.raises(InvalidObjectError):
+            snippet_service._validate_labels(labels)
+
+
+class TestSnippetLineSpecificCoverage(TestSnippetBase):
+    """Tests specifically targeting uncovered lines."""
+    
+    def test_line_293_associate_folder_exception(self, snippet_service, mock_scm_client):
+        """Test the exception handling in associate_folder (line 293)."""
+        # Setup
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "abcdef12-3456-7890-abcd-ef1234567890"
+        
+        # Make the API call raise an exception
+        mock_scm_client.post.side_effect = ValueError("Test error")
+        
+        # This should raise NotImplementedError with the wrapped exception
+        with pytest.raises(NotImplementedError):
+            snippet_service.associate_folder(snippet_id, folder_id)
+    
+    def test_line_388_name_validation_return(self, snippet_service):
+        """Test the return statement in _validate_name (line 388)."""
+        valid_name = "test-name-123"
+        
+        # This should pass validation and return the name (line 388)
+        result = snippet_service._validate_name(valid_name)
+        
+        # Verify the name was returned unchanged
+        assert result == valid_name
+
+class TestFinalCoverageItems(TestSnippetBase):
+    """Tests targeting specific uncovered lines."""
+    
+    def test_fetch_fallback_empty_list(self, snippet_service, mock_scm_client):
+        """Test fetch fallback when list returns empty to cover line 253."""
+        # Setup mock to raise 404 on direct get
+        error = APIError("Not found")
+        error.http_status_code = 404
+        mock_scm_client.get.side_effect = error
+        
+        # Setup empty response for list fallback
+        with patch.object(snippet_service, 'list', return_value=[]):
+            result = snippet_service.fetch("test_name")
+            assert result is None
+            
+    def test_associate_folder_exception_handler(self, snippet_service, mock_scm_client):
+        """Test associate_folder exception handler to cover line 293."""
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "abcdef12-3456-7890-abcd-ef1234567890"
+        
+        # Set up a specific exception type
+        mock_scm_client.post.side_effect = RuntimeError("API call failed")
+        
+        # Should wrap the exception in NotImplementedError
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.associate_folder(snippet_id, folder_id)
+            
+        # Check error message contains original exception
+        assert "API call failed" in str(excinfo.value)
+            
+    def test_disassociate_folder_exception_handler(self, snippet_service, mock_scm_client):
+        """Test disassociate_folder exception handler to cover lines 439-457."""
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "abcdef12-3456-7890-abcd-ef1234567890"
+        
+        # Set up a specific exception type
+        mock_scm_client.delete.side_effect = RuntimeError("API call failed")
+        
+        # Should wrap the exception in NotImplementedError
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.disassociate_folder(snippet_id, folder_id)
+            
+        # Check error message contains original exception
+        assert "API call failed" in str(excinfo.value)
+
+class TestSnippetAdditionalCoverage(TestSnippetBase):
+    """Tests for additional coverage."""
+    
+    def test_fetch_with_model_validation_error(self, snippet_service, mock_scm_client):
+        """Test handling of model validation errors in fetch method (line 264)."""
+        # Setup a response that will fail model validation
+        mock_response = {"id": "123", "invalid_field": True}
+        mock_scm_client.get.return_value = mock_response
+        
+        # Mock the model_validate method to raise a ValueError during validation
+        with patch('scm.models.setup.snippet_models.SnippetResponseModel.model_validate', 
+                  side_effect=ValueError("Model validation error")):
+            # This should be handled gracefully
+            result = snippet_service.fetch("test_snippet")
+            assert result is None
+
+    def test_fetch_fallback_lines_253_256(self, snippet_service, mock_scm_client):
+        """Directly testing lines 253-256 in fetch method."""
+        # Setup a 404 error for the get request
+        error = APIError("Not found")
+        error.http_status_code = 404
+        mock_scm_client.get.side_effect = error
+        
+        # Setup the list method to return empty list
+        with patch.object(snippet_service, 'list', return_value=[]):
+            result = snippet_service.fetch("test_name")
+            assert result is None
+    
+    def test_associate_folder_line_293(self, snippet_service, mock_scm_client):
+        """Directly testing line 293 in associate_folder method."""
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "abcdef12-3456-7890-abcd-ef1234567890"
+        
+        # Setup specific exception for post
+        mock_scm_client.post.side_effect = Exception("Specific test exception")
+        
+        # This should wrap the exception in NotImplementedError
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.associate_folder(snippet_id, folder_id)
+            
+        assert "Specific test exception" in str(excinfo.value)
+    
+    def test_disassociate_folder_lines_446_448(self, snippet_service, mock_scm_client):
+        """Directly testing lines 446-448 in disassociate_folder method."""
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "abcdef12-3456-7890-abcd-ef1234567890"
+        
+        # Setup specific exception for delete
+        mock_scm_client.delete.side_effect = Exception("Specific test exception")
+        
+        # This should wrap the exception in NotImplementedError
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.disassociate_folder(snippet_id, folder_id)
+            
+        assert "Specific test exception" in str(excinfo.value)
