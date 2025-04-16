@@ -5,7 +5,7 @@ This module defines the Pydantic models used for creating, updating, and
 representing Snippet resources in the Strata Cloud Manager.
 """
 
-from typing import Dict, List, Literal, Optional, Union
+from typing import List, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator

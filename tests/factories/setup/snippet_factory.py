@@ -5,11 +5,10 @@ This module provides factory classes for creating test data
 for Snippet objects in the Strata Cloud Manager SDK.
 """
 
+from typing import Any, Dict
 import uuid
-from typing import Dict, List, Optional, Any
 
 import factory
-from factory.fuzzy import FuzzyText
 from faker import Faker
 
 fake = Faker()
@@ -405,7 +404,7 @@ class SnippetResponseModelFactory(factory.DictFactory):
         data = {
             "id": kwargs.pop("id", str(uuid.uuid4())),
             "name": kwargs.pop("name", f"snippet_{fake.word()}"),
-            "description": kwargs.pop("description", f"Description for snippet"),
+            "description": kwargs.pop("description", "Description for snippet"),
             "labels": kwargs.pop("labels", [fake.word() for _ in range(2)]),
             "enable_prefix": kwargs.pop("enable_prefix", False),
             "type": kwargs.pop("type", "custom"),

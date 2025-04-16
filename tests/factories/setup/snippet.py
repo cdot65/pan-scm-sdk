@@ -5,11 +5,10 @@ This module provides factory classes for creating test data
 for Snippet objects in the Strata Cloud Manager SDK.
 """
 
+from typing import Any, Dict
 import uuid
-from typing import Dict, List, Optional, Any
 
 import factory
-from factory.fuzzy import FuzzyText
 from faker import Faker
 
 fake = Faker()

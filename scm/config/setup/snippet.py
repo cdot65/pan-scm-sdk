@@ -11,9 +11,7 @@ from uuid import UUID
 from scm.config import BaseObject
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
 from scm.models.setup.snippet_models import (
-    SnippetCreateModel,
     SnippetResponseModel,
-    SnippetUpdateModel,
 )
 
 
