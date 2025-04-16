@@ -13,6 +13,7 @@
     - [Updating Folders](#updating-folders)
     - [Listing Folders](#listing-folders)
     - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Working with Folder Hierarchies](#working-with-folder-hierarchies)
     - [Deleting Folders](#deleting-folders)
 7. [Error Handling](#error-handling)
@@ -50,14 +51,35 @@ which are used to organize resources in a hierarchical structure.
 
 ## Exceptions
 
-The Folder class can raise the following exceptions:
-
-- `APIError`: Base class for all API-related errors
-- `InvalidObjectError`: Raised when an invalid object or parameter is provided
-- `ObjectNotPresentError`: Raised when a requested folder does not exist
-- `NameNotUniqueError`: Raised when attempting to create a folder with a name that already exists
+| Exception                | HTTP Code | Description                                   |
+|--------------------------|-----------|-----------------------------------------------|
+| `InvalidObjectError`     | 400       | Invalid folder data or format                |
+| `ObjectNotPresentError`  | 404       | Requested folder not found                   |
+| `NameNotUniqueError`     | 409       | Folder name already exists in parent context |
+| `APIError`               | Various   | General API communication error              |
+| `AuthenticationError`    | 401       | Authentication failed                        |
+| `ServerError`            | 500       | Internal server error                        |
 
 ## Basic Configuration
+
+The Folder service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret"
+)
+
+# Access the Folder service directly through the client
+folders = client.folder
+```
+
+### Traditional Service Instantiation (Legacy)
 
 ```python
 from scm.client import Scm
@@ -68,7 +90,13 @@ client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret"
 )
+
+# Initialize Folder object explicitly
+folders = Folder(client)
 ```
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
@@ -156,6 +184,21 @@ exact_folders = client.folder.list(name="Development", exact_match=True)
 print(f"Found {len(exact_folders)} folders with the exact name 'Development'")
 ```
 
+### Controlling Pagination with max_limit
+
+```python
+# Create a folder client with custom max_limit
+folder_service = Folder(client, max_limit=100)
+
+# List folders with pagination controls
+folders = folder_service.list(limit=20, offset=40)
+print(f"Retrieved {len(folders)} folders starting from offset 40")
+
+# Be aware of the absolute maximum limit
+print(f"Default max limit: {Folder.DEFAULT_MAX_LIMIT}")
+print(f"Absolute max limit: {Folder.ABSOLUTE_MAX_LIMIT}")
+```
+
 ### Working with Folder Hierarchies
 
 ```python
@@ -200,135 +243,150 @@ def build_folder_tree(client, root_name=""):
 
         return branch
 
+    # Start building from the root
     return build_branch(root)
-
 
 # Example usage:
 folder_tree = build_folder_tree(client)
-import json
-
-print(json.dumps(folder_tree, indent=2))
+print(f"Folder tree: {folder_tree}")
 ```
 
 ### Deleting Folders
 
 ```python
-# Delete a folder by ID
+# Delete a folder
 folder_id = "12345678-1234-1234-1234-123456789012"
 client.folder.delete(folder_id=folder_id)
-print(f"Folder with ID {folder_id} has been deleted")
+print(f"Deleted folder with ID {folder_id}")
+
+# Verify the folder has been deleted
+try:
+    client.folder.get(folder_id=folder_id)
+    print("ERROR: Folder still exists!")
+except ObjectNotPresentError:
+    print("Folder successfully deleted")
 ```
 
 ## Error Handling
 
 ```python
-from scm.exceptions import APIError, ObjectNotPresentError, NameNotUniqueError
+from scm.exceptions import ObjectNotPresentError, NameNotUniqueError, APIError
 
 try:
-    # Attempt to create a folder
-    folder = client.folder.create(
-        name="Development",
-        parent="NonExistentParent"
+    # Try to create a folder with a duplicate name
+    duplicate_folder = client.folder.create(
+        name="Development",  # Assuming this folder already exists
+        parent="Projects",
+        description="Duplicate folder"
     )
-except NameNotUniqueError as e:
-    print(f"A folder with this name already exists: {e}")
-except ObjectNotPresentError as e:
-    print(f"The parent folder does not exist: {e}")
+except NameNotUniqueError:
+    print("A folder with this name already exists in the specified parent")
+except ObjectNotPresentError:
+    print("Parent folder not found")
 except APIError as e:
-    print(f"API Error: {e}")
+    print(f"API error occurred: {e}")
+except Exception as e:
+    print(f"Unexpected error: {e}")
 ```
 
 ## Best Practices
 
-1. **Folder Naming and Organization**
-    - Use consistent naming conventions for folders
-    - Maintain a logical hierarchy for your resources
-    - Avoid creating deeply nested folder structures (more than 5-6 levels)
-    - Document your folder organization strategy
+1. **Naming Conventions**
+   - Use descriptive names for folders
+   - Establish consistent hierarchical structure
+   - Avoid excessively long names or special characters
 
-2. **Parent References**
-    - Always use folder names (not UUIDs) for parent references
-    - Verify parent folders exist before creating child folders
-    - Be cautious when renaming parent folders as it affects child folder references
+2. **Organization**
+   - Design your folder hierarchy carefully before implementation
+   - Use descriptive labels to categorize folders
+   - Keep hierarchy depth reasonable (avoid deep nesting)
 
 3. **Error Handling**
-    - Implement comprehensive error handling for all operations
-    - Handle specific exceptions before generic ones
-    - Verify folder existence before performing operations on it
+   - Always implement proper error handling
+   - Check for naming conflicts before creation
+   - Verify parent folders exist
+
+4. **Performance**
+   - Use pagination for large folder structures
+   - Cache folder structure for repetitive operations
+   - Limit folder hierarchy depth for better performance
+
+5. **Security**
+   - Implement proper access controls
+   - Follow principle of least privilege
 
 ## Full Script Examples
 
-### Creating a Complete Folder Hierarchy
+### Creating a Folder Hierarchy
 
 ```python
-from scm.client import Scm
-from scm.exceptions import APIError, NameNotUniqueError
-
-# Initialize client
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret"
-)
-
+from scm.client import ScmClient
+from scm.exceptions import APIError, NameNotUniqueError, ObjectNotPresentError
 
 def create_folder_hierarchy():
     try:
+        # Initialize client
+        client = ScmClient(
+            client_id="your_client_id",
+            client_secret="your_client_secret"
+        )
+        
         # Create root folder
         try:
             root = client.folder.create(
                 name="Organization",
-                parent="",
-                description="Organization root folder"
+                parent="",  # Empty for root folder
+                description="Organization Root Folder",
+                labels=["root", "organization"]
             )
             print(f"Created root folder: {root.name} (ID: {root.id})")
         except NameNotUniqueError:
-            # Folder already exists, fetch it instead
+            # If the folder already exists, fetch it
             root = client.folder.fetch(name="Organization")
-            print(f"Root folder already exists: {root.name} (ID: {root.id})")
-
+            print(f"Using existing root folder: {root.name} (ID: {root.id})")
+            
         # Create department folders
-        departments = ["Engineering", "Marketing", "Operations", "Sales"]
-
+        departments = ["Engineering", "Marketing", "Operations", "Finance"]
         for dept in departments:
             try:
                 dept_folder = client.folder.create(
                     name=dept,
                     parent="Organization",
-                    description=f"{dept} department folder",
+                    description=f"{dept} Department",
                     labels=["department", dept.lower()]
                 )
-                print(f"Created department folder: {dept_folder.name} (ID: {dept_folder.id})")
-
-                # Create sub-folders for Engineering department
+                print(f"Created department folder: {dept_folder.name}")
+                
+                # Create project folders for Engineering
                 if dept == "Engineering":
-                    teams = ["Frontend", "Backend", "DevOps", "QA"]
-                    for team in teams:
+                    projects = ["Cloud", "Security", "Mobile", "Web"]
+                    for project in projects:
                         try:
-                            team_folder = client.folder.create(
-                                name=team,
+                            project_folder = client.folder.create(
+                                name=project,
                                 parent="Engineering",
-                                description=f"{team} team folder",
-                                labels=["team", team.lower(), "engineering"]
+                                description=f"{project} Projects",
+                                labels=["project", "engineering", project.lower()]
                             )
-                            print(f"Created team folder: {team_folder.name} (ID: {team_folder.id})")
+                            print(f"Created project folder: {project_folder.name}")
                         except NameNotUniqueError:
-                            print(f"Team folder '{team}' already exists")
-
+                            print(f"Project folder {project} already exists, skipping")
             except NameNotUniqueError:
-                print(f"Department folder '{dept}' already exists")
-
-        print("\nFolder hierarchy creation complete!")
-
+                print(f"Department folder {dept} already exists, skipping")
+                
+        # List all folders
+        all_folders = client.folder.list()
+        print(f"Total folders created: {len(all_folders)}")
+        
     except APIError as e:
-        print(f"Error creating folder hierarchy: {e}")
+        print(f"API error: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
-
-# Execute the function
-create_folder_hierarchy()
+if __name__ == "__main__":
+    create_folder_hierarchy()
 ```
 
 ## Related Models
 
-- [FolderCreateModel](../../models/setup/folder_models.md): Model for creating folder objects
-- [FolderUpdateModel](../../models/setup/folder_models.md): Model for updating folder objects
-- [FolderResponseModel](../../models/setup/folder_models.md): Model for folder responses from the API
+For detailed information about the models used with folders, see [Folder Models](../../models/setup/folder_models.md).
