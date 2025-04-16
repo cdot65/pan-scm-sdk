@@ -329,6 +329,6 @@ create_folder_hierarchy()
 
 ## Related Models
 
-- [FolderCreateModel](../models/setup/folder_models.md): Model for creating folder objects
-- [FolderUpdateModel](../models/setup/folder_models.md): Model for updating folder objects
-- [FolderResponseModel](../models/setup/folder_models.md): Model for folder responses from the API
+- [FolderCreateModel](../../models/setup/folder_models.md): Model for creating folder objects
+- [FolderUpdateModel](../../models/setup/folder_models.md): Model for updating folder objects
+- [FolderResponseModel](../../models/setup/folder_models.md): Model for folder responses from the API

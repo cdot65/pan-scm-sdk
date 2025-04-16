@@ -95,7 +95,7 @@ nav:
       - Client: sdk/client.md
       - Configuration:
           - BaseObject: sdk/config/base_object.md
-          - Deployment:
+          - Deployments:
               - Overview: sdk/config/deployment/index.md
               - Bandwidth Allocations: sdk/config/deployment/bandwidth_allocations.md
               - BGP Routing: sdk/config/deployment/bgp_routing.md
@@ -103,47 +103,50 @@ nav:
               - Network Locations: sdk/config/deployment/network_locations.md
               - Remote Networks: sdk/config/deployment/remote_networks.md
               - Service Connections: sdk/config/deployment/service_connections.md
-          - Mobile Agent:
+          - Mobile Agents:
               - Overview: sdk/config/mobile_agent/index.md
               - Authentication Settings: sdk/config/mobile_agent/auth_settings.md
               - Agent Versions: sdk/config/mobile_agent/agent_versions.md
           - Network:
               - Overview: sdk/config/network/index.md
-              - IKE Crypto Profile: sdk/config/network/ike_crypto_profile.md
-              - IKE Gateway: sdk/config/network/ike_gateway.md
-              - IPsec Crypto Profile: sdk/config/network/ipsec_crypto_profile.md
+              - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
+              - IKE Gateways: sdk/config/network/ike_gateway.md
+              - IPsec Crypto Profiles: sdk/config/network/ipsec_crypto_profile.md
               - NAT Rules: sdk/config/network/nat_rules.md
-              - Security Zone: sdk/config/network/security_zone.md
+              - Security Zones: sdk/config/network/security_zone.md
           - Objects:
               - Overview: sdk/config/objects/index.md
-              - Address: sdk/config/objects/address.md
-              - Address Group: sdk/config/objects/address_group.md
-              - Application: sdk/config/objects/application.md
-              - Application Filter: sdk/config/objects/application_filters.md
-              - Application Group: sdk/config/objects/application_group.md
+              - Addresses: sdk/config/objects/address.md
+              - Address Groups: sdk/config/objects/address_group.md
+              - Applications: sdk/config/objects/application.md
+              - Application Filters: sdk/config/objects/application_filters.md
+              - Application Groups: sdk/config/objects/application_group.md
               - Auto Tag Actions: sdk/config/objects/auto_tag_actions.md
-              - Dynamic User Group: sdk/config/objects/dynamic_user_group.md
-              - External Dynamic List: sdk/config/objects/external_dynamic_lists.md
-              - HIP Object: sdk/config/objects/hip_object.md
-              - HIP Profile: sdk/config/objects/hip_profile.md
-              - HTTP Server Profile: sdk/config/objects/http_server_profiles.md
-              - Log Forwarding Profile: sdk/config/objects/log_forwarding_profile.md
-              - Quarantined Device: sdk/config/objects/quarantined_devices.md
-              - Region: sdk/config/objects/region.md
-              - Schedule: sdk/config/objects/schedules.md
-              - Service: sdk/config/objects/service.md
-              - Service Group: sdk/config/objects/service_group.md
-              - Syslog Server Profile: sdk/config/objects/syslog_server_profiles.md
-              - Tag: sdk/config/objects/tag.md
+              - Dynamic User Groups: sdk/config/objects/dynamic_user_group.md
+              - External Dynamic Lists: sdk/config/objects/external_dynamic_lists.md
+              - HIP Objects: sdk/config/objects/hip_object.md
+              - HIP Profiles: sdk/config/objects/hip_profile.md
+              - HTTP Server Profiles: sdk/config/objects/http_server_profiles.md
+              - Log Forwarding Profiles: sdk/config/objects/log_forwarding_profile.md
+              - Quarantined Devices: sdk/config/objects/quarantined_devices.md
+              - Regions: sdk/config/objects/region.md
+              - Schedules: sdk/config/objects/schedules.md
+              - Services: sdk/config/objects/service.md
+              - Service Groups: sdk/config/objects/service_group.md
+              - Syslog Server Profiles: sdk/config/objects/syslog_server_profiles.md
+              - Tags: sdk/config/objects/tag.md
           - Security Services:
               - Overview: sdk/config/security_services/index.md
-              - Anti-Spyware Profile: sdk/config/security_services/anti_spyware_profile.md
-              - Decryption Profile: sdk/config/security_services/decryption_profile.md
-              - DNS Security Profile: sdk/config/security_services/dns_security_profile.md
-              - Security Rule: sdk/config/security_services/security_rule.md
-              - URL Category: sdk/config/security_services/url_categories.md
-              - Vulnerability Protection Profile: sdk/config/security_services/vulnerability_protection_profile.md
-              - WildFire Antivirus Profile: sdk/config/security_services/wildfire_antivirus.md
+              - Anti-Spyware Profiles: sdk/config/security_services/anti_spyware_profile.md
+              - Decryption Profiles: sdk/config/security_services/decryption_profile.md
+              - DNS Security Profiles: sdk/config/security_services/dns_security_profile.md
+              - Security Rules: sdk/config/security_services/security_rule.md
+              - URL Categories: sdk/config/security_services/url_categories.md
+              - WildFire Antivirus Profiles: sdk/config/security_services/wildfire_antivirus.md
+              - Vulnerability Protection Profiles: sdk/config/security_services/vulnerability_protection_profile.md
+          - Setup:
+              - Overview: sdk/config/setup/index.md
+              - Folders: sdk/config/setup/folder.md
       - Data Models:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
@@ -196,8 +199,11 @@ nav:
               - DNS Security Profile Models: sdk/models/security_services/dns_security_profile_models.md
               - Security Rule Models: sdk/models/security_services/security_rule_models.md
               - URL Category Models: sdk/models/security_services/url_categories_models.md
-              - Vulnerability Protection Profile Models: sdk/models/security_services/vulnerability_protection_profile_models.md
               - WildFire Antivirus Profile Models: sdk/models/security_services/wildfire_antivirus_profile_models.md
+              - Vulnerability Protection Profile Models: sdk/models/security_services/vulnerability_protection_profile_models.md
+          - Setup:
+              - Overview: sdk/models/setup/index.md
+              - Folder Models: sdk/models/setup/folder_models.md
       - Exceptions: sdk/exceptions.md
   - User Guide:
       - Getting Started: guide/getting-started.md

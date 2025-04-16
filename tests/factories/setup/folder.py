@@ -1,7 +1,7 @@
 # tests/factories/setup/folder.py
 
 # Standard library imports
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Union
 from uuid import uuid4
 
 # External libraries
@@ -61,7 +61,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
             parent=parent,
             **kwargs,
         )
-    
+
     @classmethod
     def with_labels(cls, labels=None, **kwargs):
         """
@@ -76,7 +76,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
         """
         if labels is None:
             labels = [fake.word(), fake.word()]
-        
+
         return cls(
             labels=labels,
             **kwargs,
@@ -96,7 +96,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
         """
         if snippets is None:
             snippets = [str(uuid4()), str(uuid4())]
-            
+
         return cls(
             snippets=snippets,
             **kwargs,
@@ -110,7 +110,7 @@ class FolderUpdateApiFactory(FolderBaseFactory):
         model = FolderUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
-    
+
     @classmethod
     def with_new_parent(cls, parent="new_parent_id", **kwargs):
         """
@@ -142,7 +142,7 @@ class FolderUpdateApiFactory(FolderBaseFactory):
         """
         if labels is None:
             labels = [f"updated_{fake.word()}" for _ in range(2)]
-            
+
         return cls(
             labels=labels,
             **kwargs,
@@ -173,7 +173,7 @@ class FolderResponseFactory(FolderBaseFactory):
             parent=parent,
             **kwargs,
         )
-    
+
     @classmethod
     def root_folder(cls, **kwargs):
         """

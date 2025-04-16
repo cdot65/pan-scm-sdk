@@ -52,6 +52,8 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [URL Categories](config/security_services/url_categories.md)
         - [Vulnerability Protection Profile](config/security_services/vulnerability_protection_profile.md)
         - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
+    - Setup
+        - [Folder](config/setup/folder.md)
 - Data Models
     - Deployment
         - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
@@ -68,7 +70,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
         - [IPsec Crypto Profile Models](models/network/ipsec_crypto_profile_models.md)
         - [NAT Rules Models](models/network/nat_rule_models.md)
-        - [Security Zones Models](models/network/security_zone_models.md)
+        - [Security Zone Models](models/network/security_zone_models.md)
     - Objects
         - [Address Models](models/objects/address_models.md)
         - [Address Group Models](models/objects/address_group_models.md)
@@ -85,11 +87,11 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Region Models](models/objects/region_models.md)
         - [Schedule Models](models/objects/schedules_models.md)
         - [Service Models](models/objects/service_models.md)
-        - [Syslog Server Profile Models](models/objects/syslog_server_profiles_models.md)
         - [Service Group Models](models/objects/service_group_models.md)
+        - [Syslog Server Profile Models](models/objects/syslog_server_profiles_models.md)
         - [Tag Models](models/objects/tag_models.md)
     - Operations
-        - [Candidate Push (commit) Models](models/operations/candidate_push.md)
+        - [Candidate Push Models](models/operations/candidate_push.md)
         - [Jobs Models](models/operations/jobs.md)
     - Security Services
         - [Anti-Spyware Profile Models](models/security_services/anti_spyware_profile_models.md)
@@ -98,7 +100,9 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Security Rule Models](models/security_services/security_rule_models.md)
         - [URL Categories Models](models/security_services/url_categories_models.md)
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
-        - [Wildfire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
+        - [WildFire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
+    - Setup
+        - [Folder Models](models/setup/folder_models.md)
 - [Exceptions](exceptions.md)
 
 ---
@@ -315,7 +319,8 @@ The following table shows all services available through the unified client inte
 | `url_category`                     | Custom URL categorization for web filtering                     |
 | `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts                 |
 | `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection            |
-
+| **Setup**                          |                                                                 |
+| `folder`                           | Folder management for organizing configurations                 |
 Check out the [Client Module](client.md) documentation for more information on the unified client interface and the available
 services.
 
