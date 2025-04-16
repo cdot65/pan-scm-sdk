@@ -53,7 +53,7 @@ class Folder(BaseObject):
         
         Args:
             name: The name of the folder.
-            parent: The ID of the parent folder.
+            parent: The name of the parent folder (not the ID). Empty string for root folders.
             description: Optional description of the folder.
             labels: Optional list of labels to apply to the folder.
             snippets: Optional list of snippet IDs associated with the folder.
@@ -171,7 +171,7 @@ class Folder(BaseObject):
         Args:
             folder_id: The ID of the folder to update.
             name: The new name of the folder.
-            parent: The ID of the new parent folder.
+            parent: The name of the new parent folder (not the ID).
             description: The new description of the folder.
             labels: The new list of labels for the folder.
             snippets: The new list of snippet IDs for the folder.

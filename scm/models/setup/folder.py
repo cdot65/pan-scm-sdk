@@ -17,7 +17,7 @@ class FolderBaseModel(BaseModel):
 
     Attributes:
         name: The name of the folder.
-        parent: The ID of the parent folder.
+        parent: The name of the parent folder (not the UUID). Empty string for root folders.
         description: Optional description of the folder.
         labels: Optional list of labels to apply to the folder.
         snippets: Optional list of snippet IDs associated with the folder.
@@ -27,7 +27,7 @@ class FolderBaseModel(BaseModel):
         description="The name of the folder",
     )
     parent: str = Field(
-        description="The ID of the parent folder",
+        description="The name of the parent folder (not the ID). Empty string for root folders.",
     )
     description: Optional[str] = Field(
         default=None,
