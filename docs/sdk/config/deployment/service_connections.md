@@ -76,10 +76,6 @@ The Service Connection service can be accessed using either the unified client i
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -95,13 +91,7 @@ client = ScmClient(
 service_connections = client.service_connection
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -118,18 +108,12 @@ client = Scm(
 service_connections = ServiceConnection(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -166,13 +150,7 @@ service_connection = client.service_connection.create(service_connection_config)
 print(f"Service connection created: {service_connection.name}")
 ```
 
-</div>
-
 ### Retrieving Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name
@@ -184,13 +162,7 @@ service_connection_by_id = client.service_connection.get(service_connection.id)
 print(f"Retrieved service connection: {service_connection_by_id.name}")
 ```
 
-</div>
-
 ### Updating Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing service connection
@@ -205,13 +177,7 @@ updated_connection = client.service_connection.update(existing_connection)
 print(f"Updated service connection subnets: {updated_connection.subnets}")
 ```
 
-</div>
-
 ### Listing Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all service connections
@@ -223,13 +189,7 @@ for conn in all_connections:
    print(f"Service Connection: {conn.name}, Region: {conn.region}")
 ```
 
-</div>
-
 ### Filtering Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List service connections with name filter
@@ -243,17 +203,11 @@ for conn in us_east_connections:
    print(f"Service Connection in US East: {conn.name}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 200. The API itself imposes a maximum allowed value of 1000. If you set `max_limit` higher than 1000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -280,13 +234,7 @@ all_connections2 = client.service_connection.list()
 # The connections are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -294,15 +242,9 @@ service_connection_id = "123e4567-e89b-12d3-a456-426655440000"
 client.service_connection.delete(service_connection_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -319,13 +261,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly from the client
@@ -338,13 +274,7 @@ for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -391,8 +321,6 @@ except ObjectNotPresentError as e:
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

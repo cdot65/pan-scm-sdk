@@ -61,10 +61,6 @@ The Internal DNS Servers service can be accessed using either the unified client
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -80,13 +76,7 @@ client = ScmClient(
 dns_servers = client.internal_dns_servers
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -103,18 +93,12 @@ client = Scm(
 dns_servers = InternalDnsServers(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating Internal DNS Servers
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -140,13 +124,7 @@ dns_server = client.internal_dns_servers.create(dns_server_config)
 print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
 ```
 
-</div>
-
 ### Retrieving Internal DNS Servers
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name
@@ -162,13 +140,7 @@ dns_server_by_id = client.internal_dns_servers.get(dns_server_id)
 print(f"Retrieved DNS server: {dns_server_by_id.name}")
 ```
 
-</div>
-
 ### Updating Internal DNS Servers
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import InternalDnsServersUpdateModel
@@ -191,13 +163,7 @@ print(f"Updated domain names: {updated_dns_server.domain_name}")
 print(f"Updated secondary DNS: {updated_dns_server.secondary}")
 ```
 
-</div>
-
 ### Listing Internal DNS Servers
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all DNS servers
@@ -216,13 +182,7 @@ for dns in filtered_dns_servers:
    print(f"Domain names: {dns.domain_name}")
 ```
 
-</div>
-
 ### Filtering Internal DNS Servers
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Filter by primary IP address
@@ -247,17 +207,11 @@ for dns in combined_filter:
     print(f"Domain names: {dns.domain_name}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -284,13 +238,7 @@ all_dns_servers = client.internal_dns_servers.list()
 # The DNS servers are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Internal DNS Servers
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -304,13 +252,7 @@ client.internal_dns_servers.delete(dns_server.id)
 print(f"Deleted DNS server: {dns_server.name}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -352,8 +294,6 @@ except MissingQueryParameterError as e:
 except Exception as e:
    print(f"Unexpected error: {str(e)}")
 ```
-
-</div>
 
 ## Best Practices
 

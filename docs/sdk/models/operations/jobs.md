@@ -95,9 +95,6 @@ The Jobs models can raise the following exceptions during validation:
 
 The JobListItem model validates timestamp fields to handle empty strings:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import JobListItem
 
@@ -118,15 +115,10 @@ job = JobListItem(
 print(job.end_ts)  # None
 ```
 
-</div>
-
 ### Datetime Serialization
 
 The JobStatusData model automatically serializes datetime fields to ISO format strings:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from datetime import datetime
 from scm.models.operations import JobStatusData
@@ -155,15 +147,10 @@ data = job.model_dump()
 print(data["start_ts"])  # "2023-12-20T10:15:30.123456"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Working with Job Details
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import JobDetails
 
@@ -181,13 +168,8 @@ print(details.warnings)  # ["Device connection slow"]
 print(details.description)  # "Configuration update job"
 ```
 
-</div>
-
 ### Processing Job Status Data
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import JobStatusResponse, JobStatusData
 from datetime import datetime
@@ -221,13 +203,8 @@ for job in response.data:
    print(f"Job {job.id}: {job.status_str} ({job.percent}%)")
 ```
 
-</div>
-
 ### Working with Job Lists
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import JobListResponse, JobListItem
 
@@ -275,13 +252,8 @@ for job in response.data:
 print(f"Showing {len(response.data)} of {response.total} jobs")
 ```
 
-</div>
-
 ### Using Jobs with Unified Client
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -319,13 +291,8 @@ parent_jobs = client.operations.list_jobs(
 print(f"Found {parent_jobs.total} top-level jobs")
 ```
 
-</div>
-
 ### Monitoring Long-Running Jobs
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 import time
@@ -377,5 +344,3 @@ while not completed and attempt < max_attempts:
 if not completed:
    print("Job monitoring timed out. Check status later.")
 ```
-
-</div>

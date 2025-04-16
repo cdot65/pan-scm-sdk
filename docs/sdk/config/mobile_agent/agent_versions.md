@@ -49,10 +49,6 @@ The AgentVersions service can be accessed using either the unified client interf
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -67,13 +63,7 @@ client = ScmClient(
 agent_versions = client.agent_version
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -90,18 +80,12 @@ client = Scm(
 agent_versions = AgentVersions(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Listing Agent Versions
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -122,13 +106,7 @@ for version in versions:
    print(f"- {version}")
 ```
 
-</div>
-
 ### Fetching Specific Versions
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -149,13 +127,7 @@ except InvalidObjectError:
     print("Version not found")
 ```
 
-</div>
-
 ### Filtering Versions
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -189,17 +161,11 @@ for version in combined_versions:
    print(f"- {version}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 200. The API itself imposes a maximum allowed value of 1000. If you set `max_limit` higher than 1000, it will be capped to the API's maximum.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -226,13 +192,7 @@ all_versions2 = client.agent_version.list()
 # but the first one will do it in larger batches.
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -260,8 +220,6 @@ except InvalidObjectError as e:
 except Exception as e:
    print(f"Unexpected error: {str(e)}")
 ```
-
-</div>
 
 ## Best Practices
 

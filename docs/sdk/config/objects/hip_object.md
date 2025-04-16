@@ -69,10 +69,6 @@ HIP objects that define security posture requirements for endpoints.
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -88,13 +84,7 @@ client = ScmClient(
 # client.hip_object is automatically initialized for you
 ```
 
-</div>
-
 You can also use the traditional approach if preferred:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -111,15 +101,9 @@ client = Scm(
 hip_objects = HIPObject(client, max_limit=5000)
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating HIP Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Host info based HIP object
@@ -164,13 +148,7 @@ disk_encryption_config = {
 disk_encryption_hip = client.hip_object.create(disk_encryption_config)
 ```
 
-</div>
-
 ### Retrieving HIP Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -182,13 +160,7 @@ hip_by_id = client.hip_object.get(hip_object.id)
 print(f"Retrieved HIP object: {hip_by_id.name}")
 ```
 
-</div>
-
 ### Updating HIP Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing HIP object
@@ -208,13 +180,7 @@ existing_hip.description = "Updated disk encryption requirements"
 updated_hip = client.hip_object.update(existing_hip)
 ```
 
-</div>
-
 ### Listing HIP Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List with direct filter parameters
@@ -243,13 +209,7 @@ list_params = {
 filtered_hips = client.hip_object.list(**list_params)
 ```
 
-</div>
-
 ### Deleting HIP Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -257,15 +217,9 @@ hip_id = "123e4567-e89b-12d3-a456-426655440000"
 client.hip_object.delete(hip_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -282,13 +236,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job
@@ -301,13 +249,7 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -363,8 +305,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

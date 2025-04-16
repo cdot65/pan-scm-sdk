@@ -72,10 +72,6 @@ The IKE Gateway models can raise the following exceptions during validation:
 
 The models enforce that exactly one authentication type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.network import Authentication
@@ -96,15 +92,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'pre_shared_key' or 'certificate' must be provided."
 ```
 
-</div>
-
 ### Peer Address Type Validation
 
 Exactly one peer address type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -126,15 +116,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'ip', 'fqdn', or 'dynamic' must be provided."
 ```
 
-</div>
-
 ### Container Type Validation
 
 For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -154,15 +138,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating an IKE Gateway with Pre-shared Key
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -239,13 +217,7 @@ payload = psk_gateway.model_dump(exclude_unset=True)
 response = ike_gateway.create(payload)
 ```
 
-</div>
-
 ### Creating an IKE Gateway with Certificate Authentication
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -317,13 +289,7 @@ payload = cert_gateway.model_dump(exclude_unset=True)
 response = ike_gateway.create(payload)
 ```
 
-</div>
-
 ### Creating an IKE Gateway with Dynamic Peer Address
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -388,13 +354,7 @@ payload = dynamic_gateway.model_dump(exclude_unset=True)
 response = ike_gateway.create(payload)
 ```
 
-</div>
-
 ### Updating an IKE Gateway
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -439,5 +399,3 @@ update_gateway = IKEGatewayUpdateModel(
 payload = update_gateway.model_dump(exclude_unset=True)
 response = ike_gateway.update(payload)
 ```
-
-</div>

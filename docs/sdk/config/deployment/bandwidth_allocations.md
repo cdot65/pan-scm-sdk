@@ -74,9 +74,6 @@ The Bandwidth Allocations service can be accessed using either the unified clien
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -92,13 +89,8 @@ client = ScmClient(
 allocations = client.bandwidth_allocation
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.deployment import BandwidthAllocations
@@ -114,8 +106,6 @@ client = Scm(
 allocations = BandwidthAllocations(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
@@ -123,9 +113,6 @@ allocations = BandwidthAllocations(client)
 
 ### Creating Bandwidth Allocations
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -168,13 +155,8 @@ print(f"QoS enabled: {qos_allocation.qos.enabled}")
 print(f"QoS guaranteed ratio: {qos_allocation.qos.guaranteed_ratio}")
 ```
 
-</div>
-
 ### Retrieving Bandwidth Allocations
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get by name
 allocation = client.bandwidth_allocation.get(name="standard-allocation")
@@ -191,13 +173,8 @@ except Exception as e:
     print(f"Error: {e}")
 ```
 
-</div>
-
 ### Updating Bandwidth Allocations
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Update bandwidth allocation
 update_config = {
@@ -220,13 +197,8 @@ print(f"New SPN list: {updated_allocation.spn_name_list}")
 print(f"QoS now enabled: {updated_allocation.qos.enabled}")
 ```
 
-</div>
-
 ### Listing Bandwidth Allocations
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # List all bandwidth allocations
 all_allocations = client.bandwidth_allocation.list()
@@ -253,8 +225,6 @@ high_bandwidth_allocations = client.bandwidth_allocation.list(allocated_bandwidt
 print(f"Allocations with 500 Mbps: {len(high_bandwidth_allocations)}")
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports several filters to refine your query results:
@@ -268,9 +238,6 @@ The `list()` method supports several filters to refine your query results:
 
 **Examples:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get allocations with QoS enabled
 qos_allocations = client.bandwidth_allocation.list(qos_enabled=True)
@@ -292,17 +259,12 @@ combined_filters = client.bandwidth_allocation.list(
 print(f"Allocations with QoS and 500 Mbps: {len(combined_filters)}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 200. If you have a large number of bandwidth allocations, adjusting `max_limit` can help manage retrieval performance and memory usage.
 
 **Example:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.config.deployment import BandwidthAllocations
@@ -328,13 +290,8 @@ all_allocations2 = client.bandwidth_allocation.list()
 # The allocations are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Bandwidth Allocations
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Delete a bandwidth allocation
 # Note: For deleting, you must provide both the name and the SPNs as a comma-separated string
@@ -345,15 +302,10 @@ client.bandwidth_allocation.delete(
 print("Bandwidth allocation deleted")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Prepare commit parameters
 commit_params = {
@@ -368,13 +320,8 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
@@ -386,13 +333,8 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.exceptions import (
@@ -446,8 +388,6 @@ except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
 
-</div>
-
 ## Best Practices
 
 1. **Client Usage**
@@ -498,9 +438,6 @@ The Bandwidth Allocations service supports several advanced use cases beyond bas
 
 When managing multiple bandwidth allocations, you can optimize your workflow with bulk operations:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Bulk creation of multiple bandwidth allocations
 allocation_configs = [
@@ -541,15 +478,10 @@ if created_allocations:
     )
 ```
 
-</div>
-
 ### Integration with Service Connections
 
 Bandwidth allocations can be linked with service connections to ensure proper resource allocation:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Create a bandwidth allocation first
 bw_allocation = client.bandwidth_allocation.create({
@@ -579,15 +511,10 @@ related_services = client.service_connection.list(spn_name="cloud-spn-1")
 print(f"Found {len(matching_allocations)} allocations and {len(related_services)} service connections for cloud-spn-1")
 ```
 
-</div>
-
 ### Automated Bandwidth Scaling
 
 Create scripts that automatically adjust bandwidth allocations based on traffic patterns:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 import time
 from datetime import datetime
@@ -619,15 +546,10 @@ def monitor_and_adjust_bandwidth(allocation_name, spn_list):
         time.sleep(3600)  # Check every hour
 ```
 
-</div>
-
 ### Export and Reporting
 
 Generate reports and export bandwidth allocation configurations:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 import csv
 import json
@@ -667,8 +589,6 @@ def export_allocations_to_json(filename):
     
     print(f"Exported {len(allocations)} bandwidth allocations to {filename}")
 ```
-
-</div>
 
 ## Full Script Examples
 

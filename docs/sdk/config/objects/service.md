@@ -81,10 +81,6 @@ The Service service can be accessed using either the unified client interface (r
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -100,13 +96,7 @@ client = ScmClient(
 services = client.service
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -123,18 +113,12 @@ client = Scm(
 services = Service(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating Services
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -186,13 +170,7 @@ udp_service = {
 udp_service_obj = client.service.create(udp_service)
 ```
 
-</div>
-
 ### Retrieving Services
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -206,13 +184,7 @@ if service_by_id.protocol.tcp:
     print(f"Ports: {service_by_id.protocol.tcp.port}")
 ```
 
-</div>
-
 ### Updating Services
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing service
@@ -231,13 +203,7 @@ existing_service.tag = ["Web", "Production", "Updated"]
 updated_service = client.service.update(existing_service)
 ```
 
-</div>
-
 ### Listing Services
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Pass filters directly into the list method
@@ -266,8 +232,6 @@ list_params = {
 filtered_services = client.service.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
@@ -282,10 +246,6 @@ The `list()` method supports additional parameters to refine your query results 
 - `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
 
 **Examples:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Only return services defined exactly in 'Texas'
@@ -340,17 +300,11 @@ for svc in combined_filters:
    print(f"Combined filters result: {svc.name} in {svc.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -377,13 +331,7 @@ all_services2 = client.service.list(folder='Texas')
 # The services are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Services
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -391,15 +339,9 @@ service_id = "123e4567-e89b-12d3-a456-426655440000"
 client.service.delete(service_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -416,13 +358,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly from the client
@@ -435,13 +371,7 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -501,8 +431,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

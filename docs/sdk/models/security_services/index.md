@@ -44,9 +44,6 @@ Security service models share common patterns:
 
 ## Usage Examples
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.security import SecurityRuleCreateModel, SecurityRuleUpdateModel
@@ -85,8 +82,6 @@ update_rule = SecurityRuleUpdateModel(
 update_dict = update_rule.model_dump(exclude_unset=True)
 updated_result = client.security_rule.update(update_dict)
 ```
-
-</div>
 
 ## Models by Category
 

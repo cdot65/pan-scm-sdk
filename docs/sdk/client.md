@@ -13,10 +13,6 @@ access, allowing for a more intuitive and streamlined developer experience.
 
 ### Class Definition
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 class Scm:
     def __init__(
@@ -29,8 +25,6 @@ class Scm:
             log_level: str = "ERROR"
     )
 ```
-
-</div>
 
 ### Attributes
 
@@ -50,10 +44,6 @@ The SDK supports two primary usage patterns:
 
 The unified client approach allows you to access all service objects directly through the client instance, providing a more intuitive and streamlined developer experience:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import Scm
 
@@ -72,8 +62,6 @@ client.tag.list(folder="Texas")
 client.security_rule.get(rule_id)
 ```
 
-</div>
-
 This pattern offers several advantages:
 - Reduced code verbosity
 - Centralized client management
@@ -84,10 +72,6 @@ This pattern offers several advantages:
 ### Traditional Service Instantiation (Legacy)
 
 You can still use the traditional pattern where service objects are explicitly instantiated:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -108,8 +92,6 @@ address_service = Address(client)
 # Use the service instance
 address_service.create({...})
 ```
-
-</div>
 
 !!! note
     While the traditional pattern is still supported for backward compatibility, it's recommended to use the unified client interface for new development as it provides a more streamlined developer experience and ensures proper token refresh handling.
@@ -169,59 +151,31 @@ The unified client provides access to all service objects in the SDK through att
 
 #### HTTP Methods
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, **kwargs)
 ```
 
-</div>
-
 Makes a GET request to the specified endpoint, automatically handling token refresh.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def post(self, endpoint: str, **kwargs)
 ```
 
-</div>
-
 Makes a POST request to the specified endpoint, automatically handling token refresh.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def put(self, endpoint: str, **kwargs)
 ```
 
-</div>
-
 Makes a PUT request to the specified endpoint, automatically handling token refresh.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def delete(self, endpoint: str, **kwargs)
 ```
 
-</div>
-
 Makes a DELETE request to the specified endpoint, automatically handling token refresh.
 
 ### Job Management Methods
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def list_jobs(
@@ -232,26 +186,14 @@ def list_jobs(
 ) -> JobListResponse
 ```
 
-</div>
-
 Lists jobs with pagination support and optional parent ID filtering. When parent_id is provided, returns only child jobs
 of the specified parent job.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def get_job_status(self, job_id: str) -> JobStatusResponse
 ```
 
-</div>
-
 Gets the status of a specific job.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def wait_for_job(
@@ -262,15 +204,9 @@ def wait_for_job(
 ) -> Optional[JobStatusResponse]
 ```
 
-</div>
-
 Waits for a job to complete with configurable timeout and polling interval.
 
 ### Configuration Management Methods
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 def commit(
@@ -283,17 +219,11 @@ def commit(
 ) -> CandidatePushResponseModel
 ```
 
-</div>
-
 Commits configuration changes to SCM with options for synchronous waiting and custom timeout.
 
 ## Usage Examples
 
 ### Client Initialization
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -310,13 +240,7 @@ client = Scm(
 )
 ```
 
-</div>
-
 ### Using the Unified Client Interface
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create an address
@@ -356,15 +280,9 @@ result = client.commit(
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Making Raw API Requests
 
 For endpoints not yet covered by dedicated service classes:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List objects with parameters
@@ -384,13 +302,7 @@ response = client.post(
 )
 ```
 
-</div>
-
 ### Job Management
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List recent jobs
@@ -403,13 +315,7 @@ child_jobs = client.list_jobs(parent_id="parent-job-id")
 status = client.wait_for_job("job-id", timeout=600)
 ```
 
-</div>
-
 ### Committing Changes
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Commit changes synchronously
@@ -428,16 +334,10 @@ status = client.get_job_status(result.job_id)
 print(f"Status: {status.data[0].status_str}")
 ```
 
-</div>
-
 ## ScmClient Alias
 
 Starting with version 0.3.14, the SDK also provides an `ScmClient` class as an alias for `Scm`. This class offers the exact
 same functionality but with a more explicit name that better describes its purpose:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -452,13 +352,7 @@ client = ScmClient(
 )
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.exceptions import APIError, AuthenticationError, TimeoutError
@@ -477,8 +371,6 @@ except TimeoutError as e:
 except APIError as e:
     print(f"API error: {str(e)}")
 ```
-
-</div>
 
 ## Best Practices
 

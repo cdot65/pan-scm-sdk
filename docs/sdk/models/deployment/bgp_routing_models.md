@@ -71,10 +71,6 @@ The BGP Routing models can raise the following exceptions during validation:
 
 The models enforce that routing_preference must be either DefaultRoutingModel or HotPotatoRoutingModel:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.deployment import BGPRoutingCreateModel
@@ -90,15 +86,9 @@ except ValueError as e:
     print(e)  # "routing_preference must be either DefaultRoutingModel or HotPotatoRoutingModel"
 ```
 
-</div>
-
 ### Update Model Validation
 
 For update operations, at least one field must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -111,15 +101,9 @@ except ValueError as e:
     print(e)  # "At least one field must be specified for update"
 ```
 
-</div>
-
 ### Outbound Routes Validation
 
 The outbound_routes_for_services field is validated to ensure proper formatting:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will handle various input formats
@@ -153,15 +137,9 @@ except ValueError as e:
     print(e)  # "outbound_routes_for_services must be a list of strings"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating BGP Routing Configuration
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary approach
@@ -209,13 +187,7 @@ model_dict = bgp_model.model_dump(exclude_unset=True)
 result = client.bgp_routing.create(model_dict)
 ```
 
-</div>
-
 ### Creating with Hot Potato Routing
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using Hot Potato routing preference
@@ -239,13 +211,7 @@ payload = hot_potato_model.model_dump(exclude_unset=True)
 result = client.bgp_routing.create(payload)
 ```
 
-</div>
-
 ### Updating BGP Routing Configuration
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Partial updates with only specified fields
@@ -270,13 +236,7 @@ partial_update = {
 result = client.bgp_routing.update(partial_update)
 ```
 
-</div>
-
 ### Handling Response Models
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Working with response models
@@ -324,8 +284,6 @@ else:
 print(f"Add host route to IKE peer: {response.add_host_route_to_ike_peer}")
 print(f"Withdraw static route: {response.withdraw_static_route}")
 ```
-
-</div>
 
 ## Field Serialization
 

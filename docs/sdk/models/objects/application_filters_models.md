@@ -80,10 +80,6 @@ The Application Filters models can raise the following exceptions during validat
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import Scm
 from scm.config.objects import ApplicationFilters
@@ -99,15 +95,9 @@ client = Scm(
 app_filters = ApplicationFilters(client)
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Basic filter configuration
@@ -135,13 +125,7 @@ saas_filter = {
 saas_filter_obj = app_filters.create(saas_filter)
 ```
 
-</div>
-
 ### Retrieving Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by ID
@@ -156,13 +140,7 @@ print(f"Risk levels: {filter_obj.risk}")
 print(f"Has vulnerabilities: {filter_obj.has_known_vulnerabilities}")
 ```
 
-</div>
-
 ### Updating Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Update filter configuration
@@ -178,13 +156,7 @@ update_filter = {
 updated_filter = app_filters.update(update_filter)
 ```
 
-</div>
-
 ### Listing Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all filters in a folder
@@ -213,13 +185,7 @@ high_risk_filters = app_filters.list(
 )
 ```
 
-</div>
-
 ### Deleting Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -234,15 +200,9 @@ except ReferenceNotZeroError:
     print("Filter is still referenced by security policies")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -263,13 +223,7 @@ except CommitFailedError as e:
     print(f"Commit failed: {str(e)}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job
@@ -321,8 +275,6 @@ try:
 except ValueError as e:
     print(f"Validation error: {str(e)}")
 ```
-
-</div>
 
 ## Error Handling {#error-handling}
 

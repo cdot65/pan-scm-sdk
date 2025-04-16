@@ -64,10 +64,6 @@ The `DynamicUserGroup` class provides functionality to manage dynamic user group
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -82,13 +78,7 @@ client = ScmClient(
 # client.dynamic_user_group is automatically initialized for you
 ```
 
-</div>
-
 You can also use the traditional approach if preferred:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -105,15 +95,9 @@ client = Scm(
 dynamic_user_groups = DynamicUserGroup(client)
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating Dynamic User Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare dynamic user group configuration
@@ -141,13 +125,7 @@ another_dug_config = {
 another_dug = client.dynamic_user_group.create(another_dug_config)
 ```
 
-</div>
-
 ### Retrieving Dynamic User Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -159,13 +137,7 @@ dug_by_id = client.dynamic_user_group.get(dug.id)
 print(f"Retrieved dynamic user group: {dug_by_id.name}")
 ```
 
-</div>
-
 ### Updating Dynamic User Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing dynamic user group
@@ -180,13 +152,7 @@ existing_dug.tag = ["RiskManagement", "Automation", "HighPriority"]
 updated_dug = client.dynamic_user_group.update(existing_dug)
 ```
 
-</div>
-
 ### Listing Dynamic User Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List dynamic user groups in the Security folder
@@ -220,8 +186,6 @@ for dug in filtered_dugs:
    print(f"Name: {dug.name}, Filter: {dug.filter}")
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
@@ -236,10 +200,6 @@ The `list()` method supports additional parameters to refine your query results 
 - `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
 
 **Examples:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Only return dynamic user groups defined exactly in 'Security'
@@ -284,17 +244,11 @@ for dug in combined_filters:
    print(f"Combined filters result: {dug.name} in {dug.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Initialize the ScmClient with a custom max_limit for dynamic user groups
@@ -313,13 +267,7 @@ all_dugs = client.dynamic_user_group.list(folder='Security')
 # 'all_dugs' contains all objects from 'Security', fetched in chunks of up to 4000 at a time.
 ```
 
-</div>
-
 ### Deleting Dynamic User Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -327,15 +275,9 @@ dug_id = "123e4567-e89b-12d3-a456-426655440000"
 client.dynamic_user_group.delete(dug_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -353,13 +295,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly on the client
@@ -372,13 +308,7 @@ for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -428,8 +358,6 @@ except ObjectNotPresentError as e:
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

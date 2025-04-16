@@ -67,10 +67,6 @@ custom URL categories that can be used in security policies and profiles.
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import Scm
 
@@ -85,15 +81,9 @@ client = Scm(
 # No need to initialize a separate URLCategories object
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating URL Categories
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # URL List category configuration
@@ -121,13 +111,7 @@ category_match_config = {
 category_match = client.url_category.create(category_match_config)
 ```
 
-</div>
-
 ### Retrieving URL Categories
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -140,13 +124,7 @@ print(f"Retrieved category: {category_by_id.name}")
 print(f"URL list: {category_by_id.list}")
 ```
 
-</div>
-
 ### Updating URL Categories
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing category
@@ -160,13 +138,7 @@ existing_category.description = "Updated blocked websites list"
 updated_category = client.url_category.update(existing_category)
 ```
 
-</div>
-
 ### Listing URL Categories
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List with direct filter parameters
@@ -191,8 +163,6 @@ list_params = {
 filtered_categories = client.url_category.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
@@ -207,10 +177,6 @@ The `list()` method supports additional parameters to refine your query results 
 - `exclude_devices (List[str])`: Provide a list of device values to exclude.
 
 **Examples:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Only return url_category defined exactly in 'Texas'
@@ -265,15 +231,9 @@ for app in combined_filters:
     print(f"Combined filters result: {app.name} in {app.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Initialize the client with a custom max_limit for URL categories
@@ -292,13 +252,7 @@ all_categories = client.url_category.list(folder='Texas')
 # 'all_categories' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
-</div>
-
 ### Deleting URL Categories
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -306,15 +260,9 @@ category_id = "123e4567-e89b-12d3-a456-426655440000"
 client.url_category.delete(category_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -331,13 +279,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job using the client
@@ -350,13 +292,7 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.exceptions import (
@@ -401,8 +337,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

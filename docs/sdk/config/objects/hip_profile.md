@@ -64,10 +64,6 @@ HIP profiles. HIP profiles define security posture matching criteria that can be
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -83,13 +79,7 @@ client = ScmClient(
 # client.hip_profile is automatically initialized for you
 ```
 
-</div>
-
 You can also use the traditional approach if preferred:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -106,15 +96,9 @@ client = Scm(
 hip_profiles = HIPProfile(client, max_limit=5000)
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating HIP Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Basic HIP profile with simple match expression
@@ -151,13 +135,7 @@ negative_profile_config = {
 negative_profile = client.hip_profile.create(negative_profile_config)
 ```
 
-</div>
-
 ### Retrieving HIP Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -170,13 +148,7 @@ print(f"Retrieved HIP profile: {hip_by_id.name}")
 print(f"Match expression: {hip_by_id.match}")
 ```
 
-</div>
-
 ### Updating HIP Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing HIP profile
@@ -197,13 +169,7 @@ updated_profile = client.hip_profile.update(update_model)
 print(f"Updated match expression: {updated_profile.match}")
 ```
 
-</div>
-
 ### Listing HIP Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List with direct filter parameters
@@ -227,13 +193,7 @@ list_params = {
 filtered_profiles = client.hip_profile.list(**list_params)
 ```
 
-</div>
-
 ### Deleting HIP Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -241,15 +201,9 @@ profile_id = "123e4567-e89b-12d3-a456-426655440000"
 client.hip_profile.delete(profile_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -266,13 +220,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job
@@ -285,13 +233,7 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -343,8 +285,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

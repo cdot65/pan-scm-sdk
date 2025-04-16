@@ -73,9 +73,6 @@ The Remote Networks service can be accessed using either the unified client inte
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -91,13 +88,8 @@ client = ScmClient(
 networks = client.remote_networks
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.deployment import RemoteNetworks
@@ -113,8 +105,6 @@ client = Scm(
 networks = RemoteNetworks(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
@@ -122,9 +112,6 @@ networks = RemoteNetworks(client)
 
 ### Creating Remote Networks
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -183,13 +170,8 @@ ecmp_config = {
 ecmp_network = client.remote_networks.create(ecmp_config)
 ```
 
-</div>
-
 ### Retrieving Remote Networks
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Fetch by name and folder
 network = client.remote_networks.fetch(
@@ -204,13 +186,8 @@ print(f"Retrieved network: {network_by_id.name}")
 print(f"Subnets: {', '.join(network_by_id.subnets)}")
 ```
 
-</div>
-
 ### Updating Remote Networks
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Fetch existing network
 existing_network = client.remote_networks.fetch(
@@ -236,13 +213,8 @@ existing_network.protocol = {
 updated_network = client.remote_networks.update(existing_network)
 ```
 
-</div>
-
 ### Listing Remote Networks
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Pass filters directly into the list method
 filtered_networks = client.remote_networks.list(
@@ -268,8 +240,6 @@ list_params = {
 filtered_networks = client.remote_networks.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
@@ -285,9 +255,6 @@ The `list()` method supports additional parameters to refine your query results 
 
 **Examples:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Only return remote networks defined exactly in 'Remote Networks'
 exact_networks = client.remote_networks.list(
@@ -320,17 +287,12 @@ for network in combined_filters:
    print(f"Combined filters result: {network.name} in {network.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 **Example:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.config.deployment import RemoteNetworks
@@ -356,28 +318,18 @@ all_networks2 = client.remote_networks.list(folder='Remote Networks')
 # The networks are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Remote Networks
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Delete by ID
 network_id = "123e4567-e89b-12d3-a456-426655440000"
 client.remote_networks.delete(network_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Prepare commit parameters
 commit_params = {
@@ -393,13 +345,8 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
@@ -411,13 +358,8 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.exceptions import (
@@ -472,8 +414,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

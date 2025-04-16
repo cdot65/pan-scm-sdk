@@ -37,10 +37,6 @@ The Dynamic User Group models can raise the following exceptions during validati
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.objects import DynamicUserGroupCreateModel
@@ -66,15 +62,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Tag Validation
 
 Tags must be unique and properly formatted:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error for duplicate tags
@@ -98,15 +88,9 @@ dug = DynamicUserGroupCreateModel(
 print(dug.tag)  # ["security"]
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Dynamic User Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -138,13 +122,7 @@ payload = dug_obj.model_dump(exclude_unset=True)
 response = dug_manager.create(payload)
 ```
 
-</div>
-
 ### Creating a Dynamic User Group with a Complex Filter
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -173,13 +151,7 @@ payload = complex_dug_obj.model_dump(exclude_unset=True)
 response = dug_manager.create(payload)
 ```
 
-</div>
-
 ### Updating a Dynamic User Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -208,15 +180,9 @@ payload = update_dug.model_dump(exclude_unset=True)
 response = dug_manager.update(payload)
 ```
 
-</div>
-
 ### Response Model
 
 When retrieving dynamic user groups, the response will be validated against the `DynamicUserGroupResponseModel` schema:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Example of a response
@@ -238,5 +204,3 @@ print(f"Name: {response_model.name}")
 print(f"Filter: {response_model.filter}")
 print(f"Tags: {response_model.tag}")
 ```
-
-</div>

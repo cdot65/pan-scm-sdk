@@ -65,10 +65,6 @@ application groups that organize collections of applications for use in security
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
     from scm.client import ScmClient
 
@@ -82,8 +78,6 @@ application groups that organize collections of applications for use in security
     # Access the application_group module directly through the client
     # client.application_group is automatically initialized for you
 ```
-
-</div>
 
 You can also use the traditional approach if preferred:
 
@@ -105,10 +99,6 @@ You can also use the traditional approach if preferred:
 ## Usage Examples
 
 ### Creating Application Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Basic application group configuration
@@ -136,13 +126,7 @@ You can also use the traditional approach if preferred:
     ms365_group_obj = client.application_group.create(ms365_group)
 ```
 
-</div>
-
 ### Retrieving Application Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Fetch by name and folder
@@ -155,13 +139,7 @@ You can also use the traditional approach if preferred:
     print(f"Members: {', '.join(group_by_id.members)}")
 ```
 
-</div>
-
 ### Updating Application Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Fetch existing group
@@ -174,13 +152,7 @@ You can also use the traditional approach if preferred:
     updated_group = client.application_group.update(existing_group)
 ```
 
-</div>
-
 ### Listing Application Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # List with direct filter parameters
@@ -204,13 +176,7 @@ You can also use the traditional approach if preferred:
     filtered_groups = client.application_group.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Only return application groups defined exactly in 'Texas'
@@ -265,15 +231,9 @@ You can also use the traditional approach if preferred:
         print(f"Combined filters result: {app.name} in {app.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Initialize the ScmClient with a custom max_limit for application groups
@@ -292,13 +252,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     # 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
-</div>
-
 ### Deleting Application Groups
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Delete by ID
@@ -306,15 +260,9 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     client.application_group.delete(group_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Prepare commit parameters
@@ -332,13 +280,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Get status of specific job directly on the client
@@ -351,13 +293,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
         print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     from scm.client import ScmClient
@@ -408,8 +344,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     except MissingQueryParameterError as e:
         print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

@@ -40,10 +40,6 @@ The Tag models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.objects import TagCreateModel
@@ -59,15 +55,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Color Validation
 
 Colors must be one of the predefined values:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -81,15 +71,9 @@ except ValueError as e:
     print(e)  # "Color must be one of: Azure Blue, Black, Blue, ..."
 ```
 
-</div>
-
 ### Name Validation
 
 Tag names must match the required pattern:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -103,15 +87,9 @@ except ValueError as e:
     print(e)  # "String should match pattern '^[a-zA-Z0-9_ \\.-\\[\\]\\-\\&\\(\\)]+$'"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Tag
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -141,13 +119,7 @@ payload = tag_model.model_dump(exclude_unset=True)
 response = tag.create(payload)
 ```
 
-</div>
-
 ### Creating Tags with Different Colors
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create multiple tags with different colors
@@ -179,13 +151,7 @@ for tag_model in tag_models:
     print(f"Created tag: {response.name} with color: {response.color}")
 ```
 
-</div>
-
 ### Creating a Tag in a Snippet
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create a tag in a snippet instead of a folder
@@ -201,13 +167,7 @@ response = tag.create(payload)
 print(f"Created tag in snippet: {response.name}")
 ```
 
-</div>
-
 ### Updating a Tag
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -237,13 +197,7 @@ payload = update_tag.model_dump(exclude_unset=True)
 response = tag.update(payload)
 ```
 
-</div>
-
 ### Retrieving Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get tag by ID
@@ -261,13 +215,7 @@ for t in filtered_tags:
     print(f"Tag: {t.name}, Color: {t.color}")
 ```
 
-</div>
-
 ### Deleting Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete tag by ID
@@ -275,5 +223,3 @@ tag_id = "123e4567-e89b-12d3-a456-426655440000"
 tag.delete(tag_id)
 print(f"Deleted tag with ID: {tag_id}")
 ```
-
-</div>

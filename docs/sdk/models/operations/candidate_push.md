@@ -42,9 +42,6 @@ The Candidate Push models can raise the following exceptions during validation:
 
 The models enforce validation rules for the folders list:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import CandidatePushModel
 
@@ -76,15 +73,10 @@ except ValueError as e:
    print(e)  # "All folders must be non-empty strings"
 ```
 
-</div>
-
 ### Admin Validation
 
 The models validate admin email addresses:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import CandidatePushModel
 
@@ -123,15 +115,10 @@ except ValueError as e:
    print(e)  # "All admin entries must be valid email addresses"
 ```
 
-</div>
-
 ### Description Validation
 
 The models validate the commit description:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.operations import CandidatePushModel
 
@@ -163,15 +150,10 @@ except ValueError as e:
    print(e)  # "Description cannot exceed 255 characters"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Commit Request
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.operations import CandidatePushModel
@@ -207,13 +189,8 @@ response = client.operations.commit(payload)
 print(f"Commit job started with ID: {response.job_id}")
 ```
 
-</div>
-
 ### Handling the Response
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.operations import CandidatePushResponseModel
@@ -246,13 +223,8 @@ else:
    print(f"Commit failed: {response.message}")
 ```
 
-</div>
-
 ### Commit with Unified Client
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 import time
@@ -299,5 +271,3 @@ if status == "FIN":
 else:
    print(f"Commit failed: {job_result.data[0].summary}")
 ```
-
-</div>

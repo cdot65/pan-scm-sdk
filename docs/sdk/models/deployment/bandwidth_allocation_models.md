@@ -34,10 +34,6 @@ The Bandwidth Allocation models enforce data validation through Pydantic:
 
 ### Creating a Bandwidth Allocation
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.deployment import BandwidthAllocations
@@ -64,13 +60,7 @@ payload = allocation.model_dump(exclude_unset=True)
 response = bandwidth_allocations.create(payload)
 ```
 
-</div>
-
 ### Creating a Bandwidth Allocation with QoS
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -109,13 +99,7 @@ payload = allocation.model_dump(exclude_unset=True)
 response = bandwidth_allocations.create(payload)
 ```
 
-</div>
-
 ### Updating a Bandwidth Allocation
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -140,13 +124,7 @@ payload = update_allocation.model_dump(exclude_unset=True)
 response = bandwidth_allocations.update(payload)
 ```
 
-</div>
-
 ### List Bandwidth Allocations
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all bandwidth allocations
@@ -165,13 +143,7 @@ allocations_with_spn = bandwidth_allocations.list(spn_name_list="spn1")
 qos_enabled_allocations = bandwidth_allocations.list(qos_enabled=True)
 ```
 
-</div>
-
 ### Get a Single Bandwidth Allocation
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get a bandwidth allocation by name
@@ -184,28 +156,16 @@ except InvalidObjectError:
     print("Bandwidth allocation not found")
 ```
 
-</div>
-
 ### Delete a Bandwidth Allocation
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete a bandwidth allocation by name and SPN name list (comma-separated)
 bandwidth_allocations.delete("west-region", "spn1,spn2")
 ```
 
-</div>
-
 ## List Response Format
 
 When listing bandwidth allocations, the API returns a paginated response with the following structure:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 {
@@ -232,8 +192,6 @@ When listing bandwidth allocations, the API returns a paginated response with th
     "total": 2
 }
 ```
-
-</div>
 
 ## Best Practices
 

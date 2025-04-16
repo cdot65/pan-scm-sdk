@@ -30,9 +30,6 @@ These objects enforce:
 
 ## Usage Examples
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -56,8 +53,6 @@ print(f"Available agent versions: {versions}")
 filtered_versions = client.agent_versions.list(version="5.3")
 print(f"Filtered versions: {filtered_versions}")
 ```
-
-</div>
 
 Select an object from the list above to view detailed documentation, including methods, parameters, and examples.
 =======

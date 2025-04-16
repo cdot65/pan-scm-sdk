@@ -68,15 +68,9 @@ I'll create a comprehensive style guide based on the provided mkdocs files, capt
    - Include `<!-- termynal -->` comment before each code block
    - Use triple backtick code blocks with language specification
    ```
-   <div class="termy">
-
-   <!-- termynal -->
-
    ```python
    # Code goes here
    ```
-
-   </div>
    ```
 
 2. **Import Statements**
@@ -180,10 +174,6 @@ For consistency, use these templates for common documentation patterns:
 
 ### Code Example Template
 ```markdown
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -207,16 +197,10 @@ result = client.service.operation(config)
 # Process results
 print(f"Operation result: {result.id}")
 ```
-
-</div>
 ```
 
 ### Error Handling Template
 ```markdown
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 from scm.exceptions import (
@@ -240,8 +224,6 @@ except ExceptionType1 as e:
 except ExceptionType2 as e:
    print(f"Error message: {e.message}")
 ```
-
-</div>
 ```
 
 ## Final Recommendations

@@ -33,10 +33,6 @@ The Internal DNS Servers models can raise the following exceptions during valida
 
 The models enforce that domain_name must be provided and cannot be empty:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.deployment import InternalDnsServersCreateModel
@@ -60,15 +56,9 @@ dns_server = InternalDnsServersCreateModel(
 print(dns_server.domain_name)  # ["example.com"]
 ```
 
-</div>
-
 ### Update Model Validation
 
 For update operations, the model validates that at least one field other than id is provided:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -84,15 +74,9 @@ except ValueError as e:
     print(e)  # "At least one field must be specified for update"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating an Internal DNS Server
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary with DNS service
@@ -122,13 +106,7 @@ payload = dns_model.model_dump(exclude_unset=True, by_alias=True)
 response = dns_servers.create(payload)
 ```
 
-</div>
-
 ### Updating an Internal DNS Server
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary with DNS service
@@ -158,13 +136,7 @@ update_model = InternalDnsServersUpdateModel(
 response = dns_servers.update(update_model)
 ```
 
-</div>
-
 ### Working with Response Model
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -198,13 +170,7 @@ update_model = InternalDnsServersUpdateModel(
 updated = client.internal_dns_servers.update(update_model)
 ```
 
-</div>
-
 ### Model Serialization
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import InternalDnsServersCreateModel
@@ -237,8 +203,6 @@ print(model_json)
 print(f"Primary DNS type: {type(dns_model.primary)}")  # IPvAnyAddress
 print(f"Serialized primary DNS: {model_dict['primary']}")  # String
 ```
-
-</div>
 
 ## Implementation Details
 

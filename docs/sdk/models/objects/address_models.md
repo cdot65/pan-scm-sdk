@@ -45,10 +45,6 @@ The Address models can raise the following exceptions during validation:
 
 The models enforce that exactly one address type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.objects import AddressCreateModel
@@ -74,15 +70,9 @@ except ValueError as e:
     print(e)  # "Value error, Exactly one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' must be provided."
 ```
 
-</div>
-
 ### Container Type Validation
 
 For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -97,15 +87,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Tag Validation
 
 Tags must be unique and properly formatted:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error for duplicate tags
@@ -128,15 +112,9 @@ address = AddressCreateModel(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating an Address Object
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -168,13 +146,7 @@ payload = address_obj.model_dump(exclude_unset=True)
 response = address.create(payload)
 ```
 
-</div>
-
 ### Creating an FQDN Address
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -203,13 +175,7 @@ payload = fqdn_address.model_dump(exclude_unset=True)
 response = address.create(payload)
 ```
 
-</div>
-
 ### Updating an Address
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -237,5 +203,3 @@ update_address = AddressUpdateModel(
 payload = update_address.model_dump(exclude_unset=True)
 response = address.update(payload)
 ```
-
-</div>

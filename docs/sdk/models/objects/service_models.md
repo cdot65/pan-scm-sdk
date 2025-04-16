@@ -52,10 +52,6 @@ The Service models can raise the following exceptions during validation:
 
 The models enforce that exactly one protocol type (TCP or UDP) must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.objects import Service
@@ -89,15 +85,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'tcp' or 'udp' must be provided in 'protocol'."
 ```
 
-</div>
-
 ### Container Type Validation
 
 For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -124,15 +114,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a TCP Service
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -180,13 +164,7 @@ payload = tcp_service.model_dump(exclude_unset=True)
 response = service.create(payload)
 ```
 
-</div>
-
 ### Creating a UDP Service
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -223,13 +201,7 @@ payload = udp_service.model_dump(exclude_unset=True)
 response = service.create(payload)
 ```
 
-</div>
-
 ### Updating a Service
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -269,5 +241,3 @@ update = ServiceUpdateModel(
 payload = update.model_dump(exclude_unset=True)
 response = service.update(payload)
 ```
-
-</div>

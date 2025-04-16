@@ -43,10 +43,6 @@ The Service Group models can raise the following exceptions during validation:
 
 The models enforce that either members or dynamic configuration must be provided, but not both:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.objects import ServiceGroupCreateModel
@@ -72,15 +68,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'members' or 'dynamic' must be provided."
 ```
 
-</div>
-
 ### Container Type Validation
 
 For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -95,15 +85,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Tag Validation
 
 Tags must be unique and properly formatted:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error for duplicate tags
@@ -126,15 +110,9 @@ service_group = ServiceGroupCreateModel(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Static Service Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -166,13 +144,7 @@ payload = static_group.model_dump(exclude_unset=True)
 response = service_group.create(payload)
 ```
 
-</div>
-
 ### Creating a Dynamic Service Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -205,13 +177,7 @@ payload = dynamic_group.model_dump(exclude_unset=True)
 response = service_group.create(payload)
 ```
 
-</div>
-
 ### Updating a Service Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -239,5 +205,3 @@ update_group = ServiceGroupUpdateModel(
 payload = update_group.model_dump(exclude_unset=True)
 response = service_group.update(payload)
 ```
-
-</div>

@@ -63,9 +63,6 @@ The NAT rules model supports three different types of source translation methods
 
 This is the most common NAT type, where multiple internal IP addresses are translated to use a single external IP with dynamic ports.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 nat_rule_data = {
    "name": "dynamic-ip-port-rule",
@@ -79,13 +76,8 @@ nat_rule_data = {
 }
 ```
 
-</div>
-
 Alternatively, you can use an interface for translation:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 nat_rule_data = {
    "name": "interface-translation-rule",
@@ -103,15 +95,10 @@ nat_rule_data = {
 }
 ```
 
-</div>
-
 ### 2. Dynamic IP (NAT)
 
 Dynamic IP NAT allows multiple internal IPs to be translated to a pool of external IPs without port translation.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 nat_rule_data = {
    "name": "dynamic-ip-rule",
@@ -126,15 +113,10 @@ nat_rule_data = {
 }
 ```
 
-</div>
-
 ### 3. Static IP
 
 This provides a one-to-one mapping between internal and external IPs, optionally with bi-directional support.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 nat_rule_data = {
    "name": "static-ip-rule",
@@ -147,8 +129,6 @@ nat_rule_data = {
    "folder": "NAT Rules"
 }
 ```
-
-</div>
 
 ## Exceptions
 
@@ -167,9 +147,6 @@ In addition to these HTTP exceptions, the model validation may raise `ValueError
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -185,13 +162,8 @@ client = ScmClient(
 # client.nat_rule is automatically initialized for you
 ```
 
-</div>
-
 You can also use the traditional approach if preferred:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.network import NatRule
@@ -207,15 +179,10 @@ client = Scm(
 nat_rule = NatRule(client, max_limit=2500)
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating NAT Rules
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -268,13 +235,8 @@ static_nat_rule = client.nat_rule.create(static_nat_data)
 print(f"Created static NAT rule with ID: {static_nat_rule.id}")
 ```
 
-</div>
-
 ### Retrieving NAT Rules
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -297,13 +259,8 @@ rule_by_id = client.nat_rule.get(fetched_rule.id)
 print(f"NAT Rule ID: {rule_by_id.id}, Name: {rule_by_id.name}")
 ```
 
-</div>
-
 ### Updating NAT Rules
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.network import NatRuleUpdateModel, SourceTranslation, DynamicIp
@@ -343,13 +300,8 @@ updated_rule = client.nat_rule.update(rule_update)
 print(f"Updated NAT Rule translation type to dynamic IP")
 ```
 
-</div>
-
 ### Listing NAT Rules
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -385,13 +337,8 @@ for rule in nat_rules_list:
             print("  Bi-directional: Yes")
 ```
 
-</div>
-
 ### Deleting NAT Rules
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -408,13 +355,8 @@ client.nat_rule.delete(rule_id_to_delete)
 print(f"NAT Rule {rule_id_to_delete} deleted successfully.")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -470,13 +412,8 @@ else:
    print(f"Commit failed: {job_result.details}")
 ```
 
-</div>
-
 ## Error Handling
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.exceptions import (
@@ -524,8 +461,6 @@ except ApiError as e:
    print(f"API error: {e.message}")
    print(f"Status code: {e.http_status_code}")
 ```
-
-</div>
 
 ## Best Practices
 

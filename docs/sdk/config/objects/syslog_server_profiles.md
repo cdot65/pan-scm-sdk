@@ -80,10 +80,6 @@ The `SyslogServerProfile` class inherits from the `BaseObject` class and provide
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Import the client
 from scm.client import Scm
@@ -107,15 +103,9 @@ client = Scm(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Syslog Server Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create a basic syslog server profile with a single UDP server
@@ -167,13 +157,7 @@ tcp_profile = client.syslog_server_profile.create({
 print(f"Created profile with ID: {tcp_profile.id}")
 ```
 
-</div>
-
 ### Retrieving a Syslog Server Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get profile by ID
@@ -193,13 +177,7 @@ profile_by_name = client.syslog_server_profile.fetch(
 )
 ```
 
-</div>
-
 ### Updating a Syslog Server Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.objects import SyslogServerProfileUpdateModel
@@ -240,13 +218,7 @@ update_model = SyslogServerProfileUpdateModel(**update_data)
 updated_profile = client.syslog_server_profile.update(update_model)
 ```
 
-</div>
-
 ### Listing Syslog Server Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all profiles in a folder
@@ -283,13 +255,7 @@ for profile in filtered_profiles:
         print(f"  Server: {server_name} - {server_data['transport']}://{server_data['server']}:{server_data['port']}")
 ```
 
-</div>
-
 ### Pagination and Max Limit
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create client with custom pagination limit for syslog server profiles
@@ -307,13 +273,7 @@ print(f"Retrieved {len(profiles)} profiles")
 # The max_limit is automatically capped at 5000 (the API's maximum)
 ```
 
-</div>
-
 ### Deleting a Syslog Server Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete a profile by ID
@@ -322,13 +282,7 @@ client.syslog_server_profile.delete(profile_id)
 print(f"Profile {profile_id} deleted successfully")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
@@ -357,8 +311,6 @@ try:
 except InvalidObjectError as e:
     print(f"Invalid filter error: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

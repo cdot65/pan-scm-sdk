@@ -11,25 +11,15 @@ with Palo Alto Networks Strata Cloud Manager.
 
 Install the package via pip:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```bash
 $ pip install pan-scm-sdk
 ```
-
-</div>
 
 ## Authentication
 
 Before using the SDK, you need to authenticate with Strata Cloud Manager using your client credentials.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -44,8 +34,6 @@ client = ScmClient(
 # The SCM client is now ready to use
 ```
 
-</div>
-
 - `client_id`: Your OAuth2 client ID.
 - `client_secret`: Your OAuth2 client secret.
 - `tsg_id`: Your Tenant Service Group ID.
@@ -57,10 +45,6 @@ The SDK provides two ways to interact with Strata Cloud Manager: the unified cli
 ### Unified Client Interface (Recommended)
 
 Starting with version 0.3.14, you can access all service objects directly through the client instance. This approach is more intuitive and streamlined:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -120,15 +104,9 @@ result = client.commit(
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
 
 You can also use the traditional pattern where service objects are explicitly instantiated. While this approach is still supported for backward compatibility, it's recommended to use the unified client interface for new development.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -163,18 +141,12 @@ for addr in addresses:
     print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
 ```
 
-</div>
-
 !!! warning
     Using the traditional approach requires manually creating service instances for each service type you want to use, which can lead to code duplication and more complex management. It also doesn't automatically handle token refreshing across all service instances.
 
 ## Common Operations
 
 ### Managing Address Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create an IP/Netmask address
@@ -198,13 +170,7 @@ found_address = client.address.fetch(name="internal-network", folder="Texas")
 client.address.delete(ip_address.id)
 ```
 
-</div>
-
 ### Managing Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create tags with different colors
@@ -224,13 +190,7 @@ for tag in all_tags:
     print(f"Tag: {tag.name}, Color: {tag.color}")
 ```
 
-</div>
-
 ### Managing Security Rules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create a security rule
@@ -259,13 +219,7 @@ for r in rules:
     print(f"Rule: {r.name}, Action: {r.action}")
 ```
 
-</div>
-
 ### Committing Changes
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Commit changes with synchronous waiting
@@ -286,15 +240,9 @@ job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 ```
 
-</div>
-
 ## Error Handling
 
 Always implement proper error handling in your code to manage API errors gracefully:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.exceptions import (
@@ -327,8 +275,6 @@ except InvalidObjectError as e:
 except APIError as e:
     print(f"API error: {e.message}")
 ```
-
-</div>
 
 ## Next Steps
 

@@ -43,10 +43,6 @@ The Decryption Profile models can raise the following exceptions during validati
 
 The SSL protocol settings enforce that max_version cannot be less than min_version:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 try:
@@ -74,15 +70,9 @@ except ValueError as e:
     print(e)  # "max_version cannot be less than min_version"
 ```
 
-</div>
-
 ### Container Type Validation
 
 For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -105,15 +95,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Decryption Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -153,13 +137,7 @@ payload = profile.model_dump(exclude_unset=True)
 response = profile.create(payload)
 ```
 
-</div>
-
 ### Creating a Profile with Forward Proxy Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -207,13 +185,7 @@ payload = forward_proxy.model_dump(exclude_unset=True)
 response = profile.create(payload)
 ```
 
-</div>
-
 ### Updating a Decryption Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -247,5 +219,3 @@ update = DecryptionProfileUpdateModel(
 payload = update.model_dump(exclude_unset=True)
 response = profile.update(payload)
 ```
-
-</div>

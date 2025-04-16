@@ -64,9 +64,6 @@ The objects also enforce:
 
 ## Usage Example
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -96,7 +93,5 @@ results = client.address.list(
 for address in results:
    print(f"Address: {address.name}, Value: {address.ip_netmask}")
 ```
-
-</div>
 
 Select an object from the sections above to view detailed documentation, including methods, parameters, and examples.

@@ -107,9 +107,6 @@ The models perform strict validation and will raise `ValueError` in scenarios su
 
 #### Using a Dictionary with Layer 3 Interfaces
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import SecurityZoneCreateModel
 
@@ -135,13 +132,8 @@ payload = security_zone.model_dump(exclude_unset=True, by_alias=True)
 print(payload)
 ```
 
-</div>
-
 #### Using the Model Directly with Virtual Wire Interfaces
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import SecurityZoneCreateModel, NetworkConfig, UserAcl, DeviceAcl
 
@@ -170,13 +162,8 @@ payload = security_zone.model_dump(exclude_unset=True, by_alias=True)
 print(payload)
 ```
 
-</div>
-
 ### Updating a Security Zone
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 import uuid
 from scm.models.network import SecurityZoneUpdateModel, NetworkConfig
@@ -202,13 +189,8 @@ payload = updated_zone.model_dump(exclude_unset=True, by_alias=True)
 print(payload)
 ```
 
-</div>
-
 ### Creating a Security Zone with ACLs
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import SecurityZoneCreateModel, UserAcl, DeviceAcl
 
@@ -235,8 +217,6 @@ security_zone = SecurityZoneCreateModel(**zone_data)
 payload = security_zone.model_dump(exclude_unset=True, by_alias=True)
 print(payload)
 ```
-
-</div>
 
 ## Related Models and Enums
 

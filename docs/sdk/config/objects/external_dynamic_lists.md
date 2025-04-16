@@ -70,10 +70,6 @@ EDLs of various types including IP, Domain, URL, IMSI, and IMEI lists with confi
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -88,13 +84,7 @@ client = ScmClient(
 # client.external_dynamic_list is automatically initialized for you
 ```
 
-</div>
-
 You can also use the traditional approach if preferred:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -111,15 +101,9 @@ client = Scm(
 edls = ExternalDynamicLists(client)
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating EDLs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # IP-based EDL with daily updates
@@ -166,13 +150,7 @@ domain_edl_config = {
 domain_edl = client.external_dynamic_list.create(domain_edl_config)
 ```
 
-</div>
-
 ### Retrieving EDLs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -184,13 +162,7 @@ edl_by_id = client.external_dynamic_list.get(edl.id)
 print(f"Retrieved EDL: {edl_by_id.name}")
 ```
 
-</div>
-
 ### Updating EDLs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing EDL
@@ -206,13 +178,7 @@ existing_edl.type.ip.recurring = {
 updated_edl = client.external_dynamic_list.update(existing_edl)
 ```
 
-</div>
-
 ### Listing EDLs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List with direct filter parameters
@@ -239,13 +205,7 @@ list_params = {
 filtered_edls = client.external_dynamic_list.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Only return edls defined exactly in 'Texas'
@@ -300,15 +260,9 @@ for app in combined_filters:
    print(f"Combined filters result: {app.name} in {app.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Initialize the ScmClient with a custom max_limit for EDLs
@@ -327,13 +281,7 @@ all_edls = client.external_dynamic_list.list(folder='Texas')
 # 'all_edls' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
-</div>
-
 ### Deleting EDLs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -341,15 +289,9 @@ edl_id = "123e4567-e89b-12d3-a456-426655440000"
 client.external_dynamic_list.delete(edl_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -367,13 +309,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly on the client
@@ -386,13 +322,7 @@ for job in recent_jobs.data:
    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -453,8 +383,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

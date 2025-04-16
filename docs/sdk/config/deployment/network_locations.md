@@ -81,10 +81,6 @@ network_locations = NetworkLocations(client)
 
 ### List Network Locations
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import Scm
 from scm.exceptions import APIError
@@ -109,13 +105,7 @@ except APIError as e:
     print(f"Error retrieving network locations: {e.message}")
 ```
 
-</div>
-
 ### Filter Network Locations
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -147,13 +137,7 @@ except APIError as e:
     print(f"Error filtering network locations: {e.message}")
 ```
 
-</div>
-
 ### Fetch a Specific Network Location
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -183,8 +167,6 @@ except InvalidObjectError:
     print("Error: Location not found")
 ```
 
-</div>
-
 ## Method Details
 
 ### list
@@ -210,10 +192,6 @@ Lists network location objects with optional filtering.
 
 **Example:**
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import Scm
 
@@ -232,8 +210,6 @@ print(f"Found {len(europe_locations)} locations in Europe")
 regions = client.network_location.list(region=["us-west2", "us-east4"])
 print(f"Found {len(regions)} locations in specific regions")
 ```
-
-</div>
 
 ### fetch
 
@@ -258,10 +234,6 @@ Fetches a single network location by its value.
 
 **Example:**
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import Scm
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
@@ -284,8 +256,6 @@ except MissingQueryParameterError:
 except InvalidObjectError:
     print("Error: Location not found")
 ```
-
-</div>
 
 ## Client Configuration
 

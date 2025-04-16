@@ -81,10 +81,6 @@ and behaviors.
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
     from scm.client import ScmClient
 
@@ -98,8 +94,6 @@ and behaviors.
     # Access the application_filters module directly through the client
     # client.application_filter is automatically initialized for you
 ```
-
-</div>
 
 You can also use the traditional approach if preferred:
 
@@ -121,10 +115,6 @@ You can also use the traditional approach if preferred:
 ## Usage Examples
 
 ### Creating Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # High-risk applications filter
@@ -153,13 +143,7 @@ You can also use the traditional approach if preferred:
     saas = client.application_filter.create(saas_filter)
 ```
 
-</div>
-
 ### Retrieving Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Fetch by name and folder
@@ -172,13 +156,7 @@ You can also use the traditional approach if preferred:
     print(f"Risk levels: {filter_by_id.risk}")
 ```
 
-</div>
-
 ### Updating Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Fetch existing filter
@@ -194,13 +172,7 @@ You can also use the traditional approach if preferred:
     updated_filter = client.application_filter.update(existing_filter)
 ```
 
-</div>
-
 ### Listing Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # List with direct filter parameters
@@ -227,13 +199,7 @@ You can also use the traditional approach if preferred:
     filtered_results = client.application_filter.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Only return filters defined exactly in 'Texas'
@@ -288,15 +254,9 @@ You can also use the traditional approach if preferred:
         print(f"Combined filters result: {f.name} in {f.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Initialize the ScmClient with a custom max_limit for application filters
@@ -315,13 +275,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     # 'all_filters' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
 ```
 
-</div>
-
 ### Deleting Application Filters
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Delete by ID
@@ -329,15 +283,9 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     client.application_filter.delete(filter_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Prepare commit parameters
@@ -355,13 +303,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     # Get status of specific job directly on the client
@@ -374,13 +316,7 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
         print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
     from scm.client import ScmClient
@@ -433,8 +369,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
     except MissingQueryParameterError as e:
         print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 
