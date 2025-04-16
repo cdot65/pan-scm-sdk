@@ -63,10 +63,6 @@ The Security Rule models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.security import SecurityRule
@@ -97,15 +93,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### List Field Validation
 
 All list fields are validated to ensure they contain only unique string values:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -131,15 +121,9 @@ except ValueError as e:
     print(e)  # "List items must be unique"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Security Rule
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -178,13 +162,7 @@ payload = rule.model_dump(exclude_unset=True)
 response = security_rule.create(payload)
 ```
 
-</div>
-
 ### Creating a Rule with Security Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -231,13 +209,7 @@ payload = rule.model_dump(exclude_unset=True)
 response = security_rule.create(payload)
 ```
 
-</div>
-
 ### Moving a Security Rule
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -261,5 +233,3 @@ move_config = SecurityRuleMoveModel(
 payload = move_config.model_dump(exclude_unset=True)
 security_rule.move("123e4567-e89b-12d3-a456-426655440000", payload)
 ```
-
-</div>

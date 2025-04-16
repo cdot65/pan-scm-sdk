@@ -41,10 +41,6 @@ There are two primary models for handling GlobalProtect agent version data:
 
 ### Reading Agent Versions
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 from scm.models.mobile_agent.agent_versions import AgentVersionsModel
@@ -67,13 +63,7 @@ for version in agent_versions.agent_versions:
     print(f"Available version: {version}")
 ```
 
-</div>
-
 ### Using the Model with the Service
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -108,13 +98,7 @@ for v_obj in version_objects:
     print(f"GlobalProtect {v_obj.version} (Released: {v_obj.release_date}) {recommendation}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -141,8 +125,6 @@ try:
 except ValidationError as e:
     print(f"Response validation failed: {e}")
 ```
-
-</div>
 
 ## Related Documentation
 

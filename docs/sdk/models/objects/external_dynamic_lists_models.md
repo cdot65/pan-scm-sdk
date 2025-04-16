@@ -46,9 +46,6 @@ The External Dynamic Lists models can raise the following exceptions during vali
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.objects import ExternalDynamicListsCreateModel
 
@@ -67,15 +64,10 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Recurring Interval Validation
 
 The models support various recurring update intervals:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Five minute interval
 edl = ExternalDynamicListsCreateModel(
@@ -108,15 +100,10 @@ edl = ExternalDynamicListsCreateModel(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating an IP List
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.config.objects import ExternalDynamicLists
 
@@ -141,13 +128,8 @@ edl = ExternalDynamicLists(api_client)
 response = edl.create(ip_list)
 ```
 
-</div>
-
 ### Creating a Domain List
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Using model directly
 from scm.models.objects import (
@@ -179,13 +161,8 @@ payload = domain_list.model_dump(exclude_unset=True)
 response = edl.create(payload)
 ```
 
-</div>
-
 ### Updating a List
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Using dictionary
 update_dict = {
@@ -202,8 +179,6 @@ update_dict = {
 
 response = edl.update(update_dict)
 ```
-
-</div>
 
 ## Best Practices
 

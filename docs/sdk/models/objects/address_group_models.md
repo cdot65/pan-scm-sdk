@@ -41,10 +41,6 @@ The Address Group models can raise the following exceptions during validation:
 
 The models enforce that exactly one group type (static or dynamic) must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.objects import AddressGroupCreateModel
@@ -70,15 +66,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'static' or 'dynamic' must be provided."
 ```
 
-</div>
-
 ### Container Type Validation
 
 For create operations, exactly one container type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -93,15 +83,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Tag Validation
 
 Tags must be unique and properly formatted:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error for duplicate tags
@@ -124,15 +108,9 @@ group = AddressGroupCreateModel(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Static Address Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -164,13 +142,7 @@ payload = static_group.model_dump(exclude_unset=True)
 response = address_group.create(payload)
 ```
 
-</div>
-
 ### Creating a Dynamic Address Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -201,13 +173,7 @@ payload = dynamic_group.model_dump(exclude_unset=True)
 response = address_group.create(payload)
 ```
 
-</div>
-
 ### Updating an Address Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -235,5 +201,3 @@ update_group = AddressGroupUpdateModel(
 payload = update_group.model_dump(exclude_unset=True)
 response = address_group.update(payload)
 ```
-
-</div>

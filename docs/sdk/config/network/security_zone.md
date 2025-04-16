@@ -167,9 +167,6 @@ The Security Zone service can be accessed using either the unified client interf
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -186,13 +183,8 @@ client = ScmClient(
 zones = client.security_zone
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.network import SecurityZone
@@ -208,8 +200,6 @@ client = Scm(
 zones = SecurityZone(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
@@ -217,9 +207,6 @@ zones = SecurityZone(client)
 
 ### Creating Security Zones
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -266,13 +253,8 @@ layer2_zone = client.security_zone.create(layer2_zone_data)
 print(f"Created Layer 2 security zone with ID: {layer2_zone.id}")
 ```
 
-</div>
-
 ### Retrieving Security Zones
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Fetch by name and folder
 zone = client.security_zone.fetch(
@@ -286,13 +268,8 @@ zone_by_id = client.security_zone.get(zone.id)
 print(f"Retrieved security zone: {zone_by_id.name}")
 ```
 
-</div>
-
 ### Updating Security Zones
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Fetch existing security zone
 existing_zone = client.security_zone.fetch(
@@ -316,13 +293,8 @@ existing_zone.enable_device_identification = True
 updated_zone = client.security_zone.update(existing_zone)
 ```
 
-</div>
-
 ### Listing Security Zones
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Pass filters directly into the list method
 filtered_zones = client.security_zone.list(
@@ -356,8 +328,6 @@ list_params = {
 filtered_zones = client.security_zone.list(**list_params)
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
@@ -373,9 +343,6 @@ which objects are included or excluded after the initial API response is fetched
 
 **Examples:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Only return security zones defined exactly in 'Security Zones'
 exact_zones = client.security_zone.list(
@@ -429,17 +396,12 @@ for zone in combined_filters:
    print(f"Combined filters result: {zone.name} in {zone.folder}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 **Example:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.config.network import SecurityZone
@@ -465,28 +427,18 @@ all_zones2 = client.security_zone.list(folder='Security Zones')
 # The security zones are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Security Zones
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Delete by ID
 zone_id = "123e4567-e89b-12d3-a456-426655440000"
 client.security_zone.delete(zone_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Prepare commit parameters
 commit_params = {
@@ -502,13 +454,8 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
@@ -520,13 +467,8 @@ for job in recent_jobs.data:
    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.exceptions import (
@@ -581,8 +523,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

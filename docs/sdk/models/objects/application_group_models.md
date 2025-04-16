@@ -37,10 +37,6 @@ The Application Group models can raise the following exceptions during validatio
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.objects import ApplicationGroup
@@ -71,15 +67,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating an Application Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -107,13 +97,7 @@ payload = app_group.model_dump(exclude_unset=True)
 response = app_group.create(payload)
 ```
 
-</div>
-
 ### Creating an Application Group in a Snippet
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -136,13 +120,7 @@ payload = snippet_group.model_dump(exclude_unset=True)
 response = app_group.create(payload)
 ```
 
-</div>
-
 ### Updating an Application Group
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -166,5 +144,3 @@ update_group = ApplicationGroupUpdateModel(
 payload = update_group.model_dump(exclude_unset=True)
 response = app_group.update(payload)
 ```
-
-</div>

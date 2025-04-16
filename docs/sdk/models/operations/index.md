@@ -38,9 +38,6 @@ Operations models share common patterns:
 
 ## Usage Examples
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.operations import CandidatePushModel
@@ -75,8 +72,6 @@ job_list = client.operations.list_jobs(limit=10)
 for job in job_list.data:
    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
-
-</div>
 
 ## Models by Category
 

@@ -58,10 +58,6 @@ The DNS Security Profile models can raise the following exceptions during valida
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.security_services import DNSSecurityProfileCreateModel
@@ -85,15 +81,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Category Action Validation
 
 The category action must be one of the allowed values:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import DNSSecurityCategory
@@ -108,15 +98,9 @@ except ValueError as e:
     print(e)  # "Value error, action must be one of ['alert', 'allow', 'block', 'sinkhole']"
 ```
 
-</div>
-
 ### Log Level Validation
 
 The log level must be one of the allowed values:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import DNSSecurityCategory
@@ -132,15 +116,9 @@ except ValueError as e:
     print(e)  # "Value error, log_level must be one of ['default', 'disable', 'medium', 'high', 'critical']"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a DNS Security Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -214,13 +192,7 @@ payload = profile.model_dump(exclude_unset=True)
 response = dns_security.create(payload)
 ```
 
-</div>
-
 ### Creating a Profile with Multiple Categories
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -265,13 +237,7 @@ profile_dict = {
 response = dns_security.create(profile_dict)
 ```
 
-</div>
-
 ### Updating a DNS Security Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -347,5 +313,3 @@ update_profile = DNSSecurityProfileUpdateModel(
 payload = update_profile.model_dump(exclude_unset=True)
 response = dns_security.update(payload)
 ```
-
-</div>

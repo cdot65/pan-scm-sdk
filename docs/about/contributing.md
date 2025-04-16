@@ -18,26 +18,16 @@ these tools, you might want to check out some tutorials on [GitHub's Help pages]
 
 2. **Clone Your Fork:** Clone your fork to your local machine:
 
-   <div class="termy">
-
-    <!-- termynal -->
-    ```bash
+   ```bash
     $ git clone https://github.com/yourusername/pan-scm-sdk.git
     $ cd pan-scm-sdk
     ```
 
-   </div>
-
 3. **Create a Branch:** Create a new branch for your feature, fix, or improvement:
 
-   <div class="termy">
-
-    <!-- termynal -->
-    ```bash
+   ```bash
     $ git checkout -b feature/YourFeatureName
     ```
-
-   </div>
 
 4. **Set Up the Development Environment:** Follow the [Getting Started](installation.md) guide to set up your local
    development environment.
@@ -52,14 +42,9 @@ these tools, you might want to check out some tutorials on [GitHub's Help pages]
 
 3. **Commit Your Changes:** Once you're happy with your changes, commit them:
 
-   <div class="termy">
-
-    <!-- termynal -->
-    ```bash
+   ```bash
     $ git commit -am "Add some AmazingFeature"
     ```
-
-   </div>
 
 ---
 
@@ -67,14 +52,9 @@ these tools, you might want to check out some tutorials on [GitHub's Help pages]
 
 1. **Push to Your Fork:** Push your branch to your GitHub fork:
 
-   <div class="termy">
-
-    <!-- termynal -->
-    ```bash
+   ```bash
     $ git push origin feature/YourFeatureName
     ```
-
-   </div>
 
 2. **Create a Pull Request:** Go to the original `pan-scm-sdk` repository on GitHub and create a new pull request.
    Provide a clear description of your changes and any relevant issue numbers.

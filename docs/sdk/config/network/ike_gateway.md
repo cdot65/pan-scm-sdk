@@ -71,10 +71,6 @@ The IKE Gateway service can be accessed using either the unified client interfac
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -90,13 +86,7 @@ client = ScmClient(
 ike_gateways = client.ike_gateway
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -113,18 +103,12 @@ client = Scm(
 ike_gateways = IKEGateway(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating IKE Gateway Objects
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -196,13 +180,7 @@ cert_config = {
 cert_gateway = client.ike_gateway.create(cert_config)
 ```
 
-</div>
-
 ### Retrieving IKE Gateways
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -214,13 +192,7 @@ gateway_by_id = client.ike_gateway.get(gateway.id)
 print(f"Retrieved gateway: {gateway_by_id.name}")
 ```
 
-</div>
-
 ### Updating IKE Gateways
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing IKE gateway
@@ -251,13 +223,7 @@ gateway_update = IKEGatewayUpdateModel(**update_data)
 updated_gateway = client.ike_gateway.update(gateway_update)
 ```
 
-</div>
-
 ### Listing IKE Gateways
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all IKE gateways in a folder
@@ -276,8 +242,6 @@ direct_gateways = client.ike_gateway.list(
 print(f"Found {len(direct_gateways)} gateways defined directly in VPN folder")
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. You can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
@@ -290,10 +254,6 @@ The `list()` method supports additional parameters to refine your query results 
 - `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
 
 **Examples:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Only return IKE gateways defined exactly in 'VPN'
@@ -336,17 +296,11 @@ for gateway in no_deviceA:
    print(f"Filtered out 'DeviceA': {gateway.name}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -373,13 +327,7 @@ all_gateways2 = client.ike_gateway.list(folder='VPN')
 # The gateways are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting IKE Gateways
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID
@@ -387,15 +335,9 @@ gateway_id = "123e4567-e89b-12d3-a456-426655440000"
 client.ike_gateway.delete(gateway_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -412,13 +354,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly from the client
@@ -431,13 +367,7 @@ for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -498,8 +428,6 @@ except ObjectNotPresentError as e:
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

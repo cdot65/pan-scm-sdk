@@ -43,9 +43,6 @@ Object models share common patterns:
 
 ## Usage Examples
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.objects import AddressCreateModel, AddressUpdateModel
@@ -81,8 +78,6 @@ update_address = AddressUpdateModel(
 update_dict = update_address.model_dump(exclude_unset=True)
 updated_result = client.address.update(update_dict)
 ```
-
-</div>
 
 ## Models by Category
 

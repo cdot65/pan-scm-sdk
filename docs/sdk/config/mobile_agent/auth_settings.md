@@ -68,10 +68,6 @@ The AuthSettings service can be accessed using either the unified client interfa
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -87,13 +83,7 @@ client = ScmClient(
 auth_settings = client.auth_settings
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -110,18 +100,12 @@ client = Scm(
 auth_settings = AuthSettings(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -159,13 +143,7 @@ ios_auth_config = {
 ios_auth_settings = client.auth_setting.create(ios_auth_config)
 ```
 
-</div>
-
 ### Retrieving Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder (folder must be "Mobile Users")
@@ -177,13 +155,7 @@ auth_settings_by_id = client.auth_setting.get(auth_settings.id)
 print(f"Retrieved authentication settings: {auth_settings_by_id.name}")
 ```
 
-</div>
-
 ### Updating Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare update data
@@ -201,13 +173,7 @@ updated_settings = client.auth_setting.update(auth_settings.id, update_data)
 print(f"Updated authentication settings: {updated_settings.name}")
 ```
 
-</div>
-
 ### Listing Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all authentication settings (always from "Mobile Users" folder)
@@ -218,15 +184,9 @@ for setting in all_settings:
     print(f"Name: {setting.name}, OS: {setting.os}, Profile: {setting.authentication_profile}")
 ```
 
-</div>
-
 ### Ordering Authentication Settings
 
 The GlobalProtect authentication settings evaluation order is important, as settings are evaluated from top to bottom. The `move()` method allows you to reorder authentication settings in the configuration.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Move a settings entry to the top of the list
@@ -260,17 +220,11 @@ after_move_config = {
 client.auth_setting.move(after_move_config)
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. 
 
 **Example:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -293,13 +247,7 @@ all_settings1 = auth_settings_service.list()
 all_settings2 = client.auth_setting.list()
 ```
 
-</div>
-
 ### Deleting Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get the authentication settings
@@ -310,15 +258,9 @@ client.auth_setting.delete(auth_settings.id)
 print(f"Deleted authentication settings: {auth_settings.name}")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -335,13 +277,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job
@@ -354,13 +290,7 @@ for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -409,8 +339,6 @@ except ObjectNotPresentError as e:
 except MissingQueryParameterError as e:
    print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

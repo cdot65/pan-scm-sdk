@@ -75,10 +75,6 @@ The Remote Networks models can raise the following exceptions during validation:
 
 The models enforce consistent configuration based on ECMP mode:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.deployment import RemoteNetworkCreateModel
@@ -112,15 +108,9 @@ except ValueError as e:
     print(e)  # "When ECMP is disabled, ipsec_tunnel must be provided"
 ```
 
-</div>
-
 ### License Type Validation
 
 When using FWAAS-AGGREGATE license type, spn_name is required:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -138,15 +128,9 @@ except ValueError as e:
     print(e)  # "When license_type is FWAAS-AGGREGATE, spn_name must be provided"
 ```
 
-</div>
-
 ### Subnet Format Validation
 
 Subnets must follow proper CIDR notation:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -165,15 +149,9 @@ except ValueError as e:
     print(e)  # "Subnet must be in CIDR notation (e.g., 192.168.1.0/24)"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Standard Remote Network
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -213,13 +191,7 @@ payload = standard_network.model_dump(exclude_unset=True)
 response = remote_networks.create(payload)
 ```
 
-</div>
-
 ### Creating an ECMP-Enabled Remote Network
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -288,13 +260,7 @@ payload = ecmp_network.model_dump(exclude_unset=True)
 response = remote_networks.create(payload)
 ```
 
-</div>
-
 ### Creating a Remote Network with BGP Protocol
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -353,13 +319,7 @@ payload = bgp_network.model_dump(exclude_unset=True)
 response = remote_networks.create(payload)
 ```
 
-</div>
-
 ### Updating a Remote Network
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -401,5 +361,3 @@ update_network = RemoteNetworkUpdateModel(
 payload = update_network.model_dump(exclude_unset=True)
 response = remote_networks.update(payload)
 ```
-
-</div>

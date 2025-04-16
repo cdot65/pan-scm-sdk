@@ -43,9 +43,6 @@ The HIP Object models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.objects import HIPObjectCreateModel
 
@@ -65,15 +62,10 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Windows Host Profile
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.config.objects import HIPObject
 
@@ -104,13 +96,8 @@ hip_object = HIPObject(api_client)
 response = hip_object.create(windows_profile)
 ```
 
-</div>
-
 ### Creating a Mobile Device Profile
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Using model directly
 from scm.models.objects import (
@@ -141,13 +128,8 @@ payload = mobile_profile.model_dump(exclude_unset=True)
 response = hip_object.create(payload)
 ```
 
-</div>
-
 ### Updating a HIP Object
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Using dictionary
 update_dict = {
@@ -165,8 +147,6 @@ update_dict = {
 
 response = hip_object.update(update_dict)
 ```
-
-</div>
 
 ## Best Practices
 

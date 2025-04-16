@@ -72,10 +72,6 @@ The Anti-Spyware Profile models can raise the following exceptions during valida
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.models.security_services import AntiSpywareProfileCreateModel
 
@@ -111,15 +107,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Action Validation
 
 For rules and threat exceptions, exactly one action type must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import RuleRequest, ActionRequest
@@ -149,15 +139,9 @@ rule = RuleRequest(
 )
 ```
 
-</div>
-
 ### Severity Validation
 
 Rule severity must be one of the allowed values:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import RuleRequest, ActionRequest, AntiSpywareSeverity
@@ -182,15 +166,9 @@ rule = RuleRequest(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -246,13 +224,7 @@ response = client.anti_spyware_profile.create(payload)
 print(f"Created profile with ID: {response.id}")
 ```
 
-</div>
-
 ### Creating a Profile with Multiple Rules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import (
@@ -306,13 +278,7 @@ response = client.anti_spyware_profile.create(payload)
 print(f"Created profile with {len(response.rules)} rules")
 ```
 
-</div>
-
 ### Creating a Profile with Threat Exceptions
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import (
@@ -361,13 +327,7 @@ response = client.anti_spyware_profile.create(payload)
 print(f"Created profile with {len(response.threat_exception)} exceptions")
 ```
 
-</div>
-
 ### Updating a Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security_services import AntiSpywareProfileUpdateModel
@@ -401,13 +361,7 @@ response = client.anti_spyware_profile.update(payload)
 print(f"Updated profile with {len(response.rules)} rules")
 ```
 
-</div>
-
 ### Listing and Filtering Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all anti-spyware profiles in a folder
@@ -433,5 +387,3 @@ for profile in all_profiles:
     else:
         print("Cloud inline analysis: Disabled")
 ```
-
-</div>

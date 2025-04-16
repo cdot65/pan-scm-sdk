@@ -48,10 +48,6 @@ The Service Connection models can raise the following exceptions during validati
 
 The name field must match the required pattern:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.models.deployment import ServiceConnectionCreateModel
 
@@ -66,15 +62,9 @@ except ValueError as e:
     print(e)  # "String should match pattern '^[0-9a-zA-Z._\\- ]+$'"
 ```
 
-</div>
-
 ### Required Fields Validation
 
 Essential fields must be provided:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import ServiceConnectionCreateModel
@@ -90,15 +80,9 @@ except ValueError as e:
     print(e)  # "Field required"
 ```
 
-</div>
-
 ### Subnet Format Validation
 
 Subnets must be in valid CIDR notation:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import ServiceConnectionCreateModel
@@ -115,15 +99,9 @@ except ValueError as e:
     print(e)  # "Invalid subnet format: 'invalid-subnet'"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Service Connection
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -163,13 +141,7 @@ response = client.service_connection.create(payload)
 print(f"Created service connection with ID: {response.id}")
 ```
 
-</div>
-
 ### Creating a Service Connection with BGP Configuration
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import (
@@ -217,13 +189,7 @@ response = client.service_connection.create(payload)
 print(f"Created BGP-enabled service connection: {response.name}")
 ```
 
-</div>
-
 ### Creating a Service Connection with QoS Configuration
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import (
@@ -253,13 +219,7 @@ response = client.service_connection.create(payload)
 print(f"Created QoS-enabled service connection: {response.name}")
 ```
 
-</div>
-
 ### Creating a Service Connection with No Export Community
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import (
@@ -282,13 +242,7 @@ response = client.service_connection.create(payload)
 print(f"Created service connection with no export community: {response.name}")
 ```
 
-</div>
-
 ### Updating a Service Connection
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.deployment import ServiceConnectionUpdateModel
@@ -311,13 +265,7 @@ response = client.service_connection.update(payload)
 print(f"Updated service connection subnets: {response.subnets}")
 ```
 
-</div>
-
 ### Retrieving and Listing Service Connections
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get service connection by ID
@@ -343,5 +291,3 @@ for conn in all_connections:
     if conn.qos and conn.qos.enable:
         print(f"QoS Profile: {conn.qos.qos_profile}")
 ```
-
-</div>

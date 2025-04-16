@@ -72,10 +72,6 @@ The Tag service can be accessed using either the unified client interface (recom
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -91,13 +87,7 @@ client = ScmClient(
 tags = client.tag
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -114,18 +104,12 @@ client = Scm(
 tags = Tag(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -169,13 +153,7 @@ app_tag = {
 app_tag_obj = client.tag.create(app_tag)
 ```
 
-</div>
-
 ### Retrieving Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder using the unified client interface
@@ -188,13 +166,7 @@ tag_by_id = client.tag.get(tag.id)
 print(f"Retrieved tag: {tag_by_id.name}")
 ```
 
-</div>
-
 ### Updating Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing tag using the unified client interface
@@ -208,13 +180,7 @@ existing_tag.comments = "Updated production environment tag"
 updated_tag = client.tag.update(existing_tag)
 ```
 
-</div>
-
 ### Listing Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List tags from a specific folder using the unified client interface
@@ -232,8 +198,6 @@ for tag in filtered_tags:
     print(f"Name: {tag.name}, Color: {tag.color}")
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
@@ -249,10 +213,6 @@ parameters to control which objects are included or excluded after the initial A
 - `colors (List[str])`: Filter tags by specified colors.
 
 **Examples:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -317,15 +277,9 @@ for tag in refined_tags:
     print(f"Refined filter result: {tag.name} in {tag.folder}, Color: {tag.color}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -352,13 +306,7 @@ all_tags2 = client.tag.list(folder='Texas')
 # The tags are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Tags
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete by ID using the unified client interface
@@ -366,15 +314,9 @@ tag_id = "123e4567-e89b-12d3-a456-426655440000"
 client.tag.delete(tag_id)
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -392,13 +334,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly from the client
@@ -411,13 +347,7 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -469,8 +399,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

@@ -80,10 +80,6 @@ The `LogForwardingProfile` class inherits from the `BaseObject` class and provid
 
 ## Basic Configuration
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Import the client
 from scm.client import Scm
@@ -107,15 +103,9 @@ client = Scm(
 )
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Log Forwarding Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create a log forwarding profile with traffic logs
@@ -159,13 +149,7 @@ multi_match_profile = client.log_forwarding_profile.create({
 print(f"Created profile with ID: {multi_match_profile.id}")
 ```
 
-</div>
-
 ### Retrieving a Log Forwarding Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get profile by ID
@@ -191,13 +175,7 @@ profile_by_name = client.log_forwarding_profile.fetch(
 )
 ```
 
-</div>
-
 ### Updating a Log Forwarding Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.objects import LogForwardingProfileUpdateModel, MatchListItem
@@ -230,13 +208,7 @@ update_data = LogForwardingProfileUpdateModel(
 updated_profile = client.log_forwarding_profile.update(update_data)
 ```
 
-</div>
-
 ### Listing Log Forwarding Profiles
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all profiles in a folder
@@ -273,13 +245,7 @@ for profile in filtered_profiles:
         print(f"  Log Types: {', '.join([match.log_type for match in profile.match_list])}")
 ```
 
-</div>
-
 ### Pagination and Max Limit
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create client with custom pagination limit for log forwarding profiles
@@ -297,13 +263,7 @@ print(f"Retrieved {len(profiles)} profiles")
 # The max_limit is automatically capped at 5000 (the API's maximum)
 ```
 
-</div>
-
 ### Deleting a Log Forwarding Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Delete a profile by ID
@@ -312,13 +272,7 @@ client.log_forwarding_profile.delete(profile_id)
 print(f"Profile {profile_id} deleted successfully")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
@@ -347,8 +301,6 @@ try:
 except InvalidObjectError as e:
     print(f"Invalid filter error: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

@@ -43,10 +43,6 @@ The WildFire Antivirus Profile models can raise the following exceptions during 
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.security import WildfireAntivirusProfile
@@ -83,15 +79,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### UUID Validation
 
 For response models, the ID field must be a valid UUID:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.models.security.wildfire_antivirus_profiles import WildfireAvProfileResponseModel
@@ -111,15 +101,9 @@ except ValueError as e:
     print(e)  # "Invalid UUID format for 'id'"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -170,13 +154,7 @@ payload = profile.model_dump(exclude_unset=True)
 response = profile.create(payload)
 ```
 
-</div>
-
 ### Creating a Profile with Exceptions
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -248,13 +226,7 @@ payload = profile.model_dump(exclude_unset=True)
 response = profile.create(payload)
 ```
 
-</div>
-
 ### Updating a Profile
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -301,5 +273,3 @@ update = WildfireAvProfileUpdateModel(
 payload = update.model_dump(exclude_unset=True)
 response = profile.update(payload)
 ```
-
-</div>

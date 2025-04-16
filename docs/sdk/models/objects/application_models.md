@@ -53,10 +53,6 @@ The Application models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.objects import Application
@@ -93,15 +89,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder' or 'snippet' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Application
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -137,13 +127,7 @@ payload = app.model_dump(exclude_unset=True)
 response = app.create(payload)
 ```
 
-</div>
-
 ### Creating an Application with Behavioral Attributes
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -184,13 +168,7 @@ payload = app.model_dump(exclude_unset=True)
 response = app.create(payload)
 ```
 
-</div>
-
 ### Updating an Application
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -218,5 +196,3 @@ update = ApplicationUpdateModel(
 payload = update.model_dump(exclude_unset=True)
 response = app.update(payload)
 ```
-
-</div>

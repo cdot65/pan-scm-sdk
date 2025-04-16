@@ -57,10 +57,6 @@ The BGP Routing service can be accessed using either the unified client interfac
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -76,13 +72,7 @@ client = ScmClient(
 bgp_routing = client.bgp_routing
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -99,18 +89,12 @@ client = Scm(
 bgp_routing = BGPRouting(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Retrieving BGP Routing Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -145,13 +129,7 @@ print(f"Add host route to IKE peer: {current_settings.add_host_route_to_ike_peer
 print(f"Withdraw static route: {current_settings.withdraw_static_route}")
 ```
 
-</div>
-
 ### Creating BGP Routing Configurations
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -180,13 +158,7 @@ new_settings = client.bgp_routing.create(bgp_config)
 print(f"Created BGP routing settings with backbone routing: {new_settings.backbone_routing}")
 ```
 
-</div>
-
 ### Updating BGP Routing Configurations
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -232,13 +204,7 @@ updated_settings = client.bgp_routing.update(model_dict)
 print(f"Updated BGP routing with backbone routing: {updated_settings.backbone_routing}")
 ```
 
-</div>
-
 ### Resetting BGP Routing Configurations
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -262,15 +228,9 @@ print(f"Routing preference: Default")
 print(f"Accept route over SC: {reset_settings.accept_route_over_SC}")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -287,13 +247,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly from the client
@@ -306,13 +260,7 @@ for job in recent_jobs.data:
      print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -348,8 +296,6 @@ except InvalidObjectError as e:
 except MissingQueryParameterError as e:
    print(f"Missing required parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

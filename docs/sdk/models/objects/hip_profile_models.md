@@ -38,9 +38,6 @@ The HIP Profile models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.objects import HIPProfileCreateModel
 
@@ -56,15 +53,10 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic HIP Profile
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.config.objects import HIPProfile
 
@@ -80,13 +72,8 @@ hip_profile = HIPProfile(api_client)
 response = hip_profile.create(basic_profile)
 ```
 
-</div>
-
 ### Creating a Complex HIP Profile with Boolean Operators
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Using model directly
 from scm.models.objects import HIPProfileCreateModel
@@ -102,13 +89,8 @@ payload = complex_profile.model_dump(exclude_unset=True)
 response = hip_profile.create(payload)
 ```
 
-</div>
-
 ### Creating a HIP Profile with Negative Match
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Negative match (NOT operator)
 negative_profile = {
@@ -121,13 +103,8 @@ negative_profile = {
 response = hip_profile.create(negative_profile)
 ```
 
-</div>
-
 ### Updating a HIP Profile
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.objects import HIPProfileUpdateModel
 from uuid import UUID
@@ -143,15 +120,10 @@ update_model = HIPProfileUpdateModel(
 response = hip_profile.update(update_model)
 ```
 
-</div>
-
 ## Match Expression Syntax
 
 The `match` field supports a powerful expression language for defining HIP profile match criteria:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Basic object reference - use double quotes around object names
 match = '"is-win"'
@@ -171,8 +143,6 @@ match = '("is-win" or "is-mac") and "is-firewall-enabled"'
 # Complex nested expressions
 match = '("is-win" and "is-firewall-enabled") or ("is-mac" and "is-mac-firewall-enabled")'
 ```
-
-</div>
 
 ## Best Practices
 

@@ -101,9 +101,6 @@ Additional features include:
 
 All configuration objects follow a consistent pattern:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -130,13 +127,8 @@ result = client.security_rule.create(sec_rule_dictionary)
 print(f"Created security rule with ID: {result.id}")
 ```
 
-</div>
-
 You can also use the traditional approach:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.security import SecurityRule  # Or other config object
@@ -166,8 +158,6 @@ sec_rule_dictionary = {
 result = security_rule.create(sec_rule_dictionary)
 print(f"Created security rule with ID: {result.id}")
 ```
-
-</div>
 
 ## Related Documentation
 

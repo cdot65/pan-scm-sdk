@@ -66,10 +66,6 @@ The Schedule models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # Using dictionary
 from scm.config.objects import Schedule
@@ -113,15 +109,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Schedule Type Validation
 
 Exactly one schedule type (recurring or non-recurring) must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -160,15 +150,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'recurring' or 'non_recurring' must be provided."
 ```
 
-</div>
-
 ### Recurring Type Validation
 
 For recurring schedules, exactly one recurring type (weekly or daily) must be specified:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -203,15 +187,9 @@ except ValueError as e:
     print(e)  # "Exactly one of 'weekly' or 'daily' must be provided."
 ```
 
-</div>
-
 ### Time Range Format Validation
 
 Time ranges must follow the format "hh:mm-hh:mm":
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -242,15 +220,9 @@ except ValueError as e:
     print(e)  # "Time range must be in format hh:mm-hh:mm and be exactly 11 characters"
 ```
 
-</div>
-
 ### DateTime Range Format Validation
 
 DateTime ranges for non-recurring schedules must follow the format "YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm":
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -279,15 +251,9 @@ except ValueError as e:
     print(e)  # "Datetime range must be in format YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm and be exactly 33 characters"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Weekly Schedule
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -334,13 +300,7 @@ payload = weekly_schedule.model_dump(exclude_unset=True)
 response = schedule.create(payload)
 ```
 
-</div>
-
 ### Creating a Daily Schedule
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -374,13 +334,7 @@ payload = daily_schedule.model_dump(exclude_unset=True)
 response = schedule.create(payload)
 ```
 
-</div>
-
 ### Creating a Non-Recurring Schedule
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -414,13 +368,7 @@ payload = non_recurring_schedule.model_dump(exclude_unset=True)
 response = schedule.create(payload)
 ```
 
-</div>
-
 ### Updating a Schedule
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary
@@ -467,8 +415,6 @@ update_schedule = ScheduleUpdateModel(
 
 response = schedule.update(update_schedule)
 ```
-
-</div>
 
 ## Best Practices
 

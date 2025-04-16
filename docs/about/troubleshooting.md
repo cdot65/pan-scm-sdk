@@ -50,10 +50,6 @@ output.
 
 **Example:**
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 import logging
 
@@ -62,8 +58,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Now, when you use the SDK, it will output debug information
 ```
-
-</div>
 
 ## Getting Help
 

@@ -67,10 +67,6 @@ The Schedule service can be accessed using either the unified client interface (
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.client import ScmClient
 
@@ -86,13 +82,7 @@ client = ScmClient(
 schedules = client.schedule
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -109,18 +99,12 @@ client = Scm(
 schedules = Schedule(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
 ### Creating Schedules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -181,13 +165,7 @@ special_event = {
 special_event_obj = client.schedule.create(special_event)
 ```
 
-</div>
-
 ### Retrieving Schedules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch by name and folder
@@ -210,13 +188,7 @@ schedule_by_id = client.schedule.get(schedule.id)
 print(f"Retrieved schedule: {schedule_by_id.name}")
 ```
 
-</div>
-
 ### Updating Schedules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Fetch existing schedule
@@ -250,13 +222,7 @@ for day, times in updated_schedule.schedule_type.recurring.weekly.__dict__.items
         print(f"{day.capitalize()}: {', '.join(times)}")
 ```
 
-</div>
-
 ### Listing Schedules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # List all schedules from a specific folder
@@ -283,8 +249,6 @@ for schedule in schedules:
     print("---")
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. You can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
@@ -295,10 +259,6 @@ The `list()` method supports additional parameters to refine your query results 
 - `recurring_type (str)`: Filter by recurring type ('weekly' or 'daily').
 
 **Examples:**
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -362,15 +322,9 @@ for schedule in filtered_schedules:
     print(f"Schedule: {schedule.name}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 200. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -397,13 +351,7 @@ all_schedules2 = client.schedule.list(folder='Shared')
 # The schedules are fetched in chunks according to the max_limit.
 ```
 
-</div>
-
 ### Deleting Schedules
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get schedule to delete
@@ -414,15 +362,9 @@ client.schedule.delete(schedule_to_delete.id)
 print(f"Deleted schedule: {schedule_to_delete.name}")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Prepare commit parameters
@@ -440,13 +382,7 @@ result = client.commit(**commit_params)
 print(f"Commit job ID: {result.job_id}")
 ```
 
-</div>
-
 ### Monitoring Jobs
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Get status of specific job directly from the client
@@ -459,13 +395,7 @@ for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import ScmClient
@@ -524,8 +454,6 @@ except ReferenceNotZeroError as e:
 except MissingQueryParameterError as e:
     print(f"Missing parameter: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

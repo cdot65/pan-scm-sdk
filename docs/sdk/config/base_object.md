@@ -63,9 +63,6 @@ The BaseObject service can be accessed using either the unified client interface
 
 ### Unified Client Interface (Recommended)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -80,13 +77,8 @@ client = ScmClient(
 # Example: client.address, client.service_group, client.security_rule, etc.
 ```
 
-</div>
-
 ### Traditional Service Instantiation (Legacy)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import Scm
 from scm.config.objects import BaseObject
@@ -106,8 +98,6 @@ class CustomObject(BaseObject):
 custom_obj = CustomObject(client)
 ```
 
-</div>
-
 !!! note
     While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
@@ -115,9 +105,6 @@ custom_obj = CustomObject(client)
 
 ### Creating Objects
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.config.objects import BaseObject
@@ -152,13 +139,8 @@ except InvalidObjectError as e:
    print(f"Invalid object data: {e.message}")
 ```
 
-</div>
-
 ### Retrieving Objects
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get object by ID
 try:
@@ -169,13 +151,8 @@ except NotFoundError as e:
    print(f"Object not found: {e.message}")
 ```
 
-</div>
-
 ### Updating Objects
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Update object data
 update_data = {
@@ -193,13 +170,8 @@ except InvalidObjectError as e:
    print(f"Invalid update data: {e.message}")
 ```
 
-</div>
-
 ### Listing Objects
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Define filter parameters
 list_params = {
@@ -217,8 +189,6 @@ except InvalidObjectError as e:
    print(f"Invalid filter parameters: {e.message}")
 ```
 
-</div>
-
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
@@ -234,9 +204,6 @@ which objects are included or excluded after the initial API response is fetched
 
 **Examples:**
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Only return objects defined exactly in 'Texas'
 exact_objects = custom_obj.list(
@@ -258,15 +225,10 @@ for obj in no_all_objects:
    print(f"Filtered out 'All': {obj['name']}")
 ```
 
-</div>
-
 ### Controlling Pagination with max_limit
 
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Initialize a custom object with a specified max_limit
 custom_obj = CustomObject(client, max_limit=4321)
@@ -275,13 +237,8 @@ custom_obj = CustomObject(client, max_limit=4321)
 all_objects = custom_obj.list(folder='Texas')
 ```
 
-</div>
-
 ### Deleting Objects
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Delete object by ID
 try:
@@ -292,15 +249,10 @@ except NotFoundError as e:
    print(f"Object not found: {e.message}")
 ```
 
-</div>
-
 ## Managing Configuration Changes
 
 ### Performing Commits
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Prepare commit parameters
 commit_params = {
@@ -318,13 +270,8 @@ except InvalidObjectError as e:
    print(f"Invalid commit parameters: {e.message}")
 ```
 
-</div>
-
 ### Monitoring Jobs
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 # Get status of specific job directly from the client
 job_status = client.get_job_status(result.job_id)
@@ -336,13 +283,8 @@ for job in recent_jobs.data:
    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
-</div>
-
 ## Error Handling
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.config.objects import BaseObject
@@ -387,8 +329,6 @@ except AuthenticationError as e:
 except ServerError as e:
    print(f"Server error: {e.message}")
 ```
-
-</div>
 
 ## Best Practices
 

@@ -60,10 +60,6 @@ The Authentication Settings models can raise the following exceptions during val
 
 The models enforce that the folder must be "Mobile Users":
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 # This will raise a validation error
 from scm.models.mobile_agent import AuthSettingsCreateModel
@@ -80,15 +76,9 @@ except ValueError as e:
     print(e)  # "Folder must be 'Mobile Users' for GlobalProtect Authentication Settings"
 ```
 
-</div>
-
 ### Container Validation for Create Model
 
 For create operations, the folder field is required:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # This will raise a validation error
@@ -103,15 +93,9 @@ except ValueError as e:
     print(e)  # "Folder is required for GlobalProtect Authentication Settings"
 ```
 
-</div>
-
 ### Move Operation Validation
 
 The move model enforces validation for destination field based on the move position:
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Missing destination for BEFORE position
@@ -137,15 +121,9 @@ except ValueError as e:
     print(e)  # "Destination should not be provided when where is 'top' or 'bottom'"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary with the SDK
@@ -177,13 +155,7 @@ payload = auth_obj.model_dump(exclude_unset=True)
 response = auth_settings.create(payload)
 ```
 
-</div>
-
 ### Creating Authentication Settings for Multiple Operating Systems
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Create settings for iOS
@@ -220,13 +192,7 @@ default_auth = {
 response = auth_settings.create(default_auth)
 ```
 
-</div>
-
 ### Updating Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Using dictionary with the SDK
@@ -255,13 +221,7 @@ payload = update_obj.model_dump(exclude_unset=True)
 response = auth_settings.update(existing.id, payload)
 ```
 
-</div>
-
 ### Moving Authentication Settings
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 # Move settings to top of evaluation order
@@ -285,5 +245,3 @@ move_before = AuthSettingsMoveModel(
 payload = move_before.model_dump()
 auth_settings.move(payload)
 ```
-
-</div>

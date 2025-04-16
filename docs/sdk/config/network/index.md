@@ -37,9 +37,6 @@ The network objects also enforce:
 
 ## Usage Example
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 
@@ -73,7 +70,5 @@ nat_rules = client.nat_rule.list(folder="NAT Rules")
 for rule in nat_rules:
    print(f"NAT Rule: {rule.name}, Type: {rule.nat_type}")
 ```
-
-</div>
 
 Select an object from the list above to view detailed documentation, including methods, parameters, and examples.

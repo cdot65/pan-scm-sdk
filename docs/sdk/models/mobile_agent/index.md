@@ -41,9 +41,6 @@ Mobile Agent models share common patterns:
 
 ## Usage Examples
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.mobile_agent.auth_settings import (
@@ -76,8 +73,6 @@ agent_versions = client.agent_versions.list()
 windows_versions = [v for v in agent_versions if "win" in v.lower()]
 print(f"Windows versions: {windows_versions}")
 ```
-
-</div>
 
 ## Best Practices
 

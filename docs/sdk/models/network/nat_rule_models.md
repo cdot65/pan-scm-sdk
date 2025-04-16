@@ -108,9 +108,6 @@ The NAT Rule models can raise the following exceptions during validation:
 
 For create operations, exactly one container type must be specified:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import NatRuleCreateModel
 
@@ -126,15 +123,10 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-</div>
-
 ### Source Translation Validation
 
 When specifying source translation, exactly one translation type must be provided:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import NatRuleCreateModel, SourceTranslation
 
@@ -158,15 +150,10 @@ except ValueError as e:
     print(e)  # "Exactly one source translation type must be provided"
 ```
 
-</div>
-
 ### DynamicIpAndPort Validation
 
 For dynamic IP and port translation, exactly one of translated_address or interface_address must be provided:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import NatRuleCreateModel, SourceTranslation, DynamicIpAndPort
 
@@ -206,15 +193,10 @@ except ValueError as e:
     print(e)  # "Either translated_address or interface_address must be provided, not both"
 ```
 
-</div>
-
 ### Bidirectional NAT Compatibility Validation
 
 Bi-directional static NAT cannot be used with destination translation:
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import (
     NatRuleCreateModel, 
@@ -246,15 +228,10 @@ except ValueError as e:
     print(e)  # "Bi-directional static NAT cannot be used with destination translation"
 ```
 
-</div>
-
 ## Usage Examples
 
 ### Creating a Basic Source NAT Rule (Dynamic IP and Port)
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.client import ScmClient
 from scm.models.network import (
@@ -313,13 +290,8 @@ response = client.nat_rule.create(payload)
 print(f"Created NAT rule with ID: {response.id}")
 ```
 
-</div>
-
 ### Creating a Destination NAT Rule
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import (
     NatRuleCreateModel, 
@@ -349,13 +321,8 @@ response = client.nat_rule.create(payload)
 print(f"Created destination NAT rule: {response.name}")
 ```
 
-</div>
-
 ### Creating a Static IP NAT Rule with Bi-directional Support
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import (
     NatRuleCreateModel, 
@@ -387,13 +354,8 @@ response = client.nat_rule.create(payload)
 print(f"Created static NAT rule: {response.name}")
 ```
 
-</div>
-
 ### Creating a Dynamic IP Source NAT Rule with Fallback
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import (
     NatRuleCreateModel, 
@@ -426,13 +388,8 @@ response = client.nat_rule.create(payload)
 print(f"Created dynamic IP NAT rule: {response.name}")
 ```
 
-</div>
-
 ### Creating a NAT Rule with Interface Address
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import (
     NatRuleCreateModel, 
@@ -468,13 +425,8 @@ response = client.nat_rule.create(payload)
 print(f"Created interface NAT rule: {response.name}")
 ```
 
-</div>
-
 ### Moving a NAT Rule
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import NatRuleMoveModel
 
@@ -499,13 +451,8 @@ client.nat_rule.move(rule_id, move_before.model_dump())
 print(f"Moved rule {rule_id} before the specified rule")
 ```
 
-</div>
-
 ### Updating a NAT Rule
 
-<div class="termy">
-
-<!-- termynal -->
 ```python
 from scm.models.network import (
     NatRuleUpdateModel, 
@@ -534,5 +481,3 @@ payload = update_rule.model_dump(exclude_unset=True)
 response = client.nat_rule.update(payload)
 print(f"Updated NAT rule: {response.name}")
 ```
-
-</div>

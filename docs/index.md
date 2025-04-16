@@ -51,21 +51,11 @@ hide:
 
 Install the package via pip:
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```bash
 $ pip install pan-scm-sdk
 ```
 
-</div>
-
 ## Quick Example
-
-<div class="termy">
-
-<!-- termynal -->
 
 ```python
 from scm.client import Scm
@@ -178,8 +168,6 @@ client.commit(
     sync=True
 )
 ```
-
-</div>
 
 For more detailed usage instructions and examples, refer to the [User Guide](about/introduction.md).
 
