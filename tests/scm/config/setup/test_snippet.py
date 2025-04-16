@@ -779,7 +779,7 @@ class TestCoverLastFewLines(TestSnippetBase):
         """Directly testing lines 253-255 - unexpected response format."""
         # Setup - specifically trigger the "unexpected response format" path in fetch
         # This happens when the response doesn't match either an array or object with 'items'
-        mock_scm_client.get.return_value = 123  # A non-dict response
+        mock_scm_client.get.return_value = 42  # Neither a dict nor a list
         
         # Execute - this should run lines 254-255
         result = snippet_service.fetch("test_snippet")
@@ -835,3 +835,55 @@ class TestCoverLastFewLines(TestSnippetBase):
         # Verify the error is properly wrapped
         assert "Disassociating snippets from folders is not yet implemented" in str(excinfo.value)
         assert "Test exception" in str(excinfo.value)
+
+class TestFinalCoverage(TestSnippetBase):
+    """Final tests to achieve 100% coverage."""
+    
+    def test_line_253_unexpected_response(self, snippet_service, mock_scm_client):
+        """Direct test for line 253."""
+        # Set up a response that is neither a list nor an object with 'items'
+        # This should trigger the execution of line 253
+        mock_scm_client.get.return_value = 42  # Neither a dict nor a list
+        
+        # This should handle the unexpected format gracefully
+        result = snippet_service.fetch("any_name")
+        assert result is None
+    
+    def test_line_293_direct(self, snippet_service, mock_scm_client):
+        """Direct test for line 293."""
+        # Set up a direct exception in the API call
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "567e4567-e89b-12d3-a456-426614174000"
+        
+        # Create a custom exception type that will be caught
+        class TestException(Exception):
+            pass
+        
+        # Force the API call to raise this specific exception
+        mock_scm_client.post.side_effect = TestException("Custom test exception")
+        
+        # This should trigger the exception handler and wrap in NotImplementedError
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.associate_folder(snippet_id, folder_id)
+        
+        # Verify the error contains our custom message
+        assert "Custom test exception" in str(excinfo.value)
+    
+    def test_lines_439_457_direct(self, snippet_service, mock_scm_client):
+        """Direct test for lines 439-457."""
+        # Create test IDs
+        snippet_id = "123e4567-e89b-12d3-a456-426614174000"
+        folder_id = "567e4567-e89b-12d3-a456-426614174000"
+        
+        # Create a custom exception with a very specific message
+        custom_exception = ValueError("Unique disassociate error")
+        mock_scm_client.delete.side_effect = custom_exception
+        
+        # This should enter the exception handling block
+        with pytest.raises(NotImplementedError) as excinfo:
+            snippet_service.disassociate_folder(snippet_id, folder_id)
+        
+        # The error should include our unique message
+        error_msg = str(excinfo.value)
+        assert "Disassociating snippets from folders is not yet implemented" in error_msg
+        assert "Unique disassociate error" in error_msg
