@@ -4,6 +4,7 @@
 from uuid import UUID
 
 import pytest
+from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.setup.snippet_models import (
