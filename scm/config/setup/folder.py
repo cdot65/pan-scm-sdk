@@ -86,32 +86,32 @@ class Folder(BaseObject):
         response = super().get(folder_id_str)
         return FolderResponseModel.model_validate(response)
     
-    def fetch(self, name: str, exact_match: bool = True) -> Optional[FolderResponseModel]:
+    def fetch(
+        self,
+        name: str,
+    ) -> Optional[FolderResponseModel]:
         """
         Get a folder by its name.
         
         Args:
             name: The name of the folder to retrieve.
-            exact_match: If True, only return folders that exactly match the name.
-                        If False, return folders that contain the name.
                         
         Returns:
-            Optional[FolderResponseModel]: The requested folder, or None if not found.
+            Optional[FolderResponseModel]: The requested folder (exact name match), or None if not found.
         """
-        results = self.list(name=name, exact_match=exact_match)
+        # Get folders with the given name (will also include nested folders)
+        results = self.list(name=name)
         
         if not results:
             return None
             
-        if exact_match:
-            # When exact_match is True, filter the results to find an exact match
-            for folder in results:
-                if folder.name == name:
-                    return folder
-            return None
-        else:
-            # When exact_match is False, return the first result
-            return results[0] if results else None
+        # Find the exact folder with the given name (not its children)
+        for folder in results:
+            if folder.name == name:
+                return folder
+                
+        # No exact match found
+        return None
     
     def list(
         self,
