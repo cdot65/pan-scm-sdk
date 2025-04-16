@@ -484,6 +484,10 @@ class Scm:
                 "scm.config.objects.service_group",
                 "ServiceGroup",
             ),
+            "snippet": (
+                "scm.config.setup.snippet",
+                "Snippet",
+            ),
             "syslog_server_profile": (
                 "scm.config.objects.syslog_server_profiles",
                 "SyslogServerProfile",
