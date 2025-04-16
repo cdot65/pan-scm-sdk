@@ -98,7 +98,7 @@ address_service.create({...})
 
 ### Available Services
 
-The unified client provides access to all service objects in the SDK through attributes:
+The unified client provides access to all service objects in the SDK through attributes. The attribute names match the singular form used in the codebase (e.g., `client.address` not `addresses`):
 
 **Objects**
 
@@ -129,23 +129,33 @@ The unified client provides access to all service objects in the SDK through att
 - `client.nat_rule` - Network address translation policies for traffic routing
 - `client.security_zone` - Security zones for network segmentation
 
+**Security**
+
+- `client.anti_spyware_profile` - Protection against spyware, C2 traffic, and data exfiltration
+- `client.decryption_profile` - SSL/TLS traffic inspection configurations
+- `client.dns_security_profile` - Protection against DNS-based threats and tunneling
+- `client.security_rule` - Core security policies controlling network traffic
+- `client.url_category` - Custom URL categorization for web filtering
+- `client.vulnerability_protection_profile` - Defense against known CVEs and exploit attempts
+- `client.wildfire_antivirus_profile` - Cloud-based malware analysis and zero-day protection
+
 **Deployment**
 
 - `client.bandwidth_allocation` - Bandwidth allocation settings for regions and service nodes
+- `client.bgp_routing` - BGP routing configuration for cloud connectivity
 - `client.internal_dns_server` - DNS server configurations for domain resolution
 - `client.network_location` - Geographic network locations for service connectivity
 - `client.remote_network` - Secure branch and remote site connectivity configurations
 - `client.service_connection` - Service connections to cloud service providers
 
-**Security**
+**Mobile Agent**
 
-- `client.security_rule` - Core security policies controlling network traffic
-- `client.anti_spyware_profile` - Protection against spyware, C2 traffic, and data exfiltration
-- `client.decryption_profile` - SSL/TLS traffic inspection configurations
-- `client.dns_security_profile` - Protection against DNS-based threats and tunneling
-- `client.url_category` - Custom URL categorization for web filtering
-- `client.vulnerability_protection_profile` - Defense against known CVEs and exploit attempts
-- `client.wildfire_antivirus_profile` - Cloud-based malware analysis and zero-day protection
+- `client.agent_version` - GlobalProtect agent version information
+- `client.auth_setting` - Authentication settings for mobile agents
+
+**Setup**
+
+- `client.folder` - Configuration folder management
 
 ### Core Methods
 
