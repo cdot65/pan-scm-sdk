@@ -54,6 +54,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
     - Setup
         - [Folder](config/setup/folder.md)
+        - [Snippet](config/setup/snippet.md)
 - Data Models
     - Deployment
         - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
@@ -103,6 +104,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [WildFire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
     - Setup
         - [Folder Models](models/setup/folder_models.md)
+        - [Snippet Models](models/setup/snippet_models.md)
 - [Exceptions](exceptions.md)
 
 ---
@@ -113,7 +115,8 @@ The `pan-scm-sdk` provides a set of classes and models to simplify interaction w
 utilizing this SDK, developers can programmatically manage configurations, ensuring consistency and efficiency.
 
 Starting with version 0.3.14, the SDK supports a unified client interface that allows you to access all service objects
-directly through the client instance using attribute-based access. This provides a more intuitive and streamlined developer
+directly through the client instance using attribute-based access. This provides a more intuitive and streamlined
+developer
 experience. Here's a comprehensive example showing how to use the unified client with multiple object types:
 
 ```python
@@ -274,57 +277,60 @@ print(f"Commit job status: {job_status.data[0].status_str}")
 
 The following table shows all services available through the unified client interface:
 
-| Client Property                    | Description                                                     |
-|------------------------------------|-----------------------------------------------------------------|
-| **Objects**                        |                                                                 |
-| `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies      |
-| `address_group`                    | Static or dynamic collections of address objects                |
-| `application`                      | Custom application definitions and signatures                   |
-| `application_filter`               | Filters for identifying applications by characteristics         |
-| `application_group`                | Logical groups of applications for policy application           |
-| `dynamic_user_group`               | User groups with dynamic membership criteria                    |
-| `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains               |
-| `hip_object`                       | Host information profile match criteria                         |
-| `hip_profile`                      | Endpoint security compliance profiles                           |
-| `http_server_profile`              | HTTP server configurations for logging and monitoring           |
-| `log_forwarding_profile`           | Configurations for forwarding logs to external systems          |
-| `quarantined_device`               | Management of devices blocked from network access               |
-| `region`                           | Geographic regions for policy control                           |
-| `schedule`                         | Time-based policies and access control                          |
-| `service`                          | Protocol and port definitions for network services              |
-| `service_group`                    | Collections of services for simplified policy management        |
-| `syslog_server_profile`            | Syslog server configurations for centralized logging            |
-| `tag`                              | Resource classification and organization labels                 |
-| **Network**                        |                                                                 |
-| `ike_crypto_profile`               | IKE crypto profiles for VPN tunnels                            |
-| `ike_gateway`                      | IKE gateway configurations for VPN tunnel endpoints             |
-| `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption                 |
-| `nat_rule`                         | Network address translation policies for traffic routing        |
-| `security_zone`                    | Security zones for network segmentation                         |
-| **Mobile Agent**                   |                                                                 |
-| `auth_setting`                     | GlobalProtect authentication settings by operating system       |
-| `agent_version`                    | Available GlobalProtect agent versions (read-only)             |
-| **Deployment**                     |                                                                 |
-| `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes     |
-| `bgp_routing`                      | Global BGP routing preferences and behaviors                    |
-| `internal_dns_servers`             | DNS server configurations for domain resolution                 |
-| `network_location`                 | Geographic network locations for service connectivity           |
-| `remote_network`                   | Secure branch and remote site connectivity configurations       |
-| `service_connection`               | Service connections to cloud service providers                  |
-| **Security**                       |                                                                 |
-| `security_rule`                    | Core security policies controlling network traffic              |
-| `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration   |
-| `decryption_profile`               | SSL/TLS traffic inspection configurations                       |
-| `dns_security_profile`             | Protection against DNS-based threats and tunneling              |
-| `url_category`                     | Custom URL categorization for web filtering                     |
-| `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts                 |
-| `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection            |
-| **Setup**                          |                                                                 |
-| `folder`                           | Folder management for organizing configurations                 |
-Check out the [Client Module](client.md) documentation for more information on the unified client interface and the available
+| Client Property                    | Description                                                   |
+|------------------------------------|---------------------------------------------------------------|
+| **Objects**                        |                                                               |
+| `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies    |
+| `address_group`                    | Static or dynamic collections of address objects              |
+| `application`                      | Custom application definitions and signatures                 |
+| `application_filter`               | Filters for identifying applications by characteristics       |
+| `application_group`                | Logical groups of applications for policy application         |
+| `dynamic_user_group`               | User groups with dynamic membership criteria                  |
+| `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains             |
+| `hip_object`                       | Host information profile match criteria                       |
+| `hip_profile`                      | Endpoint security compliance profiles                         |
+| `http_server_profile`              | HTTP server configurations for logging and monitoring         |
+| `log_forwarding_profile`           | Configurations for forwarding logs to external systems        |
+| `quarantined_device`               | Management of devices blocked from network access             |
+| `region`                           | Geographic regions for policy control                         |
+| `schedule`                         | Time-based policies and access control                        |
+| `service`                          | Protocol and port definitions for network services            |
+| `service_group`                    | Collections of services for simplified policy management      |
+| `syslog_server_profile`            | Syslog server configurations for centralized logging          |
+| `tag`                              | Resource classification and organization labels               |
+| **Network**                        |                                                               |
+| `ike_crypto_profile`               | IKE crypto profiles for VPN tunnels                           |
+| `ike_gateway`                      | IKE gateway configurations for VPN tunnel endpoints           |
+| `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption               |
+| `nat_rule`                         | Network address translation policies for traffic routing      |
+| `security_zone`                    | Security zones for network segmentation                       |
+| **Mobile Agent**                   |                                                               |
+| `auth_setting`                     | GlobalProtect authentication settings by operating system     |
+| `agent_version`                    | Available GlobalProtect agent versions (read-only)            |
+| **Deployment**                     |                                                               |
+| `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes   |
+| `bgp_routing`                      | Global BGP routing preferences and behaviors                  |
+| `internal_dns_servers`             | DNS server configurations for domain resolution               |
+| `network_location`                 | Geographic network locations for service connectivity         |
+| `remote_network`                   | Secure branch and remote site connectivity configurations     |
+| `service_connection`               | Service connections to cloud service providers                |
+| **Security**                       |                                                               |
+| `security_rule`                    | Core security policies controlling network traffic            |
+| `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration |
+| `decryption_profile`               | SSL/TLS traffic inspection configurations                     |
+| `dns_security_profile`             | Protection against DNS-based threats and tunneling            |
+| `url_category`                     | Custom URL categorization for web filtering                   |
+| `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts               |
+| `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection          |
+| **Setup**                          |                                                               |
+| `folder`                           | Folder management for organizing configurations               |
+
+Check out the [Client Module](client.md) documentation for more information on the unified client interface and the
+available
 services.
 
 For information about specific service objects, proceed to the [Configuration Objects](config/objects/index.md) section.
 
-To learn more about the data models used by the SDK, proceed to the [Data Models](models/objects/index.md) section, which
+To learn more about the data models used by the SDK, proceed to the [Data Models](models/objects/index.md) section,
+which
 explains how the Python dictionaries that are passed into the SDK are structured.

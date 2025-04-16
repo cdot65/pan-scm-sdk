@@ -2,6 +2,21 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.26
+
+**Released:** April 16, 2025
+
+### Added
+
+- **Snippet Service**:
+  - Implemented comprehensive `Snippet` service class for managing snippet resources
+  - Added Pydantic models for snippet validation and serialization
+  - Created full CRUD operations for snippet resources
+  - Developed folder association functionality (API preview)
+  - Implemented robust error handling and data validation
+  - Added support for filtering and pagination in list operations
+  - Achieved 100% test coverage for all snippet functionality
+
 ## Version 0.3.25
 
 **Released:** April 14, 2025

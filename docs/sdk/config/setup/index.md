@@ -7,9 +7,10 @@ Strata Cloud Manager. These objects form the foundation for organizing and manag
 
 ## Available Setup Configuration Objects
 
-| Configuration Object | Description                                                                 |
-|----------------------|-----------------------------------------------------------------------------|
-| [Folder](folder.md)  | Manages folder objects for organizing resources in a hierarchical structure |
+| Configuration Object  | Description                                                                 |
+|-----------------------|-----------------------------------------------------------------------------|
+| [Folder](folder.md)   | Manages folder objects for organizing resources in a hierarchical structure |
+| [Snippet](snippet.md) | Manages reusable configuration snippets for consistent deployment           |
 
 ## Folder Organization
 
@@ -22,3 +23,15 @@ of resource organization and provide the following benefits:
 - Simplified management of resource permissions
 
 See the [Folder](folder.md) documentation for detailed information on working with folder objects.
+
+## Snippet Management
+
+Snippets are reusable configuration elements that help maintain consistency across your environment. They provide the
+following advantages:
+
+- Standardized configurations that can be applied consistently
+- Reduced duplication of common configuration patterns
+- Simplified maintenance through centralized configuration management
+- Ability to associate snippets with folders for organization
+
+See the [Snippet](snippet.md) documentation for detailed information on working with snippet objects.

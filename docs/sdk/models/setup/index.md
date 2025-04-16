@@ -8,9 +8,10 @@ operations.
 
 ## Available Setup Models
 
-| Model                             | Description                                        |
-|-----------------------------------|----------------------------------------------------|
-| [Folder Models](folder_models.md) | Models for folder creation, updates, and responses |
+| Model                               | Description                                        |
+|-------------------------------------|----------------------------------------------------|
+| [Folder Models](folder_models.md)   | Models for folder creation, updates, and responses |
+| [Snippet Models](snippet_models.md) | Models for snippet operations and responses        |
 
 ## Working with Setup Models
 
