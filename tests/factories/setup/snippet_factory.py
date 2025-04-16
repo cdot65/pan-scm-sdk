@@ -1,7 +1,7 @@
 """
 Factory for generating test Snippet objects.
 
-This module provides factory classes for creating test data 
+This module provides factory classes for creating test data
 for Snippet objects in the Strata Cloud Manager SDK.
 """
 
@@ -206,9 +206,7 @@ class SnippetResponseFactory(SnippetBaseFactory):
         return cls(type="readonly", **kwargs)
 
     @classmethod
-    def from_request(
-        cls, request_model: Dict[str, Any], **kwargs
-    ):
+    def from_request(cls, request_model: Dict[str, Any], **kwargs):
         """
         Create a response model based on a request model.
 
@@ -313,7 +311,7 @@ class SnippetCreateModelFactory(factory.DictFactory):
         data = cls.build_valid(**kwargs)
         data.pop("name", None)
         return data
-        
+
     @classmethod
     def build_minimal(cls, **kwargs):
         """
@@ -372,7 +370,7 @@ class SnippetUpdateModelFactory(factory.DictFactory):
         data = cls.build_valid(**kwargs)
         data.pop("id", None)
         return data
-        
+
     @classmethod
     def build_with_empty_name(cls, **kwargs):
         """
@@ -429,7 +427,7 @@ class SnippetResponseModelFactory(factory.DictFactory):
             Dict[str, Any]: Valid data for a predefined SnippetResponseModel
         """
         return cls.build_valid(type="predefined", **kwargs)
-        
+
     @classmethod
     def build_custom(cls, **kwargs):
         """
@@ -464,7 +462,7 @@ class SnippetResponseModelFactory(factory.DictFactory):
                 }
             )
         return cls.build_valid(folders=folders, **kwargs)
-        
+
     @classmethod
     def build_with_empty_name(cls, **kwargs):
         """
@@ -477,7 +475,7 @@ class SnippetResponseModelFactory(factory.DictFactory):
             Dict[str, Any]: Invalid data for SnippetResponseModel with empty name
         """
         return cls.build_valid(name="", **kwargs)
-        
+
     @classmethod
     def build_without_id(cls, **kwargs):
         """

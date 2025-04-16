@@ -222,46 +222,32 @@ class Snippet(BaseObject):
         result = [SnippetResponseModel.model_validate(item) for item in snippets]
         return result
 
-    def fetch(self, name: str) -> Optional[SnippetResponseModel]:
+    def fetch(
+        self,
+        name: str,
+    ) -> Optional[SnippetResponseModel]:
         """
-        Fetch a single snippet by name.
+        Get a snippet by its name.
 
         Args:
-            name: The name of the snippet to fetch.
+            name: The name of the snippet to retrieve.
 
         Returns:
-            Optional[SnippetResponseModel]: The snippet if found, None otherwise.
-
-        Raises:
-            APIError: If multiple snippets with the same name are found.
+            Optional[SnippetResponseModel]: The requested snippet (exact name match), or None if not found.
+            Raises APIError if multiple exact matches are found.
         """
-        try:
-            # First try direct query with name parameter
-            response = self.api_client.get(
-                self.ENDPOINT,
-                params={"name": name},
-            )
-            
-            if isinstance(response, dict) and "data" in response:
-                snippets = response["data"]
-                if len(snippets) == 1:
-                    return SnippetResponseModel.model_validate(snippets[0])
-                elif len(snippets) > 1:
-                    raise APIError(f"Multiple snippets found with name {name}")
-                return None
-            
-            # Unexpected response format
+        # Get snippets with the given name
+        results = self.list(name=name, exact_match=True)
+
+        if not results:
             return None
-        except APIError as e:
-            if e.http_status_code == 404:
-                # Fall back to listing and filtering
-                snippets = self.list(name=name, exact_match=True)
-                if len(snippets) == 1:
-                    return snippets[0]
-                elif len(snippets) > 1:
-                    raise APIError(f"Multiple snippets found with name {name}")
-                return None
-            raise
+        # Filter to exact matches
+        exact_matches = [snippet for snippet in results if snippet.name == name]
+        if not exact_matches:
+            return None
+        if len(exact_matches) > 1:
+            raise APIError(f"Multiple snippets found with name {name}")
+        return exact_matches[0]
 
     def associate_folder(
         self, snippet_id: Union[str, UUID], folder_id: Union[str, UUID]
@@ -282,7 +268,7 @@ class Snippet(BaseObject):
         # This is a placeholder for future implementation
         snippet_id_str = str(snippet_id)
         folder_id_str = str(folder_id)
-        
+
         try:
             response = self.api_client.post(
                 f"{self.ENDPOINT}/{snippet_id_str}/folders",
@@ -313,7 +299,7 @@ class Snippet(BaseObject):
         # This is a placeholder for future implementation
         snippet_id_str = str(snippet_id)
         folder_id_str = str(folder_id)
-        
+
         try:
             response = self.api_client.delete(
                 f"{self.ENDPOINT}/{snippet_id_str}/folders/{folder_id_str}"
@@ -401,14 +387,14 @@ class Snippet(BaseObject):
         """
         if labels is None:
             return None
-        
+
         # Ensure all labels are strings
         validated_labels = []
         for label in labels:
             if not isinstance(label, str):
                 raise InvalidObjectError(f"Label must be a string: {label}")
             validated_labels.append(label)
-        
+
         return validated_labels
 
     def _get_paginated_results(
@@ -435,21 +421,21 @@ class Snippet(BaseObject):
         """
         # Create a copy of the params to avoid modifying the input
         request_params = params.copy()
-        
+
         # Add pagination parameters
         request_params["limit"] = limit
         request_params["offset"] = offset
-        
+
         # Make the API call
         response = self.api_client.get(endpoint, params=request_params)
-        
+
         # Handle the response
         if isinstance(response, dict) and "data" in response:
             return response["data"]
-        
+
         # If we got a list directly, return it
         if isinstance(response, list):
             return response
-        
+
         # Unexpected response format
         return []

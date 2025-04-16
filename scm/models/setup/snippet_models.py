@@ -14,16 +14,10 @@ from pydantic import BaseModel, Field, field_validator
 class FolderReference(BaseModel):
     """Reference to a folder that a snippet is applied to."""
 
-    id: UUID = Field(
-        ..., 
-        description="The UUID of the folder"
-    )
-    name: str = Field(
-        ..., 
-        description="The name of the folder"
-    )
+    id: UUID = Field(..., description="The UUID of the folder")
+    name: str = Field(..., description="The name of the folder")
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name(cls, value):
         """Validate that the name is not empty."""
@@ -59,8 +53,8 @@ class SnippetBaseModel(BaseModel):
         default=None,
         description="Whether to enable prefix for this snippet",
     )
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def validate_name(cls, value):
         """Validate that the name is not empty."""
@@ -75,6 +69,7 @@ class SnippetCreateModel(SnippetBaseModel):
 
     Inherits all fields from SnippetBaseModel without additional fields.
     """
+
     pass
 
 
@@ -85,6 +80,7 @@ class SnippetUpdateModel(SnippetBaseModel):
     Attributes:
         id: The unique identifier of the snippet to update.
     """
+
     id: UUID = Field(
         ...,
         description="The unique identifier of the snippet",
@@ -104,6 +100,7 @@ class SnippetResponseModel(SnippetBaseModel):
         folders: Folders the snippet is applied to.
         shared_in: Sharing scope of the snippet.
     """
+
     id: UUID = Field(
         ...,
         description="The unique identifier of the snippet",

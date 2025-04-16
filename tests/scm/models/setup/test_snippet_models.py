@@ -47,28 +47,28 @@ class TestSnippetBaseModel:
         assert model.description is None
         assert model.labels is None
         assert model.enable_prefix is None
-        
+
     def test_name_validation(self):
         """Test that name is validated."""
         # Valid name should pass
         valid_model = SnippetBaseModel(name="valid_name", labels=[])
         assert valid_model.name == "valid_name"  # Verify the return value is used
-        
+
         # Empty name should fail
         with pytest.raises(ValueError):
             SnippetBaseModel(name="", labels=[])
-            
+
         # Whitespace-only name should fail
         with pytest.raises(ValueError):
             SnippetBaseModel(name="   ", labels=[])
-            
+
         # Test the validator function directly to ensure its return value is covered
         result = SnippetBaseModel.validate_name("test_name")
         assert result == "test_name"
-        
+
         with pytest.raises(ValueError):
             SnippetBaseModel.validate_name("")
-            
+
         with pytest.raises(ValueError):
             SnippetBaseModel.validate_name("   ")
 
@@ -77,11 +77,11 @@ class TestSnippetBaseModel:
         # Valid labels
         model = SnippetBaseModel(name="test_snippet", labels=["tag1", "tag2"])
         assert model.labels == ["tag1", "tag2"]
-        
+
         # Empty list is valid
         model = SnippetBaseModel(name="test_snippet", labels=[])
         assert model.labels == []
-        
+
         # None is valid (becomes None)
         model = SnippetBaseModel(name="test_snippet", labels=None)
         assert model.labels is None
@@ -140,13 +140,13 @@ class TestSnippetUpdateModel:
         with pytest.raises(ValueError) as excinfo:
             SnippetUpdateModel(id="123e4567-e89b-12d3-a456-426614174000", name="")
         assert "name" in str(excinfo.value).lower()
-        
+
     def test_id_type_conversion(self):
         """Test that id is properly converted to UUID."""
         data = SnippetUpdateModelFactory.build_valid()
-        
+
         model = SnippetUpdateModel(**data)
-        
+
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
         assert str(model.id) == data["id"]
@@ -176,17 +176,17 @@ class TestSnippetResponseModel:
     def test_name_validation(self):
         """Test that name validation works."""
         data = SnippetResponseModelFactory.build_valid()
-        
+
         # Valid name should work
         model = SnippetResponseModel(**data)
         assert model.name == data["name"]
-        
+
         # Empty name should fail validation
         data["name"] = ""
         with pytest.raises(ValueError) as excinfo:
             SnippetResponseModel(**data)
         assert "name" in str(excinfo.value).lower()
-            
+
         # Whitespace-only name should fail validation
         data["name"] = "   "
         with pytest.raises(ValueError) as excinfo:
@@ -203,32 +203,32 @@ class TestSnippetResponseModel:
         assert isinstance(model.folders[0], FolderReference)
         assert "id" in data["folders"][0]
         assert "name" in data["folders"][0]
-        
+
     def test_id_type_conversion(self):
         """Test that id is properly converted to UUID."""
         data = SnippetResponseModelFactory.build_valid()
         id_str = data["id"]  # Save original string representation
-        
+
         model = SnippetResponseModel(**data)
-        
+
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
         assert str(model.id) == id_str
-        
+
     def test_predefined_snippet(self):
         """Test construction of a predefined snippet."""
         data = SnippetResponseModelFactory.build_predefined()
-        
+
         model = SnippetResponseModel(**data)
-        
+
         assert model.type == "predefined"
-        
+
     def test_custom_snippet(self):
         """Test construction of a custom snippet."""
         data = SnippetResponseModelFactory.build_custom()
-        
+
         model = SnippetResponseModel(**data)
-        
+
         assert model.type == "custom"
 
 
@@ -237,10 +237,7 @@ class TestFolderReference:
 
     def test_valid_construction(self):
         """Test that a valid FolderReference can be constructed."""
-        data = {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
-            "name": "test_folder"
-        }
+        data = {"id": "123e4567-e89b-12d3-a456-426614174000", "name": "test_folder"}
 
         model = FolderReference(**data)
 
@@ -260,34 +257,28 @@ class TestFolderReference:
     def test_id_uuid_validation(self):
         """Test that id is validated as a proper UUID."""
         # Valid UUID should work
-        valid_data = {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
-            "name": "test_folder"
-        }
+        valid_data = {"id": "123e4567-e89b-12d3-a456-426614174000", "name": "test_folder"}
         model = FolderReference(**valid_data)
         assert str(model.id) == valid_data["id"]
-        
+
         # Invalid UUID should fail
-        invalid_data = {
-            "id": "not-a-uuid",
-            "name": "test_folder"
-        }
+        invalid_data = {"id": "not-a-uuid", "name": "test_folder"}
         with pytest.raises(ValueError) as excinfo:
             FolderReference(**invalid_data)
         assert "id" in str(excinfo.value).lower()
-        
+
     def test_name_validator_directly(self):
         """Test the name validator function directly to ensure coverage."""
         # Test that valid name is returned by the validator
         valid_name = "test_folder"
         result = FolderReference.validate_name(valid_name)
         assert result == valid_name
-        
+
         # Test that invalid names raise ValueError
         with pytest.raises(ValueError) as exc_info:
             FolderReference.validate_name("")
         assert "folder name cannot be empty" in str(exc_info.value).lower()
-            
+
         with pytest.raises(ValueError) as exc_info:
             FolderReference.validate_name("   ")
         assert "folder name cannot be empty" in str(exc_info.value).lower()
