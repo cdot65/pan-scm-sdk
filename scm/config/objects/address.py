@@ -2,11 +2,17 @@
 
 # Standard library imports
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 # Local SDK imports
 from scm.config import BaseObject
-from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.exceptions import (
+    APIError,
+    InvalidObjectError,
+    MissingQueryParameterError,
+    ObjectNotPresentError,
+)
 from scm.models.objects import (
     AddressCreateModel,
     AddressResponseModel,
@@ -30,8 +36,16 @@ class Address(BaseObject):
     def __init__(
         self,
         api_client,
-        max_limit: Optional[int] = None,
+        max_limit: Optional[int] = DEFAULT_MAX_LIMIT,
     ):
+        """
+        Initialize the Address service class.
+
+        Args:
+            api_client: The API client instance for making HTTP requests.
+            max_limit: Maximum number of items to return in a single request.
+                      Defaults to DEFAULT_MAX_LIMIT.
+        """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -488,14 +502,22 @@ class Address(BaseObject):
 
     def delete(
         self,
-        object_id: str,
+        object_id: Union[str, UUID],
     ) -> None:
         """
         Deletes an address object.
 
         Args:
-            object_id (str): The ID of the object to delete.
+            object_id: The ID of the object to delete.
 
+        Raises:
+            ObjectNotPresentError: If the address doesn't exist.
+            APIError: If the API request fails.
         """
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        self.api_client.delete(endpoint)
+        try:
+            object_id_str = str(object_id)
+            self.api_client.delete(f"{self.ENDPOINT}/{object_id_str}")
+        except APIError as e:
+            if e.http_status_code == 404:
+                raise ObjectNotPresentError(f"Address with ID {object_id} not found")
+            raise

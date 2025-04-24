@@ -1,6 +1,7 @@
 """Factories for generating test data for SCM Devices models."""
 
 import factory
+
 from scm.models.config.setup.devices import (
     AvailableLicenseModel,
     DeviceGetResponseModel,
@@ -10,6 +11,7 @@ from scm.models.config.setup.devices import (
 
 class InstalledLicenseFactory(factory.Factory):
     """Factory for InstalledLicenseModel."""
+
     class Meta:
         model = InstalledLicenseModel
 
@@ -19,6 +21,7 @@ class InstalledLicenseFactory(factory.Factory):
 
 class AvailableLicenseFactory(factory.Factory):
     """Factory for AvailableLicenseModel."""
+
     class Meta:
         model = AvailableLicenseModel
 
@@ -28,6 +31,7 @@ class AvailableLicenseFactory(factory.Factory):
 
 class DevicesFactory(factory.Factory):
     """Factory for DeviceGetResponseModel."""
+
     class Meta:
         model = DeviceGetResponseModel
 
@@ -36,7 +40,7 @@ class DevicesFactory(factory.Factory):
     display_name = factory.LazyAttribute(lambda o: o.name)
     hostname = factory.Faker("hostname")
     description = factory.Faker("sentence")
-    serial_number = factory.Sequence(lambda n: f"SN{1000+n}")
+    serial_number = factory.Sequence(lambda n: f"SN{1000 + n}")
     folder = factory.Faker("word")
     type = "Prisma Access"
     family = "Cloud Service"
@@ -47,4 +51,3 @@ class DevicesFactory(factory.Factory):
     # TODO: Add factory logic for nested license models using SubFactory or LazyAttribute
     # installed_licenses = factory.List([factory.SubFactory(InstalledLicenseFactory) for _ in range(2)])
     # available_licenses = factory.List([factory.SubFactory(AvailableLicenseFactory) for _ in range(3)])
-

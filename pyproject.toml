@@ -9,9 +9,7 @@ keywords = ["paloaltonetworks", "stratacloudmanager", "scm"]
 homepage = "https://github.com/cdot65/pan-scm-sdk"
 repository = "https://github.com/cdot65/pan-scm-sdk"
 documentation = "https://cdot65.github.io/pan-scm-sdk/"
-packages = [
-    { include = "scm" }
-]
+packages = [{ include = "scm" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -21,6 +19,7 @@ setuptools = "^75.1.0"
 pydantic = "^2.9.2"
 pyjwt = "^2.9.0"
 cryptography = "^37.0.4"
+types-requests = "^2.32.0.20250328"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -28,7 +27,7 @@ cryptography = "^37.0.4"
 flake8 = "^7.1.1"
 mkdocs = "^1.6.1"
 mkdocs-material = "^9.5.39"
-mkdocstrings = {extras = ["python"], version = "^0.29.0"}
+mkdocstrings = { extras = ["python"], version = "^0.29.0" }
 mkdocs-autorefs = "^1.4.1"
 termynal = "^0.12.1"
 pytest = "^8.3.3"
@@ -42,7 +41,7 @@ dynaconf = "^3.2.6"
 pytest-dotenv = "^0.5.2"
 reportlab = "^4.3.1"
 rich = "^13.9.4"
-ruff = "^0.9.10"  # Replaces Black for formatting and enhances linting
+ruff = "^0.9.10"                                            # Replaces Black for formatting and enhances linting
 isort = "^6.0.1"
 mypy = "^1.15.0"
 types-requests = "^2.32.0.20250328"
@@ -55,8 +54,8 @@ line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F"]  # Error and F-style errors (flake8 equivalents)
-ignore = ["E501"]  # Match existing ignores
+select = ["E", "F"] # Error and F-style errors (flake8 equivalents)
+ignore = ["E501"]   # Match existing ignores
 
 [tool.ruff.format]
 quote-style = "double"
