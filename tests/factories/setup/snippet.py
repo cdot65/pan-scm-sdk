@@ -1,5 +1,5 @@
-import uuid
 from typing import Any, Dict, Union
+import uuid
 
 import factory
 from faker import Faker
@@ -101,9 +101,7 @@ class SnippetResponseModelFactory(SnippetBaseModelFactory):
         model = SnippetResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
-    type = factory.LazyFunction(
-        lambda: fake.random_element(["predefined", "custom", "readonly"])
-    )
+    type = factory.LazyFunction(lambda: fake.random_element(["predefined", "custom", "readonly"]))
     display_name = factory.LazyFunction(lambda: fake.word())
     last_update = factory.LazyFunction(lambda: fake.iso8601())
     created_in = factory.LazyFunction(lambda: fake.iso8601())

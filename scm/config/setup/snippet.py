@@ -154,9 +154,7 @@ class Snippet(BaseObject):
 
         # Send the request to the remote API
         try:
-            response: Dict[str, Any] = self.api_client.get(
-                f"{self.ENDPOINT}/{object_id_str}"
-            )
+            response: Dict[str, Any] = self.api_client.get(f"{self.ENDPOINT}/{object_id_str}")
 
             # Return the SCM API response as a new Pydantic object
             return SnippetResponseModel.model_validate(response)
@@ -249,9 +247,7 @@ class Snippet(BaseObject):
                 # Convert to set for efficient lookup
                 required_types_set = set(required_types)
                 filtered_data = [
-                    item
-                    for item in filtered_data
-                    if item.type and item.type in required_types_set
+                    item for item in filtered_data if item.type and item.type in required_types_set
                 ]
 
         return filtered_data
@@ -318,9 +314,7 @@ class Snippet(BaseObject):
                     )
                 data_items = response["data"]
 
-            object_instances = [
-                SnippetResponseModel.model_validate(item) for item in data_items
-            ]
+            object_instances = [SnippetResponseModel.model_validate(item) for item in data_items]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end

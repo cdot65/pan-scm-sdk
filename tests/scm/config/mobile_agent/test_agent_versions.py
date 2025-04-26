@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from scm.config.mobile_agent.agent_versions import AgentVersions
-from scm.exceptions import InvalidObjectError, MissingQueryParameterError, APIError
+from scm.exceptions import APIError, InvalidObjectError, MissingQueryParameterError
 
 
 class TestAgentVersions:
