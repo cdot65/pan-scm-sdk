@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from scm.config.mobile_agent.agent_versions import AgentVersions
-from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.exceptions import InvalidObjectError, MissingQueryParameterError, APIError
 
 
 class TestAgentVersions:
@@ -48,7 +48,7 @@ class TestAgentVersions:
 
     def test_validate_max_limit_invalid_type(self, agent_versions_service):
         """Test _validate_max_limit with invalid type."""
-        with pytest.raises(InvalidObjectError) as exc_info:
+        with pytest.raises(APIError) as exc_info:
             agent_versions_service._validate_max_limit("invalid")
         error_obj = exc_info.value
         assert error_obj.error_code == "E003"

@@ -1,8 +1,8 @@
 # tests/scm/config/objects/test_address.py
 
+import uuid
 # Standard library imports
 from unittest.mock import MagicMock
-import uuid
 
 # External libraries
 import pytest
@@ -10,7 +10,12 @@ from requests.exceptions import HTTPError
 
 # Local SDK imports
 from scm.config.objects import Address
-from scm.exceptions import InvalidObjectError, MissingQueryParameterError
+from scm.exceptions import (
+    APIError,
+    ObjectNotPresentError,
+    InvalidObjectError,
+    MissingQueryParameterError,
+)
 from scm.models.objects import AddressResponseModel, AddressUpdateModel
 from tests.factories import (
     AddressCreateApiFactory,
@@ -69,16 +74,18 @@ class TestAddressMaxLimit(TestAddressBase):
         """Test that invalid max_limit type raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Address(self.mock_scm, max_limit="invalid")  # noqa
-        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
-            exc_info.value
+        assert (
+            "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
         )
 
     def test_max_limit_too_low(self):
         """Test that max_limit below 1 raises error."""
         with pytest.raises(InvalidObjectError) as exc_info:
             Address(self.mock_scm, max_limit=0)  # noqa
-        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
-            exc_info.value
+        assert (
+            "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003"
+            in str(exc_info.value)
         )
 
     def test_max_limit_too_high(self):
@@ -86,6 +93,11 @@ class TestAddressMaxLimit(TestAddressBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             Address(self.mock_scm, max_limit=6000)  # noqa
         assert "max_limit exceeds maximum allowed value" in str(exc_info.value)
+
+    def test_constructor_with_limit_none(self):
+        """Test that passing limit=None to constructor uses DEFAULT_MAX_LIMIT."""
+        client = Address(self.mock_scm, max_limit=None)
+        assert client.max_limit == Address.DEFAULT_MAX_LIMIT
 
 
 @pytest.mark.unit
@@ -182,7 +194,11 @@ class TestAddressFilters(TestAddressBase):
                 tag=["tag2"],
             ),
             AddressResponseModel(
-                id=uuid.uuid4(), name="addr3", folder="test", fqdn="example.com", tag=["tag3"]
+                id=uuid.uuid4(),
+                name="addr3",
+                folder="test",
+                fqdn="example.com",
+                tag=["tag3"],
             ),
         ]
 
@@ -631,7 +647,10 @@ class TestAddressFetch(TestAddressBase):
             self.client.fetch(name="test")
 
         error_msg = str(exc_info.value)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in error_msg
+        assert (
+            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
+            in error_msg
+        )
         assert "HTTP error: 400" in error_msg
 
     def test_fetch_invalid_response_format(self):
@@ -735,8 +754,13 @@ class TestAddressListErrorHandling(TestAddressBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.list(folder="Texas", types="netmask")
         error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "'types' filter must be a list"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Invalid Query Parameter"
+        assert (
+            error_response["_errors"][0]["message"] == "'types' filter must be a list"
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"]
+            == "Invalid Query Parameter"
+        )
 
     def test_list_response_invalid_format(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
@@ -801,7 +825,9 @@ class TestAddressCreateErrorHandling(TestAddressBase):
         self.mock_scm.post.side_effect = mock_http_error  # noqa
 
         with pytest.raises(HTTPError):
-            self.client.create({"name": "test", "ip_netmask": "10.0.0.0/24", "folder": "test"})
+            self.client.create(
+                {"name": "test", "ip_netmask": "10.0.0.0/24", "folder": "test"}
+            )
 
     def test_create_http_error_with_response(self):
         """Test that HTTPError with response content triggers proper error handling."""
@@ -822,7 +848,9 @@ class TestAddressCreateErrorHandling(TestAddressBase):
             self.client.create(test_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Create failed"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        )
 
 
 @pytest.mark.mock
@@ -849,7 +877,9 @@ class TestAddressUpdateErrorHandling(TestAddressBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Update failed"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
+        )
 
     def test_update_object_not_present_error(self):
         """Test error handling when the object to update is not present."""
@@ -871,7 +901,9 @@ class TestAddressUpdateErrorHandling(TestAddressBase):
             self.client.update(update_data)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
 
 
 @pytest.mark.mock
@@ -892,8 +924,13 @@ class TestAddressDeleteErrorHandling(TestAddressBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
-        assert error_response["_errors"][0]["message"] == "Your configuration is not valid."
-        assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        assert (
+            error_response["_errors"][0]["message"]
+            == "Your configuration is not valid."
+        )
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
+        )
 
     def test_delete_object_not_present_error(self):
         """Test error handling when the object to delete is not present."""
@@ -910,7 +947,34 @@ class TestAddressDeleteErrorHandling(TestAddressBase):
             self.client.delete(object_id)
         error_response = exc_info.value.response.json()
         assert error_response["_errors"][0]["message"] == "Object not found"
-        assert error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        assert (
+            error_response["_errors"][0]["details"]["errorType"] == "Object Not Present"
+        )
+
+
+@pytest.mark.unit
+class TestAddressDeleteErrorHandling(TestAddressBase):
+    """Tests for Address.delete error handling."""
+
+    def test_delete_raises_object_not_present_error_on_404(self):
+        client = Address(self.mock_scm)
+        object_id = "some-id"
+        error = APIError("Not found")
+        error.http_status_code = 404
+        self.mock_scm.delete.side_effect = error
+
+        with pytest.raises(ObjectNotPresentError):
+            client.delete(object_id)
+
+    def test_delete_reraises_api_error_on_non_404(self):
+        client = Address(self.mock_scm)
+        object_id = "some-id"
+        error = APIError("Server error")
+        error.http_status_code = 500
+        self.mock_scm.delete.side_effect = error
+
+        with pytest.raises(APIError):
+            client.delete(object_id)
 
 
 # -------------------- Parametrized Tests --------------------
@@ -962,78 +1026,85 @@ class TestAddressParametrized(TestAddressBase):
 
 
 @pytest.mark.functional
-def test_address_lifecycle(mock_scm):
+class TestAddressLifecycle(TestAddressBase):
     """Functional test for complete address object lifecycle (CRUD)."""
     # Setup
-    mock_scm.get = MagicMock()
-    mock_scm.post = MagicMock()
-    mock_scm.put = MagicMock()
-    mock_scm.delete = MagicMock()
-    client = Address(mock_scm, max_limit=5000)
+    def test_address_lifecycle(self, mock_scm):
+        """Functional test for complete address object lifecycle (CRUD)."""
+        # Setup
+        mock_scm.get = MagicMock()
+        mock_scm.post = MagicMock()
+        mock_scm.put = MagicMock()
+        mock_scm.delete = MagicMock()
+        client = Address(mock_scm, max_limit=5000)
 
-    # 1. Create address
-    create_data = {
-        "name": "test-address-lifecycle",
-        "folder": "Texas",
-        "ip_netmask": "10.0.0.1/32",
-        "description": "Lifecycle test address",
-    }
+        # 1. Create address
+        create_data = {
+            "name": "test-address-lifecycle",
+            "folder": "Texas",
+            "ip_netmask": "10.0.0.1/32",
+            "description": "Lifecycle test address",
+        }
 
-    address_id = "123e4567-e89b-12d3-a456-426655440000"
-    mock_create_response = {
-        "id": address_id,
-        "name": "test-address-lifecycle",
-        "folder": "Texas",
-        "ip_netmask": "10.0.0.1/32",
-        "description": "Lifecycle test address",
-    }
-    mock_scm.post.return_value = mock_create_response
+        address_id = "123e4567-e89b-12d3-a456-426655440000"
+        mock_create_response = {
+            "id": address_id,
+            "name": "test-address-lifecycle",
+            "folder": "Texas",
+            "ip_netmask": "10.0.0.1/32",
+            "description": "Lifecycle test address",
+        }
+        mock_scm.post.return_value = mock_create_response
 
-    created = client.create(create_data)
-    assert str(created.id) == address_id
-    assert created.name == "test-address-lifecycle"
+        created = client.create(create_data)
+        assert str(created.id) == address_id
+        assert created.name == "test-address-lifecycle"
 
-    # 2. List addresses
-    mock_list_response = {"data": [mock_create_response], "offset": 0, "total": 1, "limit": 100}
-    mock_scm.get.return_value = mock_list_response
+        # 2. List addresses
+        mock_list_response = {
+            "data": [mock_create_response],
+            "offset": 0,
+            "total": 1,
+            "limit": 100,
+        }
+        mock_scm.get.return_value = mock_list_response
 
-    addresses = client.list(folder="Texas")
-    assert len(addresses) == 1
-    assert str(addresses[0].id) == address_id
+        addresses = client.list(folder="Texas")
+        assert len(addresses) == 1
+        assert str(addresses[0].id) == address_id
 
-    # 3. Get specific address
-    mock_scm.get.return_value = mock_create_response
+        # 3. Get specific address
+        mock_scm.get.return_value = mock_create_response
 
-    retrieved = client.get(address_id)
-    assert str(retrieved.id) == address_id
+        retrieved = client.get(address_id)
+        assert str(retrieved.id) == address_id
 
-    # 4. Update address
-    update_data = AddressUpdateModel(
-        id=address_id,
-        name="test-address-lifecycle",
-        folder="Texas",
-        ip_netmask="10.0.0.1/32",
-        description="Updated lifecycle test address",
-    )
+        # 4. Update address
+        update_data = AddressUpdateModel(
+            id=address_id,
+            name="test-address-lifecycle",
+            folder="Texas",
+            ip_netmask="10.0.0.1/32",
+            description="Updated lifecycle test address",
+        )
 
-    mock_update_response = {
-        "id": address_id,
-        "name": "test-address-lifecycle",
-        "folder": "Texas",
-        "ip_netmask": "10.0.0.1/32",
-        "description": "Updated lifecycle test address",
-    }
-    mock_scm.put.return_value = mock_update_response
+        mock_update_response = {
+            "id": address_id,
+            "name": "test-address-lifecycle",
+            "folder": "Texas",
+            "ip_netmask": "10.0.0.1/32",
+            "description": "Updated lifecycle test address",
+        }
+        mock_scm.put.return_value = mock_update_response
 
-    updated = client.update(update_data)
-    assert updated.description == "Updated lifecycle test address"
+        updated = client.update(update_data)
+        assert updated.description == "Updated lifecycle test address"
 
-    # 5. Delete address
-    mock_scm.delete.return_value = None
+        # 5. Delete address
+        mock_scm.delete.return_value = None
 
-    # Should not raise any exceptions
-    client.delete(address_id)
-    mock_scm.delete.assert_called_once_with(f"/config/objects/v1/addresses/{address_id}")
-
-
-# -------------------- End of Test Classes --------------------
+        # Should not raise any exceptions
+        client.delete(address_id)
+        mock_scm.delete.assert_called_once_with(
+            f"/config/objects/v1/addresses/{address_id}"
+        )

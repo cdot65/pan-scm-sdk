@@ -3,8 +3,6 @@ Service classes for interacting with Snippets in Palo Alto Networks' Strata Clou
 
 This module provides the Snippet class for performing CRUD operations on Snippet resources
 in the Strata Cloud Manager.
-
-# scm/config/setup/snippet.py
 """
 
 # Standard library imports
@@ -15,7 +13,7 @@ from uuid import UUID
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
-from scm.models.setup.snippet_models import (
+from scm.models.setup.snippet import (
     SnippetCreateModel,
     SnippetResponseModel,
     SnippetUpdateModel,
@@ -98,12 +96,7 @@ class Snippet(BaseObject):
             )
 
         if limit_int > self.ABSOLUTE_MAX_LIMIT:
-            raise InvalidObjectError(
-                message=f"max_limit cannot exceed {self.ABSOLUTE_MAX_LIMIT}",
-                error_code="E003",
-                http_status_code=400,
-                details={"error": "max_limit exceeds maximum allowed value"},
-            )
+            return self.ABSOLUTE_MAX_LIMIT
 
         return limit_int
 
@@ -161,7 +154,9 @@ class Snippet(BaseObject):
 
         # Send the request to the remote API
         try:
-            response: Dict[str, Any] = self.api_client.get(f"{self.ENDPOINT}/{object_id_str}")
+            response: Dict[str, Any] = self.api_client.get(
+                f"{self.ENDPOINT}/{object_id_str}"
+            )
 
             # Return the SCM API response as a new Pydantic object
             return SnippetResponseModel.model_validate(response)
@@ -254,7 +249,9 @@ class Snippet(BaseObject):
                 # Convert to set for efficient lookup
                 required_types_set = set(required_types)
                 filtered_data = [
-                    item for item in filtered_data if item.type and item.type in required_types_set
+                    item
+                    for item in filtered_data
+                    if item.type and item.type in required_types_set
                 ]
 
         return filtered_data
@@ -321,7 +318,9 @@ class Snippet(BaseObject):
                     )
                 data_items = response["data"]
 
-            object_instances = [SnippetResponseModel.model_validate(item) for item in data_items]
+            object_instances = [
+                SnippetResponseModel.model_validate(item) for item in data_items
+            ]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
