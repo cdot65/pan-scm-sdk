@@ -431,7 +431,10 @@ class TestSnippetList(TestSnippetBase):
     def test_list_snippets(self, snippet_service, mock_scm_client):
         """Test listing snippets with default parameters."""
         # Setup mock response with valid snippet data
-        mock_snippets = [SnippetResponseModelFactory().model_dump() for _ in range(3)]
+        mock_snippets = [
+            SnippetResponseModelFactory.build_valid_model().model_dump()
+            for _ in range(3)
+        ]
         mock_response = {"data": mock_snippets}
 
         # Patch the API client's get method
@@ -444,7 +447,10 @@ class TestSnippetList(TestSnippetBase):
 
     def test_list_snippets_pagination(self, snippet_service, mock_scm_client):
         """Test listing snippets with pagination parameters."""
-        mock_snippets = [SnippetResponseModelFactory().model_dump() for _ in range(5)]
+        mock_snippets = [
+            SnippetResponseModelFactory.build_valid_model().model_dump()
+            for _ in range(5)
+        ]
         mock_response = {"data": mock_snippets}
 
         with patch.object(
@@ -668,6 +674,28 @@ class TestPaginatedResults(TestSnippetBase):
         assert results == []
 
 
+class TestSnippetFetchSingleMatch(TestSnippetBase):
+    def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
+        mocker.patch.object(snippet_service, "list", return_value=[])
+        result = snippet_service.fetch("foo")
+        assert result is None
+
+    def test_fetch_returns_none_when_no_exact_match(self, snippet_service, mocker):
+        m1 = SnippetResponseModelFactory.build_valid_model(name="a")
+        m2 = SnippetResponseModelFactory.build_valid_model(name="b")
+        mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
+        result = snippet_service.fetch("notfound")
+        assert result is None
+
+    def test_fetch_returns_first_exact_match(self, snippet_service, mocker):
+        name = "foo"
+        m1 = SnippetResponseModelFactory.build_valid_model(name=name)
+        m2 = SnippetResponseModelFactory.build_valid_model(name=name)
+        mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
+        result = snippet_service.fetch(name)
+        assert result == m1
+
+
 class TestSnippetValidation(TestSnippetBase):
     """Tests for validation methods using Pydantic model factories."""
 
@@ -704,101 +732,6 @@ class TestSnippetValidation(TestSnippetBase):
             SnippetCreateModelFactory.build_valid_model(labels=["tag1", 123, "tag3"])
 
 
-class TestAdditionalFetchScenarios(TestSnippetBase):
-    """Additional tests for fetch method edge cases."""
-
-    def test_fetch_fallback_multiple_matches(self, snippet_service, mock_scm_client):
-        """Test fetch when list method returns multiple snippets with the same name."""
-        # Setup
-        snippet_name = "test-snippet"
-
-        # Mock API response with multiple snippets with the same name
-        mock_scm_client.get.return_value = {
-            "data": [
-                {
-                    "name": snippet_name,
-                    "id": "12345678-1234-1234-1234-123456789012",
-                    "description": "First snippet",
-                },
-                {
-                    "name": snippet_name,
-                    "id": "87654321-4321-4321-4321-210987654321",
-                    "description": "Second snippet",
-                },
-            ]
-        }
-
-        # Test
-        with pytest.raises(APIError) as excinfo:
-            snippet_service.fetch(snippet_name)
-
-            # Verify error message contains expected text
-            assert "Multiple snippets" in excinfo.value.message
-
-    def test_fetch_no_exact_matches(self, snippet_service, mock_scm_client):
-        """Test fetch when list returns snippets but none match the exact name."""
-        # Setup
-        snippet_name = "exact-test-snippet"
-
-        # Mock the list method to return snippets that are similar but not exact matches
-        similar_snippets = [
-            SnippetResponseModelFactory.build(
-                name="test-snippet-different",
-                description="Similar but different name",
-            ),
-            SnippetResponseModelFactory.build(
-                name="another-test-snippet",
-                description="Another similar name",
-            ),
-        ]
-
-        # Patch the list method to return our similar snippets
-        with patch.object(snippet_service, "list", return_value=similar_snippets):
-            # Call the fetch method
-            result = snippet_service.fetch(snippet_name)
-
-            # It should return None because no exact match was found
-            assert result is None
-
-
-class TestEdgeCaseCoverage(TestSnippetBase):
-    """Tests specifically targeting remaining coverage gaps."""
-
-    def test_fetch_raise_line_coverage(self, mock_scm_client):
-        """Directly test line 263 where non-404 errors are re-raised."""
-
-        # Create a custom subclass of Snippet to instrument the fetch method
-        class InstrumentedSnippet(Snippet):
-            def __init__(self, api_client, max_limit=Snippet.DEFAULT_MAX_LIMIT):
-                super().__init__(api_client, max_limit)
-                self.line_executed = False
-
-            def fetch(self, name):
-                try:
-                    # Force a non-404 API error
-                    error = APIError("Test error")
-                    error.http_status_code = 500  # Not a 404
-                    raise error
-                except APIError as e:
-                    # This directly corresponds to line 263
-                    if e.http_status_code != 404:
-                        self.line_executed = True
-                        raise  # This is line 263 in the original class
-                    return None  # This should never be reached in our test
-
-        # Create an instance of our instrumented class
-        with patch("scm.config.isinstance", return_value=True):
-            instrumented_service = InstrumentedSnippet(mock_scm_client)
-
-            # Call the fetch method which will trigger our instrumented line
-            try:
-                instrumented_service.fetch("test_name")
-                pytest.fail("Expected exception was not raised")
-            except APIError:
-                # Verify that our line was executed
-                assert instrumented_service.line_executed, "Line 263 was not executed!"
-
-
 class TestSnippetMaxLimitValidation(TestSnippetBase):
     """Covers edge cases for Snippet._validate_max_limit and max_limit setter."""
 
@@ -820,6 +753,9 @@ class TestSnippetMaxLimitValidation(TestSnippetBase):
         with pytest.raises(Exception) as exc:
             snippet_service._validate_max_limit(-5)
         assert "Invalid max_limit value" in str(exc.value)
+
+    def test_validate_max_limit_none(self, snippet_service):
+        assert snippet_service._validate_max_limit(None) == Snippet.DEFAULT_MAX_LIMIT
 
 
 class TestSnippetApplyFilters(TestSnippetBase):
@@ -862,7 +798,10 @@ class TestSnippetApplyFilters(TestSnippetBase):
         assert "Invalid Filter Type" in str(exc.value)
 
     def test_types_filter_empty_list(self, snippet_service):
-        models = [SnippetResponseModelFactory.build_valid_model(type="custom") for _ in range(2)]
+        models = [
+            SnippetResponseModelFactory.build_valid_model(type="custom")
+            for _ in range(2)
+        ]
         filters = {"types": []}
         result = snippet_service._apply_filters(models, filters)
         assert result == models
@@ -874,3 +813,72 @@ class TestSnippetApplyFilters(TestSnippetBase):
         filters = {"types": ["custom"]}
         result = snippet_service._apply_filters(data, filters)
         assert m1 in result and m2 not in result
+
+
+class TestSnippetListEdgeCases(TestSnippetBase):
+    """Covers edge/error cases for Snippet.list pagination and response handling."""
+
+    def test_list_invalid_response_format(self, snippet_service, mocker):
+        # API returns a non-dict response
+        mocker.patch.object(
+            snippet_service.api_client, "get", return_value="not_a_dict"
+        )
+        with pytest.raises(Exception) as exc:
+            snippet_service.list()
+        assert "Response is not a dictionary" in str(exc.value)
+
+    def test_list_single_object_no_data_key(self, snippet_service, mocker):
+        # API returns a dict without a 'data' key
+        response = SnippetResponseModelFactory.build_valid_model().model_dump()
+        mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        results = snippet_service.list()
+        assert len(results) == 1
+        assert results[0].id == response["id"]
+
+    def test_list_data_key_not_list(self, snippet_service, mocker):
+        # API returns a dict with 'data' not a list
+        response = {"data": {"id": "abc"}}
+        mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        with pytest.raises(Exception) as exc:
+            snippet_service.list()
+        assert "data" in str(exc.value) and "field must be a list" in str(exc.value)
+
+    def test_list_pagination_offset_increment(self, snippet_service, mocker):
+        # Simulate two pages
+        page1 = {
+            "data": [
+                SnippetResponseModelFactory.build_valid_model().model_dump()
+                for _ in range(2)
+            ]
+        }
+        page2 = {
+            "data": [
+                SnippetResponseModelFactory.build_valid_model().model_dump()
+                for _ in range(1)
+            ]
+        }
+        get_mock = mocker.patch.object(
+            snippet_service.api_client, "get", side_effect=[page1, page2]
+        )
+        snippet_service._max_limit = 2
+        results = snippet_service.list()
+        assert len(results) == 3
+        assert get_mock.call_count == 2
+        offsets = [call[1]["params"]["offset"] for call in get_mock.call_args_list]
+
+
+class TestSnippetFetchEdgeCases(TestSnippetBase):
+    """Covers edge/error cases for Snippet.fetch (empty, multiple, etc)."""
+
+    def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
+        mocker.patch.object(snippet_service, "list", return_value=[])
+        result = snippet_service.fetch("foo")
+        assert result is None
+
+    def test_fetch_returns_first_match(self, snippet_service, mocker):
+        name = "dup"
+        m1 = SnippetResponseModelFactory.build_valid_model(name=name)
+        m2 = SnippetResponseModelFactory.build_valid_model(name=name)
+        mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
+        result = snippet_service.fetch(name)
+        assert result == m1

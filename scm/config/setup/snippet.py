@@ -349,7 +349,6 @@ class Snippet(BaseObject):
 
         Returns:
             Optional[SnippetResponseModel]: The requested snippet (exact name match), or None if not found.
-            Raises APIError if multiple exact matches are found.
         """
         # Get snippets
         results = self.list()
@@ -360,8 +359,6 @@ class Snippet(BaseObject):
         exact_matches = [snippet for snippet in results if snippet.name == name]
         if not exact_matches:
             return None
-        if len(exact_matches) > 1:
-            raise APIError(f"Multiple snippets found with name {name}")
         return exact_matches[0]
 
     def associate_folder(
