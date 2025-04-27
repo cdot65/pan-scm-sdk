@@ -20,6 +20,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 ### Fixed
 - Improved test reliability by removing unnecessary skips and clarifying skip reasons.
 - Fixed import errors and naming consistency across device models, factories, and tests.
+- Fixed issue with HIP object validation of response models.
 
 ### Changed
 - Refactored device model and service structure for clarity and maintainability.
