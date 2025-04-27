@@ -9,8 +9,10 @@ import pytest
 # Local SDK imports
 from scm.client import Scm
 from scm.config.setup.folder import Folder
+from scm.exceptions import InvalidObjectError, APIError, ObjectNotPresentError
 from scm.models.setup.folder import (
     FolderResponseModel,
+    FolderUpdateModel,
 )
 from tests.factories.setup.folder import (
     FolderResponseFactory,
@@ -262,3 +264,123 @@ class TestFolderDelete(TestFolderBase):
 
         # Verify API call
         mock_scm_client.delete.assert_called_once_with(f"{folder_service.ENDPOINT}/{folder_id}")
+
+
+class TestFolderMisc(TestFolderBase):
+    """Tests for Folder service miscellaneous methods."""
+
+    def test_validate_max_limit_none(self, folder_service):
+        assert folder_service._validate_max_limit(None) == folder_service.DEFAULT_MAX_LIMIT
+
+    def test_validate_max_limit_invalid_type(self, folder_service):
+        with pytest.raises(InvalidObjectError) as exc:
+            folder_service._validate_max_limit("not-an-int")
+        assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
+            exc.value
+        )
+
+    def test_validate_max_limit_invalid_value(self, folder_service):
+        with pytest.raises(InvalidObjectError) as exc:
+            folder_service._validate_max_limit(0)
+        assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
+            exc.value
+        )
+
+    def test_validate_max_limit_exceeds_absolute(self, folder_service):
+        over = folder_service.ABSOLUTE_MAX_LIMIT + 100
+        assert folder_service._validate_max_limit(over) == folder_service.ABSOLUTE_MAX_LIMIT
+
+    def test_validate_max_limit_valid(self, folder_service):
+        assert folder_service._validate_max_limit(123) == 123
+
+    def test_apply_filters_all_branches(self):
+        from scm.models.setup.folder import FolderResponseModel
+
+        base = dict(
+            name="foo",
+            parent="p",
+            labels=["a", "b"],
+            type="t",
+            snippets=["s1"],
+            model="m",
+            serial_number="sn",
+            device_only=True,
+        )
+        folder = FolderResponseModel(id="baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e", **base)
+        # labels
+        out = Folder._apply_filters([folder], {"labels": ["a"]})
+        assert out
+        # parent
+        out = Folder._apply_filters([folder], {"parent": "p"})
+        assert out
+        # type
+        out = Folder._apply_filters([folder], {"type": "t"})
+        assert out
+        # snippets
+        out = Folder._apply_filters([folder], {"snippets": ["s1"]})
+        assert out
+        # model
+        out = Folder._apply_filters([folder], {"model": "m"})
+        assert out
+        # serial_number
+        out = Folder._apply_filters([folder], {"serial_number": "sn"})
+        assert out
+        # device_only
+        out = Folder._apply_filters([folder], {"device_only": True})
+        assert out
+        # no filters
+        out = Folder._apply_filters([folder], {})
+        assert out
+
+    def test_list_invalid_response_format(self, folder_service, mock_scm_client):
+        mock_scm_client.get.return_value = "not-a-dict"
+        with pytest.raises(InvalidObjectError):
+            folder_service.list()
+
+    def test_list_data_not_list(self, folder_service, mock_scm_client):
+        mock_scm_client.get.return_value = {"data": "notalist"}
+        with pytest.raises(InvalidObjectError):
+            folder_service.list()
+
+    def test_list_single_object_response(self, folder_service, mock_scm_client):
+        from scm.models.setup.folder import FolderResponseModel
+
+        folder = FolderResponseFactory()
+        mock_scm_client.get.return_value = folder.model_dump()
+        results = folder_service.list()
+        assert isinstance(results[0], FolderResponseModel)
+
+    def test_list_pagination(self, folder_service, mock_scm_client):
+        # Simulate two pages
+        page1 = [FolderResponseFactory().model_dump() for _ in range(2)]
+        page2 = [FolderResponseFactory().model_dump() for _ in range(1)]
+
+        def side_effect(*args, **kwargs):
+            offset = kwargs["params"]["offset"]
+            if offset == 0:
+                return {"data": page1}
+            else:
+                return {"data": page2}
+
+        mock_scm_client.get.side_effect = side_effect
+        folder_service.max_limit = 2
+        results = folder_service.list()
+        assert len(results) == 3
+
+    def test_update_folder_api_error(self, folder_service, mock_scm_client):
+        update_model = FolderUpdateModel(
+            id="baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e", name="n", parent="p"
+        )
+        mock_scm_client.put.side_effect = APIError("fail", http_status_code=500)
+        with pytest.raises(APIError):
+            folder_service.update(update_model)
+
+    def test_delete_folder_not_found(self, folder_service, mock_scm_client):
+        mock_scm_client.delete.side_effect = APIError("fail", http_status_code=404)
+        with pytest.raises(ObjectNotPresentError):
+            folder_service.delete("notfound")
+
+    def test_delete_folder_other_api_error(self, folder_service, mock_scm_client):
+        mock_scm_client.delete.side_effect = APIError("fail", http_status_code=500)
+        with pytest.raises(APIError):
+            folder_service.delete("notfound")
