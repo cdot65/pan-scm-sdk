@@ -23,10 +23,13 @@ from scm.models.setup.snippet import (
 class Snippet(BaseObject):
     """
     Manages Snippet objects in Palo Alto Networks' Strata Cloud Manager.
-    Args:
-        api_client: The API client instance for making HTTP requests.
-        max_limit: Maximum number of items to return in a single request.
-                  Defaults to DEFAULT_MAX_LIMIT.
+
+    This class provides methods for creating, retrieving, updating, and deleting Snippet resources.
+
+    Attributes:
+        ENDPOINT: The API endpoint for Snippet resources.
+        DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
+        ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
     """
 
     ENDPOINT = "/config/setup/v1/snippets"
@@ -164,41 +167,6 @@ class Snippet(BaseObject):
             if e.http_status_code == 404:
                 raise ObjectNotPresentError(f"Snippet with ID {object_id} not found")
             raise
-
-    def update(
-        self,
-        snippet: SnippetUpdateModel,
-    ) -> SnippetResponseModel:
-        """
-        Update an existing snippet.
-
-        Args:
-            snippet: The SnippetUpdateModel containing the updated snippet data.
-
-        Returns:
-            SnippetResponseModel: The updated snippet.
-
-        Raises:
-            InvalidObjectError: If the update data is invalid.
-            ObjectNotPresentError: If the snippet doesn't exist.
-            APIError: If the API request fails.
-        """
-        # Convert to dict for API request, excluding unset fields
-        payload = snippet.model_dump(exclude_unset=True)
-
-        # Extract ID and remove from payload since it's in the URL
-        object_id = str(snippet.id)
-        payload.pop("id", None)
-
-        # Send the updated object to the remote API as JSON
-        endpoint = f"{self.ENDPOINT}/{object_id}"
-        response: Dict[str, Any] = self.api_client.put(
-            endpoint,
-            json=payload,
-        )
-
-        # Return the SCM API response as a new Pydantic object
-        return SnippetResponseModel.model_validate(response)
 
     @staticmethod
     def _apply_filters(
@@ -355,6 +323,7 @@ class Snippet(BaseObject):
 
         if not results:
             return None
+
         # Filter to exact matches
         exact_matches = [snippet for snippet in results if snippet.name == name]
         if not exact_matches:
@@ -464,6 +433,41 @@ class Snippet(BaseObject):
 
         # Unexpected response format
         return []
+
+    def update(
+        self,
+        snippet: SnippetUpdateModel,
+    ) -> SnippetResponseModel:
+        """
+        Update an existing snippet.
+
+        Args:
+            snippet: The SnippetUpdateModel containing the updated snippet data.
+
+        Returns:
+            SnippetResponseModel: The updated snippet.
+
+        Raises:
+            InvalidObjectError: If the update data is invalid.
+            ObjectNotPresentError: If the snippet doesn't exist.
+            APIError: If the API request fails.
+        """
+        # Convert to dict for API request, excluding unset fields
+        payload = snippet.model_dump(exclude_unset=True)
+
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(snippet.id)
+        payload.pop("id", None)
+
+        # Send the updated object to the remote API as JSON
+        endpoint = f"{self.ENDPOINT}/{object_id}"
+        response: Dict[str, Any] = self.api_client.put(
+            endpoint,
+            json=payload,
+        )
+
+        # Return the SCM API response as a new Pydantic object
+        return SnippetResponseModel.model_validate(response)
 
     def delete(
         self,
