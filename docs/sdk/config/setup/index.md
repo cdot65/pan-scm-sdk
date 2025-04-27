@@ -7,10 +7,11 @@ Strata Cloud Manager. These objects form the foundation for organizing and manag
 
 ## Available Setup Configuration Objects
 
-| Configuration Object  | Description                                                                 |
-|-----------------------|-----------------------------------------------------------------------------|
-| [Folder](folder.md)   | Manages folder objects for organizing resources in a hierarchical structure |
-| [Snippet](snippet.md) | Manages reusable configuration snippets for consistent deployment           |
+| Configuration Object        | Description                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------|
+| [Folder](folder.md)         | Manages folder objects for organizing resources in a hierarchical structure |
+| [Snippet](snippet.md)       | Manages reusable configuration snippets for consistent deployment           |
+| [Device Service](device.md) | List, filter, and manage device resources.                                  |
 
 ## Folder Organization
 
