@@ -295,12 +295,12 @@ def serialize_routing_preference(self, value: Optional[Union[DefaultRoutingModel
     """Serialize routing_preference to correct format for API requests."""
     if value is None:
         return None
-        
+
     if isinstance(value, DefaultRoutingModel):
         return {"default": {}}
     elif isinstance(value, HotPotatoRoutingModel):
         return {"hot_potato_routing": {}}
-    
+
     return None
 ```
 

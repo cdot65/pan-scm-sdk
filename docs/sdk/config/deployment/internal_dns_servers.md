@@ -352,7 +352,7 @@ def create_dns_server():
             "primary": "192.168.1.10",
             "secondary": "192.168.1.11"
         }
-        
+
         # Create the DNS server
         dns_server = client.internal_dns_servers.create(dns_config)
         print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
@@ -364,7 +364,7 @@ def create_dns_server():
 def update_dns_server(dns_id):
     """Update an existing internal DNS server."""
     from scm.models.deployment import InternalDnsServersUpdateModel
-    
+
     try:
         # Create update model
         update_model = InternalDnsServersUpdateModel(
@@ -372,7 +372,7 @@ def update_dns_server(dns_id):
             domain_name=["example.com", "internal.example.com", "new-domain.example.com"],
             secondary="192.168.1.12"
         )
-        
+
         # Perform update
         updated = client.internal_dns_servers.update(update_model)
         print(f"Updated DNS server: {updated.name}")
@@ -404,13 +404,13 @@ def main():
     dns_id = create_dns_server()
     if not dns_id:
         return
-    
+
     # Update the DNS server
     update_dns_server(dns_id)
-    
+
     # List all DNS servers
     list_dns_servers()
-    
+
     # Delete the DNS server
     delete_dns_server(dns_id)
 

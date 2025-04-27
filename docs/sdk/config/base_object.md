@@ -192,7 +192,7 @@ except InvalidObjectError as e:
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control 
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
 which objects are included or excluded after the initial API response is fetched.
 
 **Parameters:**

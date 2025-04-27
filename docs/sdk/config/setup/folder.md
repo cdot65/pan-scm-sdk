@@ -205,11 +205,11 @@ print(f"Absolute max limit: {Folder.ABSOLUTE_MAX_LIMIT}")
 def build_folder_tree(client, root_name=""):
     """
     Build a hierarchical representation of the folder structure
-    
+
     Args:
         client: The SCM client
         root_name: Name of the root folder (empty string for the absolute root)
-        
+
     Returns:
         dict: A nested dictionary representing the folder tree
     """
@@ -330,7 +330,7 @@ def create_folder_hierarchy():
             client_id="your_client_id",
             client_secret="your_client_secret"
         )
-        
+
         # Create root folder
         try:
             root = client.folder.create(
@@ -344,7 +344,7 @@ def create_folder_hierarchy():
             # If the folder already exists, fetch it
             root = client.folder.fetch(name="Organization")
             print(f"Using existing root folder: {root.name} (ID: {root.id})")
-            
+
         # Create department folders
         departments = ["Engineering", "Marketing", "Operations", "Finance"]
         for dept in departments:
@@ -356,7 +356,7 @@ def create_folder_hierarchy():
                     labels=["department", dept.lower()]
                 )
                 print(f"Created department folder: {dept_folder.name}")
-                
+
                 # Create project folders for Engineering
                 if dept == "Engineering":
                     projects = ["Cloud", "Security", "Mobile", "Web"]
@@ -373,11 +373,11 @@ def create_folder_hierarchy():
                             print(f"Project folder {project} already exists, skipping")
             except NameNotUniqueError:
                 print(f"Department folder {dept} already exists, skipping")
-                
+
         # List all folders
         all_folders = client.folder.list()
         print(f"Total folders created: {len(all_folders)}")
-        
+
     except APIError as e:
         print(f"API error: {e}")
     except Exception as e:

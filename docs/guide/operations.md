@@ -69,15 +69,15 @@ Here's a helper function to wait for a job to complete:
 def wait_for_job_completion(client, job_id, interval=5, timeout=600):
     import time
     start_time = time.time()
-    
+
     while time.time() - start_time < timeout:
         job_status = client.jobs.status(job_id)
         if job_status["status"] in ["COMPLETED", "FAILED"]:
             return job_status
-        
+
         print(f"Job status: {job_status['status']}")
         time.sleep(interval)
-    
+
     raise TimeoutError(f"Job did not complete within {timeout} seconds")
 
 # Usage
@@ -102,24 +102,24 @@ try:
         "admin_name": "admin"
     })
     job_id = response["id"]
-    
+
     # Wait for job completion
     job_result = wait_for_job_completion(client, job_id)
     if job_result["status"] != "COMPLETED":
         raise Exception(f"Job failed: {job_result.get('message', 'Unknown error')}")
-        
+
 except ApiError as e:
     print(f"API Error: {e}")
     # Handle API errors (e.g., invalid parameters, insufficient permissions)
-    
+
 except BadResponseError as e:
     print(f"Response Error: {e}")
     # Handle unexpected response format
-    
+
 except ScmError as e:
     print(f"SDK Error: {e}")
     # Handle general SDK errors
-    
+
 except Exception as e:
     print(f"General Error: {e}")
     # Handle other errors

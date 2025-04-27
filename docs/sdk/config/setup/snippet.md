@@ -223,13 +223,13 @@ try:
     # Associate a snippet with a folder
     snippet_id = "12345678-1234-1234-1234-123456789012"
     folder_id = "87654321-4321-4321-4321-210987654321"
-    
+
     updated_snippet = client.snippet.associate_folder(
         snippet_id=snippet_id,
         folder_id=folder_id
     )
     print(f"Associated snippet {snippet_id} with folder {folder_id}")
-    
+
     # Disassociate a snippet from a folder
     result = client.snippet.disassociate_folder(
         snippet_id=snippet_id,
@@ -286,13 +286,13 @@ from scm.exceptions import ObjectNotPresentError, APIError
 
 def manage_snippets():
     """Complete example of managing snippets in Strata Cloud Manager."""
-    
+
     # Initialize the client
     client = ScmClient(
         client_id="your_client_id",
         client_secret="your_client_secret"
     )
-    
+
     try:
         # Create a new snippet
         snippet = client.snippet.create(
@@ -302,11 +302,11 @@ def manage_snippets():
             enable_prefix=True
         )
         print(f"Created snippet: {snippet.name} (ID: {snippet.id})")
-        
+
         # Get the snippet by ID
         retrieved_snippet = client.snippet.get(object_id=snippet.id)
         print(f"Retrieved snippet: {retrieved_snippet.name}")
-        
+
         # Update the snippet
         updated_snippet = client.snippet.update(
             snippet_id=snippet.id,
@@ -314,22 +314,22 @@ def manage_snippets():
             labels=["security", "policy", "updated"]
         )
         print(f"Updated snippet description: {updated_snippet.description}")
-        
+
         # List all snippets with "Security" in the name
         filtered_snippets = client.snippet.list(name="Security")
         print(f"Found {len(filtered_snippets)} snippets matching 'Security'")
-        
+
         # Delete the snippet
         client.snippet.delete(object_id=snippet.id)
         print("Snippet deleted successfully")
-        
+
         # Verify deletion
         try:
             client.snippet.get(object_id=snippet.id)
             print("ERROR: Snippet was not deleted!")
         except ObjectNotPresentError:
             print("Verified: Snippet was successfully deleted")
-    
+
     except ObjectNotPresentError as e:
         print(f"Snippet not found: {e}")
     except APIError as e:

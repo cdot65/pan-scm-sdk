@@ -96,7 +96,7 @@ client = Scm(
 try:
     # Using unified client approach
     locations = client.network_location.list()
-    
+
     # Print the location values
     print(f"Found {len(locations)} network locations:")
     for location in locations:
@@ -122,13 +122,13 @@ try:
     # Filter locations by continent
     us_locations = client.network_location.list(continent="North America")
     print(f"Found {len(us_locations)} locations in North America")
-    
+
     # Filter locations by multiple criteria
     west_coast = client.network_location.list(
-        continent="North America", 
+        continent="North America",
         aggregate_region="us-southwest"
     )
-    
+
     # Print the results
     print(f"Found {len(west_coast)} locations in US Southwest:")
     for location in west_coast:
@@ -153,7 +153,7 @@ client = Scm(
 try:
     # Fetch a specific network location by its value
     location = client.network_location.fetch("us-west-1")
-    
+
     # Print the location details
     print(f"Successfully retrieved location:")
     print(f"Value: {location.value}")

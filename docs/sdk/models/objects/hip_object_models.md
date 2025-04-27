@@ -179,7 +179,7 @@ response = hip_object.update(update_dict)
 
 ## Related Models
 
-- HostInfoModel 
+- HostInfoModel
 - NetworkInfoModel
 - PatchManagementModel
 - DiskEncryptionModel

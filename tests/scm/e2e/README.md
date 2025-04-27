@@ -22,10 +22,10 @@ class TestMyFeatureE2E(unittest.TestCase):
     def setUp(self):
         # Create a mock API client
         self.api_client = MockScm()
-        
+
         # Create the service
         self.service = BandwidthAllocations(self.api_client)
-        
+
         # Configure mock responses
         self.api_client.get.return_value = {"your": "mock_data"}
 ```

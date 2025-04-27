@@ -124,7 +124,7 @@ if current_settings.outbound_routes_for_services:
     print(f"Outbound routes: {', '.join(current_settings.outbound_routes_for_services)}")
 else:
     print("No outbound routes configured")
-    
+
 print(f"Add host route to IKE peer: {current_settings.add_host_route_to_ike_peer}")
 print(f"Withdraw static route: {current_settings.withdraw_static_route}")
 ```
@@ -306,7 +306,7 @@ except MissingQueryParameterError as e:
 
 2. **Routing Preference Configuration**
     - Use either Default or Hot Potato routing, never both
-    - Use the appropriate model (DefaultRoutingModel or HotPotatoRoutingModel) 
+    - Use the appropriate model (DefaultRoutingModel or HotPotatoRoutingModel)
     - When providing a dictionary, use the correct format ({"default": {}} or {"hot_potato_routing": {}})
 
 3. **Backbone Routing Configuration**

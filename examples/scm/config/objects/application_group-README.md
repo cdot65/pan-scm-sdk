@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage application groups across a wide range of real-world enterprise scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `application_group.py` script showcases enterprise-ready application group configurations addressing common use cases, including:
 

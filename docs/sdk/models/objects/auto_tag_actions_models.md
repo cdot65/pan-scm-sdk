@@ -67,24 +67,24 @@ class AutoTagMatchCriteria(BaseModel):
     source_user: Optional[List[str]] = None
     source_zone: Optional[List[str]] = None
     destination_zone: Optional[List[str]] = None
-    
+
     # Security event criteria
     severity: Optional[Union[str, List[str]]] = None
     threat_name: Optional[str] = None
     threat_id: Optional[str] = None
     threat_type: Optional[List[str]] = None
     action_taken: Optional[str] = None
-    
+
     # Application criteria
     application: Optional[AutoTagApplicationCriteria] = None
-    
+
     # URL/Domain criteria
     url_category: Optional[List[str]] = None
     destination: Optional[AutoTagDestinationCriteria] = None
-    
+
     # Data patterns
     data_pattern: Optional[List[str]] = None
-    
+
     # Custom criteria
     custom_criteria: Optional[Dict[str, Any]] = None
 ```

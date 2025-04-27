@@ -254,7 +254,7 @@ dns_servers = InternalDnsServers(api_client)
 all_dns_servers = dns_servers.list()
 for server in all_dns_servers:
     print(f"DNS Server: {server.name}, Primary: {server.primary}")
-    
+
 # Create a NetworkLocations instance
 network_locations = NetworkLocations(api_client)
 

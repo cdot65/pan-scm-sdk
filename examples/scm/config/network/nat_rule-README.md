@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage NAT rules across a wide range of real-world enterprise scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `nat_rule.py` script showcases enterprise-ready NAT configurations addressing common network translation needs, including:
 

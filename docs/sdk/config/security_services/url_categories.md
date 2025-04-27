@@ -384,6 +384,6 @@ the [url_categories.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/
 
 ## Related Models
 
-- [URLCategoriesCreateModel](../../models/security_services/url_categories_models.md#Overview)
-- [URLCategoriesUpdateModel](../../models/security_services/url_categories_models.md#Overview)
-- [URLCategoriesResponseModel](../../models/security_services/url_categories_models.md#Overview)
+- [URLCategoriesCreateModel](../../models/security_services/url_categories_models.md)
+- [URLCategoriesUpdateModel](../../models/security_services/url_categories_models.md)
+- [URLCategoriesResponseModel](../../models/security_services/url_categories_models.md)

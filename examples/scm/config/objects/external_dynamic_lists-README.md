@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage External Dynamic Lists (EDLs) across a wide range of real-world enterprise scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `external_dynamic_lists.py` script showcases enterprise-ready EDL configurations addressing common threat intelligence consumption needs, including:
 

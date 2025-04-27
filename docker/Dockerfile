@@ -1,7 +1,7 @@
 FROM python:3.12-alpine
 
 # Install build dependencies
-RUN apk add --no-cache gcc musl-dev libffi-dev make curl
+RUN apk add --no-cache gcc musl-dev libffi-dev make curl git
 
 # Install Poetry as root, copy binary to /usr/bin, and set permissions
 ENV POETRY_VERSION=1.8.2
@@ -27,9 +27,9 @@ COPY . .
 # Set the locale to avoid issues with emoji rendering
 ENV LANG=C.UTF-8
 
-# Create a non-root user
-RUN adduser -D panadmin
-USER panadmin
-
+## Create a non-root user
+#RUN adduser -D panadmin
+#USER panadmin
+#
 # Default command (PyCharm will override)
 CMD ["sleep", "infinity"]
