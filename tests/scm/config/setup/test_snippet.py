@@ -579,6 +579,9 @@ class TestSnippetDelete(TestSnippetBase):
         with pytest.raises(ObjectNotPresentError):
             snippet_service.delete(snippet_id)
 
+        # Assert the client was called correctly
+        mock_scm_client.delete.assert_called_once_with(f"/config/setup/v1/snippets/{snippet_id}")
+
     def test_delete_with_general_error(self, snippet_service, mock_scm_client):
         """Test delete with a non-404 exception."""
         # Create a non-404 error
@@ -815,6 +818,26 @@ class TestSnippetListEdgeCases(TestSnippetBase):
         results = snippet_service.list()
         assert len(results) == 3
         assert get_mock.call_count == 2
+
+    def test_list_labels_param_passed_to_api(self, snippet_service, mocker):
+        # Ensure 'labels' filter is sent as comma-separated string in params
+        labels = ["foo", "bar"]
+        expected = "foo,bar"
+        response = {"data": []}
+        get_mock = mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        snippet_service.list(labels=labels)
+        called_params = get_mock.call_args[1]["params"]
+        assert called_params["labels"] == expected
+
+    def test_list_types_param_passed_to_api(self, snippet_service, mocker):
+        # Ensure 'types' filter is sent as comma-separated string in params
+        types = ["predefined", "custom"]
+        expected = "predefined,custom"
+        response = {"data": []}
+        get_mock = mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        snippet_service.list(types=types)
+        called_params = get_mock.call_args[1]["params"]
+        assert called_params["types"] == expected
 
 
 class TestSnippetFetchEdgeCases(TestSnippetBase):

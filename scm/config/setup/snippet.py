@@ -257,12 +257,12 @@ class Snippet(BaseObject):
         **filters: Any,  # Accept arbitrary filters ('labels', 'types')
     ) -> List[SnippetResponseModel]:
         """
-        List snippets with optional client-side filtering.
+        List snippets with optional server-side and client-side filtering.
 
         Args:
-            **filters: Additional client-side filters:
-                - labels (List[str]): Filter by labels.
-                - types (List[str]): Filter by snippet type (e.g., ['predefined', 'custom']).
+            **filters: Additional filters:
+                - labels (List[str]): Filter by labels (server-side if supported).
+                - types (List[str]): Filter by snippet type (server-side if supported).
 
         Returns:
             List[SnippetResponseModel]: A list of snippets matching the filters.
@@ -273,6 +273,12 @@ class Snippet(BaseObject):
         """
         # Prepare API parameters
         params: Dict[str, Any] = {}
+
+        # Add server-side filters if supported by the API
+        if "labels" in filters:
+            params["labels"] = ",".join(filters["labels"])
+        if "types" in filters:
+            params["types"] = ",".join(filters["types"])
 
         # Pagination logic using instance max_limit
         limit = self._max_limit
@@ -323,10 +329,10 @@ class Snippet(BaseObject):
 
             offset += limit
 
-        # Apply client-side filters (currently only 'labels' and 'types')
+        # Apply any remaining client-side filters
         filtered_snippets = self._apply_filters(
             all_objects,
-            filters,
+            {k: v for k, v in filters.items() if k not in ["labels", "types"]},
         )
 
         return filtered_snippets
