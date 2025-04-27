@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 class DeviceLicenseModel(BaseModel):
     """
-    Model for a license entry in available_licensess or installed_licenses.
+    Model for a license entry in available_licenses or installed_licenses.
     """
 
     feature: str = Field(..., description="Feature name for the license.")
@@ -25,12 +25,24 @@ class DeviceLicenseModel(BaseModel):
     )
 
 
-class DeviceModel(BaseModel):
+class DeviceBaseModel(BaseModel):
     """
-    Model for a Device resource as returned by the SCM API.
+    Base model for Device resources containing common fields.
+
+    Attributes:
+        name: Device name.
+        display_name: Display name for the device.
+        serial_number: Device serial number.
+        family: Device family (e.g., 'vm').
+        model: Device model (e.g., 'PA-VM').
+        folder: Folder name containing the device.
+        hostname: Device hostname.
+        type: Device type (e.g., 'on-prem').
+        device_only: True if device-only entry.
+        is_connected: Connection status.
+        description: Device description.
     """
 
-    id: str = Field(..., description="Unique device identifier (serial number).")
     name: Optional[str] = Field(None, description="Device name.")
     display_name: Optional[str] = Field(None, description="Display name for the device.")
     serial_number: Optional[str] = Field(None, description="Device serial number.")
@@ -41,6 +53,75 @@ class DeviceModel(BaseModel):
     type: Optional[str] = Field(None, description="Device type (e.g., 'on-prem').")
     device_only: Optional[bool] = Field(None, description="True if device-only entry.")
     is_connected: Optional[bool] = Field(None, description="Connection status.")
+    description: Optional[str] = Field(None, description="Device description.")
+
+
+class DeviceCreateModel(DeviceBaseModel):
+    """
+    Model for creating new Device resources.
+
+    Inherits all fields from DeviceBaseModel without additional fields.
+    """
+
+    pass
+
+
+class DeviceUpdateModel(DeviceBaseModel):
+    """
+    Model for updating existing Device resources.
+
+    Attributes:
+        id: The unique identifier of the device to update.
+    """
+
+    id: str = Field(..., description="Unique device identifier (serial number).")
+
+
+class DeviceResponseModel(DeviceBaseModel):
+    """
+    Model for Device responses from the API.
+
+    Attributes:
+        id: Unique device identifier (serial number).
+        connected_since: ISO timestamp when connected.
+        last_disconnect_time: ISO timestamp when last disconnected.
+        last_device_update_time: ISO timestamp of last device update.
+        last_das_update_time: ISO timestamp of last DAS update.
+        deactivate_wait_hrs: Deactivation wait hours.
+        deactivated_by: Who deactivated the device.
+        to_be_deactivated_at: Scheduled deactivation time.
+        dev_cert_detail: Device certificate detail.
+        dev_cert_expiry_date: Device certificate expiry (epoch).
+        app_version: App version.
+        app_release_date: App release date.
+        av_release_date: Antivirus release date.
+        anti_virus_version: Antivirus version.
+        threat_version: Threat version.
+        threat_release_date: Threat release date.
+        wf_ver: WildFire version.
+        wf_release_date: WildFire release date.
+        iot_version: IoT version.
+        iot_release_date: IoT release date.
+        gp_client_verion: GlobalProtect client version.
+        gp_data_version: GlobalProtect data version.
+        log_db_version: Log DB version.
+        software_version: Software version.
+        uptime: Device uptime.
+        mac_address: MAC address.
+        ip_address: IPv4 address.
+        ipV6_address: IPv6 address.
+        url_db_ver: URL DB version.
+        url_db_type: URL DB type.
+        license_match: License match status.
+        available_licenses: List of available licenses.
+        installed_licenses: List of installed licenses.
+        ha_state: HA state.
+        ha_peer_state: HA peer state.
+        ha_peer_serial: HA peer serial number.
+        vm_state: VM state.
+    """
+
+    id: str = Field(..., description="Unique device identifier (serial number).")
     connected_since: Optional[str] = Field(None, description="ISO timestamp when connected.")
     last_disconnect_time: Optional[str] = Field(
         None, description="ISO timestamp when last disconnected."
@@ -58,7 +139,6 @@ class DeviceModel(BaseModel):
     dev_cert_expiry_date: Optional[str] = Field(
         None, description="Device certificate expiry (epoch)."
     )
-    description: Optional[str] = Field(None, description="Device description.")
     app_version: Optional[str] = Field(None, description="App version.")
     app_release_date: Optional[str] = Field(None, description="App release date.")
     av_release_date: Optional[str] = Field(None, description="Antivirus release date.")
@@ -80,7 +160,7 @@ class DeviceModel(BaseModel):
     url_db_ver: Optional[str] = Field(None, description="URL DB version.")
     url_db_type: Optional[str] = Field(None, description="URL DB type.")
     license_match: Optional[bool] = Field(None, description="License match status.")
-    available_licensess: Optional[List[DeviceLicenseModel]] = Field(
+    available_licenses: Optional[List[DeviceLicenseModel]] = Field(
         None, description="List of available licenses."
     )
     installed_licenses: Optional[List[DeviceLicenseModel]] = Field(
@@ -97,7 +177,7 @@ class DeviceListResponseModel(BaseModel):
     Model for the paginated response from GET /devices.
     """
 
-    data: List[DeviceModel] = Field(..., description="List of device objects.")
+    data: List[DeviceResponseModel] = Field(..., description="List of device objects.")
     limit: int = Field(..., description="Max number of devices returned.")
     offset: int = Field(..., description="Offset for pagination.")
     total: int = Field(..., description="Total number of devices available.")
