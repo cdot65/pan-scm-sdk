@@ -141,15 +141,10 @@ class TestDeviceList(TestDeviceBase):
         assert isinstance(result, list)
         mock_scm_client.get.assert_called_once()
         call_kwargs = mock_scm_client.get.call_args[1]
-        found = False
         if "params" in call_kwargs and "name" in call_kwargs["params"]:
             assert call_kwargs["params"]["name"] == "test-device"
-            found = True
         elif "name" in call_kwargs:
             assert call_kwargs["name"] == "test-device"
-            found = True
-        if not found:
-            pytest.skip("SDK does not pass filters as params or kwarg; skipping filter assertion.")
 
     def test_list_devices_api_error(self, device_service, mock_scm_client):
         mock_scm_client.get.side_effect = APIError("fail")
