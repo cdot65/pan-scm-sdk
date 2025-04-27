@@ -9,14 +9,14 @@ import pytest
 # Local SDK imports
 from scm.client import Scm
 from scm.config.setup.folder import Folder
-from scm.exceptions import InvalidObjectError, APIError, ObjectNotPresentError
+from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
 from scm.models.setup.folder import (
     FolderResponseModel,
     FolderUpdateModel,
 )
 from tests.factories.setup.folder import (
-    FolderResponseFactory,
     FolderCreateApiFactory,
+    FolderResponseFactory,
     FolderUpdateApiFactory,
 )
 
@@ -117,6 +117,16 @@ class TestFolderGet(TestFolderBase):
         assert str(result.id) == folder_id
         assert result.name == mock_response.name
         assert result.parent == mock_response.parent
+
+    def test_get_folder_404_and_other_error(self, folder_service, mock_scm_client):
+        # 404 error -> ObjectNotPresentError
+        mock_scm_client.get.side_effect = APIError("not found", http_status_code=404)
+        with pytest.raises(ObjectNotPresentError):
+            folder_service.get("doesnotexist")
+        # 500 error -> APIError
+        mock_scm_client.get.side_effect = APIError("fail", http_status_code=500)
+        with pytest.raises(APIError):
+            folder_service.get("fail")
 
 
 class TestFolderFetch(TestFolderBase):
@@ -234,6 +244,21 @@ class TestFolderList(TestFolderBase):
         assert len(filtered) == 2
         for f in filtered:
             assert f.name == "foo"
+
+    def test_list_server_side_param_building(self, folder_service, mock_scm_client):
+        # labels param
+        mock_scm_client.get.return_value = {"data": []}
+        folder_service.list(labels=["a", "b"])
+        args, kwargs = mock_scm_client.get.call_args
+        assert kwargs["params"]["labels"] == "a,b"
+        # type param
+        folder_service.list(type="foo")
+        args, kwargs = mock_scm_client.get.call_args
+        assert kwargs["params"]["type"] == "foo"
+        # parent param
+        folder_service.list(parent="pid")
+        args, kwargs = mock_scm_client.get.call_args
+        assert kwargs["params"]["parent"] == "pid"
 
 
 class TestFolderUpdate(TestFolderBase):
@@ -384,3 +409,25 @@ class TestFolderMisc(TestFolderBase):
         mock_scm_client.delete.side_effect = APIError("fail", http_status_code=500)
         with pytest.raises(APIError):
             folder_service.delete("notfound")
+
+    def test__get_paginated_results_data(self, folder_service, mock_scm_client):
+        # Patch api_client.get to return dict with 'data'
+        endpoint = "endpoint"
+        params = {"a": 1}
+        mock_scm_client.get.return_value = {"data": [1, 2, 3]}
+        out = folder_service._get_paginated_results(endpoint, params, 10, 0)
+        assert out == [1, 2, 3]
+
+    def test__get_paginated_results_list(self, folder_service, mock_scm_client):
+        endpoint = "endpoint"
+        params = {"a": 1}
+        mock_scm_client.get.return_value = [4, 5]
+        out = folder_service._get_paginated_results(endpoint, params, 10, 0)
+        assert out == [4, 5]
+
+    def test__get_paginated_results_unexpected(self, folder_service, mock_scm_client):
+        endpoint = "endpoint"
+        params = {"a": 1}
+        mock_scm_client.get.return_value = "weird"
+        out = folder_service._get_paginated_results(endpoint, params, 10, 0)
+        assert out == []
