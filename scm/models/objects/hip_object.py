@@ -27,7 +27,6 @@ class NameProductModel(BaseHIPModel):
     product: Optional[List[str]] = Field(
         None,
         max_length=1023,
-        pattern=r"^[a-zA-Z0-9\-_. ]+$",
         description="List of associated products",
     )
 
@@ -43,7 +42,6 @@ class SecurityVendorModel(BaseHIPModel):
     product: Optional[List[str]] = Field(
         None,
         max_length=1023,
-        pattern=r"^[a-zA-Z0-9\-_. ]+$",
         description="List of vendor products",
     )
 
