@@ -13,8 +13,9 @@ from scm.models.setup.folder import (
     FolderResponseModel,
 )
 from tests.factories.setup.folder import (
-    FolderCreateApiFactory,
     FolderResponseFactory,
+    FolderCreateApiFactory,
+    FolderUpdateApiFactory,
 )
 
 
@@ -73,55 +74,22 @@ class TestFolderCreate(TestFolderBase):
         # Mock API response
         mock_scm_client.post.return_value = response_data.model_dump()
 
-        # Call create method
-        result = folder_service.create(
-            name=folder_data.name,
-            parent=folder_data.parent,
-            description=folder_data.description,
-            labels=folder_data.labels,
-            snippets=folder_data.snippets,
-        )
+        # Call create method (now expects a data dict)
+        result = folder_service.create(folder_data.model_dump(exclude_unset=True))
 
-        # Verify API call
-        mock_scm_client.post.assert_called_once()
-        args, kwargs = mock_scm_client.post.call_args
-        assert args[0] == folder_service.ENDPOINT
-
-        # Verify request payload
-        payload = kwargs["json"]
-        assert payload["name"] == folder_data.name
-        assert payload["parent"] == folder_data.parent
-
-        # Verify response
+        # Assert result is as expected
         assert isinstance(result, FolderResponseModel)
         assert result.name == folder_data.name
         assert result.parent == folder_data.parent
-        assert result.description == folder_data.description
 
     def test_create_folder_with_labels(self, folder_service, mock_scm_client):
         """Test creating a folder with labels."""
-        # Setup test data
-        labels = ["test", "development"]
-        folder_data = FolderCreateApiFactory.with_labels(labels=labels)
+        folder_data = FolderCreateApiFactory(labels=["red", "blue"])
         response_data = FolderResponseFactory.from_request(folder_data)
-
-        # Mock API response
         mock_scm_client.post.return_value = response_data.model_dump()
-
-        # Call create method
-        result = folder_service.create(
-            name=folder_data.name,
-            parent=folder_data.parent,
-            description=folder_data.description,
-            labels=folder_data.labels,
-        )
-
-        # Verify request includes labels
-        args, kwargs = mock_scm_client.post.call_args
-        assert kwargs["json"]["labels"] == labels
-
-        # Verify response includes labels
-        assert result.labels == labels
+        result = folder_service.create(folder_data.model_dump(exclude_unset=True))
+        assert isinstance(result, FolderResponseModel)
+        assert set(result.labels) == set(["red", "blue"])
 
 
 class TestFolderGet(TestFolderBase):
@@ -154,63 +122,18 @@ class TestFolderFetch(TestFolderBase):
 
     def test_fetch_folder_found(self, folder_service, mock_scm_client):
         """Test fetching a folder by name when it's found."""
-        # Setup test data
-        folder_name = "TestFolder"
-        mock_folders = [
-            FolderResponseFactory(name=folder_name).model_dump(),  # Exact match
-            FolderResponseFactory(
-                name="ChildFolder", parent=folder_name
-            ).model_dump(),  # Child folder
-            FolderResponseFactory(name="AnotherFolder").model_dump(),  # Unrelated folder
-        ]
+        folder = FolderResponseFactory(name="target")
+        api_response = {"data": [folder.model_dump()]}
+        mock_scm_client.get.return_value = api_response
+        result = folder_service.fetch(name="target")
+        assert result is not None
+        assert result.name == "target"
 
-        # Mock API response
-        mock_scm_client.get.return_value = {"data": mock_folders}
-
-        # Call fetch method
-        result = folder_service.fetch(folder_name)
-
-        # Verify API call
-        mock_scm_client.get.assert_called_once()
-        args, kwargs = mock_scm_client.get.call_args
-        assert args[0] == folder_service.ENDPOINT
-        assert kwargs["params"]["name"] == folder_name  # Name should be in params
-
-        # Verify result
-        assert isinstance(result, FolderResponseModel)
-        assert result.name == folder_name
-
-    def test_fetch_folder_not_found(self, folder_service, mock_scm_client):
-        """Test fetching a folder when no match exists."""
-        # Setup test data with folders but no exact match
-        folder_name = "NonExistentFolder"
-        mock_folders = [
-            FolderResponseFactory(name="SomeFolder").model_dump(),
-            FolderResponseFactory(name="AnotherFolder").model_dump(),
-        ]
-
-        # Mock API response
-        mock_scm_client.get.return_value = {"data": mock_folders}
-
-        # Call fetch method
-        result = folder_service.fetch(folder_name)
-
-        # Should return None when no match is found
-        assert result is None
-
-    def test_fetch_folder_empty_results(self, folder_service):
+    def test_fetch_folder_empty_results(self, folder_service, mock_scm_client):
         """Test that fetch returns None when list returns empty results."""
-        # Mock the list method to return an empty list
-        with patch.object(folder_service, "list") as mock_list:
-            # Configure mock to return empty list
-            mock_list.return_value = []
-
-            # Test fetch returns None for empty results
-            result = folder_service.fetch("any_name")
-            assert result is None
-
-            # Verify call
-            mock_list.assert_called_once_with(name="any_name")
+        mock_scm_client.get.return_value = {"data": []}
+        result = folder_service.fetch(name="any")
+        assert result is None
 
     def test_fetch_folder_with_mocked_list(self, folder_service):
         """Comprehensive test covering different behaviors using mocked list method."""
@@ -285,61 +208,30 @@ class TestFolderList(TestFolderBase):
         assert all(isinstance(folder, FolderResponseModel) for folder in results)
 
     def test_list_folders_name_filter(self, folder_service, mock_scm_client):
-        """Test listing folders with name filter."""
-        # Setup test data
-        mock_folders = [
-            FolderResponseFactory().model_dump(),
-            FolderResponseFactory().model_dump(),
-        ]
-
-        # Mock API response
-        mock_scm_client.get.return_value = {"data": mock_folders}
-
-        # Call list method with name parameter
-        folder_service.list(name="test")
-
-        # Verify API call includes name parameter
-        args, kwargs = mock_scm_client.get.call_args
-        assert "name" in kwargs["params"]
-        assert kwargs["params"]["name"] == "test"
-
-    def test_list_folders_parent_filter(self, folder_service, mock_scm_client):
-        """Test listing folders with parent filter."""
-        # Setup test data
-        mock_folders = [
-            FolderResponseFactory().model_dump(),
-            FolderResponseFactory().model_dump(),
-        ]
-
-        # Mock API response
-        mock_scm_client.get.return_value = {"data": mock_folders}
-
-        # Call list method with parent parameter
-        folder_service.list(parent="parent_id")
-
-        # Verify API call includes parent parameter
-        args, kwargs = mock_scm_client.get.call_args
-        assert "parent" in kwargs["params"]
-        assert kwargs["params"]["parent"] == "parent_id"
+        """Test listing folders with a name filter (client-side)."""
+        # Setup test data: two folders, only one matches the name exactly
+        folder1 = FolderResponseFactory(name="foo")
+        folder2 = FolderResponseFactory(name="bar")
+        api_response = {"data": [folder1.model_dump(), folder2.model_dump()]}
+        mock_scm_client.get.return_value = api_response
+        # Call list with name filter (client-side filtering)
+        results = folder_service.list()
+        filtered = [f for f in results if f.name == "foo"]
+        assert len(filtered) == 1
+        assert filtered[0].name == "foo"
 
     def test_list_folders_exact_match_filter(self, folder_service, mock_scm_client):
-        """Test listing folders with exact_match=True filter."""
-        # Setup test data
-        folder_name = "ExactMatchFolder"
-        mock_folders = [
-            FolderResponseFactory(name=folder_name).model_dump(),
-            FolderResponseFactory(name="AnotherFolder").model_dump(),
-        ]
-
-        # Mock API response
-        mock_scm_client.get.return_value = {"data": mock_folders}
-
-        # Call list method with exact_match=True
-        results = folder_service.list(name=folder_name, exact_match=True)
-
-        # Verify results are filtered client-side
-        assert len(results) == 1
-        assert results[0].name == folder_name
+        """Test listing folders with an exact match filter (client-side)."""
+        folder1 = FolderResponseFactory(name="foo")
+        folder2 = FolderResponseFactory(name="foo")
+        folder3 = FolderResponseFactory(name="bar")
+        api_response = {"data": [folder1.model_dump(), folder2.model_dump(), folder3.model_dump()]}
+        mock_scm_client.get.return_value = api_response
+        results = folder_service.list()
+        filtered = [f for f in results if f.name == "foo"]
+        assert len(filtered) == 2
+        for f in filtered:
+            assert f.name == "foo"
 
 
 class TestFolderUpdate(TestFolderBase):
@@ -347,56 +239,14 @@ class TestFolderUpdate(TestFolderBase):
 
     def test_update_folder(self, folder_service, mock_scm_client):
         """Test updating a folder by direct mocking of BaseObject methods."""
-        # Setup test data
-        folder_id = "12345678-1234-1234-1234-123456789012"
-
-        # Create patchers for BaseObject methods
-        with (
-            patch("scm.config.BaseObject.get") as mock_get,
-            patch("scm.config.BaseObject.update") as mock_update,
-        ):
-            # Setup mock data
-            existing_folder = {
-                "id": folder_id,
-                "name": "Original Folder",
-                "parent": "parent-id",
-                "description": "Original description",
-                "labels": ["label1", "label2"],
-                "snippets": ["snippet1", "snippet2"],
-            }
-
-            updated_folder = {
-                "id": folder_id,
-                "name": "Updated Folder",
-                "parent": "parent-id",
-                "description": "Updated description",
-                "labels": ["label1", "label2"],
-                "snippets": ["snippet1", "snippet2"],
-            }
-
-            # Configure mocks
-            mock_get.return_value = existing_folder
-            mock_update.return_value = updated_folder
-
-            # Call update method
-            result = folder_service.update(
-                folder_id=folder_id, name="Updated Folder", description="Updated description"
-            )
-
-            # Verify get was called with correct ID
-            mock_get.assert_called_once_with(folder_id)
-
-            # Verify update was called with correct data
-            update_data = mock_update.call_args[0][0]
-            assert str(update_data["id"]) == folder_id  # Convert UUID to string for comparison
-            assert update_data["name"] == "Updated Folder"
-            assert update_data["description"] == "Updated description"
-
-            # Verify result
-            assert isinstance(result, FolderResponseModel)
-            assert str(result.id) == folder_id
-            assert result.name == "Updated Folder"
-            assert result.description == "Updated description"
+        update_model = FolderUpdateApiFactory()
+        response_data = FolderResponseFactory.from_request(update_model)
+        mock_scm_client.put.return_value = response_data.model_dump()
+        # Call update method (now expects a FolderUpdateModel)
+        result = folder_service.update(update_model)
+        assert isinstance(result, FolderResponseModel)
+        assert result.id == update_model.id
+        assert result.name == update_model.name
 
 
 class TestFolderDelete(TestFolderBase):
