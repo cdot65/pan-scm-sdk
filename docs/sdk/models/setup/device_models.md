@@ -33,7 +33,3 @@ data = {
 device = DeviceResponseModel.model_validate(data)
 print(device.id, device.model)
 ```
-
----
-
-For more details, see the source code: [`scm/models/setup/device.py`](../../../scm/models/setup/device.py)

@@ -396,8 +396,8 @@ class Scm:
                 "DecryptionProfile",
             ),
             "device": (
-                "scm.config.setup.devices",
-                "Devices",
+                "scm.config.setup.device",
+                "Device",
             ),
             "dns_security_profile": (
                 "scm.config.security.dns_security_profile",

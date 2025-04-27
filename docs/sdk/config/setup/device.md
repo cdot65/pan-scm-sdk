@@ -33,7 +33,3 @@ for device in device_service.list(type="vm"):
 
 ## Related Models
 See [DeviceResponseModel](../../models/setup/device_models.md) for the device data structure.
-
----
-
-For more details, see the source code: [`scm/config/setup/device.py`](../../../scm/config/setup/device.py)
