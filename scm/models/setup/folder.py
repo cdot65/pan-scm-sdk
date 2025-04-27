@@ -21,6 +21,11 @@ class FolderBaseModel(BaseModel):
         description: Optional description of the folder.
         labels: Optional list of labels to apply to the folder.
         snippets: Optional list of snippet IDs associated with the folder.
+        display_name: Display name for the folder/device, if present.
+        model: Device model, if present (e.g., 'PA-VM').
+        serial_number: Device serial number, if present.
+        type: Type of folder or device (e.g., 'on-prem', 'container', 'cloud').
+        device_only: True if this is a device-only entry.
     """
 
     name: str = Field(
@@ -40,6 +45,26 @@ class FolderBaseModel(BaseModel):
     snippets: Optional[List[str]] = Field(
         default=None,
         description="Optional list of snippet IDs associated with the folder",
+    )
+    display_name: Optional[str] = Field(
+        default=None,
+        description="Display name for the folder/device, if present.",
+    )
+    model: Optional[str] = Field(
+        default=None,
+        description="Device model, if present (e.g., 'PA-VM').",
+    )
+    serial_number: Optional[str] = Field(
+        default=None,
+        description="Device serial number, if present.",
+    )
+    type: Optional[str] = Field(
+        default=None,
+        description="Type of folder or device (e.g., 'on-prem', 'container', 'cloud').",
+    )
+    device_only: Optional[bool] = Field(
+        default=None,
+        description="True if this is a device-only entry.",
     )
 
 

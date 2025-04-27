@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage security zones across a wide range of real-world enterprise scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `security_zone.py` script showcases enterprise-ready security zone configurations addressing common network segmentation needs, including:
 

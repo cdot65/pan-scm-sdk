@@ -1,6 +1,6 @@
 # Log Forwarding Profile Example Script
 
-## Overview
+## Overview {#Overview}
 
 The `log_forwarding_profile.py` script demonstrates comprehensive examples of working with Log Forwarding Profile objects in Palo Alto Networks' Strata Cloud Manager (SCM). Log forwarding profiles define how logs are handled and forwarded to external systems, allowing you to configure match criteria for different log types and specify where the matching logs should be sent.
 

@@ -16,10 +16,10 @@ from scm.config.deployment import BandwidthAllocations
 def setUp(self):
     # Create a mock API client
     self.api_client = MockScm()
-    
+
     # Initialize the service with the mock client
     self.service = BandwidthAllocations(self.api_client)
-    
+
     # Configure mock API responses
     self.api_client.get.return_value = {"your": "mock_data"}
     self.api_client.post.return_value = {"created": "item"}
@@ -100,7 +100,7 @@ first_call_kwargs = self.api_client.get.call_args_list[0][1]  # Keyword args of 
 
    ```python
    from scm.exceptions import APIError
-   
+
    # Mock an API error
    self.api_client.get.side_effect = APIError("API request failed", error_code="E001")
    ```

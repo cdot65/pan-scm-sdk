@@ -1,4 +1,4 @@
-# tests/scm/models/setup/test_snippet_models.py
+# tests/scm/models/setup/test_snippet.py
 
 # Standard library imports
 from uuid import UUID
@@ -7,7 +7,7 @@ from pydantic import ValidationError
 import pytest
 
 # Local SDK imports
-from scm.models.setup.snippet_models import (
+from scm.models.setup.snippet import (
     FolderReference,
     SnippetBaseModel,
     SnippetCreateModel,
@@ -26,8 +26,8 @@ class TestSnippetBaseModel:
 
     def test_valid_construction(self):
         """Test that a valid SnippetBaseModel can be constructed."""
-        data = SnippetCreateModelFactory.build_valid()
-
+        model_instance = SnippetCreateModelFactory.build_valid_model()
+        data = model_instance.model_dump()
         model = SnippetBaseModel(**data)
 
         assert model.name == data["name"]
@@ -92,9 +92,9 @@ class TestSnippetCreateModel:
 
     def test_valid_construction(self):
         """Test that a valid SnippetCreateModel can be constructed."""
-        data = SnippetCreateModelFactory.build_valid()
-
-        model = SnippetCreateModel(**data)
+        model_instance = SnippetCreateModelFactory.build_valid_model()
+        data = model_instance.model_dump()
+        model = SnippetBaseModel(**data)
 
         assert model.name == data["name"]
         assert model.description == data["description"]
@@ -119,11 +119,11 @@ class TestSnippetUpdateModel:
 
     def test_valid_construction(self):
         """Test that a valid SnippetUpdateModel can be constructed."""
-        data = SnippetUpdateModelFactory.build_valid()
-
+        model_instance = SnippetUpdateModelFactory.build_valid_model()
+        data = model_instance.model_dump()
         model = SnippetUpdateModel(**data)
 
-        assert str(model.id) == data["id"]
+        assert model.id == data["id"]
         assert model.name == data["name"]
         assert model.description == data["description"]
         assert model.labels == data["labels"]
@@ -143,13 +143,13 @@ class TestSnippetUpdateModel:
 
     def test_id_type_conversion(self):
         """Test that id is properly converted to UUID."""
-        data = SnippetUpdateModelFactory.build_valid()
-
+        model_instance = SnippetUpdateModelFactory.build_valid_model()
+        data = model_instance.model_dump()
         model = SnippetUpdateModel(**data)
 
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
-        assert str(model.id) == data["id"]
+        assert model.id == data["id"]
 
 
 class TestSnippetResponseModel:
@@ -157,77 +157,79 @@ class TestSnippetResponseModel:
 
     def test_valid_construction(self):
         """Test that a valid SnippetResponseModel can be constructed."""
-        data = SnippetResponseModelFactory.build_valid()
+        data = SnippetResponseModelFactory.build()
 
-        model = SnippetResponseModel(**data)
+        model = SnippetResponseModel(**data.model_dump())
 
-        assert str(model.id) == data["id"]
-        assert model.name == data["name"]
-        assert model.description == data["description"]
-        assert model.labels == data["labels"]
-        assert model.enable_prefix == data["enable_prefix"]
-        assert model.type == data["type"]
-        assert model.display_name == data["display_name"]
-        assert model.last_update == data["last_update"]
-        assert model.created_in == data["created_in"]
-        assert model.folders == data["folders"]
-        assert model.shared_in == data["shared_in"]
+        assert str(model.id) == str(data.id)
+        assert model.name == data.name
+        assert model.description == data.description
+        assert model.labels == data.labels
+        assert model.enable_prefix == data.enable_prefix
+        assert model.type == data.type
+        assert model.display_name == data.display_name
+        assert model.last_update == data.last_update
+        assert model.created_in == data.created_in
+        assert model.folders == data.folders
+        assert model.shared_in == data.shared_in
 
     def test_name_validation(self):
         """Test that name validation works."""
-        data = SnippetResponseModelFactory.build_valid()
+        data = SnippetResponseModelFactory.build()
 
         # Valid name should work
-        model = SnippetResponseModel(**data)
-        assert model.name == data["name"]
+        model = SnippetResponseModel(**data.model_dump())
+        assert model.name == data.name
 
         # Empty name should fail validation
-        data["name"] = ""
+        invalid_data = data.model_dump()
+        invalid_data["name"] = ""
         with pytest.raises(ValueError) as excinfo:
-            SnippetResponseModel(**data)
+            SnippetResponseModel(**invalid_data)
         assert "name" in str(excinfo.value).lower()
 
         # Whitespace-only name should fail validation
-        data["name"] = "   "
+        invalid_data["name"] = "   "
         with pytest.raises(ValueError) as excinfo:
-            SnippetResponseModel(**data)
+            SnippetResponseModel(**invalid_data)
         assert "name" in str(excinfo.value).lower()
 
     def test_folders_construction(self):
         """Test that a SnippetResponseModel with folders can be constructed."""
-        data = SnippetResponseModelFactory.build_with_folders(folder_count=2)
+        folders = [{"id": str(UUID(int=i)), "name": f"folder_{i}"} for i in range(2)]
+        data = SnippetResponseModelFactory.build(folders=folders)
 
-        model = SnippetResponseModel(**data)
+        model = SnippetResponseModel(**data.model_dump())
 
         assert len(model.folders) == 2
         assert isinstance(model.folders[0], FolderReference)
-        assert "id" in data["folders"][0]
-        assert "name" in data["folders"][0]
+        assert "id" in folders[0]
+        assert "name" in folders[0]
 
     def test_id_type_conversion(self):
         """Test that id is properly converted to UUID."""
-        data = SnippetResponseModelFactory.build_valid()
-        id_str = data["id"]  # Save original string representation
+        data = SnippetResponseModelFactory.build()
+        id_str = data.id  # Save original string representation
 
-        model = SnippetResponseModel(**data)
+        model = SnippetResponseModel(**data.model_dump())
 
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
-        assert str(model.id) == id_str
+        assert str(model.id) == str(id_str)
 
     def test_predefined_snippet(self):
         """Test construction of a predefined snippet."""
-        data = SnippetResponseModelFactory.build_predefined()
+        data = SnippetResponseModelFactory.build(type="predefined")
 
-        model = SnippetResponseModel(**data)
+        model = SnippetResponseModel(**data.model_dump())
 
         assert model.type == "predefined"
 
     def test_custom_snippet(self):
         """Test construction of a custom snippet."""
-        data = SnippetResponseModelFactory.build_custom()
+        data = SnippetResponseModelFactory.build(type="custom")
 
-        model = SnippetResponseModel(**data)
+        model = SnippetResponseModel(**data.model_dump())
 
         assert model.type == "custom"
 
@@ -257,7 +259,10 @@ class TestFolderReference:
     def test_id_uuid_validation(self):
         """Test that id is validated as a proper UUID."""
         # Valid UUID should work
-        valid_data = {"id": "123e4567-e89b-12d3-a456-426614174000", "name": "test_folder"}
+        valid_data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_folder",
+        }
         model = FolderReference(**valid_data)
         assert str(model.id) == valid_data["id"]
 

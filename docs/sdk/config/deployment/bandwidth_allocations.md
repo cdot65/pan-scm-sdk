@@ -524,24 +524,24 @@ def monitor_and_adjust_bandwidth(allocation_name, spn_list):
     while True:
         # Get current traffic metrics (simulated in this example)
         current_usage = get_traffic_metrics(spn_list)  # Implement this function
-        
+
         # Get current allocation
         allocation = client.bandwidth_allocation.fetch(name=allocation_name)
-        
+
         # Calculate optimal bandwidth based on usage
         optimal_bandwidth = calculate_optimal_bandwidth(current_usage)  # Implement this function
-        
+
         # Adjust if necessary (with hysteresis to prevent frequent changes)
         if abs(optimal_bandwidth - allocation.allocated_bandwidth) > 50:  # 50 Mbps threshold
             print(f"{datetime.now()}: Adjusting bandwidth from {allocation.allocated_bandwidth} to {optimal_bandwidth} Mbps")
-            
+
             # Update the bandwidth allocation
             allocation.allocated_bandwidth = optimal_bandwidth
             client.bandwidth_allocation.update(allocation.model_dump())
-            
+
             # Commit the change
             client.commit(description=f"Auto-adjusted bandwidth for {allocation_name}", sync=True)
-        
+
         # Sleep before next check
         time.sleep(3600)  # Check every hour
 ```
@@ -557,12 +557,12 @@ import json
 # Export all bandwidth allocations to CSV
 def export_allocations_to_csv(filename):
     allocations = client.bandwidth_allocation.list()
-    
+
     with open(filename, 'w', newline='') as csvfile:
         fieldnames = ['name', 'allocated_bandwidth', 'spn_name_list', 'qos_enabled', 'qos_profile', 'guaranteed_ratio']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        
+
         for allocation in allocations:
             row = {
                 'name': allocation.name,
@@ -573,20 +573,20 @@ def export_allocations_to_csv(filename):
                 'guaranteed_ratio': allocation.qos.guaranteed_ratio if allocation.qos and allocation.qos.enabled else 'N/A'
             }
             writer.writerow(row)
-    
+
     print(f"Exported {len(allocations)} bandwidth allocations to {filename}")
 
 # Export to JSON for backup or migration
 def export_allocations_to_json(filename):
     allocations = client.bandwidth_allocation.list()
     export_data = []
-    
+
     for allocation in allocations:
         export_data.append(allocation.model_dump())
-    
+
     with open(filename, 'w') as jsonfile:
         json.dump(export_data, jsonfile, indent=2)
-    
+
     print(f"Exported {len(allocations)} bandwidth allocations to {filename}")
 ```
 

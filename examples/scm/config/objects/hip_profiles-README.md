@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage Host Information Profiles (HIP profiles) across a wide range of enterprise security scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `hip_profile.py` script showcases enterprise-ready HIP profile configurations addressing common host-based security needs, including:
 

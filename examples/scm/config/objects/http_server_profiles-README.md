@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage HTTP Server Profiles across a wide range of enterprise logging and monitoring scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `http_server_profiles.py` script showcases enterprise-ready HTTP server profile configurations addressing common log collection needs, including:
 

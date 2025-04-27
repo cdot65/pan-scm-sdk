@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage address groups across a wide range of real-world enterprise scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `address_group.py` script showcases enterprise-ready address group configurations addressing common network grouping needs, including:
 

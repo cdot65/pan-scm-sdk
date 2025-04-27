@@ -2,7 +2,7 @@
 
 This directory contains extensive example scripts demonstrating how to use the Palo Alto Networks Strata Cloud Manager (SCM) SDK to manage dynamic user groups across a wide range of real-world enterprise scenarios.
 
-## Overview
+## Overview {#Overview}
 
 The `dynamic_user_group.py` script showcases enterprise-ready dynamic user group configurations addressing common access control needs, including:
 

@@ -372,15 +372,15 @@ print(f"Found {len(all_profiles)} profiles")
 for profile in all_profiles:
     print(f"Profile: {profile.name}")
     print(f"Rules: {len(profile.rules)}")
-    
+
     # Count rules by severity
     severity_counts = {}
     for rule in profile.rules:
         for severity in rule.severity:
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
-    
+
     print(f"Severity distribution: {severity_counts}")
-    
+
     # Check for cloud inline analysis
     if profile.cloud_inline_analysis:
         print("Cloud inline analysis: Enabled")

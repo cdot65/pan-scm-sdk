@@ -3,7 +3,7 @@ from .folder import (
     FolderResponseModel,
     FolderUpdateModel,
 )
-from .snippet_models import (
+from .snippet import (
     FolderReference,
     SnippetBaseModel,
     SnippetCreateModel,

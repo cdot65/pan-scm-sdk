@@ -8,6 +8,8 @@ import time
 from typing import Any, Dict, List, Optional
 
 # External libraries
+# trunk-ignore(mypy/note)
+# trunk-ignore(mypy/import-untyped)
 from requests.exceptions import HTTPError
 
 # Local SDK imports
@@ -35,6 +37,7 @@ class Scm:
         log_level: Logging level (default: "ERROR")
     """
 
+    # trunk-ignore(bandit/B107)
     def __init__(
         self,
         client_id: str,
@@ -391,6 +394,10 @@ class Scm:
             "decryption_profile": (
                 "scm.config.security.decryption_profile",
                 "DecryptionProfile",
+            ),
+            "device": (
+                "scm.config.setup.device",
+                "Device",
             ),
             "dns_security_profile": (
                 "scm.config.security.dns_security_profile",

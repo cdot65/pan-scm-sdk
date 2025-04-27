@@ -1,6 +1,6 @@
 # Quarantined Devices Example Script
 
-## Overview
+## Overview {#Overview}
 
 The `quarantined_devices.py` script demonstrates comprehensive examples of working with Quarantined Devices objects in Palo Alto Networks' Strata Cloud Manager (SCM). Quarantined devices are endpoints or systems that have been isolated from the network due to potential security concerns, and this script shows how to manage these devices through the SCM API.
 

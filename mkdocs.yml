@@ -148,6 +148,7 @@ nav:
               - Overview: sdk/config/setup/index.md
               - Folders: sdk/config/setup/folder.md
               - Snippets: sdk/config/setup/snippet.md
+              - Devices: sdk/config/setup/device.md
       - Data Models:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
@@ -206,6 +207,7 @@ nav:
               - Overview: sdk/models/setup/index.md
               - Folder Models: sdk/models/setup/folder_models.md
               - Snippet Models: sdk/models/setup/snippet_models.md
+              - Device Models: sdk/models/setup/device_models.md
       - Exceptions: sdk/exceptions.md
   - User Guide:
       - Getting Started: guide/getting-started.md

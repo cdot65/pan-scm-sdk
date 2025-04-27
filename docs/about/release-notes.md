@@ -2,6 +2,29 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.27
+
+**Released:** April 27, 2025
+
+### Added
+- **Device Service:**
+  - Implemented `Device` service for listing, filtering, and managing device resources in the SCM API.
+  - Added server-side and client-side filtering, pagination, and device-specific operations.
+  - Created full Pydantic models for device resources and licenses (`DeviceResponseModel`, `DeviceLicenseModel`, etc).
+  - Developed factories for device models for robust test data generation.
+  - Achieved 100% test coverage for all device-related logic, including edge cases and error handling.
+- **Documentation:**
+  - Added SDK reference pages for Device service and Device models.
+  - Updated all relevant index and navigation files to include Device documentation.
+
+### Fixed
+- Improved test reliability by removing unnecessary skips and clarifying skip reasons.
+- Fixed import errors and naming consistency across device models, factories, and tests.
+
+### Changed
+- Refactored device model and service structure for clarity and maintainability.
+- Enhanced test factories and model validation for device-related resources.
+
 ## Version 0.3.26
 
 **Released:** April 16, 2025

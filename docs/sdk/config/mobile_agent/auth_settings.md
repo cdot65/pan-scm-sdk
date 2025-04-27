@@ -222,7 +222,7 @@ client.auth_setting.move(after_move_config)
 
 ### Controlling Pagination with max_limit
 
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. 
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000.
 
 **Example:**
 
@@ -317,16 +317,16 @@ try:
       "user_credential_or_client_cert_required": True,
       "folder": "Mobile Users"
    }
-   
+
    new_auth_settings = client.auth_setting.create(auth_settings_config)
-   
+
    # Commit changes
    result = client.commit(
       folders=["Mobile Users"],
       description="Added GlobalProtect authentication settings",
       sync=True
    )
-   
+
    # Check job status
    status = client.get_job_status(result.job_id)
 

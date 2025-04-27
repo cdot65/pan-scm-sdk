@@ -5,13 +5,18 @@ This module provides the Snippet class for performing CRUD operations on Snippet
 in the Strata Cloud Manager.
 """
 
+# Standard library imports
+import logging
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
+# Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
-from scm.models.setup.snippet_models import (
+from scm.models.setup.snippet import (
+    SnippetCreateModel,
     SnippetResponseModel,
+    SnippetUpdateModel,
 )
 
 
@@ -19,15 +24,23 @@ class Snippet(BaseObject):
     """
     Manages Snippet objects in Palo Alto Networks' Strata Cloud Manager.
 
-    This class provides methods for creating, retrieving, updating, deleting,
-    and listing Snippet resources through the Strata Cloud Manager API.
+    This class provides methods for creating, retrieving, updating, and deleting Snippet resources.
+
+    Attributes:
+        ENDPOINT: The API endpoint for Snippet resources.
+        DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
+        ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
     """
 
     ENDPOINT = "/config/setup/v1/snippets"
     DEFAULT_MAX_LIMIT = 2500
     ABSOLUTE_MAX_LIMIT = 5000  # Maximum allowed by the API
 
-    def __init__(self, api_client, max_limit: int = DEFAULT_MAX_LIMIT):
+    def __init__(
+        self,
+        api_client,
+        max_limit: Optional[int] = DEFAULT_MAX_LIMIT,
+    ):
         """
         Initialize the Snippet service class.
 
@@ -37,23 +50,68 @@ class Snippet(BaseObject):
                       Defaults to DEFAULT_MAX_LIMIT.
         """
         super().__init__(api_client)
-        self.max_limit = min(max_limit, self.ABSOLUTE_MAX_LIMIT)
+        self.logger = logging.getLogger(__name__)
+
+        # Validate and set max_limit
+        self._max_limit = self._validate_max_limit(max_limit)
+
+    @property
+    def max_limit(self) -> int:
+        return self._max_limit
+
+    @max_limit.setter
+    def max_limit(self, value: int) -> None:
+        """Set a new maximum limit for API requests."""
+        self._max_limit = self._validate_max_limit(value)
+
+    def _validate_max_limit(self, limit: Optional[int]) -> int:
+        """
+        Validates the max_limit parameter.
+
+        Args:
+            limit: The limit to validate
+
+        Returns:
+            int: The validated limit
+
+        Raises:
+            InvalidObjectError: If the limit is invalid
+        """
+        if limit is None:
+            return self.DEFAULT_MAX_LIMIT
+
+        try:
+            limit_int = int(limit)
+        except (TypeError, ValueError):
+            raise InvalidObjectError(
+                message="max_limit must be an integer",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit type"},
+            )
+
+        if limit_int < 1:
+            raise InvalidObjectError(
+                message="max_limit must be greater than 0",
+                error_code="E003",
+                http_status_code=400,
+                details={"error": "Invalid max_limit value"},
+            )
+
+        if limit_int > self.ABSOLUTE_MAX_LIMIT:
+            return self.ABSOLUTE_MAX_LIMIT
+
+        return limit_int
 
     def create(
         self,
-        name: str,
-        description: Optional[str] = None,
-        labels: Optional[List[str]] = None,
-        enable_prefix: Optional[bool] = None,
+        data: Dict[str, Any],
     ) -> SnippetResponseModel:
         """
         Create a new snippet in Strata Cloud Manager.
 
         Args:
-            name: The name of the snippet.
-            description: Optional description of the snippet.
-            labels: Optional list of labels to apply to the snippet.
-            enable_prefix: Whether to enable prefix for this snippet.
+            data: Dictionary containing snippet data.
 
         Returns:
             SnippetResponseModel: The created snippet.
@@ -62,24 +120,25 @@ class Snippet(BaseObject):
             InvalidObjectError: If the snippet data is invalid.
             APIError: If the API request fails.
         """
-        # Validate and prepare the data
-        data = self._validate_and_prepare_data(
-            name=name,
-            description=description,
-            labels=labels,
-            enable_prefix=enable_prefix,
-        )
+        # Build and validate request payload
+        create_model = SnippetCreateModel(**data)
 
-        # Make the API call
-        response = self.api_client.post(
+        # Convert back to a Python dictionary, removing any unset fields
+        payload = create_model.model_dump(exclude_unset=True)
+
+        # Send the updated object to the remote API as JSON, expecting a dictionary object to be returned.
+        response: Dict[str, Any] = self.api_client.post(
             self.ENDPOINT,
-            json=data,
+            json=payload,
         )
 
-        # Return the model
+        # Return the SCM API response as a new Pydantic object
         return SnippetResponseModel.model_validate(response)
 
-    def get(self, object_id: Union[str, UUID]) -> SnippetResponseModel:
+    def get(
+        self,
+        object_id: Union[str, UUID],
+    ) -> SnippetResponseModel:
         """
         Get a snippet by ID.
 
@@ -93,134 +152,158 @@ class Snippet(BaseObject):
             ObjectNotPresentError: If the snippet doesn't exist.
             APIError: If the API request fails.
         """
+        # Convert UUID to string if necessary
+        object_id_str = str(object_id)
+
+        # Send the request to the remote API
         try:
-            object_id_str = str(object_id)
-            response = self.api_client.get(f"{self.ENDPOINT}/{object_id_str}")
+            response: Dict[str, Any] = self.api_client.get(f"{self.ENDPOINT}/{object_id_str}")
+
+            # Return the SCM API response as a new Pydantic object
             return SnippetResponseModel.model_validate(response)
+
+        # Handle API errors
         except APIError as e:
             if e.http_status_code == 404:
                 raise ObjectNotPresentError(f"Snippet with ID {object_id} not found")
             raise
 
-    def update(
-        self,
-        snippet_id: Union[str, UUID],
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        labels: Optional[List[str]] = None,
-        enable_prefix: Optional[bool] = None,
-    ) -> SnippetResponseModel:
-        """
-        Update an existing snippet.
+    @staticmethod
+    def _apply_filters(
+        data: List["SnippetResponseModel"],
+        filters: Dict[str, Any],
+    ) -> List["SnippetResponseModel"]:
+        """Apply client-side filters to a list of snippets."""
+        filtered_data = data
 
-        Args:
-            snippet_id: The ID of the snippet to update.
-            name: The updated name of the snippet.
-            description: The updated description of the snippet.
-            labels: The updated list of labels.
-            enable_prefix: Whether to enable prefix for this snippet.
+        if not filters:
+            return filtered_data
 
-        Returns:
-            SnippetResponseModel: The updated snippet.
+        # Filter by labels (client-side)
+        if "labels" in filters:
+            if not isinstance(filters["labels"], list):
+                raise InvalidObjectError(
+                    message="'labels' filter must be a list",
+                    error_code="E003",
+                    http_status_code=400,
+                    details={"errorType": "Invalid Filter Type"},
+                )
 
-        Raises:
-            InvalidObjectError: If the update data is invalid.
-            ObjectNotPresentError: If the snippet doesn't exist.
-            APIError: If the API request fails.
-        """
-        # Ensure at least one field is specified for update
-        if all(v is None for v in [name, description, labels, enable_prefix]):
-            raise InvalidObjectError("At least one field must be specified for update")
+            required_labels = set(filters["labels"])
+            if required_labels:  # Only filter if labels list is not empty
+                filtered_data = [
+                    item
+                    for item in filtered_data
+                    if item.labels and required_labels.intersection(set(item.labels))
+                ]
 
-        # Prepare the update data
-        update_data = {}
-        if name is not None:
-            update_data["name"] = self._validate_name(name)
-        if description is not None:
-            update_data["description"] = description
-        if labels is not None:
-            update_data["labels"] = self._validate_labels(labels)
-        if enable_prefix is not None:
-            update_data["enable_prefix"] = enable_prefix
+        # Filter by types (client-side)
+        if "types" in filters:
+            required_types = filters["types"]
+            # Validate that required_types is a list of strings
+            if not isinstance(required_types, list) or not all(
+                isinstance(t, str) for t in required_types
+            ):
+                raise InvalidObjectError(
+                    message="'types' filter must be a list of strings",
+                    error_code="E003",
+                    http_status_code=400,
+                    details={"errorType": "Invalid Filter Type"},
+                )
 
-        # Make the API call
-        try:
-            snippet_id_str = str(snippet_id)
-            response = self.api_client.put(
-                f"{self.ENDPOINT}/{snippet_id_str}",
-                json=update_data,
-            )
-            return SnippetResponseModel.model_validate(response)
-        except APIError as e:
-            if e.http_status_code == 404:
-                raise ObjectNotPresentError(f"Snippet with ID {snippet_id} not found")
-            raise
+            if required_types:  # Only filter if the list is not empty
+                # Convert to set for efficient lookup
+                required_types_set = set(required_types)
+                filtered_data = [
+                    item for item in filtered_data if item.type and item.type in required_types_set
+                ]
 
-    def delete(self, object_id: Union[str, UUID]) -> None:
-        """
-        Delete a snippet.
-
-        Args:
-            object_id: The ID of the snippet to delete.
-
-        Raises:
-            ObjectNotPresentError: If the snippet doesn't exist.
-            APIError: If the API request fails.
-        """
-        try:
-            object_id_str = str(object_id)
-            self.api_client.delete(f"{self.ENDPOINT}/{object_id_str}")
-        except APIError as e:
-            if e.http_status_code == 404:
-                raise ObjectNotPresentError(f"Snippet with ID {object_id} not found")
-            raise
+        return filtered_data
 
     def list(
         self,
-        name: Optional[str] = None,
-        type: Optional[str] = None,
-        exact_match: bool = False,
-        offset: int = 0,
-        limit: Optional[int] = None,
+        **filters: Any,  # Accept arbitrary filters ('labels', 'types')
     ) -> List[SnippetResponseModel]:
         """
-        List snippets with optional filtering.
+        List snippets with optional server-side and client-side filtering.
 
         Args:
-            name: Optional filter for snippet name.
-            type: Optional filter for snippet type.
-            exact_match: If True, performs exact name matching rather than substring.
-            offset: Starting position for pagination.
-            limit: Maximum number of items to return (defaults to max_limit).
+            **filters: Additional filters:
+                - labels (List[str]): Filter by labels (server-side if supported).
+                - types (List[str]): Filter by snippet type (server-side if supported).
 
         Returns:
             List[SnippetResponseModel]: A list of snippets matching the filters.
 
         Raises:
             APIError: If the API request fails.
+            InvalidObjectError: If filter parameters are invalid.
         """
-        # Prepare filter parameters
-        params = {}
-        if name is not None:
-            params["name"] = name
-        if type is not None:
-            params["type"] = type
+        # Prepare API parameters
+        params: Dict[str, Any] = {}
 
-        # Get paginated results
-        snippets = self._get_paginated_results(
-            endpoint=self.ENDPOINT,
-            params=params,
-            limit=limit or self.max_limit,
-            offset=offset,
+        # Add server-side filters if supported by the API
+        if "labels" in filters:
+            params["labels"] = ",".join(filters["labels"])
+        if "types" in filters:
+            params["types"] = ",".join(filters["types"])
+
+        # Pagination logic using instance max_limit
+        limit = self._max_limit
+        offset = 0
+        all_objects = []
+
+        while True:
+            params["limit"] = limit
+            params["offset"] = offset
+
+            # Get paginated results from the API
+            response = self.api_client.get(
+                self.ENDPOINT,
+                params=params,
+            )
+
+            if not isinstance(response, dict):
+                raise InvalidObjectError(
+                    message="Invalid response format: expected dictionary",
+                    error_code="E003",
+                    http_status_code=500,
+                    details={"error": "Response is not a dictionary"},
+                )
+
+            # Handle single-item response when name filter returns one object
+            if "data" not in response:
+                # API returned a single object; wrap it into a list
+                data_items = [response]
+            else:
+                if not isinstance(response["data"], list):
+                    raise InvalidObjectError(
+                        message="Invalid response format: 'data' field must be a list",
+                        error_code="E003",
+                        http_status_code=500,
+                        details={
+                            "field": "data",
+                            "error": '"data" field must be a list',
+                        },
+                    )
+                data_items = response["data"]
+
+            object_instances = [SnippetResponseModel.model_validate(item) for item in data_items]
+            all_objects.extend(object_instances)
+
+            # If we got fewer than 'limit' objects, we've reached the end
+            if len(data_items) < limit:
+                break
+
+            offset += limit
+
+        # Apply any remaining client-side filters
+        filtered_snippets = self._apply_filters(
+            all_objects,
+            {k: v for k, v in filters.items() if k not in ["labels", "types"]},
         )
 
-        # Handle exact_match filter if specified
-        if exact_match and name is not None and snippets:
-            snippets = [s for s in snippets if s.get("name") == name]
-
-        # Convert the results to models
-        result = [SnippetResponseModel.model_validate(item) for item in snippets]
-        return result
+        return filtered_snippets
 
     def fetch(
         self,
@@ -234,19 +317,17 @@ class Snippet(BaseObject):
 
         Returns:
             Optional[SnippetResponseModel]: The requested snippet (exact name match), or None if not found.
-            Raises APIError if multiple exact matches are found.
         """
-        # Get snippets with the given name
-        results = self.list(name=name, exact_match=True)
+        # Get snippets
+        results = self.list()
 
         if not results:
             return None
+
         # Filter to exact matches
         exact_matches = [snippet for snippet in results if snippet.name == name]
         if not exact_matches:
             return None
-        if len(exact_matches) > 1:
-            raise APIError(f"Multiple snippets found with name {name}")
         return exact_matches[0]
 
     def associate_folder(
@@ -310,93 +391,6 @@ class Snippet(BaseObject):
                 f"Disassociating snippets from folders is not yet implemented: {str(e)}"
             )
 
-    def _validate_and_prepare_data(
-        self,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        labels: Optional[List[str]] = None,
-        enable_prefix: Optional[bool] = None,
-    ) -> Dict[str, Any]:
-        """
-        Validate and prepare snippet data for API requests.
-
-        Args:
-            name: The name of the snippet.
-            description: The description of the snippet.
-            labels: The list of labels.
-            enable_prefix: Whether to enable prefix for this snippet.
-
-        Returns:
-            Dict[str, Any]: The validated and prepared data.
-
-        Raises:
-            InvalidObjectError: If the data is invalid.
-        """
-        # Start with empty data
-        data = {}
-
-        # Add and validate the name if provided
-        if name is not None:
-            data["name"] = self._validate_name(name)
-
-        # Add optional fields if provided
-        if description is not None:
-            data["description"] = description
-        if labels is not None:
-            data["labels"] = self._validate_labels(labels)
-        if enable_prefix is not None:
-            data["enable_prefix"] = enable_prefix
-
-        # Ensure required fields are present
-        if "name" not in data:
-            raise InvalidObjectError("Name is required")
-
-        return data
-
-    def _validate_name(self, name: str) -> str:
-        """
-        Validate a snippet name.
-
-        Args:
-            name: The name to validate.
-
-        Returns:
-            str: The validated name.
-
-        Raises:
-            InvalidObjectError: If the name is invalid.
-        """
-        if not name or name.strip() == "":
-            raise InvalidObjectError("Snippet name cannot be empty")
-        if len(name) > 255:
-            raise InvalidObjectError("Snippet name cannot exceed 255 characters")
-        return name
-
-    def _validate_labels(self, labels: Optional[List[str]]) -> Optional[List[str]]:
-        """
-        Validate snippet labels.
-
-        Args:
-            labels: The labels to validate.
-
-        Returns:
-            Optional[List[str]]: The validated labels.
-
-        Raises:
-            InvalidObjectError: If any label is invalid.
-        """
-        if labels is None:
-            return None
-
-        # Ensure all labels are strings
-        validated_labels = []
-        for label in labels:
-            if not isinstance(label, str):
-                raise InvalidObjectError(f"Label must be a string: {label}")
-            validated_labels.append(label)
-
-        return validated_labels
-
     def _get_paginated_results(
         self,
         endpoint: str,
@@ -439,3 +433,60 @@ class Snippet(BaseObject):
 
         # Unexpected response format
         return []
+
+    def update(
+        self,
+        snippet: SnippetUpdateModel,
+    ) -> SnippetResponseModel:
+        """
+        Update an existing snippet.
+
+        Args:
+            snippet: The SnippetUpdateModel containing the updated snippet data.
+
+        Returns:
+            SnippetResponseModel: The updated snippet.
+
+        Raises:
+            InvalidObjectError: If the update data is invalid.
+            ObjectNotPresentError: If the snippet doesn't exist.
+            APIError: If the API request fails.
+        """
+        # Convert to dict for API request, excluding unset fields
+        payload = snippet.model_dump(exclude_unset=True)
+
+        # Extract ID and remove from payload since it's in the URL
+        object_id = str(snippet.id)
+        payload.pop("id", None)
+
+        # Send the updated object to the remote API as JSON
+        endpoint = f"{self.ENDPOINT}/{object_id}"
+        response: Dict[str, Any] = self.api_client.put(
+            endpoint,
+            json=payload,
+        )
+
+        # Return the SCM API response as a new Pydantic object
+        return SnippetResponseModel.model_validate(response)
+
+    def delete(
+        self,
+        object_id: Union[str, UUID],
+    ) -> None:
+        """
+        Delete a snippet.
+
+        Args:
+            object_id: The ID of the snippet to delete.
+
+        Raises:
+            ObjectNotPresentError: If the snippet doesn't exist.
+            APIError: If the API request fails.
+        """
+        try:
+            object_id_str = str(object_id)
+            self.api_client.delete(f"{self.ENDPOINT}/{object_id_str}")
+        except APIError as e:
+            if e.http_status_code == 404:
+                raise ObjectNotPresentError(f"Snippet with ID {object_id} not found")
+            raise

@@ -31,11 +31,11 @@ all_results = []
 while True:
     page = client.address.list(offset=offset, limit=limit)
     all_results.extend(page)
-    
+
     if len(page) < limit:
         # Reached the end of results
         break
-        
+
     offset += limit
 ```
 

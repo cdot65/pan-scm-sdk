@@ -9,10 +9,6 @@ import os
 import sys
 from pathlib import Path
 
-# Add the project root to the path to allow imports from the scm package
-project_root = Path(__file__).parent.parent.absolute()
-sys.path.insert(0, str(project_root))
-
 # Third-party imports
 from dotenv import load_dotenv
 
@@ -22,6 +18,10 @@ from scm.exceptions import (
     APIError,
     AuthenticationError,
 )
+
+# Add the project root to the path to allow imports from the scm package
+project_root = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(project_root))
 
 
 def load_environment_variables():
@@ -49,7 +49,9 @@ def load_environment_variables():
     folder = os.environ.get("FOLDER", "Texas")  # Default to Texas folder from your example
 
     if not all([client_id, client_secret, tsg_id]):
-        print("❌ Missing required environment variables. Please set CLIENT_ID, CLIENT_SECRET, and TSG_ID.")
+        print(
+            "❌ Missing required environment variables. Please set CLIENT_ID, CLIENT_SECRET, and TSG_ID."
+        )
         sys.exit(1)
 
     return client_id, client_secret, tsg_id, log_level, folder
@@ -83,16 +85,16 @@ def list_security_rules(client, folder):
     """List security rules in a folder"""
     print(f"\nListing security rules in folder '{folder}'...")
     try:
-        rules = client.security_rule.list(folder=folder, rulebase='pre', exact_match=True)
-        
+        rules = client.security_rule.list(folder=folder, rulebase="pre", exact_match=True)
+
         if not rules:
             print(f"No security rules found in folder '{folder}'.")
             sys.exit(0)
-            
+
         print(f"Found {len(rules)} security rules:")
         for i, rule in enumerate(rules, 1):
             print(f"{i}. {rule.name} - {rule.id}")
-            
+
         return rules
     except Exception as e:
         print(f"❌ Error listing security rules: {str(e)}")
@@ -107,33 +109,33 @@ def move_security_rule(client, rules, folder):
     if len(rules) < 2:
         print("Need at least 2 rules to perform a move operation.")
         sys.exit(1)
-    
+
     # Select rules for the move operation
     source_rule = rules[-1]  # Last rule
     target_rule = rules[-2]  # Second-to-last rule
-    
+
     print(f"\nMoving rule '{source_rule.name}' before '{target_rule.name}'...")
-    
+
     try:
         # Prepare move configuration
         move_config = {
             "destination": "before",
             "rulebase": "pre",
-            "destination_rule": str(target_rule.id)  # Convert UUID to string
+            "destination_rule": str(target_rule.id),  # Convert UUID to string
         }
-        
+
         # Execute the move operation
         client.security_rule.move(source_rule.id, move_config)
         print(f"✅ Successfully moved rule '{source_rule.name}' before '{target_rule.name}'")
-        
+
         # Verify the move by listing rules again
         print("\nVerifying move operation...")
-        updated_rules = client.security_rule.list(folder=folder, rulebase='pre', exact_match=True)
-        
+        updated_rules = client.security_rule.list(folder=folder, rulebase="pre", exact_match=True)
+
         print("Updated rule order:")
         for i, rule in enumerate(updated_rules, 1):
             print(f"{i}. {rule.name} - {rule.id}")
-            
+
     except Exception as e:
         print(f"❌ Error moving security rule: {str(e)}")
         sys.exit(1)
@@ -142,14 +144,14 @@ def move_security_rule(client, rules, folder):
 if __name__ == "__main__":
     # Load environment variables
     client_id, client_secret, tsg_id, log_level, folder = load_environment_variables()
-    
+
     # Initialize client
     client = initialize_client(client_id, client_secret, tsg_id, log_level)
-    
+
     # List security rules
     rules = list_security_rules(client, folder)
-    
+
     # Move a rule
     move_security_rule(client, rules, folder)
-    
+
     print("\nTest completed!")

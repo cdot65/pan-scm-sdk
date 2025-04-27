@@ -281,7 +281,7 @@ existing_zone = client.security_zone.fetch(
 if existing_zone.network and existing_zone.network.layer3:
     # Add a new interface to the existing list
     existing_zone.network.layer3.append("ethernet1/3")
-    
+
 # Update protection profile
 if existing_zone.network:
     existing_zone.network.zone_protection_profile = "enhanced-security"
@@ -305,7 +305,7 @@ filtered_zones = client.security_zone.list(
 # Process results
 for zone in filtered_zones:
     print(f"Name: {zone.name}")
-    
+
     # Check network configuration
     if zone.network:
         if zone.network.layer3:
@@ -313,7 +313,7 @@ for zone in filtered_zones:
         elif zone.network.layer2:
             print(f"  Type: Layer 2, Interfaces: {', '.join(zone.network.layer2)}")
         # Check other network types...
-            
+
     # Display user identification status
     print(f"  User ID Enabled: {zone.enable_user_identification}")
     print(f"  Device ID Enabled: {zone.enable_device_identification}")
@@ -331,7 +331,7 @@ filtered_zones = client.security_zone.list(**list_params)
 ### Filtering Responses
 
 The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters,
-you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control 
+you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control
 which objects are included or excluded after the initial API response is fetched.
 
 **Parameters:**

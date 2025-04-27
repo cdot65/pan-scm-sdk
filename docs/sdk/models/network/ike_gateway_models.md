@@ -177,8 +177,8 @@ response = ike_gateway.create(psk_config)
 
 # Using model directly
 from scm.models.network import (
-    IKEGatewayCreateModel, 
-    Authentication, 
+    IKEGatewayCreateModel,
+    Authentication,
     PreSharedKey,
     PeerID,
     Protocol,
@@ -250,8 +250,8 @@ response = ike_gateway.create(cert_config)
 
 # Using model directly
 from scm.models.network import (
-    IKEGatewayCreateModel, 
-    Authentication, 
+    IKEGatewayCreateModel,
+    Authentication,
     Certificate,
     LocalCertificate,
     Protocol,
@@ -319,8 +319,8 @@ response = ike_gateway.create(dynamic_config)
 
 # Using model directly
 from scm.models.network import (
-    IKEGatewayCreateModel, 
-    Authentication, 
+    IKEGatewayCreateModel,
+    Authentication,
     PreSharedKey,
     Protocol,
     IKEv2Config,
@@ -376,7 +376,7 @@ response = ike_gateway.update(update_dict)
 
 # Using model directly
 from scm.models.network import (
-    IKEGatewayUpdateModel, 
+    IKEGatewayUpdateModel,
     PeerID,
     ProtocolCommon,
     NatTraversal

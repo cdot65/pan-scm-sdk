@@ -23,7 +23,7 @@ This guide provides examples of creating, managing, and working with Application
 6. [Common Scenarios](#common-scenarios)
 7. [Troubleshooting](#troubleshooting)
 
-## Overview
+## Overview {#Overview}
 
 Applications in Strata Cloud Manager define the characteristics of specific applications that can be used in security policies. The Application SDK service allows you to create, retrieve, update, delete, and list custom applications with various security attributes.
 

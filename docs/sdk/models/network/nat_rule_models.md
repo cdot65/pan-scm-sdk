@@ -140,7 +140,7 @@ try:
             "translated_address": ["192.168.1.2"]
         }
     )
-    
+
     nat_rule = NatRuleCreateModel(
         name="invalid-rule",
         folder="Texas",
@@ -164,7 +164,7 @@ try:
             # Neither translated_address nor interface_address provided
         )
     )
-    
+
     nat_rule = NatRuleCreateModel(
         name="invalid-rule",
         folder="Texas",
@@ -183,7 +183,7 @@ try:
             }
         )
     )
-    
+
     nat_rule = NatRuleCreateModel(
         name="invalid-rule",
         folder="Texas",
@@ -199,8 +199,8 @@ Bi-directional static NAT cannot be used with destination translation:
 
 ```python
 from scm.models.network import (
-    NatRuleCreateModel, 
-    SourceTranslation, 
+    NatRuleCreateModel,
+    SourceTranslation,
     StaticIp,
     DestinationTranslation
 )
@@ -213,11 +213,11 @@ try:
             bi_directional="yes"
         )
     )
-    
+
     destination_translation = DestinationTranslation(
         translated_address="192.168.2.100"  # Can't use with bi-directional static NAT
     )
-    
+
     nat_rule = NatRuleCreateModel(
         name="invalid-rule",
         folder="Texas",
@@ -235,8 +235,8 @@ except ValueError as e:
 ```python
 from scm.client import ScmClient
 from scm.models.network import (
-    NatRuleCreateModel, 
-    SourceTranslation, 
+    NatRuleCreateModel,
+    SourceTranslation,
     DynamicIpAndPort
 )
 
@@ -294,7 +294,7 @@ print(f"Created NAT rule with ID: {response.id}")
 
 ```python
 from scm.models.network import (
-    NatRuleCreateModel, 
+    NatRuleCreateModel,
     DestinationTranslation
 )
 
@@ -325,8 +325,8 @@ print(f"Created destination NAT rule: {response.name}")
 
 ```python
 from scm.models.network import (
-    NatRuleCreateModel, 
-    SourceTranslation, 
+    NatRuleCreateModel,
+    SourceTranslation,
     StaticIp
 )
 
@@ -358,8 +358,8 @@ print(f"Created static NAT rule: {response.name}")
 
 ```python
 from scm.models.network import (
-    NatRuleCreateModel, 
-    SourceTranslation, 
+    NatRuleCreateModel,
+    SourceTranslation,
     DynamicIp
 )
 
@@ -392,8 +392,8 @@ print(f"Created dynamic IP NAT rule: {response.name}")
 
 ```python
 from scm.models.network import (
-    NatRuleCreateModel, 
-    SourceTranslation, 
+    NatRuleCreateModel,
+    SourceTranslation,
     DynamicIpAndPort,
     InterfaceAddress
 )
@@ -455,8 +455,8 @@ print(f"Moved rule {rule_id} before the specified rule")
 
 ```python
 from scm.models.network import (
-    NatRuleUpdateModel, 
-    SourceTranslation, 
+    NatRuleUpdateModel,
+    SourceTranslation,
     DynamicIpAndPort
 )
 

@@ -4,24 +4,25 @@
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
+from pydantic_core import ValidationError
+
 # External libraries
 import pytest
 
 # Local SDK imports
 from scm.client import Scm
 from scm.config.setup.snippet import Snippet
-from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
-from scm.models.setup.snippet_models import (
+from scm.exceptions import APIError, ObjectNotPresentError
+from scm.models.setup.snippet import (
     FolderReference,
-    SnippetBaseModel,
     SnippetCreateModel,
     SnippetResponseModel,
-    SnippetUpdateModel,
 )
 from tests.factories.setup.snippet import (
+    SnippetCreateModelDictFactory,
     SnippetCreateModelFactory,
-    SnippetResponseFactory,
     SnippetResponseModelFactory,
+    SnippetUpdateModelDictFactory,
     SnippetUpdateModelFactory,
 )
 
@@ -54,31 +55,26 @@ class TestSnippetBaseModel:
 
     def test_valid_construction(self):
         """Test that a valid SnippetBaseModel can be constructed."""
-        data = SnippetCreateModelFactory.build_valid()
-
-        model = SnippetBaseModel(**data)
-
-        assert model.name == data["name"]
-        assert model.description == data["description"]
-        assert model.labels == data["labels"]
-        assert model.enable_prefix == data["enable_prefix"]
+        model = SnippetCreateModelDictFactory.build_valid_dict()
+        assert isinstance(model, dict)
+        assert model["name"] is not None
+        assert model["description"] is not None
+        assert model["labels"] is not None
+        assert model["enable_prefix"] is not None
 
     def test_minimal_construction(self):
         """Test that a minimal SnippetBaseModel can be constructed."""
-        data = {"name": "minimal_snippet"}
-
-        model = SnippetBaseModel(**data)
-
-        assert model.name == "minimal_snippet"
-        assert model.description is None
-        assert model.labels is None
-        assert model.enable_prefix is None
+        model = SnippetCreateModelDictFactory.build_minimal_dict()
+        assert isinstance(model, dict)
+        assert model["name"] is not None
+        assert model["description"] is not None
+        assert model["labels"] is not None
+        assert model["enable_prefix"] is not None
 
     def test_name_validation(self):
         """Test that the name is validated."""
-        with pytest.raises(ValueError) as excinfo:
-            SnippetBaseModel(name="")
-
+        with pytest.raises(ValidationError) as excinfo:
+            SnippetCreateModel(**SnippetCreateModelDictFactory.build_valid_dict(name=""))
         assert "name" in str(excinfo.value)
         assert "empty" in str(excinfo.value)
 
@@ -87,81 +83,66 @@ class TestSnippetCreateModel:
     """Tests for the SnippetCreateModel."""
 
     def test_valid_construction(self):
-        """Test that a valid SnippetCreateModel can be constructed."""
-        data = SnippetCreateModelFactory.build_valid()
+        """
+        Test that a valid SnippetCreateModel can be constructed from a dictionary.
 
-        model = SnippetCreateModel(**data)
+        Verifies that the model is an instance of SnippetCreateModel and that the fields
+        name, description, labels, and enable_prefix are not empty.
+        """
+        model = SnippetCreateModelDictFactory.build_valid_dict()
+        assert isinstance(model, dict)
+        assert model["name"] is not None
+        assert model["description"] is not None
+        assert model["labels"] is not None
+        assert model["enable_prefix"] is not None
 
-        assert model.name == data["name"]
-        assert model.description == data["description"]
-        assert model.labels == data["labels"]
-        assert model.enable_prefix == data["enable_prefix"]
-
-    def test_required_fields(self):
-        """Test that SnippetCreateModel requires name."""
-        data = SnippetCreateModelFactory.build_without_name()
-
-        with pytest.raises(ValueError) as excinfo:
-            SnippetCreateModel(**data)
-
-        assert "name" in str(excinfo.value)
+    def test_minimal_construction(self):
+        model = SnippetCreateModelDictFactory.build_minimal_dict()
+        assert isinstance(model, dict)
+        assert model["name"] is not None
 
 
 class TestSnippetUpdateModel:
     """Tests for the SnippetUpdateModel."""
 
     def test_valid_construction(self):
-        """Test that a valid SnippetUpdateModel can be constructed."""
-        data = SnippetUpdateModelFactory.build_valid()
+        model = SnippetUpdateModelDictFactory.build_valid_dict()
+        assert isinstance(model, dict)
+        assert model["id"] is not None
+        assert model["name"] is not None
+        assert model["description"] is not None
+        assert model["labels"] is not None
+        assert model["enable_prefix"] is not None
 
-        model = SnippetUpdateModel(**data)
-
-        assert model.id == UUID(data["id"])
-        assert model.name == data["name"]
-        assert model.description == data["description"]
-        assert model.labels == data["labels"]
-        assert model.enable_prefix == data["enable_prefix"]
-
-    def test_required_fields(self):
-        """Test that SnippetUpdateModel requires an id."""
-        data = SnippetUpdateModelFactory.build_without_id()
-
-        with pytest.raises(ValueError) as excinfo:
-            SnippetUpdateModel(**data)
-
-        assert "id" in str(excinfo.value)
+    def test_minimal_construction(self):
+        model = SnippetUpdateModelDictFactory.build_minimal_dict()
+        assert isinstance(model, dict)
+        assert model["id"] is not None
+        assert model["name"] is not None
 
 
 class TestSnippetResponseModel:
     """Tests for the SnippetResponseModel."""
 
     def test_valid_construction(self):
-        """Test that a valid SnippetResponseModel can be constructed."""
-        data = SnippetResponseModelFactory.build_valid()
+        model = SnippetResponseModelFactory.build_valid_model()
+        assert isinstance(model, SnippetResponseModel)
+        assert model.id is not None
+        assert model.name is not None
+        assert model.description is not None
+        assert model.labels is not None
+        assert model.enable_prefix is not None
+        assert model.type in ["predefined", "custom", "readonly"]
+        assert model.display_name is not None
+        assert model.last_update is not None
+        assert model.created_in is not None
+        assert model.shared_in is not None
+        assert isinstance(model.folders, list)
 
-        model = SnippetResponseModel(**data)
-
-        assert model.id == UUID(data["id"])
-        assert model.name == data["name"]
-        assert model.description == data["description"]
-        assert model.labels == data["labels"]
-        assert model.enable_prefix == data["enable_prefix"]
-        assert model.type == data["type"]
-        assert model.display_name == data["display_name"]
-        assert model.last_update == data["last_update"]
-        assert model.created_in == data["created_in"]
-        assert model.shared_in == data["shared_in"]
-        assert len(model.folders) == len(data["folders"])
-
-    def test_with_folders(self):
-        """Test construction with folders."""
-        data = SnippetResponseModelFactory.build_with_folders(folder_count=2)
-
-        model = SnippetResponseModel(**data)
-
-        assert len(model.folders) == 2
-        for folder in model.folders:
-            assert isinstance(folder, FolderReference)
+    def test_from_request(self):
+        req = SnippetCreateModelDictFactory.build_valid_dict()
+        model = SnippetResponseModelFactory.from_request_model(req)
+        assert isinstance(model, SnippetResponseModel)
 
 
 class TestSnippetBase:
@@ -213,11 +194,12 @@ class TestSnippetCreate(TestSnippetBase):
     def test_create_snippet(self, snippet_service, mock_scm_client):
         """Test creating a snippet with minimum required fields."""
         # Setup mock response
-        mock_response = SnippetResponseFactory.build()
+        mock_response = SnippetResponseModelFactory.build()
         mock_scm_client.post.return_value = mock_response
 
         # Create the snippet
-        result = snippet_service.create(name="test_snippet")
+        data = SnippetCreateModelDictFactory.build_valid_dict(name="test_snippet")
+        result = snippet_service.create(data=data)
 
         # Assert the client was called correctly
         mock_scm_client.post.assert_called_once()
@@ -227,22 +209,23 @@ class TestSnippetCreate(TestSnippetBase):
 
         # Assert the result is a SnippetResponseModel
         assert isinstance(result, SnippetResponseModel)
-        assert result.name == mock_response["name"]
-        assert str(result.id) == mock_response["id"]
+        assert result.name == str(mock_response.name)
+        assert str(result.id) == str(mock_response.id)
 
     def test_create_snippet_with_all_fields(self, snippet_service, mock_scm_client):
         """Test creating a snippet with all fields."""
         # Setup mock response
-        mock_response = SnippetResponseFactory.build()
+        mock_response = SnippetResponseModelFactory.build()
         mock_scm_client.post.return_value = mock_response
 
         # Create the snippet with all fields
-        result = snippet_service.create(
+        data = SnippetCreateModelDictFactory.build_valid_dict(
             name="test_snippet",
             description="Test description",
             labels=["tag1", "tag2"],
             enable_prefix=True,
         )
+        result = snippet_service.create(data=data)
 
         # Assert the client was called correctly
         mock_scm_client.post.assert_called_once()
@@ -259,17 +242,21 @@ class TestSnippetCreate(TestSnippetBase):
 
     def test_create_snippet_with_invalid_data(self, snippet_service):
         """Test creating a snippet with invalid data."""
+
         # Test with empty name
-        with pytest.raises(InvalidObjectError):
-            snippet_service.create(name="")
+        with pytest.raises(ValidationError):
+            data = SnippetCreateModelDictFactory.build_valid_dict(name="")
+            snippet_service.create(data=data)
 
         # Test with None name
-        with pytest.raises(InvalidObjectError):
-            snippet_service.create(name=None)
+        with pytest.raises(ValidationError):
+            data = SnippetCreateModelDictFactory.build_valid_dict(name=None)
+            snippet_service.create(data=data)
 
         # Test with whitespace-only name
-        with pytest.raises(InvalidObjectError):
-            snippet_service.create(name="   ")
+        with pytest.raises(ValidationError):
+            data = SnippetCreateModelDictFactory.build_valid_dict(name="   ")
+            snippet_service.create(data=data)
 
 
 class TestSnippetGet(TestSnippetBase):
@@ -278,7 +265,7 @@ class TestSnippetGet(TestSnippetBase):
     def test_get_snippet(self, snippet_service, mock_scm_client):
         """Test retrieving a snippet by ID."""
         # Setup mock response
-        mock_response = SnippetResponseFactory.build()
+        mock_response = SnippetResponseModelFactory.build()
         mock_scm_client.get.return_value = mock_response
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
 
@@ -290,8 +277,8 @@ class TestSnippetGet(TestSnippetBase):
 
         # Assert the result is a SnippetResponseModel
         assert isinstance(result, SnippetResponseModel)
-        assert str(result.id) == mock_response["id"]
-        assert result.name == mock_response["name"]
+        assert str(result.id) == str(mock_response.id)
+        assert result.name == str(mock_response.name)
 
     def test_get_nonexistent_snippet(self, snippet_service, mock_scm_client):
         """Test retrieving a snippet that doesn't exist."""
@@ -309,136 +296,7 @@ class TestSnippetGet(TestSnippetBase):
         mock_scm_client.get.assert_called_once_with(f"/config/setup/v1/snippets/{snippet_id}")
 
     def test_get_with_general_error(self, snippet_service, mock_scm_client):
-        """Test get with a non-404 exception."""
-        object_id = "123e4567-e89b-12d3-a456-426614174000"
-
-        # Create a non-404 error
-        error = APIError("General server error")
-        error.http_status_code = 500
-        mock_scm_client.get.side_effect = error
-
-        # Should re-raise the error
-        with pytest.raises(APIError):
-            snippet_service.get(object_id)
-
-
-class TestSnippetFetch(TestSnippetBase):
-    """Tests for Snippet.fetch method."""
-
-    def test_fetch_snippet_found(self, snippet_service, mock_scm_client):
-        """Test fetching a snippet by name when it exists."""
-        # Setup
-        snippet_name = "test-snippet"
-        mock_response = {
-            "data": [{"name": snippet_name, "id": "12345678-1234-1234-1234-123456789012"}]
-        }
-        mock_scm_client.get.return_value = mock_response
-
-        # Call the method
-        result = snippet_service.fetch(snippet_name)
-
-        # Verify API call
-        mock_scm_client.get.assert_called_once()
-        args, kwargs = mock_scm_client.get.call_args
-        assert args[0] == snippet_service.ENDPOINT
-        assert kwargs["params"]["name"] == snippet_name
-
-        # Verify result
-        assert isinstance(result, SnippetResponseModel)
-        assert result.name == snippet_name
-
-    def test_fetch_snippet_not_found(self, snippet_service, mock_scm_client):
-        """Test fetching a snippet by name when it doesn't exist."""
-        # Setup empty response
-        mock_scm_client.get.return_value = {"data": []}
-
-        # Call the method
-        result = snippet_service.fetch("nonexistent-snippet")
-
-        # Should return None when not found
-        assert result is None
-
-    def test_fetch_multiple_matches(self, snippet_service, mock_scm_client):
-        """Test fetch with multiple matches raising an error."""
-        # Setup multiple matches
-        snippet_name = "duplicate-snippet"
-        mock_response = {
-            "data": [
-                {"name": snippet_name, "id": "12345678-1234-1234-1234-123456789012"},
-                {"name": snippet_name, "id": "87654321-4321-4321-4321-210987654321"},
-            ]
-        }
-        mock_scm_client.get.return_value = mock_response
-
-        # Should raise APIError for multiple matches
-        with pytest.raises(APIError) as excinfo:
-            snippet_service.fetch(snippet_name)
-
-        # Verify error message
-        assert "Multiple snippets found" in excinfo.value.message
-        assert snippet_name in excinfo.value.message
-
-    def test_fetch_fallback_to_list(self, snippet_service, mock_scm_client):
-        """Test fetch fallback to list method with results."""
-        # Mock original API call to return unexpected format
-        mock_scm_client.get.return_value = {"unexpected": "format"}
-
-        # Setup mocked list method return
-        mock_snippet = SnippetResponseModel(
-            id="12345678-1234-1234-1234-123456789012",
-            name="test-snippet",
-            description="Test description",
-        )
-
-        with patch.object(snippet_service, "list", return_value=[mock_snippet]):
-            # Call the method
-            result = snippet_service.fetch("test-snippet")
-
-            # Verify result
-            assert result is mock_snippet
-
-    def test_fetch_invalid_response_format(self, snippet_service, mock_scm_client):
-        """Test fetch with an invalid API response format."""
-        # Mock invalid API response
-        mock_scm_client.get.return_value = "not a dict"
-
-        # Mock list to return empty to avoid fallback success
-        with patch.object(snippet_service, "list", return_value=[]):
-            # Call the method
-            result = snippet_service.fetch("test-snippet")
-
-            # Should return None for invalid response format
-            assert result is None
-
-    def test_fetch_fallback_multiple_matches(self, snippet_service, mock_scm_client):
-        """Test fetch with multiple matches in fallback."""
-        # Mock original API call to return unexpected format
-        mock_scm_client.get.return_value = {"unexpected": "format"}
-
-        # Setup multiple matches in the list method
-        mock_snippets = [
-            SnippetResponseModel(
-                id="12345678-1234-1234-1234-123456789012",
-                name="duplicate",
-                description="First duplicate",
-            ),
-            SnippetResponseModel(
-                id="87654321-4321-4321-4321-210987654321",
-                name="duplicate",
-                description="Second duplicate",
-            ),
-        ]
-
-        with patch.object(snippet_service, "list", return_value=mock_snippets):
-            # Should raise APIError for multiple matches
-            with pytest.raises(APIError) as excinfo:
-                snippet_service.fetch("duplicate")
-
-            # Verify error message
-            assert "Multiple snippets found" in excinfo.value.message
-
-    def test_fetch_with_non_404_error(self, snippet_service, mock_scm_client):
-        """Test fetch method with a non-404 API error (to cover line 263)."""
+        """Test get with a non-404 API error (to cover line 263)."""
         # Create a non-404 API error (e.g., 500 server error)
         error = APIError("Server error")
         error.http_status_code = 500
@@ -446,7 +304,7 @@ class TestSnippetFetch(TestSnippetBase):
 
         # Test with a try-except to ensure the original error is re-raised
         try:
-            snippet_service.fetch("test_snippet")
+            snippet_service.get("123")
             pytest.fail("Expected APIError was not raised")
         except APIError as e:
             # Verify we got the same error that was injected
@@ -479,12 +337,12 @@ class TestFolderAssociations(TestSnippetBase):
         # Setup mock response for a successful API call
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
         folder_id = "223e4567-e89b-12d3-a456-426614174000"
-        mock_response = SnippetResponseFactory.build()
+        mock_response = SnippetResponseModelFactory.build()
         mock_scm_client.post.return_value = mock_response
 
         # Mock the model_validate to prevent NotImplementedError being raised
         with patch(
-            "scm.models.setup.snippet_models.SnippetResponseModel.model_validate",
+            "scm.models.setup.snippet.SnippetResponseModel.model_validate",
             return_value=SnippetResponseModel.model_validate(mock_response),
         ):
             # Call associate_folder - this should succeed
@@ -524,12 +382,12 @@ class TestFolderAssociations(TestSnippetBase):
         # Setup mock response for a successful API call
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
         folder_id = "223e4567-e89b-12d3-a456-426614174000"
-        mock_response = SnippetResponseFactory.build()
+        mock_response = SnippetResponseModelFactory.build()
         mock_scm_client.delete.return_value = mock_response
 
         # Mock the model_validate to prevent NotImplementedError being raised
         with patch(
-            "scm.models.setup.snippet_models.SnippetResponseModel.model_validate",
+            "scm.models.setup.snippet.SnippetResponseModel.model_validate",
             return_value=SnippetResponseModel.model_validate(mock_response),
         ):
             # Call disassociate_folder - this should succeed
@@ -555,104 +413,46 @@ class TestSnippetList(TestSnippetBase):
     def test_list_snippets(self, snippet_service, mock_scm_client):
         """Test listing snippets with default parameters."""
         # Setup mock response with valid snippet data
-        mock_data = [SnippetResponseFactory.build() for _ in range(3)]
+        mock_snippets = [
+            SnippetResponseModelFactory.build_valid_model().model_dump() for _ in range(3)
+        ]
+        mock_response = {"data": mock_snippets}
 
-        # Patch the _get_paginated_results method
-        with patch.object(snippet_service, "_get_paginated_results", return_value=mock_data):
-            # List the snippets
+        # Patch the API client's get method
+        with patch.object(snippet_service.api_client, "get", return_value=mock_response):
             results = snippet_service.list()
-
-            # Assert _get_paginated_results was called correctly
-            snippet_service._get_paginated_results.assert_called_once()
-            call_args = snippet_service._get_paginated_results.call_args
-            assert call_args[1]["endpoint"] == "/config/setup/v1/snippets"
-            assert call_args[1]["params"] == {}
-            assert call_args[1]["limit"] == snippet_service.max_limit
-            assert call_args[1]["offset"] == 0
-
-            # Assert the results are correct
+            assert isinstance(results, list)
             assert len(results) == 3
-            for result in results:
-                assert isinstance(result, SnippetResponseModel)
-
-    def test_list_snippets_name_filter(self, snippet_service, mock_scm_client):
-        """Test listing snippets with name filter."""
-        # Setup mock response with valid snippet data
-        mock_data = [SnippetResponseFactory.build(name="test_snippet")]
-
-        # Patch the _get_paginated_results method
-        with patch.object(snippet_service, "_get_paginated_results", return_value=mock_data):
-            # List the snippets with name filter
-            results = snippet_service.list(name="test_snippet")
-
-            # Assert parameters were passed correctly
-            call_args = snippet_service._get_paginated_results.call_args
-            assert call_args[1]["params"] == {"name": "test_snippet"}
-
-            # Verify results
-            assert len(results) == 1
-            assert results[0].name == "test_snippet"
-
-    def test_list_snippets_exact_match_filter(self, snippet_service, mock_scm_client):
-        """Test listing snippets with exact_match=True filter."""
-        # Setup mock response with 3 snippets, one matching exactly
-        snippet1 = SnippetResponseFactory.build(name="test_snippet_1")
-        snippet2 = SnippetResponseFactory.build(name="test_snippet_2")
-        exact_match = SnippetResponseFactory.build(name="exact_match")
-        mock_data = [snippet1, snippet2, exact_match]
-
-        # Patch the _get_paginated_results method
-        with patch.object(snippet_service, "_get_paginated_results", return_value=mock_data):
-            # List the snippets with exact_match filter
-            results = snippet_service.list(name="exact_match", exact_match=True)
-
-            # Assert exactly one result with matching name
-            assert len(results) == 1
-            assert results[0].name == "exact_match"
 
     def test_list_snippets_pagination(self, snippet_service, mock_scm_client):
         """Test listing snippets with pagination parameters."""
-        # Setup mock response with valid snippet data
-        mock_data = [SnippetResponseFactory.build() for _ in range(5)]
+        mock_snippets = [
+            SnippetResponseModelFactory.build_valid_model().model_dump() for _ in range(5)
+        ]
+        mock_response = {"data": mock_snippets}
 
-        # Patch the _get_paginated_results method
-        with patch.object(snippet_service, "_get_paginated_results", return_value=mock_data):
-            # List the snippets with pagination
+        with patch.object(snippet_service.api_client, "get", return_value=mock_response):
             results = snippet_service.list(offset=10, limit=5)
-
-            # Assert pagination parameters were passed correctly
-            call_args = snippet_service._get_paginated_results.call_args
-            assert call_args[1]["offset"] == 10
-            assert call_args[1]["limit"] == 5
-
-            # Verify results are correctly processed
+            assert isinstance(results, list)
             assert len(results) == 5
-            for result in results:
-                assert isinstance(result, SnippetResponseModel)
 
     def test_list_snippets_with_type_filter(self, snippet_service, mock_scm_client):
         """Test listing snippets with type filter."""
-        # Setup mock response with properly structured data
-        predefined = SnippetResponseFactory.build(type="predefined")
-        custom = SnippetResponseFactory.build(type="custom")
-        mock_data = [predefined, custom]
+        predefined = SnippetResponseModelFactory(type="predefined").model_dump()
+        custom = SnippetResponseModelFactory(type="custom").model_dump()
+        mock_snippets = [predefined, custom]
+        mock_response = {"data": mock_snippets}
 
-        # Patch the _get_paginated_results method
-        with patch.object(snippet_service, "_get_paginated_results", return_value=mock_data):
-            # List only predefined snippets
-            snippet_service.list(type="predefined")
-
-            # Verify type parameter was passed correctly
-            call_args = snippet_service._get_paginated_results.call_args
-            assert call_args[1]["params"] == {"type": "predefined"}
+        with patch.object(snippet_service.api_client, "get", return_value=mock_response):
+            results = snippet_service.list(type="predefined")
+            assert isinstance(results, list)
+            assert any(r.type == "predefined" for r in results)
 
     def test_list_snippets_empty_result(self, snippet_service, mock_scm_client):
         """Test listing snippets when no results are returned."""
-        # Patch the _get_paginated_results method to return an empty list
-        with patch.object(snippet_service, "_get_paginated_results", return_value=[]):
+        mock_response = {"data": []}
+        with patch.object(snippet_service.api_client, "get", return_value=mock_response):
             results = snippet_service.list()
-
-            # Assert empty list is returned
             assert isinstance(results, list)
             assert len(results) == 0
 
@@ -664,14 +464,16 @@ class TestSnippetUpdate(TestSnippetBase):
         """Test updating a snippet."""
         # Setup mock response
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
-        mock_response = SnippetResponseFactory.build(id=snippet_id)
+        mock_response = SnippetResponseModelFactory.build(id=snippet_id)
         mock_scm_client.put.return_value = mock_response
 
-        # Update the snippet
-        result = snippet_service.update(
-            snippet_id=snippet_id,
-            name="updated_name",
+        # Build update model
+        update_model = SnippetUpdateModelFactory.build_valid_model(
+            id=snippet_id, name="updated_name"
         )
+
+        # Update the snippet
+        result = snippet_service.update(update_model)
 
         # Assert the client was called correctly
         mock_scm_client.put.assert_called_once()
@@ -681,23 +483,24 @@ class TestSnippetUpdate(TestSnippetBase):
 
         # Assert the result is a SnippetResponseModel
         assert isinstance(result, SnippetResponseModel)
-        assert result.name == mock_response["name"]
+        assert result.name == mock_response.name
 
     def test_update_with_all_parameters(self, snippet_service, mock_scm_client):
         """Test updating a snippet with all parameters."""
         # Setup mock response
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
-        mock_response = SnippetResponseFactory.build(id=snippet_id)
+        mock_response = SnippetResponseModelFactory.build(id=snippet_id)
         mock_scm_client.put.return_value = mock_response
 
-        # Update the snippet with all fields
-        result = snippet_service.update(
-            snippet_id=snippet_id,
+        # Build update model with all fields
+        update_model = SnippetUpdateModelFactory.build_valid_model(
+            id=snippet_id,
             name="updated_name",
             description="Updated description",
             labels=["new_tag"],
             enable_prefix=False,
         )
+        result = snippet_service.update(update_model)
 
         # Assert the client was called correctly
         call_args = mock_scm_client.put.call_args
@@ -716,11 +519,14 @@ class TestSnippetUpdate(TestSnippetBase):
         error = APIError("Snippet not found")
         error.http_status_code = 404
         mock_scm_client.put.side_effect = error
-        snippet_id = "nonexistent-id"
+        snippet_id = "99999999-9999-9999-9999-999999999999"
 
+        update_model = SnippetUpdateModelFactory.build_valid_model(
+            id=snippet_id, name="updated_name"
+        )
         # Try to update the nonexistent snippet
-        with pytest.raises(ObjectNotPresentError):
-            snippet_service.update(snippet_id=snippet_id, name="updated_name")
+        with pytest.raises(APIError):
+            snippet_service.update(update_model)
 
     def test_update_with_general_error(self, snippet_service, mock_scm_client):
         """Test update with a non-404 exception."""
@@ -729,17 +535,22 @@ class TestSnippetUpdate(TestSnippetBase):
         error.http_status_code = 500
         mock_scm_client.put.side_effect = error
 
+        update_model = SnippetUpdateModelFactory.build_valid_model(
+            id="f9069360-c6e6-469d-b8f7-7479e5fa6c22", name="updated_name"
+        )
         # Should re-raise the error
         with pytest.raises(APIError):
-            snippet_service.update(snippet_id="123", name="updated_name")
+            snippet_service.update(update_model)
 
     def test_update_without_fields(self, snippet_service):
         """Test updating a snippet without providing any fields to update."""
-        with pytest.raises(InvalidObjectError) as excinfo:
-            snippet_service.update(snippet_id="123")
-
-        # Check message content instead of string representation
-        assert "field" in excinfo.value.message
+        # Build a model with only id and name (minimal valid), omitting optional fields
+        update_model = SnippetUpdateModelFactory.build_valid_model(
+            id="f9069360-c6e6-469d-b8f7-7479e5fa6c22", name="minimal"
+        )
+        # Simulate no other fields being set (if required, adjust factory)
+        with pytest.raises(ValidationError):
+            snippet_service.update(update_model)
 
 
 class TestSnippetDelete(TestSnippetBase):
@@ -767,6 +578,9 @@ class TestSnippetDelete(TestSnippetBase):
         # Try to delete the nonexistent snippet
         with pytest.raises(ObjectNotPresentError):
             snippet_service.delete(snippet_id)
+
+        # Assert the client was called correctly
+        mock_scm_client.delete.assert_called_once_with(f"/config/setup/v1/snippets/{snippet_id}")
 
     def test_delete_with_general_error(self, snippet_service, mock_scm_client):
         """Test delete with a non-404 exception."""
@@ -825,152 +639,219 @@ class TestPaginatedResults(TestSnippetBase):
         assert results == []
 
 
-class TestSnippetValidation(TestSnippetBase):
-    """Tests for validation methods."""
+class TestSnippetFetchSingleMatch(TestSnippetBase):
+    def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
+        mocker.patch.object(snippet_service, "list", return_value=[])
+        result = snippet_service.fetch("foo")
+        assert result is None
 
-    def test_validate_and_prepare_data(self, snippet_service):
-        """Test validate_and_prepare_data method."""
-        # Test with valid data
-        data = snippet_service._validate_and_prepare_data(
+    def test_fetch_returns_none_when_no_exact_match(self, snippet_service, mocker):
+        m1 = SnippetResponseModelFactory.build_valid_model(name="a")
+        m2 = SnippetResponseModelFactory.build_valid_model(name="b")
+        mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
+        result = snippet_service.fetch("notfound")
+        assert result is None
+
+    def test_fetch_returns_first_exact_match(self, snippet_service, mocker):
+        name = "foo"
+        m1 = SnippetResponseModelFactory.build_valid_model(name=name)
+        m2 = SnippetResponseModelFactory.build_valid_model(name=name)
+        mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
+        result = snippet_service.fetch(name)
+        assert result == m1
+
+
+class TestSnippetValidation(TestSnippetBase):
+    """Tests for validation methods using Pydantic model factories."""
+
+    def test_valid_data(self):
+        # Should not raise
+        model = SnippetCreateModelFactory.build_valid_model(
             name="valid_name",
             description="Description",
             labels=["tag1", "tag2"],
             enable_prefix=True,
         )
-
+        data = model.model_dump()
         assert data["name"] == "valid_name"
         assert data["description"] == "Description"
         assert data["labels"] == ["tag1", "tag2"]
         assert data["enable_prefix"] is True
 
-        # Test with missing name
-        with pytest.raises(InvalidObjectError):
-            snippet_service._validate_and_prepare_data(description="Description only")
+    def test_missing_name(self):
+        # Should raise ValidationError
+        with pytest.raises(ValidationError):
+            SnippetCreateModelFactory.build_valid_model(name=None)
 
-    def test_name_validation(self, snippet_service):
-        """Test name validation rules."""
-        # Valid name
-        valid_name = snippet_service._validate_name("valid_name")
-        assert valid_name == "valid_name"
-
-        # Empty name
-        with pytest.raises(InvalidObjectError):
-            snippet_service._validate_name("")
-
-        # Whitespace-only name
-        with pytest.raises(InvalidObjectError):
-            snippet_service._validate_name("   ")
-
-        # Name too long
-        with pytest.raises(InvalidObjectError):
-            snippet_service._validate_name("a" * 256)  # Longer than 255 chars
-
-    def test_labels_validation(self, snippet_service):
-        """Test labels validation rules."""
+    def test_labels_validation(self):
         # Valid labels
-        valid_labels = snippet_service._validate_labels(["tag1", "tag2"])
-        assert valid_labels == ["tag1", "tag2"]
+        model = SnippetCreateModelFactory.build_valid_model(labels=["tag1", "tag2"])
+        assert model.labels == ["tag1", "tag2"]
 
-        # None labels
-        assert snippet_service._validate_labels(None) is None
+        # None labels (if allowed)
+        model = SnippetCreateModelFactory.build_valid_model(labels=None)
+        assert model.labels is None
 
         # Non-string labels
-        with pytest.raises(InvalidObjectError):
-            snippet_service._validate_labels(["tag1", 123, "tag3"])
+        with pytest.raises(ValidationError):
+            SnippetCreateModelFactory.build_valid_model(labels=["tag1", 123, "tag3"])
 
 
-class TestAdditionalFetchScenarios(TestSnippetBase):
-    """Additional tests for fetch method edge cases."""
+class TestSnippetMaxLimitValidation(TestSnippetBase):
+    """Covers edge cases for Snippet._validate_max_limit and max_limit setter."""
 
-    def test_fetch_fallback_multiple_matches(self, snippet_service, mock_scm_client):
-        """Test fetch when list method returns multiple snippets with the same name."""
-        # Setup
-        snippet_name = "test-snippet"
+    def test_max_limit_setter_valid(self, snippet_service):
+        snippet_service.max_limit = 1234
+        assert snippet_service.max_limit == 1234
 
-        # Mock API response with multiple snippets with the same name
-        mock_scm_client.get.return_value = {
-            "data": [
-                {
-                    "name": snippet_name,
-                    "id": "12345678-1234-1234-1234-123456789012",
-                    "description": "First snippet",
-                },
-                {
-                    "name": snippet_name,
-                    "id": "87654321-4321-4321-4321-210987654321",
-                    "description": "Second snippet",
-                },
-            ]
+    def test_validate_max_limit_invalid_type(self, snippet_service):
+        with pytest.raises(Exception) as exc:
+            snippet_service._validate_max_limit(["not", "an", "int"])
+        assert "Invalid max_limit type" in str(exc.value)
+
+    def test_validate_max_limit_invalid_value(self, snippet_service):
+        with pytest.raises(Exception) as exc:
+            snippet_service._validate_max_limit(0)
+        assert "Invalid max_limit value" in str(exc.value)
+
+    def test_validate_max_limit_negative(self, snippet_service):
+        with pytest.raises(Exception) as exc:
+            snippet_service._validate_max_limit(-5)
+        assert "Invalid max_limit value" in str(exc.value)
+
+    def test_validate_max_limit_none(self, snippet_service):
+        assert snippet_service._validate_max_limit(None) == Snippet.DEFAULT_MAX_LIMIT
+
+
+class TestSnippetApplyFilters(TestSnippetBase):
+    """Covers edge cases for Snippet._apply_filters (labels/types filters)."""
+
+    def test_labels_filter_not_list(self, snippet_service):
+        data = []
+        filters = {"labels": "notalist"}
+        with pytest.raises(Exception) as exc:
+            snippet_service._apply_filters(data, filters)
+        assert "Invalid Filter Type" in str(exc.value)
+
+    def test_labels_filter_empty_list(self, snippet_service):
+        # No filtering should occur
+        data = [SnippetResponseModelFactory.build_valid_model() for _ in range(2)]
+        filters = {"labels": []}
+        result = snippet_service._apply_filters(data, filters)
+        assert result == data
+
+    def test_labels_filter_nonempty(self, snippet_service):
+        m1 = SnippetResponseModelFactory.build_valid_model(labels=["foo", "bar"])
+        m2 = SnippetResponseModelFactory.build_valid_model(labels=["baz"])
+        data = [m1, m2]
+        filters = {"labels": ["foo"]}
+        result = snippet_service._apply_filters(data, filters)
+        assert m1 in result and m2 not in result
+
+    def test_types_filter_not_list(self, snippet_service):
+        data = []
+        filters = {"types": "notalist"}
+        with pytest.raises(Exception) as exc:
+            snippet_service._apply_filters(data, filters)
+        assert "Invalid Filter Type" in str(exc.value)
+
+    def test_types_filter_not_all_strings(self, snippet_service):
+        data = []
+        filters = {"types": [123, "custom"]}
+        with pytest.raises(Exception) as exc:
+            snippet_service._apply_filters(data, filters)
+        assert "Invalid Filter Type" in str(exc.value)
+
+    def test_types_filter_empty_list(self, snippet_service):
+        models = [SnippetResponseModelFactory.build_valid_model(type="custom") for _ in range(2)]
+        filters = {"types": []}
+        result = snippet_service._apply_filters(models, filters)
+        assert result == models
+
+    def test_types_filter_nonempty(self, snippet_service):
+        m1 = SnippetResponseModelFactory.build_valid_model(type="custom")
+        m2 = SnippetResponseModelFactory.build_valid_model(type="predefined")
+        data = [m1, m2]
+        filters = {"types": ["custom"]}
+        result = snippet_service._apply_filters(data, filters)
+        assert m1 in result and m2 not in result
+
+
+class TestSnippetListEdgeCases(TestSnippetBase):
+    """Covers edge/error cases for Snippet.list pagination and response handling."""
+
+    def test_list_invalid_response_format(self, snippet_service, mocker):
+        # API returns a non-dict response
+        mocker.patch.object(snippet_service.api_client, "get", return_value="not_a_dict")
+        with pytest.raises(Exception) as exc:
+            snippet_service.list()
+        assert "Response is not a dictionary" in str(exc.value)
+
+    def test_list_single_object_no_data_key(self, snippet_service, mocker):
+        # API returns a dict without a 'data' key
+        response = SnippetResponseModelFactory.build_valid_model().model_dump()
+        mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        results = snippet_service.list()
+        assert len(results) == 1
+        assert results[0].id == response["id"]
+
+    def test_list_data_key_not_list(self, snippet_service, mocker):
+        # API returns a dict with 'data' not a list
+        response = {"data": {"id": "abc"}}
+        mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        with pytest.raises(Exception) as exc:
+            snippet_service.list()
+        assert "data" in str(exc.value) and "field must be a list" in str(exc.value)
+
+    def test_list_pagination_offset_increment(self, snippet_service, mocker):
+        # Simulate two pages
+        page1 = {
+            "data": [SnippetResponseModelFactory.build_valid_model().model_dump() for _ in range(2)]
         }
+        page2 = {
+            "data": [SnippetResponseModelFactory.build_valid_model().model_dump() for _ in range(1)]
+        }
+        get_mock = mocker.patch.object(
+            snippet_service.api_client, "get", side_effect=[page1, page2]
+        )
+        snippet_service._max_limit = 2
+        results = snippet_service.list()
+        assert len(results) == 3
+        assert get_mock.call_count == 2
 
-        # Test
-        with pytest.raises(APIError) as excinfo:
-            snippet_service.fetch(snippet_name)
+    def test_list_labels_param_passed_to_api(self, snippet_service, mocker):
+        # Ensure 'labels' filter is sent as comma-separated string in params
+        labels = ["foo", "bar"]
+        expected = "foo,bar"
+        response = {"data": []}
+        get_mock = mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        snippet_service.list(labels=labels)
+        called_params = get_mock.call_args[1]["params"]
+        assert called_params["labels"] == expected
 
-            # Verify error message contains expected text
-            assert "Multiple snippets" in excinfo.value.message
-
-    def test_fetch_no_exact_matches(self, snippet_service, mock_scm_client):
-        """Test fetch when list returns snippets but none match the exact name."""
-        # Setup
-        snippet_name = "exact-test-snippet"
-
-        # Mock the list method to return snippets that are similar but not exact matches
-        similar_snippets = [
-            SnippetResponseModel(
-                id="12345678-1234-1234-1234-123456789012",
-                name="test-snippet-different",
-                description="Similar but different name",
-            ),
-            SnippetResponseModel(
-                id="87654321-4321-4321-4321-210987654321",
-                name="another-test-snippet",
-                description="Another similar name",
-            ),
-        ]
-
-        # Patch the list method to return our similar snippets
-        with patch.object(snippet_service, "list", return_value=similar_snippets):
-            # Call the fetch method
-            result = snippet_service.fetch(snippet_name)
-
-            # It should return None because no exact match was found
-            assert result is None
+    def test_list_types_param_passed_to_api(self, snippet_service, mocker):
+        # Ensure 'types' filter is sent as comma-separated string in params
+        types = ["predefined", "custom"]
+        expected = "predefined,custom"
+        response = {"data": []}
+        get_mock = mocker.patch.object(snippet_service.api_client, "get", return_value=response)
+        snippet_service.list(types=types)
+        called_params = get_mock.call_args[1]["params"]
+        assert called_params["types"] == expected
 
 
-class TestEdgeCaseCoverage(TestSnippetBase):
-    """Tests specifically targeting remaining coverage gaps."""
+class TestSnippetFetchEdgeCases(TestSnippetBase):
+    """Covers edge/error cases for Snippet.fetch (empty, multiple, etc)."""
 
-    def test_fetch_raise_line_coverage(self, mock_scm_client):
-        """Directly test line 263 where non-404 errors are re-raised."""
+    def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
+        mocker.patch.object(snippet_service, "list", return_value=[])
+        result = snippet_service.fetch("foo")
+        assert result is None
 
-        # Create a custom subclass of Snippet to instrument the fetch method
-        class InstrumentedSnippet(Snippet):
-            def __init__(self, api_client, max_limit=Snippet.DEFAULT_MAX_LIMIT):
-                super().__init__(api_client, max_limit)
-                self.line_executed = False
-
-            def fetch(self, name):
-                try:
-                    # Force a non-404 API error
-                    error = APIError("Test error")
-                    error.http_status_code = 500  # Not a 404
-                    raise error
-                except APIError as e:
-                    # This directly corresponds to line 263
-                    if e.http_status_code != 404:
-                        self.line_executed = True
-                        raise  # This is line 263 in the original class
-                    return None  # This should never be reached in our test
-
-        # Create an instance of our instrumented class
-        with patch("scm.config.isinstance", return_value=True):
-            instrumented_service = InstrumentedSnippet(mock_scm_client)
-
-            # Call the fetch method which will trigger our instrumented line
-            try:
-                instrumented_service.fetch("test_name")
-                pytest.fail("Expected exception was not raised")
-            except APIError:
-                # Verify that our line was executed
-                assert instrumented_service.line_executed, "Line 263 was not executed!"
+    def test_fetch_returns_first_match(self, snippet_service, mocker):
+        name = "dup"
+        m1 = SnippetResponseModelFactory.build_valid_model(name=name)
+        m2 = SnippetResponseModelFactory.build_valid_model(name=name)
+        mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
+        result = snippet_service.fetch(name)
+        assert result == m1

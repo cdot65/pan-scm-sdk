@@ -82,7 +82,7 @@ versions = client.agent_versions.list()
 # Create AgentVersionModel instances for versions with additional metadata
 version_objects = []
 for ver in versions:
-    # This is hypothetical - in a real scenario, 
+    # This is hypothetical - in a real scenario,
     # you might have additional metadata from elsewhere
     metadata = {
         "version": ver,
@@ -115,13 +115,13 @@ client = ScmClient(
 try:
     # Get a response from the API
     response = client.get("/mobile-agent/v1/agent-versions")
-    
+
     # Validate the response against the model
     versions_model = AgentVersionsModel(**response)
-    
+
     # Access the validated data
     print(f"Found {len(versions_model.agent_versions)} versions")
-    
+
 except ValidationError as e:
     print(f"Response validation failed: {e}")
 ```
