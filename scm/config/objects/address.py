@@ -520,4 +520,5 @@ class Address(BaseObject):
         except APIError as e:
             if e.http_status_code == 404:
                 raise ObjectNotPresentError(f"Address with ID {object_id} not found")
+            self.logger.error(f"Error deleting address with ID {object_id}: {str(e)}")
             raise

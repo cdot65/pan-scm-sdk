@@ -929,6 +929,18 @@ class TestAddressDeleteErrorHandling(TestAddressBase):
         with pytest.raises(APIError):
             client.delete(object_id)
 
+    def test_delete_logs_error_on_non_404(self, mocker):
+        client = Address(self.mock_scm)
+        object_id = "some-id"
+        error = APIError("Server error")
+        error.http_status_code = 500
+        self.mock_scm.delete.side_effect = error
+        logger_mock = mocker.patch.object(client.logger, "error")
+        with pytest.raises(APIError):
+            client.delete(object_id)
+        logger_mock.assert_called_once()
+        assert f"Error deleting address with ID {object_id}" in logger_mock.call_args[0][0]
+
 
 # -------------------- Parametrized Tests --------------------
 
