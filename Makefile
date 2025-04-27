@@ -1,4 +1,4 @@
-.PHONY: setup lint format test clean install-hooks docs docs-serve isort flake8 mypy quality quality-basic lint-format test-cov update-hooks pre-commit-all
+.PHONY: setup lint format test clean install-hooks docs docs-serve docs-stop isort flake8 mypy quality quality-basic lint-format test-cov update-hooks pre-commit-all
 
 # Default goal
 .DEFAULT_GOAL := help
@@ -83,7 +83,14 @@ docs:
 
 # Serve documentation locally
 docs-serve:
-	$(DC_RUN) poetry run mkdocs serve
+	docker compose up -d docs
+	@echo "Documentation server started. Access at http://localhost:8000/pan-scm-sdk/"
+	@echo "To stop the server, run: make docs-stop"
+
+# Stop documentation server
+docs-stop:
+	docker compose stop docs
+	@echo "Documentation server stopped."
 
 help:
 	@echo "Available commands:"
@@ -101,7 +108,8 @@ help:
 	@echo "  test-cov        - Run tests with coverage (in Docker)"
 	@echo "  clean           - Clean cache directories (local)"
 	@echo "  docs            - Build documentation site (in Docker)"
-	@echo "  docs-serve      - Serve documentation locally (in Docker)"
+	@echo "  docs-serve      - Serve documentation locally on http://localhost:8000/pan-scm-sdk/ (using dedicated docs service)"
+	@echo "  docs-stop       - Stop the documentation server"
 	@echo "  install-hooks   - Install pre-commit hooks (in Docker)"
 	@echo "  update-hooks    - Update pre-commit hooks to the latest versions (in Docker)"
 	@echo "  pre-commit-all  - Run pre-commit on all files (in Docker)"

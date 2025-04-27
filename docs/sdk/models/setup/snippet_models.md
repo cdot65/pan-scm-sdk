@@ -4,11 +4,11 @@
 
 1. [Overview](#overview)
 2. [Models](#models)
+    - [FolderReference](#folderreference)
     - [SnippetBaseModel](#snippetbasemodel)
     - [SnippetCreateModel](#snippetcreatemodel)
     - [SnippetUpdateModel](#snippetupdatemodel)
     - [SnippetResponseModel](#snippetresponsemodel)
-    - [FolderReference](#folderreference)
 3. [Model Validation Rules](#model-validation-rules)
 4. [Usage Examples](#usage-examples)
     - [Creating Model Instances](#creating-model-instances)
@@ -18,26 +18,47 @@
 
 ## Overview
 
-This page documents the Pydantic models used for snippet operations in the Strata Cloud Manager SDK. These models provide
-structured data validation and serialization for snippet creation, updates, and API responses.
+This page documents the Pydantic models used for snippet operations in the Strata Cloud Manager SDK. These models provide structured data validation and serialization for snippet creation, updates, and API responses.
 
 ## Models
 
+### FolderReference
+
+Reference to a folder that a snippet is applied to.
+
+```python
+class FolderReference(BaseModel):
+    id: UUID
+    name: str
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        if not value or value.strip() == "":
+            raise ValueError("Folder name cannot be empty")
+        return value
+```
+
 ### SnippetBaseModel
 
-Base model for snippet objects with common fields.
+The base model for snippet resources containing common fields.
 
 ```python
 class SnippetBaseModel(BaseModel):
     name: str
     description: Optional[str] = None
     labels: Optional[List[str]] = None
-    enable_prefix: bool = False
+    enable_prefix: Optional[bool] = None
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value):
+        if not value or value.strip() == "":
+            raise ValueError("Snippet name cannot be empty")
+        return value
 ```
 
 ### SnippetCreateModel
 
-Model for creating new snippets.
+Model for creating new snippet resources.
 
 ```python
 class SnippetCreateModel(SnippetBaseModel):
@@ -46,11 +67,11 @@ class SnippetCreateModel(SnippetBaseModel):
 
 ### SnippetUpdateModel
 
-Model for updating existing snippets.
+Model for updating existing snippet resources.
 
 ```python
 class SnippetUpdateModel(SnippetBaseModel):
-    id: UUID  # Required for update operations
+    id: UUID
 ```
 
 ### SnippetResponseModel
@@ -60,29 +81,29 @@ Model for snippet responses from the API.
 ```python
 class SnippetResponseModel(SnippetBaseModel):
     id: UUID
+    type: Optional[Literal["predefined", "custom", "readonly"]] = None
+    display_name: Optional[str] = None
+    last_update: Optional[str] = None
+    created_in: Optional[str] = None
     folders: Optional[List[FolderReference]] = None
-```
-
-### FolderReference
-
-Model for folder references within snippets.
-
-```python
-class FolderReference(BaseModel):
-    id: UUID
-    name: str
+    shared_in: Optional[str] = None
 ```
 
 ## Model Validation Rules
 
-| Field           | Validation Rules                                          |
-|-----------------|------------------------------------------------------------|
-| `name`          | Non-empty string, max 255 characters                       |
-| `description`   | Optional text description                                  |
-| `labels`        | Optional list of string labels                             |
-| `enable_prefix` | Boolean flag, defaults to False                            |
-| `id`            | Valid UUID format                                          |
-| `folders`       | Optional list of folder references with valid UUIDs        |
+| Field           | Validation Rules                                                |
+|-----------------|-----------------------------------------------------------------|
+| `name`          | Non-empty string, max 255 characters                            |
+| `description`   | Optional text description                                       |
+| `labels`        | Optional list of string labels                                  |
+| `enable_prefix` | Optional boolean                                                |
+| `id`            | Valid UUID format (required in response and update models)      |
+| `type`          | One of: 'predefined', 'custom', 'readonly' (response only)      |
+| `display_name`  | Optional string (response only)                                 |
+| `last_update`   | Optional ISO8601 timestamp (response only)                      |
+| `created_in`    | Optional ISO8601 timestamp (response only)                      |
+| `folders`       | Optional list of FolderReference, each with valid UUID and name |
+| `shared_in`     | Optional string (response only)                                 |
 
 ## Usage Examples
 
@@ -90,13 +111,12 @@ class FolderReference(BaseModel):
 
 ```python
 from uuid import UUID
-from typing import List, Optional
-from scm.models.setup.snippet_models import (
+from scm.models.setup.snippet import (
+    FolderReference,
     SnippetBaseModel,
     SnippetCreateModel,
     SnippetUpdateModel,
     SnippetResponseModel,
-    FolderReference
 )
 
 # Create a base snippet model
@@ -104,7 +124,7 @@ base_snippet = SnippetBaseModel(
     name="Base Snippet",
     description="A base snippet model",
     labels=["base", "example"],
-    enable_prefix=True
+    enable_prefix=True,
 )
 
 # Create a snippet creation model
@@ -112,7 +132,7 @@ create_snippet = SnippetCreateModel(
     name="New Snippet",
     description="A snippet for creation",
     labels=["new", "creation"],
-    enable_prefix=False
+    enable_prefix=False,
 )
 
 # Create a snippet update model
@@ -120,13 +140,13 @@ update_snippet = SnippetUpdateModel(
     id=UUID("12345678-1234-1234-1234-123456789012"),
     name="Updated Snippet",
     description="An updated snippet",
-    labels=["updated", "modified"]
+    labels=["updated", "modified"],
 )
 
 # Create a folder reference
 folder_ref = FolderReference(
     id=UUID("87654321-4321-4321-4321-210987654321"),
-    name="Example Folder"
+    name="Example Folder",
 )
 
 # Create a snippet response model
@@ -136,90 +156,57 @@ response_snippet = SnippetResponseModel(
     description="A response snippet",
     labels=["response", "example"],
     enable_prefix=True,
-    folders=[folder_ref]
+    type="custom",
+    display_name="Custom Snippet",
+    last_update="2024-04-01T12:00:00Z",
+    created_in="2024-03-01T08:00:00Z",
+    folders=[folder_ref],
+    shared_in="local",
 )
 ```
 
 ### Model Validation
 
 ```python
-from pydantic import ValidationError
-from scm.models.setup.snippet_models import SnippetCreateModel
+from pydantic_core import ValidationError
+from scm.models.setup.snippet import SnippetCreateModel
 
 try:
-    # This will fail validation (empty name)
-    invalid_snippet = SnippetCreateModel(
-        name="",
-        description="Invalid snippet"
-    )
+    SnippetCreateModel(name="", description="Invalid snippet")
 except ValidationError as e:
-    print(f"Validation error: {e}")
-
-try:
-    # This will succeed
-    valid_snippet = SnippetCreateModel(
-        name="Valid Snippet",
-        description="A valid snippet"
-    )
-    print(f"Valid snippet created: {valid_snippet.name}")
-except ValidationError as e:
-    print(f"Validation error: {e}")
+    print("Validation error:", e)
 ```
 
 ### Model Serialization
 
 ```python
-from uuid import UUID
-from scm.models.setup.snippet_models import SnippetResponseModel, FolderReference
-
-# Create a response model
-snippet = SnippetResponseModel(
-    id=UUID("12345678-1234-1234-1234-123456789012"),
-    name="Example Snippet",
-    description="An example snippet",
-    labels=["example", "serialization"],
-    folders=[
-        FolderReference(
-            id=UUID("87654321-4321-4321-4321-210987654321"),
-            name="Example Folder"
-        )
-    ]
-)
-
-# Convert to dictionary
+snippet = response_snippet
+# Convert to dict
 snippet_dict = snippet.model_dump()
-print(f"Dictionary representation: {snippet_dict}")
-
-# Convert to JSON string
+# Convert to JSON
 snippet_json = snippet.model_dump_json()
-print(f"JSON representation: {snippet_json}")
 ```
 
 ### API Integration Examples
 
 ```python
-from scm.client import ScmClient
-from scm.models.setup.snippet_models import SnippetCreateModel
+from scm.config.setup.snippet import Snippet
+snippets = Snippet(client)
 
-# Initialize client
-client = ScmClient(
-    client_id="your_client_id",
-    client_secret="your_client_secret"
+# Create and send a snippet
+new_snippet = SnippetCreateModel(
+    name="QA Snippet",
+    description="Quality Assurance snippet",
+    labels=["qa"],
+    enable_prefix=True,
 )
+created = snippets.create(new_snippet.model_dump(exclude_unset=True))
 
-# Create a snippet model
-snippet_model = SnippetCreateModel(
-    name="API Integration Snippet",
-    description="A snippet for API integration",
-    labels=["api", "integration"]
+# Update a snippet
+update = SnippetUpdateModel(
+    id=created.id,
+    name="QA Snippet",
+    description="QA and Testing",
 )
-
-# Use the model with the API client
-response = client.snippet.create(
-    name=snippet_model.name,
-    description=snippet_model.description,
-    labels=snippet_model.labels,
-    enable_prefix=snippet_model.enable_prefix
-)
-
-print(f"Created snippet with ID: {response.id}")
+snippets.update(update)
+```
