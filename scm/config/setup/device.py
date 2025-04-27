@@ -182,11 +182,4 @@ class Device(BaseObject):
             self.ENDPOINT,
             params={"limit": limit, "offset": offset, **params},
         )
-        if not isinstance(response, dict):
-            raise InvalidObjectError(
-                message="Invalid response format: expected dictionary",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response is not a dictionary"},
-            )
         return DeviceListResponseModel.model_validate(response)
