@@ -161,17 +161,17 @@ class TestSnippetResponseModel:
 
         model = SnippetResponseModel(**data.model_dump())
 
-        assert str(model.id) == str(model.id)
-        assert model.name == model.name
-        assert model.description == model.description
-        assert model.labels == model.labels
-        assert model.enable_prefix == model.enable_prefix
-        assert model.type == model.type
-        assert model.display_name == model.display_name
-        assert model.last_update == model.last_update
-        assert model.created_in == model.created_in
-        assert model.folders == model.folders
-        assert model.shared_in == model.shared_in
+        assert str(model.id) == str(data.id)
+        assert model.name == data.name
+        assert model.description == data.description
+        assert model.labels == data.labels
+        assert model.enable_prefix == data.enable_prefix
+        assert model.type == data.type
+        assert model.display_name == data.display_name
+        assert model.last_update == data.last_update
+        assert model.created_in == data.created_in
+        assert model.folders == data.folders
+        assert model.shared_in == data.shared_in
 
     def test_name_validation(self):
         """Test that name validation works."""
@@ -179,7 +179,7 @@ class TestSnippetResponseModel:
 
         # Valid name should work
         model = SnippetResponseModel(**data.model_dump())
-        assert model.name == model.name
+        assert model.name == data.name
 
         # Empty name should fail validation
         invalid_data = data.model_dump()
