@@ -29,12 +29,16 @@ jobs:
           make quality
 
       - name: Run Tests with Coverage
-        env:
-          CLIENT_ID: fake_client_id
-          CLIENT_SECRET: fake_client_secret
-          TSG_ID: fake_tsg_id
         run: |
-          make test-cov
+          docker compose run --rm \
+            -e CLIENT_ID \
+            -e CLIENT_SECRET \
+            -e TSG_ID \
+            sdk poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing tests/
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          TSG_ID: ${{ secrets.TSG_ID }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
