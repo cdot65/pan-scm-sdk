@@ -113,7 +113,7 @@ class WildfireAvProfileCreateModel(WildfireAvProfileBase):
     """
 
     @model_validator(mode="after")
-    def validate_container(self) -> "WildfireAvProfileCreateModel":
+    def validate_container_type(self) -> "WildfireAvProfileCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None

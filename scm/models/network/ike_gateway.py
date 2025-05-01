@@ -355,7 +355,7 @@ class IKEGatewayCreateModel(IKEGatewayBaseModel):
     """Model for creating new IKE Gateways."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "IKEGatewayCreateModel":
+    def validate_container_type(self) -> "IKEGatewayCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

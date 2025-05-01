@@ -149,7 +149,7 @@ class IKECryptoProfileCreateModel(IKECryptoProfileBaseModel):
     """Model for creating new IKE Crypto Profiles."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "IKECryptoProfileCreateModel":
+    def validate_container_type(self) -> "IKECryptoProfileCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

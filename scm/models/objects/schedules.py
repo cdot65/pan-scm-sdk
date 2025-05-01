@@ -51,7 +51,7 @@ class WeeklyScheduleModel(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def validate_at_least_one_day(cls, values):
+    def ensure_at_least_one_day(cls, values):
         """Validate that at least one day has time ranges defined."""
         days = [
             values.sunday,
@@ -106,7 +106,7 @@ class RecurringScheduleModel(BaseModel):
     daily: Optional[List[str]] = None
 
     @model_validator(mode="after")
-    def validate_exactly_one_type(cls, values):
+    def ensure_exactly_one_type(cls, values):
         """Validate that exactly one of weekly or daily is provided."""
         if values.weekly is not None and values.daily is not None:
             raise ValueError("Exactly one of 'weekly' or 'daily' must be provided")
@@ -127,7 +127,7 @@ class NonRecurringScheduleModel(BaseModel):
     non_recurring: List[str]
 
     @field_validator("non_recurring")
-    def validate_datetime_ranges(cls, v):
+    def validate_time_ranges(cls, v):
         """Validate that datetime ranges follow the correct format."""
         if not v:
             raise ValueError("Non-recurring schedule must contain at least one datetime range")
@@ -243,7 +243,7 @@ class ScheduleTypeModel(BaseModel):
     non_recurring: Optional[List[str]] = None
 
     @model_validator(mode="after")
-    def validate_exactly_one_type(cls, values):
+    def ensure_exactly_one_type(cls, values):
         """Validate that exactly one of recurring or non_recurring is provided."""
         if values.recurring is not None and values.non_recurring is not None:
             raise ValueError("Exactly one of 'recurring' or 'non_recurring' must be provided")

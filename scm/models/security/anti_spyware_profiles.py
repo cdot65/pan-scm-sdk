@@ -137,7 +137,7 @@ class AntiSpywareActionRequest(RootModel[dict]):
 
     @model_validator(mode="before")
     @classmethod
-    def check_and_transform_action(cls, values):
+    def convert_action(cls, values):
         if isinstance(values, str):
             # Convert string to dict
             values = {values: {}}
@@ -173,7 +173,7 @@ class AntiSpywareActionResponse(RootModel[dict]):
     """
 
     @model_validator(mode="before")
-    def check_action(cls, values):
+    def validate_action(cls, values):
         if isinstance(values, str):
             # Convert string to dict
             values = {values: {}}
@@ -328,7 +328,7 @@ class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
     """
 
     @model_validator(mode="after")
-    def validate_container(self) -> "AntiSpywareProfileCreateModel":
+    def validate_container_type(self) -> "AntiSpywareProfileCreateModel":
         container_fields = [
             "folder",
             "snippet",

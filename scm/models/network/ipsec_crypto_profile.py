@@ -151,7 +151,7 @@ class EspConfig(BaseModel):
     )
 
     @model_validator(mode="before")
-    def convert_string_to_enum(cls, values):
+    def convert_enum_values(cls, values):
         """Convert string authentication values to EspAuthentication enum if needed."""
         auth = values.get("authentication")
         if auth and isinstance(auth, list):
@@ -279,7 +279,7 @@ class IPsecCryptoProfileCreateModel(IPsecCryptoProfileBaseModel):
     """Model for creating new IPsec Crypto Profiles."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "IPsecCryptoProfileCreateModel":
+    def validate_container_type(self) -> "IPsecCryptoProfileCreateModel":
         """Validate that exactly one container field is provided."""
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
