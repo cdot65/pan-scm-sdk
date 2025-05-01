@@ -1,3 +1,8 @@
+from .device import (
+    DeviceCreateModel,
+    DeviceResponseModel,
+    DeviceUpdateModel,
+)
 from .folder import (
     FolderCreateModel,
     FolderResponseModel,
@@ -10,8 +15,16 @@ from .snippet import (
     SnippetResponseModel,
     SnippetUpdateModel,
 )
+from .variable import (
+    VariableCreateModel,
+    VariableResponseModel,
+    VariableUpdateModel,
+)
 
 __all__ = [
+    "DeviceCreateModel",
+    "DeviceResponseModel",
+    "DeviceUpdateModel",
     "FolderCreateModel",
     "FolderResponseModel",
     "FolderUpdateModel",
@@ -20,4 +33,7 @@ __all__ = [
     "SnippetCreateModel",
     "SnippetResponseModel",
     "SnippetUpdateModel",
+    "VariableCreateModel",
+    "VariableResponseModel",
+    "VariableUpdateModel",
 ]

@@ -511,6 +511,10 @@ class Scm:
                 "scm.config.security.vulnerability_protection_profile",
                 "VulnerabilityProtectionProfile",
             ),
+            "variable": (
+                "scm.config.setup.variable",
+                "Variable",
+            ),
             "wildfire_antivirus_profile": (
                 "scm.config.security.wildfire_antivirus_profile",
                 "WildfireAntivirusProfile",
