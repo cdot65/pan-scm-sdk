@@ -85,7 +85,7 @@ client = ScmClient(
 
 # Access the Remote Networks service directly through the client
 # No need to create a separate RemoteNetworks instance
-networks = client.remote_networks
+networks = client.remote_network
 ```
 
 ### Traditional Service Instantiation (Legacy)
@@ -136,7 +136,7 @@ standard_config = {
 }
 
 # Create standard remote network
-standard_network = client.remote_networks.create(standard_config)
+standard_network = client.remote_network.create(standard_config)
 
 # ECMP-enabled remote network configuration
 ecmp_config = {
@@ -167,21 +167,21 @@ ecmp_config = {
 }
 
 # Create ECMP-enabled remote network
-ecmp_network = client.remote_networks.create(ecmp_config)
+ecmp_network = client.remote_network.create(ecmp_config)
 ```
 
 ### Retrieving Remote Networks
 
 ```python
 # Fetch by name and folder
-network = client.remote_networks.fetch(
+network = client.remote_network.fetch(
     name="branch-office-1",
     folder="Remote Networks"
 )
 print(f"Found network: {network.name}")
 
 # Get by ID
-network_by_id = client.remote_networks.get(network.id)
+network_by_id = client.remote_network.get(network.id)
 print(f"Retrieved network: {network_by_id.name}")
 print(f"Subnets: {', '.join(network_by_id.subnets)}")
 ```
@@ -190,7 +190,7 @@ print(f"Subnets: {', '.join(network_by_id.subnets)}")
 
 ```python
 # Fetch existing network
-existing_network = client.remote_networks.fetch(
+existing_network = client.remote_network.fetch(
     name="branch-office-1",
     folder="Remote Networks"
 )
@@ -210,14 +210,14 @@ existing_network.protocol = {
 }
 
 # Perform update
-updated_network = client.remote_networks.update(existing_network)
+updated_network = client.remote_network.update(existing_network)
 ```
 
 ### Listing Remote Networks
 
 ```python
 # Pass filters directly into the list method
-filtered_networks = client.remote_networks.list(
+filtered_networks = client.remote_network.list(
     folder='Remote Networks',
     regions=['us-east-1'],
     license_types=['FWAAS-AGGREGATE']
@@ -237,7 +237,7 @@ list_params = {
 }
 
 # List with filters as kwargs
-filtered_networks = client.remote_networks.list(**list_params)
+filtered_networks = client.remote_network.list(**list_params)
 ```
 
 ### Filtering Responses
@@ -257,7 +257,7 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return remote networks defined exactly in 'Remote Networks'
-exact_networks = client.remote_networks.list(
+exact_networks = client.remote_network.list(
    folder='Remote Networks',
    exact_match=True
 )
@@ -266,7 +266,7 @@ for network in exact_networks:
    print(f"Exact match: {network.name} in {network.folder}")
 
 # Exclude all remote networks from the 'All' folder
-no_all_networks = client.remote_networks.list(
+no_all_networks = client.remote_network.list(
    folder='Remote Networks',
    exclude_folders=['All']
 )
@@ -276,7 +276,7 @@ for network in no_all_networks:
    print(f"Filtered out 'All': {network.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = client.remote_networks.list(
+combined_filters = client.remote_network.list(
    folder='Remote Networks',
    exact_match=True,
    exclude_folders=['All'],
@@ -312,7 +312,7 @@ all_networks1 = remote_networks_service.list(folder='Remote Networks')
 
 # Option 2: Use the unified client interface directly
 # This will use the default max_limit (2500)
-all_networks2 = client.remote_networks.list(folder='Remote Networks')
+all_networks2 = client.remote_network.list(folder='Remote Networks')
 
 # Both options will auto-paginate through all available objects.
 # The networks are fetched in chunks according to the max_limit.
@@ -323,7 +323,7 @@ all_networks2 = client.remote_networks.list(folder='Remote Networks')
 ```python
 # Delete by ID
 network_id = "123e4567-e89b-12d3-a456-426655440000"
-client.remote_networks.delete(network_id)
+client.remote_network.delete(network_id)
 ```
 
 ## Managing Configuration Changes
@@ -391,7 +391,7 @@ try:
     }
 
     # Create the network using the unified client interface
-    new_network = client.remote_networks.create(network_config)
+    new_network = client.remote_network.create(network_config)
 
     # Commit changes directly from the client
     result = client.commit(
@@ -418,7 +418,7 @@ except MissingQueryParameterError as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified client interface (`client.remote_networks`) for streamlined code
+    - Use the unified client interface (`client.remote_network`) for streamlined code
     - Create a single client instance and reuse it across your application
     - Perform commit operations directly on the client object (`client.commit()`)
     - For custom max_limit settings, create a dedicated service instance if needed

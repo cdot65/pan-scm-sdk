@@ -73,7 +73,7 @@ client = ScmClient(
 
 # Access the Internal DNS Servers service directly through the client
 # No need to create a separate InternalDnsServers instance
-dns_servers = client.internal_dns_servers
+dns_servers = client.internal_dns_server
 ```
 
 ### Traditional Service Instantiation (Legacy)
@@ -119,7 +119,7 @@ dns_server_config = {
 }
 
 # Create the DNS server object using the unified client interface
-dns_server = client.internal_dns_servers.create(dns_server_config)
+dns_server = client.internal_dns_server.create(dns_server_config)
 
 print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
 ```
@@ -128,7 +128,7 @@ print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
 
 ```python
 # Fetch by name
-dns_server = client.internal_dns_servers.fetch(name="main-dns-server")
+dns_server = client.internal_dns_server.fetch(name="main-dns-server")
 print(f"Found DNS server: {dns_server.name}")
 print(f"Domain names: {dns_server.domain_name}")
 print(f"Primary DNS: {dns_server.primary}")
@@ -136,7 +136,7 @@ print(f"Secondary DNS: {dns_server.secondary}")
 
 # Get by ID
 dns_server_id = "123e4567-e89b-12d3-a456-426655440000"
-dns_server_by_id = client.internal_dns_servers.get(dns_server_id)
+dns_server_by_id = client.internal_dns_server.get(dns_server_id)
 print(f"Retrieved DNS server: {dns_server_by_id.name}")
 ```
 
@@ -146,7 +146,7 @@ print(f"Retrieved DNS server: {dns_server_by_id.name}")
 from scm.models.deployment import InternalDnsServersUpdateModel
 
 # Fetch existing DNS server
-existing_dns_server = client.internal_dns_servers.fetch(name="main-dns-server")
+existing_dns_server = client.internal_dns_server.fetch(name="main-dns-server")
 
 # Create update model with ID and only fields to update
 update_model = InternalDnsServersUpdateModel(
@@ -156,7 +156,7 @@ update_model = InternalDnsServersUpdateModel(
 )
 
 # Perform update
-updated_dns_server = client.internal_dns_servers.update(update_model)
+updated_dns_server = client.internal_dns_server.update(update_model)
 
 print(f"Updated DNS server: {updated_dns_server.name}")
 print(f"Updated domain names: {updated_dns_server.domain_name}")
@@ -167,14 +167,14 @@ print(f"Updated secondary DNS: {updated_dns_server.secondary}")
 
 ```python
 # List all DNS servers
-all_dns_servers = client.internal_dns_servers.list()
+all_dns_servers = client.internal_dns_server.list()
 
 # Process results
 for dns in all_dns_servers:
    print(f"Name: {dns.name}, Primary DNS: {dns.primary}")
 
 # Filter by name
-filtered_dns_servers = client.internal_dns_servers.list(name="main")
+filtered_dns_servers = client.internal_dns_server.list(name="main")
 
 # Process filtered results
 for dns in filtered_dns_servers:
@@ -186,15 +186,15 @@ for dns in filtered_dns_servers:
 
 ```python
 # Filter by primary IP address
-primary_ip_filter = client.internal_dns_servers.list(primary="192.168.1.10")
+primary_ip_filter = client.internal_dns_server.list(primary="192.168.1.10")
 print(f"DNS servers with primary IP 192.168.1.10: {len(primary_ip_filter)}")
 
 # Filter by domain name (partial match)
-domain_filter = client.internal_dns_servers.list(domain_name="example")
+domain_filter = client.internal_dns_server.list(domain_name="example")
 print(f"DNS servers with 'example' in domain name: {len(domain_filter)}")
 
 # Combine multiple filters
-combined_filter = client.internal_dns_servers.list(
+combined_filter = client.internal_dns_server.list(
     primary="192.168.1.10",
     domain_name="example"
 )
@@ -232,7 +232,7 @@ all_dns_servers = dns_servers_service.list()
 
 # Option 2: Use the unified client interface directly
 # This will use the default max_limit (2500)
-all_dns_servers = client.internal_dns_servers.list()
+all_dns_servers = client.internal_dns_server.list()
 
 # Both options will auto-paginate through all available objects.
 # The DNS servers are fetched in chunks according to the max_limit.
@@ -243,12 +243,12 @@ all_dns_servers = client.internal_dns_servers.list()
 ```python
 # Delete by ID
 dns_server_id = "123e4567-e89b-12d3-a456-426655440000"
-client.internal_dns_servers.delete(dns_server_id)
+client.internal_dns_server.delete(dns_server_id)
 print(f"Deleted DNS server with ID: {dns_server_id}")
 
 # Fetch by name, then delete by ID
-dns_server = client.internal_dns_servers.fetch(name="main-dns-server")
-client.internal_dns_servers.delete(dns_server.id)
+dns_server = client.internal_dns_server.fetch(name="main-dns-server")
+client.internal_dns_server.delete(dns_server.id)
 print(f"Deleted DNS server: {dns_server.name}")
 ```
 
@@ -278,12 +278,12 @@ try:
    }
 
    # Create the DNS server using the unified client interface
-   new_dns_server = client.internal_dns_servers.create(dns_config)
+   new_dns_server = client.internal_dns_server.create(dns_config)
    print(f"Created DNS server: {new_dns_server.name}")
 
    # Try to retrieve non-existent DNS server
    try:
-      non_existent = client.internal_dns_servers.fetch(name="non-existent-server")
+      non_existent = client.internal_dns_server.fetch(name="non-existent-server")
    except ObjectNotPresentError as e:
       print(f"DNS server not found: {e.message}")
 
@@ -298,7 +298,7 @@ except Exception as e:
 ## Best Practices
 
 1. **Client Usage**
-    - Use the unified client interface (`client.internal_dns_servers`) for streamlined code
+    - Use the unified client interface (`client.internal_dns_server`) for streamlined code
     - Create a single client instance and reuse it across your application
     - For custom max_limit settings, create a dedicated service instance if needed
 
@@ -354,7 +354,7 @@ def create_dns_server():
         }
 
         # Create the DNS server
-        dns_server = client.internal_dns_servers.create(dns_config)
+        dns_server = client.internal_dns_server.create(dns_config)
         print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
         return dns_server.id
     except InvalidObjectError as e:
@@ -374,7 +374,7 @@ def update_dns_server(dns_id):
         )
 
         # Perform update
-        updated = client.internal_dns_servers.update(update_model)
+        updated = client.internal_dns_server.update(update_model)
         print(f"Updated DNS server: {updated.name}")
         print(f"Updated domain names: {updated.domain_name}")
         print(f"Updated secondary DNS: {updated.secondary}")
@@ -385,7 +385,7 @@ def update_dns_server(dns_id):
 
 def list_dns_servers():
     """List all internal DNS servers."""
-    dns_servers = client.internal_dns_servers.list()
+    dns_servers = client.internal_dns_server.list()
     print(f"Found {len(dns_servers)} DNS servers:")
     for dns in dns_servers:
         print(f"  - {dns.name}: Primary={dns.primary}, Domains={dns.domain_name}")
@@ -393,7 +393,7 @@ def list_dns_servers():
 def delete_dns_server(dns_id):
     """Delete an internal DNS server by ID."""
     try:
-        client.internal_dns_servers.delete(dns_id)
+        client.internal_dns_server.delete(dns_id)
         print(f"Deleted DNS server with ID: {dns_id}")
     except ObjectNotPresentError as e:
         print(f"DNS server not found: {e.message}")

@@ -149,8 +149,8 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 
 - **API Endpoint Path**: Fixed 404 error in agent_versions API endpoint path by adding missing '/config' prefix
 - **Documentation**: Fixed inconsistencies between code and documentation regarding client service property names
-  - Corrected references from `client.auth_settings` to `client.auth_setting`
-  - Corrected references from `client.agent_versions` to `client.agent_version`
+  - Corrected references from `client.auth_setting` to `client.auth_setting`
+  - Corrected references from `client.agent_version` to `client.agent_version`
   - Updated code examples to use correct API client attribute names
 
 ## Version 0.3.21

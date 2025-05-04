@@ -80,7 +80,7 @@ my_address.description = "Updated via unified client"
 updated_address = client.address.update(my_address)
 
 # Work with Internal DNS Servers
-dns_server = client.internal_dns_servers.create({
+dns_server = client.internal_dns_server.create({
     "name": "main-dns-server",
     "domain_name": ["example.com", "internal.example.com"],
     "primary": "192.168.1.10",
@@ -89,7 +89,7 @@ dns_server = client.internal_dns_servers.create({
 print(f"Created DNS server: {dns_server.name}")
 
 # List all DNS servers
-dns_servers = client.internal_dns_servers.list()
+dns_servers = client.internal_dns_server.list()
 print(f"Found {len(dns_servers)} DNS servers")
 
 # Work with BGP Routing
@@ -106,21 +106,21 @@ client.bgp_routing.update({
 print("Updated BGP routing settings")
 
 # Work with Network Locations
-locations = client.network_locations.list()
+locations = client.network_location.list()
 print(f"Found {len(locations)} network locations")
 
-us_locations = client.network_locations.list(continent="North America")
+us_locations = client.network_location.list(continent="North America")
 print(f"Found {len(us_locations)} locations in North America")
 
-west_coast = client.network_locations.fetch("us-west-1")
+west_coast = client.network_location.fetch("us-west-1")
 print(f"Location: {west_coast.display} ({west_coast.value})")
 
 # Work with GlobalProtect Agent Versions (read-only)
-agent_versions = client.agent_versions.list()
+agent_versions = client.agent_version.list()
 print(f"Found {len(agent_versions)} GlobalProtect agent versions")
 
 # Filter for specific versions
-filtered_versions = client.agent_versions.list(version="5.3")
+filtered_versions = client.agent_version.list(version="5.3")
 print(f"Found {len(filtered_versions)} versions containing '5.3'")
 
 # Work with Security Rules
@@ -139,11 +139,11 @@ security_zones = client.security_zone.list(folder="Texas")
 print(f"Found {len(security_zones)} security zones")
 
 # Work with Bandwidth Allocations
-bandwidth_allocations = client.bandwidth_allocations.list()
+bandwidth_allocations = client.bandwidth_allocation.list()
 print(f"Found {len(bandwidth_allocations)} bandwidth allocations")
 
 # Create a new bandwidth allocation
-new_allocation = client.bandwidth_allocations.create({
+new_allocation = client.bandwidth_allocation.create({
     "name": "test-region",
     "allocated_bandwidth": 100,
     "spn_name_list": ["spn1", "spn2"],

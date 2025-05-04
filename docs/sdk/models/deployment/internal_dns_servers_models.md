@@ -149,7 +149,7 @@ client = ScmClient(
 )
 
 # Get an existing DNS server
-dns_server = client.internal_dns_servers.fetch(name="main-dns-server")
+dns_server = client.internal_dns_server.fetch(name="main-dns-server")
 
 # Access response model attributes
 print(f"DNS Server ID: {dns_server.id}")
@@ -167,7 +167,7 @@ update_model = InternalDnsServersUpdateModel(
 )
 
 # Update the DNS server
-updated = client.internal_dns_servers.update(update_model)
+updated = client.internal_dns_server.update(update_model)
 ```
 
 ### Model Serialization
