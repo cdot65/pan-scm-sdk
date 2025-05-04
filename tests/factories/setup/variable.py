@@ -21,11 +21,30 @@ class VariableBaseModelFactory(factory.Factory):
         abstract = True
 
     name = factory.Sequence(lambda n: f"variable_{n}")
-    type = factory.LazyFunction(lambda: fake.random_element([
-        "ip-netmask", "fqdn", "port", "percent", "count", "zone", "ip-range", 
-        "ip-wildcard", "device-priority", "device-id", "egress-max", "as-number",
-        "link-tag", "group-id", "rate", "router-id", "qos-profile", "timer"
-    ]))
+    type = factory.LazyFunction(
+        lambda: fake.random_element(
+            [
+                "ip-netmask",
+                "fqdn",
+                "port",
+                "percent",
+                "count",
+                "zone",
+                "ip-range",
+                "ip-wildcard",
+                "device-priority",
+                "device-id",
+                "egress-max",
+                "as-number",
+                "link-tag",
+                "group-id",
+                "rate",
+                "router-id",
+                "qos-profile",
+                "timer",
+            ]
+        )
+    )
     value = factory.LazyFunction(lambda: fake.word())
     description = factory.LazyFunction(lambda: fake.sentence())
     folder = factory.LazyFunction(lambda: fake.word())
@@ -99,7 +118,21 @@ class VariableResponseModelFactory(VariableBaseModelFactory):
     @classmethod
     def build_valid_model(cls, **kwargs) -> VariableResponseModel:
         """Return a valid VariableResponseModel instance."""
-        return cls.build(**kwargs)
+        model = cls.build(**kwargs)
+        # Add extra attributes that might be in API responses but aren't defined in the model
+        if "labels" in kwargs:
+            model.__dict__["labels"] = kwargs["labels"]
+        if "parent" in kwargs:
+            model.__dict__["parent"] = kwargs["parent"]
+        if "snippets" in kwargs:
+            model.__dict__["snippets"] = kwargs["snippets"]
+        if "model" in kwargs:
+            model.__dict__["model"] = kwargs["model"]
+        if "serial_number" in kwargs:
+            model.__dict__["serial_number"] = kwargs["serial_number"]
+        if "device_only" in kwargs:
+            model.__dict__["device_only"] = kwargs["device_only"]
+        return model
 
     @classmethod
     def from_request_model(
@@ -130,15 +163,34 @@ class VariableCreateModelDictFactory(factory.Factory):
         model = dict
 
     name = factory.Sequence(lambda n: f"variable_{n}")
-    type = factory.LazyFunction(lambda: fake.random_element([
-        "ip-netmask", "fqdn", "port", "percent", "count", "zone", "ip-range",
-        "ip-wildcard", "device-priority", "device-id", "egress-max", "as-number",
-        "link-tag", "group-id", "rate", "router-id", "qos-profile", "timer"
-    ]))
+    type = factory.LazyFunction(
+        lambda: fake.random_element(
+            [
+                "ip-netmask",
+                "fqdn",
+                "port",
+                "percent",
+                "count",
+                "zone",
+                "ip-range",
+                "ip-wildcard",
+                "device-priority",
+                "device-id",
+                "egress-max",
+                "as-number",
+                "link-tag",
+                "group-id",
+                "rate",
+                "router-id",
+                "qos-profile",
+                "timer",
+            ]
+        )
+    )
     value = factory.LazyFunction(lambda: fake.word())
     description = factory.LazyFunction(lambda: fake.sentence())
     folder = factory.LazyFunction(lambda: fake.word())
-    
+
     @classmethod
     def build_valid_dict(cls, **kwargs) -> Dict[str, Any]:
         """Return a data dict with all the expected attributes."""
@@ -166,11 +218,30 @@ class VariableUpdateModelDictFactory(factory.Factory):
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
     name = factory.Sequence(lambda n: f"updated_variable_{n}")
-    type = factory.LazyFunction(lambda: fake.random_element([
-        "ip-netmask", "fqdn", "port", "percent", "count", "zone", "ip-range",
-        "ip-wildcard", "device-priority", "device-id", "egress-max", "as-number",
-        "link-tag", "group-id", "rate", "router-id", "qos-profile", "timer"
-    ]))
+    type = factory.LazyFunction(
+        lambda: fake.random_element(
+            [
+                "ip-netmask",
+                "fqdn",
+                "port",
+                "percent",
+                "count",
+                "zone",
+                "ip-range",
+                "ip-wildcard",
+                "device-priority",
+                "device-id",
+                "egress-max",
+                "as-number",
+                "link-tag",
+                "group-id",
+                "rate",
+                "router-id",
+                "qos-profile",
+                "timer",
+            ]
+        )
+    )
     value = factory.LazyFunction(lambda: fake.word())
     description = factory.LazyFunction(lambda: fake.sentence())
     folder = factory.LazyFunction(lambda: fake.word())

@@ -5,7 +5,7 @@ This module defines the Pydantic models used for creating, updating, and
 representing Variable resources in the Strata Cloud Manager.
 """
 
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
@@ -128,4 +128,30 @@ class VariableResponseModel(VariableBaseModel):
     overridden: Optional[bool] = Field(
         default=None,
         description="Is the variable overridden?",
+    )
+
+    # Additional fields often present in API responses but not in the OpenAPI spec
+    labels: Optional[List[str]] = Field(
+        default=None,
+        description="Labels assigned to the variable",
+    )
+    parent: Optional[str] = Field(
+        default=None,
+        description="The parent folder or container",
+    )
+    snippets: Optional[List[str]] = Field(
+        default=None,
+        description="Snippets associated with the variable",
+    )
+    model: Optional[str] = Field(
+        default=None,
+        description="Device model information",
+    )
+    serial_number: Optional[str] = Field(
+        default=None,
+        description="Device serial number",
+    )
+    device_only: Optional[bool] = Field(
+        default=None,
+        description="Whether the variable is only applicable to devices",
     )

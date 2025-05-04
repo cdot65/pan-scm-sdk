@@ -57,46 +57,31 @@ class TestVariableBaseModel:
         """Test that type is validated."""
         # Valid type should pass
         valid_model = VariableBaseModel(
-            name="valid_name", 
-            type="ip-netmask", 
-            value="192.168.1.0/24", 
-            folder="test_folder"
+            name="valid_name", type="ip-netmask", value="192.168.1.0/24", folder="test_folder"
         )
         assert valid_model.type == "ip-netmask"
 
         # Invalid type should fail
         with pytest.raises(ValueError):
             VariableBaseModel(
-                name="invalid_type", 
-                type="invalid_type", 
-                value="test", 
-                folder="test_folder"
+                name="invalid_type", type="invalid_type", value="test", folder="test_folder"
             )
 
     def test_container_validation(self):
         """Test container validation."""
         # Valid: one container field
         model1 = VariableBaseModel(
-            name="test1", 
-            type="ip-netmask", 
-            value="192.168.1.0/24", 
-            folder="folder1"
+            name="test1", type="ip-netmask", value="192.168.1.0/24", folder="folder1"
         )
         assert model1.folder == "folder1"
 
         model2 = VariableBaseModel(
-            name="test2", 
-            type="ip-netmask", 
-            value="192.168.1.0/24", 
-            snippet="snippet1"
+            name="test2", type="ip-netmask", value="192.168.1.0/24", snippet="snippet1"
         )
         assert model2.snippet == "snippet1"
 
         model3 = VariableBaseModel(
-            name="test3", 
-            type="ip-netmask", 
-            value="192.168.1.0/24", 
-            device="device1"
+            name="test3", type="ip-netmask", value="192.168.1.0/24", device="device1"
         )
         assert model3.device == "device1"
 
@@ -121,11 +106,11 @@ class TestVariableCreateModel:
         # Missing name
         with pytest.raises(ValueError):
             VariableCreateModel(type="ip-netmask", value="192.168.1.0/24", folder="test")
-        
+
         # Missing type
         with pytest.raises(ValueError):
             VariableCreateModel(name="test", value="192.168.1.0/24", folder="test")
-        
+
         # Missing value
         with pytest.raises(ValueError):
             VariableCreateModel(name="test", type="ip-netmask", folder="test")
@@ -152,10 +137,7 @@ class TestVariableUpdateModel:
         with pytest.raises(ValueError):
             # Missing id should fail validation
             VariableUpdateModel(
-                name="test_variable", 
-                type="ip-netmask", 
-                value="192.168.1.0/24", 
-                folder="test"
+                name="test_variable", type="ip-netmask", value="192.168.1.0/24", folder="test"
             )
 
     def test_id_type_conversion(self):
@@ -200,7 +182,7 @@ class TestVariableResponseModel:
         """Test creating a response model from a request model."""
         create_model = VariableCreateModelFactory.build_valid_model()
         response_model = VariableResponseModelFactory.from_request_model(create_model)
-        
+
         assert isinstance(response_model, VariableResponseModel)
         assert response_model.name == create_model.name
         assert response_model.type == create_model.type
@@ -211,12 +193,26 @@ class TestVariableResponseModel:
     def test_variable_type_values(self):
         """Test different valid type values."""
         valid_types = [
-            "percent", "count", "ip-netmask", "zone", "ip-range", 
-            "ip-wildcard", "device-priority", "device-id", "egress-max", 
-            "as-number", "fqdn", "port", "link-tag", "group-id", 
-            "rate", "router-id", "qos-profile", "timer"
+            "percent",
+            "count",
+            "ip-netmask",
+            "zone",
+            "ip-range",
+            "ip-wildcard",
+            "device-priority",
+            "device-id",
+            "egress-max",
+            "as-number",
+            "fqdn",
+            "port",
+            "link-tag",
+            "group-id",
+            "rate",
+            "router-id",
+            "qos-profile",
+            "timer",
         ]
-        
+
         for valid_type in valid_types:
             model = VariableResponseModelFactory.build(type=valid_type)
             assert model.type == valid_type

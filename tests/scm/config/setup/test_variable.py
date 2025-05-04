@@ -2,6 +2,7 @@
 
 # Standard library imports
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 from pydantic import ValidationError
 import pytest
@@ -11,7 +12,10 @@ from scm.client import Scm
 from scm.config.setup.variable import Variable
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
 from scm.models.setup.variable import (
+    VariableBaseModel,
+    VariableCreateModel,
     VariableResponseModel,
+    VariableUpdateModel,
 )
 from tests.factories.setup.variable import (
     VariableCreateModelDictFactory,
@@ -62,6 +66,131 @@ class TestVariableInitialization(TestVariableBase):
             variable = Variable(mock_scm_client, max_limit=exceeding_limit)
             # For Variable, exceeding limit is capped at ABSOLUTE_MAX_LIMIT
             assert variable.max_limit == Variable.ABSOLUTE_MAX_LIMIT
+
+
+class TestVariablePydanticModel:
+    """Tests for the Variable model classes."""
+
+    def test_validate_container_type_valid(self):
+        """Test validate_container_type with valid container configuration."""
+        # Test with folder only
+        values_with_folder = {"folder": "test_folder", "snippet": None, "device": None}
+        assert VariableBaseModel.validate_container_type(values_with_folder) == values_with_folder
+
+        # Test with snippet only
+        values_with_snippet = {"folder": None, "snippet": "test_snippet", "device": None}
+        assert VariableBaseModel.validate_container_type(values_with_snippet) == values_with_snippet
+
+        # Test with device only
+        values_with_device = {"folder": None, "snippet": None, "device": "test_device"}
+        assert VariableBaseModel.validate_container_type(values_with_device) == values_with_device
+
+    def test_validate_container_type_multiple_containers(self):
+        """Test validate_container_type with multiple containers set."""
+        # Test with folder and snippet
+        values = {"folder": "test_folder", "snippet": "test_snippet", "device": None}
+        with pytest.raises(ValueError) as excinfo:
+            VariableBaseModel.validate_container_type(values)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            excinfo.value
+        )
+
+        # Test with all three containers
+        values = {"folder": "test_folder", "snippet": "test_snippet", "device": "test_device"}
+        with pytest.raises(ValueError) as excinfo:
+            VariableBaseModel.validate_container_type(values)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            excinfo.value
+        )
+
+    def test_validate_container_type_no_container(self):
+        """Test validate_container_type with no container set."""
+        values = {"folder": None, "snippet": None, "device": None}
+        with pytest.raises(ValueError) as excinfo:
+            VariableBaseModel.validate_container_type(values)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            excinfo.value
+        )
+
+    def test_validate_type_enum_valid(self):
+        """Test the type enum validator with valid types."""
+        for valid_type in [
+            "percent",
+            "count",
+            "ip-netmask",
+            "zone",
+            "ip-range",
+            "ip-wildcard",
+            "device-priority",
+            "device-id",
+            "egress-max",
+            "as-number",
+            "fqdn",
+            "port",
+            "link-tag",
+            "group-id",
+            "rate",
+            "router-id",
+            "qos-profile",
+            "timer",
+        ]:
+            assert VariableBaseModel.validate_type_enum(valid_type) == valid_type
+
+    def test_validate_type_enum_invalid(self):
+        """Test the type enum validator with invalid types."""
+        with pytest.raises(ValueError) as excinfo:
+            VariableBaseModel.validate_type_enum("invalid-type")
+        assert "type must be one of" in str(excinfo.value)
+
+    def test_variable_create_model_validate(self):
+        """Test model validation for VariableCreateModel."""
+        # Create a valid model
+        valid_data = {
+            "name": "test_var",
+            "type": "fqdn",
+            "value": "example.com",
+            "folder": "test_folder",
+        }
+        model = VariableCreateModel.model_validate(valid_data)
+        assert model.name == "test_var"
+        assert model.type == "fqdn"
+        assert model.value == "example.com"
+        assert model.folder == "test_folder"
+
+        # Test with invalid container (multiple containers set)
+        invalid_data = valid_data.copy()
+        invalid_data["snippet"] = "test_snippet"
+        with pytest.raises(ValueError) as excinfo:
+            VariableCreateModel.model_validate(invalid_data)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            excinfo.value
+        )
+
+    def test_variable_update_model_validate(self):
+        """Test model validation for VariableUpdateModel."""
+        # Create a valid model
+        valid_data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test_var",
+            "type": "fqdn",
+            "value": "example.com",
+            "folder": "test_folder",
+        }
+        model = VariableUpdateModel.model_validate(valid_data)
+        assert model.id == UUID("123e4567-e89b-12d3-a456-426655440000")
+        assert model.name == "test_var"
+        assert model.type == "fqdn"
+        assert model.value == "example.com"
+        assert model.folder == "test_folder"
+
+        # Test with invalid container (no container set)
+        invalid_data = valid_data.copy()
+        invalid_data["folder"] = None
+        with pytest.raises(ValueError) as excinfo:
+            VariableUpdateModel.model_validate(invalid_data)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            excinfo.value
+        )
 
 
 class TestVariableCreate(TestVariableBase):
@@ -214,21 +343,21 @@ class TestVariableList(TestVariableBase):
         # Setup two pages of response data
         page1 = {"data": [VariableResponseModelFactory.build().model_dump() for _ in range(5)]}
         page2 = {"data": [VariableResponseModelFactory.build().model_dump() for _ in range(3)]}
-        
+
         # Mock the get method to return different responses for first and second calls
         mock_scm_client.get.side_effect = [page1, page2]
-        
+
         # Set a low max_limit to force pagination
         variable_service.max_limit = 5
-        
+
         # Call list and verify pagination works
         results = variable_service.list()
-        
+
         # Verify expected results
         assert isinstance(results, list)
         assert len(results) == 8  # Combined total from both pages
         assert mock_scm_client.get.call_count == 2
-        
+
         # Verify the second call had the correct offset
         second_call_args = mock_scm_client.get.call_args_list[1][1]
         assert second_call_args["params"]["offset"] == 5
@@ -240,7 +369,7 @@ class TestVariableList(TestVariableBase):
             results = variable_service.list()
             assert isinstance(results, list)
             assert len(results) == 0
-            
+
     def test_list_with_filters(self, variable_service, mock_scm_client):
         """Test listing variables with filters."""
         # Setup mock response
@@ -248,14 +377,14 @@ class TestVariableList(TestVariableBase):
             VariableResponseModelFactory.build_valid_model().model_dump() for _ in range(3)
         ]
         mock_response = {"data": mock_variables}
-        
+
         # Patch the API client's get method
         mock_get = MagicMock(return_value=mock_response)
         variable_service.api_client.get = mock_get
-        
+
         # Call list with a filter
         variable_service.list(type="fqdn")
-        
+
         # Verify filter was passed to API call
         call_args = mock_get.call_args[1]
         assert "params" in call_args
@@ -304,7 +433,7 @@ class TestVariableUpdate(TestVariableBase):
             description="Updated description",
             type="fqdn",
             value="updated.example.com",
-            folder="updated_folder"
+            folder="updated_folder",
         )
         result = variable_service.update(update_model)
 
@@ -319,7 +448,7 @@ class TestVariableUpdate(TestVariableBase):
 
         # Assert the result is a VariableResponseModel
         assert isinstance(result, VariableResponseModel)
-        
+
     def test_update_nonexistent_variable(self, variable_service, mock_scm_client):
         """Test updating a variable that doesn't exist."""
         # Setup mock client to raise APIError with 404 status
@@ -399,50 +528,50 @@ class TestVariableFetch(TestVariableBase):
         name = "test_variable"
         # Create a mock variable response
         mock_variable = VariableResponseModelFactory.build_valid_model(name=name)
-        
+
         # Mock the list method to return our test variable
         with patch.object(variable_service, "list", return_value=[mock_variable]):
             result = variable_service.fetch(name)
-            
+
             # Assert correct variable is returned
             assert result is not None
             assert result.name == name
-    
+
     def test_fetch_nonexistent_variable(self, variable_service):
         """Test fetching a variable that doesn't exist."""
         # Mock the list method to return empty list
         with patch.object(variable_service, "list", return_value=[]):
             result = variable_service.fetch("nonexistent")
-            
+
             # Assert None is returned
             assert result is None
-    
+
     def test_fetch_with_multiple_matches(self, variable_service):
         """Test fetch returns only the first match when multiple exist."""
         name = "duplicate_name"
         # Create two mock variables with the same name
         var1 = VariableResponseModelFactory.build_valid_model(name=name, value="value1")
         var2 = VariableResponseModelFactory.build_valid_model(name=name, value="value2")
-        
+
         # Mock the list method to return both variables
         with patch.object(variable_service, "list", return_value=[var1, var2]):
             result = variable_service.fetch(name)
-            
+
             # Assert first matching variable is returned
             assert result is not None
             assert result.name == name
             assert result.value == "value1"  # Should be the first one
-            
+
     def test_fetch_no_exact_match(self, variable_service):
         """Test fetch with no exact matches."""
         # Create mock variables with different names
         var1 = VariableResponseModelFactory.build_valid_model(name="name1")
         var2 = VariableResponseModelFactory.build_valid_model(name="name2")
-        
+
         # Mock the list method to return these variables
         with patch.object(variable_service, "list", return_value=[var1, var2]):
             result = variable_service.fetch("different_name")
-            
+
             # Assert None is returned (no match)
             assert result is None
 
@@ -530,9 +659,179 @@ class TestVariableApplyFilters(TestVariableBase):
         """Test _apply_filters with no filters."""
         # Create test data
         variables = [VariableResponseModelFactory.build_valid_model() for _ in range(3)]
-        
+
         # Apply no filters
         result = variable_service._apply_filters(variables, {})
-        
+
         # Should return all variables unchanged
         assert result == variables
+
+    def test_apply_labels_filter(self, variable_service):
+        """Test _apply_filters with labels filter."""
+        # Create test variables with different labels
+        var1 = VariableResponseModelFactory.build_valid_model(labels=["label1", "label2"])
+        var2 = VariableResponseModelFactory.build_valid_model(labels=["label3"])
+        var3 = VariableResponseModelFactory.build_valid_model(labels=["label1", "label3"])
+
+        variables = [var1, var2, var3]
+
+        # Apply labels filter
+        result = variable_service._apply_filters(variables, {"labels": ["label1"]})
+
+        # Should return only variables with matching labels
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_parent_filter(self, variable_service):
+        """Test _apply_filters with parent filter."""
+        # Create test variables with different parent values
+        var1 = VariableResponseModelFactory.build_valid_model(parent="parent1")
+        var2 = VariableResponseModelFactory.build_valid_model(parent="parent2")
+        var3 = VariableResponseModelFactory.build_valid_model(parent="parent1")
+
+        variables = [var1, var2, var3]
+
+        # Apply parent filter
+        result = variable_service._apply_filters(variables, {"parent": "parent1"})
+
+        # Should return only variables with matching parent
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_type_filter(self, variable_service):
+        """Test _apply_filters with type filter."""
+        # Create test variables with different types
+        var1 = VariableResponseModelFactory.build_valid_model(type="fqdn")
+        var2 = VariableResponseModelFactory.build_valid_model(type="ip-netmask")
+        var3 = VariableResponseModelFactory.build_valid_model(type="fqdn")
+
+        variables = [var1, var2, var3]
+
+        # Apply type filter
+        result = variable_service._apply_filters(variables, {"type": "fqdn"})
+
+        # Should return only variables with matching type
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_snippets_filter(self, variable_service):
+        """Test _apply_filters with snippets filter."""
+        # Create test variables with different snippets
+        var1 = VariableResponseModelFactory.build_valid_model(snippets=["snippet1", "snippet2"])
+        var2 = VariableResponseModelFactory.build_valid_model(snippets=["snippet3"])
+        var3 = VariableResponseModelFactory.build_valid_model(snippets=["snippet1", "snippet3"])
+
+        variables = [var1, var2, var3]
+
+        # Apply snippets filter
+        result = variable_service._apply_filters(variables, {"snippets": ["snippet1"]})
+
+        # Should return only variables with matching snippets
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_model_filter(self, variable_service):
+        """Test _apply_filters with model filter."""
+        # Create test variables with different models
+        var1 = VariableResponseModelFactory.build_valid_model(model="model1")
+        var2 = VariableResponseModelFactory.build_valid_model(model="model2")
+        var3 = VariableResponseModelFactory.build_valid_model(model="model1")
+
+        variables = [var1, var2, var3]
+
+        # Apply model filter
+        result = variable_service._apply_filters(variables, {"model": "model1"})
+
+        # Should return only variables with matching model
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_serial_number_filter(self, variable_service):
+        """Test _apply_filters with serial_number filter."""
+        # Create test variables with different serial_numbers
+        var1 = VariableResponseModelFactory.build_valid_model(serial_number="sn1")
+        var2 = VariableResponseModelFactory.build_valid_model(serial_number="sn2")
+        var3 = VariableResponseModelFactory.build_valid_model(serial_number="sn1")
+
+        variables = [var1, var2, var3]
+
+        # Apply serial_number filter
+        result = variable_service._apply_filters(variables, {"serial_number": "sn1"})
+
+        # Should return only variables with matching serial_number
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_device_only_filter(self, variable_service):
+        """Test _apply_filters with device_only filter."""
+        # Create test variables with different device_only values
+        var1 = VariableResponseModelFactory.build_valid_model(device_only=True)
+        var2 = VariableResponseModelFactory.build_valid_model(device_only=False)
+        var3 = VariableResponseModelFactory.build_valid_model(device_only=True)
+
+        variables = [var1, var2, var3]
+
+        # Apply device_only filter
+        result = variable_service._apply_filters(variables, {"device_only": True})
+
+        # Should return only variables with matching device_only
+        assert len(result) == 2
+        assert var1 in result
+        assert var2 not in result
+        assert var3 in result
+
+    def test_apply_multiple_filters(self, variable_service):
+        """Test _apply_filters with multiple filters."""
+        # Create test variables with different combinations of attributes
+        var1 = VariableResponseModelFactory.build_valid_model(
+            type="fqdn", model="model1", device_only=True
+        )
+        var2 = VariableResponseModelFactory.build_valid_model(
+            type="ip-netmask", model="model1", device_only=True
+        )
+        var3 = VariableResponseModelFactory.build_valid_model(
+            type="fqdn", model="model2", device_only=True
+        )
+        var4 = VariableResponseModelFactory.build_valid_model(
+            type="fqdn", model="model1", device_only=False
+        )
+
+        variables = [var1, var2, var3, var4]
+
+        # Apply multiple filters
+        result = variable_service._apply_filters(
+            variables, {"type": "fqdn", "model": "model1", "device_only": True}
+        )
+
+        # Should return only var1 which matches all filters
+        assert len(result) == 1
+        assert var1 in result
+        assert var2 not in result  # Doesn't match type
+        assert var3 not in result  # Doesn't match model
+        assert var4 not in result  # Doesn't match device_only
+
+    def test_filter_with_missing_attribute(self, variable_service):
+        """Test filtering when variables don't have the filtered attribute."""
+        # Create variables without the filtered attributes
+        var1 = VariableResponseModelFactory.build_valid_model()
+        var2 = VariableResponseModelFactory.build_valid_model()
+
+        variables = [var1, var2]
+
+        # Try filtering by attributes that don't exist on the variables
+        result = variable_service._apply_filters(variables, {"labels": ["label1"]})
+
+        # Should not match any variables since they don't have labels attribute
+        assert len(result) == 0
