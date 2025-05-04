@@ -2,6 +2,18 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.29
+
+**Released:** May 4, 2025
+
+### Fixed
+- **HTTP Server Profiles:**
+  - Fixed inconsistent API response format in the `fetch()` method of HTTP Server Profiles
+  - Added support for both direct object response and list-style data array format
+  - Enhanced error handling for empty responses
+  - Added comprehensive test coverage for both response formats
+  - Resolves issue #182
+
 ## Version 0.3.28
 
 **Released:** May 4, 2025
