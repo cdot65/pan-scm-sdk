@@ -8,11 +8,12 @@ operations.
 
 ## Available Setup Models
 
-| Model                               | Description                                          |
-|-------------------------------------|------------------------------------------------------|
-| [Folder Models](folder_models.md)   | Models for folder creation, updates, and responses   |
-| [Snippet Models](snippet_models.md) | Models for snippet operations and responses          |
-| [Device Models](device_models.md)   | Pydantic models for device resources and licenses.   |
+| Model                               | Description                                                |
+|-------------------------------------|------------------------------------------------------------|
+| [Folder Models](folder_models.md)   | Models for folder creation, updates, and responses         |
+| [Snippet Models](snippet_models.md) | Models for snippet operations and responses                |
+| [Device Models](device_models.md)   | Pydantic models for device resources and licenses          |
+| [Variable Models](variable_models.md) | Models for typed variables with container validation     |
 
 ## Working with Setup Models
 

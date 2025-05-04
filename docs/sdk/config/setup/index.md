@@ -11,7 +11,8 @@ Strata Cloud Manager. These objects form the foundation for organizing and manag
 |-----------------------------|-----------------------------------------------------------------------------|
 | [Folder](folder.md)         | Manages folder objects for organizing resources in a hierarchical structure |
 | [Snippet](snippet.md)       | Manages reusable configuration snippets for consistent deployment           |
-| [Device Service](device.md) | List, filter, and manage device resources.                                  |
+| [Device Service](device.md) | List, filter, and manage device resources                                   |
+| [Variable](variable.md)     | Create and manage variable resources with flexible typing and containers    |
 
 ## Folder Organization
 
@@ -36,3 +37,14 @@ following advantages:
 - Ability to associate snippets with folders for organization
 
 See the [Snippet](snippet.md) documentation for detailed information on working with snippet objects.
+
+## Variable Management
+
+Variables allow for dynamic configurations and parameterization of resources. They provide the following capabilities:
+
+- Typed variables for different usage contexts (IP addresses, percentages, etc.)
+- Container scoping to folders, snippets, or devices
+- Client-side filtering by various attributes
+- Support for labeling and organization
+
+See the [Variable](variable.md) documentation for detailed information on working with variable resources.

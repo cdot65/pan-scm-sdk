@@ -2,6 +2,27 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.28
+
+**Released:** May 4, 2025
+
+### Added
+- **Variable Service:**
+  - Implemented `Variable` service for creating, retrieving, updating, and deleting variable resources in the SCM API.
+  - Added client-side filtering by labels, parent, type, snippets, model, serial_number, and device_only.
+  - Created comprehensive Pydantic models for variable validation and serialization with 18 supported variable types.
+  - Implemented container validation to ensure exactly one of folder, snippet, or device is specified.
+  - Added advanced filtering with intersection matching for labels and snippets.
+  - Developed robust factories for variable models with proper attribute handling.
+  - Achieved 100% test coverage for all variable-related functionality.
+- **Documentation:**
+  - Added SDK reference pages for Variable service and Variable models.
+  - Updated all relevant index and navigation files to include Variable documentation.
+
+### Improved
+- Enhanced model handling for attributes not explicitly defined in OpenAPI specs but present in API responses.
+- Refined client-side filtering mechanisms for better performance across large datasets.
+
 ## Version 0.3.27
 
 **Released:** April 27, 2025
