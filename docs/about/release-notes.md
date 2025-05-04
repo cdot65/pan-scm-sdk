@@ -2,6 +2,18 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.30
+
+**Released:** May 4, 2025
+
+### Improved
+- **Documentation:**
+  - Updated documentation for setup module objects (Device, Folder, Snippet, Variable) to use consistent formatting
+  - Added unified client interface examples to all setup module documentation
+  - Standardized Basic Configuration sections across all setup module objects
+  - Fixed initialization examples to use proper credentials (client_id, client_secret, tsg_id)
+  - Enhanced documentation readability with consistent structure and format
+
 ## Version 0.3.29
 
 **Released:** May 4, 2025

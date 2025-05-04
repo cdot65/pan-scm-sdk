@@ -50,13 +50,44 @@ The `Device` class provides methods for listing, filtering, and managing device 
 
 ## Basic Configuration
 
+The Device service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the Device service directly through the client
+# No need to create a separate Device instance
+devices = client.device
+```
+
+### Traditional Service Instantiation (Legacy)
+
 ```python
 from scm.client import Scm
 from scm.config.setup.device import Device
 
-client = Scm(api_key="your-api-key")
+# Initialize client
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Initialize Device object explicitly
 devices = Device(client)
 ```
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
