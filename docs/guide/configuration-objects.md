@@ -38,17 +38,17 @@ The SDK organizes configuration objects into several categories:
 
 ### Prisma Access Deployment
 
-- [Bandwidth Allocations](../sdk/config/deployment/bandwidth_allocations.md)
+- [Bandwidth Allocation](../sdk/config/deployment/bandwidth_allocations.md)
 - [BGP Routing](../sdk/config/deployment/bgp_routing.md)
-- [Internal DNS Servers](../sdk/config/deployment/internal_dns_servers.md)
-- [Network Locations](../sdk/config/deployment/network_locations.md)
-- [Remote Networks](../sdk/config/deployment/remote_networks.md)
-- [Service Connections](../sdk/config/deployment/service_connections.md)
+- [Internal DNS Server](../sdk/config/deployment/internal_dns_servers.md)
+- [Network Location](../sdk/config/deployment/network_locations.md)
+- [Remote Network](../sdk/config/deployment/remote_networks.md)
+- [Service Connection](../sdk/config/deployment/service_connections.md)
 
 ### Mobile Agent
 
-- [Authentication Settings](../sdk/config/mobile_agent/auth_settings.md)
-- [Agent Versions](../sdk/config/mobile_agent/agent_versions.md)
+- [Authentication Setting](../sdk/config/mobile_agent/auth_settings.md)
+- [Agent Version](../sdk/config/mobile_agent/agent_versions.md)
 
 ## Common Operations
 

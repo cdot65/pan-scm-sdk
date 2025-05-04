@@ -20,4 +20,18 @@ operations.
 Setup models provide a structured way to interact with the Strata Cloud Manager API. They ensure data validation before
 requests are sent and proper parsing of API responses.
 
-For details on specific models, refer to the corresponding model documentation pages listed above.
+### Variable Models
+
+The Variable models include:
+
+- **VariableBaseModel**: Base model with common fields for all variable operations
+- **VariableCreateModel**: Model for creating new variables, with container validation
+- **VariableUpdateModel**: Model for updating existing variables
+- **VariableResponseModel**: Model representing API responses for variables
+
+These models handle validation for:
+- Variable type validation (18 supported types)
+- Container validation (ensuring exactly one of folder, snippet, or device is specified)
+- Additional fields for filtering (labels, parent, snippets, etc.)
+
+For complete details on specific models, refer to the corresponding model documentation pages listed above.

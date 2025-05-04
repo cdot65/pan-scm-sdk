@@ -66,10 +66,10 @@ auth_setting = AuthSettingsCreateModel(
 
 # Convert the model to a dictionary for the API call
 auth_dict = auth_setting.model_dump(exclude_unset=True)
-result = client.auth_settings.create(auth_dict)
+result = client.auth_setting.create(auth_dict)
 
 # List and filter agent versions
-agent_versions = client.agent_versions.list()
+agent_versions = client.agent_version.list()
 windows_versions = [v for v in agent_versions if "win" in v.lower()]
 print(f"Windows versions: {windows_versions}")
 ```

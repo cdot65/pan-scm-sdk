@@ -80,7 +80,7 @@ my_address.description = "Updated via unified client"
 updated_address = client.address.update(my_address)
 
 # Work with Internal DNS Servers
-dns_server = client.internal_dns_servers.create({
+dns_server = client.internal_dns_server.create({
     "name": "main-dns-server",
     "domain_name": ["example.com", "internal.example.com"],
     "primary": "192.168.1.10",
@@ -89,7 +89,7 @@ dns_server = client.internal_dns_servers.create({
 print(f"Created DNS server: {dns_server.name}")
 
 # List all DNS servers
-dns_servers = client.internal_dns_servers.list()
+dns_servers = client.internal_dns_server.list()
 print(f"Found {len(dns_servers)} DNS servers")
 
 # Work with BGP Routing
@@ -116,11 +116,11 @@ west_coast = client.network_location.fetch("us-west-1")
 print(f"Location: {west_coast.display} ({west_coast.value})")
 
 # Work with GlobalProtect Agent Versions (read-only)
-agent_versions = client.agent_versions.list()
+agent_versions = client.agent_version.list()
 print(f"Found {len(agent_versions)} GlobalProtect agent versions")
 
 # Filter for specific versions
-filtered_versions = client.agent_versions.list(version="5.3")
+filtered_versions = client.agent_version.list(version="5.3")
 print(f"Found {len(filtered_versions)} versions containing '5.3'")
 
 # Work with Security Rules
@@ -182,4 +182,4 @@ on how to contribute.
 
 This project is licensed under the Apache 2.0 License - see the [License](about/license.md) page for details.
 
-- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Snippet, Device, and more.
+- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Snippet, Device, Variable, and more.

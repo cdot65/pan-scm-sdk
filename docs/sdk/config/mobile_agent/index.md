@@ -41,16 +41,16 @@ client = ScmClient(
 )
 
 # List all authentication settings
-auth_settings = client.auth_settings.list()
+auth_settings = client.auth_setting.list()
 for setting in auth_settings:
     print(f"Auth Setting: {setting.name}, OS: {setting.os}")
 
 # Get available agent versions
-versions = client.agent_versions.list()
+versions = client.agent_version.list()
 print(f"Available agent versions: {versions}")
 
 # Filter by version
-filtered_versions = client.agent_versions.list(version="5.3")
+filtered_versions = client.agent_version.list(version="5.3")
 print(f"Filtered versions: {filtered_versions}")
 ```
 

@@ -80,7 +80,7 @@ client = ScmClient(
 
 # Access the AuthSettings service directly through the client
 # No need to create a separate AuthSettings instance
-auth_settings = client.auth_settings
+auth_settings = client.auth_setting
 ```
 
 ### Traditional Service Instantiation (Legacy)
@@ -127,7 +127,7 @@ auth_settings_config = {
 }
 
 # Create the authentication settings
-new_auth_settings = client.auth_settings.create(auth_settings_config)
+new_auth_settings = client.auth_setting.create(auth_settings_config)
 print(f"Created authentication settings: {new_auth_settings.name}")
 
 # Another example for a different operating system

@@ -110,7 +110,7 @@ print(f"Updated address description: {updated_addr.description}")
 # === INTERNAL DNS SERVERS ===
 
 # Create a new internal DNS server
-dns_server = client.internal_dns_servers.create({
+dns_server = client.internal_dns_server.create({
     "name": "main-dns-server",
     "domain_name": ["example.com", "internal.example.com"],
     "primary": "192.168.1.10",
@@ -119,7 +119,7 @@ dns_server = client.internal_dns_servers.create({
 print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
 
 # List all internal DNS servers
-dns_servers = client.internal_dns_servers.list()
+dns_servers = client.internal_dns_server.list()
 for server in dns_servers:
     print(f"DNS Server: {server.name}, Primary: {server.primary}")
 
@@ -182,6 +182,7 @@ The unified client provides access to the following services through attribute-b
 | `application`                      | Custom application definitions and signatures                 |
 | `application_filter`               | Filters for identifying applications by characteristics       |
 | `application_group`                | Logical groups of applications for policy application         |
+| `auto_tag_action`                  | Automated tag assignment based on traffic and security events |
 | `dynamic_user_group`               | User groups with dynamic membership criteria                  |
 | `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains             |
 | `hip_object`                       | Host information profile match criteria                       |
@@ -195,7 +196,6 @@ The unified client provides access to the following services through attribute-b
 | `service_group`                    | Collections of services for simplified policy management      |
 | `syslog_server_profile`            | Syslog server configurations for centralized logging          |
 | `tag`                              | Resource classification and organization labels               |
-| `auto_tag_actions`                 | Automated tag assignment based on traffic and security events |
 | **Mobile Agent**                   |                                                               |
 | `auth_setting`                     | GlobalProtect authentication settings                         |
 | `agent_version`                    | GlobalProtect agent versions (read-only)                      |
@@ -208,7 +208,7 @@ The unified client provides access to the following services through attribute-b
 | **Deployment**                     |                                                               |
 | `bandwidth_allocation`             | Bandwidth allocation management for network capacity planning |
 | `bgp_routing`                      | BGP routing configuration for network connectivity            |
-| `internal_dns_servers`             | Internal DNS server configurations for domain resolution      |
+| `internal_dns_server`              | Internal DNS server configurations for domain resolution      |
 | `network_location`                 | Geographic network locations for service connectivity         |
 | `remote_network`                   | Secure branch and remote site connectivity configurations     |
 | `service_connection`               | Service connections to cloud service providers                |
@@ -220,6 +220,11 @@ The unified client provides access to the following services through attribute-b
 | `url_category`                     | Custom URL categorization for web filtering                   |
 | `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts               |
 | `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection          |
+| **Setup**                          |                                                               |
+| `device`                           | Device resources and management                               |
+| `folder`                           | Folder organization and hierarchy                             |
+| `snippet`                          | Reusable configuration snippets                               |
+| `variable`                         | Typed variables with flexible container scoping               |
 
 #### Traditional Access Pattern (Legacy Support)
 

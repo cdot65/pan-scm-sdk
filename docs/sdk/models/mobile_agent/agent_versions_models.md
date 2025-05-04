@@ -77,7 +77,7 @@ client = ScmClient(
 )
 
 # Get agent versions using the service
-versions = client.agent_versions.list()
+versions = client.agent_version.list()
 
 # Create AgentVersionModel instances for versions with additional metadata
 version_objects = []
