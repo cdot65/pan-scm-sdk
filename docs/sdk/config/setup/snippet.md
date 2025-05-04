@@ -68,13 +68,44 @@ The `Snippet` class manages snippet objects in Palo Alto Networks' Strata Cloud 
 
 ## Basic Configuration
 
+The Snippet service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the Snippet service directly through the client
+# No need to create a separate Snippet instance
+snippets = client.snippet
+```
+
+### Traditional Service Instantiation (Legacy)
+
 ```python
 from scm.client import Scm
 from scm.config.setup.snippet import Snippet
 
-client = Scm(api_key="your-api-key")
+# Initialize client
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Initialize Snippet object explicitly
 snippets = Snippet(client)
 ```
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 

@@ -71,13 +71,44 @@ The `Variable` class provides methods for creating, retrieving, updating, and de
 
 ## Basic Configuration
 
+The Variable service can be accessed using either the unified client interface (recommended) or the traditional service instantiation.
+
+### Unified Client Interface (Recommended)
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the Variable service directly through the client
+# No need to create a separate Variable instance
+variables = client.variable
+```
+
+### Traditional Service Instantiation (Legacy)
+
 ```python
 from scm.client import Scm
 from scm.config.setup.variable import Variable
 
-client = Scm(api_key="your-api-key")
+# Initialize client
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Initialize Variable object explicitly
 variables = Variable(client)
 ```
+
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
 
 ## Usage Examples
 
