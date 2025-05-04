@@ -1,6 +1,7 @@
 # tests/scm/config/objects/test_http_server_profiles.py
 
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
 import requests
@@ -883,6 +884,67 @@ class TestHTTPServerProfileListAndFetch:
         with pytest.raises(InvalidObjectError) as exc_info:
             http_server_profile.fetch(name="test-profile", folder="Security Profiles")
         assert "Invalid response format: missing 'id' field" in exc_info.value.message
+
+    def test_fetch_with_data_list_response(self):
+        """Test fetching a HTTP server profile when API returns a list format with 'data' key."""
+        api_client = MagicMock(spec=Scm)
+        # Mock the API response in the problematic format:
+        # Instead of a single object, it returns a list inside 'data' key
+        mock_response = {
+            "data": [
+                {
+                    "folder": "All",
+                    "id": "4042341d-7013-472c-ba24-ca37e48a8058",
+                    "name": "hgu-http-srv-profile",
+                    "server": [
+                        {
+                            "address": "1.2.3.4",
+                            "certificate_profile": "None",
+                            "http_method": "POST",
+                            "name": "hgu-srv-http",
+                            "password": "passwd-hash",
+                            "port": 443,
+                            "protocol": "HTTPS",
+                            "tls_version": "1.2",
+                            "username": "test",
+                        }
+                    ],
+                    "tag_registration": False,
+                }
+            ],
+            "limit": 200,
+            "offset": 0,
+            "total": 1,
+        }
+        api_client.get.return_value = mock_response
+
+        http_server_profile = HTTPServerProfile(api_client)
+        profile = http_server_profile.fetch(name="hgu-http-srv-profile", folder="All")
+
+        # Verify the result - should get the first item from data list
+        assert profile.name == "hgu-http-srv-profile"
+        assert profile.folder == "All"
+        assert profile.id == UUID("4042341d-7013-472c-ba24-ca37e48a8058")
+        assert len(profile.server) == 1
+        assert profile.server[0].name == "hgu-srv-http"
+        assert profile.server[0].protocol == "HTTPS"
+
+    def test_fetch_with_empty_data_list(self):
+        """Test fetching a HTTP server profile when API returns an empty list in 'data' key."""
+        api_client = MagicMock(spec=Scm)
+        # Mock an empty response
+        mock_response = {"data": [], "limit": 200, "offset": 0, "total": 0}
+        api_client.get.return_value = mock_response
+
+        http_server_profile = HTTPServerProfile(api_client)
+        with pytest.raises(InvalidObjectError) as exc_info:
+            http_server_profile.fetch(name="nonexistent-profile", folder="All")
+
+        assert (
+            "No HTTP server profile found with the given name and container"
+            in exc_info.value.message
+        )
+        assert exc_info.value.http_status_code == 404
 
     def test_list_response_not_dict(self):
         """Test list with response that's not a dictionary."""

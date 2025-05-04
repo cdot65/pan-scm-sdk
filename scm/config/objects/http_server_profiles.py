@@ -470,7 +470,20 @@ class HTTPServerProfile(BaseObject):
                 details={"error": "Response is not a dictionary"},
             )
 
-        if "id" in response:
+        # Handle the case when response has a 'data' key with a list
+        # This is a workaround for an API inconsistency where fetch sometimes returns a list format
+        if "data" in response and isinstance(response["data"], list):
+            if len(response["data"]) == 0:
+                raise InvalidObjectError(
+                    message="No HTTP server profile found with the given name and container",
+                    error_code="E003",
+                    http_status_code=404,
+                    details={"error": "HTTP server profile not found"},
+                )
+            # Return the first item from the data list
+            return HTTPServerProfileResponseModel(**response["data"][0])
+        # Handle the normal case when response has an 'id' field
+        elif "id" in response:
             return HTTPServerProfileResponseModel(**response)
         else:
             raise InvalidObjectError(
