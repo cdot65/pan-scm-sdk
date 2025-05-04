@@ -162,7 +162,7 @@ class SecurityZoneCreateModel(SecurityZoneBaseModel):
     """Model for creating new Security Zones."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "SecurityZoneCreateModel":
+    def validate_container_type(self) -> "SecurityZoneCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

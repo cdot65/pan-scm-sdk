@@ -272,3 +272,5 @@ _test_*.py
 
 # ignore Claude-specific files
 CLAUDE.md
+
+**/.claude/settings.local.json

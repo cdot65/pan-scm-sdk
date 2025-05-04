@@ -193,7 +193,7 @@ class SecurityRuleCreateModel(SecurityRuleBaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_container(self) -> "SecurityRuleCreateModel":
+    def validate_container_type(self) -> "SecurityRuleCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

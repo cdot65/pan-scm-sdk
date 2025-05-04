@@ -104,7 +104,6 @@ class FolderResponseModel(FolderBaseModel):
     )
 
     @field_validator("parent")
-    @classmethod
     def validate_parent(cls, v: str) -> str:
         """
         Validate parent field. Empty string is allowed for root folders.

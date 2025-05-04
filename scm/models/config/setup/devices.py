@@ -5,7 +5,7 @@ Ref: https://pan.dev/sase/api/config/v1/resources/devices/
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class InstalledLicenseModel(BaseModel):
@@ -51,6 +51,8 @@ class DeviceGetResponseModel(BaseModel):
     )  # Check API for correct key
     # TODO: Add other potential fields from API response
 
-    class Config:
+    # Pydantic v2 model configuration
+    model_config = ConfigDict(
         # Allow extra fields if the API adds new ones
-        extra = "allow"
+        extra="allow"
+    )

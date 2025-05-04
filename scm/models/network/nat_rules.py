@@ -352,7 +352,7 @@ class NatRuleCreateModel(NatRuleBaseModel):
     """Model for creating new NAT Rules."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "NatRuleCreateModel":
+    def validate_container_type(self) -> "NatRuleCreateModel":
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

@@ -69,7 +69,7 @@ class URLCategoriesCreateModel(URLCategoriesBaseModel):
     """Model for creating a new DNS Security Profile."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "URLCategoriesCreateModel":
+    def validate_container_type(self) -> "URLCategoriesCreateModel":
         container_fields = [
             "folder",
             "snippet",

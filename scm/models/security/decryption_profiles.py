@@ -244,7 +244,7 @@ class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
     """Model for creating a new Decryption Profile."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "DecryptionProfileCreateModel":
+    def validate_container_type(self) -> "DecryptionProfileCreateModel":
         """Validates that exactly one container type is provided."""
         container_fields = [
             "folder",

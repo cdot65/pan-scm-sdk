@@ -62,7 +62,7 @@ class ListActionRequestModel(ListActionBaseModel):
     """Action field validator for requests requiring exactly one action."""
 
     @model_validator(mode="before")
-    def check_and_transform_action(cls, values):
+    def convert_action(cls, values):
         if isinstance(values, str):
             values = {values: {}}
         elif not isinstance(values, dict):
@@ -212,7 +212,7 @@ class DNSSecurityProfileCreateModel(DNSSecurityProfileBaseModel):
     """Model for creating a new DNS Security Profile."""
 
     @model_validator(mode="after")
-    def validate_container(self) -> "DNSSecurityProfileCreateModel":
+    def validate_container_type(self) -> "DNSSecurityProfileCreateModel":
         container_fields = [
             "folder",
             "snippet",
