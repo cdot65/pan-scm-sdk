@@ -387,9 +387,17 @@ class Scm:
                 "scm.config.mobile_agent.auth_settings",
                 "AuthSettings",
             ),
+            "auto_tag_action": (
+                "scm.config.objects.auto_tag_actions",
+                "AutoTagActions",
+            ),
             "bandwidth_allocation": (
                 "scm.config.deployment.bandwidth_allocations",
                 "BandwidthAllocations",
+            ),
+            "bgp_routing": (
+                "scm.config.deployment.bgp_routing",
+                "BGPRouting",
             ),
             "decryption_profile": (
                 "scm.config.security.decryption_profile",

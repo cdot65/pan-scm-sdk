@@ -9,9 +9,9 @@ Strata Cloud Manager. These objects form the foundation for organizing and manag
 
 | Configuration Object        | Description                                                                 |
 |-----------------------------|-----------------------------------------------------------------------------|
+| [Device Service](device.md) | List, filter, and manage device resources                                   |
 | [Folder](folder.md)         | Manages folder objects for organizing resources in a hierarchical structure |
 | [Snippet](snippet.md)       | Manages reusable configuration snippets for consistent deployment           |
-| [Device Service](device.md) | List, filter, and manage device resources                                   |
 | [Variable](variable.md)     | Create and manage variable resources with flexible typing and containers    |
 
 ## Folder Organization
@@ -44,7 +44,17 @@ Variables allow for dynamic configurations and parameterization of resources. Th
 
 - Typed variables for different usage contexts (IP addresses, percentages, etc.)
 - Container scoping to folders, snippets, or devices
-- Client-side filtering by various attributes
+- Client-side filtering by various attributes (labels, parent, type, snippets, etc.)
 - Support for labeling and organization
+- Advanced filtering with intersection matching for collections
+
+Variables support 18 different types including:
+- `percent`: Percentage values
+- `count`: Numeric count values
+- `ip-netmask`: IP address with netmask
+- `ip-range`: Range of IP addresses
+- `ip-wildcard`: IP address with wildcard
+- `fqdn`: Fully qualified domain names
+- And many more specialized types
 
 See the [Variable](variable.md) documentation for detailed information on working with variable resources.

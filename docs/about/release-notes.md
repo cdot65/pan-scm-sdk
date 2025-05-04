@@ -142,8 +142,8 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 ### Added
 
 - **Mobile Agent Features**:
-  - **Agent Versions**: Support for managing GlobalProtect agent versions
-  - **Authentication Settings**: Support for configuring GlobalProtect authentication settings
+  - **Agent Version**: Support for managing GlobalProtect agent versions
+  - **Authentication Setting**: Support for configuring GlobalProtect authentication settings
 
 ### Fixed
 
@@ -160,10 +160,10 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 ### Added
 
 - **Prisma Access Features**:
-  - **Bandwidth Allocations**: Support for managing bandwidth allocation across service provider networks (SPNs)
+  - **Bandwidth Allocation**: Support for managing bandwidth allocation across service provider networks (SPNs)
   - **BGP Routing**: Support for configuring and managing BGP routing
-  - **Internal DNS Servers**: Support for configuring internal DNS servers
-  - **Network Locations**: Support for managing network locations
+  - **Internal DNS Server**: Support for configuring internal DNS servers
+  - **Network Location**: Support for managing network locations
 
 ## Version 0.3.20
 

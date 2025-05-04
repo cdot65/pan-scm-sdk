@@ -211,9 +211,3 @@ nav:
               - Device Models: sdk/models/setup/device_models.md
               - Variable Models: sdk/models/setup/variable_models.md
       - Exceptions: sdk/exceptions.md
-  - User Guide:
-      - Getting Started: guide/getting-started.md
-      - Configuration Objects: guide/configuration-objects.md
-      - Data Models: guide/data-models.md
-      - Operations: guide/operations.md
-      - Advanced Topics: guide/advanced-topics.md

@@ -126,15 +126,15 @@ for server in dns_servers:
 # === NETWORK LOCATIONS ===
 
 # List all network locations
-locations = client.network_location.list()
+locations = client.network_locations.list()
 print(f"Found {len(locations)} network locations")
 
 # Filter locations by continent
-us_locations = client.network_location.list(continent="North America")
+us_locations = client.network_locations.list(continent="North America")
 print(f"Found {len(us_locations)} locations in North America")
 
 # Fetch a specific location
-west_coast = client.network_location.fetch("us-west-1")
+west_coast = client.network_locations.fetch("us-west-1")
 print(f"Location: {west_coast.display} ({west_coast.value})")
 print(f"Region: {west_coast.region}, Coordinates: {west_coast.latitude}, {west_coast.longitude}")
 
@@ -180,25 +180,25 @@ The unified client provides access to the following services through attribute-b
 | `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies    |
 | `address_group`                    | Static or dynamic collections of address objects              |
 | `application`                      | Custom application definitions and signatures                 |
-| `application_filter`               | Filters for identifying applications by characteristics       |
+| `application_filters`              | Filters for identifying applications by characteristics       |
 | `application_group`                | Logical groups of applications for policy application         |
+| `auto_tag_actions`                 | Automated tag assignment based on traffic and security events |
 | `dynamic_user_group`               | User groups with dynamic membership criteria                  |
-| `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains             |
+| `external_dynamic_lists`           | Externally managed lists of IPs, URLs, or domains             |
 | `hip_object`                       | Host information profile match criteria                       |
 | `hip_profile`                      | Endpoint security compliance profiles                         |
 | `http_server_profile`              | HTTP server configurations for logging and monitoring         |
 | `log_forwarding_profile`           | Configurations for forwarding logs to external systems        |
-| `quarantined_device`               | Management of devices blocked from network access             |
+| `quarantined_devices`              | Management of devices blocked from network access             |
 | `region`                           | Geographic regions for policy control                         |
 | `schedule`                         | Time-based policies and access control                        |
 | `service`                          | Protocol and port definitions for network services            |
 | `service_group`                    | Collections of services for simplified policy management      |
 | `syslog_server_profile`            | Syslog server configurations for centralized logging          |
 | `tag`                              | Resource classification and organization labels               |
-| `auto_tag_actions`                 | Automated tag assignment based on traffic and security events |
 | **Mobile Agent**                   |                                                               |
-| `auth_setting`                     | GlobalProtect authentication settings                         |
-| `agent_version`                    | GlobalProtect agent versions (read-only)                      |
+| `auth_settings`                    | GlobalProtect authentication settings                         |
+| `agent_versions`                   | GlobalProtect agent versions (read-only)                      |
 | **Network**                        |                                                               |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                 |
 | `ike_gateway`                      | IKE gateways for VPN tunnel endpoints                         |
@@ -206,11 +206,11 @@ The unified client provides access to the following services through attribute-b
 | `nat_rule`                         | Network address translation policies for traffic routing      |
 | `security_zone`                    | Security zones for network segmentation                       |
 | **Deployment**                     |                                                               |
-| `bandwidth_allocation`             | Bandwidth allocation management for network capacity planning |
+| `bandwidth_allocations`            | Bandwidth allocation management for network capacity planning |
 | `bgp_routing`                      | BGP routing configuration for network connectivity            |
 | `internal_dns_servers`             | Internal DNS server configurations for domain resolution      |
-| `network_location`                 | Geographic network locations for service connectivity         |
-| `remote_network`                   | Secure branch and remote site connectivity configurations     |
+| `network_locations`                | Geographic network locations for service connectivity         |
+| `remote_networks`                  | Secure branch and remote site connectivity configurations     |
 | `service_connection`               | Service connections to cloud service providers                |
 | **Security**                       |                                                               |
 | `security_rule`                    | Core security policies controlling network traffic            |
@@ -220,6 +220,11 @@ The unified client provides access to the following services through attribute-b
 | `url_category`                     | Custom URL categorization for web filtering                   |
 | `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts               |
 | `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection          |
+| **Setup**                          |                                                               |
+| `device`                           | Device resources and management                               |
+| `folder`                           | Folder organization and hierarchy                             |
+| `snippet`                          | Reusable configuration snippets                               |
+| `variable`                         | Typed variables with flexible container scoping               |
 
 #### Traditional Access Pattern (Legacy Support)
 

@@ -106,13 +106,13 @@ client.bgp_routing.update({
 print("Updated BGP routing settings")
 
 # Work with Network Locations
-locations = client.network_location.list()
+locations = client.network_locations.list()
 print(f"Found {len(locations)} network locations")
 
-us_locations = client.network_location.list(continent="North America")
+us_locations = client.network_locations.list(continent="North America")
 print(f"Found {len(us_locations)} locations in North America")
 
-west_coast = client.network_location.fetch("us-west-1")
+west_coast = client.network_locations.fetch("us-west-1")
 print(f"Location: {west_coast.display} ({west_coast.value})")
 
 # Work with GlobalProtect Agent Versions (read-only)
@@ -139,11 +139,11 @@ security_zones = client.security_zone.list(folder="Texas")
 print(f"Found {len(security_zones)} security zones")
 
 # Work with Bandwidth Allocations
-bandwidth_allocations = client.bandwidth_allocation.list()
+bandwidth_allocations = client.bandwidth_allocations.list()
 print(f"Found {len(bandwidth_allocations)} bandwidth allocations")
 
 # Create a new bandwidth allocation
-new_allocation = client.bandwidth_allocation.create({
+new_allocation = client.bandwidth_allocations.create({
     "name": "test-region",
     "allocated_bandwidth": 100,
     "spn_name_list": ["spn1", "spn2"],
@@ -182,4 +182,4 @@ on how to contribute.
 
 This project is licensed under the Apache 2.0 License - see the [License](about/license.md) page for details.
 
-- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Snippet, Device, and more.
+- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Snippet, Device, Variable, and more.

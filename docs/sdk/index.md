@@ -10,15 +10,15 @@ configuration objects and data models used to interact with Palo Alto Networks S
 - Configuration
     - [BaseObject](config/base_object.md)
     - Deployment
-        - [Bandwidth Allocations](config/deployment/bandwidth_allocations.md)
+        - [Bandwidth Allocation](config/deployment/bandwidth_allocations.md)
         - [BGP Routing](config/deployment/bgp_routing.md)
-        - [Internal DNS Servers](config/deployment/internal_dns_servers.md)
-        - [Network Locations](config/deployment/network_locations.md)
-        - [Remote Networks](config/deployment/remote_networks.md)
-        - [Service Connections](config/deployment/service_connections.md)
+        - [Internal DNS Server](config/deployment/internal_dns_servers.md)
+        - [Network Location](config/deployment/network_locations.md)
+        - [Remote Network](config/deployment/remote_networks.md)
+        - [Service Connection](config/deployment/service_connections.md)
     - Mobile Agent
-        - [Authentication Settings](config/mobile_agent/auth_settings.md)
-        - [Agent Versions](config/mobile_agent/agent_versions.md)
+        - [Authentication Setting](config/mobile_agent/auth_settings.md)
+        - [Agent Version](config/mobile_agent/agent_versions.md)
     - Network
         - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
         - [IKE Gateways](config/network/ike_gateway.md)
@@ -56,17 +56,18 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Folder](config/setup/folder.md)
         - [Device](config/setup/device.md)
         - [Snippet](config/setup/snippet.md)
+        - [Variable](config/setup/variable.md)
 - Data Models
     - Deployment
         - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
         - [BGP Routing Models](models/deployment/bgp_routing_models.md)
-        - [Internal DNS Servers Models](models/deployment/internal_dns_servers_models.md)
-        - [Network Locations Models](models/deployment/network_locations.md)
-        - [Remote Networks Models](models/deployment/remote_networks_models.md)
-        - [Service Connections Models](models/deployment/service_connections_models.md)
+        - [Internal DNS Server Models](models/deployment/internal_dns_servers_models.md)
+        - [Network Location Models](models/deployment/network_locations.md)
+        - [Remote Network Models](models/deployment/remote_networks_models.md)
+        - [Service Connection Models](models/deployment/service_connections_models.md)
     - Mobile Agent
-        - [Authentication Settings Models](models/mobile_agent/auth_settings_models.md)
-        - [Agent Versions Models](models/mobile_agent/agent_versions_models.md)
+        - [Authentication Setting Models](models/mobile_agent/auth_settings_models.md)
+        - [Agent Version Models](models/mobile_agent/agent_versions_models.md)
     - Network
         - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
         - [IKE Gateway Models](models/network/ike_gateway_models.md)
@@ -104,9 +105,10 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
         - [WildFire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
     - Setup
-        - [Models Setup](models/setup/index.md): Folder, Snippet, Device models
+        - [Models Setup](models/setup/index.md): Folder, Snippet, Device, Variable models
         - [Folder Models](models/setup/folder_models.md)
         - [Snippet Models](models/setup/snippet_models.md)
+        - [Variable Models](models/setup/variable_models.md)
 - [Exceptions](exceptions.md)
 
 ---
@@ -164,7 +166,7 @@ print("Updated BGP routing settings")
 # ===== WORKING WITH INTERNAL DNS SERVERS =====
 
 # Create a new internal DNS server
-dns_server = client.internal_dns_servers.create({
+dns_server = client.internal_dns_server.create({
     "name": "main-dns-server",
     "domain_name": ["example.com", "internal.example.com"],
     "primary": "192.168.1.10",
@@ -173,7 +175,7 @@ dns_server = client.internal_dns_servers.create({
 print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
 
 # List all DNS servers
-dns_servers = client.internal_dns_servers.list()
+dns_servers = client.internal_dns_server.list()
 print(f"Found {len(dns_servers)} DNS servers")
 
 # ===== WORKING WITH SECURITY RULES =====
@@ -312,7 +314,7 @@ The following table shows all services available through the unified client inte
 | **Deployment**                     |                                                               |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes   |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                  |
-| `internal_dns_servers`             | DNS server configurations for domain resolution               |
+| `internal_dns_server`              | DNS server configurations for domain resolution               |
 | `network_location`                 | Geographic network locations for service connectivity         |
 | `remote_network`                   | Secure branch and remote site connectivity configurations     |
 | `service_connection`               | Service connections to cloud service providers                |
