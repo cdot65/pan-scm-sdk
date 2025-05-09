@@ -55,6 +55,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - Setup
         - [Folder](config/setup/folder.md)
         - [Device](config/setup/device.md)
+        - [Label](config/setup/label.md)
         - [Snippet](config/setup/snippet.md)
         - [Variable](config/setup/variable.md)
 - Data Models
@@ -105,8 +106,9 @@ configuration objects and data models used to interact with Palo Alto Networks S
         - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
         - [WildFire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
     - Setup
-        - [Models Setup](models/setup/index.md): Folder, Snippet, Device, Variable models
+        - [Models Setup](models/setup/index.md): Folder, Label, Snippet, Device, Variable models
         - [Folder Models](models/setup/folder_models.md)
+        - [Label Models](models/setup/label_models.md)
         - [Snippet Models](models/setup/snippet_models.md)
         - [Variable Models](models/setup/variable_models.md)
 - [Exceptions](exceptions.md)

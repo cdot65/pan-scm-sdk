@@ -223,6 +223,7 @@ The unified client provides access to the following services through attribute-b
 | **Setup**                          |                                                               |
 | `device`                           | Device resources and management                               |
 | `folder`                           | Folder organization and hierarchy                             |
+| `label`                            | Resource classification and simple key-value object labels    |
 | `snippet`                          | Reusable configuration snippets                               |
 | `variable`                         | Typed variables with flexible container scoping               |
 
