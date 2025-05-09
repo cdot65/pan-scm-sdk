@@ -8,6 +8,11 @@ from .folder import (
     FolderResponseModel,
     FolderUpdateModel,
 )
+from .label import (
+    LabelCreateModel,
+    LabelResponseModel,
+    LabelUpdateModel,
+)
 from .snippet import (
     FolderReference,
     SnippetBaseModel,
@@ -29,6 +34,9 @@ __all__ = [
     "FolderResponseModel",
     "FolderUpdateModel",
     "FolderReference",
+    "LabelCreateModel",
+    "LabelResponseModel",
+    "LabelUpdateModel",
     "SnippetBaseModel",
     "SnippetCreateModel",
     "SnippetResponseModel",
