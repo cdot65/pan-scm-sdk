@@ -150,13 +150,13 @@ class Label(BaseObject):
 
     def update(
         self,
-        label: LabelUpdateModel,
+        label: Union[LabelUpdateModel, LabelResponseModel],
     ) -> LabelResponseModel:
         """
         Update an existing label.
 
         Args:
-            label: The LabelUpdateModel containing the updated label data.
+            label: Either a LabelUpdateModel or LabelResponseModel containing the updated label data.
 
         Returns:
             LabelResponseModel: The updated label.
@@ -166,12 +166,31 @@ class Label(BaseObject):
             ObjectNotPresentError: If the label doesn't exist.
             APIError: If the API request fails.
         """
-        payload = label.model_dump(exclude_unset=True)
+        # Handle either model type appropriately
+        if isinstance(label, LabelResponseModel):
+            # Convert LabelResponseModel to a dict for model_dump compatibility
+            data = {
+                "id": label.id,
+                "name": label.name,
+                "description": label.description,
+            }
+            # Create a LabelUpdateModel from the LabelResponseModel fields
+            update_model = LabelUpdateModel(**data)
+            payload = update_model.model_dump(exclude_unset=True)
+        else:
+            # Already a LabelUpdateModel
+            payload = label.model_dump(exclude_unset=True)
+
         object_id = str(label.id)
         payload.pop("id", None)
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.put(endpoint, json=payload)
-        return LabelResponseModel.model_validate(response)
+
+        # Handle the API returning a list instead of a single object
+        if isinstance(response, list) and len(response) > 0:
+            return LabelResponseModel.model_validate(response[0])
+        else:
+            return LabelResponseModel.model_validate(response)
 
     def delete(
         self,

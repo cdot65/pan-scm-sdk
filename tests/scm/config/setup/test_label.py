@@ -424,12 +424,13 @@ class TestLabelList(TestLabelBase):
 class TestLabelUpdate(TestLabelBase):
     """Tests for Label.update method."""
 
-    def test_update_label(self, label_service, mock_scm_client):
-        """Test updating a label."""
+    def test_update_label_with_update_model(self, label_service, mock_scm_client):
+        """Test updating a label with LabelUpdateModel."""
         # Setup mock response
         label_id = "123e4567-e89b-12d3-a456-426614174000"
         mock_response = LabelResponseModelFactory.build(id=label_id)
-        mock_scm_client.put.return_value = mock_response
+        # Simulate the API returning a list instead of a single object
+        mock_scm_client.put.return_value = [mock_response.model_dump()]
 
         # Build update model
         update_model = LabelUpdateModelFactory.build_valid_model(
@@ -449,21 +450,49 @@ class TestLabelUpdate(TestLabelBase):
         assert isinstance(result, LabelResponseModel)
         assert result.name == mock_response.name
 
+    def test_update_label_with_response_model(self, label_service, mock_scm_client):
+        """Test updating a label with LabelResponseModel."""
+        # Setup mock response
+        label_id = "123e4567-e89b-12d3-a456-426614174000"
+        mock_response = LabelResponseModelFactory.build(id=label_id)
+        # Simulate the API returning a list instead of a single object
+        mock_scm_client.put.return_value = [mock_response.model_dump()]
+
+        # Build response model for input
+        input_response_model = LabelResponseModelFactory.build_valid_model(
+            id=label_id, name="original_name", description="original_description"
+        )
+
+        # Update the label using response model
+        result = label_service.update(input_response_model)
+
+        # Assert the client was called correctly
+        mock_scm_client.put.assert_called_once()
+        call_args = mock_scm_client.put.call_args
+        assert call_args[0][0] == f"/config/setup/v1/labels/{label_id}"
+
+        # Verify payload has name and description from response model
+        payload = call_args[1]["json"]
+        assert payload["name"] == "original_name"
+        assert payload["description"] == "original_description"
+
+        # Assert the result is a LabelResponseModel
+        assert isinstance(result, LabelResponseModel)
+        assert result.name == mock_response.name
+
     def test_update_with_all_parameters(self, label_service, mock_scm_client):
         """Test updating a label with all parameters."""
         # Setup mock response
         label_id = "123e4567-e89b-12d3-a456-426614174000"
         mock_response = LabelResponseModelFactory.build(id=label_id)
-        mock_scm_client.put.return_value = mock_response
+        # Simulate the API returning a list instead of a single object
+        mock_scm_client.put.return_value = [mock_response.model_dump()]
 
-        # Build update model with all fields
+        # Build update model with all fields that the model actually supports
         update_model = LabelUpdateModelFactory.build_valid_model(
             id=label_id,
             name="updated_name",
-            description="Updated description",
-            type="fqdn",
-            value="updated.example.com",
-            folder="updated_folder",
+            description="Updated description"
         )
         result = label_service.update(update_model)
 
@@ -472,9 +501,10 @@ class TestLabelUpdate(TestLabelBase):
         payload = call_args[1]["json"]
         assert payload["name"] == "updated_name"
         assert payload["description"] == "Updated description"
-        assert payload["type"] == "fqdn"
-        assert payload["value"] == "updated.example.com"
-        assert payload["folder"] == "updated_folder"
+
+        # Note: The model definition in scm/models/setup/label.py doesn't include
+        # type, value, or folder fields even though the tests were checking for them.
+        # The actual model only has name and description.
 
         # Assert the result is a LabelResponseModel
         assert isinstance(result, LabelResponseModel)
