@@ -4,15 +4,14 @@
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.client import Scm
 from scm.config.setup.label import Label
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
 from scm.models.setup.label import (
-    LabelBaseModel,
     LabelCreateModel,
     LabelResponseModel,
     LabelUpdateModel,
@@ -74,10 +73,7 @@ class TestLabelPydanticModel:
     def test_label_create_model_validate(self):
         """Test model validation for LabelCreateModel."""
         # Create a valid model
-        valid_data = {
-            "name": "test_label",
-            "description": "Test label description"
-        }
+        valid_data = {"name": "test_label", "description": "Test label description"}
         model = LabelCreateModel.model_validate(valid_data)
         assert model.name == "test_label"
         assert model.description == "Test label description"
@@ -88,7 +84,7 @@ class TestLabelPydanticModel:
         valid_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test_label",
-            "description": "Test label description"
+            "description": "Test label description",
         }
         model = LabelUpdateModel.model_validate(valid_data)
         assert model.id == UUID("123e4567-e89b-12d3-a456-426655440000")
@@ -166,9 +162,7 @@ class TestLabelGet(TestLabelBase):
         result = label_service.get(label_id)
 
         # Assert the client was called correctly
-        mock_scm_client.get.assert_called_once_with(
-            f"/config/setup/v1/labels/{label_id}"
-        )
+        mock_scm_client.get.assert_called_once_with(f"/config/setup/v1/labels/{label_id}")
 
         # Assert the result is a LabelResponseModel
         assert isinstance(result, LabelResponseModel)
@@ -188,9 +182,7 @@ class TestLabelGet(TestLabelBase):
             label_service.get(label_id)
 
         # Assert the client was called correctly
-        mock_scm_client.get.assert_called_once_with(
-            f"/config/setup/v1/labels/{label_id}"
-        )
+        mock_scm_client.get.assert_called_once_with(f"/config/setup/v1/labels/{label_id}")
 
     def test_get_with_general_error(self, label_service, mock_scm_client):
         """Test get with a non-404 API error."""
@@ -216,9 +208,7 @@ class TestLabelList(TestLabelBase):
     def test_list_labels(self, label_service, mock_scm_client):
         """Test listing labels with default parameters."""
         # Setup mock response with valid label data
-        mock_labels = [
-            LabelResponseModelFactory.build_valid_model().model_dump() for _ in range(3)
-        ]
+        mock_labels = [LabelResponseModelFactory.build_valid_model().model_dump() for _ in range(3)]
         mock_response = {"data": mock_labels}
 
         # Patch the API client's get method
@@ -230,12 +220,8 @@ class TestLabelList(TestLabelBase):
     def test_list_labels_pagination(self, label_service, mock_scm_client):
         """Test listing labels with pagination parameters."""
         # Setup two pages of response data
-        page1 = {
-            "data": [LabelResponseModelFactory.build().model_dump() for _ in range(5)]
-        }
-        page2 = {
-            "data": [LabelResponseModelFactory.build().model_dump() for _ in range(3)]
-        }
+        page1 = {"data": [LabelResponseModelFactory.build().model_dump() for _ in range(5)]}
+        page2 = {"data": [LabelResponseModelFactory.build().model_dump() for _ in range(3)]}
 
         # Mock the get method to return different responses for first and second calls
         mock_scm_client.get.side_effect = [page1, page2]
@@ -266,9 +252,7 @@ class TestLabelList(TestLabelBase):
     def test_list_with_filters(self, label_service, mock_scm_client):
         """Test listing labels with filters."""
         # Setup mock response
-        mock_labels = [
-            LabelResponseModelFactory.build_valid_model().model_dump() for _ in range(3)
-        ]
+        mock_labels = [LabelResponseModelFactory.build_valid_model().model_dump() for _ in range(3)]
         mock_response = {"data": mock_labels}
 
         # Patch the API client's get method
@@ -296,9 +280,7 @@ class TestLabelUpdate(TestLabelBase):
         mock_scm_client.put.return_value = [mock_response.model_dump()]
 
         # Build update model
-        update_model = LabelUpdateModelFactory.build_valid_model(
-            id=label_id, name="updated_name"
-        )
+        update_model = LabelUpdateModelFactory.build_valid_model(id=label_id, name="updated_name")
 
         # Update the label
         result = label_service.update(update_model)
@@ -308,6 +290,32 @@ class TestLabelUpdate(TestLabelBase):
         call_args = mock_scm_client.put.call_args
         assert call_args[0][0] == f"/config/setup/v1/labels/{label_id}"
         assert call_args[1]["json"]["name"] == "updated_name"
+
+        # Assert the result is a LabelResponseModel
+        assert isinstance(result, LabelResponseModel)
+        assert result.name == mock_response.name
+
+    def test_update_label_with_single_object_response(self, label_service, mock_scm_client):
+        """Test updating a label when API returns a single object (not a list)."""
+        # Setup mock response as a single object (not a list)
+        label_id = "123e4567-e89b-12d3-a456-426614174000"
+        mock_response = LabelResponseModelFactory.build(id=label_id)
+        # Return a dictionary directly instead of a list
+        mock_scm_client.put.return_value = mock_response.model_dump()
+
+        # Build update model
+        update_model = LabelUpdateModelFactory.build_valid_model(
+            id=label_id, name="updated_name_single_object"
+        )
+
+        # Update the label
+        result = label_service.update(update_model)
+
+        # Assert the client was called correctly
+        mock_scm_client.put.assert_called_once()
+        call_args = mock_scm_client.put.call_args
+        assert call_args[0][0] == f"/config/setup/v1/labels/{label_id}"
+        assert call_args[1]["json"]["name"] == "updated_name_single_object"
 
         # Assert the result is a LabelResponseModel
         assert isinstance(result, LabelResponseModel)
@@ -353,9 +361,7 @@ class TestLabelUpdate(TestLabelBase):
 
         # Build update model with all fields that the model actually supports
         update_model = LabelUpdateModelFactory.build_valid_model(
-            id=label_id,
-            name="updated_name",
-            description="Updated description"
+            id=label_id, name="updated_name", description="Updated description"
         )
         result = label_service.update(update_model)
 
@@ -380,9 +386,7 @@ class TestLabelUpdate(TestLabelBase):
         mock_scm_client.put.side_effect = error
         label_id = "99999999-9999-9999-9999-999999999999"
 
-        update_model = LabelUpdateModelFactory.build_valid_model(
-            id=label_id, name="updated_name"
-        )
+        update_model = LabelUpdateModelFactory.build_valid_model(id=label_id, name="updated_name")
         # Try to update the nonexistent label
         with pytest.raises(APIError):
             label_service.update(update_model)
@@ -414,9 +418,7 @@ class TestLabelDelete(TestLabelBase):
         label_service.delete(label_id)
 
         # Assert the client was called correctly
-        mock_scm_client.delete.assert_called_once_with(
-            f"/config/setup/v1/labels/{label_id}"
-        )
+        mock_scm_client.delete.assert_called_once_with(f"/config/setup/v1/labels/{label_id}")
 
     def test_delete_nonexistent_label(self, label_service, mock_scm_client):
         """Test deleting a label that doesn't exist."""
@@ -431,9 +433,7 @@ class TestLabelDelete(TestLabelBase):
             label_service.delete(label_id)
 
         # Assert the client was called correctly
-        mock_scm_client.delete.assert_called_once_with(
-            f"/config/setup/v1/labels/{label_id}"
-        )
+        mock_scm_client.delete.assert_called_once_with(f"/config/setup/v1/labels/{label_id}")
 
     def test_delete_with_general_error(self, label_service, mock_scm_client):
         """Test delete with a non-404 exception."""
@@ -477,8 +477,12 @@ class TestLabelFetch(TestLabelBase):
         """Test fetch returns only the first match when multiple exist."""
         name = "duplicate_name"
         # Create two mock labels with the same name but different descriptions
-        label1 = LabelResponseModel(id=UUID("11111111-e89b-12d3-a456-426655440000"), name=name, description="Description 1")
-        label2 = LabelResponseModel(id=UUID("22222222-e89b-12d3-a456-426655440000"), name=name, description="Description 2")
+        label1 = LabelResponseModel(
+            id=UUID("11111111-e89b-12d3-a456-426655440000"), name=name, description="Description 1"
+        )
+        label2 = LabelResponseModel(
+            id=UUID("22222222-e89b-12d3-a456-426655440000"), name=name, description="Description 2"
+        )
 
         # Mock the list method to return both labels
         with patch.object(label_service, "list", return_value=[label1, label2]):
@@ -540,9 +544,7 @@ class TestLabelGetPaginatedResults(TestLabelBase):
     def test_get_paginated_results_dict_with_data(self, label_service, mock_scm_client):
         """Test _get_paginated_results with dict response containing 'data'."""
         # Setup mock response
-        mock_response = {
-            "data": [{"id": "1", "name": "test1"}, {"id": "2", "name": "test2"}]
-        }
+        mock_response = {"data": [{"id": "1", "name": "test1"}, {"id": "2", "name": "test2"}]}
         mock_scm_client.get.return_value = mock_response
 
         # Call the method
@@ -567,9 +569,7 @@ class TestLabelGetPaginatedResults(TestLabelBase):
         # Assert the list is returned directly
         assert results == mock_response
 
-    def test_get_paginated_results_unexpected_format(
-        self, label_service, mock_scm_client
-    ):
+    def test_get_paginated_results_unexpected_format(self, label_service, mock_scm_client):
         """Test _get_paginated_results with unexpected response format."""
         # Setup mock response with unexpected format
         mock_scm_client.get.return_value = "not a dict or list"
@@ -581,5 +581,3 @@ class TestLabelGetPaginatedResults(TestLabelBase):
 
         # Assert empty list is returned for unexpected format
         assert results == []
-
-

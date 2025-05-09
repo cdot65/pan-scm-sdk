@@ -12,11 +12,6 @@ from scm.models.setup.label import (
     LabelResponseModel,
     LabelUpdateModel,
 )
-from tests.factories.setup.label import (
-    LabelCreateModelFactory,
-    LabelResponseModelFactory,
-    LabelUpdateModelFactory,
-)
 
 
 class TestLabelBaseModel:
@@ -24,10 +19,7 @@ class TestLabelBaseModel:
 
     def test_valid_construction(self):
         """Test that a valid LabelBaseModel can be constructed."""
-        data = {
-            "name": "test_label",
-            "description": "This is a test label"
-        }
+        data = {"name": "test_label", "description": "This is a test label"}
         model = LabelBaseModel(**data)
 
         assert model.name == "test_label"
@@ -50,10 +42,7 @@ class TestLabelCreateModel:
 
     def test_valid_construction(self):
         """Test that a valid LabelCreateModel can be constructed."""
-        data = {
-            "name": "create_test_label",
-            "description": "This is a test create label"
-        }
+        data = {"name": "create_test_label", "description": "This is a test create label"}
         model = LabelCreateModel(**data)
 
         assert model.name == "create_test_label"
@@ -74,7 +63,7 @@ class TestLabelUpdateModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "update_test_label",
-            "description": "This is a test update label"
+            "description": "This is a test update label",
         }
         model = LabelUpdateModel(**data)
 
@@ -86,16 +75,12 @@ class TestLabelUpdateModel:
         """Test that LabelUpdateModel requires id and name."""
         # Missing id should fail validation
         with pytest.raises(ValueError):
-            LabelUpdateModel(
-                name="test_label",
-                description="test description"
-            )
+            LabelUpdateModel(name="test_label", description="test description")
 
         # Missing name should fail validation
         with pytest.raises(ValueError):
             LabelUpdateModel(
-                id="123e4567-e89b-12d3-a456-426655440000",
-                description="test description"
+                id="123e4567-e89b-12d3-a456-426655440000", description="test description"
             )
 
     def test_id_type_conversion(self):
@@ -119,7 +104,7 @@ class TestLabelResponseModel:
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "response_test_label",
-            "description": "This is a test response label"
+            "description": "This is a test response label",
         }
 
         model = LabelResponseModel(**data)
@@ -144,15 +129,12 @@ class TestLabelResponseModel:
 
     def test_from_request_model(self):
         """Test creating a response model from a request model."""
-        create_data = {
-            "name": "create_test_label",
-            "description": "This is a test create label"
-        }
+        create_data = {"name": "create_test_label", "description": "This is a test create label"}
         create_model = LabelCreateModel(**create_data)
         response_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": create_model.name,
-            "description": create_model.description
+            "description": create_model.description,
         }
         response_model = LabelResponseModel(**response_data)
 

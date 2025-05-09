@@ -1,5 +1,5 @@
-import uuid
 from typing import Any, Dict, Union
+import uuid
 
 import factory
 from faker import Faker

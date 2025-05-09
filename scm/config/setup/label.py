@@ -239,9 +239,7 @@ class Label(BaseObject):
             params.update({k: v for k, v in filters.items() if v is not None})
             response = self.api_client.get(self.ENDPOINT, params=params)
             data_items = response["data"] if "data" in response else response
-            object_instances = [
-                LabelResponseModel.model_validate(item) for item in data_items
-            ]
+            object_instances = [LabelResponseModel.model_validate(item) for item in data_items]
             all_objects.extend(object_instances)
             if len(data_items) < limit:
                 break
