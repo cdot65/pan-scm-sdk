@@ -451,6 +451,10 @@ class Scm:
                 "scm.config.network.ipsec_crypto_profile",
                 "IPsecCryptoProfile",
             ),
+            "label": (
+                "scm.config.setup.label",
+                "Label",
+            ),
             "log_forwarding_profile": (
                 "scm.config.objects.log_forwarding_profile",
                 "LogForwardingProfile",

@@ -11,6 +11,7 @@ operations.
 | Model                               | Description                                                |
 |-------------------------------------|------------------------------------------------------------|
 | [Folder Models](folder_models.md)   | Models for folder creation, updates, and responses         |
+| [Label Models](label_models.md)     | Models for label creation, updates, and responses          |
 | [Snippet Models](snippet_models.md) | Models for snippet operations and responses                |
 | [Device Models](device_models.md)   | Pydantic models for device resources and licenses          |
 | [Variable Models](variable_models.md) | Models for typed variables with container validation     |

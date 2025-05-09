@@ -182,4 +182,4 @@ on how to contribute.
 
 This project is licensed under the Apache 2.0 License - see the [License](about/license.md) page for details.
 
-- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Snippet, Device, Variable, and more.
+- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Label, Snippet, Device, Variable, and more.

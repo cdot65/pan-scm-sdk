@@ -11,6 +11,7 @@ Strata Cloud Manager. These objects form the foundation for organizing and manag
 |-----------------------------|-----------------------------------------------------------------------------|
 | [Device Service](device.md) | List, filter, and manage device resources                                   |
 | [Folder](folder.md)         | Manages folder objects for organizing resources in a hierarchical structure |
+| [Label](label.md)           | Manages label objects for resource classification and organization          |
 | [Snippet](snippet.md)       | Manages reusable configuration snippets for consistent deployment           |
 | [Variable](variable.md)     | Create and manage variable resources with flexible typing and containers    |
 
