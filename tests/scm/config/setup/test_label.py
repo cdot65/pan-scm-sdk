@@ -71,148 +71,29 @@ class TestLabelInitialization(TestLabelBase):
 class TestLabelPydanticModel:
     """Tests for the Label model classes."""
 
-    def test_validate_container_type_valid(self):
-        """Test validate_container_type with valid container configuration."""
-        # Test with folder only
-        values_with_folder = {"folder": "test_folder", "snippet": None, "device": None}
-        assert (
-            LabelBaseModel.validate_container_type(values_with_folder)
-            == values_with_folder
-        )
-
-        # Test with snippet only
-        values_with_snippet = {
-            "folder": None,
-            "snippet": "test_snippet",
-            "device": None,
-        }
-        assert (
-            LabelBaseModel.validate_container_type(values_with_snippet)
-            == values_with_snippet
-        )
-
-        # Test with device only
-        values_with_device = {"folder": None, "snippet": None, "device": "test_device"}
-        assert (
-            LabelBaseModel.validate_container_type(values_with_device)
-            == values_with_device
-        )
-
-    def test_validate_container_type_multiple_containers(self):
-        """Test validate_container_type with multiple containers set."""
-        # Test with folder and snippet
-        values = {"folder": "test_folder", "snippet": "test_snippet", "device": None}
-        with pytest.raises(ValueError) as excinfo:
-            LabelBaseModel.validate_container_type(values)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(excinfo.value)
-        )
-
-        # Test with all three containers
-        values = {
-            "folder": "test_folder",
-            "snippet": "test_snippet",
-            "device": "test_device",
-        }
-        with pytest.raises(ValueError) as excinfo:
-            LabelBaseModel.validate_container_type(values)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(excinfo.value)
-        )
-
-    def test_validate_container_type_no_container(self):
-        """Test validate_container_type with no container set."""
-        values = {"folder": None, "snippet": None, "device": None}
-        with pytest.raises(ValueError) as excinfo:
-            LabelBaseModel.validate_container_type(values)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(excinfo.value)
-        )
-
-    def test_validate_type_enum_valid(self):
-        """Test the type enum validator with valid types."""
-        for valid_type in [
-            "percent",
-            "count",
-            "ip-netmask",
-            "zone",
-            "ip-range",
-            "ip-wildcard",
-            "device-priority",
-            "device-id",
-            "egress-max",
-            "as-number",
-            "fqdn",
-            "port",
-            "link-tag",
-            "group-id",
-            "rate",
-            "router-id",
-            "qos-profile",
-            "timer",
-        ]:
-            assert LabelBaseModel.validate_type_enum(valid_type) == valid_type
-
-    def test_validate_type_enum_invalid(self):
-        """Test the type enum validator with invalid types."""
-        with pytest.raises(ValueError) as excinfo:
-            LabelBaseModel.validate_type_enum("invalid-type")
-        assert "type must be one of" in str(excinfo.value)
-
     def test_label_create_model_validate(self):
         """Test model validation for LabelCreateModel."""
         # Create a valid model
         valid_data = {
-            "name": "test_var",
-            "type": "fqdn",
-            "value": "example.com",
-            "folder": "test_folder",
+            "name": "test_label",
+            "description": "Test label description"
         }
         model = LabelCreateModel.model_validate(valid_data)
-        assert model.name == "test_var"
-        assert model.type == "fqdn"
-        assert model.value == "example.com"
-        assert model.folder == "test_folder"
-
-        # Test with invalid container (multiple containers set)
-        invalid_data = valid_data.copy()
-        invalid_data["snippet"] = "test_snippet"
-        with pytest.raises(ValueError) as excinfo:
-            LabelCreateModel.model_validate(invalid_data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(excinfo.value)
-        )
+        assert model.name == "test_label"
+        assert model.description == "Test label description"
 
     def test_label_update_model_validate(self):
         """Test model validation for LabelUpdateModel."""
         # Create a valid model
         valid_data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
-            "name": "test_var",
-            "type": "fqdn",
-            "value": "example.com",
-            "folder": "test_folder",
+            "name": "test_label",
+            "description": "Test label description"
         }
         model = LabelUpdateModel.model_validate(valid_data)
         assert model.id == UUID("123e4567-e89b-12d3-a456-426655440000")
-        assert model.name == "test_var"
-        assert model.type == "fqdn"
-        assert model.value == "example.com"
-        assert model.folder == "test_folder"
-
-        # Test with invalid container (no container set)
-        invalid_data = valid_data.copy()
-        invalid_data["folder"] = None
-        with pytest.raises(ValueError) as excinfo:
-            LabelUpdateModel.model_validate(invalid_data)
-        assert (
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided"
-            in str(excinfo.value)
-        )
+        assert model.name == "test_label"
+        assert model.description == "Test label description"
 
 
 class TestLabelCreate(TestLabelBase):
@@ -246,13 +127,10 @@ class TestLabelCreate(TestLabelBase):
         mock_scm_client.post.return_value = mock_response
 
         # Create the label with all fields
-        data = LabelCreateModelDictFactory.build_valid_dict(
-            name="test_label",
-            type="fqdn",
-            value="example.com",
-            description="Test description",
-            folder="test_folder",
-        )
+        data = {
+            "name": "test_label",
+            "description": "Test description",
+        }
         result = label_service.create(data=data)
 
         # Assert the client was called correctly
@@ -261,31 +139,16 @@ class TestLabelCreate(TestLabelBase):
         assert call_args[0][0] == "/config/setup/v1/labels"
         payload = call_args[1]["json"]
         assert payload["name"] == "test_label"
-        assert payload["type"] == "fqdn"
-        assert payload["value"] == "example.com"
         assert payload["description"] == "Test description"
-        assert payload["folder"] == "test_folder"
 
         # Assert the result is a LabelResponseModel
         assert isinstance(result, LabelResponseModel)
 
     def test_create_label_with_invalid_data(self, label_service):
         """Test creating a label with invalid data."""
-        # Missing type
+        # Missing name (required field)
         with pytest.raises(ValidationError):
-            data = LabelCreateModelDictFactory.build_valid_dict()
-            data.pop("type")
-            label_service.create(data=data)
-
-        # Missing value
-        with pytest.raises(ValidationError):
-            data = LabelCreateModelDictFactory.build_valid_dict()
-            data.pop("value")
-            label_service.create(data=data)
-
-        # Invalid type
-        with pytest.raises(ValidationError):
-            data = LabelCreateModelDictFactory.build_valid_dict(type="invalid_type")
+            data = {"description": "Missing name field"}
             label_service.create(data=data)
 
 
@@ -613,18 +476,18 @@ class TestLabelFetch(TestLabelBase):
     def test_fetch_with_multiple_matches(self, label_service):
         """Test fetch returns only the first match when multiple exist."""
         name = "duplicate_name"
-        # Create two mock labels with the same name
-        var1 = LabelResponseModelFactory.build_valid_model(name=name, value="value1")
-        var2 = LabelResponseModelFactory.build_valid_model(name=name, value="value2")
+        # Create two mock labels with the same name but different descriptions
+        label1 = LabelResponseModel(id=UUID("11111111-e89b-12d3-a456-426655440000"), name=name, description="Description 1")
+        label2 = LabelResponseModel(id=UUID("22222222-e89b-12d3-a456-426655440000"), name=name, description="Description 2")
 
         # Mock the list method to return both labels
-        with patch.object(label_service, "list", return_value=[var1, var2]):
+        with patch.object(label_service, "list", return_value=[label1, label2]):
             result = label_service.fetch(name)
 
             # Assert first matching label is returned
             assert result is not None
             assert result.name == name
-            assert result.value == "value1"  # Should be the first one
+            assert result.description == "Description 1"  # Should be the first one
 
     def test_fetch_no_exact_match(self, label_service):
         """Test fetch with no exact matches."""
@@ -720,190 +583,3 @@ class TestLabelGetPaginatedResults(TestLabelBase):
         assert results == []
 
 
-class TestLabelApplyFilters(TestLabelBase):
-    """Tests for _apply_filters helper method."""
-
-    def test_apply_no_filters(self, label_service):
-        """Test _apply_filters with no filters."""
-        # Create test data
-        labels = [LabelResponseModelFactory.build_valid_model() for _ in range(3)]
-
-        # Apply no filters
-        result = label_service._apply_filters(labels, {})
-
-        # Should return all labels unchanged
-        assert result == labels
-
-    def test_apply_labels_filter(self, label_service):
-        """Test _apply_filters with labels filter."""
-        # Create test labels with different labels
-        var1 = LabelResponseModelFactory.build_valid_model(labels=["label1", "label2"])
-        var2 = LabelResponseModelFactory.build_valid_model(labels=["label3"])
-        var3 = LabelResponseModelFactory.build_valid_model(labels=["label1", "label3"])
-
-        labels = [var1, var2, var3]
-
-        # Apply labels filter
-        result = label_service._apply_filters(labels, {"labels": ["label1"]})
-
-        # Should return only labels with matching labels
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_parent_filter(self, label_service):
-        """Test _apply_filters with parent filter."""
-        # Create test labels with different parent values
-        var1 = LabelResponseModelFactory.build_valid_model(parent="parent1")
-        var2 = LabelResponseModelFactory.build_valid_model(parent="parent2")
-        var3 = LabelResponseModelFactory.build_valid_model(parent="parent1")
-
-        labels = [var1, var2, var3]
-
-        # Apply parent filter
-        result = label_service._apply_filters(labels, {"parent": "parent1"})
-
-        # Should return only labels with matching parent
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_type_filter(self, label_service):
-        """Test _apply_filters with type filter."""
-        # Create test labels with different types
-        var1 = LabelResponseModelFactory.build_valid_model(type="fqdn")
-        var2 = LabelResponseModelFactory.build_valid_model(type="ip-netmask")
-        var3 = LabelResponseModelFactory.build_valid_model(type="fqdn")
-
-        labels = [var1, var2, var3]
-
-        # Apply type filter
-        result = label_service._apply_filters(labels, {"type": "fqdn"})
-
-        # Should return only labels with matching type
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_snippets_filter(self, label_service):
-        """Test _apply_filters with snippets filter."""
-        # Create test labels with different snippets
-        var1 = LabelResponseModelFactory.build_valid_model(
-            snippets=["snippet1", "snippet2"]
-        )
-        var2 = LabelResponseModelFactory.build_valid_model(snippets=["snippet3"])
-        var3 = LabelResponseModelFactory.build_valid_model(
-            snippets=["snippet1", "snippet3"]
-        )
-
-        labels = [var1, var2, var3]
-
-        # Apply snippets filter
-        result = label_service._apply_filters(labels, {"snippets": ["snippet1"]})
-
-        # Should return only labels with matching snippets
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_model_filter(self, label_service):
-        """Test _apply_filters with model filter."""
-        # Create test labels with different models
-        var1 = LabelResponseModelFactory.build_valid_model(model="model1")
-        var2 = LabelResponseModelFactory.build_valid_model(model="model2")
-        var3 = LabelResponseModelFactory.build_valid_model(model="model1")
-
-        labels = [var1, var2, var3]
-
-        # Apply model filter
-        result = label_service._apply_filters(labels, {"model": "model1"})
-
-        # Should return only labels with matching model
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_serial_number_filter(self, label_service):
-        """Test _apply_filters with serial_number filter."""
-        # Create test labels with different serial_numbers
-        var1 = LabelResponseModelFactory.build_valid_model(serial_number="sn1")
-        var2 = LabelResponseModelFactory.build_valid_model(serial_number="sn2")
-        var3 = LabelResponseModelFactory.build_valid_model(serial_number="sn1")
-
-        labels = [var1, var2, var3]
-
-        # Apply serial_number filter
-        result = label_service._apply_filters(labels, {"serial_number": "sn1"})
-
-        # Should return only labels with matching serial_number
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_device_only_filter(self, label_service):
-        """Test _apply_filters with device_only filter."""
-        # Create test labels with different device_only values
-        var1 = LabelResponseModelFactory.build_valid_model(device_only=True)
-        var2 = LabelResponseModelFactory.build_valid_model(device_only=False)
-        var3 = LabelResponseModelFactory.build_valid_model(device_only=True)
-
-        labels = [var1, var2, var3]
-
-        # Apply device_only filter
-        result = label_service._apply_filters(labels, {"device_only": True})
-
-        # Should return only labels with matching device_only
-        assert len(result) == 2
-        assert var1 in result
-        assert var2 not in result
-        assert var3 in result
-
-    def test_apply_multiple_filters(self, label_service):
-        """Test _apply_filters with multiple filters."""
-        # Create test labels with different combinations of attributes
-        var1 = LabelResponseModelFactory.build_valid_model(
-            type="fqdn", model="model1", device_only=True
-        )
-        var2 = LabelResponseModelFactory.build_valid_model(
-            type="ip-netmask", model="model1", device_only=True
-        )
-        var3 = LabelResponseModelFactory.build_valid_model(
-            type="fqdn", model="model2", device_only=True
-        )
-        var4 = LabelResponseModelFactory.build_valid_model(
-            type="fqdn", model="model1", device_only=False
-        )
-
-        labels = [var1, var2, var3, var4]
-
-        # Apply multiple filters
-        result = label_service._apply_filters(
-            labels, {"type": "fqdn", "model": "model1", "device_only": True}
-        )
-
-        # Should return only var1 which matches all filters
-        assert len(result) == 1
-        assert var1 in result
-        assert var2 not in result  # Doesn't match type
-        assert var3 not in result  # Doesn't match model
-        assert var4 not in result  # Doesn't match device_only
-
-    def test_filter_with_missing_attribute(self, label_service):
-        """Test filtering when labels don't have the filtered attribute."""
-        # Create labels without the filtered attributes
-        var1 = LabelResponseModelFactory.build_valid_model()
-        var2 = LabelResponseModelFactory.build_valid_model()
-
-        labels = [var1, var2]
-
-        # Try filtering by attributes that don't exist on the labels
-        result = label_service._apply_filters(labels, {"labels": ["label1"]})
-
-        # Should not match any labels since they don't have labels attribute
-        assert len(result) == 0
