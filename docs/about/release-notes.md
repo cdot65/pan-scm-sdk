@@ -2,6 +2,24 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.32
+
+**Released:** May 9, 2025
+
+### Improved
+- **Bearer Token Authentication:**
+  - Enhanced bearer token authentication with comprehensive testing
+  - Improved error handling for commit operations when using bearer token authentication
+  - Added clear error messaging when admin parameter is required for commit operations with bearer token authentication
+  - Consolidated test coverage for bearer token functionality
+  - Achieved 100% test coverage for all client authentication methods
+
+### Fixed
+- **Testing Infrastructure:**
+  - Fixed inconsistencies in error message validation in tests
+  - Improved test reliability for bearer token authentication
+  - Enhanced test organization for better maintainability
+
 ## Version 0.3.31
 
 **Released:** May 9, 2025

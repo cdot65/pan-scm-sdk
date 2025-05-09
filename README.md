@@ -30,8 +30,9 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 
 ## Features
 
-- **OAuth2 Authentication**: Securely authenticate with the Strata Cloud Manager API using OAuth2 client credentials
-  flow.
+- **Flexible Authentication**:
+  - OAuth2 client credentials flow for standard authentication
+  - Bearer token support for scenarios with pre-acquired tokens
 - **Resource Management**: Create, read, update, and delete configuration objects such as addresses, address groups,
   applications, regions, internal DNS servers, and more.
 - **Data Validation**: Utilize Pydantic models for data validation and serialization.
@@ -54,12 +55,14 @@ pip install pan-scm-sdk
 
 ### Authentication
 
-Before interacting with the SDK, you need to authenticate using your Strata Cloud Manager credentials.
+Before interacting with the SDK, you need to authenticate using one of the following methods:
+
+#### Method 1: OAuth2 Client Credentials (Standard)
 
 ```python
 from scm.client import Scm
 
-# Initialize the API client with your credentials
+# Initialize the API client with OAuth2 client credentials
 api_client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
@@ -67,6 +70,32 @@ api_client = Scm(
 )
 
 # The SCM client is now ready to use
+```
+
+#### Method 2: Bearer Token Authentication
+
+If you already have a valid OAuth token, you can use it directly:
+
+```python
+from scm.client import Scm
+
+# Initialize the API client with a pre-acquired bearer token
+api_client = Scm(
+    access_token="your_bearer_token"
+)
+
+# The SCM client is now ready to use
+```
+
+> **NOTE**: When using bearer token authentication, token refresh is your responsibility. For commit operations with bearer token auth, you must explicitly provide the `admin` parameter.
+```python
+# Example of commit with bearer token authentication
+api_client.commit(
+    folders=["Texas"],
+    description="Configuration changes",
+    admin=["admin@example.com"],  # Required when using bearer token
+    sync=True
+)
 ```
 
 ### Managing Objects

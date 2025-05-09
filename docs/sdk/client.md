@@ -17,12 +17,13 @@ access, allowing for a more intuitive and streamlined developer experience.
 class Scm:
     def __init__(
             self,
-            client_id: str,
-            client_secret: str,
-            tsg_id: str,
+            client_id: Optional[str] = None,
+            client_secret: Optional[str] = None,
+            tsg_id: Optional[str] = None,
             api_base_url: str = "https://api.strata.paloaltonetworks.com",
             token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
-            log_level: str = "ERROR"
+            log_level: str = "ERROR",
+            access_token: Optional[str] = None
     )
 ```
 
@@ -36,6 +37,57 @@ class Scm:
 | `session`      | requests.Session | HTTP session for making requests      |
 | `logger`       | Logger           | Logger instance for SDK logging       |
 
+## Authentication Methods
+
+The SDK supports two authentication methods:
+
+### 1. OAuth2 Client Credentials Flow (Standard)
+
+This is the primary authentication method using client credentials:
+
+```python
+from scm.client import Scm
+
+# Initialize client with OAuth2 client credentials
+client = Scm(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id",
+    # Optional parameters:
+    # token_url="https://custom.auth.server.com/oauth2/token"
+)
+```
+
+### 2. Bearer Token Authentication
+
+For scenarios where you already have a valid OAuth token, you can use it directly:
+
+```python
+from scm.client import Scm
+
+# Initialize client with a pre-acquired bearer token
+client = Scm(
+    access_token="your_bearer_token"
+    # Optional parameters:
+    # api_base_url="https://api.custom-domain.com"
+)
+```
+
+!!! note
+    When using bearer token authentication, token refresh is the caller's responsibility. The SDK will use the token as-is.
+
+!!! warning
+    For commit operations with bearer token authentication, you must explicitly provide the `admin` parameter:
+    ```python
+    # When using bearer token authentication with commit operations
+    client.commit(
+        folders=["Texas"],
+        description="Configuration changes",
+        admin=["admin@example.com"],  # Required when using bearer token
+        sync=True
+    )
+    ```
+
 ## Client Usage Patterns
 
 The SDK supports two primary usage patterns:
@@ -47,14 +99,16 @@ The unified client approach allows you to access all service objects directly th
 ```python
 from scm.client import Scm
 
-# Initialize client with your credentials
+# Initialize client with your preferred authentication method
+# Option 1: OAuth2 client credentials
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    # Optional parameters:
-    # token_url="https://custom.auth.server.com/oauth2/token"
+    tsg_id="your_tsg_id"
 )
+
+# Option 2: Bearer token
+# client = Scm(access_token="your_bearer_token")
 
 # Access services directly through attributes
 client.address.create({...})
@@ -238,7 +292,7 @@ Commits configuration changes to SCM with options for synchronous waiting and cu
 ```python
 from scm.client import Scm
 
-# Initialize client with basic configuration
+# Initialize client with OAuth2 client credentials (standard method)
 client = Scm(
     client_id="your_client_id",
     client_secret="your_client_secret",
@@ -246,6 +300,14 @@ client = Scm(
     # Optional parameters:
     # api_base_url="https://api.custom-domain.com",  # Custom API endpoint
     # token_url="https://auth.custom-domain.com/oauth2/token",  # Custom token endpoint
+    # log_level="DEBUG"  # Change logging level
+)
+
+# OR initialize client with a bearer token
+bearer_client = Scm(
+    access_token="your_bearer_token",
+    # Optional parameters:
+    # api_base_url="https://api.custom-domain.com",  # Custom API endpoint
     # log_level="DEBUG"  # Change logging level
 )
 ```
@@ -352,13 +414,18 @@ same functionality but with a more explicit name that better describes its purpo
 ```python
 from scm.client import ScmClient
 
-# Use ScmClient instead of Scm (identical functionality)
+# Use ScmClient instead of Scm with OAuth2 client credentials (identical functionality)
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
     # Optional parameters:
     # token_url="https://custom.auth.server.com/oauth2/token"
+)
+
+# OR use ScmClient with bearer token authentication
+bearer_client = ScmClient(
+    access_token="your_bearer_token"
 )
 ```
 
