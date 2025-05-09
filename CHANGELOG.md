@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Bearer token authentication support for stateless automation scenarios
+- New `access_token` parameter in Scm and ScmClient constructors
+- Example scripts demonstrating bearer token usage
+- Unit and integration tests for bearer token functionality
+- Support for Ansible and other automation frameworks
+
 ## [0.3.14] - 2025-02-28
 
 ### Added
