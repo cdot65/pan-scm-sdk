@@ -28,26 +28,35 @@ class Scm:
     """
     A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
 
+    This client supports two authentication methods:
+    1. OAuth2 client credentials flow (requires client_id, client_secret, and tsg_id)
+    2. Bearer token authentication (requires access_token)
+
     Args:
-        client_id: OAuth client ID for authentication
-        client_secret: OAuth client secret for authentication
-        tsg_id: Tenant Service Group ID for scope construction
+        client_id: OAuth client ID for authentication (required when not using access_token)
+        client_secret: OAuth client secret for authentication (required when not using access_token)
+        tsg_id: Tenant Service Group ID for scope construction (required when not using access_token)
         api_base_url: Base URL for the SCM API (default: "https://api.strata.paloaltonetworks.com")
         token_url: URL for obtaining OAuth tokens (default: "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token")
         log_level: Logging level (default: "ERROR")
+        access_token: Pre-acquired OAuth2 bearer token for stateless authentication
+            When provided, client_id, client_secret, and tsg_id are not required.
+            Token refresh is the caller's responsibility when using this mode.
     """
 
     # trunk-ignore(bandit/B107)
     def __init__(
         self,
-        client_id: str,
-        client_secret: str,
-        tsg_id: str,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
+        tsg_id: Optional[str] = None,
         api_base_url: str = "https://api.strata.paloaltonetworks.com",
         token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
         log_level: str = "ERROR",
+        access_token: Optional[str] = None,
     ):
         self.api_base_url = api_base_url
+        self.oauth_client = None
 
         # Map string log level to numeric level
         numeric_level = getattr(logging, log_level.upper(), None)
@@ -66,25 +75,41 @@ class Scm:
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
-        # Create the AuthRequestModel object
-        try:
-            auth_request = AuthRequestModel(
-                client_id=client_id,
-                client_secret=client_secret,
-                tsg_id=tsg_id,
-                token_url=token_url,
+        # Initialize service cache for unified client access
+        self._services = {}
+
+        # Bearer token authentication mode
+        if access_token:
+            self.logger.debug("Using bearer token authentication mode")
+
+            # Create a standard requests session with the bearer token
+            import requests
+
+            self.session = requests.Session()
+            self.session.headers["Authorization"] = f"Bearer {access_token}"
+            self.logger.debug(f"Session created with bearer token: {self.session.headers}")
+            return
+
+        # OAuth2 client credentials flow authentication mode
+        if not all([client_id, client_secret, tsg_id]):
+            raise APIError(
+                "When not using access_token, client_id, client_secret, and tsg_id are required"
             )
-        except ValueError as e:
-            # Let exception propagate
-            raise APIError(f"Authentication initialization failed: {e}") from e
+
+        self.logger.debug("Using OAuth2 client credentials authentication mode")
+
+        # Create the AuthRequestModel object
+        auth_request = AuthRequestModel(
+            client_id=client_id,
+            client_secret=client_secret,
+            tsg_id=tsg_id,
+            token_url=token_url,
+        )
 
         self.logger.debug(f"Auth request: {auth_request.model_dump()}")
         self.oauth_client = OAuth2Client(auth_request)
         self.session = self.oauth_client.session
         self.logger.debug(f"Session created: {self.session.headers}")
-
-        # Initialize service cache for unified client access
-        self._services = {}
 
     def request(
         self,
@@ -136,8 +161,12 @@ class Scm:
     ):
         """
         Sends a GET request to the SCM API.
+
+        In OAuth2 client credentials mode, automatically refreshes the token if expired.
+        In bearer token mode, the token is used as-is with no refresh capability.
         """
-        if self.oauth_client.is_expired:
+        # Only check token expiration if using OAuth2 client credentials flow
+        if self.oauth_client and self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
         return self.request(
             "GET",
@@ -153,8 +182,12 @@ class Scm:
     ):
         """
         Sends a POST request to the SCM API.
+
+        In OAuth2 client credentials mode, automatically refreshes the token if expired.
+        In bearer token mode, the token is used as-is with no refresh capability.
         """
-        if self.oauth_client.is_expired:
+        # Only check token expiration if using OAuth2 client credentials flow
+        if self.oauth_client and self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
         return self.request(
             "POST",
@@ -169,8 +202,12 @@ class Scm:
     ):
         """
         Sends a PUT request to the SCM API.
+
+        In OAuth2 client credentials mode, automatically refreshes the token if expired.
+        In bearer token mode, the token is used as-is with no refresh capability.
         """
-        if self.oauth_client.is_expired:
+        # Only check token expiration if using OAuth2 client credentials flow
+        if self.oauth_client and self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
         return self.request(
             "PUT",
@@ -185,8 +222,12 @@ class Scm:
     ):
         """
         Sends a DELETE request to the SCM API.
+
+        In OAuth2 client credentials mode, automatically refreshes the token if expired.
+        In bearer token mode, the token is used as-is with no refresh capability.
         """
-        if self.oauth_client.is_expired:
+        # Only check token expiration if using OAuth2 client credentials flow
+        if self.oauth_client and self.oauth_client.is_expired:
             self.oauth_client.refresh_token()
         return self.request(
             "DELETE",
@@ -298,8 +339,15 @@ class Scm:
         Returns:
             CandidatePushResponseModel: Response containing job information
         """
+        # If using bearer token mode and admin is None, we need to specify an admin
         if admin is None:
-            admin = [self.oauth_client.auth_request.client_id]
+            if self.oauth_client:
+                admin = [self.oauth_client.auth_request.client_id]
+            else:
+                # When using a bearer token, we need to provide an admin explicitly
+                raise APIError(
+                    "When using bearer token authentication, 'admin' must be provided for commit operations"
+                )
 
         commit_request = CandidatePushRequestModel(
             folders=folders,
@@ -559,13 +607,20 @@ class ScmClient(Scm):
     Alias for the Scm class to provide a more explicit naming option.
     This class provides all the same functionality as Scm.
 
+    This client supports two authentication methods:
+    1. OAuth2 client credentials flow (requires client_id, client_secret, and tsg_id)
+    2. Bearer token authentication (requires access_token)
+
     Args:
-        client_id: OAuth client ID for authentication
-        client_secret: OAuth client secret for authentication
-        tsg_id: Tenant Service Group ID for scope construction
+        client_id: OAuth client ID for authentication (required when not using access_token)
+        client_secret: OAuth client secret for authentication (required when not using access_token)
+        tsg_id: Tenant Service Group ID for scope construction (required when not using access_token)
         api_base_url: Base URL for the SCM API (default: "https://api.strata.paloaltonetworks.com")
         token_url: URL for obtaining OAuth tokens (default: "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token")
         log_level: Logging level (default: "ERROR")
+        access_token: Pre-acquired OAuth2 bearer token for stateless authentication
+            When provided, client_id, client_secret, and tsg_id are not required.
+            Token refresh is the caller's responsibility when using this mode.
     """
 
     pass

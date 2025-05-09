@@ -1,0 +1,143 @@
+"""
+Unit tests for bearer token authentication in the SCM client.
+"""
+
+import unittest
+from unittest.mock import Mock, patch
+
+from requests import Session
+
+from scm.client import Scm, ScmClient
+from scm.exceptions import APIError
+
+
+class TestBearerTokenAuth(unittest.TestCase):
+    """Test cases for bearer token authentication."""
+
+    def test_client_init_with_bearer_token(self):
+        """Test that client initializes correctly with a bearer token."""
+        token = "test_token_12345"
+        client = Scm(access_token=token)
+
+        # Verify oauth_client is None when using bearer token
+        self.assertIsNone(client.oauth_client)
+
+        # Verify session was created and has correct auth header
+        self.assertIsNotNone(client.session)
+        self.assertIsInstance(client.session, Session)
+        self.assertEqual(client.session.headers["Authorization"], f"Bearer {token}")
+
+    def test_client_init_requires_credentials_or_token(self):
+        """Test that client initialization requires either credentials or token."""
+        # No credentials or token should raise error
+        with self.assertRaises(APIError):
+            Scm()
+
+        # Partial credentials should raise error
+        with self.assertRaises(APIError):
+            Scm(client_id="test_id")
+
+        with self.assertRaises(APIError):
+            Scm(client_id="test_id", client_secret="test_secret")
+
+    def test_scm_client_alias_with_bearer_token(self):
+        """Test that ScmClient alias works with bearer token."""
+        token = "test_token_12345"
+        client = ScmClient(access_token=token)
+
+        # Verify oauth_client is None when using bearer token
+        self.assertIsNone(client.oauth_client)
+
+        # Verify session was created and has correct auth header
+        self.assertIsNotNone(client.session)
+        self.assertIsInstance(client.session, Session)
+        self.assertEqual(client.session.headers["Authorization"], f"Bearer {token}")
+
+    @patch("requests.Session.request")
+    def test_api_methods_skip_token_refresh(self, mock_request):
+        """Test that API methods skip token refresh when using bearer token."""
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.content = b'{"test": "response"}'
+        mock_response.json.return_value = {"test": "response"}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+
+        # Initialize client with bearer token
+        client = Scm(access_token="test_token")
+
+        # Call API methods - no oauth_client means no refresh check should occur
+        client.get("/test")
+        client.post("/test")
+        client.put("/test")
+        client.delete("/test")
+
+        # Verify request was called for each method
+        self.assertEqual(mock_request.call_count, 4)
+
+    @patch("requests.Session.request")
+    def test_commit_with_bearer_token(self, mock_request):
+        """Test commit method requires admin when using bearer token."""
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.content = (
+            b'{"success": true, "job_id": "123", "message": "Commit job created"}'
+        )
+        mock_response.json.return_value = {
+            "success": True,
+            "job_id": "123",
+            "message": "Commit job created",
+        }
+        mock_request.return_value = mock_response
+        # Also set up raise_for_status to prevent errors
+        mock_response.raise_for_status.return_value = None
+
+        # Initialize client with bearer token
+        client = Scm(access_token="test_token")
+
+        # Commit with no admin should raise error
+        with self.assertRaises(APIError) as exc_info:
+            client.commit(folders=["test"], description="test commit")
+
+        # Verify error message
+        error = exc_info.exception
+        expected_message = (
+            "When using bearer token authentication, 'admin' must be provided for commit operations"
+        )
+        self.assertEqual(error.message, expected_message)
+
+        # Commit with admin should work
+        response = client.commit(
+            folders=["test"], description="test commit", admin=["test@example.com"]
+        )
+
+        self.assertTrue(response.success)
+        self.assertEqual(response.job_id, "123")
+
+    @patch("requests.Session.request")
+    def test_dynamic_service_access_with_bearer_token(self, mock_request):
+        """Test that dynamic service access works with bearer token."""
+        # Setup mock response
+        mock_response = Mock()
+        mock_response.content = b'{"data": []}'
+        mock_response.json.return_value = {"data": []}
+        mock_response.raise_for_status.return_value = None
+        mock_request.return_value = mock_response
+
+        # Initialize client with bearer token
+        client = Scm(access_token="test_token")
+
+        # Access a service dynamically
+        address_service = client.address
+
+        # Verify the service was created and properly initialized
+        self.assertIsNotNone(address_service)
+        self.assertEqual(address_service.api_client, client)
+
+        # Call a method to ensure it works
+        result = address_service.list(folder="test")
+        self.assertEqual(result, [])
+
+
+if __name__ == "__main__":
+    unittest.main()
