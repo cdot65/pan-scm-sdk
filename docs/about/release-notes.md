@@ -2,6 +2,24 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.31
+
+**Released:** May 9, 2025
+
+### Added
+- **Label Support:**
+  - Implemented `Label` service for creating, retrieving, updating, and deleting label resources in the SCM API
+  - Added Pydantic models for label validation and serialization
+  - Created comprehensive documentation for Label service with examples
+  - Integrated Label service with the unified client interface
+  - Added new Label documentation pages to mkdocs
+
+### Improved
+- **Documentation:**
+  - Added Label entry to all index pages and navigation
+  - Updated README.md to include Label in the available client services table
+  - Enhanced documentation structure for consistent navigation
+
 ## Version 0.3.30
 
 **Released:** May 4, 2025
