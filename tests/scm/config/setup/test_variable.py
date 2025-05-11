@@ -554,8 +554,12 @@ class TestVariableFetch(TestVariableBase):
         name = "duplicate_name"
         folder = "test_folder"
         # Create two mock variables with the same name
-        var1 = VariableResponseModelFactory.build_valid_model(name=name, folder=folder, value="value1")
-        var2 = VariableResponseModelFactory.build_valid_model(name=name, folder=folder, value="value2")
+        var1 = VariableResponseModelFactory.build_valid_model(
+            name=name, folder=folder, value="value1"
+        )
+        var2 = VariableResponseModelFactory.build_valid_model(
+            name=name, folder=folder, value="value2"
+        )
 
         # Mock the list method to return both variables
         with patch.object(variable_service, "list", return_value=[var1, var2]):

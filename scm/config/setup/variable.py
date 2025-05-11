@@ -220,9 +220,7 @@ class Variable(BaseObject):
             params.update({k: v for k, v in filters.items() if v is not None})
             response = self.api_client.get(self.ENDPOINT, params=params)
             data_items = response["data"] if "data" in response else response
-            object_instances = [
-                VariableResponseModel.model_validate(item) for item in data_items
-            ]
+            object_instances = [VariableResponseModel.model_validate(item) for item in data_items]
             all_objects.extend(object_instances)
             if len(data_items) < limit:
                 break
@@ -342,8 +340,7 @@ class Variable(BaseObject):
             filtered = [
                 f
                 for f in filtered
-                if getattr(f, "labels", None)
-                and required_labels.intersection(set(f.labels))
+                if getattr(f, "labels", None) and required_labels.intersection(set(f.labels))
             ]
 
         # Filter by parent (exact match)
@@ -362,8 +359,7 @@ class Variable(BaseObject):
             filtered = [
                 f
                 for f in filtered
-                if getattr(f, "snippets", None)
-                and required_snippets.intersection(set(f.snippets))
+                if getattr(f, "snippets", None) and required_snippets.intersection(set(f.snippets))
             ]
 
         # Filter by model (exact match)
@@ -374,17 +370,11 @@ class Variable(BaseObject):
         # Filter by serial_number (exact match)
         if "serial_number" in filters:
             serial_val = filters["serial_number"]
-            filtered = [
-                f for f in filtered if getattr(f, "serial_number", None) == serial_val
-            ]
+            filtered = [f for f in filtered if getattr(f, "serial_number", None) == serial_val]
 
         # Filter by device_only (boolean match)
         if "device_only" in filters:
             device_only_val = filters["device_only"]
-            filtered = [
-                f
-                for f in filtered
-                if getattr(f, "device_only", None) == device_only_val
-            ]
+            filtered = [f for f in filtered if getattr(f, "device_only", None) == device_only_val]
 
         return filtered
