@@ -524,24 +524,27 @@ class TestVariableFetch(TestVariableBase):
     """Tests for Variable.fetch method."""
 
     def test_fetch_variable_by_name(self, variable_service):
-        """Test fetching a variable by name."""
+        """Test fetching a variable by name and folder."""
         name = "test_variable"
+        folder = "test_folder"
         # Create a mock variable response
-        mock_variable = VariableResponseModelFactory.build_valid_model(name=name)
+        mock_variable = VariableResponseModelFactory.build_valid_model(name=name, folder=folder)
 
         # Mock the list method to return our test variable
         with patch.object(variable_service, "list", return_value=[mock_variable]):
-            result = variable_service.fetch(name)
+            result = variable_service.fetch(name=name, folder=folder)
 
             # Assert correct variable is returned
             assert result is not None
             assert result.name == name
+            assert result.folder == folder
 
     def test_fetch_nonexistent_variable(self, variable_service):
         """Test fetching a variable that doesn't exist."""
+        folder = "test_folder"
         # Mock the list method to return empty list
         with patch.object(variable_service, "list", return_value=[]):
-            result = variable_service.fetch("nonexistent")
+            result = variable_service.fetch(name="nonexistent", folder=folder)
 
             # Assert None is returned
             assert result is None
@@ -549,13 +552,18 @@ class TestVariableFetch(TestVariableBase):
     def test_fetch_with_multiple_matches(self, variable_service):
         """Test fetch returns only the first match when multiple exist."""
         name = "duplicate_name"
+        folder = "test_folder"
         # Create two mock variables with the same name
-        var1 = VariableResponseModelFactory.build_valid_model(name=name, value="value1")
-        var2 = VariableResponseModelFactory.build_valid_model(name=name, value="value2")
+        var1 = VariableResponseModelFactory.build_valid_model(
+            name=name, folder=folder, value="value1"
+        )
+        var2 = VariableResponseModelFactory.build_valid_model(
+            name=name, folder=folder, value="value2"
+        )
 
         # Mock the list method to return both variables
         with patch.object(variable_service, "list", return_value=[var1, var2]):
-            result = variable_service.fetch(name)
+            result = variable_service.fetch(name=name, folder=folder)
 
             # Assert first matching variable is returned
             assert result is not None
@@ -564,16 +572,29 @@ class TestVariableFetch(TestVariableBase):
 
     def test_fetch_no_exact_match(self, variable_service):
         """Test fetch with no exact matches."""
+        folder = "test_folder"
         # Create mock variables with different names
-        var1 = VariableResponseModelFactory.build_valid_model(name="name1")
-        var2 = VariableResponseModelFactory.build_valid_model(name="name2")
+        var1 = VariableResponseModelFactory.build_valid_model(name="name1", folder=folder)
+        var2 = VariableResponseModelFactory.build_valid_model(name="name2", folder=folder)
 
         # Mock the list method to return these variables
         with patch.object(variable_service, "list", return_value=[var1, var2]):
-            result = variable_service.fetch("different_name")
+            result = variable_service.fetch(name="different_name", folder=folder)
 
             # Assert None is returned (no match)
             assert result is None
+
+    def test_fetch_empty_name(self, variable_service):
+        """Test fetch with empty name raises error."""
+        folder = "test_folder"
+        with pytest.raises(InvalidObjectError):
+            variable_service.fetch(name="", folder=folder)
+
+    def test_fetch_empty_folder(self, variable_service):
+        """Test fetch with empty folder raises error."""
+        name = "test_variable"
+        with pytest.raises(InvalidObjectError):
+            variable_service.fetch(name=name, folder="")
 
 
 class TestVariableMaxLimitValidation(TestVariableBase):

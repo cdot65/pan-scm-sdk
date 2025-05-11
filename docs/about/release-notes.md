@@ -2,6 +2,19 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.33
+
+**Released:** May 11, 2025
+
+### Fixed
+- **Variable Service:**
+  - Fixed bug in the `fetch()` method of the `Variable` class by requiring a `folder` parameter to properly identify variables
+  - Updated the method signature to require both `name` and `folder` parameters for more precise variable lookup
+  - Added proper validation for empty name or folder parameters
+  - Updated documentation and examples to reflect the new parameter requirements
+  - Enhanced test coverage for the `fetch()` method with various test cases
+  - Achieved 100% test coverage for all variable-related functionality
+
 ## Version 0.3.32
 
 **Released:** May 9, 2025
