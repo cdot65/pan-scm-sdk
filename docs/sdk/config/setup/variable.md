@@ -35,7 +35,7 @@ The `Variable` class provides methods for creating, retrieving, updating, and de
 | `update()` | Updates an existing variable    | `variable: VariableUpdateModel`  | `VariableResponseModel`          |
 | `delete()` | Deletes a variable              | `variable_id: Union[str, UUID]`  | `None`                           |
 | `list()`   | Lists variables with filtering  | `**filters`                      | `List[VariableResponseModel]`    |
-| `fetch()`  | Gets a variable by its name     | `name: str`                      | `Optional[VariableResponseModel]`|
+| `fetch()`  | Gets a variable by its name     | `name: str, folder: str`         | `Optional[VariableResponseModel]`|
 
 ## Variable Model Attributes
 
@@ -133,7 +133,7 @@ print(variable.name, variable.type, variable.value)
 
 ### Fetching a Variable by Name
 ```python
-variable_by_name = variables.fetch("subnet-variable")
+variable_by_name = variables.fetch(name="subnet-variable", folder="department-a")
 if variable_by_name:
     print(variable_by_name.id, variable_by_name.value)
 ```

@@ -230,18 +230,46 @@ class Variable(BaseObject):
     def fetch(
         self,
         name: str,
+        folder: str,
     ) -> Optional[VariableResponseModel]:
         """
-        Get a variable by its name.
+        Get a variable by its name and folder.
 
         Args:
             name: The name of the variable to retrieve.
+            folder: The folder in which the variable is defined.
 
         Returns:
             Optional[VariableResponseModel]: The requested variable (exact name match), or None if not found.
+
+        Raises:
+            MissingQueryParameterError: If name or folder is empty.
+            InvalidObjectError: If the response format is invalid.
         """
-        # Get all variables
-        results = self.list()
+        if not name:
+            raise InvalidObjectError(
+                message="Field 'name' cannot be empty",
+                error_code="E003",
+                http_status_code=400,
+                details={
+                    "field": "name",
+                    "error": '"name" is not allowed to be empty',
+                },
+            )
+
+        if not folder:
+            raise InvalidObjectError(
+                message="Field 'folder' cannot be empty",
+                error_code="E003",
+                http_status_code=400,
+                details={
+                    "field": "folder",
+                    "error": '"folder" is not allowed to be empty',
+                },
+            )
+
+        # Use the folder parameter in the API request
+        results = self.list(folder=folder)
 
         if not results:
             return None
