@@ -2,6 +2,17 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.36
+
+**Released:** May 16, 2025
+
+### Fixed & Improved
+- **Log Forwarding Profile:**
+  - Hotfix: Fetch logic now robustly handles all valid and invalid API response shapes, raising precise exceptions for missing, malformed, or empty data.
+  - Full error handling for all edge cases, including missing or non-dict API responses, and explicit validation of container parameters.
+  - Achieved 100% test coverage for all Log Forwarding Profile logic and error branches.
+  - All tests updated to match real API response structure and new error handling.
+
 ## Version 0.3.35
 
 **Released:** May 16, 2025
