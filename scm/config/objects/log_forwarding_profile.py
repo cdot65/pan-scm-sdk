@@ -121,6 +121,7 @@ class LogForwardingProfile(BaseObject):
 
             # Return the SCM API response as a new Pydantic object
             return LogForwardingProfileResponseModel(**response)
+
         except Exception as e:
             self.logger.error(
                 f"Error in API call to create log forwarding profile: {str(e)}", exc_info=True
@@ -489,15 +490,22 @@ class LogForwardingProfile(BaseObject):
                 details={"error": "Response is not a dictionary"},
             )
 
-        if "id" in response:
-            return LogForwardingProfileResponseModel(**response)
-        else:
-            raise InvalidObjectError(
-                message="Invalid response format: missing 'id' field",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response missing 'id' field"},
-            )
+        if "data" in response and isinstance(response["data"], list):
+            if not response["data"]:
+                raise InvalidObjectError(
+                    message="No log forwarding profile found with the given criteria.",
+                    error_code="E003",
+                    http_status_code=404,
+                    details={"error": "No profile found."},
+                )
+            profile_data = response["data"][0]
+            return LogForwardingProfileResponseModel(**profile_data)
+        raise InvalidObjectError(
+            message="Unexpected response format from API.",
+            error_code="E003",
+            http_status_code=500,
+            details={"error": "Response missing expected fields"},
+        )
 
     def delete(
         self,

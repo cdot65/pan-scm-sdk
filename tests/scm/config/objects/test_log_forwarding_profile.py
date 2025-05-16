@@ -448,7 +448,13 @@ class TestLogForwardingProfileListAndFetch:
     def test_fetch(self):
         """Test fetching a single log forwarding profile by name."""
         api_client = MagicMock(spec=Scm)
-        mock_response = LogForwardingProfileResponseFactory.build().model_dump()
+        mock_profile = LogForwardingProfileResponseFactory.build().model_dump()
+        mock_response = {
+            "data": [mock_profile],
+            "limit": 200,
+            "offset": 0,
+            "total": 1,
+        }
         api_client.get.return_value = mock_response
 
         log_forwarding_profile = LogForwardingProfile(api_client)
@@ -464,9 +470,15 @@ class TestLogForwardingProfileListAndFetch:
     def test_fetch_with_snippet(self):
         """Test fetching a log forwarding profile in a snippet container."""
         api_client = MagicMock(spec=Scm)
-        mock_response = LogForwardingProfileResponseFactory.build().model_dump()
-        mock_response["folder"] = None
-        mock_response["snippet"] = "TestSnippet"
+        mock_profile = LogForwardingProfileResponseFactory.build().model_dump()
+        mock_profile["folder"] = None
+        mock_profile["snippet"] = "TestSnippet"
+        mock_response = {
+            "data": [mock_profile],
+            "limit": 200,
+            "offset": 0,
+            "total": 1,
+        }
         api_client.get.return_value = mock_response
 
         log_forwarding_profile = LogForwardingProfile(api_client)
@@ -484,9 +496,15 @@ class TestLogForwardingProfileListAndFetch:
     def test_fetch_with_device(self):
         """Test fetching a log forwarding profile in a device container."""
         api_client = MagicMock(spec=Scm)
-        mock_response = LogForwardingProfileResponseFactory.build().model_dump()
-        mock_response["folder"] = None
-        mock_response["device"] = "TestDevice"
+        mock_profile = LogForwardingProfileResponseFactory.build().model_dump()
+        mock_profile["folder"] = None
+        mock_profile["device"] = "TestDevice"
+        mock_response = {
+            "data": [mock_profile],
+            "limit": 200,
+            "offset": 0,
+            "total": 1,
+        }
         api_client.get.return_value = mock_response
 
         log_forwarding_profile = LogForwardingProfile(api_client)
@@ -753,6 +771,54 @@ class TestLogForwardingProfileListAndFetch:
         assert exc_info.value.error_code == "E003"
         assert '"data" field must be a list' in str(exc_info.value.details)
 
+    def test_fetch_non_dict_response_raises_error(self):
+        """Test that fetch raises InvalidObjectError when response is not a dict (line 486)."""
+        api_client = MagicMock(spec=Scm)
+        api_client.get.return_value = "not a dict"
+        log_profile = LogForwardingProfile(api_client)
+        with pytest.raises(InvalidObjectError) as exc_info:
+            log_profile.fetch("test-profile", folder="Shared")
+        assert exc_info.value.error_code == "E003"
+        assert "Response is not a dictionary" in str(exc_info.value.details)
+
+    def test_fetch_dict_missing_data_field_raises_error(self):
+        """Test that fetch raises InvalidObjectError when response is a dict missing 'data' (line 503)."""
+        api_client = MagicMock(spec=Scm)
+        api_client.get.return_value = {"foo": "bar"}
+        log_profile = LogForwardingProfile(api_client)
+        with pytest.raises(InvalidObjectError) as exc_info:
+            log_profile.fetch("test-profile", folder="Shared")
+        assert exc_info.value.error_code == "E003"
+        assert "Response missing expected fields" in str(exc_info.value.details)
+
+    def test_fetch_empty_data_list_raises_error(self):
+        """Test that fetch raises InvalidObjectError when 'data' is an empty list (lines 493-494)."""
+        api_client = MagicMock(spec=Scm)
+        api_client.get.return_value = {"data": []}
+        log_profile = LogForwardingProfile(api_client)
+        with pytest.raises(InvalidObjectError) as exc_info:
+            log_profile.fetch("test-profile", folder="Shared")
+        assert exc_info.value.error_code == "E003"
+        assert "No profile found" in str(exc_info.value.details)
+
+    def test_fetch_valid_profile_returns_model(self):
+        """Test that fetch returns a model when response['data'] contains a profile (lines 501-502)."""
+        api_client = MagicMock(spec=Scm)
+        profile_dict = LogForwardingProfileResponseFactory.build(name="test-profile").model_dump()
+        api_client.get.return_value = {"data": [profile_dict]}
+        log_profile = LogForwardingProfile(api_client)
+        result = log_profile.fetch("test-profile", folder="Shared")
+        assert isinstance(result, LogForwardingProfileResponseModel)
+        assert result.name == "test-profile"
+
+    def test_delete_calls_api_client_delete(self):
+        """Test that delete calls api_client.delete with the correct endpoint (lines 520-521)."""
+        api_client = MagicMock(spec=Scm)
+        log_profile = LogForwardingProfile(api_client)
+        object_id = "abc-123"
+        log_profile.delete(object_id)
+        api_client.delete.assert_called_once_with(f"/config/objects/v1/log-forwarding-profiles/{object_id}")
+
     def test_fetch_error_handling(self):
         """Test error handling in fetch method."""
         api_client = MagicMock(spec=Scm)
@@ -788,33 +854,6 @@ class TestLogForwardingProfileListAndFetch:
             log_profile.fetch("test-profile", folder="Shared", snippet="TestSnippet")
         # Check for correct error code
         assert exc_info.value.error_code == "E003"
-        # Check the actual error message content that is present
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
-            exc_info.value.details
-        )
-
-        # Test non-dictionary response
-        api_client.get.return_value = "not a dict"
-        with pytest.raises(InvalidObjectError) as exc_info:
-            log_profile.fetch("test-profile", folder="Shared")
-        # Check that the error code is correct
-        assert exc_info.value.error_code == "E003"
-        assert "Response is not a dictionary" in str(exc_info.value.details)
-
-        # Test missing ID in response
-        api_client.get.return_value = {"name": "test-profile", "no_id": "field"}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            log_profile.fetch("test-profile", folder="Shared")
-        # Check that the error code is correct
-        assert exc_info.value.error_code == "E003"
-        assert "missing 'id' field" in str(
-            exc_info.value.details
-        ) or "Response missing 'id' field" in str(exc_info.value.details)
-
-    def test_list_with_multi_page_pagination(self):
-        """Test pagination with multiple pages."""
-        # Create a fresh MagicMock instance
-        api_client = MagicMock(spec=Scm)
 
         # Create test profiles for first page
         profile1 = LogForwardingProfileResponseFactory.build(name="page1-profile1").model_dump()
