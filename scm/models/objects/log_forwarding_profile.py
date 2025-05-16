@@ -15,7 +15,7 @@ class MatchListItem(BaseModel):
     Attributes:
         name (str): Name of the match profile.
         action_desc (Optional[str]): Match profile description.
-        log_type (str): Log type for matching (traffic, threat, wildfire, url, data, tunnel, auth, decryption).
+        log_type (str): Log type for matching (traffic, threat, wildfire, url, data, tunnel, auth, decryption, dns-security).
         filter (Optional[str]): Filter match criteria.
         send_http (Optional[List[str]]): A list of HTTP server profiles.
         send_syslog (Optional[List[str]]): A list of syslog server profiles.
@@ -36,6 +36,7 @@ class MatchListItem(BaseModel):
         "tunnel",
         "auth",
         "decryption",
+        "dns-security",
     ] = Field(..., description="Log type")
     filter: Optional[str] = Field(None, description="Filter match criteria", max_length=65535)
     send_http: Optional[List[str]] = Field(None, description="A list of HTTP server profiles")
