@@ -2,6 +2,16 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.34
+
+**Released:** May 16, 2025
+
+### Fixed
+- **Log Forwarding Profile:**
+  - Added support for the `dns-security` log_type in LogForwardingProfile models and API validation.
+  - Resolves user validation errors when listing or handling profiles containing `dns-security` entries.
+  - Motivation: The SDK previously rejected LogForwardingProfile objects with `dns-security` match_list entries, causing failures for users with such log types configured in their environments. This release ensures full compatibility with all supported log types from the API.
+
 ## Version 0.3.33
 
 **Released:** May 11, 2025
