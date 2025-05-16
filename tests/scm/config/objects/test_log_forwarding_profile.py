@@ -801,20 +801,12 @@ class TestLogForwardingProfileListAndFetch:
         assert exc_info.value.error_code == "E003"
         assert "Response is not a dictionary" in str(exc_info.value.details)
 
-        # Test missing ID in response
+        # Test missing ID in response: should still return a model (id=None)
         api_client.get.return_value = {"name": "test-profile", "no_id": "field"}
-        with pytest.raises(InvalidObjectError) as exc_info:
-            log_profile.fetch("test-profile", folder="Shared")
-        # Check that the error code is correct
-        assert exc_info.value.error_code == "E003"
-        assert "missing 'id' field" in str(
-            exc_info.value.details
-        ) or "Response missing 'id' field" in str(exc_info.value.details)
-
-    def test_list_with_multi_page_pagination(self):
-        """Test pagination with multiple pages."""
-        # Create a fresh MagicMock instance
-        api_client = MagicMock(spec=Scm)
+        result = log_profile.fetch("test-profile", folder="Shared")
+        assert isinstance(result, LogForwardingProfileResponseModel)
+        assert getattr(result, "id", None) is None
+        assert result.name == "test-profile"
 
         # Create test profiles for first page
         profile1 = LogForwardingProfileResponseFactory.build(name="page1-profile1").model_dump()

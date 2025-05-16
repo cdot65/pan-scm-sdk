@@ -489,15 +489,7 @@ class LogForwardingProfile(BaseObject):
                 details={"error": "Response is not a dictionary"},
             )
 
-        if "id" in response:
-            return LogForwardingProfileResponseModel(**response)
-        else:
-            raise InvalidObjectError(
-                message="Invalid response format: missing 'id' field",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response missing 'id' field"},
-            )
+        return LogForwardingProfileResponseModel(**response)
 
     def delete(
         self,

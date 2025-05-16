@@ -2,6 +2,15 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.35
+
+**Released:** May 16, 2025
+
+### Fixed
+- **Log Forwarding Profile:**
+  - Hotfix: The SDK now always returns a `LogForwardingProfileResponseModel` from API responses, even if the `id` field is missing or `None`. This prevents unnecessary errors for valid profiles where `id` can be `None`.
+  - Updated tests to reflect new behavior and ensure robust error handling for all valid API responses.
+
 ## Version 0.3.34
 
 **Released:** May 16, 2025
