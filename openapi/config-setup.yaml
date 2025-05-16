@@ -1390,7 +1390,7 @@ components:
         "vm_state":
           type: string
           readOnly: true
-        "gp_client_verion":
+        "gp_client_version":
           type: string
           readOnly: true
         "gp_data_version":

@@ -74,7 +74,7 @@ class DeviceResponseModelFactory(factory.Factory):
     iot_release_date = factory.LazyFunction(
         lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
     )
-    gp_client_verion = factory.LazyFunction(lambda: fake.numerify(text="#.#.#"))
+    gp_client_version = factory.LazyFunction(lambda: fake.numerify(text="#.#.#"))
     gp_data_version = factory.LazyFunction(lambda: fake.numerify(text="#"))
     log_db_version = factory.LazyFunction(lambda: fake.numerify(text="##.#.#"))
     software_version = factory.LazyFunction(lambda: fake.numerify(text="##.#.#"))
@@ -157,7 +157,7 @@ class DeviceResponseModelDictFactory(factory.Factory):
     iot_release_date = factory.LazyFunction(
         lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
     )
-    gp_client_verion = factory.LazyFunction(lambda: fake.numerify(text="#.#.#"))
+    gp_client_version = factory.LazyFunction(lambda: fake.numerify(text="#.#.#"))
     gp_data_version = factory.LazyFunction(lambda: fake.numerify(text="#"))
     log_db_version = factory.LazyFunction(lambda: fake.numerify(text="##.#.#"))
     software_version = factory.LazyFunction(lambda: fake.numerify(text="##.#.#"))

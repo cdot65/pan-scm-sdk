@@ -6,7 +6,7 @@ Defines Pydantic models for representing Device resources returned by the SCM AP
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DeviceLicenseModel(BaseModel):
@@ -102,7 +102,7 @@ class DeviceResponseModel(DeviceBaseModel):
         wf_release_date: WildFire release date.
         iot_version: IoT version.
         iot_release_date: IoT release date.
-        gp_client_verion: GlobalProtect client version.
+        gp_client_version: GlobalProtect client version.
         gp_data_version: GlobalProtect data version.
         log_db_version: Log DB version.
         software_version: Software version.
@@ -120,6 +120,8 @@ class DeviceResponseModel(DeviceBaseModel):
         ha_peer_serial: HA peer serial number.
         vm_state: VM state.
     """
+
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(..., description="Unique device identifier (serial number).")
     connected_since: Optional[str] = Field(None, description="ISO timestamp when connected.")
@@ -149,7 +151,11 @@ class DeviceResponseModel(DeviceBaseModel):
     wf_release_date: Optional[str] = Field(None, description="WildFire release date.")
     iot_version: Optional[str] = Field(None, description="IoT version.")
     iot_release_date: Optional[str] = Field(None, description="IoT release date.")
-    gp_client_verion: Optional[str] = Field(None, description="GlobalProtect client version.")
+    gp_client_version: Optional[str] = Field(
+        None,
+        alias="gp_client_verion",
+        description="GlobalProtect client version.",
+    )
     gp_data_version: Optional[str] = Field(None, description="GlobalProtect data version.")
     log_db_version: Optional[str] = Field(None, description="Log DB version.")
     software_version: Optional[str] = Field(None, description="Software version.")
