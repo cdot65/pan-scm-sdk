@@ -98,6 +98,59 @@ All SDK service files (e.g., `scm/config/objects/address.py`) must strictly adhe
   - All parameter validation and API response errors must raise custom SDK exceptions, with full context.
   - See `CLAUDE.md` and `SDK_SERVICE_TEMPLATE.py` for canonical error handling code snippets.
 
+---
+
+## SDK Model File Standards
+
+All SDK model files (e.g., `scm/models/objects/address.py`) must strictly adhere to the following standards, harmonized from real project code, `CLAUDE_MODELS.md`, `SDK_MODELS_TEMPLATE.py`, and `SDK_MODELS_STYLING_GUIDE.md`. These standards are enforced for all new and existing SDK models.
+
+- **File & Class Structure**
+  - One resource per file, named after the resource (pluralized as needed).
+  - File-level docstring: Google-style, describing the resource and modeling purpose.
+  - Import order: Standard library, then Pydantic, then enums, then typing.
+  - Enums defined at the top if needed, with clear docstrings.
+  - Always define `BaseModel`, `CreateModel`, `UpdateModel`, `ResponseModel` (and `MoveModel` if needed).
+  - Each model class must have a Google-style docstring with Args/Attributes, Returns, Raises as needed.
+  - Use `ConfigDict`/`model_config` for settings: `validate_assignment`, `populate_by_name`, `arbitrary_types_allowed`, `extra="forbid"`.
+
+- **Field/Attribute Conventions**
+  - Use `Field(...)` with type hints, description, and constraints (`min_length`, `max_length`, `pattern`, `examples`).
+  - snake_case for all fields and models.
+  - ID fields always present in `UpdateModel` and `ResponseModel` (`UUID` or `str` if legacy).
+  - Container fields (`folder`, `snippet`, `device`) must always be validated for exclusivity.
+  - Tag fields are lists of strings, validated for uniqueness.
+
+- **Validation & Logic**
+  - Use `@field_validator` and `@model_validator` for:
+    - Ensuring exactly one of a set of mutually exclusive fields is set (e.g., address type, container, group type).
+    - Ensuring lists are unique and/or always lists of strings.
+    - Enum/boolean conversions.
+    - Complex resource-specific logic (e.g., NAT/SECURITY move validation).
+  - Always raise `ValueError` with clear, actionable messages in validators.
+
+- **Docstrings & Documentation**
+  - Google-style docstrings for all models and validators.
+  - Attributes section always lists all fields with types and descriptions.
+  - Validation logic clearly described in docstrings.
+
+- **Formatting & Style**
+  - Line length: 88 chars (ruff default).
+  - Blank lines between class-level constants, classes, and methods.
+  - Imports grouped and sorted.
+  - No extra fields: `extra="forbid"` in model config unless otherwise required.
+
+- **Canonical Patterns & References**
+  - See `SDK_MODELS_TEMPLATE.py` for a canonical skeleton.
+  - See `SDK_MODELS_STYLING_GUIDE.md` for a markdown style guide.
+  - See real-world models in `scm/models/objects/address.py`, `scm/models/objects/address_group.py`, `scm/models/network/nat_rules.py`, `scm/models/security/security_rules.py` for advanced patterns.
+  - Always use `model_dump(exclude_unset=True)` for API payloads.
+
+- **Further Reading**
+  - [CLAUDE_MODELS.md](./CLAUDE_MODELS.md): Canonical model style guide.
+  - [SDK_MODELS_TEMPLATE.py](./SDK_MODELS_TEMPLATE.py): Canonical template for SDK models.
+  - [SDK_MODELS_STYLING_GUIDE.md](./SDK_MODELS_STYLING_GUIDE.md): Markdown style guide for SDK models.
+  - [CLAUDE.md](../cdot65.scm/CLAUDE.md): AI/codegen guidance for SDK model/service files.
+
 - **Pagination Pattern**
   - Use the standard pagination loop with `limit`, `offset`, and breaking when the returned data length is less than the limit.
 
