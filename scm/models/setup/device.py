@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 #     """Represents an available license for a device."""
 #     pass
 
+
 class DeviceLicenseModel(BaseModel):
     """Model for a license entry in available_licenses or installed_licenses."""
 

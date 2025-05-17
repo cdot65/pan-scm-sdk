@@ -98,7 +98,7 @@ class DeviceResponseFactory(factory.Factory):
     model = "Prisma Access GW"
     is_connected = factory.Faker("boolean")
     connected_since = factory.Faker("iso8601")
-    
+
     # Added fields from correct model
     device_only = factory.Faker("boolean")
     last_disconnect_time = factory.Faker("iso8601")
@@ -226,7 +226,7 @@ class DeviceResponseDictFactory(factory.Factory):
     model = "Prisma Access GW"
     isConnected = factory.Faker("boolean")  # Use API alias
     connectedSince = factory.Faker("iso8601")  # Use API alias
-    
+
     # Added fields from correct model
     device_only = factory.Faker("boolean")
     last_disconnect_time = factory.Faker("iso8601")
