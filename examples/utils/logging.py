@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standardized logging utilities for Strata Cloud Manager SDK examples.
+"""Standardized logging utilities for Strata Cloud Manager SDK examples.
 
 This module provides enhanced logging capabilities for SDK examples using
 the Rich library for improved terminal formatting and visual output.
@@ -151,8 +150,7 @@ class SDKLogger:
     """Unified logger for SDK example scripts with enhanced formatting."""
 
     def __init__(self, name: str, log_level: str = "INFO"):
-        """
-        Initialize the SDK Logger.
+        """Initialize the SDK Logger.
 
         Args:
             name: The logger name (usually the script or module name)
@@ -186,8 +184,7 @@ class SDKLogger:
             )
 
     def section(self, title: str) -> None:
-        """
-        Display a section header with visual separation.
+        """Display a section header with visual separation.
 
         Args:
             title: The section title to display
@@ -207,8 +204,7 @@ class SDKLogger:
             print(f"{COLORS['BOLD']}{COLORS['BRIGHT_CYAN']}{separator}{COLORS['RESET']}")
 
     def operation_start(self, operation: str) -> None:
-        """
-        Log the start of an operation with clear visual indicator.
+        """Log the start of an operation with clear visual indicator.
 
         Args:
             operation: The name of the operation being started
@@ -221,8 +217,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_BLUE']}▶ STARTING: {operation}{COLORS['RESET']}")
 
     def operation_complete(self, operation: str, details: Optional[str] = None) -> None:
-        """
-        Log the completion of an operation with success status.
+        """Log the completion of an operation with success status.
 
         Args:
             operation: The name of the completed operation
@@ -244,8 +239,7 @@ class SDKLogger:
                 print(f"{COLORS['BRIGHT_GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
     def warning(self, message: str) -> None:
-        """
-        Log a warning message with clear visual indicator.
+        """Log a warning message with clear visual indicator.
 
         Args:
             message: The warning message to log
@@ -258,8 +252,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
     def error(self, message: str, error: Optional[Any] = None) -> None:
-        """
-        Log an error message with clear visual indicator.
+        """Log an error message with clear visual indicator.
 
         Args:
             message: The error message to log
@@ -279,8 +272,7 @@ class SDKLogger:
                 print(f"{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
     def info(self, message: str) -> None:
-        """
-        Log an informational message.
+        """Log an informational message.
 
         Args:
             message: The informational message to log
@@ -293,8 +285,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_BLUE']}{message}{COLORS['RESET']}")
 
     def success(self, message: str) -> None:
-        """
-        Log a success message.
+        """Log a success message.
 
         Args:
             message: The success message to log
@@ -307,8 +298,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_GREEN']}✓ {message}{COLORS['RESET']}")
 
     def create_progress(self, description: str = "Processing") -> Progress:
-        """
-        Create a Rich progress bar for operations.
+        """Create a Rich progress bar for operations.
 
         Args:
             description: Default description for the progress bar
@@ -329,8 +319,7 @@ class SDKLogger:
             return Progress()
 
     def create_table(self, title: str, columns: List[str]) -> Table:
-        """
-        Create a Rich table for displaying structured data.
+        """Create a Rich table for displaying structured data.
 
         Args:
             title: The table title

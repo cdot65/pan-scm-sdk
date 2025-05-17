@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standardized client initialization utilities for Strata Cloud Manager SDK examples.
+"""Standardized client initialization utilities for Strata Cloud Manager SDK examples.
 
 This module provides consistent authentication and client initialization
 for SDK examples, with support for .env files and environment variables.
@@ -52,8 +51,7 @@ class ClientInitializer:
         self.logger = logger
 
     def load_environment_variables(self) -> bool:
-        """
-        Load environment variables from .env files.
+        """Load environment variables from .env files.
 
         Attempts to load from:
         1. Current directory .env file
@@ -90,8 +88,7 @@ class ClientInitializer:
         return False
 
     def validate_credentials(self) -> tuple:
-        """
-        Validate required SCM credentials from environment variables.
+        """Validate required SCM credentials from environment variables.
 
         Checks for the following environment variables:
         - SCM_CLIENT_ID
@@ -121,8 +118,7 @@ class ClientInitializer:
         return client_id, client_secret, tsg_id, log_level, missing
 
     def initialize_client(self, client_class: Type[Any]) -> Optional[Any]:
-        """
-        Initialize the SCM client using credentials from environment variables or .env file.
+        """Initialize the SCM client using credentials from environment variables or .env file.
 
         This method:
         1. Loads credentials from .env file (if available)
