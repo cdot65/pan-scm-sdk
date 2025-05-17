@@ -11,8 +11,15 @@ We welcome contributions to `pan-scm-sdk`! This document provides guidelines and
 ## Pull Request Process
 
 1. Fork the repository and create your branch from `main`.
-2. Make your changes, ensuring they adhere to the project's coding conventions.
-3. Write clear, concise commit messages and ensure your code passes any tests.
+2. Make your changes, ensuring they adhere to the project's coding conventions:
+   - Review `SDK_STYLING_GUIDE.md` for service file standards
+   - Follow `CLAUDE_MODELS.md` for model creation
+   - Use `SDK_SERVICE_TEMPLATE.py` as a starting point for new services
+   - Adhere to `WINDSURF_RULES.md` for overall project standards
+3. Write clear, concise commit messages and ensure your code passes all tests:
+   - Run `make quality` to check linting and formatting
+   - Run `make test` to execute all tests
+   - Ensure test coverage exceeds 80%
 4. Open a pull request with a comprehensive description of changes.
 
 ## Code of Conduct
