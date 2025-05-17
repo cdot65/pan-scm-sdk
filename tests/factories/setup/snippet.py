@@ -19,6 +19,7 @@ fake = Faker()
 
 # --- Folder Reference ModelFactory ---
 class FolderReferenceModelFactory(factory.Factory):
+    """Factory for creating FolderReference instances."""
     class Meta:
         model = FolderReference
 
@@ -28,6 +29,7 @@ class FolderReferenceModelFactory(factory.Factory):
 
 # --- Base ModelFactory for All Snippet Models ---
 class SnippetBaseModelFactory(factory.Factory):
+    """Base factory for creating snippet model instances."""
     class Meta:
         model = SnippetBaseModel
         abstract = True

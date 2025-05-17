@@ -554,6 +554,7 @@ class TestNatRuleFetch(TestNatRuleBase):
 
 
 class TestNatRuleApplyFilters:
+    """Tests for NAT rule filter application."""
     @pytest.fixture(autouse=True)
     def setup(self):
         # Create two dummy NAT rule objects with varying attributes.
@@ -738,6 +739,7 @@ class TestNatRuleListFiltering:
 
 
 class TestNatRuleContainerFiltering(TestNatRuleBase):
+    """Tests for NAT rule container filtering."""
     def test_exact_match_filter(self):
         """Test that when exact_match=True, only objects whose container
         field exactly matches the provided value are returned.

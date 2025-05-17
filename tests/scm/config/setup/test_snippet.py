@@ -640,6 +640,7 @@ class TestPaginatedResults(TestSnippetBase):
 
 
 class TestSnippetFetchSingleMatch(TestSnippetBase):
+    """Tests for Snippet fetch single match behavior."""
     def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
         mocker.patch.object(snippet_service, "list", return_value=[])
         result = snippet_service.fetch("foo")

@@ -16,6 +16,7 @@ from tests.factories.setup.device import (
 
 
 class TestDeviceLicenseModel:
+    """Tests for device license model validation."""
     def test_valid_construction(self):
         data = DeviceLicenseModelDictFactory.build()
         model = DeviceLicenseModel.model_validate(data)
@@ -39,6 +40,7 @@ class TestDeviceLicenseModel:
 
 
 class TestDeviceResponseModel:
+    """Tests for device response model validation."""
     def test_valid_construction(self):
         data = DeviceResponseModelDictFactory.build()
         model = DeviceResponseModel.model_validate(data)
@@ -74,6 +76,7 @@ class TestDeviceResponseModel:
 
 
 class TestDeviceListResponseModel:
+    """Tests for device list response model validation."""
     def test_valid_construction(self):
         data = DeviceListResponseModelDictFactory.build()
         model = DeviceListResponseModel.model_validate(data)

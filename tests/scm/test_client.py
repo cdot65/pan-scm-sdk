@@ -763,6 +763,7 @@ class TestClientJobMethods(TestClientBase):
 
 
 class TestClientCommitMethods(TestClientBase):
+    """Tests for client commit methods."""
     @patch("requests.Session.request")
     def test_commit_with_bearer_token(self, mock_request):
         """Test commit method requires admin when using bearer token."""

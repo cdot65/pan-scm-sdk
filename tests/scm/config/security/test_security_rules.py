@@ -1632,6 +1632,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
 
 
 class TestSecurityRuleModelMisc(TestSecurityRuleBase):
+    """Tests for miscellaneous SecurityRule model behavior."""
     def test_security_rule_profile_setting_group_unique(self):
         """Test that duplicate items in 'group' raise a ValueError."""
         with pytest.raises(ValueError, match="List items in 'group' must be unique"):

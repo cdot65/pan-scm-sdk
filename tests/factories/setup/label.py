@@ -18,6 +18,7 @@ fake = Faker()
 
 # --- Base ModelFactory for All Label Models ---
 class LabelBaseModelFactory(factory.Factory):
+    """Base factory for creating label model instances."""
     class Meta:
         model = LabelBaseModel
         abstract = True

@@ -506,7 +506,7 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
         **Workflow:**
             1. Mocks an error response from the API
             2. Attempts to create an object
-            3. Verifies proper error handling and exception raising
+            3. Verifies proper error handling and exception raising.
         """
         test_data = {
             "name": "NewWFProfile",
@@ -956,7 +956,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         """**Objective:** Test fetch with empty name parameter.
         **Workflow:**
             1. Attempts to fetch with empty name
-            2. Verifies MissingQueryParameterError is raised
+            2. Verifies MissingQueryParameterError is raised.
         """
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.fetch(name="", folder="Texas")
@@ -969,7 +969,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
         """**Objective:** Test container parameter validation in fetch.
         **Workflow:**
             1. Tests various invalid container combinations
-            2. Verifies proper error handling
+            2. Verifies proper error handling.
         """
         # Test empty folder
         with pytest.raises(MissingQueryParameterError) as exc_info:
@@ -1069,7 +1069,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         """**Objective:** Test that filters are properly added to parameters.
         **Workflow:**
             1. Calls list with various filters
-            2. Verifies filters are properly formatted in the request
+            2. Verifies filters are properly formatted in the request.
         """
         filters = {
             "rules": ["rule1", "rule2"],
@@ -1094,7 +1094,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         """**Objective:** Test that empty folder raises appropriate error.
         **Workflow:**
             1. Attempts to list objects with empty folder
-            2. Verifies MissingQueryParameterError is raised
+            2. Verifies MissingQueryParameterError is raised.
         """
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.list(folder="")
@@ -1107,7 +1107,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         """**Objective:** Test validation of container parameters.
         **Workflow:**
             1. Attempts to list with multiple containers
-            2. Verifies InvalidObjectError is raised
+            2. Verifies InvalidObjectError is raised.
         """
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="folder1", snippet="snippet1")
@@ -1144,7 +1144,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
         **Workflow:**
             1. Tests various invalid filter type scenarios
             2. Verifies InvalidObjectError is raised with correct message
-            3. Tests valid filter types pass validation
+            3. Tests valid filter types pass validation.
         """
         mock_response = {
             "data": [

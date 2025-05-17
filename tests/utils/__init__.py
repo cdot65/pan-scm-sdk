@@ -8,6 +8,17 @@ from requests.exceptions import HTTPError
 
 
 def raise_mock_http_error(status_code, error_code, message, error_type):
+    """Create and raise a mock HTTP error for testing.
+    
+    Args:
+        status_code: HTTP status code for the error
+        error_code: Application-specific error code
+        message: Error message
+        error_type: Type of error
+        
+    Raises:
+        HTTPError: A mock HTTP error with the specified parameters
+    """
     mock_error_response = {
         "_errors": [
             {

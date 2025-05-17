@@ -83,6 +83,7 @@ class TestExternalDynamicListsMaxLimit(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsList(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists list operations."""
     def test_list_valid(self):
         """Test getting an EDL list with valid parameters."""
         # Prepare response in the format expected by the client
@@ -433,6 +434,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists create operations."""
     def test_create_valid(self):
         """Test creating a valid EDL."""
         # Create test data
@@ -510,6 +512,7 @@ class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists update operations."""
     def test_update_valid(self):
         """Test a valid update operation."""
         # Create test data with required ID
@@ -592,6 +595,7 @@ class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists get operations."""
     def test_get_valid(self):
         """Test getting a valid EDL."""
         # Use a valid UUID string for the ID
@@ -631,6 +635,7 @@ class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists delete operations."""
     def test_delete_success(self):
         edl_id = "123e4567-e89b-12d3-a456-426655440000"
         self.mock_scm.delete.return_value = None
@@ -670,6 +675,7 @@ class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists fetch operations."""
     def test_fetch_valid_predefined(self):
         """Test fetching a predefined snippet."""
         name = "predefined-edl"
@@ -790,6 +796,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
 
 
 class TestExternalDynamicListsApplyFilters(TestExternalDynamicListsBase):
+    """Tests for ExternalDynamicLists filter application."""
     def test_apply_filters_non_list_types(self):
         edls = []
         with pytest.raises(InvalidObjectError) as exc_info:

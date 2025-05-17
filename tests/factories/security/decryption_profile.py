@@ -58,6 +58,7 @@ class SSLForwardProxyFactory(factory.Factory):
 
 
 class SSLInboundProxyFactory(factory.Factory):
+    """Factory for creating SSLInboundProxy instances."""
     class Meta:
         model = SSLInboundProxy
 
@@ -68,6 +69,7 @@ class SSLInboundProxyFactory(factory.Factory):
 
 
 class SSLNoProxyFactory(factory.Factory):
+    """Factory for creating SSLNoProxy instances."""
     class Meta:
         model = SSLNoProxy
 
@@ -77,6 +79,7 @@ class SSLNoProxyFactory(factory.Factory):
 
 # Main factories
 class DecryptionProfileCreateApiFactory(factory.Factory):
+    """Factory for creating DecryptionProfileCreateModel instances."""
     class Meta:
         model = DecryptionProfileCreateModel
 
@@ -111,6 +114,7 @@ class DecryptionProfileCreateApiFactory(factory.Factory):
 
 
 class DecryptionProfileUpdateApiFactory(factory.Factory):
+    """Factory for creating DecryptionProfileUpdateModel instances."""
     class Meta:
         model = DecryptionProfileUpdateModel
 
@@ -133,6 +137,7 @@ class DecryptionProfileUpdateApiFactory(factory.Factory):
 
 
 class DecryptionProfileResponseFactory(factory.Factory):
+    """Factory for creating DecryptionProfileResponseModel instances."""
     class Meta:
         model = DecryptionProfileResponseModel
 
@@ -162,6 +167,7 @@ class DecryptionProfileResponseFactory(factory.Factory):
 
 # Dict factories for model validation tests
 class DecryptionProfileCreateModelFactory(factory.DictFactory):
+    """Factory for creating decryption profile create dictionaries."""
     name = factory.Sequence(lambda n: f"decryption_profile_{n}")
     folder = "Texas"
 
@@ -211,6 +217,7 @@ class DecryptionProfileCreateModelFactory(factory.DictFactory):
 
 
 class DecryptionProfileUpdateModelFactory(factory.DictFactory):
+    """Factory for creating decryption profile update dictionaries."""
     id = "123e4567-e89b-12d3-a456-426655440000"
     name = factory.Sequence(lambda n: f"decryption_profile_{n}")
 

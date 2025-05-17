@@ -21,6 +21,7 @@ fake = Faker()
 
 # --- Base ModelFactory for All Variable Models ---
 class VariableBaseModelFactory(factory.Factory):
+    """Base factory for creating variable model instances."""
     class Meta:
         model = VariableBaseModel
         abstract = True

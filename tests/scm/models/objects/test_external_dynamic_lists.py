@@ -17,6 +17,7 @@ from tests.factories.objects.external_dynamic_lists import (
 
 
 class TestExternalDynamicListsCreateModel:
+    """Tests for external dynamic lists create model validation."""
     def test_no_container_provided(self):
         data = ExternalDynamicListsCreateModelFactory.build_without_container()
         with pytest.raises(ValueError) as exc_info:
@@ -57,6 +58,7 @@ class TestExternalDynamicListsCreateModel:
 
 
 class TestExternalDynamicListsUpdateModel:
+    """Tests for external dynamic lists update model validation."""
     # def test_no_id_provided(self):
     #     data = ExternalDynamicListsUpdateModelFactory.build_without_id()
     #     with pytest.raises(ValidationError) as exc_info:
@@ -103,6 +105,7 @@ class TestExternalDynamicListsUpdateModel:
 
 
 class TestExternalDynamicListsResponseModel:
+    """Tests for external dynamic lists response model."""
     def test_predefined_snippet_no_id_no_type(self):
         """Test that a predefined snippet response doesn't require id or type."""
         data = ExternalDynamicListsResponseModelFactory.build_predefined()
