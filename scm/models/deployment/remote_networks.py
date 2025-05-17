@@ -133,6 +133,17 @@ class RemoteNetworkBaseModel(BaseModel):
 
     @model_validator(mode="after")
     def validate_remote_network_logic(self) -> "RemoteNetworkBaseModel":
+        """Validate ECMP/load balancing and tunnel logic after model creation.
+
+        Ensures that if ECMP load balancing is enabled, ecmp_tunnels must be set;
+        otherwise, ipsec_tunnel must be set.
+
+        Returns:
+            RemoteNetworkBaseModel: The validated model instance.
+
+        Raises:
+            ValueError: If required fields are missing for the given configuration.
+        """
         if self.ecmp_load_balancing == EcmpLoadBalancingEnum.enable:
             if not self.ecmp_tunnels:
                 raise ValueError("ecmp_tunnels is required when ecmp_load_balancing is enable")
@@ -155,6 +166,14 @@ class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "RemoteNetworkCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            RemoteNetworkCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [f for f in container_fields if getattr(self, f) is not None]
         if len(provided) != 1:

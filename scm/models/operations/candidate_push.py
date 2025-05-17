@@ -56,6 +56,17 @@ class CandidatePushRequestModel(BaseModel):
 
     @field_validator("admin")
     def validate_admin(cls, v):
+        """Validate that the admin list is non-empty and contains only valid entries.
+
+        Args:
+            v (list): The list of admin entries to validate.
+
+        Returns:
+            list: The validated and normalized list of admin entries.
+
+        Raises:
+            ValueError: If the admin list is empty or contains invalid entries.
+        """
         if not v:
             raise ValueError("At least one admin must be specified")
 

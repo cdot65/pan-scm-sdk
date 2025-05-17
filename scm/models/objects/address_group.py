@@ -112,12 +112,31 @@ class AddressGroupBaseModel(BaseModel):
 
     @field_validator("tag")
     def ensure_unique_items(cls, v):  # noqa
+        """Ensure all items in the list are unique.
+
+        Args:
+            v (list): The list to validate.
+
+        Returns:
+            list: The validated list.
+
+        Raises:
+            ValueError: If duplicate items are found.
+        """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
         return v
 
     @model_validator(mode="after")
     def validate_address_group_type(self) -> "AddressGroupBaseModel":
+        """Ensure exactly one group type field (dynamic or static) is set.
+
+        Returns:
+            AddressGroupBaseModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one group type field is set.
+        """
         group_type_fields = ["dynamic", "static"]
         provided = [field for field in group_type_fields if getattr(self, field) is not None]
         if len(provided) != 1:
@@ -133,6 +152,14 @@ class AddressGroupCreateModel(AddressGroupBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "AddressGroupCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            AddressGroupCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

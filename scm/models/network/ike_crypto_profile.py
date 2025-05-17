@@ -150,6 +150,14 @@ class IKECryptoProfileCreateModel(IKECryptoProfileBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "IKECryptoProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            IKECryptoProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

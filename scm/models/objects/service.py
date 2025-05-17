@@ -62,6 +62,14 @@ class Protocol(BaseModel):
 
     @model_validator(mode="after")
     def validate_protocol(self) -> "Protocol":
+        """Ensure exactly one protocol field (tcp or udp) is set.
+
+        Returns:
+            Protocol: The validated protocol instance.
+
+        Raises:
+            ValueError: If zero or more than one protocol field is set.
+        """
         protocol_fields = ["tcp", "udp"]
         provided = [field for field in protocol_fields if getattr(self, field) is not None]
         if len(provided) != 1:
@@ -137,6 +145,14 @@ class ServiceCreateModel(ServiceBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "ServiceCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            ServiceCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

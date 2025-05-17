@@ -41,10 +41,7 @@ class QuarantinedDevicesCreateModel(QuarantinedDevicesBaseModel):
 
 
 class QuarantinedDevicesResponseModel(QuarantinedDevicesBaseModel):
-    """Represents the response from creating or retrieving a Quarantined Devices object
-
-    from Palo Alto Networks' Strata Cloud Manager.
-    """
+    """Represents the response from creating or retrieving a Quarantined Devices object."""
 
 
 class QuarantinedDevicesListParamsModel(BaseModel):

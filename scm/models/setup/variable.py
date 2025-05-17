@@ -54,6 +54,7 @@ class VariableBaseModel(BaseModel):
 
     @field_validator("type")
     def validate_type_enum(cls, v):
+        """Validate that the type is one of the allowed values."""
         allowed = [
             "percent",
             "count",
@@ -80,6 +81,7 @@ class VariableBaseModel(BaseModel):
 
     @classmethod
     def validate_container_type(cls, values):
+        """Validate that exactly one of 'folder', 'snippet', or 'device' is provided."""
         container_fields = [values.get("folder"), values.get("snippet"), values.get("device")]
         set_count = sum(1 for v in container_fields if v is not None)
         if set_count != 1:
@@ -93,6 +95,14 @@ class VariableCreateModel(VariableBaseModel):
     # Validate container type after model creation
     @classmethod
     def model_validate(cls, value):
+        """Validate and post-process model creation, ensuring container type is valid.
+
+        Args:
+            value (Any): The value to validate and convert.
+
+        Returns:
+            VariableCreateModel: The validated model instance.
+        """
         model = super().model_validate(value)
         cls.validate_container_type(model.__dict__)
         return model
@@ -109,6 +119,14 @@ class VariableUpdateModel(VariableBaseModel):
     # Validate container type after model creation
     @classmethod
     def model_validate(cls, value):
+        """Validate and post-process model update, ensuring container type is valid.
+
+        Args:
+            value (Any): The value to validate and convert.
+
+        Returns:
+            VariableUpdateModel: The validated model instance.
+        """
         model = super().model_validate(value)
         cls.validate_container_type(model.__dict__)
         return model

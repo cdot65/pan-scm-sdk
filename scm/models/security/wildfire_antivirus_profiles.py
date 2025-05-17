@@ -117,6 +117,14 @@ class WildfireAvProfileCreateModel(WildfireAvProfileBase):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "WildfireAvProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            WildfireAvProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = ["folder", "snippet", "device"]
         provided_containers = [
             field for field in container_fields if getattr(self, field) is not None

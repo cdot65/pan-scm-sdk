@@ -149,6 +149,17 @@ class TagBaseModel(BaseModel):
         cls,
         value: Optional[str],
     ) -> Optional[str]:
+        """Validate and normalize the color value for a tag.
+
+        Args:
+            value (Optional[str]): The color value to validate.
+
+        Returns:
+            Optional[str]: The validated and standardized color name, or None.
+
+        Raises:
+            ValueError: If the color is not recognized or not in the allowed set.
+        """
         if value is None:
             return value
         normalized_name = normalize_color_name(value)

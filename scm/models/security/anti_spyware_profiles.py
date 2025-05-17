@@ -137,6 +137,17 @@ class AntiSpywareActionRequest(RootModel[dict]):
     @model_validator(mode="before")
     @classmethod
     def convert_action(cls, values):
+        """Convert and validate the action field, ensuring exactly one action is provided.
+
+        Args:
+            values (Any): The action value to validate and convert.
+
+        Returns:
+            dict: The validated action dictionary.
+
+        Raises:
+            ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+        """
         if isinstance(values, str):
             # Convert string to dict
             values = {values: {}}
@@ -161,6 +172,11 @@ class AntiSpywareActionRequest(RootModel[dict]):
         return values
 
     def get_action_name(self) -> str:
+        """Return the name of the action in the root dictionary.
+
+        Returns:
+            str: The action name, or 'unknown' if not set.
+        """
         return next(iter(self.root.keys()), "unknown")
 
 
@@ -172,6 +188,17 @@ class AntiSpywareActionResponse(RootModel[dict]):
 
     @model_validator(mode="before")
     def validate_action(cls, values):
+        """Convert and validate the action field for response models.
+
+        Args:
+            values (Any): The action value to validate and convert.
+
+        Returns:
+            dict: The validated action dictionary.
+
+        Raises:
+            ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+        """
         if isinstance(values, str):
             # Convert string to dict
             values = {values: {}}
@@ -197,6 +224,11 @@ class AntiSpywareActionResponse(RootModel[dict]):
         return values
 
     def get_action_name(self) -> str:
+        """Return the name of the action in the root dictionary.
+
+        Returns:
+            str: The action name, or 'unknown' if not set.
+        """
         return next(iter(self.root.keys()), "unknown")
 
 
@@ -230,6 +262,14 @@ class AntiSpywareRuleBaseModel(BaseModel):
         mode="before",
     )
     def default_threat_name(cls, v):
+        """Set the default threat name to 'any' if not provided.
+
+        Args:
+            v (Optional[str]): The threat name value.
+
+        Returns:
+            str: The threat name, or 'any' if not provided.
+        """
         return v or "any"
 
 
@@ -325,6 +365,14 @@ class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "AntiSpywareProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            AntiSpywareProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = [
             "folder",
             "snippet",

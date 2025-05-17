@@ -387,6 +387,14 @@ class ExternalDynamicListsBaseModel(BaseModel):
 class ExternalDynamicListsCreateModel(ExternalDynamicListsBaseModel):
     @model_validator(mode="after")
     def validate_container_type(self) -> "ExternalDynamicListsCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            ExternalDynamicListsCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = [
             "folder",
             "snippet",
@@ -415,6 +423,14 @@ class ExternalDynamicListsResponseModel(ExternalDynamicListsBaseModel):
 
     @model_validator(mode="after")
     def validate_predefined_snippet(self) -> "ExternalDynamicListsResponseModel":
+        """Validate that required fields are set if snippet is not 'predefined'.
+
+        Returns:
+            ExternalDynamicListsResponseModel: The validated model instance.
+
+        Raises:
+            ValueError: If id or type is missing when snippet is not 'predefined'.
+        """
         if self.snippet != "predefined":
             if self.id is None:
                 raise ValueError("id is required if snippet is not 'predefined'")

@@ -1,3 +1,4 @@
+"""scm.exceptions: Custom exception hierarchy for SCM SDK."""
 # scm/exceptions/__init__.py
 
 from dataclasses import dataclass
@@ -14,6 +15,17 @@ class ErrorResponse:
 
     @classmethod
     def from_response(cls, response_data: Dict[str, Any]) -> "ErrorResponse":
+        """Create an ErrorResponse instance from API error response data.
+
+        Args:
+            response_data (Dict[str, Any]): The error response dictionary from the API.
+
+        Returns:
+            ErrorResponse: An instance representing the error details.
+
+        Raises:
+            ValueError: If the response format does not contain valid error information.
+        """
         if "_errors" not in response_data or not response_data["_errors"]:
             raise ValueError("Invalid error response format")
 
@@ -260,6 +272,15 @@ class ErrorHandler:
         response_data: Dict[str, Any],
         http_status_code: int,
     ) -> None:
+        """Raise the appropriate exception for a given API error response and HTTP status.
+
+        Args:
+            response_data (Dict[str, Any]): The error response dictionary from the API.
+            http_status_code (int): The HTTP status code of the response.
+
+        Raises:
+            APIError or a subclass: The mapped exception based on the error response and status code.
+        """
         # Perform the mapping of the error response from the provided response data
         error_response = ErrorResponse.from_response(response_data)
 

@@ -1,3 +1,4 @@
+"""scm.config.network: Network-related service classes."""
 # scm/config/network/__init__.py
 
 from .ike_crypto_profile import IKECryptoProfile

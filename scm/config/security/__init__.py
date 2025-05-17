@@ -1,3 +1,4 @@
+"""scm.config.security: Security-related service classes."""
 # scm/config/security/__init__.py
 
 from .anti_spyware_profile import AntiSpywareProfile

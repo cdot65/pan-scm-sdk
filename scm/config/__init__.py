@@ -1,3 +1,4 @@
+"""scm.config: Service classes by resource category."""
 # scm/config/__init__.py
 
 from typing import Any, Dict, List, Optional
@@ -46,6 +47,14 @@ class BaseObject:
         self,
         data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        """Create a new object via the API.
+
+        Args:
+            data (Dict[str, Any]): Data for the object to create.
+
+        Returns:
+            Dict[str, Any]: API response containing the created object.
+        """
         response = self.api_client.post(
             self.ENDPOINT,
             json=data,
@@ -56,6 +65,14 @@ class BaseObject:
         self,
         object_id: str,
     ) -> Dict[str, Any]:
+        """Retrieve an object by its ID.
+
+        Args:
+            object_id (str): The unique identifier of the object.
+
+        Returns:
+            Dict[str, Any]: API response containing the object data.
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
         return response
@@ -64,6 +81,14 @@ class BaseObject:
         self,
         data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        """Update an existing object.
+
+        Args:
+            data (Dict[str, Any]): Updated data for the object (must include 'id').
+
+        Returns:
+            Dict[str, Any]: API response containing the updated object.
+        """
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(
             endpoint,
@@ -75,6 +100,11 @@ class BaseObject:
         self,
         object_id: str,
     ) -> None:
+        """Delete an object by its ID.
+
+        Args:
+            object_id (str): The unique identifier of the object to delete.
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
 
@@ -82,6 +112,14 @@ class BaseObject:
         self,
         **filters,
     ) -> List[Dict[str, Any]]:
+        """List objects, optionally filtered by parameters.
+
+        Args:
+            **filters: Arbitrary keyword arguments for filtering results.
+
+        Returns:
+            List[Dict[str, Any]]: List of objects from the API response.
+        """
         params = {k: v for k, v in filters.items() if v is not None}
         response = self.api_client.get(
             self.ENDPOINT,

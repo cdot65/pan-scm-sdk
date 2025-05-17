@@ -142,6 +142,14 @@ class ApplicationFiltersCreateModel(ApplicationFiltersBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "ApplicationFiltersCreateModel":
+        """Ensure exactly one container field (folder or snippet) is set.
+
+        Returns:
+            ApplicationFiltersCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = [
             "folder",
             "snippet",

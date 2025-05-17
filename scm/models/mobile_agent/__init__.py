@@ -1,3 +1,4 @@
+"""scm.models.mobile_agent: Mobile Agent models."""
 # scm/models/deployment/__init__.py
 
 from .agent_versions import AgentVersionsModel

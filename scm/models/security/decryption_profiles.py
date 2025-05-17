@@ -103,6 +103,14 @@ class SSLProtocolSettings(BaseModel):
 
     @model_validator(mode="after")
     def validate_versions(self):
+        """Validate that max_version is not less than min_version.
+
+        Returns:
+            Self: The validated model instance.
+
+        Raises:
+            ValueError: If max_version is less than min_version.
+        """
         if SSL_VERSIONS_ORDER.index(self.max_version) < SSL_VERSIONS_ORDER.index(self.min_version):
             raise ValueError("max_version cannot be less than min_version")
         return self

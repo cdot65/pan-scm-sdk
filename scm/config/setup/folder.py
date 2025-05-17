@@ -52,6 +52,11 @@ class Folder(BaseObject):
 
     @property
     def max_limit(self) -> int:
+        """Get the maximum number of items to return in a single request.
+
+        Returns:
+            int: The current max_limit value.
+        """
         return self._max_limit
 
     @max_limit.setter

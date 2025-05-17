@@ -1,3 +1,4 @@
+"""scm.config.setup: Setup-related service classes."""
 # from .devices import Devices
 from .device import Device
 from .folder import Folder

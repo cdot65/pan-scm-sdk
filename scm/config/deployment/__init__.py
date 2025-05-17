@@ -1,3 +1,4 @@
+"""scm.config.deployment: Deployment-related service classes."""
 # scm/config/deployment/__init__.py
 
 from .bandwidth_allocations import BandwidthAllocations

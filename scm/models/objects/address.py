@@ -111,6 +111,17 @@ class AddressBaseModel(BaseModel):
     # Custom Validators
     @field_validator("tag", mode="before")
     def ensure_list_of_strings(cls, v):  # noqa
+        """Ensure the tag value is a list of strings, converting from string if needed.
+
+        Args:
+            v (Any): The value to validate.
+
+        Returns:
+            list[str]: A list of strings.
+
+        Raises:
+            ValueError: If the value is not a string or list of strings.
+        """
         if isinstance(v, str):
             return [v]
         elif isinstance(v, list):
@@ -120,12 +131,33 @@ class AddressBaseModel(BaseModel):
 
     @field_validator("tag")
     def ensure_unique_items(cls, v):  # noqa
+        """Ensure all items in the tag list are unique.
+
+        Args:
+            v (list): The list to validate.
+
+        Returns:
+            list: The validated list.
+
+        Raises:
+            ValueError: If duplicate items are found.
+        """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
         return v
 
     @model_validator(mode="after")
     def validate_address_type(self) -> "AddressBaseModel":
+        """Validate that exactly one address type is provided.
+
+        Ensures that only one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' is set.
+
+        Returns:
+            AddressBaseModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one address type field is set.
+        """
         """Validate that exactly one address type is provided."""
         address_fields = [
             "ip_netmask",

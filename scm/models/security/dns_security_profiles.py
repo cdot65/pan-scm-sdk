@@ -55,6 +55,11 @@ class ListActionBaseModel(RootModel[dict]):
     """Base class for list actions with common validation logic."""
 
     def get_action_name(self) -> str:
+        """Return the name of the action in the root dictionary.
+
+        Returns:
+            str: The action name, or 'unknown' if not set.
+        """
         return next(iter(self.root.keys()), "unknown")
 
 
@@ -63,6 +68,17 @@ class ListActionRequestModel(ListActionBaseModel):
 
     @model_validator(mode="before")
     def convert_action(cls, values):
+        """Convert and validate the action field, ensuring exactly one action is provided.
+
+        Args:
+            values (Any): The action value to validate and convert.
+
+        Returns:
+            dict: The validated action dictionary.
+
+        Raises:
+            ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+        """
         if isinstance(values, str):
             values = {values: {}}
         elif not isinstance(values, dict):
@@ -213,6 +229,14 @@ class DNSSecurityProfileCreateModel(DNSSecurityProfileBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "DNSSecurityProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            DNSSecurityProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = [
             "folder",
             "snippet",

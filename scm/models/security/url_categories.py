@@ -70,6 +70,14 @@ class URLCategoriesCreateModel(URLCategoriesBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "URLCategoriesCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            URLCategoriesCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+        """
         container_fields = [
             "folder",
             "snippet",

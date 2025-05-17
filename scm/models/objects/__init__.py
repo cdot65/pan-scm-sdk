@@ -1,3 +1,4 @@
+"""scm.models.objects: Object resource models."""
 # scm/models/objects/__init__.py
 
 from .address import AddressCreateModel, AddressResponseModel, AddressUpdateModel
