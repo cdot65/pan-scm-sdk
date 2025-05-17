@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_service_group_models.py
 
+"""Tests for service group models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

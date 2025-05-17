@@ -1,5 +1,7 @@
 # tests/factories/objects/syslog_server_profiles.py
 
+"""Factory definitions for syslog server profile objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore

@@ -1,5 +1,4 @@
-"""
-Test module for Application Filters configuration service.
+"""Test module for Application Filters configuration service.
 
 This module contains unit tests for the Application Filters configuration service and its related models.
 """
@@ -325,8 +324,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """Test that exact_match=True returns only filters that match the container exactly.
-        """
+        """Test that exact_match=True returns only filters that match the container exactly."""
         mock_response = {
             "data": [
                 ApplicationFiltersResponseFactory(
@@ -348,8 +346,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
         assert filtered[0].name == "filters_in_texas"
 
     def test_list_exclude_folders(self):
-        """Test that exclude_folders removes filters from those folders.
-        """
+        """Test that exclude_folders removes filters from those folders."""
         mock_response = {
             "data": [
                 ApplicationFiltersResponseFactory(

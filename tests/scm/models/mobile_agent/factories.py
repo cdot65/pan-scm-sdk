@@ -1,3 +1,5 @@
+"""Factory definitions for mobile agent models."""
+
 from factory import Factory, Faker  # type: ignore
 import factory.fuzzy  # type: ignore
 from faker import Faker as FakerGenerator

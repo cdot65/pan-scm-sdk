@@ -1,5 +1,7 @@
 # tests/utils.py
 
+"""Utility functions for tests."""
+
 from unittest.mock import MagicMock
 
 from requests.exceptions import HTTPError

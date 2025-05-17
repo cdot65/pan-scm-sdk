@@ -1,3 +1,5 @@
+"""Factory definitions for decryption profile objects."""
+
 import uuid
 
 import factory
@@ -16,6 +18,7 @@ from scm.models.security.decryption_profiles import (
 
 # Sub-factories for component models
 class SSLProtocolSettingsFactory(factory.Factory):
+    """Factory for SSL protocol settings."""
     class Meta:
         model = SSLProtocolSettings
 
@@ -37,6 +40,7 @@ class SSLProtocolSettingsFactory(factory.Factory):
 
 
 class SSLForwardProxyFactory(factory.Factory):
+    """Factory for SSL forward proxy settings."""
     class Meta:
         model = SSLForwardProxy
 

@@ -1,5 +1,7 @@
 # tests/conftest.py
 
+"""Configuration and fixtures for the test suite."""
+
 import os
 from unittest.mock import MagicMock, patch
 
@@ -14,6 +16,7 @@ load_dotenv()
 
 # Register custom markers
 def pytest_configure(config):
+    """Configure pytest with custom test markers."""
     config.addinivalue_line(
         "markers", "unit: Unit tests for individual functions and classes in isolation"
     )
@@ -38,6 +41,7 @@ def pytest_configure(config):
 @pytest.fixture(scope="session", autouse=True)
 def load_env():
     """Pytest fixture to load environment variables from a .env file.
+
     This fixture is automatically used by all tests.
     """
     client_id = os.getenv("CLIENT_ID")
@@ -54,8 +58,7 @@ def load_env():
 
 @pytest.fixture
 def mock_scm():
-    """Fixture to provide a mocked Scm instance with mocked OAuth2Client and session.
-    """
+    """Fixture to provide a mocked Scm instance with mocked OAuth2Client and session."""
     with patch("scm.client.OAuth2Client") as MockOAuth2Client:
         mock_oauth2client_instance = MagicMock()
         mock_session = MagicMock()

@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_http_server_profiles_models.py
 
+"""Tests for HTTP server profile models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

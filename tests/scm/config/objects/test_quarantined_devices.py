@@ -1,5 +1,7 @@
 # tests/scm/config/objects/test_quarantined_devices.py
 
+"""Tests for quarantined device configuration objects."""
+
 # Standard library imports
 from unittest.mock import MagicMock
 

@@ -1,3 +1,5 @@
+"""Factory definitions for DNS security profile objects."""
+
 import uuid
 
 import factory

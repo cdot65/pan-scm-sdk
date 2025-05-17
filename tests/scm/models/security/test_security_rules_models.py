@@ -1,4 +1,7 @@
 # tests/scm/models/security/test_security_rules_models.py
+
+"""Tests for security rule models."""
+
 import uuid
 from uuid import UUID
 

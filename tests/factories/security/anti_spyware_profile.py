@@ -1,5 +1,7 @@
 # tests/factories/security/anti_spyware_profile.py
 
+"""Factory definitions for anti-spyware profile objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore
@@ -117,6 +119,7 @@ class AntiSpywareProfileResponseFactory(AntiSpywareProfileBaseFactory):
 # Minimal valid rule and threat exception dict factories
 # ----------------------------------------------------------------------------
 class AntiSpywareRuleDictFactory:
+    """Factory for creating anti-spyware rule dictionaries."""
     @classmethod
     def build_valid(cls, **kwargs):
         return {
@@ -131,6 +134,7 @@ class AntiSpywareRuleDictFactory:
 
 
 class AntiSpywareThreatExceptionDictFactory:
+    """Factory for creating anti-spyware threat exception dictionaries."""
     @classmethod
     def build_valid(cls, **kwargs):
         return {

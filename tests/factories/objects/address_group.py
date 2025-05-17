@@ -1,5 +1,7 @@
 # tests/factories/objects/address_group.py
 
+"""Factory definitions for address group objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore

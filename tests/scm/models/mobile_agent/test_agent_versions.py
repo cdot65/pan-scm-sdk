@@ -1,5 +1,7 @@
 # tests/scm/models/mobile_agent/test_agent_versions.py
 
+"""Tests for mobile agent version models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

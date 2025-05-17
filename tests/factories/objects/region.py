@@ -1,5 +1,7 @@
 # tests/factories/objects/region.py
 
+"""Factory definitions for region objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore

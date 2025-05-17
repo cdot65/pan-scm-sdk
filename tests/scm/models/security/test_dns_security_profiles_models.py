@@ -1,5 +1,7 @@
 # tests/scm/models/security/test_dns_security_profiles_models.py
 
+"""Tests for DNS security profile models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

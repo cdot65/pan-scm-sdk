@@ -1,5 +1,7 @@
 # tests/scm/config/security/test_decryption_profile.py
 
+"""Tests for decryption profile security configuration."""
+
 # Standard library imports
 from unittest.mock import MagicMock
 
@@ -266,8 +268,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """Test that exact_match=True returns only objects that match the container exactly.
-        """
+        """Test that exact_match=True returns only objects that match the container exactly."""
         mock_response = {
             "data": [
                 DecryptionProfileResponseFactory(
@@ -290,8 +291,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         assert filtered[0].name == "addr_in_texas"
 
     def test_list_exclude_folders(self):
-        """Test that exclude_folders removes objects from those folders.
-        """
+        """Test that exclude_folders removes objects from those folders."""
         mock_response = {
             "data": [
                 DecryptionProfileResponseFactory(
@@ -311,8 +311,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         assert all(a.folder != "All" for a in filtered)
 
     def test_list_exclude_snippets(self):
-        """Test that exclude_snippets removes objects with those snippets.
-        """
+        """Test that exclude_snippets removes objects with those snippets."""
         mock_response = {
             "data": [
                 DecryptionProfileResponseFactory(
@@ -334,8 +333,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         assert all(a.snippet != "default" for a in filtered)
 
     def test_list_exclude_devices(self):
-        """Test that exclude_devices removes objects with those devices.
-        """
+        """Test that exclude_devices removes objects with those devices."""
         mock_response = {
             "data": [
                 DecryptionProfileResponseFactory(
@@ -359,8 +357,7 @@ class TestDecryptionProfileList(TestDecryptionProfileBase):
         assert all(a.device != "DeviceA" for a in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """Test combining exact_match with exclusions.
-        """
+        """Test combining exact_match with exclusions."""
         mock_response = {
             "data": [
                 DecryptionProfileResponseFactory(

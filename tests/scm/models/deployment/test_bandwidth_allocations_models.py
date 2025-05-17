@@ -1,5 +1,7 @@
 # tests/scm/models/deployment/test_bandwidth_allocations_models.py
 
+"""Tests for bandwidth allocation deployment models."""
+
 from pydantic import ValidationError
 import pytest
 

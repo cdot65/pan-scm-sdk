@@ -1,5 +1,7 @@
 # tests/factories/objects/address.py
 
+"""Factory definitions for address objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore

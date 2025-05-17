@@ -1,3 +1,5 @@
+"""Factory definitions for wildfire antivirus profile objects."""
+
 import uuid
 
 import factory

@@ -1,5 +1,7 @@
 # tests/scm/models/security/test_anti_spyware_profile_models.py
 
+"""Tests for anti-spyware profile security models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

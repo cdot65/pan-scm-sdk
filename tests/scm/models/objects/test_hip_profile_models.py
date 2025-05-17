@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_hip_profile_models.py
 
+"""Tests for HIP profile models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

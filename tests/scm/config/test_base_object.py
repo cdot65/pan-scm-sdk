@@ -1,5 +1,7 @@
 # tests/scm/config/test_base_object.py
 
+"""Tests for base configuration object functionality."""
+
 from unittest.mock import MagicMock
 
 import pytest

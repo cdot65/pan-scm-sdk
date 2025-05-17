@@ -1,4 +1,7 @@
 # tests/factories/objects/__init__.py
+
+"""Factory definitions for configuration objects."""
+
 from tests.factories.objects.address import (
     AddressCreateApiFactory,
     AddressCreateModelFactory,

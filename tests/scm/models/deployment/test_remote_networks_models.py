@@ -1,5 +1,7 @@
 # tests/scm/models/deployment/test_remote_networks_models.py
 
+"""Tests for remote network deployment models."""
+
 from pydantic import ValidationError
 import pytest
 

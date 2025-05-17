@@ -1,3 +1,5 @@
+"""Factory definitions for security rule objects."""
+
 from typing import Dict, Union
 import uuid
 

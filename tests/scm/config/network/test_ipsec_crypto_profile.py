@@ -1,5 +1,4 @@
-"""
-Test module for IPsec Crypto Profile configuration service.
+"""Test module for IPsec Crypto Profile configuration service.
 
 This module contains unit tests for the IPsec Crypto Profile configuration service and its related models.
 """

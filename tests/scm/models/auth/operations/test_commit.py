@@ -1,3 +1,5 @@
+"""Tests for commit operation models."""
+
 from pydantic import ValidationError
 import pytest
 

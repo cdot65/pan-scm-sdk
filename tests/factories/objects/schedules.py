@@ -1,5 +1,7 @@
 # tests/factories/objects/schedules.py
 
+"""Factory definitions for schedule objects."""
+
 from typing import Dict, List, Optional
 from uuid import uuid4
 

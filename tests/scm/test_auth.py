@@ -1,5 +1,7 @@
 # tests/test_auth.py
 
+"""Tests for SCM authentication functionality."""
+
 # Standard library imports
 import time
 from unittest.mock import MagicMock, patch

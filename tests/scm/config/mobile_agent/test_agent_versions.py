@@ -1,5 +1,4 @@
-"""
-Test module for Mobile Agent Versions configuration service.
+"""Test module for Mobile Agent Versions configuration service.
 
 This module contains unit tests for the Mobile Agent Versions configuration service and its related models.
 """

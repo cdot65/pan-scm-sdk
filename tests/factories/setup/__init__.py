@@ -1,3 +1,5 @@
+"""Factory definitions for setup objects."""
+
 from .folder import (
     FolderBaseFactory,
     FolderCreateApiFactory,

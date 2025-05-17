@@ -1,5 +1,7 @@
 # tests/factories/objects/service_group.py
 
+"""Factory definitions for service group objects."""
+
 # Standard library imports
 from typing import Any, Dict, Union
 from uuid import uuid4

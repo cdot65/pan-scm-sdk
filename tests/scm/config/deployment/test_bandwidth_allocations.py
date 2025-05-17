@@ -1,5 +1,4 @@
-"""
-Test module for Bandwidth Allocations configuration service.
+"""Test module for Bandwidth Allocations configuration service.
 
 This module contains unit tests for the Bandwidth Allocations configuration service and its related models.
 """

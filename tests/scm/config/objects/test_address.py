@@ -1,5 +1,4 @@
-"""
-Test module for Address configuration service.
+"""Test module for Address configuration service.
 
 This module contains unit tests for the Address configuration service and its related models.
 """

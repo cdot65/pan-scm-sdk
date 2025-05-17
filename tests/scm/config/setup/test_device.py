@@ -1,5 +1,7 @@
 # tests/scm/config/setup/test_device.py
 
+"""Tests for device setup configuration."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest

@@ -1,5 +1,4 @@
-"""
-Test module for NAT Rules configuration service.
+"""Test module for NAT Rules configuration service.
 
 This module contains unit tests for the NAT Rules configuration service and its related models.
 """

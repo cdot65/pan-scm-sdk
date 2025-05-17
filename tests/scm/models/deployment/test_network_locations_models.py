@@ -1,5 +1,7 @@
 # tests/scm/models/deployment/test_network_locations_models.py
 
+"""Tests for network location deployment models."""
+
 from pydantic import ValidationError
 import pytest
 

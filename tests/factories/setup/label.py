@@ -1,3 +1,5 @@
+"""Factory definitions for label objects."""
+
 from typing import Any, Dict, Union
 import uuid
 

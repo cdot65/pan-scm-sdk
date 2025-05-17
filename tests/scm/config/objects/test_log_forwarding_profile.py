@@ -1,5 +1,7 @@
 # tests/scm/config/objects/test_log_forwarding_profile.py
 
+"""Tests for log forwarding profile configuration objects."""
+
 from unittest.mock import MagicMock, call, patch
 
 import pytest

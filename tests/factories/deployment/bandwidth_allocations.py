@@ -110,8 +110,9 @@ class BandwidthAllocationBaseFactory(factory.Factory):
 
 
 class BandwidthAllocationCreateApiFactory:
-    """Factory for creating dictionaries suitable for BandwidthAllocationCreateModel
-    with the structure used by the Python SDK calls.
+    """Factory for creating dictionaries suitable for BandwidthAllocationCreateModel.
+
+    With the structure used by the Python SDK calls.
     """
 
     def __call__(self, **kwargs) -> Dict[str, Any]:
@@ -188,8 +189,9 @@ class BandwidthAllocationCreateApiFactory:
 
 
 class BandwidthAllocationUpdateApiFactory:
-    """Factory for creating dictionaries suitable for BandwidthAllocationUpdateModel
-    with the structure used by the Python SDK calls.
+    """Factory for creating dictionaries suitable for BandwidthAllocationUpdateModel.
+
+    With the structure used by the Python SDK calls.
     """
 
     def __call__(self, **kwargs) -> Dict[str, Any]:

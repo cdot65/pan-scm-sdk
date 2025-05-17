@@ -1,5 +1,7 @@
 # tests/factories/setup/device.py
 
+"""Factory definitions for device objects."""
+
 import factory
 from faker import Faker
 

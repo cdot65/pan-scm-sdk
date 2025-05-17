@@ -1,5 +1,4 @@
-"""
-Test module for Application configuration service.
+"""Test module for Application configuration service.
 
 This module contains unit tests for the Application configuration service and its related models.
 """
@@ -355,8 +354,7 @@ class TestApplicationList(TestApplicationBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """Test that exact_match=True returns only applications that match the container exactly.
-        """
+        """Test that exact_match=True returns only applications that match the container exactly."""
         mock_response = {
             "data": [
                 ApplicationResponseFactory(
@@ -381,8 +379,7 @@ class TestApplicationList(TestApplicationBase):
         assert filtered[0].name == "app_in_texas"
 
     def test_list_exclude_folders(self):
-        """Test that exclude_folders removes applications from those folders.
-        """
+        """Test that exclude_folders removes applications from those folders."""
         mock_response = {
             "data": [
                 ApplicationResponseFactory(

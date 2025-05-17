@@ -1,6 +1,7 @@
 # tests/examples/updated_conftest.py
 
 """Shared fixtures and configuration for tests.
+
 This configuration supports the new test category structure.
 """
 
@@ -19,6 +20,7 @@ from scm.models.auth import AuthRequestModel
 @pytest.fixture
 def load_env():
     """Load testing environment variables.
+
     This is used by all test categories.
     """
     # Set environment variables for testing
@@ -34,6 +36,7 @@ def load_env():
 @pytest.fixture
 def mock_scm():
     """Create a mock SCM client.
+
     This is used by most test categories.
     """
     scm = MagicMock()
@@ -84,6 +87,7 @@ def mock_api_responses():
 @pytest.fixture
 def functional_test_workflow():
     """Setup for functional tests.
+
     Provides a workflow context that can be shared across steps.
     """
     return {
@@ -167,6 +171,7 @@ def environment_config():
 @pytest.fixture
 def doc_example_context():
     """Setup context for documentation examples.
+
     This provides a clean environment for testing documentation examples.
     """
     return {

@@ -1,5 +1,4 @@
-"""
-Test module for HIP Profile configuration service.
+"""Test module for HIP Profile configuration service.
 
 This module contains unit tests for the HIP Profile configuration service and its related models.
 """

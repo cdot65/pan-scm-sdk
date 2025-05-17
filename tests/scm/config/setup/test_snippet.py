@@ -1,5 +1,7 @@
 # tests/scm/config/setup/test_snippet.py
 
+"""Tests for snippet setup configuration."""
+
 # Standard library imports
 from unittest.mock import MagicMock, patch
 from uuid import UUID

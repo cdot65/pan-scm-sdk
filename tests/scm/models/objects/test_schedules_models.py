@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_schedules_models.py
 
+"""Tests for schedule models."""
+
 # External libraries
 from uuid import UUID
 

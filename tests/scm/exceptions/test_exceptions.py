@@ -1,5 +1,7 @@
 # tests/scm/exceptions/test_exceptions.py
 
+"""Tests for SCM exception handling."""
+
 from unittest.mock import MagicMock
 
 import pytest

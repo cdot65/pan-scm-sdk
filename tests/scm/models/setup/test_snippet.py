@@ -1,5 +1,7 @@
 # tests/scm/models/setup/test_snippet.py
 
+"""Tests for snippet setup models."""
+
 # Standard library imports
 from uuid import UUID
 

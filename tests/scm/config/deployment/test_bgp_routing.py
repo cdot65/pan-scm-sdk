@@ -1,5 +1,4 @@
-"""
-Test module for BGP Routing configuration service.
+"""Test module for BGP Routing configuration service.
 
 This module contains unit tests for the BGP Routing configuration service and its related models.
 """

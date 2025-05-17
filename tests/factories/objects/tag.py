@@ -1,5 +1,7 @@
 # tests/factories/objects/tag.py
 
+"""Factory definitions for tag objects."""
+
 # Standard library imports
 from typing import Any, Dict, Union
 from uuid import uuid4

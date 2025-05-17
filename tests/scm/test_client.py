@@ -1,4 +1,7 @@
 # tests/test_client.py
+
+"""Tests for SCM client functionality."""
+
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest

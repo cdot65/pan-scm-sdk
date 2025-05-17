@@ -1,5 +1,4 @@
-"""
-Factory module for generating test instances of setup variable models.
+"""Factory module for generating test instances of setup variable models.
 
 This module provides Factory Boy factories for the various Pydantic models related to setup variables.
 Used for generating consistent and realistic test data in unit and integration tests.

@@ -1,5 +1,7 @@
 # tests/factories/setup/folder.py
 
+"""Factory definitions for folder objects."""
+
 # Standard library imports
 from typing import Any, Dict, Union
 from uuid import uuid4

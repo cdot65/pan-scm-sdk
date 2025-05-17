@@ -1,5 +1,7 @@
 # tests/scm/config/setup/test_folder.py
 
+"""Tests for folder setup configuration."""
+
 # Standard library imports
 from unittest.mock import MagicMock, patch
 

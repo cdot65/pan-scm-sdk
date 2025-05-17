@@ -1,5 +1,7 @@
 # tests/factories/objects/application_group.py
 
+"""Factory definitions for application group objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore

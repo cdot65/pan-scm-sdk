@@ -1,5 +1,7 @@
 # tests/scm/config/setup/test_variable.py
 
+"""Tests for variable setup configuration."""
+
 # Standard library imports
 from unittest.mock import MagicMock, patch
 from uuid import UUID

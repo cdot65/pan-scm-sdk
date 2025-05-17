@@ -1,5 +1,7 @@
 # tests/scm/config/objects/test_service_group.py
 
+"""Tests for service group configuration objects."""
+
 # Standard library imports
 from unittest.mock import MagicMock
 
@@ -84,8 +86,7 @@ class TestServiceGroupList(TestServiceGroupBase):
     """Tests for listing Service objects."""
 
     def test_list_valid(self):
-        """**Objective:** Test listing all objects using factories.
-        """
+        """**Objective:** Test listing all objects using factories."""
         mock_response = {
             "data": [
                 ServiceGroupResponseFactory.with_members().model_dump(),
@@ -140,8 +141,7 @@ class TestServiceGroupList(TestServiceGroupBase):
             self.client.list(folder="NonexistentFolder")
 
     def test_list_container_missing_error(self):
-        """Test that InvalidObjectError is raised when no container parameter is provided.
-        """
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
         # Use the utility function to create the mock HTTP error
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
@@ -356,8 +356,7 @@ class TestServiceGroupList(TestServiceGroupBase):
         assert filtered_objects[0].name == "Testasdfasdfsadfasdf"
 
     def test_list_response_invalid_format(self):
-        """Test that InvalidObjectError is raised when the response is not a dictionary.
-        """
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
         # Mock the API client to return a non-dictionary response
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
@@ -433,8 +432,7 @@ class TestServiceGroupList(TestServiceGroupBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """Test that exact_match=True returns only objects that match the container exactly.
-        """
+        """Test that exact_match=True returns only objects that match the container exactly."""
         mock_response = {
             "data": [
                 ServiceGroupResponseFactory(
@@ -459,8 +457,7 @@ class TestServiceGroupList(TestServiceGroupBase):
         assert filtered[0].name == "addr_in_texas"
 
     def test_list_exclude_folders(self):
-        """Test that exclude_folders removes objects from those folders.
-        """
+        """Test that exclude_folders removes objects from those folders."""
         mock_response = {
             "data": [
                 ServiceGroupResponseFactory(
@@ -482,8 +479,7 @@ class TestServiceGroupList(TestServiceGroupBase):
         assert all(a.folder != "All" for a in filtered)
 
     def test_list_exclude_snippets(self):
-        """Test that exclude_snippets removes objects with those snippets.
-        """
+        """Test that exclude_snippets removes objects with those snippets."""
         mock_response = {
             "data": [
                 ServiceGroupResponseFactory.with_members(
@@ -503,8 +499,7 @@ class TestServiceGroupList(TestServiceGroupBase):
         assert all(a.snippet != "default" for a in filtered)
 
     def test_list_exclude_devices(self):
-        """Test that exclude_devices removes objects with those devices.
-        """
+        """Test that exclude_devices removes objects with those devices."""
         mock_response = {
             "data": [
                 ServiceGroupResponseFactory.with_members(
@@ -526,8 +521,7 @@ class TestServiceGroupList(TestServiceGroupBase):
         assert all(a.device != "DeviceA" for a in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """Test combining exact_match with exclusions.
-        """
+        """Test combining exact_match with exclusions."""
         mock_response = {
             "data": [
                 ServiceGroupResponseFactory.with_members(
@@ -699,8 +693,7 @@ class TestServiceGroupCreate(TestServiceGroupBase):
             )
 
     def test_create_object_error_handling(self):
-        """**Objective:** Test error handling during object creation.
-        """
+        """**Objective:** Test error handling during object creation."""
         test_data = ServiceGroupCreateApiFactory.with_members()
 
         # Configure mock to raise HTTPError with the mock response
@@ -736,8 +729,7 @@ class TestServiceGroupGet(TestServiceGroupBase):
     """Tests for retrieving a specific Service object."""
 
     def test_get_valid_object(self):
-        """**Objective:** Test retrieving a specific object using factories.
-        """
+        """**Objective:** Test retrieving a specific object using factories."""
         mock_response = ServiceGroupResponseFactory.with_members()
 
         self.mock_scm.get.return_value = mock_response.model_dump()  # noqa
@@ -817,8 +809,7 @@ class TestServiceGroupUpdate(TestServiceGroupBase):
     """Tests for updating Service objects."""
 
     def test_update_valid_object(self):
-        """**Objective:** Test updating an object using factories.
-        """
+        """**Objective:** Test updating an object using factories."""
         # Create update data using factory
         update_data = ServiceGroupUpdateApiFactory.with_members()
 
@@ -1047,8 +1038,7 @@ class TestServiceGroupFetch(TestServiceGroupBase):
         assert fetched_object.folder == mock_response_model.folder
 
     def test_fetch_object_not_present_error(self):
-        """**Objective:** Test that fetching a non-existent object raises NotFoundError.
-        """
+        """**Objective:** Test that fetching a non-existent object raises NotFoundError."""
         service_name = "NonExistent"
         folder_name = "Texas"
 
@@ -1150,8 +1140,7 @@ class TestServiceGroupFetch(TestServiceGroupBase):
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_fetch_response_handling(self):
-        """**Objective:** Test fetch method's response handling using factories.
-        """
+        """**Objective:** Test fetch method's response handling using factories."""
         mock_response_model = ServiceGroupResponseFactory.with_members()
         mock_response_data = mock_response_model.model_dump()
 

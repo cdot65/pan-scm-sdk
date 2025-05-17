@@ -1,3 +1,5 @@
+"""Factory definitions for snippet objects."""
+
 from typing import Any, Dict, Union
 import uuid
 

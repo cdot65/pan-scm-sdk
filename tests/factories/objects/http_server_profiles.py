@@ -1,5 +1,7 @@
 # tests/factories/objects/http_server_profiles.py
 
+"""Factory definitions for HTTP server profile objects."""
+
 from typing import Dict
 from uuid import uuid4
 

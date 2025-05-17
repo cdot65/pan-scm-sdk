@@ -1,5 +1,7 @@
 # tests/scm/models/mobile_agent/test_auth_settings_models.py
 
+"""Tests for mobile agent authentication settings models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

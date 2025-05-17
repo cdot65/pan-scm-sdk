@@ -1,3 +1,5 @@
+"""Tests for job operation models."""
+
 from datetime import datetime, timezone
 
 from scm.models.operations.jobs import JobListItem, JobStatusData

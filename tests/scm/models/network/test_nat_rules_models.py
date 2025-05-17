@@ -1,5 +1,7 @@
 # tests/scm/models/security/test_nat_rules.py
 
+"""Tests for NAT rule network models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

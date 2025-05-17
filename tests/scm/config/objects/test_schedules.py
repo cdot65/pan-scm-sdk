@@ -1,5 +1,7 @@
 # tests/scm/config/objects/test_schedules.py
 
+"""Tests for schedule configuration objects."""
+
 # Standard library imports
 from unittest.mock import MagicMock
 import uuid

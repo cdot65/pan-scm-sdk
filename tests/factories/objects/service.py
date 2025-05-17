@@ -1,5 +1,7 @@
 # tests/factories/objects/service.py
 
+"""Factory definitions for service objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore

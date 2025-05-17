@@ -1,5 +1,6 @@
 # tests/factories/objects/dynamic_user_group.py
 
+"""Factory definitions for dynamic user group objects."""
 
 import factory  # type: ignore
 from faker import Faker

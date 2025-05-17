@@ -1,5 +1,4 @@
-"""
-Test module for Mobile Agent Auth Settings configuration service.
+"""Test module for Mobile Agent Auth Settings configuration service.
 
 This module contains unit tests for the Mobile Agent Auth Settings configuration service and its related models.
 """
@@ -15,6 +14,7 @@ from scm.models.mobile_agent import AuthSettingsResponseModel
 
 
 class TestAuthSettings:
+    """Test cases for AuthSettings mobile agent configuration."""
     @pytest.fixture
     def mock_api_client(self):
         mock_client = MagicMock()
@@ -29,6 +29,7 @@ class TestAuthSettings:
             return service
 
     def test_init_with_default_max_limit(self, mock_api_client):
+        """Test initialization with default max limit value."""
         with patch("scm.config.isinstance", return_value=True):
             service = AuthSettings(mock_api_client)
             assert service._max_limit == AuthSettings.DEFAULT_MAX_LIMIT

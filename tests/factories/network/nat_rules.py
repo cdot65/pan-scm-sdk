@@ -1,3 +1,5 @@
+"""Factory definitions for network NAT rule objects."""
+
 from typing import List
 import uuid
 
