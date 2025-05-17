@@ -160,12 +160,9 @@ class OAuth2Client:
         """Refresh the OAuth2 access token with improved error handling and retry logic."""
         logger.debug("Refreshing token...")
 
-        # Create a new session for the refresh request to avoid any stale state
-        temp_session = Session()
-        retry_strategy = self._setup_retry_strategy()
-        adapter = HTTPAdapter(max_retries=retry_strategy)
-        temp_session.mount("http://", adapter)  # noqa
-        temp_session.mount("https://", adapter)
+        # Refresh using the existing OAuth2 session which already has
+        # the retry strategy configured. The previously created
+        # temporary session was never used and has been removed.
 
         try:
             new_token = self.session.fetch_token(
@@ -202,5 +199,3 @@ class OAuth2Client:
         except Exception as e:
             logger.error(f"Unexpected error during token refresh: {str(e)}")
             raise APIError(f"Failed to refresh token: {str(e)}") from e
-        finally:
-            temp_session.close()
