@@ -34,6 +34,7 @@ class AgentVersions(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the AgentVersions service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 

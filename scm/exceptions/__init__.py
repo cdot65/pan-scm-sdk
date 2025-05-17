@@ -48,6 +48,7 @@ class APIError(Exception):
         http_status_code: Optional[int] = None,
         details: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize the APIError exception with message, error_code, http_status_code, and details."""
         super().__init__(message)
         self.message = message
         self.error_code = error_code
@@ -55,6 +56,7 @@ class APIError(Exception):
         self.details = details
 
     def __str__(self):
+        """Return a string representation of the APIError, including details and codes."""
         parts = []
         # if self.message:
         #     parts.append(f"{self.message}")

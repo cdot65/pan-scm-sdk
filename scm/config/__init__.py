@@ -32,6 +32,7 @@ class BaseObject:
     ENDPOINT: str  # Should be defined in subclasses
 
     def __init__(self, api_client: Scm):
+        """Initialize the base config service with the provided Scm API client."""
         # Check if ENDPOINT is defined
         if not hasattr(self, "ENDPOINT"):
             raise AttributeError("ENDPOINT must be defined in the subclass")

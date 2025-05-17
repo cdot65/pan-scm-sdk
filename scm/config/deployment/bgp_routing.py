@@ -38,6 +38,7 @@ class BGPRouting(BaseObject):
         self,
         api_client,
     ):
+        """Initialize the BgpRouting service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 

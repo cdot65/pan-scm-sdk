@@ -38,6 +38,7 @@ class URLCategories(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the UrlCategories service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 

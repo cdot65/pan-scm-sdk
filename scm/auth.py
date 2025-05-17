@@ -50,6 +50,7 @@ class OAuth2Client:
         self,
         auth_request: AuthRequestModel,
     ):
+        """Initialize the Auth class with the provided AuthRequestModel."""
         self.auth_request = auth_request
         self.session = self._create_session()
         self.signing_key = None

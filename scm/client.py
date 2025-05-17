@@ -61,6 +61,7 @@ class Scm:
         log_level: str = "ERROR",
         access_token: Optional[str] = None,
     ):
+        """Initialize the ScmClient with the provided client_id, client_secret, tsg_id, API URLs, log level, and access token."""
         self.api_base_url = api_base_url
         self.oauth_client = None
 

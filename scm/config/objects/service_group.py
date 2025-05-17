@@ -38,6 +38,7 @@ class ServiceGroup(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the ServiceGroup service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -147,7 +148,7 @@ class ServiceGroup(BaseObject):
         """Update an existing service group object.
 
         Args:
-            service_group (ServiceGroupUpdateModel):
+            service_group (ServiceGroupUpdateModel): The updated service group object data to send to the API.
 
         Returns:
             ServiceGroupResponseModel
