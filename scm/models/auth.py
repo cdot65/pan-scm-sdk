@@ -39,6 +39,7 @@ class AuthRequestModel(BaseModel):
 
         Raises:
             ValueError: If neither 'scope' nor 'tsg_id' is provided.
+
         """
         if values.get("scope") is None:
             tsg_id = values.get("tsg_id")
@@ -59,6 +60,7 @@ class AuthRequestModel(BaseModel):
 
         Raises:
             ValueError: If the scope is an empty string.
+
         """
         if v is not None and v.strip() == "":
             raise ValueError("Scope cannot be empty string")

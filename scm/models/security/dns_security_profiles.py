@@ -59,6 +59,7 @@ class ListActionBaseModel(RootModel[dict]):
 
         Returns:
             str: The action name, or 'unknown' if not set.
+
         """
         return next(iter(self.root.keys()), "unknown")
 
@@ -78,6 +79,7 @@ class ListActionRequestModel(ListActionBaseModel):
 
         Raises:
             ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+
         """
         if isinstance(values, str):
             values = {values: {}}
@@ -236,6 +238,7 @@ class DNSSecurityProfileCreateModel(DNSSecurityProfileBaseModel):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = [
             "folder",

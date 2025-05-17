@@ -53,6 +53,7 @@ class Device(BaseObject):
 
         Returns:
             int: The current max_limit value.
+
         """
         return self._max_limit
 

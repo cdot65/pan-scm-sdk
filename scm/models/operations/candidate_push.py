@@ -66,6 +66,7 @@ class CandidatePushRequestModel(BaseModel):
 
         Raises:
             ValueError: If the admin list is empty or contains invalid entries.
+
         """
         if not v:
             raise ValueError("At least one admin must be specified")

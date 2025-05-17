@@ -69,6 +69,7 @@ class Protocol(BaseModel):
 
         Raises:
             ValueError: If zero or more than one protocol field is set.
+
         """
         protocol_fields = ["tcp", "udp"]
         provided = [field for field in protocol_fields if getattr(self, field) is not None]
@@ -152,6 +153,7 @@ class ServiceCreateModel(ServiceBaseModel):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]

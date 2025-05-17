@@ -122,6 +122,7 @@ class AddressGroupBaseModel(BaseModel):
 
         Raises:
             ValueError: If duplicate items are found.
+
         """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
@@ -136,6 +137,7 @@ class AddressGroupBaseModel(BaseModel):
 
         Raises:
             ValueError: If zero or more than one group type field is set.
+
         """
         group_type_fields = ["dynamic", "static"]
         provided = [field for field in group_type_fields if getattr(self, field) is not None]
@@ -159,6 +161,7 @@ class AddressGroupCreateModel(AddressGroupBaseModel):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]

@@ -121,6 +121,7 @@ class AddressBaseModel(BaseModel):
 
         Raises:
             ValueError: If the value is not a string or list of strings.
+
         """
         if isinstance(v, str):
             return [v]
@@ -141,6 +142,7 @@ class AddressBaseModel(BaseModel):
 
         Raises:
             ValueError: If duplicate items are found.
+
         """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
@@ -157,6 +159,7 @@ class AddressBaseModel(BaseModel):
 
         Raises:
             ValueError: If zero or more than one address type field is set.
+
         """
         """Validate that exactly one address type is provided."""
         address_fields = [

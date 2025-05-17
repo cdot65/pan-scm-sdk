@@ -143,6 +143,7 @@ class RemoteNetworkBaseModel(BaseModel):
 
         Raises:
             ValueError: If required fields are missing for the given configuration.
+
         """
         if self.ecmp_load_balancing == EcmpLoadBalancingEnum.enable:
             if not self.ecmp_tunnels:
@@ -173,6 +174,7 @@ class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = ["folder", "snippet", "device"]
         provided = [f for f in container_fields if getattr(self, f) is not None]

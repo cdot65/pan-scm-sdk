@@ -102,6 +102,7 @@ class VariableCreateModel(VariableBaseModel):
 
         Returns:
             VariableCreateModel: The validated model instance.
+
         """
         model = super().model_validate(value)
         cls.validate_container_type(model.__dict__)
@@ -126,6 +127,7 @@ class VariableUpdateModel(VariableBaseModel):
 
         Returns:
             VariableUpdateModel: The validated model instance.
+
         """
         model = super().model_validate(value)
         cls.validate_container_type(model.__dict__)

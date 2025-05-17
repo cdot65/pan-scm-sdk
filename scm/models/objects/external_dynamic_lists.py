@@ -394,6 +394,7 @@ class ExternalDynamicListsCreateModel(ExternalDynamicListsBaseModel):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = [
             "folder",
@@ -430,6 +431,7 @@ class ExternalDynamicListsResponseModel(ExternalDynamicListsBaseModel):
 
         Raises:
             ValueError: If id or type is missing when snippet is not 'predefined'.
+
         """
         if self.snippet != "predefined":
             if self.id is None:

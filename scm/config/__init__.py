@@ -54,6 +54,7 @@ class BaseObject:
 
         Returns:
             Dict[str, Any]: API response containing the created object.
+
         """
         response = self.api_client.post(
             self.ENDPOINT,
@@ -72,6 +73,7 @@ class BaseObject:
 
         Returns:
             Dict[str, Any]: API response containing the object data.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
@@ -88,6 +90,7 @@ class BaseObject:
 
         Returns:
             Dict[str, Any]: API response containing the updated object.
+
         """
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(
@@ -104,6 +107,7 @@ class BaseObject:
 
         Args:
             object_id (str): The unique identifier of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
@@ -119,6 +123,7 @@ class BaseObject:
 
         Returns:
             List[Dict[str, Any]]: List of objects from the API response.
+
         """
         params = {k: v for k, v in filters.items() if v is not None}
         response = self.api_client.get(

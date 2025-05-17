@@ -159,6 +159,7 @@ class TagBaseModel(BaseModel):
 
         Raises:
             ValueError: If the color is not recognized or not in the allowed set.
+
         """
         if value is None:
             return value

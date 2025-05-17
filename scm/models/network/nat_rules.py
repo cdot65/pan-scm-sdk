@@ -300,6 +300,7 @@ class NatRuleBaseModel(BaseModel):
 
         Raises:
             ValueError: If the value is not a string or list of strings.
+
         """
         if isinstance(v, str):
             v = [v]
@@ -327,6 +328,7 @@ class NatRuleBaseModel(BaseModel):
 
         Raises:
             ValueError: If duplicate items are found.
+
         """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
@@ -382,6 +384,7 @@ class NatRuleCreateModel(NatRuleBaseModel):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
@@ -442,6 +445,7 @@ class NatRuleMoveModel(BaseModel):
 
         Raises:
             ValueError: If destination_rule is missing or present in an invalid context.
+
         """
         if self.destination in (NatMoveDestination.BEFORE, NatMoveDestination.AFTER):
             if not self.destination_rule:

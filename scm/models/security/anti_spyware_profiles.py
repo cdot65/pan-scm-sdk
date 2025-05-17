@@ -147,6 +147,7 @@ class AntiSpywareActionRequest(RootModel[dict]):
 
         Raises:
             ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+
         """
         if isinstance(values, str):
             # Convert string to dict
@@ -176,6 +177,7 @@ class AntiSpywareActionRequest(RootModel[dict]):
 
         Returns:
             str: The action name, or 'unknown' if not set.
+
         """
         return next(iter(self.root.keys()), "unknown")
 
@@ -198,6 +200,7 @@ class AntiSpywareActionResponse(RootModel[dict]):
 
         Raises:
             ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+
         """
         if isinstance(values, str):
             # Convert string to dict
@@ -228,6 +231,7 @@ class AntiSpywareActionResponse(RootModel[dict]):
 
         Returns:
             str: The action name, or 'unknown' if not set.
+
         """
         return next(iter(self.root.keys()), "unknown")
 
@@ -269,6 +273,7 @@ class AntiSpywareRuleBaseModel(BaseModel):
 
         Returns:
             str: The threat name, or 'any' if not provided.
+
         """
         return v or "any"
 
@@ -372,6 +377,7 @@ class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
 
         Raises:
             ValueError: If zero or more than one container field is set.
+
         """
         container_fields = [
             "folder",
