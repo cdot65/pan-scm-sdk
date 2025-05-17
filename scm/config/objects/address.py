@@ -64,7 +64,7 @@ class Address(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -111,7 +111,7 @@ class Address(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AddressResponseModel:
-        """Creates a new address object.
+        """Create a new address object.
 
         Returns:
             AddressResponseModel
@@ -136,7 +136,7 @@ class Address(BaseObject):
         self,
         object_id: str,
     ) -> AddressResponseModel:
-        """Gets an address object by ID.
+        """Get an address object by ID.
 
         Returns:
             AddressResponseModel
@@ -153,7 +153,7 @@ class Address(BaseObject):
         self,
         address: AddressUpdateModel,
     ) -> AddressResponseModel:
-        """Updates an existing address object.
+        """Update an existing address object.
 
         Args:
             address: AddressUpdateModel instance containing the update data
@@ -262,7 +262,7 @@ class Address(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -280,7 +280,7 @@ class Address(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AddressResponseModel]:
-        """Lists address objects with optional filtering.
+        """List address objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -422,7 +422,7 @@ class Address(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> AddressResponseModel:
-        """Fetches a single object by name.
+        """Fetch a single address by name.
 
         Args:
             name (str): The name of the address to fetch.
@@ -504,7 +504,7 @@ class Address(BaseObject):
         self,
         object_id: Union[str, UUID],
     ) -> None:
-        """Deletes an address object.
+        """Delete an address object.
 
         Args:
             object_id: The ID of the object to delete.

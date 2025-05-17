@@ -50,7 +50,7 @@ class SecurityZone(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class SecurityZone(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> SecurityZoneResponseModel:
-        """Creates a new security zone object.
+        """Create a new security zone object.
 
         Args:
             data: Dictionary containing the security zone configuration
@@ -128,7 +128,7 @@ class SecurityZone(BaseObject):
         self,
         object_id: str,
     ) -> SecurityZoneResponseModel:
-        """Gets a security zone object by ID.
+        """Get a security zone object by ID.
 
         Args:
             object_id: The ID of the security zone to retrieve
@@ -145,7 +145,7 @@ class SecurityZone(BaseObject):
         self,
         zone: SecurityZoneUpdateModel,
     ) -> SecurityZoneResponseModel:
-        """Updates an existing security zone object.
+        """Update an existing security zone object.
 
         Args:
             zone: SecurityZoneUpdateModel instance containing the update data
@@ -251,7 +251,7 @@ class SecurityZone(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -269,7 +269,7 @@ class SecurityZone(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SecurityZoneResponseModel]:
-        """Lists security zone objects with optional filtering.
+        """List security zone objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -411,7 +411,7 @@ class SecurityZone(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> SecurityZoneResponseModel:
-        """Fetches a single security zone by name.
+        """Fetch a single security zone by name.
 
         Args:
             name: The name of the security zone to fetch
@@ -516,7 +516,7 @@ class SecurityZone(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a security zone object.
+        """Delete a security zone object.
 
         Args:
             object_id: The ID of the object to delete

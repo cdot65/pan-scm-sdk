@@ -50,7 +50,7 @@ class SyslogServerProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class SyslogServerProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> SyslogServerProfileResponseModel:
-        """Creates a new syslog server profile object.
+        """Create a new syslog server profile object.
 
         Args:
             data: Dictionary containing the syslog server profile data
@@ -130,7 +130,7 @@ class SyslogServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> SyslogServerProfileResponseModel:
-        """Gets a syslog server profile object by ID.
+        """Get a syslog server profile object by ID.
 
         Args:
             object_id: The ID of the syslog server profile to retrieve
@@ -150,7 +150,7 @@ class SyslogServerProfile(BaseObject):
         self,
         syslog_server_profile: SyslogServerProfileUpdateModel,
     ) -> SyslogServerProfileResponseModel:
-        """Updates an existing syslog server profile object.
+        """Update an existing syslog server profile object.
 
         Args:
             syslog_server_profile: SyslogServerProfileUpdateModel instance containing the update data
@@ -240,7 +240,7 @@ class SyslogServerProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary.
+        """Build container parameters dictionary.
 
         Args:
             folder: Optional folder name
@@ -268,7 +268,7 @@ class SyslogServerProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SyslogServerProfileResponseModel]:
-        """Lists syslog server profile objects with optional filtering.
+        """List syslog server profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -409,7 +409,7 @@ class SyslogServerProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> SyslogServerProfileResponseModel:
-        """Fetches a single syslog server profile object by name.
+        """Fetch a single syslog server profile by name.
 
         Args:
             name (str): The name of the syslog server profile to fetch.
@@ -491,7 +491,7 @@ class SyslogServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a syslog server profile object.
+        """Delete a syslog server profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

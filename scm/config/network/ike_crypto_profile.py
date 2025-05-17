@@ -50,7 +50,7 @@ class IKECryptoProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class IKECryptoProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> IKECryptoProfileResponseModel:
-        """Creates a new IKE crypto profile object.
+        """Create a new IKE crypto profile object.
 
         Args:
             data: Dictionary containing the IKE crypto profile configuration
@@ -128,7 +128,7 @@ class IKECryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> IKECryptoProfileResponseModel:
-        """Gets an IKE crypto profile object by ID.
+        """Get an IKE crypto profile object by ID.
 
         Args:
             object_id: The ID of the IKE crypto profile to retrieve
@@ -145,7 +145,7 @@ class IKECryptoProfile(BaseObject):
         self,
         profile: IKECryptoProfileUpdateModel,
     ) -> IKECryptoProfileResponseModel:
-        """Updates an existing IKE crypto profile object.
+        """Update an existing IKE crypto profile object.
 
         Args:
             profile: IKECryptoProfileUpdateModel instance containing the update data
@@ -180,7 +180,7 @@ class IKECryptoProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -197,7 +197,7 @@ class IKECryptoProfile(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         exclude_devices: Optional[List[str]] = None,
     ) -> List[IKECryptoProfileResponseModel]:
-        """Lists IKE crypto profile objects with optional filtering.
+        """List IKE crypto profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -323,7 +323,7 @@ class IKECryptoProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> IKECryptoProfileResponseModel:
-        """Fetches a single IKE crypto profile by name.
+        """Fetch a single IKE crypto profile by name.
 
         Args:
             name: The name of the IKE crypto profile to fetch
@@ -405,7 +405,7 @@ class IKECryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an IKE crypto profile object.
+        """Delete an IKE crypto profile object.
 
         Args:
             object_id: The ID of the object to delete

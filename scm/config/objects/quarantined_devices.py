@@ -35,7 +35,7 @@ class QuarantinedDevices(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> QuarantinedDevicesResponseModel:
-        """Creates a new quarantined device.
+        """Create a new quarantined device.
 
         Args:
             data: Dictionary containing the quarantined device data
@@ -71,7 +71,7 @@ class QuarantinedDevices(BaseObject):
         host_id: Optional[str] = None,
         serial_number: Optional[str] = None,
     ) -> List[QuarantinedDevicesResponseModel]:
-        """Lists quarantined devices with optional filtering.
+        """List quarantined devices with optional filtering.
 
         Args:
             host_id: Filter by device host ID
@@ -113,7 +113,7 @@ class QuarantinedDevices(BaseObject):
         self,
         host_id: str,
     ) -> None:
-        """Deletes a quarantined device by host ID.
+        """Delete a quarantined device by host ID.
 
         Args:
             host_id: The host ID of the quarantined device to delete

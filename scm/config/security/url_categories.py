@@ -50,7 +50,7 @@ class URLCategories(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class URLCategories(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> URLCategoriesResponseModel:
-        """Creates a new URL Category.
+        """Create a new URL Category.
 
         Returns:
             URLCategoriesResponseModel
@@ -122,7 +122,7 @@ class URLCategories(BaseObject):
         self,
         object_id: str,
     ) -> URLCategoriesResponseModel:
-        """Gets a URL Category by ID.
+        """Get a URL Category by ID.
 
         Returns:
             URLCategoriesResponseModel
@@ -139,7 +139,7 @@ class URLCategories(BaseObject):
         self,
         profile: URLCategoriesUpdateModel,
     ) -> URLCategoriesResponseModel:
-        """Updates an existing URL Category.
+        """Update an existing URL Category.
 
         Args:
             profile: URLCategoriesUpdateModel instance containing the update data
@@ -199,7 +199,7 @@ class URLCategories(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -217,7 +217,7 @@ class URLCategories(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[URLCategoriesResponseModel]:
-        """Lists URL Categories with optional filtering.
+        """List URL Categories with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -357,7 +357,7 @@ class URLCategories(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> URLCategoriesResponseModel:
-        """Fetches a single URL Category by name.
+        """Fetch a single URL Category by name.
 
         Args:
             name (str): The name of the URL Category to fetch.
@@ -439,7 +439,7 @@ class URLCategories(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a URL Category object.
+        """Delete a URL Category object.
 
         Args:
             object_id (str): The ID of the object to delete.

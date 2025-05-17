@@ -50,7 +50,7 @@ class Service(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class Service(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceResponseModel:
-        """Creates a new service object.
+        """Create a new service object.
 
         Returns:
             ServiceResponseModel
@@ -122,7 +122,7 @@ class Service(BaseObject):
         self,
         object_id: str,
     ) -> ServiceResponseModel:
-        """Gets a service object by ID.
+        """Get a service object by ID.
 
         Returns:
             ServiceResponseModel
@@ -139,7 +139,7 @@ class Service(BaseObject):
         self,
         service: ServiceUpdateModel,
     ) -> ServiceResponseModel:
-        """Updates an existing service object.
+        """Update an existing service object.
 
         Args:
             service: ServiceUpdateModel instance containing the update data
@@ -225,7 +225,7 @@ class Service(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -243,7 +243,7 @@ class Service(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ServiceResponseModel]:
-        """Lists service objects with optional filtering.
+        """List service objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -384,7 +384,7 @@ class Service(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ServiceResponseModel:
-        """Fetches a single service by name.
+        """Fetch a single service by name.
 
         Args:
             name (str): The name of the service to fetch.
@@ -466,7 +466,7 @@ class Service(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a service object.
+        """Delete a service object.
 
         Args:
             object_id (str): The ID of the object to delete.

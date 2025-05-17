@@ -46,7 +46,7 @@ class NetworkLocations(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -208,7 +208,7 @@ class NetworkLocations(BaseObject):
         self,
         **filters,
     ) -> List[NetworkLocationModel]:
-        """Lists network location objects with optional filtering.
+        """List network location objects with optional filtering.
 
         Args:
             **filters: Additional filters including:
@@ -252,7 +252,7 @@ class NetworkLocations(BaseObject):
         self,
         value: str,
     ) -> NetworkLocationModel:
-        """Fetches a single network location by its value.
+        """Fetch a single network location by its value.
 
         Args:
             value: The system value of the network location to fetch

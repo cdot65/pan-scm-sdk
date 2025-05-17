@@ -51,7 +51,7 @@ class BandwidthAllocations(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -98,7 +98,7 @@ class BandwidthAllocations(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BandwidthAllocationResponseModel:
-        """Creates a new Bandwidth Allocation object.
+        """Create a new Bandwidth Allocation object.
 
         Args:
             data: Dictionary containing the bandwidth allocation configuration
@@ -126,7 +126,7 @@ class BandwidthAllocations(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BandwidthAllocationResponseModel:
-        """Updates an existing Bandwidth Allocation object.
+        """Update an existing Bandwidth Allocation object.
 
         Args:
             data: Dictionary containing the bandwidth allocation configuration
@@ -155,7 +155,7 @@ class BandwidthAllocations(BaseObject):
         name: str,
         spn_name_list: str,
     ) -> None:
-        """Deletes a bandwidth allocation.
+        """Delete a bandwidth allocation.
 
         Args:
             name: Name of the aggregated bandwidth region
@@ -307,7 +307,7 @@ class BandwidthAllocations(BaseObject):
         self,
         **filters,
     ) -> List[BandwidthAllocationResponseModel]:
-        """Lists bandwidth allocation objects with optional filtering.
+        """List bandwidth allocation objects with optional filtering.
 
         Args:
             **filters: Additional filters including:
@@ -367,7 +367,7 @@ class BandwidthAllocations(BaseObject):
         self,
         name: str,
     ) -> Optional[BandwidthAllocationResponseModel]:
-        """Gets a bandwidth allocation by name.
+        """Get a bandwidth allocation by name.
 
         Args:
             name: The name of the bandwidth allocation to retrieve
@@ -416,7 +416,7 @@ class BandwidthAllocations(BaseObject):
         self,
         name: str,
     ) -> BandwidthAllocationResponseModel:
-        """Fetches a single bandwidth allocation by name.
+        """Fetch a single bandwidth allocation by name.
 
         Args:
             name: The name of the bandwidth allocation to fetch

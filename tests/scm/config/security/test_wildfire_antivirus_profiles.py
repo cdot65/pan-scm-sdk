@@ -141,7 +141,7 @@ class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
             1. Sets up a mock response resembling the expected API response for listing objects.
             2. Calls the `list` method with a filter parameter.
             3. Asserts that the mocked service was called correctly.
-            4. Validates the returned list of objects.
+            4. Validate the returned list of objects.
         """
         mock_response = {
             "data": [
@@ -879,7 +879,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
             1. Sets up a mock response resembling the expected API response for fetching an object by name.
             2. Calls the `fetch` method of `self.client` with a specific name and container.
             3. Asserts that the mocked service was called with the correct URL and parameters.
-            4. Validates the returned object's attributes.
+            4. Validate the returned object's attributes.
         """
         mock_response_model = WildfireAvProfileResponseFactory(
             id="123e4567-e89b-12d3-a456-426655440000",

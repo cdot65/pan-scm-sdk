@@ -64,7 +64,7 @@ class Snippet(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -106,7 +106,7 @@ class Snippet(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> SnippetResponseModel:
-        """Create a new snippet in Strata Cloud Manager.
+        """Create a new snippet object in Strata Cloud Manager.
 
         Args:
             data: Dictionary containing snippet data.
@@ -138,7 +138,7 @@ class Snippet(BaseObject):
         self,
         object_id: Union[str, UUID],
     ) -> SnippetResponseModel:
-        """Get a snippet by ID.
+        """Get a snippet object by ID.
 
         Args:
             object_id: The UUID of the snippet to retrieve.
@@ -223,7 +223,7 @@ class Snippet(BaseObject):
         self,
         **filters: Any,  # Accept arbitrary filters ('labels', 'types')
     ) -> List[SnippetResponseModel]:
-        """List snippets with optional server-side and client-side filtering.
+        """List snippet objects with optional server-side and client-side filtering.
 
         Args:
             **filters: Additional filters:
@@ -437,7 +437,7 @@ class Snippet(BaseObject):
         self,
         snippet: SnippetUpdateModel,
     ) -> SnippetResponseModel:
-        """Update an existing snippet.
+        """Update an existing snippet object.
 
         Args:
             snippet: The SnippetUpdateModel containing the updated snippet data.
@@ -472,7 +472,7 @@ class Snippet(BaseObject):
         self,
         object_id: Union[str, UUID],
     ) -> None:
-        """Delete a snippet.
+        """Delete a snippet object.
 
         Args:
             object_id: The ID of the snippet to delete.

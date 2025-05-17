@@ -51,7 +51,7 @@ class ServiceConnection(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -98,7 +98,7 @@ class ServiceConnection(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceConnectionResponseModel:
-        """Creates a new service connection.
+        """Create a new service connection.
 
         Args:
             data: Dictionary containing the service connection configuration
@@ -129,7 +129,7 @@ class ServiceConnection(BaseObject):
         self,
         object_id: str,
     ) -> ServiceConnectionResponseModel:
-        """Gets a service connection by ID.
+        """Get a service connection by ID.
 
         Args:
             object_id: The ID of the service connection to retrieve
@@ -146,7 +146,7 @@ class ServiceConnection(BaseObject):
         self,
         service_connection: ServiceConnectionUpdateModel,
     ) -> ServiceConnectionResponseModel:
-        """Updates an existing service connection.
+        """Update an existing service connection.
 
         Args:
             service_connection: ServiceConnectionUpdateModel instance containing the update data
@@ -180,7 +180,7 @@ class ServiceConnection(BaseObject):
         name: Optional[str] = None,
         **filters,
     ) -> List[ServiceConnectionResponseModel]:
-        """Lists service connection objects with optional filtering.
+        """List service connection objects with optional filtering.
 
         Args:
             name: Optional name filter
@@ -278,7 +278,7 @@ class ServiceConnection(BaseObject):
         self,
         name: str,
     ) -> ServiceConnectionResponseModel:
-        """Fetches a single service connection by name.
+        """Fetch a single service connection by name.
 
         Args:
             name: The name of the service connection to fetch
@@ -353,7 +353,7 @@ class ServiceConnection(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a service connection object.
+        """Delete a service connection object.
 
         Args:
             object_id: The ID of the object to delete

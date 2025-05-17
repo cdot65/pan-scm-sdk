@@ -50,7 +50,7 @@ class HTTPServerProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class HTTPServerProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> HTTPServerProfileResponseModel:
-        """Creates a new HTTP server profile object.
+        """Create a new HTTP server profile object.
 
         Args:
             data: Dictionary containing the HTTP server profile data
@@ -130,7 +130,7 @@ class HTTPServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> HTTPServerProfileResponseModel:
-        """Gets an HTTP server profile object by ID.
+        """Get an HTTP server profile object by ID.
 
         Args:
             object_id: The ID of the HTTP server profile to retrieve
@@ -150,7 +150,7 @@ class HTTPServerProfile(BaseObject):
         self,
         http_server_profile: HTTPServerProfileUpdateModel,
     ) -> HTTPServerProfileResponseModel:
-        """Updates an existing HTTP server profile object.
+        """Update an existing HTTP server profile object.
 
         Args:
             http_server_profile: HTTPServerProfileUpdateModel instance containing the update data
@@ -233,7 +233,7 @@ class HTTPServerProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary.
+        """Build container parameters dictionary.
 
         Args:
             folder: Optional folder name
@@ -261,7 +261,7 @@ class HTTPServerProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[HTTPServerProfileResponseModel]:
-        """Lists HTTP server profile objects with optional filtering.
+        """List HTTP server profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -402,7 +402,7 @@ class HTTPServerProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> HTTPServerProfileResponseModel:
-        """Fetches a single HTTP server profile object by name.
+        """Fetch a single HTTP server profile by name.
 
         Args:
             name (str): The name of the HTTP server profile to fetch.
@@ -497,7 +497,7 @@ class HTTPServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an HTTP server profile object.
+        """Delete an HTTP server profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

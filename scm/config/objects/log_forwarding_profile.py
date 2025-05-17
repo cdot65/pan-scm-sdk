@@ -50,7 +50,7 @@ class LogForwardingProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class LogForwardingProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> LogForwardingProfileResponseModel:
-        """Creates a new log forwarding profile object.
+        """Create a new log forwarding profile object.
 
         Args:
             data: Dictionary containing profile data
@@ -132,7 +132,7 @@ class LogForwardingProfile(BaseObject):
         self,
         object_id: str,
     ) -> LogForwardingProfileResponseModel:
-        """Gets a log forwarding profile object by ID.
+        """Get a log forwarding profile object by ID.
 
         Args:
             object_id: The UUID of the profile to retrieve
@@ -152,7 +152,7 @@ class LogForwardingProfile(BaseObject):
         self,
         profile: LogForwardingProfileUpdateModel,
     ) -> LogForwardingProfileResponseModel:
-        """Updates an existing log forwarding profile object.
+        """Update an existing log forwarding profile object.
 
         Args:
             profile: LogForwardingProfileUpdateModel instance containing the update data
@@ -263,7 +263,7 @@ class LogForwardingProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -281,7 +281,7 @@ class LogForwardingProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[LogForwardingProfileResponseModel]:
-        """Lists log forwarding profile objects with optional filtering.
+        """List log forwarding profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -422,7 +422,7 @@ class LogForwardingProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> LogForwardingProfileResponseModel:
-        """Fetches a single log forwarding profile by name.
+        """Fetch a single log forwarding profile by name.
 
         Args:
             name (str): The name of the profile to fetch.
@@ -511,7 +511,7 @@ class LogForwardingProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a log forwarding profile object.
+        """Delete a log forwarding profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

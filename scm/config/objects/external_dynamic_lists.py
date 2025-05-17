@@ -59,7 +59,7 @@ class ExternalDynamicLists(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -106,7 +106,7 @@ class ExternalDynamicLists(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ExternalDynamicListsResponseModel:
-        """Creates a new EDL object.
+        """Create a new EDL object.
 
         Returns:
             ExternalDynamicListsResponseModel
@@ -131,7 +131,7 @@ class ExternalDynamicLists(BaseObject):
         self,
         edl_id: str,
     ) -> ExternalDynamicListsResponseModel:
-        """Gets an EDL by ID.
+        """Get an EDL by ID.
 
         Returns:
             ExternalDynamicListsResponseModel
@@ -148,7 +148,7 @@ class ExternalDynamicLists(BaseObject):
         self,
         edl: ExternalDynamicListsUpdateModel,
     ) -> ExternalDynamicListsResponseModel:
-        """Updates an existing EDL.
+        """Update an existing EDL.
 
         Args:
             edl: ExternalDynamicListsUpdateModel instance containing the update data
@@ -238,7 +238,7 @@ class ExternalDynamicLists(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -256,7 +256,7 @@ class ExternalDynamicLists(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ExternalDynamicListsResponseModel]:
-        """Lists address objects with optional filtering.
+        """List address objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -398,7 +398,7 @@ class ExternalDynamicLists(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ExternalDynamicListsResponseModel:
-        """Fetches a single EDL by name.
+        """Fetch a single EDL by name.
 
         Args:
             name (str): The name of the address group to fetch.
@@ -480,7 +480,7 @@ class ExternalDynamicLists(BaseObject):
         self,
         edl_id: str,
     ) -> None:
-        """Deletes an EDL.
+        """Delete an EDL.
 
         Args:
             edl_id (str): The ID of the object to delete.

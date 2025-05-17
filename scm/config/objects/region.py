@@ -52,7 +52,7 @@ class Region(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -99,7 +99,7 @@ class Region(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> RegionResponseModel:
-        """Creates a new region object.
+        """Create a new region object.
 
         Returns:
             RegionResponseModel
@@ -125,7 +125,7 @@ class Region(BaseObject):
         self,
         object_id: str,
     ) -> RegionResponseModel:
-        """Gets a region object by ID.
+        """Get a region object by ID.
 
         Returns:
             RegionResponseModel
@@ -142,7 +142,7 @@ class Region(BaseObject):
         self,
         region: RegionUpdateModel,
     ) -> RegionResponseModel:
-        """Updates an existing region object.
+        """Update an existing region object.
 
         Args:
             region: RegionUpdateModel instance containing the update data
@@ -246,7 +246,7 @@ class Region(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -264,7 +264,7 @@ class Region(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[RegionResponseModel]:
-        """Lists region objects with optional filtering.
+        """List region objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -415,7 +415,7 @@ class Region(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> RegionResponseModel:
-        """Fetches a single object by name.
+        """Fetch a single region by name.
 
         Args:
             name (str): The name of the region to fetch.
@@ -497,7 +497,7 @@ class Region(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a region object.
+        """Delete a region object.
 
         Args:
             object_id (str): The ID of the object to delete.

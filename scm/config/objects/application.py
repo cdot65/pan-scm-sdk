@@ -50,7 +50,7 @@ class Application(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class Application(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationResponseModel:
-        """Creates a new application object.
+        """Create a new application object.
 
         Returns:
             ApplicationResponseModel
@@ -122,7 +122,7 @@ class Application(BaseObject):
         self,
         object_id: str,
     ) -> ApplicationResponseModel:
-        """Gets an application object by ID.
+        """Get an application object by ID.
 
         Returns:
             ApplicationResponseModel
@@ -139,7 +139,7 @@ class Application(BaseObject):
         self,
         application: ApplicationUpdateModel,
     ) -> ApplicationResponseModel:
-        """Updates an existing application object.
+        """Update an existing application object.
 
         Args:
             application: ApplicationUpdateModel instance containing the update data
@@ -237,7 +237,7 @@ class Application(BaseObject):
         folder: Optional[str],
         snippet: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {k: v for k, v in {"folder": folder, "snippet": snippet}.items() if v is not None}
 
     def list(
@@ -249,7 +249,7 @@ class Application(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationResponseModel]:
-        """Lists application objects with optional filtering.
+        """List application objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -382,7 +382,7 @@ class Application(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
     ) -> ApplicationResponseModel:
-        """Fetches a single application by name.
+        """Fetch a single application by name.
 
         Args:
             name (str): The name of the application to fetch.
@@ -460,7 +460,7 @@ class Application(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an application object.
+        """Delete an application object.
 
         Args:
             object_id (str): The ID of the object to delete.

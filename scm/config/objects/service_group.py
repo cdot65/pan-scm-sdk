@@ -50,7 +50,7 @@ class ServiceGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class ServiceGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceGroupResponseModel:
-        """Creates a new service group object.
+        """Create a new service group object.
 
         Returns:
             ServiceGroupResponseModel
@@ -122,7 +122,7 @@ class ServiceGroup(BaseObject):
         self,
         object_id: str,
     ) -> ServiceGroupResponseModel:
-        """Gets a service group object by ID.
+        """Get a service group object by ID.
 
         Returns:
             ServiceGroupResponseModel
@@ -139,7 +139,7 @@ class ServiceGroup(BaseObject):
         self,
         service_group: ServiceGroupUpdateModel,
     ) -> ServiceGroupResponseModel:
-        """Updates an existing service group object.
+        """Update an existing service group object.
 
         Args:
             service_group (ServiceGroupUpdateModel):
@@ -222,7 +222,7 @@ class ServiceGroup(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -240,7 +240,7 @@ class ServiceGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ServiceGroupResponseModel]:
-        """Lists service group objects with optional filtering.
+        """List service group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -381,7 +381,7 @@ class ServiceGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ServiceGroupResponseModel:
-        """Fetches a single service group by name.
+        """Fetch a single service group by name.
 
         Args:
             name (str): The name of the service group to fetch.
@@ -463,7 +463,7 @@ class ServiceGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a service group object.
+        """Delete a service group object.
 
         Args:
             object_id (str): The ID of the object to delete.

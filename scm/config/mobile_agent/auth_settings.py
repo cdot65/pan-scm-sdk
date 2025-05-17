@@ -51,7 +51,7 @@ class AuthSettings(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -98,7 +98,7 @@ class AuthSettings(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AuthSettingsResponseModel:
-        """Creates a new GlobalProtect Authentication Settings object.
+        """Create a new GlobalProtect Authentication Settings object.
 
         Args:
             data: Dictionary containing the authentication settings configuration
@@ -129,7 +129,7 @@ class AuthSettings(BaseObject):
         self,
         object_id: str,
     ) -> AuthSettingsResponseModel:
-        """Gets a GlobalProtect Authentication Settings object by ID.
+        """Get a GlobalProtect Authentication Settings object by ID.
 
         Args:
             object_id: The ID of the authentication settings to retrieve
@@ -147,7 +147,7 @@ class AuthSettings(BaseObject):
         object_id: str,
         data: Dict[str, Any],
     ) -> AuthSettingsResponseModel:
-        """Updates an existing GlobalProtect Authentication Settings object.
+        """Update an existing GlobalProtect Authentication Settings object.
 
         Args:
             object_id: The ID of the object to update
@@ -180,7 +180,7 @@ class AuthSettings(BaseObject):
         self,
         move_data: Dict[str, Any],
     ) -> None:
-        """Moves a GlobalProtect Authentication Settings object to a different position.
+        """Move a GlobalProtect Authentication Settings object to a different position.
 
         Args:
             move_data: Dictionary containing the move configuration
@@ -207,7 +207,7 @@ class AuthSettings(BaseObject):
         folder: str = "Mobile Users",
         **filters,
     ) -> List[AuthSettingsResponseModel]:
-        """Lists GlobalProtect Authentication Settings objects with optional filtering.
+        """List GlobalProtect Authentication Settings objects with optional filtering.
 
         Args:
             folder: Folder name (defaults to "Mobile Users" as it's the only valid value)
@@ -262,7 +262,7 @@ class AuthSettings(BaseObject):
         name: str,
         folder: str = "Mobile Users",
     ) -> AuthSettingsResponseModel:
-        """Fetches a single GlobalProtect Authentication Settings by name.
+        """Fetch a single GlobalProtect Authentication Settings by name.
 
         Args:
             name: The name of the authentication settings to fetch
@@ -314,7 +314,7 @@ class AuthSettings(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a GlobalProtect Authentication Settings object.
+        """Delete a GlobalProtect Authentication Settings object.
 
         Args:
             object_id: The ID of the object to delete

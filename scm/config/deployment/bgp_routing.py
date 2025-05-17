@@ -37,7 +37,7 @@ class BGPRouting(BaseObject):
         self.logger = logging.getLogger(__name__)
 
     def get(self) -> BGPRoutingResponseModel:
-        """Gets the current BGP routing settings.
+        """Get the current BGP routing settings.
 
         Returns:
             BGPRoutingResponseModel: The current BGP routing configuration
@@ -83,7 +83,7 @@ class BGPRouting(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BGPRoutingResponseModel:
-        """Creates a new BGP routing configuration.
+        """Create a new BGP routing configuration.
 
         Note: Since BGP routing is a singleton object, this method is functionally
         equivalent to update() and will replace any existing configuration.
@@ -191,7 +191,7 @@ class BGPRouting(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BGPRoutingResponseModel:
-        """Updates the BGP routing settings.
+        """Update the BGP routing settings.
 
         Args:
             data: Dictionary containing the BGP routing configuration
@@ -293,7 +293,7 @@ class BGPRouting(BaseObject):
             )
 
     def delete(self) -> None:
-        """Resets the BGP routing configuration to default values.
+        """Reset the BGP routing configuration to default values.
 
         Note: Since BGP routing is a singleton configuration object, it cannot be truly deleted.
         This method resets the configuration to default values instead.

@@ -50,7 +50,7 @@ class HIPProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class HIPProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> HIPProfileResponseModel:
-        """Creates a new HIP profile.
+        """Create a new HIP profile.
 
         Args:
             data: Dictionary containing the HIP profile data
@@ -125,7 +125,7 @@ class HIPProfile(BaseObject):
         self,
         object_id: str,
     ) -> HIPProfileResponseModel:
-        """Gets a HIP profile by ID.
+        """Get a HIP profile by ID.
 
         Args:
             object_id: The ID of the HIP profile to get
@@ -145,7 +145,7 @@ class HIPProfile(BaseObject):
         self,
         hip_profile: HIPProfileUpdateModel,
     ) -> HIPProfileResponseModel:
-        """Updates an existing HIP profile.
+        """Update an existing HIP profile.
 
         Args:
             hip_profile: HIPProfileUpdateModel instance containing the update data
@@ -177,7 +177,7 @@ class HIPProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -194,7 +194,7 @@ class HIPProfile(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         exclude_devices: Optional[List[str]] = None,
     ) -> List[HIPProfileResponseModel]:
-        """Lists HIP profiles with optional filtering.
+        """List HIP profiles with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -329,7 +329,7 @@ class HIPProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> HIPProfileResponseModel:
-        """Fetches a single HIP profile by name.
+        """Fetch a single HIP profile by name.
 
         Args:
             name (str): The name of the HIP profile to fetch.
@@ -411,7 +411,7 @@ class HIPProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a HIP profile.
+        """Delete a HIP profile.
 
         Args:
             object_id (str): The ID of the object to delete.

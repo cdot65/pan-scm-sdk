@@ -126,7 +126,7 @@ class AddressBaseModel(BaseModel):
 
     @model_validator(mode="after")
     def validate_address_type(self) -> "AddressBaseModel":
-        """Validates that exactly one address type is provided."""
+        """Validate that exactly one address type is provided."""
         address_fields = [
             "ip_netmask",
             "ip_range",
@@ -165,7 +165,7 @@ class AddressCreateModel(AddressBaseModel):
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "AddressCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",

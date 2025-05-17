@@ -50,7 +50,7 @@ class DynamicUserGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class DynamicUserGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DynamicUserGroupResponseModel:
-        """Creates a new dynamic user group object.
+        """Create a new dynamic user group object.
 
         Args:
             data: Dictionary containing the dynamic user group data
@@ -125,7 +125,7 @@ class DynamicUserGroup(BaseObject):
         self,
         object_id: str,
     ) -> DynamicUserGroupResponseModel:
-        """Gets a dynamic user group object by ID.
+        """Get a dynamic user group object by ID.
 
         Args:
             object_id: The ID of the dynamic user group to retrieve
@@ -145,7 +145,7 @@ class DynamicUserGroup(BaseObject):
         self,
         dynamic_user_group: DynamicUserGroupUpdateModel,
     ) -> DynamicUserGroupResponseModel:
-        """Updates an existing dynamic user group object.
+        """Update an existing dynamic user group object.
 
         Args:
             dynamic_user_group: DynamicUserGroupUpdateModel instance containing the update data
@@ -228,7 +228,7 @@ class DynamicUserGroup(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary.
+        """Build container parameters dictionary.
 
         Args:
             folder: Optional folder name
@@ -256,7 +256,7 @@ class DynamicUserGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[DynamicUserGroupResponseModel]:
-        """Lists dynamic user group objects with optional filtering.
+        """List dynamic user group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -397,7 +397,7 @@ class DynamicUserGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> DynamicUserGroupResponseModel:
-        """Fetches a single dynamic user group object by name.
+        """Fetch a single dynamic user group object by name.
 
         Args:
             name (str): The name of the dynamic user group to fetch.
@@ -479,7 +479,7 @@ class DynamicUserGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a dynamic user group object.
+        """Delete a dynamic user group object.
 
         Args:
             object_id (str): The ID of the object to delete.

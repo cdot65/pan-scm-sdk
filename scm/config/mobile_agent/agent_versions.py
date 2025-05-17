@@ -46,7 +46,7 @@ class AgentVersions(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -148,7 +148,7 @@ class AgentVersions(BaseObject):
         self,
         **filters,
     ) -> List[str]:
-        """Lists all available GlobalProtect agent versions with optional filtering.
+        """List all available GlobalProtect agent versions with optional filtering.
 
         Args:
             **filters: Additional filters including:
@@ -179,7 +179,7 @@ class AgentVersions(BaseObject):
         self,
         version: str,
     ) -> str:
-        """Fetches a single agent version by exact match.
+        """Fetch a single agent version by exact match.
 
         Args:
             version: The exact version string to fetch

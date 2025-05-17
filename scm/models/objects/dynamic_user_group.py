@@ -121,7 +121,7 @@ class DynamicUserGroupCreateModel(DynamicUserGroupBaseModel):
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "DynamicUserGroupCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",

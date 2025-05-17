@@ -50,7 +50,7 @@ class IKEGateway(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class IKEGateway(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> IKEGatewayResponseModel:
-        """Creates a new IKE Gateway object.
+        """Create a new IKE Gateway object.
 
         Args:
             data: Dictionary containing the IKE Gateway configuration
@@ -128,7 +128,7 @@ class IKEGateway(BaseObject):
         self,
         object_id: str,
     ) -> IKEGatewayResponseModel:
-        """Gets an IKE Gateway object by ID.
+        """Get an IKE Gateway object by ID.
 
         Args:
             object_id: The ID of the IKE Gateway to retrieve
@@ -145,7 +145,7 @@ class IKEGateway(BaseObject):
         self,
         gateway: IKEGatewayUpdateModel,
     ) -> IKEGatewayResponseModel:
-        """Updates an existing IKE Gateway object.
+        """Update an existing IKE Gateway object.
 
         Args:
             gateway: IKEGatewayUpdateModel instance containing the update data
@@ -180,7 +180,7 @@ class IKEGateway(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -197,7 +197,7 @@ class IKEGateway(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         exclude_devices: Optional[List[str]] = None,
     ) -> List[IKEGatewayResponseModel]:
-        """Lists IKE Gateway objects with optional filtering.
+        """List IKE Gateway objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -323,7 +323,7 @@ class IKEGateway(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> IKEGatewayResponseModel:
-        """Fetches a single IKE Gateway by name.
+        """Fetch a single IKE Gateway by name.
 
         Args:
             name: The name of the IKE Gateway to fetch
@@ -409,7 +409,7 @@ class IKEGateway(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an IKE Gateway object.
+        """Delete an IKE Gateway object.
 
         Args:
             object_id: The ID of the object to delete

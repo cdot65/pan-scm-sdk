@@ -48,7 +48,7 @@ class Tag(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -95,7 +95,7 @@ class Tag(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> TagResponseModel:
-        """Creates a new tag object.
+        """Create a new tag object.
 
         Returns:
             TagResponseModel
@@ -120,7 +120,7 @@ class Tag(BaseObject):
         self,
         object_id: str,
     ) -> TagResponseModel:
-        """Gets a tag object by ID.
+        """Get a tag object by ID.
 
         Returns:
             TagResponseModel
@@ -137,7 +137,7 @@ class Tag(BaseObject):
         self,
         tag: TagUpdateModel,
     ) -> TagResponseModel:
-        """Updates an existing tag object.
+        """Update an existing tag object.
 
         Args:
             tag: TagUpdateModel instance containing the update data
@@ -218,7 +218,7 @@ class Tag(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -236,7 +236,7 @@ class Tag(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[TagResponseModel]:
-        """Lists tag objects with optional filtering.
+        """List tag objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -376,7 +376,7 @@ class Tag(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> TagResponseModel:
-        """Fetches a single tag by name.
+        """Fetch a single tag by name.
 
         Args:
             name (str): The name of the tag to fetch.
@@ -444,7 +444,7 @@ class Tag(BaseObject):
             )
 
     def delete(self, object_id: str) -> None:
-        """Deletes a tag object.
+        """Delete a tag object.
 
         Args:
             object_id (str): The ID of the object to delete.

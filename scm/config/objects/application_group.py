@@ -50,7 +50,7 @@ class ApplicationGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class ApplicationGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationGroupResponseModel:
-        """Creates a new application group object.
+        """Create a new application group object.
 
         Returns:
             ApplicationGroupResponseModel
@@ -122,7 +122,7 @@ class ApplicationGroup(BaseObject):
         self,
         object_id: str,
     ) -> ApplicationGroupResponseModel:
-        """Gets an application group object by ID.
+        """Get an application group object by ID.
 
         Returns:
             ApplicationGroupResponseModel
@@ -139,7 +139,7 @@ class ApplicationGroup(BaseObject):
         self,
         app_group: ApplicationGroupUpdateModel,
     ) -> ApplicationGroupResponseModel:
-        """Updates an existing application group object.
+        """Update an existing application group object.
 
         Args:
             app_group: ApplicationGroupUpdateModel instance containing the update data
@@ -206,7 +206,7 @@ class ApplicationGroup(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -224,7 +224,7 @@ class ApplicationGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationGroupResponseModel]:
-        """Lists application group objects with optional filtering.
+        """List application group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -364,7 +364,7 @@ class ApplicationGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ApplicationGroupResponseModel:
-        """Fetches a single application group by name.
+        """Fetch a single application group by name.
 
         Args:
             name (str): The name of the application group to fetch.
@@ -446,7 +446,7 @@ class ApplicationGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an application group object.
+        """Delete an application group object.
 
         Args:
             object_id (str): The ID of the object to delete.

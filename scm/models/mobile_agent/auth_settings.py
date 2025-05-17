@@ -77,7 +77,7 @@ class AuthSettingsBaseModel(BaseModel):
 
     @field_validator("folder")
     def validate_folder(cls, v):  # noqa
-        """Validates that folder is 'Mobile Users' if provided."""
+        """Validate that folder is 'Mobile Users' if provided."""
         if v is not None and v != "Mobile Users":
             raise ValueError(
                 "Folder must be 'Mobile Users' for GlobalProtect Authentication Settings"
@@ -98,7 +98,7 @@ class AuthSettingsCreateModel(AuthSettingsBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "AuthSettingsCreateModel":
-        """Validates that folder is provided and set to 'Mobile Users'."""
+        """Validate that folder is provided and set to 'Mobile Users'."""
         if not self.folder:
             raise ValueError("Folder is required for GlobalProtect Authentication Settings")
         return self
@@ -155,7 +155,7 @@ class AuthSettingsUpdateModel(BaseModel):
 
     @field_validator("folder")
     def validate_folder(cls, v):  # noqa
-        """Validates that folder is 'Mobile Users' if provided."""
+        """Validate that folder is 'Mobile Users' if provided."""
         if v is not None and v != "Mobile Users":
             raise ValueError(
                 "Folder must be 'Mobile Users' for GlobalProtect Authentication Settings"
@@ -216,7 +216,7 @@ class AuthSettingsMoveModel(BaseModel):
 
     @model_validator(mode="after")
     def validate_destination_required(self) -> "AuthSettingsMoveModel":
-        """Validates that destination is provided when required."""
+        """Validate that destination is provided when required."""
         if self.where in [MovePosition.BEFORE, MovePosition.AFTER] and not self.destination:
             raise ValueError("Destination is required when where is 'before' or 'after'")
         if self.where in [MovePosition.TOP, MovePosition.BOTTOM] and self.destination:

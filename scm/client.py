@@ -117,7 +117,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """Handles the API request and returns the response JSON or None if no content is present.
+        """Handle the API request and return the response JSON or None if no content is present.
 
         Args:
             method: HTTP method to be used for the request (e.g., 'GET', 'POST').
@@ -159,7 +159,7 @@ class Scm:
         params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
-        """Sends a GET request to the SCM API.
+        """Send a GET request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -179,7 +179,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """Sends a POST request to the SCM API.
+        """Send a POST request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -198,7 +198,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """Sends a PUT request to the SCM API.
+        """Send a PUT request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -217,7 +217,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """Sends a DELETE request to the SCM API.
+        """Send a DELETE request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -322,7 +322,7 @@ class Scm:
         sync: bool = False,
         timeout: int = 300,
     ) -> CandidatePushResponseModel:
-        """Commits configuration changes to SCM.
+        """Commit configuration changes to SCM.
 
         Args:
             folders: List of folder names to commit changes from

@@ -53,7 +53,7 @@ class Schedule(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -100,7 +100,7 @@ class Schedule(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ScheduleResponseModel:
-        """Creates a new schedule object.
+        """Create a new schedule object.
 
         Args:
             data: Dictionary containing schedule data
@@ -128,7 +128,7 @@ class Schedule(BaseObject):
         self,
         object_id: str,
     ) -> ScheduleResponseModel:
-        """Gets a schedule object by ID.
+        """Get a schedule object by ID.
 
         Args:
             object_id: The ID of the schedule to get
@@ -148,7 +148,7 @@ class Schedule(BaseObject):
         self,
         schedule: ScheduleUpdateModel,
     ) -> ScheduleResponseModel:
-        """Updates an existing schedule object.
+        """Update an existing schedule object.
 
         Args:
             schedule: ScheduleUpdateModel instance containing the update data
@@ -239,7 +239,7 @@ class Schedule(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -257,7 +257,7 @@ class Schedule(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ScheduleResponseModel]:
-        """Lists schedule objects with optional filtering.
+        """List schedule objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -396,7 +396,7 @@ class Schedule(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ScheduleResponseModel:
-        """Fetches a single schedule by name.
+        """Fetch a single schedule by name.
 
         Args:
             name: The name of the schedule to fetch
@@ -478,7 +478,7 @@ class Schedule(BaseObject):
             )
 
     def delete(self, object_id: str) -> None:
-        """Deletes a schedule object.
+        """Delete a schedule object.
 
         Args:
             object_id: The ID of the schedule to delete

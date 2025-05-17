@@ -140,7 +140,7 @@ class LogForwardingProfileCreateModel(LogForwardingProfileBaseModel):
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "LogForwardingProfileCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -189,7 +189,7 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
 
     @model_validator(mode="after")
     def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
-        """Validates that non-predefined profiles have an ID."""
+        """Validate that non-predefined profiles have an ID."""
         # Skip validation if snippet is "predefined-snippet"
         if self.snippet == "predefined-snippet":
             return self

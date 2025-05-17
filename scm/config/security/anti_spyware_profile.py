@@ -50,7 +50,7 @@ class AntiSpywareProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class AntiSpywareProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AntiSpywareProfileResponseModel:
-        """Creates a new anti-spyware profile object.
+        """Create a new anti-spyware profile object.
 
         Returns:
             AntiSpywareProfileResponseModel
@@ -122,7 +122,7 @@ class AntiSpywareProfile(BaseObject):
         self,
         object_id: str,
     ) -> AntiSpywareProfileResponseModel:
-        """Gets an anti-spyware profile object by ID.
+        """Get an anti-spyware profile object by ID.
 
         Returns:
             AntiSpywareProfileResponseModel
@@ -139,7 +139,7 @@ class AntiSpywareProfile(BaseObject):
         self,
         profile: AntiSpywareProfileUpdateModel,
     ) -> AntiSpywareProfileResponseModel:
-        """Updates an existing anti-spyware profile object.
+        """Update an existing anti-spyware profile object.
 
         Args:
             profile: AntiSpywareProfileUpdateModel instance containing the update data
@@ -206,7 +206,7 @@ class AntiSpywareProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -224,7 +224,7 @@ class AntiSpywareProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AntiSpywareProfileResponseModel]:
-        """Lists anti-spyware profile objects with optional filtering.
+        """List anti-spyware profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -364,7 +364,7 @@ class AntiSpywareProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> AntiSpywareProfileResponseModel:
-        """Fetches a single anti-spyware profile by name.
+        """Fetch a single anti-spyware profile by name.
 
         Args:
             name (str): The name of the anti-spyware profile to fetch.
@@ -446,7 +446,7 @@ class AntiSpywareProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an anti-spyware profile object.
+        """Delete an anti-spyware profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

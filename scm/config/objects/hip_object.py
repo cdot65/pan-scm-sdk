@@ -50,7 +50,7 @@ class HIPObject(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class HIPObject(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> HIPObjectResponseModel:
-        """Creates a new HIP object.
+        """Create a new HIP object.
 
         Returns:
             HIPObjectResponseModel
@@ -122,7 +122,7 @@ class HIPObject(BaseObject):
         self,
         object_id: str,
     ) -> HIPObjectResponseModel:
-        """Gets a HIP object by ID.
+        """Get a HIP object by ID.
 
         Returns:
             HIPObjectResponseModel
@@ -139,7 +139,7 @@ class HIPObject(BaseObject):
         self,
         hip_object: HIPObjectUpdateModel,
     ) -> HIPObjectResponseModel:
-        """Updates an existing HIP object.
+        """Update an existing HIP object.
 
         Args:
             hip_object: HIPObjectUpdateModel instance containing the update data
@@ -217,7 +217,7 @@ class HIPObject(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -235,7 +235,7 @@ class HIPObject(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[HIPObjectResponseModel]:
-        """Lists HIP objects with optional filtering.
+        """List HIP objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -375,7 +375,7 @@ class HIPObject(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> HIPObjectResponseModel:
-        """Fetches a single HIP object by name.
+        """Fetch a single HIP object by name.
 
         Args:
             name (str): The name of the HIP object to fetch.
@@ -457,7 +457,7 @@ class HIPObject(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a HIP object.
+        """Delete a HIP object.
 
         Args:
             object_id (str): The ID of the object to delete.

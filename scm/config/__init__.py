@@ -132,7 +132,7 @@ class BaseObject:
         sync: bool = False,
         timeout: int = 300,
     ) -> CandidatePushResponseModel:
-        """Commits configuration changes to SCM.
+        """Commit configuration changes to SCM.
 
         This method proxies to the api_client's commit method.
 

@@ -148,7 +148,7 @@ class BGPRoutingCreateModel(BGPRoutingBaseModel):
 
     @model_validator(mode="after")
     def validate_routing_preference_type(self) -> "BGPRoutingCreateModel":
-        """Validates that routing_preference is the correct type if provided."""
+        """Validate that routing_preference is the correct type if provided."""
         if self.routing_preference is not None:
             if not isinstance(
                 self.routing_preference, (DefaultRoutingModel, HotPotatoRoutingModel)
@@ -201,7 +201,7 @@ class BGPRoutingUpdateModel(BGPRoutingBaseModel):
 
     @model_validator(mode="after")
     def validate_update_model(self) -> "BGPRoutingUpdateModel":
-        """Validates the update model.
+        """Validate the update model.
 
         1. Ensures routing_preference is the correct type if provided
         2. Ensures at least one field is set for update

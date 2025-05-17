@@ -60,7 +60,7 @@ class Label(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -102,7 +102,7 @@ class Label(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> LabelResponseModel:
-        """Create a new Label in the Strata Cloud Manager.
+        """Create a new label object in the Strata Cloud Manager.
 
         Args:
             data: Dictionary containing label data.
@@ -125,7 +125,7 @@ class Label(BaseObject):
         self,
         label_id: Union[str, UUID],
     ) -> LabelResponseModel:
-        """Get a label by its ID.
+        """Get a label object by ID.
 
         Args:
             label_id: The ID of the label to retrieve.
@@ -151,7 +151,7 @@ class Label(BaseObject):
         self,
         label: Union[LabelUpdateModel, LabelResponseModel],
     ) -> LabelResponseModel:
-        """Update an existing label.
+        """Update an existing label object.
 
         Args:
             label: Either a LabelUpdateModel or LabelResponseModel containing the updated label data.
@@ -195,7 +195,7 @@ class Label(BaseObject):
         self,
         label_id: Union[str, UUID],
     ) -> None:
-        """Delete a label.
+        """Delete a label object.
 
         Args:
             label_id: The ID of the label to delete.
@@ -217,7 +217,7 @@ class Label(BaseObject):
         self,
         **filters: Any,
     ) -> List[LabelResponseModel]:
-        """List labels with optional filters.
+        """List label objects with optional filtering.
 
         Args:
             **filters: Additional filters for the API.
@@ -249,7 +249,7 @@ class Label(BaseObject):
         self,
         name: str,
     ) -> Optional[LabelResponseModel]:
-        """Get a label by its name.
+        """Fetch a single label by name.
 
         Args:
             name: The name of the label to retrieve.

@@ -50,7 +50,7 @@ class WildfireAntivirusProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> WildfireAvProfileResponseModel:
-        """Creates a new wildfire antivirus profile object.
+        """Create a new wildfire antivirus profile object.
 
         Returns:
             WildfireAntivirusProfileResponseModel
@@ -122,7 +122,7 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         object_id: str,
     ) -> WildfireAvProfileResponseModel:
-        """Gets a wildfire antivirus profile object by ID.
+        """Get a wildfire antivirus profile object by ID.
 
         Returns:
             WildfireAntivirusProfileResponseModel
@@ -139,7 +139,7 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         profile: WildfireAvProfileUpdateModel,
     ) -> WildfireAvProfileResponseModel:
-        """Updates an existing wildfire antivirus profile object.
+        """Update an existing wildfire antivirus profile object.
 
         Args:
             profile: WildfireAvProfileUpdateModel instance containing the update data
@@ -206,7 +206,7 @@ class WildfireAntivirusProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -224,7 +224,7 @@ class WildfireAntivirusProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[WildfireAvProfileResponseModel]:
-        """Lists wildfire antivirus profile objects with optional filtering.
+        """List wildfire antivirus profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -364,7 +364,7 @@ class WildfireAntivirusProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> WildfireAvProfileResponseModel:
-        """Fetches a single wildfire antivirus profile by name.
+        """Fetch a single wildfire antivirus profile by name.
 
         Args:
             name (str): The name of the wildfire antivirus profile to fetch.
@@ -446,7 +446,7 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a wildfire antivirus profile object.
+        """Delete a wildfire antivirus profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

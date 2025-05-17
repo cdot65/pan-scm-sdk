@@ -50,7 +50,7 @@ class DecryptionProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class DecryptionProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DecryptionProfileResponseModel:
-        """Creates a new decryption profile object.
+        """Create a new decryption profile object.
 
         Returns:
             DecryptionProfileResponseModel
@@ -122,7 +122,7 @@ class DecryptionProfile(BaseObject):
         self,
         object_id: str,
     ) -> DecryptionProfileResponseModel:
-        """Gets a decryption profile object by ID.
+        """Get a decryption profile object by ID.
 
         Returns:
             DecryptionProfileResponseModel
@@ -139,7 +139,7 @@ class DecryptionProfile(BaseObject):
         self,
         profile: DecryptionProfileUpdateModel,
     ) -> DecryptionProfileResponseModel:
-        """Updates an existing decryption profile object.
+        """Update an existing decryption profile object.
 
         Args:
             profile: DecryptionProfileUpdateModel instance containing the update data
@@ -214,7 +214,7 @@ class DecryptionProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -232,7 +232,7 @@ class DecryptionProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[DecryptionProfileResponseModel]:
-        """Lists decryption profile objects with optional filtering.
+        """List decryption profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -372,7 +372,7 @@ class DecryptionProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> DecryptionProfileResponseModel:
-        """Fetches a single decryption profile by name.
+        """Fetch a single decryption profile by name.
 
         Args:
             name (str): The name of the decryption profile to fetch.
@@ -454,7 +454,7 @@ class DecryptionProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a decryption profile object.
+        """Delete a decryption profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

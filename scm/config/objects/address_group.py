@@ -50,7 +50,7 @@ class AddressGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class AddressGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AddressGroupResponseModel:
-        """Creates a new address group object.
+        """Create a new address group object.
 
         Returns:
             AddressGroupResponseModel
@@ -122,7 +122,7 @@ class AddressGroup(BaseObject):
         self,
         object_id: str,
     ) -> AddressGroupResponseModel:
-        """Gets an address group object by ID.
+        """Get an address group object by ID.
 
         Returns:
             AddressGroupResponseModel
@@ -139,7 +139,7 @@ class AddressGroup(BaseObject):
         self,
         address_group: AddressGroupUpdateModel,
     ) -> AddressGroupResponseModel:
-        """Updates an existing address group object.
+        """Update an existing address group object.
 
         Args:
             address_group: AddressGroupUpdateModel instance containing the update data
@@ -245,7 +245,7 @@ class AddressGroup(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -263,7 +263,7 @@ class AddressGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AddressGroupResponseModel]:
-        """Lists address group objects with optional filtering.
+        """List address group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -405,7 +405,7 @@ class AddressGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> AddressGroupResponseModel:
-        """Fetches a single address group by name.
+        """Fetch a single address group by name.
 
         Args:
             name (str): The name of the address group to fetch.
@@ -487,7 +487,7 @@ class AddressGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an address group object.
+        """Delete an address group object.
 
         Args:
             object_id (str): The ID of the object to delete.

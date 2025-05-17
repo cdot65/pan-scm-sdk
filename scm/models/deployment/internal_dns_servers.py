@@ -90,7 +90,7 @@ class InternalDnsServersCreateModel(InternalDnsServersBaseModel):
 
     @model_validator(mode="after")
     def validate_create_model(self) -> "InternalDnsServersCreateModel":
-        """Validates the create model.
+        """Validate the create model.
 
         1. Ensures domain_name is not empty
         """
@@ -136,7 +136,7 @@ class InternalDnsServersUpdateModel(InternalDnsServersBaseModel):
 
     @model_validator(mode="after")
     def validate_update_model(self) -> "InternalDnsServersUpdateModel":
-        """Validates the update model.
+        """Validate the update model.
 
         1. Ensures at least one field other than id is set for update
         2. Ensures domain_name is not empty if provided
@@ -170,7 +170,7 @@ class InternalDnsServersResponseModel(InternalDnsServersBaseModel):
 
     @model_validator(mode="after")
     def validate_response_model(self) -> "InternalDnsServersResponseModel":
-        """Validates the response model.
+        """Validate the response model.
 
         1. Ensures domain_name is not empty
         """

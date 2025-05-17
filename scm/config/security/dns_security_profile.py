@@ -50,7 +50,7 @@ class DNSSecurityProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class DNSSecurityProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DNSSecurityProfileResponseModel:
-        """Creates a new DNS security profile object.
+        """Create a new DNS security profile object.
 
         Returns:
             DNSSecurityProfileResponseModel
@@ -122,7 +122,7 @@ class DNSSecurityProfile(BaseObject):
         self,
         object_id: str,
     ) -> DNSSecurityProfileResponseModel:
-        """Gets a DNS security profile object by ID.
+        """Get a DNS security profile object by ID.
 
         Returns:
             DNSSecurityProfileResponseModel
@@ -139,7 +139,7 @@ class DNSSecurityProfile(BaseObject):
         self,
         profile: DNSSecurityProfileUpdateModel,
     ) -> DNSSecurityProfileResponseModel:
-        """Updates an existing DNS security profile object.
+        """Update an existing DNS security profile object.
 
         Args:
             profile: DNSSecurityProfileUpdateModel instance containing the update data
@@ -212,7 +212,7 @@ class DNSSecurityProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -230,7 +230,7 @@ class DNSSecurityProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[DNSSecurityProfileResponseModel]:
-        """Lists DNS security profile objects with optional filtering.
+        """List DNS security profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -370,7 +370,7 @@ class DNSSecurityProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> DNSSecurityProfileResponseModel:
-        """Fetches a single DNS security profile by name.
+        """Fetch a single DNS security profile by name.
 
         Args:
             name (str): The name of the DNS security profile to fetch.
@@ -452,7 +452,7 @@ class DNSSecurityProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a DNS security profile object.
+        """Delete a DNS security profile object.
 
         Args:
             object_id (str): The ID of the object to delete.

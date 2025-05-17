@@ -53,7 +53,7 @@ class SecurityRule(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -101,7 +101,7 @@ class SecurityRule(BaseObject):
         data: Dict[str, Any],
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """Creates a new security rule object.
+        """Create a new security rule object.
 
         Returns:
             SecurityRuleResponseModel
@@ -146,7 +146,7 @@ class SecurityRule(BaseObject):
         object_id: str,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """Gets a security rule object by ID.
+        """Get a security rule object by ID.
 
         Returns:
             SecurityRuleResponseModel
@@ -176,7 +176,7 @@ class SecurityRule(BaseObject):
         rule: SecurityRuleUpdateModel,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """Updates an existing security rule object.
+        """Update an existing security rule object.
 
         Args:
             rule: SecurityRuleUpdateModel instance containing the update data
@@ -416,7 +416,7 @@ class SecurityRule(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -435,7 +435,7 @@ class SecurityRule(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SecurityRuleResponseModel]:
-        """Lists security rule objects with optional filtering.
+        """List security rule objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -600,7 +600,7 @@ class SecurityRule(BaseObject):
         device: Optional[str] = None,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """Fetches a single security rule by name.
+        """Fetch a single security rule by name.
 
         Args:
             name (str): The name of the security rule to fetch.
@@ -697,7 +697,7 @@ class SecurityRule(BaseObject):
         object_id: str,
         rulebase: str = "pre",
     ) -> None:
-        """Deletes a security rule object.
+        """Delete a security rule object.
 
         Args:
             object_id (str): The ID of the object to delete.

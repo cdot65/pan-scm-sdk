@@ -50,7 +50,7 @@ class InternalDnsServers(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -100,7 +100,7 @@ class InternalDnsServers(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> InternalDnsServersResponseModel:
-        """Creates a new internal DNS server object.
+        """Create a new internal DNS server object.
 
         Args:
             data: Dictionary containing the internal DNS server configuration
@@ -131,7 +131,7 @@ class InternalDnsServers(BaseObject):
         self,
         object_id: str,
     ) -> InternalDnsServersResponseModel:
-        """Gets an internal DNS server object by ID.
+        """Get an internal DNS server object by ID.
 
         Args:
             object_id: The ID of the internal DNS server to retrieve
@@ -148,7 +148,7 @@ class InternalDnsServers(BaseObject):
         self,
         dns_server: InternalDnsServersUpdateModel,
     ) -> InternalDnsServersResponseModel:
-        """Updates an existing internal DNS server object.
+        """Update an existing internal DNS server object.
 
         Args:
             dns_server: InternalDnsServersUpdateModel instance containing the update data
@@ -182,7 +182,7 @@ class InternalDnsServers(BaseObject):
         name: Optional[str] = None,
         **filters,
     ) -> List[InternalDnsServersResponseModel]:
-        """Lists internal DNS server objects with optional filtering.
+        """List internal DNS server objects with optional filtering.
 
         Args:
             name: Optional DNS server name to filter by
@@ -267,7 +267,7 @@ class InternalDnsServers(BaseObject):
         self,
         name: str,
     ) -> InternalDnsServersResponseModel:
-        """Fetches a single internal DNS server by name.
+        """Fetch a single internal DNS server by name.
 
         Args:
             name: The name of the internal DNS server to fetch
@@ -344,7 +344,7 @@ class InternalDnsServers(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an internal DNS server object.
+        """Delete an internal DNS server object.
 
         Args:
             object_id: The ID of the object to delete

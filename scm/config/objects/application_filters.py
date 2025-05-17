@@ -50,7 +50,7 @@ class ApplicationFilters(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class ApplicationFilters(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationFiltersResponseModel:
-        """Creates a new application filter object.
+        """Create a new application filter object.
 
         Returns:
             ApplicationFiltersResponseModel
@@ -122,7 +122,7 @@ class ApplicationFilters(BaseObject):
         self,
         object_id: str,
     ) -> ApplicationFiltersResponseModel:
-        """Gets an application filter object by ID.
+        """Get an application filter object by ID.
 
         Returns:
             ApplicationFiltersResponseModel
@@ -139,7 +139,7 @@ class ApplicationFilters(BaseObject):
         self,
         application: ApplicationFiltersUpdateModel,
     ) -> ApplicationFiltersResponseModel:
-        """Updates an existing application filter object.
+        """Update an existing application filter object.
 
         Args:
             application: ApplicationFiltersUpdateModel instance containing the update data
@@ -255,7 +255,7 @@ class ApplicationFilters(BaseObject):
         folder: Optional[str],
         snippet: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {k: v for k, v in {"folder": folder, "snippet": snippet}.items() if v is not None}
 
     def list(
@@ -267,7 +267,7 @@ class ApplicationFilters(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationFiltersResponseModel]:
-        """Lists application objects with optional filtering.
+        """List application objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -400,7 +400,7 @@ class ApplicationFilters(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
     ) -> ApplicationFiltersResponseModel:
-        """Fetches a single application filter by name.
+        """Fetch a single application filter by name.
 
         Args:
             name (str): The name of the application filter to fetch.
@@ -478,7 +478,7 @@ class ApplicationFilters(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an application filter object.
+        """Delete an application filter object.
 
         Args:
             object_id (str): The ID of the object to delete.

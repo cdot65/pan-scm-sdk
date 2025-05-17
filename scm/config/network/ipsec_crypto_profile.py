@@ -50,7 +50,7 @@ class IPsecCryptoProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -97,7 +97,7 @@ class IPsecCryptoProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> IPsecCryptoProfileResponseModel:
-        """Creates a new IPsec crypto profile.
+        """Create a new IPsec crypto profile.
 
         Args:
             data: Dictionary containing the IPsec crypto profile configuration
@@ -128,7 +128,7 @@ class IPsecCryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> IPsecCryptoProfileResponseModel:
-        """Gets an IPsec crypto profile by ID.
+        """Get an IPsec crypto profile by ID.
 
         Args:
             object_id: The ID of the IPsec crypto profile to retrieve
@@ -145,7 +145,7 @@ class IPsecCryptoProfile(BaseObject):
         self,
         profile: IPsecCryptoProfileUpdateModel,
     ) -> IPsecCryptoProfileResponseModel:
-        """Updates an existing IPsec crypto profile.
+        """Update an existing IPsec crypto profile.
 
         Args:
             profile: IPsecCryptoProfileUpdateModel instance containing the update data
@@ -180,7 +180,7 @@ class IPsecCryptoProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -198,7 +198,7 @@ class IPsecCryptoProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[IPsecCryptoProfileResponseModel]:
-        """Lists IPsec crypto profile objects with optional filtering.
+        """List IPsec crypto profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -324,7 +324,7 @@ class IPsecCryptoProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> IPsecCryptoProfileResponseModel:
-        """Fetches a single IPsec crypto profile by name.
+        """Fetch a single IPsec crypto profile by name.
 
         Args:
             name: The name of the IPsec crypto profile to fetch
@@ -429,7 +429,7 @@ class IPsecCryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes an IPsec crypto profile.
+        """Delete an IPsec crypto profile.
 
         Args:
             object_id: The ID of the object to delete

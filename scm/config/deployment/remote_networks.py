@@ -53,7 +53,7 @@ class RemoteNetworks(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -100,7 +100,7 @@ class RemoteNetworks(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> RemoteNetworkResponseModel:
-        """Creates a new Remote Network object.
+        """Create a new Remote Network object.
 
         Returns:
             RemoteNetworkResponseModel
@@ -118,7 +118,7 @@ class RemoteNetworks(BaseObject):
         self,
         object_id: str,
     ) -> RemoteNetworkResponseModel:
-        """Gets a Remote Network object by ID.
+        """Get a Remote Network object by ID.
 
         Returns:
             RemoteNetworkResponseModel
@@ -132,7 +132,7 @@ class RemoteNetworks(BaseObject):
         self,
         remote_network: RemoteNetworkUpdateModel,
     ) -> RemoteNetworkResponseModel:
-        """Updates an existing Remote Network object.
+        """Update an existing Remote Network object.
 
         Args:
             remote_network: RemoteNetworkUpdateModel instance containing the update data
@@ -182,7 +182,7 @@ class RemoteNetworks(BaseObject):
         """
 
         def match_field(obj_value, filter_value) -> bool:
-            """Returns True if `obj_value` matches the given `filter_value`.
+            """Return True if `obj_value` matches the given `filter_value`.
 
             - If filter_value is an empty list, we interpret that as returning False overall
               (the calling code can short-circuit the entire result to []).
@@ -301,7 +301,7 @@ class RemoteNetworks(BaseObject):
         # snippet: Optional[str],
         # device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {k: v for k, v in {"folder": folder}.items() if v is not None}
 
     def list(
@@ -315,7 +315,7 @@ class RemoteNetworks(BaseObject):
         # exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[RemoteNetworkResponseModel]:
-        """Lists remote networks with optional filtering.
+        """List remote networks with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -445,7 +445,7 @@ class RemoteNetworks(BaseObject):
         # snippet: Optional[str] = None,
         # device: Optional[str] = None,
     ) -> RemoteNetworkResponseModel:
-        """Fetches a single remote network by name.
+        """Fetch a single remote network by name.
 
         Args:
             name (str): The name of the remote network to fetch.
@@ -521,7 +521,7 @@ class RemoteNetworks(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """Deletes a remote network object.
+        """Delete a remote network object.
 
         Args:
             object_id (str): The ID of the object to delete.
