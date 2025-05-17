@@ -36,12 +36,12 @@ class DailyRecurringModel(BaseModel):
         """Model representing the daily time specification for recurring updates."""
 
         at: str = Field(
-        default="00",
-        description="Time specification hh (e.g. 20)",
-        pattern="([01][0-9]|[2][0-3])",
-        min_length=2,
-        max_length=2,
-    )
+            default="00",
+            description="Time specification hh (e.g. 20)",
+            pattern="([01][0-9]|[2][0-3])",
+            min_length=2,
+            max_length=2,
+        )
 
     daily: DailyModel = Field(
         ...,
@@ -56,17 +56,17 @@ class WeeklyRecurringModel(BaseModel):
         """Model representing the day and time specification for weekly recurring updates."""
 
         day_of_week: str = Field(
-        ...,
-        description="Day of the week",
-        pattern="^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$",
-    )
-    at: str = Field(
-        default="00",
-        description="Time specification hh (e.g. 20)",
-        pattern="([01][0-9]|[2][0-3])",
-        min_length=2,
-        max_length=2,
-    )
+            ...,
+            description="Day of the week",
+            pattern="^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$",
+        )
+        at: str = Field(
+            default="00",
+            description="Time specification hh (e.g. 20)",
+            pattern="([01][0-9]|[2][0-3])",
+            min_length=2,
+            max_length=2,
+        )
 
     weekly: WeeklyModel = Field(
         ...,
@@ -81,18 +81,18 @@ class MonthlyRecurringModel(BaseModel):
         """Model representing the day and time specification for monthly recurring updates."""
 
         day_of_month: int = Field(
-        ...,
-        description="Day of month",
-        ge=1,
-        le=31,
-    )
-    at: str = Field(
-        default="00",
-        description="Time specification hh (e.g. 20)",
-        pattern="([01][0-9]|[2][0-3])",
-        min_length=2,
-        max_length=2,
-    )
+            ...,
+            description="Day of month",
+            ge=1,
+            le=31,
+        )
+        at: str = Field(
+            default="00",
+            description="Time specification hh (e.g. 20)",
+            pattern="([01][0-9]|[2][0-3])",
+            min_length=2,
+            max_length=2,
+        )
 
     monthly: MonthlyModel = Field(
         ...,
