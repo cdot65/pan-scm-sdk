@@ -5,7 +5,17 @@ Defines Pydantic models for representing Device resources returned by the SCM AP
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+# TODO: These placeholder models were defined in the incorrect location
+# - scm/models/config/setup/devices.py. They need proper implementation:
+# class InstalledLicenseModel(BaseModel):
+#     """Represents an installed license on a device."""
+#     pass
+#
+# class AvailableLicenseModel(BaseModel):
+#     """Represents an available license for a device."""
+#     pass
 
 
 class DeviceLicenseModel(BaseModel):
@@ -41,15 +51,15 @@ class DeviceBaseModel(BaseModel):
     """
 
     name: Optional[str] = Field(None, description="Device name.")
-    display_name: Optional[str] = Field(None, description="Display name for the device.")
-    serial_number: Optional[str] = Field(None, description="Device serial number.")
+    display_name: Optional[str] = Field(None, alias="displayName", description="Display name for the device.")
+    serial_number: Optional[str] = Field(None, alias="serialNumber", description="Device serial number.")
     family: Optional[str] = Field(None, description="Device family (e.g., 'vm').")
     model: Optional[str] = Field(None, description="Device model (e.g., 'PA-VM').")
     folder: Optional[str] = Field(None, description="Folder name containing the device.")
     hostname: Optional[str] = Field(None, description="Device hostname.")
     type: Optional[str] = Field(None, description="Device type (e.g., 'on-prem').")
     device_only: Optional[bool] = Field(None, description="True if device-only entry.")
-    is_connected: Optional[bool] = Field(None, description="Connection status.")
+    is_connected: Optional[bool] = Field(None, alias="isConnected", description="Connection status.")
     description: Optional[str] = Field(None, description="Device description.")
 
 
@@ -118,7 +128,7 @@ class DeviceResponseModel(DeviceBaseModel):
     """
 
     id: str = Field(..., description="Unique device identifier (serial number).")
-    connected_since: Optional[str] = Field(None, description="ISO timestamp when connected.")
+    connected_since: Optional[str] = Field(None, alias="connectedSince", description="ISO timestamp when connected.")
     last_disconnect_time: Optional[str] = Field(
         None, description="ISO timestamp when last disconnected."
     )
@@ -157,15 +167,19 @@ class DeviceResponseModel(DeviceBaseModel):
     url_db_type: Optional[str] = Field(None, description="URL DB type.")
     license_match: Optional[bool] = Field(None, description="License match status.")
     available_licenses: Optional[List[DeviceLicenseModel]] = Field(
-        None, description="List of available licenses."
+        None, alias="availableLicenses", description="List of available licenses."
     )
     installed_licenses: Optional[List[DeviceLicenseModel]] = Field(
-        None, description="List of installed licenses."
+        None, alias="installedLicenses", description="List of installed licenses."
     )
     ha_state: Optional[str] = Field(None, description="HA state.")
     ha_peer_state: Optional[str] = Field(None, description="HA peer state.")
     ha_peer_serial: Optional[str] = Field(None, description="HA peer serial number.")
     vm_state: Optional[str] = Field(None, description="VM state.")
+
+    model_config = ConfigDict(
+        extra="allow"  # Allow extra fields if the API adds new ones
+    )
 
 
 class DeviceListResponseModel(BaseModel):

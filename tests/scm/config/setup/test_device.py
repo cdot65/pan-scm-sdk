@@ -12,7 +12,7 @@ from scm.exceptions import APIError, ObjectNotPresentError
 from scm.models.setup.device import DeviceResponseModel
 from tests.factories.setup.device import (
     DeviceListResponseModelDictFactory,
-    DeviceResponseModelDictFactory,
+    DeviceResponseDictFactory,
 )
 
 
@@ -90,7 +90,7 @@ class TestDeviceGet(TestDeviceBase):
     def test_get_device(self, device_service, mock_scm_client):
         """Test getting a device by ID."""
         device_id = "dev123"
-        fake_response = DeviceResponseModelDictFactory.build()
+        fake_response = DeviceResponseDictFactory.build()
         mock_scm_client.get.return_value = fake_response
         model = device_service.get(device_id)
         assert isinstance(model, DeviceResponseModel)
@@ -115,7 +115,7 @@ class TestDeviceGetEdgeCases(TestDeviceBase):
 
     def test_get_device_response_list(self, device_service, mock_scm_client):
         """Test getting a device when response is a list."""
-        fake_device = DeviceResponseModelDictFactory.build()
+        fake_device = DeviceResponseDictFactory.build()
         mock_scm_client.get.return_value = [fake_device]
         model = device_service.get("dev123")
         assert isinstance(model, DeviceResponseModel)
@@ -123,7 +123,7 @@ class TestDeviceGetEdgeCases(TestDeviceBase):
 
     def test_get_device_response_dict(self, device_service, mock_scm_client):
         """Test getting a device when response is a dict."""
-        fake_device = DeviceResponseModelDictFactory.build()
+        fake_device = DeviceResponseDictFactory.build()
         mock_scm_client.get.return_value = fake_device
         model = device_service.get("dev123")
         assert isinstance(model, DeviceResponseModel)
@@ -396,7 +396,7 @@ class TestDeviceFetch(TestDeviceBase):
     def test_fetch_device_found(self, device_service, mock_scm_client):
         """Test fetching device when found."""
         name = "deviceX"
-        fake_device = DeviceResponseModelDictFactory.build(name=name)
+        fake_device = DeviceResponseDictFactory.build(name=name)
         fake_response = DeviceListResponseModelDictFactory.build(data=[fake_device])
         mock_scm_client.get.return_value = fake_response
         model = device_service.fetch(name)
@@ -412,7 +412,7 @@ class TestDeviceFetch(TestDeviceBase):
     def test_fetch_device_exact_match(self, device_service, mock_scm_client):
         """Test fetching device with exact name match."""
         name = "exact-match-device"
-        fake_device = DeviceResponseModelDictFactory.build(name=name)
+        fake_device = DeviceResponseDictFactory.build(name=name)
         fake_response = DeviceListResponseModelDictFactory.build(data=[fake_device])
         mock_scm_client.get.return_value = fake_response
         model = device_service.fetch(name)
@@ -430,7 +430,7 @@ class TestDeviceFetchEdgeCases(TestDeviceBase):
 
     def test_fetch_device_no_exact_match(self, device_service, mock_scm_client):
         """Test fetching device with no exact match."""
-        fake_device = DeviceResponseModelDictFactory.build(name="foo")
+        fake_device = DeviceResponseDictFactory.build(name="foo")
         mock_scm_client.get.return_value = DeviceListResponseModelDictFactory.build(
             data=[fake_device]
         )
@@ -438,7 +438,7 @@ class TestDeviceFetchEdgeCases(TestDeviceBase):
 
     def test_fetch_device_first_exact_match(self, device_service, mock_scm_client):
         """Test fetching device returns first exact match."""
-        fake_device = DeviceResponseModelDictFactory.build(name="foo")
+        fake_device = DeviceResponseDictFactory.build(name="foo")
         mock_scm_client.get.return_value = DeviceListResponseModelDictFactory.build(
             data=[fake_device]
         )
@@ -453,8 +453,8 @@ class TestDeviceApplyFilters(TestDeviceBase):
     def test_labels_filter_noop(self, device_service):
         """Test labels filter (no-op for devices)."""
         # Device model does not have 'labels', so filter should always return []
-        d1 = DeviceResponseModelDictFactory.build()
-        d2 = DeviceResponseModelDictFactory.build()
+        d1 = DeviceResponseDictFactory.build()
+        d2 = DeviceResponseDictFactory.build()
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"labels": ["a"]})
         assert filtered == []
@@ -462,16 +462,16 @@ class TestDeviceApplyFilters(TestDeviceBase):
     def test_parent_filter_noop(self, device_service):
         """Test parent filter (no-op for devices)."""
         # Device model does not have 'parent', so filter should always return []
-        d1 = DeviceResponseModelDictFactory.build()
-        d2 = DeviceResponseModelDictFactory.build()
+        d1 = DeviceResponseDictFactory.build()
+        d2 = DeviceResponseDictFactory.build()
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"parent": "p1"})
         assert filtered == []
 
     def test_type_filter(self, device_service):
         """Test type filter."""
-        d1 = DeviceResponseModelDictFactory.build(type="foo")
-        d2 = DeviceResponseModelDictFactory.build(type="bar")
+        d1 = DeviceResponseDictFactory.build(type="foo")
+        d2 = DeviceResponseDictFactory.build(type="bar")
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"type": "foo"})
         assert devices[0] in filtered and devices[1] not in filtered
@@ -479,32 +479,32 @@ class TestDeviceApplyFilters(TestDeviceBase):
     def test_snippets_filter_noop(self, device_service):
         """Test snippets filter (no-op for devices)."""
         # Device model does not have 'snippets', so filter should always return []
-        d1 = DeviceResponseModelDictFactory.build()
-        d2 = DeviceResponseModelDictFactory.build()
+        d1 = DeviceResponseDictFactory.build()
+        d2 = DeviceResponseDictFactory.build()
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"snippets": ["b"]})
         assert filtered == []
 
     def test_model_filter(self, device_service):
         """Test model filter."""
-        d1 = DeviceResponseModelDictFactory.build(model="foo")
-        d2 = DeviceResponseModelDictFactory.build(model="bar")
+        d1 = DeviceResponseDictFactory.build(model="foo")
+        d2 = DeviceResponseDictFactory.build(model="bar")
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"model": "foo"})
         assert devices[0] in filtered and devices[1] not in filtered
 
     def test_serial_number_filter(self, device_service):
         """Test serial number filter."""
-        d1 = DeviceResponseModelDictFactory.build(serial_number="123")
-        d2 = DeviceResponseModelDictFactory.build(serial_number="456")
+        d1 = DeviceResponseDictFactory.build(serialNumber="123")
+        d2 = DeviceResponseDictFactory.build(serialNumber="456")
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"serial_number": "123"})
         assert devices[0] in filtered and devices[1] not in filtered
 
     def test_device_only_filter(self, device_service):
         """Test device only filter."""
-        d1 = DeviceResponseModelDictFactory.build(device_only=True)
-        d2 = DeviceResponseModelDictFactory.build(device_only=False)
+        d1 = DeviceResponseDictFactory.build(device_only=True)
+        d2 = DeviceResponseDictFactory.build(device_only=False)
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
         filtered = device_service._apply_filters(devices, {"device_only": True})
         assert devices[0] in filtered and devices[1] not in filtered
