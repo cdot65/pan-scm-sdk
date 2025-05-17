@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pan-scm-sdk"
-version = "0.3.36"
+version = "0.3.37"
 description = "Python SDK for Palo Alto Networks Strata Cloud Manager."
 authors = ["Calvin Remsburg <calvin@cdot.io>"]
 license = "Apache 2.0"
@@ -23,7 +23,6 @@ types-requests = "^2.32.0.20250328"
 
 
 [tool.poetry.group.dev.dependencies]
-# black = "^24.10.0"  # Replaced by Ruff
 flake8 = "^7.1.1"
 mkdocs = "^1.6.1"
 mkdocs-material = "^9.5.39"
@@ -41,7 +40,7 @@ dynaconf = "^3.2.6"
 pytest-dotenv = "^0.5.2"
 reportlab = "^4.3.1"
 rich = "^13.9.4"
-ruff = "^0.9.10"                                            # Replaces Black for formatting and enhances linting
+ruff = "^0.9.10"
 isort = "^6.0.1"
 mypy = "^1.15.0"
 types-requests = "^2.32.0.20250328"
@@ -55,8 +54,15 @@ line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F"] # Error and F-style errors (flake8 equivalents)
-ignore = ["E501"]   # Match existing ignores
+select = ["E", "F", "D"] # Error, F-style, and all docstring rules
+ignore = [
+    "E501", # Match existing ignores
+    "D203", # Ignore: require 1 blank line before class (conflicts with Google style)
+    "D213", # Ignore: require multi-line summary on second line (conflicts with Google style)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.format]
 quote-style = "double"
