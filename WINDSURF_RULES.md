@@ -46,45 +46,70 @@ This project is the `pan-scm-sdk` Python SDK, providing programmatic access to P
 
 ## SDK Service File Standards
 
-All SDK service files (e.g., `scm/config/objects/address.py`) must follow these conventions:
+All SDK service files (e.g., `scm/config/objects/address.py`) must strictly adhere to the following standards, which are harmonized from `CLAUDE.md`, `SDK_SERVICE_TEMPLATE.py`, `SDK_STYLING_GUIDE.md`, and `CLAUDE_MODELS.md`. These rules supersede any previous conventions and are enforced for all new and existing SDK service code.
 
-- **File/Class Structure**
+- **File & Module Structure**
   - One main service class per file, named after the resource (PascalCase, singular).
-  - Header docstring: Google-style, describing the file and resource.
-  - Imports: Standard library first, then SDK modules (absolute), then models/exceptions.
-  - Class-level constants: ENDPOINT, DEFAULT_MAX_LIMIT, ABSOLUTE_MAX_LIMIT.
-  - Constructor: Accepts api_client, max_limit; sets up logger and validates limit.
-  - max_limit property: With getter/setter, both documented.
-  - Private _validate_max_limit method: Validates input, raises InvalidObjectError.
-  - CRUD methods: At minimum, create, get, update, all returning a Pydantic ResponseModel.
-  - Static _apply_filters method: For client-side filtering, with type hints and docstrings.
+  - **Module docstring**: Google-style, describing the service and resource.
+  - **File header comment**: Include the source file path as the first line after the docstring.
+  - **Imports**: Standard library first, then SDK modules (absolute imports only), then models/exceptions.
+  - **Class-level constants**: `ENDPOINT`, `DEFAULT_MAX_LIMIT`, `ABSOLUTE_MAX_LIMIT` (with comments on API limits).
+  - **Constructor**: Accepts `api_client`, `max_limit`; sets up logger, validates limit, and follows the template pattern.
+  - **max_limit property**: With getter/setter, both documented with Google-style docstrings.
+  - **Private `_validate_max_limit` method**: Validates input, raises `InvalidObjectError` with detailed error code, status, and details.
+  - **CRUD methods**: At minimum, `create`, `get`, `update`, all returning a Pydantic `ResponseModel`, and following the exact signature and docstring patterns from the template and guides.
+  - **Static `_apply_filters` method**: For client-side filtering, with full type hints and docstrings.
+  - **Standard helper methods**: e.g., `_build_container_params`, as per template.
 
 - **Naming & Typing**
-  - snake_case for methods, PascalCase for classes/models, UPPER_CASE for constants.
-  - Type hints for all parameters and return values (Python 3.10+).
-  - Pydantic V2+ models for all resource data.
+  - `snake_case` for all methods, properties, variables.
+  - `PascalCase` for all classes and Pydantic models.
+  - `UPPER_CASE` for constants.
+  - Type hints for all parameters and return values (Python 3.10+ syntax required).
+  - All resource data must use Pydantic V2+ models (`CreateModel`, `UpdateModel`, `ResponseModel`).
 
 - **Docstrings & Comments**
-  - Google-style docstrings for all public classes and methods.
-  - Inline comments for clarity, especially for validation and API workflows.
+  - Google-style docstrings are required for all public classes and methods, including Args, Returns, and Raises sections.
+  - Inline comments must be used for clarity, especially around validation, API workflows, and any SCM API-specific behaviors (such as boolean handling).
+  - All method docstrings must be specific about types and expected values.
 
 - **Formatting & Linting**
-  - Line length: 88 characters (ruff default).
+  - Line length: 88 characters (ruff default; see `pyproject.toml`).
   - Blank lines between class-level constants, methods, and logical blocks.
-  - Ruff for linting/formatting, isort for imports.
-  - Absolute imports for all SDK-internal modules.
+  - Use `ruff` and `isort` for linting and formatting (see Makefile and style guide).
+  - Only absolute imports for SDK-internal modules.
+  - Double quotes for strings (unless otherwise required by project-wide style guide).
 
 - **Logic & Workflow**
-  - Input validation: All user inputs (esp. limits, enums) are validated, with custom exceptions raised.
-  - Model-driven: All data validated/serialized via Pydantic models.
-  - API calls: Always via self.api_client, with endpoint and params explicit.
-  - Error handling: Always uses SDK custom exceptions, detailed error codes/messages.
+  - All user input (especially limits, enums, containers) must be validated, with custom exceptions (`InvalidObjectError`, `MissingQueryParameterError`, etc.) raised as appropriate.
+  - All data must be validated and serialized via Pydantic models, using `.model_dump(exclude_unset=True)` for payloads.
+  - All API calls must be made via `self.api_client`, with endpoint and params explicit and clear.
+  - All error handling must use SDK custom exceptions, with detailed error codes, HTTP status, and context in the `details` dictionary.
+  - Pagination logic must use `max_limit`, `offset`, and process all pages as per the canonical pattern in the template.
 
-- **Special Behaviors**
-  - Boolean field handling: Only include True values in payloads for SCM API (omit False).
-  - Serialization: Always use .model_dump(exclude_unset=True) for API payloads.
+- **Special Behaviors & SCM API Requirements**
+  - Boolean field handling: Only include `True` values in API payloads; omit `False` (per SCM API requirements).
+  - Serialization: Always use `.model_dump(exclude_unset=True)` for all API payloads.
+  - Container argument validation: For `folder`, `snippet`, `device`, ensure exactly one is used when required, and raise if ambiguous.
+  - Resource-specific validations: Enforce string length, regex, enum, and container exclusivity as required by the resource and API.
+  - Security and deployment services may require extra parameters (e.g., `rulebase`) or have different pagination logic (see template).
 
-- **Reference:** See `sdk_service_file_styling.md` for detailed examples and rationale.
+- **Error Handling Patterns**
+  - All parameter validation and API response errors must raise custom SDK exceptions, with full context.
+  - See `CLAUDE.md` and `SDK_SERVICE_TEMPLATE.py` for canonical error handling code snippets.
+
+- **Pagination Pattern**
+  - Use the standard pagination loop with `limit`, `offset`, and breaking when the returned data length is less than the limit.
+
+- **Reference & Templates**
+  - For full, up-to-date examples and rationale, see:
+    - `sdk_service_file_styling.md`
+    - `SDK_SERVICE_TEMPLATE.py`
+    - `SDK_STYLING_GUIDE.md`
+    - `CLAUDE_MODELS.md`
+    - `CLAUDE.md` (AI/codegen guidance)
+
+These standards are strictly enforced for all SDK service files. If you have questions or need clarification, consult the above guides or contact the maintainers.
 
 ---
 
