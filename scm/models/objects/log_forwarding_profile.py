@@ -1,3 +1,8 @@
+"""Log Forwarding Profile models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing log forwarding profile objects and related data.
+"""
+
 # scm/models/objects/log_forwarding_profile.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""
+Test module for HIP Profile configuration service.
+
+This module contains unit tests for the HIP Profile configuration service and its related models.
+"""
 # tests/scm/config/objects/test_hip_profile.py
 
 # Standard library imports

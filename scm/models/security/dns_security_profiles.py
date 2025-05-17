@@ -1,3 +1,8 @@
+"""DNS Security Profiles security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing DNS security profile objects and related data.
+"""
+
 # scm/models/security/dns_security_profiles.py
 
 from enum import Enum

@@ -1,3 +1,8 @@
+"""Service Group models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing service group objects and related data.
+"""
+
 # scm/models/objects/service_group.py
 
 # Standard library imports

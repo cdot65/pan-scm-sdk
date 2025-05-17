@@ -1,3 +1,8 @@
+"""Security Rule configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing security rule objects via the SCM API.
+"""
+
 # scm/config/security/security_rule.py
 
 # Standard library imports

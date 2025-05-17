@@ -1,3 +1,8 @@
+"""HIP Object configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing HIP object resources via the SCM API.
+"""
+
 # scm/config/objects/hip_object.py
 
 # Standard library imports

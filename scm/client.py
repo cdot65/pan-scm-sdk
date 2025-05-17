@@ -1,3 +1,9 @@
+"""SCM API client for Strata Cloud Manager SDK.
+
+This module defines the main Scm client class, supporting authentication and
+HTTP operations for interacting with the Palo Alto Networks Strata Cloud Manager REST API.
+"""
+
 # scm/client.py
 
 # Standard library imports

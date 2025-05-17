@@ -1,3 +1,8 @@
+"""Syslog Server Profiles configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing syslog server profile objects via the SCM API.
+"""
+
 # scm/config/objects/syslog_server_profiles.py
 
 # Standard library imports

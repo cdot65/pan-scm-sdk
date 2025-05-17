@@ -1,3 +1,8 @@
+"""
+Test module for Application Group configuration service.
+
+This module contains unit tests for the Application Group configuration service and its related models.
+"""
 # tests/scm/config/objects/test_application_group.py
 
 # Standard library imports

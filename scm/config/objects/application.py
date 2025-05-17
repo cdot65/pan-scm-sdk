@@ -1,3 +1,8 @@
+"""Application configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing application objects via the SCM API.
+"""
+
 # scm/config/objects/application.py
 
 # Standard library imports

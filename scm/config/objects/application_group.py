@@ -1,3 +1,8 @@
+"""Application Group configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing application group objects via the SCM API.
+"""
+
 # scm/config/objects/application_group.py
 
 # Standard library imports

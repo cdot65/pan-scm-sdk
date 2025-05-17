@@ -1,3 +1,8 @@
+"""
+Test module for Address configuration service.
+
+This module contains unit tests for the Address configuration service and its related models.
+"""
 # tests/scm/config/objects/test_address.py
 
 # Standard library imports

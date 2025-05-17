@@ -1,3 +1,8 @@
+"""Schedules configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing schedule objects via the SCM API.
+"""
+
 # scm/config/objects/schedules.py
 
 # Standard library imports

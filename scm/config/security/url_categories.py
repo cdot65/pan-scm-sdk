@@ -1,3 +1,8 @@
+"""URL Categories configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing URL category objects via the SCM API.
+"""
+
 # scm/config/security/url_categories.py
 
 # Standard library imports

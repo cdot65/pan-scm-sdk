@@ -1,4 +1,9 @@
-# scm/config/network/nat_rule.py
+"""NAT Rules configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing NAT rule objects via the SCM API.
+"""
+
+# scm/config/network/nat_rules.py
 
 # Standard library imports
 import logging

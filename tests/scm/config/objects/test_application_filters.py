@@ -1,3 +1,8 @@
+"""
+Test module for Application Filters configuration service.
+
+This module contains unit tests for the Application Filters configuration service and its related models.
+"""
 # tests/scm/config/objects/test_application_filters.py
 
 # Standard library imports

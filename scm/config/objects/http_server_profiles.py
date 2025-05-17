@@ -1,3 +1,8 @@
+"""HTTP Server Profiles configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing HTTP server profile objects via the SCM API.
+"""
+
 # scm/config/objects/http_server_profiles.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""Service models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing service objects and related data.
+"""
+
 # scm/models/objects/service.py
 
 from typing import List, Optional

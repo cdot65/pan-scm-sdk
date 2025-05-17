@@ -1,3 +1,9 @@
+"""Authentication models for Strata Cloud Manager SDK.
+
+Contains Pydantic models and validators for representing and validating authentication
+requests and credentials for the SCM API.
+"""
+
 # scm/models/auth.py
 
 from pydantic import BaseModel, Field, field_validator, model_validator

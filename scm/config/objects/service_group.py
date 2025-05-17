@@ -1,3 +1,8 @@
+"""Service Group configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing service group objects via the SCM API.
+"""
+
 # scm/config/objects/service_group.py
 
 # Standard library imports

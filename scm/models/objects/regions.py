@@ -1,3 +1,8 @@
+"""Regions models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing region objects and related data.
+"""
+
 # scm/models/objects/regions.py
 
 # Standard library imports

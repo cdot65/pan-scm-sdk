@@ -1,3 +1,8 @@
+"""Security Zone models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing security zone objects and related data.
+"""
+
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID

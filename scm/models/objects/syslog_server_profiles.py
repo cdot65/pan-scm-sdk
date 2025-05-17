@@ -1,3 +1,8 @@
+"""Syslog Server Profiles models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing syslog server profile objects and related data.
+"""
+
 # scm/models/objects/syslog_server_profiles.py
 
 # Standard library imports

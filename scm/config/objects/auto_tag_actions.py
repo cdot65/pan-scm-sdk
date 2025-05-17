@@ -1,3 +1,8 @@
+"""Auto Tag Actions configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing auto tag action objects via the SCM API.
+"""
+
 # scm/config/objects/auto_tag_actions.py
 
 #

@@ -1,3 +1,8 @@
+"""Anti-Spyware Profiles security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing anti-spyware profile objects and related data.
+"""
+
 # scm/models/security/anti_spyware_profile.py
 
 from enum import Enum

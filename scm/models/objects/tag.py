@@ -1,3 +1,8 @@
+"""Tag models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing tag objects and related data.
+"""
+
 # scm/models/objects/tag.py
 
 from enum import Enum
@@ -19,6 +24,8 @@ TagString = constr(max_length=64)
 
 
 class Colors(str, Enum):
+    """Enumeration of available color names for tag resources."""
+
     AZURE_BLUE = "Azure Blue"
     BLACK = "Black"
     BLUE = "Blue"

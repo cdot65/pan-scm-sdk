@@ -1,3 +1,8 @@
+"""BGP Routing models for Strata Cloud Manager SDK.
+
+Contains Pydantic models and enums for representing BGP routing configuration data.
+"""
+
 # scm/models/deployment/bgp_routing.py
 
 from enum import Enum

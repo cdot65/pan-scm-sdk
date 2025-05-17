@@ -1,3 +1,8 @@
+"""Dynamic User Group models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing dynamic user group objects and related data.
+"""
+
 # scm/models/objects/dynamic_user_group.py
 
 # Standard library imports

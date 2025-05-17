@@ -1,3 +1,8 @@
+"""Tag configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing tag objects via the SCM API.
+"""
+
 # scm/config/objects/tag.py
 
 # Standard library imports

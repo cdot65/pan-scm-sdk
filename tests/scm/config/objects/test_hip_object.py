@@ -1,3 +1,8 @@
+"""
+Test module for HIP Object configuration service.
+
+This module contains unit tests for the HIP Object configuration service and its related models.
+"""
 # tests/scm/config/objects/test_hip_object.py
 
 # Standard library imports

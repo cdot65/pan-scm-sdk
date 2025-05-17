@@ -1,3 +1,8 @@
+"""Quarantined Devices configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing quarantined device objects via the SCM API.
+"""
+
 # scm/config/objects/quarantined_devices.py
 
 # Standard library imports

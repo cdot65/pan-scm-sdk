@@ -1,3 +1,8 @@
+"""Mobile Agent Versions configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing agent version objects via the SCM API.
+"""
+
 # scm/config/mobile_agent/agent_versions.py
 
 # Standard library imports

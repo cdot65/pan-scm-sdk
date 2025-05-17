@@ -1,3 +1,8 @@
+"""Remote Networks models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing remote network objects and related data.
+"""
+
 # scm/models/deployment/remote_networks.py
 
 from enum import Enum
@@ -8,11 +13,15 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class EcmpLoadBalancingEnum(str, Enum):
+    """Enumeration of ECMP load balancing states for remote networks."""
+
     enable = "enable"
     disable = "disable"
 
 
 class PeeringTypeEnum(str, Enum):
+    """Enumeration of supported BGP peering types for remote networks."""
+
     exchange_v4_over_v4 = "exchange-v4-over-v4"
     exchange_v4_v6_over_v4 = "exchange-v4-v6-over-v4"
     exchange_v4_over_v4_v6_over_v6 = "exchange-v4-over-v4-v6-over-v6"
@@ -20,12 +29,16 @@ class PeeringTypeEnum(str, Enum):
 
 
 class BgpPeerModel(BaseModel):
+    """Model representing a BGP peer configuration for remote networks."""
+
     local_ip_address: Optional[str] = None
     peer_ip_address: Optional[str] = None
     secret: Optional[str] = None
 
 
 class BgpModel(BaseModel):
+    """Model representing BGP configuration for remote networks."""
+
     do_not_export_routes: Optional[bool] = None
     enable: Optional[bool] = None
     local_ip_address: Optional[str] = None
@@ -38,11 +51,15 @@ class BgpModel(BaseModel):
 
 
 class ProtocolModel(BaseModel):
+    """Model encapsulating protocol settings (BGP and BGP peer) for remote networks."""
+
     bgp: Optional[BgpModel] = None
     bgp_peer: Optional[BgpPeerModel] = None
 
 
 class EcmpTunnelModel(BaseModel):
+    """Model representing an ECMP tunnel configuration for remote networks."""
+
     name: str = Field(..., max_length=63)
     ipsec_tunnel: str = Field(..., max_length=1023)
     local_ip_address: Optional[str] = None

@@ -1,3 +1,8 @@
+"""Dynamic User Group configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing dynamic user group objects via the SCM API.
+"""
+
 # scm/config/objects/dynamic_user_group.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""Auth Settings models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing mobile agent authentication settings and related data.
+"""
+
 # scm/models/mobile_agent/auth_settings.py
 
 # Standard library imports

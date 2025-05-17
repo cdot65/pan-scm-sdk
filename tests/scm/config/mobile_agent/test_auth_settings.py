@@ -1,3 +1,8 @@
+"""
+Test module for Mobile Agent Auth Settings configuration service.
+
+This module contains unit tests for the Mobile Agent Auth Settings configuration service and its related models.
+"""
 # tests/scm/config/mobile_agent/test_auth_settings.py
 
 from unittest.mock import MagicMock, patch

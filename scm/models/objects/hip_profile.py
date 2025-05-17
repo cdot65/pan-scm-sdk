@@ -1,3 +1,8 @@
+"""HIP Profile models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing HIP profile objects and related data.
+"""
+
 # scm/models/objects/hip_profile.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""External Dynamic Lists configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing external dynamic list objects via the SCM API.
+"""
+
 # scm/config/objects/external_dynamic_lists.py
 
 # Standard library imports

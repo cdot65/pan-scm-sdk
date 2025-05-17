@@ -1,3 +1,8 @@
+"""Decryption Profiles security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing decryption profile objects and related data.
+"""
+
 # scm/models/security/decryption_profiles.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""Address Group configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing address group objects via the SCM API.
+"""
+
 # scm/config/objects/address_group.py
 
 # Standard library imports

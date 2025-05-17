@@ -1,3 +1,8 @@
+"""Address Group models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing address group objects and related data.
+"""
+
 # scm/models/objects/address_group.py
 
 from typing import List, Optional

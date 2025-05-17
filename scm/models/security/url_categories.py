@@ -1,3 +1,8 @@
+"""URL Categories security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing URL category objects and related data.
+"""
+
 # scm/models/security/url_categories.py
 
 from enum import Enum

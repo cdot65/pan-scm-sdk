@@ -1,3 +1,8 @@
+"""
+Test module for NAT Rules configuration service.
+
+This module contains unit tests for the NAT Rules configuration service and its related models.
+"""
 # tests/scm/config/network/test_nat_rules.py
 
 from unittest.mock import MagicMock

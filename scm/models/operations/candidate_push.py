@@ -1,3 +1,8 @@
+"""Candidate Push operations models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing candidate push operation objects and related data.
+"""
+
 # scm/models/operations/candidate_push.py
 
 from typing import List

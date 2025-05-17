@@ -1,3 +1,8 @@
+"""Anti-Spyware Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing anti-spyware profile objects via the SCM API.
+"""
+
 # scm/config/security/anti_spyware_profile.py
 
 # Standard library imports

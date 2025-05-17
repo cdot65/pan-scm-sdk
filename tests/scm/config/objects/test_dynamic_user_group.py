@@ -1,3 +1,8 @@
+"""
+Test module for Dynamic User Group configuration service.
+
+This module contains unit tests for the Dynamic User Group configuration service and its related models.
+"""
 # tests/scm/config/objects/test_dynamic_user_group.py
 
 # Standard library imports

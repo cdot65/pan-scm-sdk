@@ -1,3 +1,8 @@
+"""Security Zone configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing security zone objects via the SCM API.
+"""
+
 # scm/config/network/security_zone.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""Agent Versions models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing agent version objects and related data.
+"""
+
 # scm/models/mobile_agent/agent_versions.py
 
 from typing import List, Optional

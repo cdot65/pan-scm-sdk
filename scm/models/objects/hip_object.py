@@ -1,3 +1,8 @@
+"""HIP Object models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing HIP object resources and related data.
+"""
+
 # scm/models/objects/hip_object.py
 
 from typing import List, Literal, Optional, Union

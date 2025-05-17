@@ -1,3 +1,8 @@
+"""IKE Gateway configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing IKE gateway objects via the SCM API.
+"""
+
 # scm/config/network/ike_gateway.py
 
 # Standard library imports

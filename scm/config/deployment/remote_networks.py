@@ -1,3 +1,8 @@
+"""Remote Networks configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing remote network objects via the SCM API.
+"""
+
 # scm/config/deployment/remote_networks.py
 
 # Standard library imports

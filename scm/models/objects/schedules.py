@@ -1,3 +1,8 @@
+"""Schedules models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing schedule objects and related data.
+"""
+
 # scm/models/objects/schedules.py
 
 # Standard library imports

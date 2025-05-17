@@ -1,3 +1,8 @@
+"""DNS Security Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing DNS security profile objects via the SCM API.
+"""
+
 # scm/config/security/dns_security_profile.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""Decryption Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing decryption profile objects via the SCM API.
+"""
+
 # scm/config/security/decryption_profile.py
 
 # Standard library imports

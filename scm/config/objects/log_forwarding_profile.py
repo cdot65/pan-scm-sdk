@@ -1,3 +1,8 @@
+"""Log Forwarding Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing log forwarding profile objects via the SCM API.
+"""
+
 # scm/config/objects/log_forwarding_profile.py
 
 # Standard library imports

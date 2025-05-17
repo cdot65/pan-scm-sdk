@@ -1,3 +1,8 @@
+"""
+Test module for Mobile Agent Versions configuration service.
+
+This module contains unit tests for the Mobile Agent Versions configuration service and its related models.
+"""
 # tests/scm/config/mobile_agent/test_agent_versions.py
 
 from unittest.mock import Mock, patch

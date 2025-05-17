@@ -1,3 +1,8 @@
+"""Application Filters models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing application filter objects and related data.
+"""
+
 # scm/models/objects/application_filters.py
 
 from typing import List, Optional

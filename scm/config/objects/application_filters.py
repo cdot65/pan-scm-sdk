@@ -1,3 +1,8 @@
+"""Application Filters configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing application filter objects via the SCM API.
+"""
+
 # scm/config/objects/application_filters.py
 
 # Standard library imports

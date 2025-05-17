@@ -1,3 +1,8 @@
+"""HIP Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing HIP profile objects via the SCM API.
+"""
+
 # scm/config/objects/hip_profile.py
 
 # Standard library imports

@@ -1,3 +1,8 @@
+"""Security Rules security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing security rule objects and related data.
+"""
+
 # scm/models/security/security_rules.py
 
 from enum import Enum

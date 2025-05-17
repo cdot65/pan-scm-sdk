@@ -1,3 +1,8 @@
+"""WildFire Antivirus Profiles security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing WildFire antivirus profile objects and related data.
+"""
+
 # scm/models/security/wildfire_antivirus_profiles.py
 
 from enum import Enum

@@ -1,3 +1,8 @@
+"""Bandwidth Allocations models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing bandwidth allocation objects and related data.
+"""
+
 # scm/models/deployment/bandwidth_allocations.py
 
 from typing import List, Optional

@@ -1,3 +1,8 @@
+"""BGP Routing configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing BGP routing settings via the SCM API.
+"""
+
 # scm/config/deployment/bgp_routing.py
 
 # Standard library imports

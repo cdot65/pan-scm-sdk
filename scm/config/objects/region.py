@@ -1,3 +1,8 @@
+"""Region configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing region objects via the SCM API.
+"""
+
 # scm/config/objects/region.py
 
 # Standard library imports

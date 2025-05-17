@@ -1,3 +1,8 @@
+"""
+Test module for External Dynamic Lists configuration service.
+
+This module contains unit tests for the External Dynamic Lists configuration service and its related models.
+"""
 # tests/scm/config/objects/test_external_dynamic_lists.py
 
 from unittest.mock import MagicMock

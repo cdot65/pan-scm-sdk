@@ -1,3 +1,8 @@
+"""Mobile Agent Auth Settings configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing mobile agent authentication settings via the SCM API.
+"""
+
 # scm/config/mobile_agent/auth_settings.py
 
 # Standard library imports

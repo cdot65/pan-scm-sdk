@@ -1,3 +1,8 @@
+"""Internal DNS Servers configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing internal DNS server objects via the SCM API.
+"""
+
 # scm/config/deployment/internal_dns_servers.py
 
 # Standard library imports

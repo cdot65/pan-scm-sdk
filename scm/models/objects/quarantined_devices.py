@@ -1,3 +1,8 @@
+"""Quarantined Devices models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing quarantined device objects and related data.
+"""
+
 # scm/models/objects/quarantined_devices.py
 
 # Standard library imports

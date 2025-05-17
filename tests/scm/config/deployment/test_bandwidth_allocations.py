@@ -1,3 +1,8 @@
+"""
+Test module for Bandwidth Allocations configuration service.
+
+This module contains unit tests for the Bandwidth Allocations configuration service and its related models.
+"""
 # tests/scm/config/deployment/test_bandwidth_allocations.py
 
 # Standard library imports

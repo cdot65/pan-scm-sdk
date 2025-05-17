@@ -1,3 +1,8 @@
+"""
+Test module for Address Group configuration service.
+
+This module contains unit tests for the Address Group configuration service and its related models.
+"""
 # tests/scm/config/objects/test_address_group.py
 
 # Standard library imports

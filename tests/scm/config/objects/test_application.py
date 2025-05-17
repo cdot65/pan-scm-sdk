@@ -1,3 +1,8 @@
+"""
+Test module for Application configuration service.
+
+This module contains unit tests for the Application configuration service and its related models.
+"""
 # tests/scm/config/objects/test_application.py
 
 # Standard library imports

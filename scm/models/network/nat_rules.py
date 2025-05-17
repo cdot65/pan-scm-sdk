@@ -1,3 +1,8 @@
+"""NAT Rules models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing NAT rule objects and related data.
+"""
+
 from enum import Enum
 from typing import List, Literal, Optional
 from uuid import UUID

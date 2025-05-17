@@ -1,3 +1,8 @@
+"""WildFire Antivirus Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing WildFire antivirus profile objects via the SCM API.
+"""
+
 # scm/config/security/wildfire_antivirus_profiles.py
 
 # Standard library imports

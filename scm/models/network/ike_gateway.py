@@ -1,3 +1,8 @@
+"""IKE Gateway models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing IKE gateway objects and related data.
+"""
+
 from enum import Enum
 from typing import Any, Dict, Optional
 from uuid import UUID

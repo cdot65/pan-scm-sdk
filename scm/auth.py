@@ -1,3 +1,9 @@
+"""Authentication utilities for Strata Cloud Manager SDK.
+
+This module provides OAuth2 client logic, token management, and authentication models
+for securely interacting with Palo Alto Networks Strata Cloud Manager APIs.
+"""
+
 # scm/auth.py
 
 # Standard libraries

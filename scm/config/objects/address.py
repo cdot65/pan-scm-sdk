@@ -1,3 +1,8 @@
+"""Address configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing address objects via the SCM API.
+"""
+
 # scm/config/objects/address.py
 
 # Standard library imports

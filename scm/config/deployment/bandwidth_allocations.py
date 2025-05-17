@@ -1,3 +1,8 @@
+"""Bandwidth Allocations configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing bandwidth allocation objects via the SCM API.
+"""
+
 # scm/config/deployment/bandwidth_allocations.py
 
 # Standard library imports

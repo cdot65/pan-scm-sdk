@@ -1,4 +1,9 @@
-# scm/config/network/service_connections.py
+"""Service Connections configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing service connection objects via the SCM API.
+"""
+
+# scm/config/deployment/service_connections.py
 
 # Standard library imports
 import logging
