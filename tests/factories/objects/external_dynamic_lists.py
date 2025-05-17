@@ -21,6 +21,8 @@ class ExternalDynamicListsBaseFactory(factory.Factory):
     """Base factory for External Dynamic Lists with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsBaseFactory."""
+
         model = ExternalDynamicListsBaseModel
         abstract = True
 
@@ -35,6 +37,8 @@ class ExternalDynamicListsCreateApiFactory(ExternalDynamicListsBaseFactory):
     """Factory for creating ExternalDynamicListsCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsCreateModelFactory."""
+
         model = ExternalDynamicListsCreateModel
 
     # Default to folder and IP type
@@ -264,6 +268,8 @@ class ExternalDynamicListsUpdateApiFactory(ExternalDynamicListsBaseFactory):
     """Factory for creating ExternalDynamicListsUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsUpdateModelFactory."""
+
         model = ExternalDynamicListsUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -398,6 +404,8 @@ class ExternalDynamicListsResponseFactory(ExternalDynamicListsBaseFactory):
     """Factory for creating ExternalDynamicListsResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsResponseModelFactory."""
+
         model = ExternalDynamicListsResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

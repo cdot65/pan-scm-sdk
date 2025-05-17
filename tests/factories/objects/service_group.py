@@ -26,6 +26,8 @@ class ServiceGroupBaseFactory(factory.Factory):
     """Base factory for Service Group with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ServiceGroupBaseFactory."""
+
         model = ServiceGroupBaseModel
         abstract = True
 
@@ -46,6 +48,8 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
     """Factory for creating ServiceGroupCreateModel instances with members."""
 
     class Meta:
+        """Meta class that defines the model for ServiceGroupCreateModelFactory."""
+
         model = ServiceGroupCreateModel
 
     # Default to folder container
@@ -162,6 +166,8 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
     """Factory for creating ServiceGroupUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ServiceGroupUpdateModelFactory."""
+
         model = ServiceGroupUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -278,6 +284,8 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
     """Factory for creating ServiceGroupResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ServiceGroupResponseModelFactory."""
+
         model = ServiceGroupResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

@@ -25,6 +25,8 @@ class HIPProfileBaseFactory(factory.Factory):
     """Base factory for HIP Profile with common fields."""
 
     class Meta:
+        """Meta class that defines the model for HIPProfileBaseFactory."""
+
         model = HIPProfileBaseModel
         abstract = True
 
@@ -42,6 +44,8 @@ class HIPProfileCreateApiFactory(HIPProfileBaseFactory):
     """Factory for creating HIPProfileCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for HIPProfileCreateModelFactory."""
+
         model = HIPProfileCreateModel
 
     # Default to folder container
@@ -98,6 +102,8 @@ class HIPProfileUpdateApiFactory(HIPProfileBaseFactory):
     """Factory for creating HIPProfileUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for HIPProfileUpdateModelFactory."""
+
         model = HIPProfileUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -162,6 +168,8 @@ class HIPProfileResponseFactory(HIPProfileBaseFactory):
     """Factory for creating HIPProfileResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for HIPProfileResponseModelFactory."""
+
         model = HIPProfileResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

@@ -22,6 +22,8 @@ class DynamicUserGroupBaseFactory(factory.Factory):
     """Base factory for Dynamic User Group with common fields."""
 
     class Meta:
+        """Meta class that defines the model for DynamicUserGroupBaseFactory."""
+
         model = DynamicUserGroupBaseModel
         abstract = True
 
@@ -245,6 +247,8 @@ class DynamicUserGroupCreateModelFactory(factory.Factory):
     """Factory for creating data dicts for DynamicUserGroupCreateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for DynamicUserGroupCreateModelFactory."""
+
         model = dict
 
     name = factory.Sequence(lambda n: f"dynamic_user_group_{n}")
@@ -295,6 +299,8 @@ class DynamicUserGroupUpdateModelFactory(factory.Factory):
     """Factory for creating data dicts for DynamicUserGroupUpdateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for DynamicUserGroupUpdateModelFactory."""
+
         model = dict
 
     id = "123e4567-e89b-12d3-a456-426655440000"

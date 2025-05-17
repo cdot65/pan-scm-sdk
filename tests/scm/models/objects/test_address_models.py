@@ -121,6 +121,7 @@ class TestAddressCreateModel:
 
 class TestAddressUpdateModel:
     """Tests for address update model validation."""
+
     def test_address_update_model_invalid_data_error(self):
         """Test that ValidationError is raised when invalid data is provided."""
         data = {"invalid": "data"}

@@ -26,6 +26,8 @@ class TagBaseFactory(factory.Factory):
     """Base factory for Tag objects with common fields."""
 
     class Meta:
+        """Meta class that defines the model for TagBaseModelFactory."""
+
         model = TagBaseModel
         abstract = True
 
@@ -46,6 +48,8 @@ class TagCreateApiFactory(TagBaseFactory):
     """Factory for creating TagCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for TagCreateModelFactory."""
+
         model = TagCreateModel
 
     # Default to folder container
@@ -176,6 +180,8 @@ class TagUpdateApiFactory(TagBaseFactory):
     """Factory for creating TagUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for TagUpdateModelFactory."""
+
         model = TagUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -212,6 +218,8 @@ class TagResponseFactory(TagBaseFactory):
     """Factory for creating TagResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for TagResponseModelFactory."""
+
         model = TagResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

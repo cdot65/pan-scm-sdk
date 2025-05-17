@@ -31,6 +31,7 @@ class TestExternalDynamicListsBase:
 
     @pytest.fixture(autouse=True)
     def setup_method(self, mock_scm):
+        """Test fixture for setting up mock SCM client."""
         self.mock_scm = mock_scm
         self.mock_scm.get = MagicMock()
         self.mock_scm.post = MagicMock()
@@ -84,6 +85,7 @@ class TestExternalDynamicListsMaxLimit(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsList(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists list operations."""
+
     def test_list_valid(self):
         """Test getting an EDL list with valid parameters."""
         # Prepare response in the format expected by the client
@@ -109,6 +111,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
         assert isinstance(edls[0], ExternalDynamicListsResponseModel)
 
     def test_list_folder_empty_error(self):
+        """Test list with empty folder parameter."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
@@ -121,6 +124,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
         assert '"folder" is not allowed to be empty' in str(exc_info.value)
 
     def test_list_no_container(self):
+        """Test list without container parameter."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
@@ -131,6 +135,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
             self.client.list()
 
     def test_list_multiple_containers(self):
+        """Test list with multiple container parameters."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
@@ -141,18 +146,21 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
             self.client.list(folder="FolderA", snippet="SnippetA")
 
     def test_list_response_not_dict(self):
+        """Test list with non-dict response."""
         self.mock_scm.get.return_value = ["not", "a", "dict"]
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="All")
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
     def test_list_response_missing_data(self):
+        """Test list with response missing data field."""
         self.mock_scm.get.return_value = {}
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="All")
         assert '"data" field missing in the response' in str(exc_info.value)
 
     def test_list_response_data_not_list(self):
+        """Test list with non-list data field."""
         self.mock_scm.get.return_value = {"data": "not a list"}
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.list(folder="All")
@@ -324,6 +332,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
 
     def test_list_pagination_multiple_pages(self):
         """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = ExternalDynamicLists(
@@ -435,6 +444,7 @@ class TestExternalDynamicListsList(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists create operations."""
+
     def test_create_valid(self):
         """Test creating a valid EDL."""
         # Create test data
@@ -495,6 +505,7 @@ class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
         )
 
     def test_create_http_error_no_response_content(self):
+        """Test create with HTTP error and no response content."""
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
@@ -505,6 +516,7 @@ class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
             self.client.create({"name": "test-edl", "folder": "My Folder"})
 
     def test_create_generic_exception(self):
+        """Test create with generic exception."""
         self.mock_scm.post.side_effect = Exception("Generic error")
         with pytest.raises(Exception) as exc_info:
             self.client.create({"name": "test-edl", "folder": "My Folder"})
@@ -513,6 +525,7 @@ class TestExternalDynamicListsCreate(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists update operations."""
+
     def test_update_valid(self):
         """Test a valid update operation."""
         # Create test data with required ID
@@ -559,6 +572,7 @@ class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
         assert updated.name == update_model.name
 
     def test_update_object_not_present(self):
+        """Test update when object is not present."""
         update_data = ExternalDynamicListsUpdateApiFactory.with_ip_type().model_dump()
         update_model = ExternalDynamicListsUpdateModel(**update_data)
         self.mock_scm.put.side_effect = raise_mock_http_error(
@@ -574,6 +588,7 @@ class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
         assert error_response["_errors"][0]["message"] == "Object not found"
 
     def test_update_http_error_no_response_content(self):
+        """Test update with HTTP error and no response content."""
         update_data = ExternalDynamicListsUpdateApiFactory.with_ip_type().model_dump()
         update_model = ExternalDynamicListsUpdateModel(**update_data)
         mock_response = MagicMock()
@@ -585,6 +600,7 @@ class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
             self.client.update(update_model)
 
     def test_update_generic_exception(self):
+        """Test update with generic exception."""
         update_data = ExternalDynamicListsUpdateApiFactory.with_ip_type().model_dump()
         update_model = ExternalDynamicListsUpdateModel(**update_data)
         self.mock_scm.put.side_effect = Exception("Generic error")
@@ -596,6 +612,7 @@ class TestExternalDynamicListsUpdate(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists get operations."""
+
     def test_get_valid(self):
         """Test getting a valid EDL."""
         # Use a valid UUID string for the ID
@@ -615,6 +632,7 @@ class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
         assert str(edl.id) == test_id
 
     def test_get_object_not_found(self):
+        """Test get when object is not found."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
@@ -628,6 +646,7 @@ class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
         assert error_response["_errors"][0]["message"] == "Object not found"
 
     def test_get_generic_exception(self):
+        """Test get with generic exception."""
         self.mock_scm.get.side_effect = Exception("Generic error")
         with pytest.raises(Exception) as exc_info:
             self.client.get("some-id")
@@ -636,7 +655,9 @@ class TestExternalDynamicListsGet(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists delete operations."""
+
     def test_delete_success(self):
+        """Test successful deletion."""
         edl_id = "123e4567-e89b-12d3-a456-426655440000"
         self.mock_scm.delete.return_value = None
         self.client.delete(edl_id)
@@ -645,6 +666,7 @@ class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
         )
 
     def test_delete_object_not_present(self):
+        """Test delete when object is not present."""
         edl_id = "nonexistent-id"
         self.mock_scm.delete.side_effect = raise_mock_http_error(
             status_code=404,
@@ -658,6 +680,7 @@ class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
         assert error_response["_errors"][0]["message"] == "Object not found"
 
     def test_delete_http_error_no_response_content(self):
+        """Test delete with HTTP error and no response content."""
         edl_id = "some-id"
         mock_response = MagicMock()
         mock_response.content = None
@@ -668,6 +691,7 @@ class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
             self.client.delete(edl_id)
 
     def test_delete_generic_exception(self):
+        """Test delete with generic exception."""
         self.mock_scm.delete.side_effect = Exception("Generic error")
         with pytest.raises(Exception) as exc_info:
             self.client.delete("some-id")
@@ -676,6 +700,7 @@ class TestExternalDynamicListsDelete(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists fetch operations."""
+
     def test_fetch_valid_predefined(self):
         """Test fetching a predefined snippet."""
         name = "predefined-edl"
@@ -696,6 +721,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
 
     def test_fetch_valid_non_predefined(self):
         """Test fetching a non-predefined snippet."""
+        """Test fetching a non-predefined snippet."""
         name = "test-edl"
         folder = "My Folder"
         mock_response = ExternalDynamicListsResponseFactory.with_url_type().model_dump()
@@ -713,6 +739,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
         assert fetched.name == name
 
     def test_fetch_object_not_found(self):
+        """Test fetch when object is not found."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=404,
             error_code="API_I00013",
@@ -725,6 +752,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
         assert error_response["_errors"][0]["message"] == "Object not found"
 
     def test_fetch_empty_name(self):
+        """Test fetch with empty name parameter."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
@@ -735,6 +763,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
             self.client.fetch(name="", folder="My Folder")
 
     def test_fetch_empty_container(self):
+        """Test fetch with empty container parameter."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
@@ -745,10 +774,12 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
             self.client.fetch(name="test-edl", folder="")
 
     def test_fetch_no_container(self):
+        """Test fetch without container parameter."""
         with pytest.raises(InvalidObjectError):
             self.client.fetch(name="test-edl")
 
     def test_fetch_multiple_containers(self):
+        """Test fetch with multiple container parameters."""
         with pytest.raises(InvalidObjectError):
             self.client.fetch(name="test-edl", folder="My Folder", snippet="My Snippet")
 
@@ -775,12 +806,14 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
         assert "Response missing 'id' field" in str(exc_info.value)
 
     def test_fetch_invalid_response_type(self):
+        """Test fetch with invalid response type."""
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.fetch(name="test-edl", folder="My Folder")
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
     def test_fetch_http_error_no_content(self):
+        """Test fetch with HTTP error and no content."""
         mock_response = MagicMock()
         mock_response.content = None
         mock_response.status_code = 500
@@ -790,6 +823,7 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
             self.client.fetch(name="test-edl", folder="My Folder")
 
     def test_fetch_generic_exception(self):
+        """Test fetch with generic exception."""
         self.mock_scm.get.side_effect = Exception("Generic error")
         with pytest.raises(Exception):
             self.client.fetch(name="test-edl", folder="My Folder")
@@ -797,7 +831,9 @@ class TestExternalDynamicListsFetch(TestExternalDynamicListsBase):
 
 class TestExternalDynamicListsApplyFilters(TestExternalDynamicListsBase):
     """Tests for ExternalDynamicLists filter application."""
+
     def test_apply_filters_non_list_types(self):
+        """Test apply filters with non-list types."""
         edls = []
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client._apply_filters(edls, {"types": "ip"})
@@ -805,6 +841,7 @@ class TestExternalDynamicListsApplyFilters(TestExternalDynamicListsBase):
         assert "'types' filter must be a list" in exc_info.value.message
 
     def test_apply_filters_unknown_types(self):
+        """Test apply filters with unknown types."""
         edls = []
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client._apply_filters(edls, {"types": ["unknown_type"]})

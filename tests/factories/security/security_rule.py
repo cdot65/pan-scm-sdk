@@ -22,6 +22,8 @@ class SecurityRuleProfileSettingFactory(factory.Factory):
     """Factory for creating ProfileSetting instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleProfileSettingFactory. It is used by the SecurityRuleProfileSettingFactory."""
+
         model = SecurityRuleProfileSetting
 
     group = ["best-practice"]
@@ -42,6 +44,8 @@ class SecurityRuleCreateApiFactory(factory.Factory):
     """Factory for creating SecurityRuleCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleCreateApiFactory. It is used by the SecurityRuleCreateApiFactory."""
+
         model = SecurityRuleCreateModel
 
     name = factory.Sequence(lambda n: f"security_rule_{n}")
@@ -100,6 +104,8 @@ class SecurityRuleUpdateApiFactory(factory.Factory):
     """Factory for creating SecurityRuleUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleUpdateApiFactory. It is used by the SecurityRuleUpdateApiFactory."""
+
         model = SecurityRuleUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -148,6 +154,8 @@ class SecurityRuleResponseFactory(factory.Factory):
     """Factory for creating SecurityRuleResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleResponseFactory. It is used by the SecurityRuleResponseFactory."""
+
         model = SecurityRuleResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -230,6 +238,8 @@ class SecurityRuleMoveApiFactory(factory.Factory):
     """Factory for creating SecurityRuleMoveModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleMoveModelFactory."""
+
         model = SecurityRuleMoveModel
 
     destination = SecurityRuleMoveDestination.TOP

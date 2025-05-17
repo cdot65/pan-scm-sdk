@@ -23,6 +23,8 @@ class ScheduleBaseFactory(factory.Factory):
     """Base factory for Schedule with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ScheduleBaseFactory. This Meta class is part of the ScheduleBaseFactory."""
+
         model = ScheduleBaseModel
         abstract = True
 
@@ -53,6 +55,8 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
     """Factory for creating ScheduleCreateModel instances with different schedule types."""
 
     class Meta:
+        """Meta class that defines the model for ScheduleCreateApiFactory. This Meta class is part of the ScheduleCreateApiFactory."""
+
         model = ScheduleCreateModel
 
     # Default to folder container
@@ -158,6 +162,8 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
     """Factory for creating ScheduleUpdateModel instances with different schedule types."""
 
     class Meta:
+        """Meta class that defines the model for ScheduleUpdateApiFactory. This Meta class is part of the ScheduleUpdateApiFactory."""
+
         model = ScheduleUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -229,6 +235,8 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
     """Factory for creating ScheduleResponseModel instances with different schedule types."""
 
     class Meta:
+        """Meta class that defines the model for ScheduleResponseFactory. This Meta class is part of the ScheduleResponseFactory."""
+
         model = ScheduleResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -336,6 +344,8 @@ class ScheduleCreateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for ScheduleCreateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for ScheduleCreateModelDictFactory."""
+
         model = dict
 
     name = factory.Sequence(lambda n: f"schedule_{n}")
@@ -557,6 +567,8 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
     """Factory for creating data dicts for ScheduleUpdateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for ScheduleUpdateModelDictFactory."""
+
         model = dict
 
     id = "123e4567-e89b-12d3-a456-426655440000"

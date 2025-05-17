@@ -23,6 +23,8 @@ class RegionBaseFactory(factory.Factory):
     """Base factory for Region with common fields."""
 
     class Meta:
+        """Meta class that defines the model for RegionBaseFactory."""
+
         model = RegionBaseModel
         abstract = True
 
@@ -49,6 +51,8 @@ class RegionCreateApiFactory(RegionBaseFactory):
     """Factory for creating RegionCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for RegionCreateModelFactory."""
+
         model = RegionCreateModel
 
     # Default to folder container
@@ -129,6 +133,8 @@ class RegionUpdateApiFactory(RegionBaseFactory):
     """Factory for creating RegionUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for RegionUpdateModelFactory."""
+
         model = RegionUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -191,6 +197,8 @@ class RegionResponseFactory(RegionBaseFactory):
     """Factory for creating RegionResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for RegionResponseModelFactory."""
+
         model = RegionResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

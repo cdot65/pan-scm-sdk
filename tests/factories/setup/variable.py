@@ -3,6 +3,7 @@
 This module provides Factory Boy factories for the various Pydantic models related to setup variables.
 Used for generating consistent and realistic test data in unit and integration tests.
 """
+
 from typing import Any, Dict, Union
 import uuid
 
@@ -22,7 +23,10 @@ fake = Faker()
 # --- Base ModelFactory for All Variable Models ---
 class VariableBaseModelFactory(factory.Factory):
     """Base factory for creating variable model instances."""
+
     class Meta:
+        """Meta class that defines the model for VariableBaseModelFactory."""
+
         model = VariableBaseModel
         abstract = True
 
@@ -63,6 +67,8 @@ class VariableCreateModelFactory(VariableBaseModelFactory):
     """Factory for creating VariableCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for VariableCreateModelFactory, inheriting from VariableBaseModelFactory."""
+
         model = VariableCreateModel
 
     @classmethod
@@ -88,6 +94,8 @@ class VariableUpdateModelFactory(VariableBaseModelFactory):
     """Factory for creating VariableUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for VariableUpdateModelFactory, inheriting from VariableBaseModelFactory."""
+
         model = VariableUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -116,6 +124,8 @@ class VariableResponseModelFactory(VariableBaseModelFactory):
     """Factory for creating VariableResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for VariableResponseModelFactory, inheriting from VariableBaseModelFactory."""
+
         model = VariableResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -166,6 +176,8 @@ class VariableCreateModelDictFactory(factory.Factory):
     """Factory for creating data dicts for VariableCreateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for VariableCreateModelDictFactory."""
+
         model = dict
 
     name = factory.Sequence(lambda n: f"variable_{n}")
@@ -220,6 +232,8 @@ class VariableUpdateModelDictFactory(factory.Factory):
     """Factory for creating data dicts for VariableUpdateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for VariableUpdateModelDictFactory."""
+
         model = dict
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))

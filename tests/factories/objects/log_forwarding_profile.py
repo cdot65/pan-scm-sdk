@@ -25,6 +25,8 @@ class MatchListItemFactory(factory.Factory):
     """Factory for creating MatchListItem instances."""
 
     class Meta:
+        """Meta class that defines the model for MatchListItemFactory. This Meta class is part of the MatchListItemFactory."""
+
         model = MatchListItem
 
     name = factory.Sequence(lambda n: f"match_list_item_{n}")
@@ -42,6 +44,8 @@ class LogForwardingProfileBaseFactory(factory.Factory):
     """Base factory for Log Forwarding Profile with common fields."""
 
     class Meta:
+        """Meta class that defines the model for LogForwardingProfileBaseFactory. This Meta class is part of the LogForwardingProfileBaseFactory."""
+
         model = LogForwardingProfileBaseModel
         abstract = True
 
@@ -62,6 +66,8 @@ class LogForwardingProfileCreateApiFactory(LogForwardingProfileBaseFactory):
     """Factory for creating LogForwardingProfileCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for LogForwardingProfileCreateModelFactory."""
+
         model = LogForwardingProfileCreateModel
 
     # Default to folder container
@@ -131,6 +137,8 @@ class LogForwardingProfileUpdateApiFactory(LogForwardingProfileBaseFactory):
     """Factory for creating LogForwardingProfileUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for LogForwardingProfileUpdateApiFactory. This Meta class is part of the LogForwardingProfileUpdateApiFactory."""
+
         model = LogForwardingProfileUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -208,6 +216,8 @@ class LogForwardingProfileResponseFactory(LogForwardingProfileBaseFactory):
     """Factory for creating LogForwardingProfileResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for LogForwardingProfileResponseFactory. This Meta class is part of the LogForwardingProfileResponseFactory."""
+
         model = LogForwardingProfileResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

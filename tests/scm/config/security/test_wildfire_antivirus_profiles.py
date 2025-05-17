@@ -139,6 +139,7 @@ class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
 
     def test_list_objects(self):
         """**Objective:** Test listing all objects.
+
         **Workflow:**
             1. Sets up a mock response resembling the expected API response for listing objects.
             2. Calls the `list` method with a filter parameter.
@@ -329,6 +330,7 @@ class TestWildfireAntivirusProfileList(TestWildfireAntivirusProfileBase):
 
     def test_list_pagination_multiple_pages(self):
         """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = WildfireAntivirusProfile(self.mock_scm, max_limit=2500)  # noqa
@@ -452,6 +454,7 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
 
     def test_create_object(self):
         """**Objective:** Test creating a new object.
+
         **Workflow:**
             1. Creates test data.
             2. Mocks the API response.
@@ -503,6 +506,7 @@ class TestWildfireAntivirusProfileCreate(TestWildfireAntivirusProfileBase):
 
     def test_create_object_error_handling(self):
         """**Objective:** Test error handling during object creation.
+
         **Workflow:**
             1. Mocks an error response from the API
             2. Attempts to create an object
@@ -627,6 +631,7 @@ class TestWildfireAntivirusProfileGet(TestWildfireAntivirusProfileBase):
 
     def test_get_object(self):
         """**Objective:** Test retrieving a specific object.
+
         **Workflow:**
             1. Mocks the API response for a specific object.
             2. Verifies the get request and response handling.
@@ -764,6 +769,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
         assert error_response["_errors"][0]["details"]["errorType"] == "Malformed Command"
 
     def test_update_generic_exception_handling(self):
+        """Test update with generic exception handling."""
         # Create update data using factory
         update_data = WildfireAvProfileUpdateApiFactory.with_packet_capture()
 
@@ -774,6 +780,7 @@ class TestWildfireAntivirusProfileUpdate(TestWildfireAntivirusProfileBase):
         assert str(exc_info.value) == "Generic error"
 
     def test_update_http_error_no_response_content(self):
+        """Test update with HTTP error and no response content."""
         # Create update data using factory
         update_data = WildfireAvProfileUpdateApiFactory.with_packet_capture()
 
@@ -872,6 +879,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
 
     def test_fetch_valid_object(self):
         """**Objective:** Test retrieving an object by its name using the `fetch` method.
+
         **Workflow:**
             1. Sets up a mock response resembling the expected API response for fetching an object by name.
             2. Calls the `fetch` method of `self.client` with a specific name and container.
@@ -954,6 +962,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
 
     def test_fetch_empty_name(self):
         """**Objective:** Test fetch with empty name parameter.
+
         **Workflow:**
             1. Attempts to fetch with empty name
             2. Verifies MissingQueryParameterError is raised.
@@ -967,6 +976,7 @@ class TestWildfireAntivirusProfileFetch(TestWildfireAntivirusProfileBase):
 
     def test_fetch_container_validation(self):
         """**Objective:** Test container parameter validation in fetch.
+
         **Workflow:**
             1. Tests various invalid container combinations
             2. Verifies proper error handling.
@@ -1067,6 +1077,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
 
     def test_list_with_filters(self):
         """**Objective:** Test that filters are properly added to parameters.
+
         **Workflow:**
             1. Calls list with various filters
             2. Verifies filters are properly formatted in the request.
@@ -1092,6 +1103,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
 
     def test_list_empty_folder_error(self):
         """**Objective:** Test that empty folder raises appropriate error.
+
         **Workflow:**
             1. Attempts to list objects with empty folder
             2. Verifies MissingQueryParameterError is raised.
@@ -1105,6 +1117,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
 
     def test_list_multiple_containers_error(self):
         """**Objective:** Test validation of container parameters.
+
         **Workflow:**
             1. Attempts to list with multiple containers
             2. Verifies InvalidObjectError is raised.
@@ -1141,6 +1154,7 @@ class TestWildfireAntivirusProfileListFilters(TestWildfireAntivirusProfileBase):
 
     def test_list_filters_type_validation(self):
         """**Objective:** Test validation of filter types in list method.
+
         **Workflow:**
             1. Tests various invalid filter type scenarios
             2. Verifies InvalidObjectError is raised with correct message

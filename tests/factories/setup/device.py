@@ -18,6 +18,8 @@ class DeviceLicenseModelFactory(factory.Factory):
     """Factory for DeviceLicenseModel."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = DeviceLicenseModel
 
     feature = factory.LazyFunction(lambda: fake.word())
@@ -33,6 +35,8 @@ class DeviceResponseModelFactory(factory.Factory):
     """Factory for DeviceResponseModel."""
 
     class Meta:
+        """Meta class that defines the model for DeviceResponseModelFactory."""
+
         model = DeviceResponseModel
 
     id = factory.LazyFunction(lambda: fake.lexify(text="??????????", letters="0123456789ABCDEF"))
@@ -101,6 +105,8 @@ class DeviceLicenseModelDictFactory(factory.Factory):
     """Factory for DeviceLicenseModel."""
 
     class Meta:
+        """Meta class that defines the model for DeviceLicenseModelDictFactory."""
+
         model = dict
 
     feature = factory.LazyFunction(lambda: fake.word())
@@ -116,6 +122,8 @@ class DeviceResponseModelDictFactory(factory.Factory):
     """Factory for DeviceResponseModel."""
 
     class Meta:
+        """Meta class that defines the model for DeviceResponseModelDictFactory."""
+
         model = dict
 
     id = factory.LazyFunction(lambda: fake.lexify(text="??????????", letters="0123456789ABCDEF"))
@@ -188,6 +196,8 @@ class DeviceListResponseModelFactory(factory.Factory):
     """Factory for DeviceListResponseModel."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = DeviceListResponseModel
 
     data = factory.LazyFunction(lambda: DeviceResponseModelFactory.build_batch(3))
@@ -200,6 +210,8 @@ class DeviceListResponseModelDictFactory(factory.Factory):
     """Factory for DeviceListResponseModel."""
 
     class Meta:
+        """Meta class that defines the model for DeviceListResponseModelDictFactory."""
+
         model = dict
 
     data = factory.LazyFunction(lambda: [DeviceResponseModelDictFactory.build() for _ in range(3)])

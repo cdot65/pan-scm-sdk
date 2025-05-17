@@ -26,6 +26,8 @@ class FolderBaseFactory(factory.Factory):
     """Base factory for Folder objects with common fields."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = FolderBaseModel
         abstract = True
 
@@ -45,6 +47,8 @@ class FolderCreateApiFactory(FolderBaseFactory):
     """Factory for creating FolderCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = FolderCreateModel
 
     @classmethod
@@ -109,6 +113,8 @@ class FolderUpdateApiFactory(FolderBaseFactory):
     """Factory for creating FolderUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = FolderUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -155,6 +161,8 @@ class FolderResponseFactory(FolderBaseFactory):
     """Factory for creating FolderResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = FolderResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

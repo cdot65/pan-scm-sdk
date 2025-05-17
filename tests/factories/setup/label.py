@@ -19,7 +19,10 @@ fake = Faker()
 # --- Base ModelFactory for All Label Models ---
 class LabelBaseModelFactory(factory.Factory):
     """Base factory for creating label model instances."""
+
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = LabelBaseModel
         abstract = True
 
@@ -60,6 +63,8 @@ class LabelCreateModelFactory(LabelBaseModelFactory):
     """Factory for creating LabelCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = LabelCreateModel
 
     @classmethod
@@ -85,6 +90,8 @@ class LabelUpdateModelFactory(LabelBaseModelFactory):
     """Factory for creating LabelUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = LabelUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -113,6 +120,8 @@ class LabelResponseModelFactory(LabelBaseModelFactory):
     """Factory for creating LabelResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = LabelResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -163,6 +172,8 @@ class LabelCreateModelDictFactory(factory.Factory):
     """Factory for creating data dicts for LabelCreateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for LabelCreateModelDictFactory."""
+
         model = dict
 
     name = factory.Sequence(lambda n: f"label_{n}")
@@ -217,6 +228,8 @@ class LabelUpdateModelDictFactory(factory.Factory):
     """Factory for creating data dicts for LabelUpdateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for LabelUpdateModelDictFactory."""
+
         model = dict
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))

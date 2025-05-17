@@ -433,6 +433,7 @@ class TestRegionList(TestRegionBase):
 
     def test_list_pagination_multiple_pages(self):
         """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = Region(self.mock_scm, max_limit=2500)
@@ -475,6 +476,7 @@ class TestRegionList(TestRegionBase):
 
     def test_list_with_invalid_items(self):
         """Test that the list method correctly handles invalid items in the response.
+
         This tests the logging code in Region.list() that handles invalid items.
         """
         # Create mock response with some invalid items (missing ID)

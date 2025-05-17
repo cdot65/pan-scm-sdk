@@ -489,6 +489,7 @@ class TestAntiSpywareProfileList(TestAntiSpywareProfileBase):
 
     def test_list_pagination_multiple_pages(self):
         """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = AntiSpywareProfile(self.mock_scm, max_limit=2500)  # noqa

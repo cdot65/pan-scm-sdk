@@ -367,6 +367,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
 
     def test_list_exclude_snippets(self):
         """Test that exclude_snippets removes filters from those snippets.
+
         Assume snippet is supported by the model/factory.
         """
         mock_response = {
@@ -391,6 +392,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
 
     def test_list_exact_match_and_exclusions(self):
         """Test combining exact_match with exclusions.
+
         Assume snippet/device are supported.
         """
         mock_response = {
@@ -426,9 +428,10 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
 
-    def test_list_pagination_multiple_pages(self):
-        """Test that the list method correctly aggregates data from multiple pages.
-        Using a custom client with max_limit=2500 to test pagination.
+    def test_list_with_invalid_items(self):
+        """Test that the list method correctly handles invalid items in the response.
+
+        This tests the logging code in Region.list() that handles invalid items.
         """
         client = ApplicationFilters(self.mock_scm, max_limit=2500)  # noqa
 

@@ -27,6 +27,8 @@ class QosModelFactory(factory.Factory):
     """Factory for creating QosModel instances."""
 
     class Meta:
+        """Factory configuration."""
+
         model = QosModel
 
     enabled = True
@@ -94,6 +96,8 @@ class BandwidthAllocationBaseFactory(factory.Factory):
     """Base factory for Bandwidth Allocation objects with common fields."""
 
     class Meta:
+        """Factory configuration."""
+
         model = BandwidthAllocationBaseModel
         abstract = True
 
@@ -280,8 +284,9 @@ class BandwidthAllocationUpdateApiFactory:
 
 
 class BandwidthAllocationResponseFactory:
-    """Factory for creating dictionaries suitable for BandwidthAllocationResponseModel
-    to mimic the actual data returned by the SCM API.
+    """Factory for creating dictionaries suitable for BandwidthAllocationResponseModel.
+
+    Creates response dictionaries that match the structure returned by the SCM API.
     """
 
     def __call__(self, **kwargs) -> Dict[str, Any]:
@@ -412,6 +417,7 @@ BandwidthAllocationResponseFactory = BandwidthAllocationResponseFactory()
 
 class BandwidthAllocationCreateModelFactory(factory.DictFactory):
     """Factory for creating dictionary data suitable for instantiating BandwidthAllocationCreateModel.
+
     Useful for direct Pydantic validation tests.
     """
 
@@ -494,6 +500,7 @@ class BandwidthAllocationCreateModelFactory(factory.DictFactory):
 
 class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
     """Factory for creating dictionary data suitable for instantiating BandwidthAllocationUpdateModel.
+
     Useful for direct Pydantic validation tests.
     """
 
@@ -562,6 +569,7 @@ class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
 
 class BandwidthAllocationResponseModelFactory(factory.DictFactory):
     """Factory for creating dictionary data suitable for instantiating BandwidthAllocationResponseModel.
+
     Useful for direct Pydantic validation tests.
     """
 

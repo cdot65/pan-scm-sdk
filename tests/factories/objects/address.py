@@ -22,6 +22,8 @@ class AddressBaseFactory(factory.Factory):
     """Base factory for Address with common fields."""
 
     class Meta:
+        """Meta class that defines the model for AddressBaseFactory."""
+
         model = AddressBaseModel
         abstract = True
 
@@ -45,6 +47,8 @@ class AddressCreateApiFactory(AddressBaseFactory):
     """Factory for creating AddressCreateModel instances with different address types."""
 
     class Meta:
+        """Meta class that defines the model for AddressCreateModelFactory."""
+
         model = AddressCreateModel
 
     # Default to folder container
@@ -119,6 +123,8 @@ class AddressUpdateApiFactory(AddressBaseFactory):
     """Factory for creating AddressUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for AddressUpdateModelFactory."""
+
         model = AddressUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -193,6 +199,8 @@ class AddressResponseFactory(AddressBaseFactory):
     """Factory for creating AddressResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for AddressResponseModelFactory."""
+
         model = AddressResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -306,6 +314,8 @@ class AddressCreateModelFactory(factory.Factory):
     """Factory for creating data dicts for AddressCreateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for AddressCreateModelFactory."""
+
         model = dict
 
     name = factory.Sequence(lambda n: f"address_{n}")
@@ -364,6 +374,8 @@ class AddressUpdateModelFactory(factory.Factory):
     """Factory for creating data dicts for AddressUpdateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for AddressUpdateModelFactory."""
+
         model = dict
 
     id = "123e4567-e89b-12d3-a456-426655440000"

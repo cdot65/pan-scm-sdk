@@ -22,6 +22,8 @@ class NetworkLocationBaseFactory(factory.Factory):
     """Base factory for Network Location objects."""
 
     class Meta:
+        """Factory configuration."""
+
         model = NetworkLocationModel
         abstract = True
 
@@ -41,7 +43,8 @@ class NetworkLocationBaseFactory(factory.Factory):
 
 
 class NetworkLocationApiFactory:
-    """Factory for creating dictionaries suitable for NetworkLocationModel
+    """Factory for creating dictionaries suitable for NetworkLocationModel.
+
     with the structure used by the Python SDK calls.
     """
 
@@ -175,6 +178,7 @@ NetworkLocationApiFactory = NetworkLocationApiFactory()
 
 class NetworkLocationModelFactory:
     """Factory for creating dictionary data suitable for instantiating NetworkLocationModel.
+
     Useful for direct Pydantic validation tests.
     """
 

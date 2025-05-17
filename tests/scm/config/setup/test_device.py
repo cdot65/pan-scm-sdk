@@ -21,11 +21,13 @@ class TestDeviceBase:
 
     @pytest.fixture
     def mock_scm_client(self):
+        """Test fixture for mock SCM client."""
         client = MagicMock(spec=Scm)
         return client
 
     @pytest.fixture
     def device_service(self, mock_scm_client):
+        """Test fixture for Device service instance."""
         with patch("scm.config.isinstance", return_value=True):
             service = Device(mock_scm_client)
             return service
@@ -33,7 +35,9 @@ class TestDeviceBase:
 
 class TestDeviceInitialization(TestDeviceBase):
     """Tests for Device initialization."""
+
     def test_init_with_default_max_limit(self, mock_scm_client):
+        """Test initialization with default max limit."""
         with patch("scm.config.isinstance", return_value=True):
             device = Device(mock_scm_client)
             assert device.api_client == mock_scm_client
@@ -41,12 +45,14 @@ class TestDeviceInitialization(TestDeviceBase):
             assert device.max_limit == Device.DEFAULT_MAX_LIMIT
 
     def test_init_with_custom_max_limit(self, mock_scm_client):
+        """Test initialization with custom max limit."""
         with patch("scm.config.isinstance", return_value=True):
             custom_limit = 100
             device = Device(mock_scm_client, max_limit=custom_limit)
             assert device.max_limit == custom_limit
 
     def test_init_with_exceeding_max_limit(self, mock_scm_client):
+        """Test initialization with max limit exceeding absolute limit."""
         with patch("scm.config.isinstance", return_value=True):
             device = Device(mock_scm_client, max_limit=9999)
             assert device.max_limit == Device.ABSOLUTE_MAX_LIMIT
@@ -54,27 +60,35 @@ class TestDeviceInitialization(TestDeviceBase):
 
 class TestDeviceMaxLimitValidation(TestDeviceBase):
     """Tests for Device max limit validation."""
+
     def test_validate_max_limit_none(self, device_service):
+        """Test validate max limit with None value."""
         assert device_service._validate_max_limit(None) == Device.DEFAULT_MAX_LIMIT
 
     def test_validate_max_limit_invalid_type(self, device_service):
+        """Test validate max limit with invalid type."""
         with pytest.raises(Exception):
             device_service._validate_max_limit("bad-string")
 
     def test_validate_max_limit_invalid_value(self, device_service):
+        """Test validate max limit with invalid value."""
         with pytest.raises(Exception):
             device_service._validate_max_limit(0)
 
     def test_validate_max_limit_exceeds_absolute(self, device_service):
+        """Test validate max limit when it exceeds absolute limit."""
         assert device_service._validate_max_limit(9999) == Device.ABSOLUTE_MAX_LIMIT
 
     def test_validate_max_limit_valid(self, device_service):
+        """Test validate max limit with valid value."""
         assert device_service._validate_max_limit(10) == 10
 
 
 class TestDeviceGet(TestDeviceBase):
     """Tests for Device get operations."""
+
     def test_get_device(self, device_service, mock_scm_client):
+        """Test getting a device by ID."""
         device_id = "dev123"
         fake_response = DeviceResponseModelDictFactory.build()
         mock_scm_client.get.return_value = fake_response
@@ -84,11 +98,13 @@ class TestDeviceGet(TestDeviceBase):
         mock_scm_client.get.assert_called_once_with(f"/config/setup/v1/devices/{device_id}")
 
     def test_get_device_not_found(self, device_service, mock_scm_client):
+        """Test getting a non-existent device."""
         mock_scm_client.get.side_effect = ObjectNotPresentError("not found")
         with pytest.raises(ObjectNotPresentError):
             device_service.get("nope")
 
     def test_get_device_api_error(self, device_service, mock_scm_client):
+        """Test getting a device with API error."""
         mock_scm_client.get.side_effect = APIError("fail")
         with pytest.raises(APIError):
             device_service.get("fail")
@@ -96,7 +112,9 @@ class TestDeviceGet(TestDeviceBase):
 
 class TestDeviceGetEdgeCases(TestDeviceBase):
     """Tests for Device get edge cases."""
+
     def test_get_device_response_list(self, device_service, mock_scm_client):
+        """Test getting a device when response is a list."""
         fake_device = DeviceResponseModelDictFactory.build()
         mock_scm_client.get.return_value = [fake_device]
         model = device_service.get("dev123")
@@ -104,6 +122,7 @@ class TestDeviceGetEdgeCases(TestDeviceBase):
         assert model.id == fake_device["id"]
 
     def test_get_device_response_dict(self, device_service, mock_scm_client):
+        """Test getting a device when response is a dict."""
         fake_device = DeviceResponseModelDictFactory.build()
         mock_scm_client.get.return_value = fake_device
         model = device_service.get("dev123")
@@ -111,11 +130,13 @@ class TestDeviceGetEdgeCases(TestDeviceBase):
         assert model.id == fake_device["id"]
 
     def test_get_device_invalid_response(self, device_service, mock_scm_client):
+        """Test getting a device with invalid response format."""
         mock_scm_client.get.return_value = "not-a-dict-or-list"
         with pytest.raises(Exception):
             device_service.get("dev123")
 
     def test_get_device_apierror_404(self, device_service, mock_scm_client):
+        """Test getting a device with 404 API error."""
         err = APIError("fail")
         err.http_status_code = 404
         mock_scm_client.get.side_effect = err
@@ -123,6 +144,7 @@ class TestDeviceGetEdgeCases(TestDeviceBase):
             device_service.get("dev404")
 
     def test_get_device_apierror_other(self, device_service, mock_scm_client):
+        """Test getting a device with non-404 API error."""
         err = APIError("fail")
         err.http_status_code = 500
         mock_scm_client.get.side_effect = err
@@ -132,7 +154,9 @@ class TestDeviceGetEdgeCases(TestDeviceBase):
 
 class TestDeviceList(TestDeviceBase):
     """Tests for Device list operations."""
+
     def test_list_devices(self, device_service, mock_scm_client):
+        """Test listing all devices."""
         fake_response = DeviceListResponseModelDictFactory.build()
         mock_scm_client.get.return_value = fake_response
         result = device_service.list()
@@ -141,6 +165,7 @@ class TestDeviceList(TestDeviceBase):
         mock_scm_client.get.assert_called_once()
 
     def test_list_devices_with_filters(self, device_service, mock_scm_client):
+        """Test listing devices with filters."""
         fake_response = DeviceListResponseModelDictFactory.build()
         mock_scm_client.get.return_value = fake_response
         filters = {"name": "test-device"}
@@ -154,11 +179,13 @@ class TestDeviceList(TestDeviceBase):
             assert call_kwargs["name"] == "test-device"
 
     def test_list_devices_api_error(self, device_service, mock_scm_client):
+        """Test listing devices with API error."""
         mock_scm_client.get.side_effect = APIError("fail")
         with pytest.raises(APIError):
             device_service.list()
 
     def test_list_limit_assignment_coverage(self):
+        """Test list method with limit assignment coverage."""
         from unittest.mock import MagicMock
 
         from scm.client import Scm
@@ -174,6 +201,7 @@ class TestDeviceList(TestDeviceBase):
         assert result == []
 
     def test_list_single_object_response(self):
+        """Test list with single object response."""
         from unittest.mock import MagicMock
 
         from scm.client import Scm
@@ -196,6 +224,7 @@ class TestDeviceList(TestDeviceBase):
         assert result[0].id == "dev1"
 
     def test_list_invalid_data_field(self):
+        """Test list with invalid data field."""
         from unittest.mock import MagicMock
 
         from scm.client import Scm
@@ -210,6 +239,7 @@ class TestDeviceList(TestDeviceBase):
             device.list()
 
     def test_list_invalid_response_type(self):
+        """Test list with invalid response type."""
         from unittest.mock import MagicMock
 
         from scm.client import Scm
@@ -343,7 +373,9 @@ class TestDeviceList(TestDeviceBase):
 
 class TestDeviceListEdgeCases(TestDeviceBase):
     """Tests for Device list edge cases."""
+
     def test_list_invalid_response_format(self):
+        """Test list with invalid response format."""
         from unittest.mock import MagicMock
 
         from scm.client import Scm
@@ -360,7 +392,9 @@ class TestDeviceListEdgeCases(TestDeviceBase):
 
 class TestDeviceFetch(TestDeviceBase):
     """Tests for Device fetch operations."""
+
     def test_fetch_device_found(self, device_service, mock_scm_client):
+        """Test fetching device when found."""
         name = "deviceX"
         fake_device = DeviceResponseModelDictFactory.build(name=name)
         fake_response = DeviceListResponseModelDictFactory.build(data=[fake_device])
@@ -370,11 +404,13 @@ class TestDeviceFetch(TestDeviceBase):
         assert model.name == name
 
     def test_fetch_device_not_found(self, device_service, mock_scm_client):
+        """Test fetching device when not found."""
         mock_scm_client.get.return_value = DeviceListResponseModelDictFactory.build(data=[])
         model = device_service.fetch("not-a-device")
         assert model is None
 
     def test_fetch_device_exact_match(self, device_service, mock_scm_client):
+        """Test fetching device with exact name match."""
         name = "exact-match-device"
         fake_device = DeviceResponseModelDictFactory.build(name=name)
         fake_response = DeviceListResponseModelDictFactory.build(data=[fake_device])
@@ -386,11 +422,14 @@ class TestDeviceFetch(TestDeviceBase):
 
 class TestDeviceFetchEdgeCases(TestDeviceBase):
     """Tests for Device fetch edge cases."""
+
     def test_fetch_device_no_results(self, device_service, mock_scm_client):
+        """Test fetching device with no results."""
         mock_scm_client.get.return_value = {"data": [], "limit": 200, "offset": 0, "total": 0}
         assert device_service.fetch("nope") is None
 
     def test_fetch_device_no_exact_match(self, device_service, mock_scm_client):
+        """Test fetching device with no exact match."""
         fake_device = DeviceResponseModelDictFactory.build(name="foo")
         mock_scm_client.get.return_value = DeviceListResponseModelDictFactory.build(
             data=[fake_device]
@@ -398,6 +437,7 @@ class TestDeviceFetchEdgeCases(TestDeviceBase):
         assert device_service.fetch("bar") is None
 
     def test_fetch_device_first_exact_match(self, device_service, mock_scm_client):
+        """Test fetching device returns first exact match."""
         fake_device = DeviceResponseModelDictFactory.build(name="foo")
         mock_scm_client.get.return_value = DeviceListResponseModelDictFactory.build(
             data=[fake_device]
@@ -409,7 +449,9 @@ class TestDeviceFetchEdgeCases(TestDeviceBase):
 
 class TestDeviceApplyFilters(TestDeviceBase):
     """Tests for Device filter application."""
+
     def test_labels_filter_noop(self, device_service):
+        """Test labels filter (no-op for devices)."""
         # Device model does not have 'labels', so filter should always return []
         d1 = DeviceResponseModelDictFactory.build()
         d2 = DeviceResponseModelDictFactory.build()
@@ -418,6 +460,7 @@ class TestDeviceApplyFilters(TestDeviceBase):
         assert filtered == []
 
     def test_parent_filter_noop(self, device_service):
+        """Test parent filter (no-op for devices)."""
         # Device model does not have 'parent', so filter should always return []
         d1 = DeviceResponseModelDictFactory.build()
         d2 = DeviceResponseModelDictFactory.build()
@@ -426,6 +469,7 @@ class TestDeviceApplyFilters(TestDeviceBase):
         assert filtered == []
 
     def test_type_filter(self, device_service):
+        """Test type filter."""
         d1 = DeviceResponseModelDictFactory.build(type="foo")
         d2 = DeviceResponseModelDictFactory.build(type="bar")
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
@@ -433,6 +477,7 @@ class TestDeviceApplyFilters(TestDeviceBase):
         assert devices[0] in filtered and devices[1] not in filtered
 
     def test_snippets_filter_noop(self, device_service):
+        """Test snippets filter (no-op for devices)."""
         # Device model does not have 'snippets', so filter should always return []
         d1 = DeviceResponseModelDictFactory.build()
         d2 = DeviceResponseModelDictFactory.build()
@@ -441,6 +486,7 @@ class TestDeviceApplyFilters(TestDeviceBase):
         assert filtered == []
 
     def test_model_filter(self, device_service):
+        """Test model filter."""
         d1 = DeviceResponseModelDictFactory.build(model="foo")
         d2 = DeviceResponseModelDictFactory.build(model="bar")
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
@@ -448,6 +494,7 @@ class TestDeviceApplyFilters(TestDeviceBase):
         assert devices[0] in filtered and devices[1] not in filtered
 
     def test_serial_number_filter(self, device_service):
+        """Test serial number filter."""
         d1 = DeviceResponseModelDictFactory.build(serial_number="123")
         d2 = DeviceResponseModelDictFactory.build(serial_number="456")
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
@@ -455,6 +502,7 @@ class TestDeviceApplyFilters(TestDeviceBase):
         assert devices[0] in filtered and devices[1] not in filtered
 
     def test_device_only_filter(self, device_service):
+        """Test device only filter."""
         d1 = DeviceResponseModelDictFactory.build(device_only=True)
         d2 = DeviceResponseModelDictFactory.build(device_only=False)
         devices = [DeviceResponseModel.model_validate(d1), DeviceResponseModel.model_validate(d2)]
@@ -464,17 +512,21 @@ class TestDeviceApplyFilters(TestDeviceBase):
 
 class TestDeviceListServerSideFilters(TestDeviceBase):
     """Tests for Device server-side filters."""
+
     def test_list_includes_type_filter(self, device_service, mock_scm_client):
+        """Test list includes type filter."""
         mock_scm_client.get.return_value = {"data": []}
         device_service.list(type="foo")
         assert mock_scm_client.get.call_args[1]["params"]["type"] == "foo"
 
     def test_list_includes_serial_number_filter(self, device_service, mock_scm_client):
+        """Test list includes serial number filter."""
         mock_scm_client.get.return_value = {"data": []}
         device_service.list(serial_number="abc123")
         assert mock_scm_client.get.call_args[1]["params"]["serial_number"] == "abc123"
 
     def test_list_includes_model_filter(self, device_service, mock_scm_client):
+        """Test list includes model filter."""
         mock_scm_client.get.return_value = {"data": []}
         device_service.list(model="PA-VM")
         assert mock_scm_client.get.call_args[1]["params"]["model"] == "PA-VM"

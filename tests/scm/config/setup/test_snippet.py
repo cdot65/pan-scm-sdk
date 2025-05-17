@@ -98,6 +98,7 @@ class TestSnippetCreateModel:
         assert model["enable_prefix"] is not None
 
     def test_minimal_construction(self):
+        """Test minimal construction of create model."""
         model = SnippetCreateModelDictFactory.build_minimal_dict()
         assert isinstance(model, dict)
         assert model["name"] is not None
@@ -107,6 +108,7 @@ class TestSnippetUpdateModel:
     """Tests for the SnippetUpdateModel."""
 
     def test_valid_construction(self):
+        """Test valid construction of update model."""
         model = SnippetUpdateModelDictFactory.build_valid_dict()
         assert isinstance(model, dict)
         assert model["id"] is not None
@@ -116,6 +118,7 @@ class TestSnippetUpdateModel:
         assert model["enable_prefix"] is not None
 
     def test_minimal_construction(self):
+        """Test minimal construction of update model."""
         model = SnippetUpdateModelDictFactory.build_minimal_dict()
         assert isinstance(model, dict)
         assert model["id"] is not None
@@ -126,6 +129,7 @@ class TestSnippetResponseModel:
     """Tests for the SnippetResponseModel."""
 
     def test_valid_construction(self):
+        """Test valid construction of response model."""
         model = SnippetResponseModelFactory.build_valid_model()
         assert isinstance(model, SnippetResponseModel)
         assert model.id is not None
@@ -141,6 +145,7 @@ class TestSnippetResponseModel:
         assert isinstance(model.folders, list)
 
     def test_from_request(self):
+        """Test response model from request."""
         req = SnippetCreateModelDictFactory.build_valid_dict()
         model = SnippetResponseModelFactory.from_request_model(req)
         assert isinstance(model, SnippetResponseModel)
@@ -641,12 +646,15 @@ class TestPaginatedResults(TestSnippetBase):
 
 class TestSnippetFetchSingleMatch(TestSnippetBase):
     """Tests for Snippet fetch single match behavior."""
+
     def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
+        """Test fetch returns None when no results."""
         mocker.patch.object(snippet_service, "list", return_value=[])
         result = snippet_service.fetch("foo")
         assert result is None
 
     def test_fetch_returns_none_when_no_exact_match(self, snippet_service, mocker):
+        """Test fetch returns None when no exact match."""
         m1 = SnippetResponseModelFactory.build_valid_model(name="a")
         m2 = SnippetResponseModelFactory.build_valid_model(name="b")
         mocker.patch.object(snippet_service, "list", return_value=[m1, m2])
@@ -654,6 +662,7 @@ class TestSnippetFetchSingleMatch(TestSnippetBase):
         assert result is None
 
     def test_fetch_returns_first_exact_match(self, snippet_service, mocker):
+        """Test fetch returns first exact match."""
         name = "foo"
         m1 = SnippetResponseModelFactory.build_valid_model(name=name)
         m2 = SnippetResponseModelFactory.build_valid_model(name=name)
@@ -666,6 +675,7 @@ class TestSnippetValidation(TestSnippetBase):
     """Tests for validation methods using Pydantic model factories."""
 
     def test_valid_data(self):
+        """Test validation with valid data."""
         # Should not raise
         model = SnippetCreateModelFactory.build_valid_model(
             name="valid_name",
@@ -680,11 +690,13 @@ class TestSnippetValidation(TestSnippetBase):
         assert data["enable_prefix"] is True
 
     def test_missing_name(self):
+        """Test validation with missing name."""
         # Should raise ValidationError
         with pytest.raises(ValidationError):
             SnippetCreateModelFactory.build_valid_model(name=None)
 
     def test_labels_validation(self):
+        """Test labels validation."""
         # Valid labels
         model = SnippetCreateModelFactory.build_valid_model(labels=["tag1", "tag2"])
         assert model.labels == ["tag1", "tag2"]
@@ -702,25 +714,30 @@ class TestSnippetMaxLimitValidation(TestSnippetBase):
     """Covers edge cases for Snippet._validate_max_limit and max_limit setter."""
 
     def test_max_limit_setter_valid(self, snippet_service):
+        """Test max limit setter with valid value."""
         snippet_service.max_limit = 1234
         assert snippet_service.max_limit == 1234
 
     def test_validate_max_limit_invalid_type(self, snippet_service):
+        """Test validate max limit with invalid type."""
         with pytest.raises(Exception) as exc:
             snippet_service._validate_max_limit(["not", "an", "int"])
         assert "Invalid max_limit type" in str(exc.value)
 
     def test_validate_max_limit_invalid_value(self, snippet_service):
+        """Test validate max limit with invalid value."""
         with pytest.raises(Exception) as exc:
             snippet_service._validate_max_limit(0)
         assert "Invalid max_limit value" in str(exc.value)
 
     def test_validate_max_limit_negative(self, snippet_service):
+        """Test validate max limit with negative value."""
         with pytest.raises(Exception) as exc:
             snippet_service._validate_max_limit(-5)
         assert "Invalid max_limit value" in str(exc.value)
 
     def test_validate_max_limit_none(self, snippet_service):
+        """Test validate max limit with None value."""
         assert snippet_service._validate_max_limit(None) == Snippet.DEFAULT_MAX_LIMIT
 
 
@@ -728,6 +745,7 @@ class TestSnippetApplyFilters(TestSnippetBase):
     """Covers edge cases for Snippet._apply_filters (labels/types filters)."""
 
     def test_labels_filter_not_list(self, snippet_service):
+        """Test labels filter with non-list value."""
         data = []
         filters = {"labels": "notalist"}
         with pytest.raises(Exception) as exc:
@@ -735,6 +753,7 @@ class TestSnippetApplyFilters(TestSnippetBase):
         assert "Invalid Filter Type" in str(exc.value)
 
     def test_labels_filter_empty_list(self, snippet_service):
+        """Test labels filter with empty list."""
         # No filtering should occur
         data = [SnippetResponseModelFactory.build_valid_model() for _ in range(2)]
         filters = {"labels": []}
@@ -742,6 +761,7 @@ class TestSnippetApplyFilters(TestSnippetBase):
         assert result == data
 
     def test_labels_filter_nonempty(self, snippet_service):
+        """Test labels filter with non-empty list."""
         m1 = SnippetResponseModelFactory.build_valid_model(labels=["foo", "bar"])
         m2 = SnippetResponseModelFactory.build_valid_model(labels=["baz"])
         data = [m1, m2]
@@ -750,6 +770,7 @@ class TestSnippetApplyFilters(TestSnippetBase):
         assert m1 in result and m2 not in result
 
     def test_types_filter_not_list(self, snippet_service):
+        """Test types filter with non-list value."""
         data = []
         filters = {"types": "notalist"}
         with pytest.raises(Exception) as exc:
@@ -757,6 +778,7 @@ class TestSnippetApplyFilters(TestSnippetBase):
         assert "Invalid Filter Type" in str(exc.value)
 
     def test_types_filter_not_all_strings(self, snippet_service):
+        """Test types filter with non-string values."""
         data = []
         filters = {"types": [123, "custom"]}
         with pytest.raises(Exception) as exc:
@@ -764,12 +786,14 @@ class TestSnippetApplyFilters(TestSnippetBase):
         assert "Invalid Filter Type" in str(exc.value)
 
     def test_types_filter_empty_list(self, snippet_service):
+        """Test types filter with empty list."""
         models = [SnippetResponseModelFactory.build_valid_model(type="custom") for _ in range(2)]
         filters = {"types": []}
         result = snippet_service._apply_filters(models, filters)
         assert result == models
 
     def test_types_filter_nonempty(self, snippet_service):
+        """Test types filter with non-empty list."""
         m1 = SnippetResponseModelFactory.build_valid_model(type="custom")
         m2 = SnippetResponseModelFactory.build_valid_model(type="predefined")
         data = [m1, m2]
@@ -782,6 +806,7 @@ class TestSnippetListEdgeCases(TestSnippetBase):
     """Covers edge/error cases for Snippet.list pagination and response handling."""
 
     def test_list_invalid_response_format(self, snippet_service, mocker):
+        """Test list with invalid response format."""
         # API returns a non-dict response
         mocker.patch.object(snippet_service.api_client, "get", return_value="not_a_dict")
         with pytest.raises(Exception) as exc:
@@ -789,6 +814,7 @@ class TestSnippetListEdgeCases(TestSnippetBase):
         assert "Response is not a dictionary" in str(exc.value)
 
     def test_list_single_object_no_data_key(self, snippet_service, mocker):
+        """Test list with single object and no data key."""
         # API returns a dict without a 'data' key
         response = SnippetResponseModelFactory.build_valid_model().model_dump()
         mocker.patch.object(snippet_service.api_client, "get", return_value=response)
@@ -797,6 +823,7 @@ class TestSnippetListEdgeCases(TestSnippetBase):
         assert results[0].id == response["id"]
 
     def test_list_data_key_not_list(self, snippet_service, mocker):
+        """Test list with data key not a list."""
         # API returns a dict with 'data' not a list
         response = {"data": {"id": "abc"}}
         mocker.patch.object(snippet_service.api_client, "get", return_value=response)
@@ -805,6 +832,7 @@ class TestSnippetListEdgeCases(TestSnippetBase):
         assert "data" in str(exc.value) and "field must be a list" in str(exc.value)
 
     def test_list_pagination_offset_increment(self, snippet_service, mocker):
+        """Test list with pagination offset increment."""
         # Simulate two pages
         page1 = {
             "data": [SnippetResponseModelFactory.build_valid_model().model_dump() for _ in range(2)]
@@ -821,6 +849,7 @@ class TestSnippetListEdgeCases(TestSnippetBase):
         assert get_mock.call_count == 2
 
     def test_list_labels_param_passed_to_api(self, snippet_service, mocker):
+        """Test list with labels parameter passed to API."""
         # Ensure 'labels' filter is sent as comma-separated string in params
         labels = ["foo", "bar"]
         expected = "foo,bar"
@@ -831,6 +860,7 @@ class TestSnippetListEdgeCases(TestSnippetBase):
         assert called_params["labels"] == expected
 
     def test_list_types_param_passed_to_api(self, snippet_service, mocker):
+        """Test list with types parameter passed to API."""
         # Ensure 'types' filter is sent as comma-separated string in params
         types = ["predefined", "custom"]
         expected = "predefined,custom"
@@ -845,11 +875,13 @@ class TestSnippetFetchEdgeCases(TestSnippetBase):
     """Covers edge/error cases for Snippet.fetch (empty, multiple, etc)."""
 
     def test_fetch_returns_none_when_no_results(self, snippet_service, mocker):
+        """Test fetch returns None when no results."""
         mocker.patch.object(snippet_service, "list", return_value=[])
         result = snippet_service.fetch("foo")
         assert result is None
 
     def test_fetch_returns_first_match(self, snippet_service, mocker):
+        """Test fetch returns first match when multiple exist."""
         name = "dup"
         m1 = SnippetResponseModelFactory.build_valid_model(name=name)
         m2 = SnippetResponseModelFactory.build_valid_model(name=name)

@@ -32,6 +32,7 @@ class MockScm(MagicMock, Scm):
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialize the MockScm instance for testing purposes."""
         MagicMock.__init__(self, *args, **kwargs)
         # Skip the Scm.__init__ since it would require real authentication credentials
 

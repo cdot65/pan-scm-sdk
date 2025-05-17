@@ -22,6 +22,8 @@ class ApplicationFiltersBaseFactory(factory.Factory):
     """Base factory for ApplicationFilters with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationFiltersBaseFactory."""
+
         model = ApplicationFiltersBaseModel
         abstract = True
 
@@ -60,6 +62,8 @@ class ApplicationFiltersCreateApiFactory(ApplicationFiltersBaseFactory):
     """Factory for creating ApplicationFiltersCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationFiltersCreateModelFactory."""
+
         model = ApplicationFiltersCreateModel
 
     @classmethod
@@ -123,6 +127,8 @@ class ApplicationFiltersUpdateApiFactory(ApplicationFiltersBaseFactory):
     """Factory for creating ApplicationFiltersUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationFiltersUpdateModelFactory."""
+
         model = ApplicationFiltersUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -166,6 +172,8 @@ class ApplicationFiltersResponseFactory(ApplicationFiltersBaseFactory):
     """Factory for creating ApplicationFiltersResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationFiltersResponseModelFactory."""
+
         model = ApplicationFiltersResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

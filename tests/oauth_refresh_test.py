@@ -2,6 +2,7 @@
 
 This module contains tests and utilities for validating token refresh logic and tracking API call status in the SDK.
 """
+
 from datetime import datetime
 import sys
 import time
@@ -12,6 +13,7 @@ class TokenMonitor:
     """Monitor class to track API calls and token status."""
 
     def __init__(self, address_client):
+        """Initialize the Monitor instance with an address client for tracking."""
         self.address_client = address_client
         self.start_time = time.time()
         self.iteration = 0

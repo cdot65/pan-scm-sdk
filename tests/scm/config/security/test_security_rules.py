@@ -700,6 +700,7 @@ class TestSecurityRuleList(TestSecurityRuleBase):
 
     def test_list_pagination_multiple_pages(self):
         """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = SecurityRule(self.mock_scm, max_limit=2500)  # noqa
@@ -1633,6 +1634,7 @@ class TestSecurityRuleMove(TestSecurityRuleBase):
 
 class TestSecurityRuleModelMisc(TestSecurityRuleBase):
     """Tests for miscellaneous SecurityRule model behavior."""
+
     def test_security_rule_profile_setting_group_unique(self):
         """Test that duplicate items in 'group' raise a ValueError."""
         with pytest.raises(ValueError, match="List items in 'group' must be unique"):

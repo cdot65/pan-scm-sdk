@@ -402,6 +402,7 @@ class TestApplicationList(TestApplicationBase):
 
     def test_list_exclude_snippets(self):
         """Test that exclude_snippets removes applications from those snippets.
+
         Assume snippet is supported by ApplicationResponseModel and ApplicationResponseFactory.
         """
         mock_response = {
@@ -428,6 +429,7 @@ class TestApplicationList(TestApplicationBase):
 
     def test_list_exact_match_and_exclusions(self):
         """Test combining exact_match with exclusions.
+
         Assume snippet and device are supported by ApplicationResponseModel.
         """
         mock_response = {
@@ -473,6 +475,7 @@ class TestApplicationList(TestApplicationBase):
 
     def test_list_pagination_multiple_pages(self):
         """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = Application(self.mock_scm, max_limit=2500)  # noqa

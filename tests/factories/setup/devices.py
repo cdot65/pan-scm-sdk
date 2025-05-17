@@ -13,6 +13,8 @@ class InstalledLicenseFactory(factory.Factory):
     """Factory for InstalledLicenseModel."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = InstalledLicenseModel
 
     # TODO: Define factory fields based on InstalledLicenseModel
@@ -23,6 +25,8 @@ class AvailableLicenseFactory(factory.Factory):
     """Factory for AvailableLicenseModel."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = AvailableLicenseModel
 
     # TODO: Define factory fields based on AvailableLicenseModel
@@ -33,6 +37,8 @@ class DevicesFactory(factory.Factory):
     """Factory for DeviceGetResponseModel."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = DeviceGetResponseModel
 
     id = factory.Faker("uuid4")

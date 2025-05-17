@@ -914,6 +914,7 @@ class TestAddressDeleteErrorHandling(TestAddressBase):
         assert error_response["_errors"][0]["details"]["errorType"] == "Reference Not Zero"
 
     def test_delete_raises_object_not_present_error_on_404(self):
+        """Test delete raises ObjectNotPresentError on 404."""
         client = Address(self.mock_scm)
         object_id = "some-id"
         error = APIError("Not found")
@@ -924,6 +925,7 @@ class TestAddressDeleteErrorHandling(TestAddressBase):
             client.delete(object_id)
 
     def test_delete_reraises_api_error_on_non_404(self):
+        """Test delete re-raises APIError on non-404 status."""
         client = Address(self.mock_scm)
         object_id = "some-id"
         error = APIError("Server error")
@@ -934,6 +936,7 @@ class TestAddressDeleteErrorHandling(TestAddressBase):
             client.delete(object_id)
 
     def test_delete_logs_error_on_non_404(self, mocker):
+        """Test delete logs error on non-404 status."""
         client = Address(self.mock_scm)
         object_id = "some-id"
         error = APIError("Server error")
