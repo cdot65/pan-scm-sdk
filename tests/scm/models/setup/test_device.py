@@ -9,9 +9,9 @@ from scm.models.setup.device import (
     DeviceResponseModel,
 )
 from tests.factories.setup.device import (
-    DeviceLicenseModelDictFactory,
+    DeviceLicenseDictFactory,
     DeviceListResponseModelDictFactory,
-    DeviceResponseModelDictFactory,
+    DeviceResponseDictFactory,
 )
 
 
@@ -20,7 +20,7 @@ class TestDeviceLicenseModel:
 
     def test_valid_construction(self):
         """Test valid construction of DeviceLicenseModel."""
-        data = DeviceLicenseModelDictFactory.build()
+        data = DeviceLicenseDictFactory.build()
         model = DeviceLicenseModel.model_validate(data)
         assert model.feature == data["feature"]
         assert model.expires == data["expires"]
@@ -28,14 +28,14 @@ class TestDeviceLicenseModel:
 
     def test_missing_required_field(self):
         """Test validation error when required field is missing."""
-        data = DeviceLicenseModelDictFactory.build()
+        data = DeviceLicenseDictFactory.build()
         data.pop("feature")
         with pytest.raises(ValidationError):
             DeviceLicenseModel.model_validate(data)
 
     def test_optional_fields(self):
         """Test that optional fields can be omitted."""
-        data = DeviceLicenseModelDictFactory.build()
+        data = DeviceLicenseDictFactory.build()
         data.pop("authcode", None)
         data.pop("expired", None)
         model = DeviceLicenseModel.model_validate(data)
@@ -48,7 +48,7 @@ class TestDeviceResponseModel:
 
     def test_valid_construction(self):
         """Test valid construction of DeviceResponseModel."""
-        data = DeviceResponseModelDictFactory.build()
+        data = DeviceResponseDictFactory.build()
         model = DeviceResponseModel.model_validate(data)
         assert model.id == data["id"]
         assert isinstance(model.available_licenses, list)
@@ -70,16 +70,16 @@ class TestDeviceResponseModel:
 
     def test_missing_required_field(self):
         """Test validation error when required field is missing."""
-        data = DeviceResponseModelDictFactory.build()
+        data = DeviceResponseDictFactory.build()
         data.pop("id")
         with pytest.raises(ValidationError):
             DeviceResponseModel.model_validate(data)
 
     def test_nested_license_validation(self):
         """Test validation of nested license objects."""
-        data = DeviceResponseModelDictFactory.build()
+        data = DeviceResponseDictFactory.build()
         # Corrupt a nested license entry
-        data["available_licenses"][0].pop("feature")
+        data["availableLicenses"][0].pop("feature")
         with pytest.raises(ValidationError):
             DeviceResponseModel.model_validate(data)
 
