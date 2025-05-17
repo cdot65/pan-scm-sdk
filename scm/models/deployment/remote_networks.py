@@ -56,9 +56,7 @@ class EcmpTunnelModel(BaseModel):
 
 
 class RemoteNetworkBaseModel(BaseModel):
-    """
-    Base model for Remote Network objects containing fields common to all CRUD operations.
-    """
+    """Base model for Remote Network objects containing fields common to all CRUD operations."""
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -150,8 +148,8 @@ class RemoteNetworkBaseModel(BaseModel):
 
 
 class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
-    """
-    Model for creating a new Remote Network.
+    """Model for creating a new Remote Network.
+
     Ensures exactly one container field is set (folder, snippet, or device).
     """
 
@@ -165,8 +163,8 @@ class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
 
 
 class RemoteNetworkUpdateModel(RemoteNetworkBaseModel):
-    """
-    Model for updating an existing Remote Network.
+    """Model for updating an existing Remote Network.
+
     Includes optional id field.
     """
 
@@ -178,8 +176,8 @@ class RemoteNetworkUpdateModel(RemoteNetworkBaseModel):
 
 
 class RemoteNetworkResponseModel(RemoteNetworkBaseModel):
-    """
-    Model for Remote Network API responses.
+    """Model for Remote Network API responses.
+
     Includes id as a required field.
     """
 

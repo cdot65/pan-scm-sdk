@@ -21,12 +21,13 @@ from scm.models.objects import (
 
 
 class Address(BaseObject):
-    """
-    Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Address objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/addresses"
@@ -38,13 +39,13 @@ class Address(BaseObject):
         api_client,
         max_limit: Optional[int] = DEFAULT_MAX_LIMIT,
     ):
-        """
-        Initialize the Address service class.
+        """Initialize the Address service class.
 
         Args:
             api_client: The API client instance for making HTTP requests.
             max_limit: Maximum number of items to return in a single request.
                       Defaults to DEFAULT_MAX_LIMIT.
+
         """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
@@ -63,8 +64,7 @@ class Address(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -74,6 +74,7 @@ class Address(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -110,11 +111,11 @@ class Address(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AddressResponseModel:
-        """
-        Creates a new address object.
+        """Creates a new address object.
 
         Returns:
             AddressResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         address = AddressCreateModel(**data)
@@ -135,11 +136,11 @@ class Address(BaseObject):
         self,
         object_id: str,
     ) -> AddressResponseModel:
-        """
-        Gets an address object by ID.
+        """Gets an address object by ID.
 
         Returns:
             AddressResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -152,14 +153,14 @@ class Address(BaseObject):
         self,
         address: AddressUpdateModel,
     ) -> AddressResponseModel:
-        """
-        Updates an existing address object.
+        """Updates an existing address object.
 
         Args:
             address: AddressUpdateModel instance containing the update data
 
         Returns:
             AddressResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = address.model_dump(exclude_unset=True)
@@ -183,8 +184,7 @@ class Address(BaseObject):
         addresses: List[AddressResponseModel],
         filters: Dict[str, Any],
     ) -> List[AddressResponseModel]:
-        """
-        Apply client-side filtering to the list of addresses.
+        """Apply client-side filtering to the list of addresses.
 
         Args:
             addresses: List of AddressResponseModel objects
@@ -192,8 +192,8 @@ class Address(BaseObject):
 
         Returns:
             List[AddressResponseModel]: Filtered list of addresses
-        """
 
+        """
         filter_criteria = addresses
 
         # Filter by types
@@ -280,8 +280,7 @@ class Address(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AddressResponseModel]:
-        """
-        Lists address objects with optional filtering.
+        """Lists address objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -299,6 +298,7 @@ class Address(BaseObject):
 
         Returns:
             List[AddressResponseModel]: A list of address objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -422,8 +422,7 @@ class Address(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> AddressResponseModel:
-        """
-        Fetches a single object by name.
+        """Fetches a single object by name.
 
         Args:
             name (str): The name of the address to fetch.
@@ -433,6 +432,7 @@ class Address(BaseObject):
 
         Returns:
             AddressResponseModel: The fetched address object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -504,8 +504,7 @@ class Address(BaseObject):
         self,
         object_id: Union[str, UUID],
     ) -> None:
-        """
-        Deletes an address object.
+        """Deletes an address object.
 
         Args:
             object_id: The ID of the object to delete.
@@ -513,6 +512,7 @@ class Address(BaseObject):
         Raises:
             ObjectNotPresentError: If the address doesn't exist.
             APIError: If the API request fails.
+
         """
         try:
             object_id_str = str(object_id)

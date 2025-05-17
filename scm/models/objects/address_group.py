@@ -16,11 +16,11 @@ TagString = constr(max_length=64)
 
 
 class DynamicFilter(BaseModel):
-    """
-    Represents the dynamic filter for an Address Group in Palo Alto Networks' Strata Cloud Manager.
+    """Represents the dynamic filter for an Address Group in Palo Alto Networks' Strata Cloud Manager.
 
     Attributes:
         filter (str): Tag-based filter defining group membership.
+
     """
 
     filter: str = Field(
@@ -32,8 +32,7 @@ class DynamicFilter(BaseModel):
 
 
 class AddressGroupBaseModel(BaseModel):
-    """
-    Base model for Address Group objects containing fields common to all CRUD operations.
+    """Base model for Address Group objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the address group.
@@ -44,6 +43,7 @@ class AddressGroupBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     model_config = ConfigDict(
@@ -126,8 +126,8 @@ class AddressGroupBaseModel(BaseModel):
 
 
 class AddressGroupCreateModel(AddressGroupBaseModel):
-    """
-    Model for creating a new Address Group.
+    """Model for creating a new Address Group.
+
     Inherits from AddressGroupBase and adds container type validation.
     """
 
@@ -141,8 +141,8 @@ class AddressGroupCreateModel(AddressGroupBaseModel):
 
 
 class AddressGroupUpdateModel(AddressGroupBaseModel):
-    """
-    Model for updating an existing Address Group.
+    """Model for updating an existing Address Group.
+
     All fields are optional to allow partial updates.
     """
 
@@ -154,8 +154,7 @@ class AddressGroupUpdateModel(AddressGroupBaseModel):
 
 
 class AddressGroupResponseModel(AddressGroupBaseModel):
-    """
-    Represents the creation of a new AddressGroup object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new AddressGroup object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressGroupResponseModel object,
     it inherits all fields from the AddressGroupBaseModel class, adds its own attribute for the
@@ -166,6 +165,7 @@ class AddressGroupResponseModel(AddressGroupBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     id: UUID = Field(

@@ -215,14 +215,14 @@ class LogForwardingProfileResponseFactory(LogForwardingProfileBaseFactory):
 
     @classmethod
     def build(cls, **kwargs):
-        """
-        Create a basic LogForwardingProfileResponseModel instance.
+        """Create a basic LogForwardingProfileResponseModel instance.
 
         Args:
             **kwargs: Additional keyword arguments to override default values
 
         Returns:
             LogForwardingProfileResponseModel: A configured log forwarding profile response model
+
         """
         return cls(**kwargs)
 
@@ -302,8 +302,7 @@ class LogForwardingProfileResponseFactory(LogForwardingProfileBaseFactory):
         request_model: Union[LogForwardingProfileCreateModel, Dict[str, Any]],
         **kwargs,
     ) -> LogForwardingProfileResponseModel:
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create request.
 
@@ -313,6 +312,7 @@ class LogForwardingProfileResponseFactory(LogForwardingProfileBaseFactory):
 
         Returns:
             LogForwardingProfileResponseModel instance
+
         """
         if isinstance(request_model, dict):
             data = request_model.copy()
@@ -545,8 +545,7 @@ class LogForwardingProfileResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_from_request(cls, request_data: Dict[str, Any], **kwargs):
-        """
-        Return a data dictionary based on request data.
+        """Return a data dictionary based on request data.
 
         Args:
             request_data: Request data dictionary to base the response on
@@ -554,6 +553,7 @@ class LogForwardingProfileResponseModelFactory(factory.DictFactory):
 
         Returns:
             Dictionary with response data
+
         """
         data = request_data.copy()
 

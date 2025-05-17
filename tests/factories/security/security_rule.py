@@ -189,8 +189,7 @@ class SecurityRuleResponseFactory(factory.Factory):
 
     @classmethod
     def with_device(cls, device: Union[str, Dict] = "TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: Either a string device name or an empty dictionary
@@ -198,6 +197,7 @@ class SecurityRuleResponseFactory(factory.Factory):
 
         Returns:
             An instance of SecurityRuleResponseModel
+
         """
         # Validate the device parameter
         if isinstance(device, dict) and device != {}:
@@ -207,11 +207,11 @@ class SecurityRuleResponseFactory(factory.Factory):
 
     @classmethod
     def with_empty_dict_device(cls, **kwargs):
-        """
-        Create an instance with an empty dictionary as device.
+        """Create an instance with an empty dictionary as device.
 
         Returns:
             An instance of SecurityRuleResponseModel with device={}
+
         """
         return cls(folder=None, snippet=None, device={}, **kwargs)
 

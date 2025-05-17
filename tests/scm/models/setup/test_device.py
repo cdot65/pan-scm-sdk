@@ -1,5 +1,4 @@
-"""
-Pytest suite for Device Pydantic models.
+"""Pytest suite for Device Pydantic models.
 """
 
 from pydantic import ValidationError

@@ -50,12 +50,12 @@ class TokenMonitor:
         sys.stdout.flush()
 
     def run(self, interval: int = 10, duration: Optional[int] = None):
-        """
-        Run the monitor.
+        """Run the monitor.
 
         Args:
             interval: Time between checks in seconds
             duration: Optional total runtime in seconds
+
         """
         try:
             while True:

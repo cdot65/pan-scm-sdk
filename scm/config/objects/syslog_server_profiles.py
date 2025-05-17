@@ -15,13 +15,13 @@ from scm.models.objects import (
 
 
 class SyslogServerProfile(BaseObject):
-    """
-    Manages Syslog Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Syslog Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/objects/v1/syslog-server-profiles"
@@ -50,8 +50,7 @@ class SyslogServerProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +60,7 @@ class SyslogServerProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +97,14 @@ class SyslogServerProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> SyslogServerProfileResponseModel:
-        """
-        Creates a new syslog server profile object.
+        """Creates a new syslog server profile object.
 
         Args:
             data: Dictionary containing the syslog server profile data
 
         Returns:
             SyslogServerProfileResponseModel: The created syslog server profile
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         syslog_server_profile = SyslogServerProfileCreateModel(**data)
@@ -130,14 +130,14 @@ class SyslogServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> SyslogServerProfileResponseModel:
-        """
-        Gets a syslog server profile object by ID.
+        """Gets a syslog server profile object by ID.
 
         Args:
             object_id: The ID of the syslog server profile to retrieve
 
         Returns:
             SyslogServerProfileResponseModel: The retrieved syslog server profile
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -150,14 +150,14 @@ class SyslogServerProfile(BaseObject):
         self,
         syslog_server_profile: SyslogServerProfileUpdateModel,
     ) -> SyslogServerProfileResponseModel:
-        """
-        Updates an existing syslog server profile object.
+        """Updates an existing syslog server profile object.
 
         Args:
             syslog_server_profile: SyslogServerProfileUpdateModel instance containing the update data
 
         Returns:
             SyslogServerProfileResponseModel: The updated syslog server profile
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = syslog_server_profile.model_dump(exclude_unset=True)
@@ -181,8 +181,7 @@ class SyslogServerProfile(BaseObject):
         syslog_server_profiles: List[SyslogServerProfileResponseModel],
         filters: Dict[str, Any],
     ) -> List[SyslogServerProfileResponseModel]:
-        """
-        Apply client-side filtering to the list of syslog server profiles.
+        """Apply client-side filtering to the list of syslog server profiles.
 
         Args:
             syslog_server_profiles: List of SyslogServerProfileResponseModel objects
@@ -190,6 +189,7 @@ class SyslogServerProfile(BaseObject):
 
         Returns:
             List[SyslogServerProfileResponseModel]: Filtered list of syslog server profiles
+
         """
         filter_criteria = syslog_server_profiles
 
@@ -240,8 +240,7 @@ class SyslogServerProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """
-        Builds container parameters dictionary.
+        """Builds container parameters dictionary.
 
         Args:
             folder: Optional folder name
@@ -250,6 +249,7 @@ class SyslogServerProfile(BaseObject):
 
         Returns:
             dict: Dictionary of non-None container parameters
+
         """
         return {
             k: v
@@ -268,8 +268,7 @@ class SyslogServerProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SyslogServerProfileResponseModel]:
-        """
-        Lists syslog server profile objects with optional filtering.
+        """Lists syslog server profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -286,6 +285,7 @@ class SyslogServerProfile(BaseObject):
 
         Returns:
             List[SyslogServerProfileResponseModel]: A list of syslog server profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -409,8 +409,7 @@ class SyslogServerProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> SyslogServerProfileResponseModel:
-        """
-        Fetches a single syslog server profile object by name.
+        """Fetches a single syslog server profile object by name.
 
         Args:
             name (str): The name of the syslog server profile to fetch.
@@ -420,6 +419,7 @@ class SyslogServerProfile(BaseObject):
 
         Returns:
             SyslogServerProfileResponseModel: The fetched syslog server profile object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -491,11 +491,11 @@ class SyslogServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a syslog server profile object.
+        """Deletes a syslog server profile object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

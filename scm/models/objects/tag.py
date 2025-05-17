@@ -66,14 +66,14 @@ class Colors(str, Enum):
         cls,
         normalized_name: str,
     ) -> Optional[str]:
-        """
-        Retrieve the standard color name based on the normalized color name.
+        """Retrieve the standard color name based on the normalized color name.
 
         Args:
             normalized_name (str): The normalized color name.
 
         Returns:
             Optional[str]: The standard color name if found, else None.
+
         """
         for color in cls:
             if normalize_color_name(color) == normalized_name:
@@ -82,8 +82,7 @@ class Colors(str, Enum):
 
 
 class TagBaseModel(BaseModel):
-    """
-    Base model for Tag objects containing fields common to all CRUD operations.
+    """Base model for Tag objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the tag object.
@@ -92,6 +91,7 @@ class TagBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -160,8 +160,7 @@ class TagBaseModel(BaseModel):
 
 
 class TagCreateModel(TagBaseModel):
-    """
-    Represents the creation of a new Tag object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Tag object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an TagCreateModel object,
     it inherits all fields from the TagBaseModel class, and provides a custom validator
@@ -172,6 +171,7 @@ class TagCreateModel(TagBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
@@ -190,8 +190,7 @@ class TagCreateModel(TagBaseModel):
 
 
 class TagUpdateModel(TagBaseModel):
-    """
-    Represents the update of an existing Tag object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Tag object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an TagUpdateModel object, similar to the
     TagCreateModel class, but does not have the same custom validator as the TagBaseModel class.
@@ -210,8 +209,7 @@ class TagUpdateModel(TagBaseModel):
 
 
 class TagResponseModel(TagBaseModel):
-    """
-    Represents the creation of a new Tag object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Tag object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an TagResponseModel object,
     it inherits all fields from the TagBaseModel class, adds its own attribute for the
@@ -222,6 +220,7 @@ class TagResponseModel(TagBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Optional fields

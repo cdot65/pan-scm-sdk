@@ -7,8 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ApplicationGroupBaseModel(BaseModel):
-    """
-    Base model for Application Group objects containing fields common to all CRUD operations.
+    """Base model for Application Group objects containing fields common to all CRUD operations.
 
     This model serves as the foundation for create, update, and response models,
     containing all shared fields and validation logic.
@@ -19,6 +18,7 @@ class ApplicationGroupBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     model_config = ConfigDict(
@@ -66,8 +66,8 @@ class ApplicationGroupBaseModel(BaseModel):
 
 
 class ApplicationGroupCreateModel(ApplicationGroupBaseModel):
-    """
-    Model for creating a new Application Group.
+    """Model for creating a new Application Group.
+
     Inherits from ApplicationGroupBaseModel and adds container type validation.
     """
 
@@ -85,8 +85,8 @@ class ApplicationGroupCreateModel(ApplicationGroupBaseModel):
 
 
 class ApplicationGroupUpdateModel(ApplicationGroupBaseModel):
-    """
-    Model for updating an existing Application Group.
+    """Model for updating an existing Application Group.
+
     All fields are optional to allow partial updates.
     """
 
@@ -98,8 +98,8 @@ class ApplicationGroupUpdateModel(ApplicationGroupBaseModel):
 
 
 class ApplicationGroupResponseModel(ApplicationGroupBaseModel):
-    """
-    Model for Application Group responses.
+    """Model for Application Group responses.
+
     Includes all base fields plus the id field.
     """
 

@@ -10,8 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # Server model for HTTP server profile
 class ServerModel(BaseModel):
-    """
-    Represents a server configuration within an HTTP server profile.
+    """Represents a server configuration within an HTTP server profile.
 
     Attributes:
         name (str): HTTP server name.
@@ -23,6 +22,7 @@ class ServerModel(BaseModel):
         http_method (Optional[str]): HTTP operation to perform.
         username (Optional[str]): Username for HTTP server authentication.
         password (Optional[str]): Password for HTTP server authentication.
+
     """
 
     name: str = Field(..., description="HTTP server name")
@@ -42,8 +42,7 @@ class ServerModel(BaseModel):
 
 # PayloadFormat model for HTTP server profile
 class PayloadFormatModel(BaseModel):
-    """
-    Represents the payload format configuration for a specific log type.
+    """Represents the payload format configuration for a specific log type.
 
     Attributes:
         name (Optional[str]): The name of the payload format. Default is "Default".
@@ -51,6 +50,7 @@ class PayloadFormatModel(BaseModel):
         headers (Optional[List[Dict[str, str]]]): List of HTTP headers to include in the request.
         params (Optional[List[Dict[str, str]]]): List of HTTP parameters to include in the request.
         payload (Optional[str]): The log payload format. Contains log field values.
+
     """
 
     name: Optional[str] = Field("Default", description="The name of the payload format")
@@ -67,8 +67,7 @@ class PayloadFormatModel(BaseModel):
 
 
 class HTTPServerProfileBaseModel(BaseModel):
-    """
-    Base model for HTTP Server Profile objects containing fields common to all CRUD operations.
+    """Base model for HTTP Server Profile objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the HTTP server profile.
@@ -79,6 +78,7 @@ class HTTPServerProfileBaseModel(BaseModel):
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
         description (Optional[str]): A description of the HTTP server profile.
+
     """
 
     # Required fields
@@ -143,8 +143,7 @@ class HTTPServerProfileBaseModel(BaseModel):
 
 
 class HTTPServerProfileCreateModel(HTTPServerProfileBaseModel):
-    """
-    Represents the creation of a new HTTP Server Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new HTTP Server Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an HTTPServerProfileCreateModel object,
     it inherits all fields from the HTTPServerProfileBaseModel class, and provides a custom validator
@@ -155,6 +154,7 @@ class HTTPServerProfileCreateModel(HTTPServerProfileBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
@@ -173,13 +173,13 @@ class HTTPServerProfileCreateModel(HTTPServerProfileBaseModel):
 
 
 class HTTPServerProfileUpdateModel(HTTPServerProfileBaseModel):
-    """
-    Represents the update of an existing HTTP Server Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing HTTP Server Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an HTTPServerProfileUpdateModel object.
 
     Attributes:
         id (UUID): The UUID of the HTTP server profile.
+
     """
 
     id: UUID = Field(
@@ -190,8 +190,7 @@ class HTTPServerProfileUpdateModel(HTTPServerProfileBaseModel):
 
 
 class HTTPServerProfileResponseModel(HTTPServerProfileBaseModel):
-    """
-    Represents the response model for a HTTP Server Profile object from Palo Alto Networks' Strata Cloud Manager.
+    """Represents the response model for a HTTP Server Profile object from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an HTTPServerProfileResponseModel object,
     it inherits all fields from the HTTPServerProfileBaseModel class, and adds its own attribute for the
@@ -199,6 +198,7 @@ class HTTPServerProfileResponseModel(HTTPServerProfileBaseModel):
 
     Attributes:
         id (UUID): The UUID of the HTTP server profile.
+
     """
 
     id: UUID = Field(

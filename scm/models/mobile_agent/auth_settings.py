@@ -25,8 +25,7 @@ class OperatingSystem(str, Enum):
 
 
 class AuthSettingsBaseModel(BaseModel):
-    """
-    Base model for GlobalProtect Authentication Settings containing fields common to all CRUD operations.
+    """Base model for GlobalProtect Authentication Settings containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the authentication settings.
@@ -37,6 +36,7 @@ class AuthSettingsBaseModel(BaseModel):
 
     Error:
         ValueError: Raised when validation fails for any field or when folder is not 'Mobile Users'.
+
     """
 
     # Pydantic model configuration
@@ -86,14 +86,14 @@ class AuthSettingsBaseModel(BaseModel):
 
 
 class AuthSettingsCreateModel(AuthSettingsBaseModel):
-    """
-    Represents the creation of a new GlobalProtect Authentication Settings.
+    """Represents the creation of a new GlobalProtect Authentication Settings.
 
     This class defines the structure and validation rules for creating authentication settings,
     ensuring that folder is set to 'Mobile Users'.
 
     Error:
         ValueError: Raised when folder is not provided or not set to 'Mobile Users'.
+
     """
 
     @model_validator(mode="after")
@@ -105,8 +105,7 @@ class AuthSettingsCreateModel(AuthSettingsBaseModel):
 
 
 class AuthSettingsUpdateModel(BaseModel):
-    """
-    Represents the update of an existing GlobalProtect Authentication Settings.
+    """Represents the update of an existing GlobalProtect Authentication Settings.
 
     This class defines the structure and validation rules for updating authentication settings.
     Only fields that need to be updated can be provided.
@@ -117,6 +116,7 @@ class AuthSettingsUpdateModel(BaseModel):
         os (Optional[OperatingSystem]): The operating system this authentication setting applies to.
         user_credential_or_client_cert_required (Optional[bool]): Whether user credentials or client certificate is required.
         folder (Optional[str]): The folder in which the resource is defined (must be 'Mobile Users').
+
     """
 
     # Pydantic model configuration
@@ -164,8 +164,7 @@ class AuthSettingsUpdateModel(BaseModel):
 
 
 class AuthSettingsResponseModel(AuthSettingsBaseModel):
-    """
-    Represents the response model for GlobalProtect Authentication Settings.
+    """Represents the response model for GlobalProtect Authentication Settings.
 
     This class defines the structure for authentication settings returned by the API.
     """
@@ -181,8 +180,7 @@ class MovePosition(str, Enum):
 
 
 class AuthSettingsMoveModel(BaseModel):
-    """
-    Represents the model for moving GlobalProtect Authentication Settings in the configuration.
+    """Represents the model for moving GlobalProtect Authentication Settings in the configuration.
 
     This class defines the structure and validation rules for moving authentication settings
     to a different position within the configuration.
@@ -195,6 +193,7 @@ class AuthSettingsMoveModel(BaseModel):
 
     Error:
         ValueError: Raised when destination is not provided for 'before' or 'after' positions.
+
     """
 
     model_config = ConfigDict(

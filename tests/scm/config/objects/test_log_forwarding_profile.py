@@ -414,7 +414,6 @@ class TestLogForwardingProfileListAndFetch:
 
     def test_apply_filters_directly(self):
         """Test applying filters directly on a list of profiles."""
-
         # Create sample profiles
         profile1 = LogForwardingProfileResponseModel(
             **LogForwardingProfileResponseFactory.build().model_dump()

@@ -1,5 +1,4 @@
-"""
-Models for interacting with Devices in Palo Alto Networks' Strata Cloud Manager.
+"""Models for interacting with Devices in Palo Alto Networks' Strata Cloud Manager.
 
 Defines Pydantic models for representing Device resources returned by the SCM API.
 """
@@ -10,9 +9,7 @@ from pydantic import BaseModel, Field
 
 
 class DeviceLicenseModel(BaseModel):
-    """
-    Model for a license entry in available_licenses or installed_licenses.
-    """
+    """Model for a license entry in available_licenses or installed_licenses."""
 
     feature: str = Field(..., description="Feature name for the license.")
     expires: str = Field(..., description="Expiration date (YYYY-MM-DD).")
@@ -26,8 +23,7 @@ class DeviceLicenseModel(BaseModel):
 
 
 class DeviceBaseModel(BaseModel):
-    """
-    Base model for Device resources containing common fields.
+    """Base model for Device resources containing common fields.
 
     Attributes:
         name: Device name.
@@ -41,6 +37,7 @@ class DeviceBaseModel(BaseModel):
         device_only: True if device-only entry.
         is_connected: Connection status.
         description: Device description.
+
     """
 
     name: Optional[str] = Field(None, description="Device name.")
@@ -57,8 +54,7 @@ class DeviceBaseModel(BaseModel):
 
 
 class DeviceCreateModel(DeviceBaseModel):
-    """
-    Model for creating new Device resources.
+    """Model for creating new Device resources.
 
     Inherits all fields from DeviceBaseModel without additional fields.
     """
@@ -67,19 +63,18 @@ class DeviceCreateModel(DeviceBaseModel):
 
 
 class DeviceUpdateModel(DeviceBaseModel):
-    """
-    Model for updating existing Device resources.
+    """Model for updating existing Device resources.
 
     Attributes:
         id: The unique identifier of the device to update.
+
     """
 
     id: str = Field(..., description="Unique device identifier (serial number).")
 
 
 class DeviceResponseModel(DeviceBaseModel):
-    """
-    Model for Device responses from the API.
+    """Model for Device responses from the API.
 
     Attributes:
         id: Unique device identifier (serial number).
@@ -119,6 +114,7 @@ class DeviceResponseModel(DeviceBaseModel):
         ha_peer_state: HA peer state.
         ha_peer_serial: HA peer serial number.
         vm_state: VM state.
+
     """
 
     id: str = Field(..., description="Unique device identifier (serial number).")
@@ -173,9 +169,7 @@ class DeviceResponseModel(DeviceBaseModel):
 
 
 class DeviceListResponseModel(BaseModel):
-    """
-    Model for the paginated response from GET /devices.
-    """
+    """Model for the paginated response from GET /devices."""
 
     data: List[DeviceResponseModel] = Field(..., description="List of device objects.")
     limit: int = Field(..., description="Max number of devices returned.")

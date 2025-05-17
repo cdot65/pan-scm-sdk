@@ -16,13 +16,13 @@ from scm.models.mobile_agent import (
 
 
 class AuthSettings(BaseObject):
-    """
-    Manages GlobalProtect Authentication Settings in Palo Alto Networks' Strata Cloud Manager.
+    """Manages GlobalProtect Authentication Settings in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/mobile-agent/v1/authentication-settings"
@@ -51,8 +51,7 @@ class AuthSettings(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -62,6 +61,7 @@ class AuthSettings(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -98,14 +98,14 @@ class AuthSettings(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AuthSettingsResponseModel:
-        """
-        Creates a new GlobalProtect Authentication Settings object.
+        """Creates a new GlobalProtect Authentication Settings object.
 
         Args:
             data: Dictionary containing the authentication settings configuration
 
         Returns:
             AuthSettingsResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         auth_settings = AuthSettingsCreateModel(**data)
@@ -129,14 +129,14 @@ class AuthSettings(BaseObject):
         self,
         object_id: str,
     ) -> AuthSettingsResponseModel:
-        """
-        Gets a GlobalProtect Authentication Settings object by ID.
+        """Gets a GlobalProtect Authentication Settings object by ID.
 
         Args:
             object_id: The ID of the authentication settings to retrieve
 
         Returns:
             AuthSettingsResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -147,8 +147,7 @@ class AuthSettings(BaseObject):
         object_id: str,
         data: Dict[str, Any],
     ) -> AuthSettingsResponseModel:
-        """
-        Updates an existing GlobalProtect Authentication Settings object.
+        """Updates an existing GlobalProtect Authentication Settings object.
 
         Args:
             object_id: The ID of the object to update
@@ -156,6 +155,7 @@ class AuthSettings(BaseObject):
 
         Returns:
             AuthSettingsResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         auth_settings = AuthSettingsUpdateModel(**data)
@@ -180,14 +180,14 @@ class AuthSettings(BaseObject):
         self,
         move_data: Dict[str, Any],
     ) -> None:
-        """
-        Moves a GlobalProtect Authentication Settings object to a different position.
+        """Moves a GlobalProtect Authentication Settings object to a different position.
 
         Args:
             move_data: Dictionary containing the move configuration
 
         Returns:
             None
+
         """
         # Validate and create move model
         move_model = AuthSettingsMoveModel(**move_data)
@@ -207,8 +207,7 @@ class AuthSettings(BaseObject):
         folder: str = "Mobile Users",
         **filters,
     ) -> List[AuthSettingsResponseModel]:
-        """
-        Lists GlobalProtect Authentication Settings objects with optional filtering.
+        """Lists GlobalProtect Authentication Settings objects with optional filtering.
 
         Args:
             folder: Folder name (defaults to "Mobile Users" as it's the only valid value)
@@ -216,6 +215,7 @@ class AuthSettings(BaseObject):
 
         Returns:
             List[AuthSettingsResponseModel]: A list of authentication settings objects
+
         """
         if folder != "Mobile Users":
             raise InvalidObjectError(
@@ -262,8 +262,7 @@ class AuthSettings(BaseObject):
         name: str,
         folder: str = "Mobile Users",
     ) -> AuthSettingsResponseModel:
-        """
-        Fetches a single GlobalProtect Authentication Settings by name.
+        """Fetches a single GlobalProtect Authentication Settings by name.
 
         Args:
             name: The name of the authentication settings to fetch
@@ -271,6 +270,7 @@ class AuthSettings(BaseObject):
 
         Returns:
             AuthSettingsResponseModel: The fetched authentication settings object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -314,11 +314,11 @@ class AuthSettings(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a GlobalProtect Authentication Settings object.
+        """Deletes a GlobalProtect Authentication Settings object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

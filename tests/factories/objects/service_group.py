@@ -51,8 +51,7 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_members(cls, members=None, **kwargs):
-        """
-        Create a ServiceGroupCreateModel instance with members.
+        """Create a ServiceGroupCreateModel instance with members.
 
         Args:
             members: List of member names (defaults to ["custom-service1", "custom-service2"])
@@ -60,6 +59,7 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupCreateModel: A model instance with members set
+
         """
         if members is None:
             members = ["custom-service1", "custom-service2"]
@@ -67,8 +67,7 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
-        """
-        Create an instance with snippet container.
+        """Create an instance with snippet container.
 
         Args:
             snippet: The snippet value to use
@@ -76,6 +75,7 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupCreateModel: A model instance with snippet container
+
         """
         return cls(
             snippet=snippet,
@@ -86,8 +86,7 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_device(cls, device="TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: The device value to use
@@ -95,6 +94,7 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupCreateModel: A model instance with device container
+
         """
         return cls(
             device=device,
@@ -105,53 +105,53 @@ class ServiceGroupCreateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def build_without_members(cls, **kwargs):
-        """
-        Return an instance without the required members field.
+        """Return an instance without the required members field.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupCreateModel: A model instance without members
+
         """
         return cls(members=None, **kwargs)
 
     @classmethod
     def build_with_duplicate_members(cls, **kwargs):
-        """
-        Return an instance with duplicate members (should fail validation).
+        """Return an instance with duplicate members (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupCreateModel: A model instance with duplicate members
+
         """
         return cls(members=["service1", "service1"], **kwargs)
 
     @classmethod
     def build_with_no_containers(cls, **kwargs):
-        """
-        Return an instance without any containers.
+        """Return an instance without any containers.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupCreateModel: A model instance without containers
+
         """
         return cls(folder=None, snippet=None, device=None, **kwargs)
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
-        """
-        Return an instance with multiple containers (should fail validation).
+        """Return an instance with multiple containers (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupCreateModel: A model instance with multiple containers
+
         """
         return cls(folder="Test Folder", snippet="Test Snippet", device=None, **kwargs)
 
@@ -167,8 +167,7 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_members(cls, members=None, **kwargs):
-        """
-        Create a ServiceGroupUpdateModel instance with members.
+        """Create a ServiceGroupUpdateModel instance with members.
 
         Args:
             members: List of member names (defaults to ["custom-service1", "custom-service2"])
@@ -176,6 +175,7 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupUpdateModel: A model instance with members set
+
         """
         if members is None:
             members = ["custom-service1", "custom-service2"]
@@ -183,8 +183,7 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
-        """
-        Create an instance with snippet container.
+        """Create an instance with snippet container.
 
         Args:
             snippet: The snippet value to use
@@ -192,6 +191,7 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupUpdateModel: A model instance with snippet container
+
         """
         return cls(
             snippet=snippet,
@@ -202,8 +202,7 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_device(cls, device="TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: The device value to use
@@ -211,6 +210,7 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupUpdateModel: A model instance with device container
+
         """
         return cls(
             device=device,
@@ -221,53 +221,53 @@ class ServiceGroupUpdateApiFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def build_without_members(cls, **kwargs):
-        """
-        Return an instance without the required members field.
+        """Return an instance without the required members field.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupUpdateModel: A model instance without members
+
         """
         return cls(members=None, **kwargs)
 
     @classmethod
     def build_with_duplicate_members(cls, **kwargs):
-        """
-        Return an instance with duplicate members (should fail validation).
+        """Return an instance with duplicate members (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupUpdateModel: A model instance with duplicate members
+
         """
         return cls(members=["service1", "service1"], **kwargs)
 
     @classmethod
     def build_with_no_containers(cls, **kwargs):
-        """
-        Return an instance without any containers.
+        """Return an instance without any containers.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupUpdateModel: A model instance without containers
+
         """
         return cls(folder=None, snippet=None, device=None, **kwargs)
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
-        """
-        Return an instance with multiple containers (should fail validation).
+        """Return an instance with multiple containers (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupUpdateModel: A model instance with multiple containers
+
         """
         return cls(folder="Test Folder", snippet="Test Snippet", device=None, **kwargs)
 
@@ -283,8 +283,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_members(cls, members=None, **kwargs):
-        """
-        Create a ServiceGroupResponseModel instance with members.
+        """Create a ServiceGroupResponseModel instance with members.
 
         Args:
             members: List of member names (defaults to ["custom-service1", "custom-service2"])
@@ -292,6 +291,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupResponseModel: A model instance with members set
+
         """
         if members is None:
             members = ["custom-service1", "custom-service2"]
@@ -299,8 +299,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
-        """
-        Create an instance with snippet container.
+        """Create an instance with snippet container.
 
         Args:
             snippet: The snippet value to use
@@ -308,6 +307,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupResponseModel: A model instance with snippet container
+
         """
         return cls(
             snippet=snippet,
@@ -318,8 +318,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def with_device(cls, device="TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: The device value to use
@@ -327,6 +326,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupResponseModel: A model instance with device container
+
         """
         return cls(
             device=device,
@@ -337,53 +337,53 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
     @classmethod
     def build_without_members(cls, **kwargs):
-        """
-        Return an instance without the required members field.
+        """Return an instance without the required members field.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupResponseModel: A model instance without members
+
         """
         return cls(members=None, **kwargs)
 
     @classmethod
     def build_with_duplicate_members(cls, **kwargs):
-        """
-        Return an instance with duplicate members.
+        """Return an instance with duplicate members.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupResponseModel: A model instance with duplicate members
+
         """
         return cls(members=["service1", "service1"], **kwargs)
 
     @classmethod
     def build_with_no_containers(cls, **kwargs):
-        """
-        Return an instance without any containers.
+        """Return an instance without any containers.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupResponseModel: A model instance without containers
+
         """
         return cls(folder=None, snippet=None, device=None, **kwargs)
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
-        """
-        Return an instance with multiple containers.
+        """Return an instance with multiple containers.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             ServiceGroupResponseModel: A model instance with multiple containers
+
         """
         return cls(folder="Test Folder", snippet="Test Snippet", device=None, **kwargs)
 
@@ -393,8 +393,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
         request_model: Union[ServiceGroupCreateModel, ServiceGroupUpdateModel, Dict[str, Any]],
         **kwargs,
     ) -> ServiceGroupResponseModel:
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create request.
 
@@ -404,6 +403,7 @@ class ServiceGroupResponseFactory(ServiceGroupBaseFactory):
 
         Returns:
             ServiceGroupResponseModel instance
+
         """
         if isinstance(request_model, (ServiceGroupCreateModel, ServiceGroupUpdateModel)):
             data = request_model.model_dump()
@@ -435,14 +435,14 @@ class ServiceGroupCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_without_members(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict without the required members field.
+        """Return a data dict without the required members field.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for ServiceGroupCreateModel validation
+
         """
         data = {"members": None}
         data.update(kwargs)
@@ -450,14 +450,14 @@ class ServiceGroupCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_no_containers(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict without any containers.
+        """Return a data dict without any containers.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for ServiceGroupCreateModel validation
+
         """
         data = {"folder": None, "snippet": None, "device": None}
         data.update(kwargs)
@@ -465,14 +465,14 @@ class ServiceGroupCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with multiple containers.
+        """Return a data dict with multiple containers.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for ServiceGroupCreateModel validation
+
         """
         data = {"folder": "Test Folder", "snippet": "Test Snippet", "device": None}
         data.update(kwargs)
@@ -480,14 +480,14 @@ class ServiceGroupCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid_members(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict for a service group.
+        """Return a valid data dict for a service group.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for ServiceGroupCreateModel
+
         """
         data = {"members": ["custom-service1", "custom-service2"]}
         data.update(kwargs)
@@ -507,14 +507,14 @@ class ServiceGroupUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_without_members(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict without the required members field.
+        """Return a data dict without the required members field.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for ServiceGroupUpdateModel validation
+
         """
         data = {"members": None}
         data.update(kwargs)
@@ -522,14 +522,14 @@ class ServiceGroupUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_no_containers(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict without any containers.
+        """Return a data dict without any containers.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for ServiceGroupUpdateModel validation
+
         """
         data = {"folder": None, "snippet": None, "device": None}
         data.update(kwargs)
@@ -537,14 +537,14 @@ class ServiceGroupUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with multiple containers.
+        """Return a data dict with multiple containers.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for ServiceGroupUpdateModel validation
+
         """
         data = {"folder": "Test Folder", "snippet": "Test Snippet", "device": None}
         data.update(kwargs)
@@ -552,14 +552,14 @@ class ServiceGroupUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid_members(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict for a service group.
+        """Return a valid data dict for a service group.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for ServiceGroupUpdateModel
+
         """
         data = {"members": ["custom-service1", "custom-service2"]}
         data.update(kwargs)

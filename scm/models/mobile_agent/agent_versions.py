@@ -6,8 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class AgentVersionModel(BaseModel):
-    """
-    Model for GlobalProtect agent version.
+    """Model for GlobalProtect agent version.
 
     This model represents a single agent version in the Strata Cloud Manager API.
 
@@ -15,6 +14,7 @@ class AgentVersionModel(BaseModel):
         version (str): The version string of the GlobalProtect agent
         release_date (Optional[str]): The release date of this version
         is_recommended (Optional[bool]): Whether this version is recommended
+
     """
 
     model_config = ConfigDict(
@@ -42,14 +42,14 @@ class AgentVersionModel(BaseModel):
 
 
 class AgentVersionsModel(BaseModel):
-    """
-    Model for GlobalProtect agent versions.
+    """Model for GlobalProtect agent versions.
 
     GlobalProtect agent versions are read-only resources in the Strata Cloud Manager API,
     only supporting list operations.
 
     Attributes:
         agent_versions (List[str]): The available versions of the GlobalProtect agent.
+
     """
 
     model_config = ConfigDict(

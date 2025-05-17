@@ -16,13 +16,13 @@ from scm.models.deployment import (
 
 
 class ServiceConnection(BaseObject):
-    """
-    Manages Service Connection objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Service Connection objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 200. Must be between 1 and 1000.
+
     """
 
     ENDPOINT = "/config/deployment/v1/service-connections"
@@ -51,8 +51,7 @@ class ServiceConnection(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -62,6 +61,7 @@ class ServiceConnection(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -98,14 +98,14 @@ class ServiceConnection(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceConnectionResponseModel:
-        """
-        Creates a new service connection.
+        """Creates a new service connection.
 
         Args:
             data: Dictionary containing the service connection configuration
 
         Returns:
             ServiceConnectionResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         service_connection = ServiceConnectionCreateModel(**data)
@@ -129,14 +129,14 @@ class ServiceConnection(BaseObject):
         self,
         object_id: str,
     ) -> ServiceConnectionResponseModel:
-        """
-        Gets a service connection by ID.
+        """Gets a service connection by ID.
 
         Args:
             object_id: The ID of the service connection to retrieve
 
         Returns:
             ServiceConnectionResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -146,14 +146,14 @@ class ServiceConnection(BaseObject):
         self,
         service_connection: ServiceConnectionUpdateModel,
     ) -> ServiceConnectionResponseModel:
-        """
-        Updates an existing service connection.
+        """Updates an existing service connection.
 
         Args:
             service_connection: ServiceConnectionUpdateModel instance containing the update data
 
         Returns:
             ServiceConnectionResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = service_connection.model_dump(
@@ -180,8 +180,7 @@ class ServiceConnection(BaseObject):
         name: Optional[str] = None,
         **filters,
     ) -> List[ServiceConnectionResponseModel]:
-        """
-        Lists service connection objects with optional filtering.
+        """Lists service connection objects with optional filtering.
 
         Args:
             name: Optional name filter
@@ -189,6 +188,7 @@ class ServiceConnection(BaseObject):
 
         Returns:
             List[ServiceConnectionResponseModel]: A list of service connection objects
+
         """
         # Pagination logic
         limit = self._max_limit
@@ -278,14 +278,14 @@ class ServiceConnection(BaseObject):
         self,
         name: str,
     ) -> ServiceConnectionResponseModel:
-        """
-        Fetches a single service connection by name.
+        """Fetches a single service connection by name.
 
         Args:
             name: The name of the service connection to fetch
 
         Returns:
             ServiceConnectionResponseModel: The fetched service connection object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -353,11 +353,11 @@ class ServiceConnection(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a service connection object.
+        """Deletes a service connection object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

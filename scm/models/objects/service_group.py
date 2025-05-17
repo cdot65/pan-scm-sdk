@@ -18,8 +18,7 @@ TagString = constr(max_length=64)
 
 
 class ServiceGroupBaseModel(BaseModel):
-    """
-    Base model for Service Group objects containing fields common to all CRUD operations.
+    """Base model for Service Group objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the service group.
@@ -27,6 +26,7 @@ class ServiceGroupBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -106,8 +106,7 @@ class ServiceGroupBaseModel(BaseModel):
 
 
 class ServiceGroupCreateModel(ServiceGroupBaseModel):
-    """
-    Represents the creation of a new Service Group object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Service Group object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an ServiceGroupCreateModel object,
     it inherits all fields from the ServiceGroupBaseModel class, and provides a custom validator
@@ -118,6 +117,7 @@ class ServiceGroupCreateModel(ServiceGroupBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     @model_validator(mode="after")
@@ -135,8 +135,7 @@ class ServiceGroupCreateModel(ServiceGroupBaseModel):
 
 
 class ServiceGroupUpdateModel(ServiceGroupBaseModel):
-    """
-    Represents the update of an existing Service Group object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Service Group object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an ServiceGroupUpdateModel object.
     """
@@ -149,8 +148,7 @@ class ServiceGroupUpdateModel(ServiceGroupBaseModel):
 
 
 class ServiceGroupResponseModel(ServiceGroupBaseModel):
-    """
-    Represents the creation of a new ServiceGroup object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new ServiceGroup object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a ServiceGroupResponseModel object,
     it inherits all fields from the ServiceGroupBaseModel class, adds its own attribute for the
@@ -161,6 +159,7 @@ class ServiceGroupResponseModel(ServiceGroupBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     id: UUID = Field(

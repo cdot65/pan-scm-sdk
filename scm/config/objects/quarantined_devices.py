@@ -15,11 +15,11 @@ from scm.models.objects import (
 
 
 class QuarantinedDevices(BaseObject):
-    """
-    Manages Quarantined Devices in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Quarantined Devices in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
+
     """
 
     ENDPOINT = "/config/objects/v1/quarantined-devices"
@@ -35,8 +35,7 @@ class QuarantinedDevices(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> QuarantinedDevicesResponseModel:
-        """
-        Creates a new quarantined device.
+        """Creates a new quarantined device.
 
         Args:
             data: Dictionary containing the quarantined device data
@@ -46,6 +45,7 @@ class QuarantinedDevices(BaseObject):
 
         Raises:
             InvalidObjectError: If the request payload is invalid
+
         """
         try:
             # Validate the data using Pydantic model
@@ -71,8 +71,7 @@ class QuarantinedDevices(BaseObject):
         host_id: Optional[str] = None,
         serial_number: Optional[str] = None,
     ) -> List[QuarantinedDevicesResponseModel]:
-        """
-        Lists quarantined devices with optional filtering.
+        """Lists quarantined devices with optional filtering.
 
         Args:
             host_id: Filter by device host ID
@@ -83,6 +82,7 @@ class QuarantinedDevices(BaseObject):
 
         Raises:
             InvalidObjectError: If the response format is invalid
+
         """
         # Create filter params using Pydantic model for validation
         params_model = QuarantinedDevicesListParamsModel(
@@ -113,14 +113,14 @@ class QuarantinedDevices(BaseObject):
         self,
         host_id: str,
     ) -> None:
-        """
-        Deletes a quarantined device by host ID.
+        """Deletes a quarantined device by host ID.
 
         Args:
             host_id: The host ID of the quarantined device to delete
 
         Raises:
             MissingQueryParameterError: If host_id is empty or None
+
         """
         if not host_id:
             raise MissingQueryParameterError(

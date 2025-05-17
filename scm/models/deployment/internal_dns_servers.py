@@ -15,14 +15,14 @@ from pydantic import (
 
 
 class InternalDnsServersBaseModel(BaseModel):
-    """
-    Base model for Internal DNS Servers containing fields common to all operations.
+    """Base model for Internal DNS Servers containing fields common to all operations.
 
     Attributes:
         name (str): The name of the internal DNS server resource.
         domain_name (List[str]): The DNS domain name(s).
         primary (str): The IP address of the primary DNS server.
         secondary (Optional[str]): The IP address of the secondary DNS server.
+
     """
 
     model_config = ConfigDict(
@@ -86,14 +86,12 @@ class InternalDnsServersBaseModel(BaseModel):
 
 
 class InternalDnsServersCreateModel(InternalDnsServersBaseModel):
-    """
-    Model for creating new Internal DNS Servers.
-    """
+    """Model for creating new Internal DNS Servers."""
 
     @model_validator(mode="after")
     def validate_create_model(self) -> "InternalDnsServersCreateModel":
-        """
-        Validates the create model:
+        """Validates the create model.
+
         1. Ensures domain_name is not empty
         """
         if not self.domain_name:
@@ -103,8 +101,7 @@ class InternalDnsServersCreateModel(InternalDnsServersBaseModel):
 
 
 class InternalDnsServersUpdateModel(InternalDnsServersBaseModel):
-    """
-    Model for updating existing Internal DNS Servers.
+    """Model for updating existing Internal DNS Servers.
 
     All fields are optional to support partial updates, except for id which is required.
     """
@@ -139,8 +136,8 @@ class InternalDnsServersUpdateModel(InternalDnsServersBaseModel):
 
     @model_validator(mode="after")
     def validate_update_model(self) -> "InternalDnsServersUpdateModel":
-        """
-        Validates the update model:
+        """Validates the update model.
+
         1. Ensures at least one field other than id is set for update
         2. Ensures domain_name is not empty if provided
         """
@@ -160,8 +157,7 @@ class InternalDnsServersUpdateModel(InternalDnsServersBaseModel):
 
 
 class InternalDnsServersResponseModel(InternalDnsServersBaseModel):
-    """
-    Model for Internal DNS Servers API responses.
+    """Model for Internal DNS Servers API responses.
 
     Includes id as a required field.
     """
@@ -174,8 +170,8 @@ class InternalDnsServersResponseModel(InternalDnsServersBaseModel):
 
     @model_validator(mode="after")
     def validate_response_model(self) -> "InternalDnsServersResponseModel":
-        """
-        Validates the response model:
+        """Validates the response model.
+
         1. Ensures domain_name is not empty
         """
         if not self.domain_name:

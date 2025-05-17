@@ -15,9 +15,7 @@ class QosModel(BaseModel):
 
 
 class BandwidthAllocationBaseModel(BaseModel):
-    """
-    Base model for Bandwidth Allocation objects containing fields common to all CRUD operations.
-    """
+    """Base model for Bandwidth Allocation objects containing fields common to all CRUD operations."""
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,9 +48,7 @@ class BandwidthAllocationBaseModel(BaseModel):
 
 
 class BandwidthAllocationCreateModel(BandwidthAllocationBaseModel):
-    """
-    Model for creating a new Bandwidth Allocation.
-    """
+    """Model for creating a new Bandwidth Allocation."""
 
     # Unlike other models, bandwidth allocations don't have an ID field
     # They are identified by name and spn_name_list in the API
@@ -60,9 +56,7 @@ class BandwidthAllocationCreateModel(BandwidthAllocationBaseModel):
 
 
 class BandwidthAllocationUpdateModel(BandwidthAllocationBaseModel):
-    """
-    Model for updating an existing Bandwidth Allocation.
-    """
+    """Model for updating an existing Bandwidth Allocation."""
 
     # Unlike other models, bandwidth allocations don't have an ID field
     # Updates are done based on name and spn_name_list
@@ -70,9 +64,7 @@ class BandwidthAllocationUpdateModel(BandwidthAllocationBaseModel):
 
 
 class BandwidthAllocationResponseModel(BandwidthAllocationBaseModel):
-    """
-    Model for Bandwidth Allocation API responses.
-    """
+    """Model for Bandwidth Allocation API responses."""
 
     # Unlike other models, bandwidth allocations don't include an ID in responses
     # based on the OpenAPI specification
@@ -80,9 +72,7 @@ class BandwidthAllocationResponseModel(BandwidthAllocationBaseModel):
 
 
 class BandwidthAllocationListResponseModel(BaseModel):
-    """
-    Model for the list response from the Bandwidth Allocations API.
-    """
+    """Model for the list response from the Bandwidth Allocations API."""
 
     data: List[BandwidthAllocationResponseModel] = Field(
         ..., description="List of bandwidth allocations"

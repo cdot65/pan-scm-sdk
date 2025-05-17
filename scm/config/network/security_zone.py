@@ -15,13 +15,13 @@ from scm.models.network import (
 
 
 class SecurityZone(BaseObject):
-    """
-    Manages Security Zone objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Security Zone objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/network/v1/zones"
@@ -50,8 +50,7 @@ class SecurityZone(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +60,7 @@ class SecurityZone(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +97,14 @@ class SecurityZone(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> SecurityZoneResponseModel:
-        """
-        Creates a new security zone object.
+        """Creates a new security zone object.
 
         Args:
             data: Dictionary containing the security zone configuration
 
         Returns:
             SecurityZoneResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         security_zone = SecurityZoneCreateModel(**data)
@@ -128,14 +128,14 @@ class SecurityZone(BaseObject):
         self,
         object_id: str,
     ) -> SecurityZoneResponseModel:
-        """
-        Gets a security zone object by ID.
+        """Gets a security zone object by ID.
 
         Args:
             object_id: The ID of the security zone to retrieve
 
         Returns:
             SecurityZoneResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -145,14 +145,14 @@ class SecurityZone(BaseObject):
         self,
         zone: SecurityZoneUpdateModel,
     ) -> SecurityZoneResponseModel:
-        """
-        Updates an existing security zone object.
+        """Updates an existing security zone object.
 
         Args:
             zone: SecurityZoneUpdateModel instance containing the update data
 
         Returns:
             SecurityZoneResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = zone.model_dump(
@@ -179,8 +179,7 @@ class SecurityZone(BaseObject):
         zones: List[SecurityZoneResponseModel],
         filters: Dict[str, Any],
     ) -> List[SecurityZoneResponseModel]:
-        """
-        Apply client-side filtering to the list of security zones.
+        """Apply client-side filtering to the list of security zones.
 
         Args:
             zones: List of SecurityZoneResponseModel objects
@@ -188,6 +187,7 @@ class SecurityZone(BaseObject):
 
         Returns:
             List[SecurityZoneResponseModel]: Filtered list of security zones
+
         """
         filter_criteria = zones
 
@@ -269,8 +269,7 @@ class SecurityZone(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SecurityZoneResponseModel]:
-        """
-        Lists security zone objects with optional filtering.
+        """Lists security zone objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -288,6 +287,7 @@ class SecurityZone(BaseObject):
 
         Returns:
             List[SecurityZoneResponseModel]: A list of security zone objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -411,8 +411,7 @@ class SecurityZone(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> SecurityZoneResponseModel:
-        """
-        Fetches a single security zone by name.
+        """Fetches a single security zone by name.
 
         Args:
             name: The name of the security zone to fetch
@@ -422,6 +421,7 @@ class SecurityZone(BaseObject):
 
         Returns:
             SecurityZoneResponseModel: The fetched security zone object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -516,11 +516,11 @@ class SecurityZone(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a security zone object.
+        """Deletes a security zone object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

@@ -19,8 +19,7 @@ from tests.factories.objects.quarantined_devices import (
 
 
 class TestQuarantinedDevicesBaseModel:
-    """
-    Tests for QuarantinedDevicesBaseModel.
+    """Tests for QuarantinedDevicesBaseModel.
     """
 
     def test_valid_model(self):
@@ -43,8 +42,7 @@ class TestQuarantinedDevicesBaseModel:
 
 
 class TestQuarantinedDevicesCreateModel:
-    """
-    Tests for QuarantinedDevicesCreateModel.
+    """Tests for QuarantinedDevicesCreateModel.
     """
 
     def test_valid_model(self):
@@ -67,8 +65,7 @@ class TestQuarantinedDevicesCreateModel:
 
 
 class TestQuarantinedDevicesResponseModel:
-    """
-    Tests for QuarantinedDevicesResponseModel.
+    """Tests for QuarantinedDevicesResponseModel.
     """
 
     def test_valid_model(self):
@@ -91,8 +88,7 @@ class TestQuarantinedDevicesResponseModel:
 
 
 class TestQuarantinedDevicesListParamsModel:
-    """
-    Tests for QuarantinedDevicesListParamsModel.
+    """Tests for QuarantinedDevicesListParamsModel.
     """
 
     def test_empty_model(self):

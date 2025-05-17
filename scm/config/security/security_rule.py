@@ -18,12 +18,13 @@ from scm.models.security import (
 
 
 class SecurityRule(BaseObject):
-    """
-    Manages Security Rule objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Security Rule objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/security/v1/security-rules"
@@ -52,8 +53,7 @@ class SecurityRule(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -63,6 +63,7 @@ class SecurityRule(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -100,11 +101,11 @@ class SecurityRule(BaseObject):
         data: Dict[str, Any],
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """
-        Creates a new security rule object.
+        """Creates a new security rule object.
 
         Returns:
             SecurityRuleResponseModel
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
@@ -145,11 +146,11 @@ class SecurityRule(BaseObject):
         object_id: str,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """
-        Gets a security rule object by ID.
+        """Gets a security rule object by ID.
 
         Returns:
             SecurityRuleResponseModel
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
@@ -175,8 +176,7 @@ class SecurityRule(BaseObject):
         rule: SecurityRuleUpdateModel,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """
-        Updates an existing security rule object.
+        """Updates an existing security rule object.
 
         Args:
             rule: SecurityRuleUpdateModel instance containing the update data
@@ -184,6 +184,7 @@ class SecurityRule(BaseObject):
 
         Returns:
             SecurityRuleResponseModel
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
@@ -223,8 +224,7 @@ class SecurityRule(BaseObject):
         rules: List[SecurityRuleResponseModel],
         filters: Dict[str, Any],
     ) -> List[SecurityRuleResponseModel]:
-        """
-        Apply client-side filtering to the list of security rules.
+        """Apply client-side filtering to the list of security rules.
 
         Args:
             rules: List of SecurityRuleResponseModel objects
@@ -232,6 +232,7 @@ class SecurityRule(BaseObject):
 
         Returns:
             List[SecurityRuleResponseModel]: Filtered list of security rules
+
         """
         filter_criteria = rules
 
@@ -434,8 +435,7 @@ class SecurityRule(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[SecurityRuleResponseModel]:
-        """
-        Lists security rule objects with optional filtering.
+        """Lists security rule objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -462,8 +462,8 @@ class SecurityRule(BaseObject):
 
         Returns:
             List[SecurityRuleResponseModel]: A list of security rule objects
-        """
 
+        """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
             try:
@@ -600,8 +600,7 @@ class SecurityRule(BaseObject):
         device: Optional[str] = None,
         rulebase: str = "pre",
     ) -> SecurityRuleResponseModel:
-        """
-        Fetches a single security rule by name.
+        """Fetches a single security rule by name.
 
         Args:
             name (str): The name of the security rule to fetch.
@@ -612,6 +611,7 @@ class SecurityRule(BaseObject):
 
         Returns:
             SecurityRuleResponseModel: The fetched security rule object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -697,12 +697,12 @@ class SecurityRule(BaseObject):
         object_id: str,
         rulebase: str = "pre",
     ) -> None:
-        """
-        Deletes a security rule object.
+        """Deletes a security rule object.
 
         Args:
             object_id (str): The ID of the object to delete.
             rulebase: Which rulebase to use ('pre' or 'post'), defaults to 'pre'
+
         """
         # Validate that the rulebase is of type `pre` or `post`
         if not isinstance(rulebase, SecurityRuleRulebase):
@@ -727,8 +727,7 @@ class SecurityRule(BaseObject):
         rule_id: UUID,
         data: Dict[str, Any],
     ) -> None:
-        """
-        Move a security rule to a new position within the rulebase.
+        """Move a security rule to a new position within the rulebase.
 
         Args:
             rule_id (UUID): The UUID of the rule to move
@@ -736,6 +735,7 @@ class SecurityRule(BaseObject):
                 - destination: Where to move the rule ('top', 'bottom', 'before', 'after')
                 - rulebase: Which rulebase to use ('pre', 'post')
                 - destination_rule: UUID of reference rule (required for 'before'/'after')
+
         """
         rule_id_str = str(rule_id)
         move_config = SecurityRuleMoveModel(**data)

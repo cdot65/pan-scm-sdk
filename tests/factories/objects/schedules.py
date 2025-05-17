@@ -58,8 +58,7 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """
-        Create an instance with snippet container.
+        """Create an instance with snippet container.
 
         Args:
             snippet: The snippet name to use
@@ -67,13 +66,13 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleCreateModel with the snippet container
+
         """
         return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
     def with_device(cls, device: str = "TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: The device name to use
@@ -81,13 +80,13 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleCreateModel with the device container
+
         """
         return cls(folder=None, snippet=None, device=device, **kwargs)
 
     @classmethod
     def with_daily_schedule(cls, **kwargs):
-        """
-        Create an instance with daily schedule.
+        """Create an instance with daily schedule.
 
         Uses recurring schedule with daily time ranges.
 
@@ -96,14 +95,14 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleCreateModel with a daily schedule
+
         """
         schedule_type = {"recurring": {"daily": ["09:00-17:00", "18:00-20:00"]}}
         return cls(schedule_type=schedule_type, **kwargs)
 
     @classmethod
     def with_non_recurring_schedule(cls, **kwargs):
-        """
-        Create an instance with non-recurring schedule.
+        """Create an instance with non-recurring schedule.
 
         Uses non-recurring schedule with specific date and time ranges.
 
@@ -112,6 +111,7 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleCreateModel with a non-recurring schedule
+
         """
         schedule_type = {
             "non_recurring": [
@@ -123,8 +123,7 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
     @classmethod
     def with_weekly_specific_days(cls, days: List[str], **kwargs):
-        """
-        Create an instance with weekly schedule for specific days.
+        """Create an instance with weekly schedule for specific days.
 
         Args:
             days: List of days to include in weekly schedule (e.g., ["monday", "friday"])
@@ -132,6 +131,7 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleCreateModel with a weekly schedule for specific days
+
         """
         weekly_schedule = {day: ["09:00-17:00"] for day in days}
         schedule_type = {"recurring": {"weekly": weekly_schedule}}
@@ -139,14 +139,14 @@ class ScheduleCreateApiFactory(ScheduleBaseFactory):
 
     @classmethod
     def build_invalid_time_format(cls, **kwargs):
-        """
-        Create an instance with invalid time format for testing validation errors.
+        """Create an instance with invalid time format for testing validation errors.
 
         Args:
             **kwargs: Additional fields to override
 
         Returns:
             An instance of ScheduleCreateModel with invalid time format
+
         """
         schedule_type = {"recurring": {"weekly": {"monday": ["0900-1700"]}}}  # Missing colons
         return cls(schedule_type=schedule_type, **kwargs)
@@ -172,8 +172,7 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
 
     @classmethod
     def with_daily_schedule(cls, **kwargs):
-        """
-        Create an instance with daily schedule.
+        """Create an instance with daily schedule.
 
         Uses recurring schedule with daily time ranges.
 
@@ -182,14 +181,14 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleUpdateModel with a daily schedule
+
         """
         schedule_type = {"recurring": {"daily": ["10:00-18:00"]}}  # Updated time range
         return cls(schedule_type=schedule_type, **kwargs)
 
     @classmethod
     def with_non_recurring_schedule(cls, **kwargs):
-        """
-        Create an instance with non-recurring schedule.
+        """Create an instance with non-recurring schedule.
 
         Uses non-recurring schedule with specific date and time ranges.
 
@@ -198,6 +197,7 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleUpdateModel with a non-recurring schedule
+
         """
         schedule_type = {
             "non_recurring": [
@@ -208,8 +208,7 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
 
     @classmethod
     def with_weekly_specific_days(cls, days: List[str], **kwargs):
-        """
-        Create an instance with weekly schedule for specific days.
+        """Create an instance with weekly schedule for specific days.
 
         Args:
             days: List of days to include in weekly schedule (e.g., ["monday", "friday"])
@@ -217,6 +216,7 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleUpdateModel with a weekly schedule for specific days
+
         """
         weekly_schedule = {day: ["10:00-18:00"] for day in days}
         schedule_type = {"recurring": {"weekly": weekly_schedule}}
@@ -244,8 +244,7 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet: str = "TestSnippet", **kwargs):
-        """
-        Create an instance with snippet container.
+        """Create an instance with snippet container.
 
         Args:
             snippet: The snippet name to use
@@ -253,13 +252,13 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleResponseModel with the snippet container
+
         """
         return cls(folder=None, snippet=snippet, device=None, **kwargs)
 
     @classmethod
     def with_device(cls, device: str = "TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: The device name to use
@@ -267,13 +266,13 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleResponseModel with the device container
+
         """
         return cls(folder=None, snippet=None, device=device, **kwargs)
 
     @classmethod
     def with_daily_schedule(cls, **kwargs):
-        """
-        Create an instance with daily schedule.
+        """Create an instance with daily schedule.
 
         Uses recurring schedule with daily time ranges.
 
@@ -282,14 +281,14 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleResponseModel with a daily schedule
+
         """
         schedule_type = {"recurring": {"daily": ["09:00-17:00", "18:00-20:00"]}}
         return cls(schedule_type=schedule_type, **kwargs)
 
     @classmethod
     def with_non_recurring_schedule(cls, **kwargs):
-        """
-        Create an instance with non-recurring schedule.
+        """Create an instance with non-recurring schedule.
 
         Uses non-recurring schedule with specific date and time ranges.
 
@@ -298,6 +297,7 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleResponseModel with a non-recurring schedule
+
         """
         schedule_type = {
             "non_recurring": [
@@ -309,8 +309,7 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
     @classmethod
     def from_request(cls, request_model: ScheduleCreateModel, **kwargs):
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         Args:
             request_model: The request model to base the response on
@@ -318,6 +317,7 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
 
         Returns:
             An instance of ScheduleResponseModel based on the request model
+
         """
         data = request_model.model_dump()
         data["id"] = str(uuid4())
@@ -351,11 +351,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls):
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Returns:
             A dictionary representing a valid ScheduleCreateModel
+
         """
         return cls(
             name="TestSchedule",
@@ -374,11 +374,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid_daily(cls):
-        """
-        Return a valid data dict with daily schedule.
+        """Return a valid data dict with daily schedule.
 
         Returns:
             A dictionary representing a valid ScheduleCreateModel with daily schedule
+
         """
         return cls(
             name="TestSchedule",
@@ -389,11 +389,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid_non_recurring(cls):
-        """
-        Return a valid data dict with non-recurring schedule.
+        """Return a valid data dict with non-recurring schedule.
 
         Returns:
             A dictionary representing a valid ScheduleCreateModel with non-recurring schedule
+
         """
         return cls(
             name="TestSchedule",
@@ -409,11 +409,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_name(cls):
-        """
-        Return a data dict with invalid name pattern.
+        """Return a data dict with invalid name pattern.
 
         Returns:
             A dictionary with an invalid name for testing validation errors
+
         """
         return cls(
             name="@invalid-name#",
@@ -429,11 +429,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_time_format(cls):
-        """
-        Return a data dict with invalid time range format.
+        """Return a data dict with invalid time range format.
 
         Returns:
             A dictionary with an invalid time range for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -449,11 +449,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_multiple_schedule_types(cls):
-        """
-        Return a data dict with multiple schedule types.
+        """Return a data dict with multiple schedule types.
 
         Returns:
             A dictionary with both recurring and non-recurring schedules for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -466,11 +466,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_recurring_format(cls):
-        """
-        Return a data dict with both weekly and daily recurring schedules.
+        """Return a data dict with both weekly and daily recurring schedules.
 
         Returns:
             A dictionary with invalid recurring structure for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -485,11 +485,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_both_recurring_types(cls):
-        """
-        Return a data dict with both weekly and daily recurring schedules.
+        """Return a data dict with both weekly and daily recurring schedules.
 
         Returns:
             A dictionary with invalid recurring structure for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -504,11 +504,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_multiple_containers(cls):
-        """
-        Return a data dict with multiple containers.
+        """Return a data dict with multiple containers.
 
         Returns:
             A dictionary with multiple containers for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -519,11 +519,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_no_container(cls):
-        """
-        Return a data dict without any container.
+        """Return a data dict without any container.
 
         Returns:
             A dictionary without any container for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -535,11 +535,11 @@ class ScheduleCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_both_schedule_types(cls):
-        """
-        Return a data dict with both recurring and non-recurring schedule types.
+        """Return a data dict with both recurring and non-recurring schedule types.
 
         Returns:
             A dictionary with both schedule types for testing validation errors
+
         """
         return cls(
             name="TestSchedule",
@@ -572,11 +572,11 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls):
-        """
-        Return a valid data dict for updating a schedule.
+        """Return a valid data dict for updating a schedule.
 
         Returns:
             A dictionary representing a valid ScheduleUpdateModel
+
         """
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
@@ -594,11 +594,11 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid_daily(cls):
-        """
-        Return a valid data dict with daily schedule.
+        """Return a valid data dict with daily schedule.
 
         Returns:
             A dictionary representing a valid ScheduleUpdateModel with daily schedule
+
         """
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
@@ -609,11 +609,11 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid_non_recurring(cls):
-        """
-        Return a valid data dict with non-recurring schedule.
+        """Return a valid data dict with non-recurring schedule.
 
         Returns:
             A dictionary representing a valid ScheduleUpdateModel with non-recurring schedule
+
         """
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
@@ -628,11 +628,11 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_fields(cls):
-        """
-        Return a data dict with multiple invalid fields.
+        """Return a data dict with multiple invalid fields.
 
         Returns:
             A dictionary with invalid fields for testing validation errors
+
         """
         return cls(
             id="invalid-uuid",
@@ -642,11 +642,11 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_minimal_update(cls):
-        """
-        Return a data dict with minimal valid update fields.
+        """Return a data dict with minimal valid update fields.
 
         Returns:
             A dictionary with only required fields for a minimal update
+
         """
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",

@@ -15,13 +15,13 @@ from scm.models.network import (
 
 
 class IPsecCryptoProfile(BaseObject):
-    """
-    Manages IPsec Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages IPsec Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/network/v1/ipsec-crypto-profiles"
@@ -50,8 +50,7 @@ class IPsecCryptoProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +60,7 @@ class IPsecCryptoProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +97,14 @@ class IPsecCryptoProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> IPsecCryptoProfileResponseModel:
-        """
-        Creates a new IPsec crypto profile.
+        """Creates a new IPsec crypto profile.
 
         Args:
             data: Dictionary containing the IPsec crypto profile configuration
 
         Returns:
             IPsecCryptoProfileResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         profile = IPsecCryptoProfileCreateModel(**data)
@@ -128,14 +128,14 @@ class IPsecCryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> IPsecCryptoProfileResponseModel:
-        """
-        Gets an IPsec crypto profile by ID.
+        """Gets an IPsec crypto profile by ID.
 
         Args:
             object_id: The ID of the IPsec crypto profile to retrieve
 
         Returns:
             IPsecCryptoProfileResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -145,14 +145,14 @@ class IPsecCryptoProfile(BaseObject):
         self,
         profile: IPsecCryptoProfileUpdateModel,
     ) -> IPsecCryptoProfileResponseModel:
-        """
-        Updates an existing IPsec crypto profile.
+        """Updates an existing IPsec crypto profile.
 
         Args:
             profile: IPsecCryptoProfileUpdateModel instance containing the update data
 
         Returns:
             IPsecCryptoProfileResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = profile.model_dump(
@@ -198,8 +198,7 @@ class IPsecCryptoProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[IPsecCryptoProfileResponseModel]:
-        """
-        Lists IPsec crypto profile objects with optional filtering.
+        """Lists IPsec crypto profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -214,6 +213,7 @@ class IPsecCryptoProfile(BaseObject):
 
         Returns:
             List[IPsecCryptoProfileResponseModel]: A list of IPsec crypto profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -324,8 +324,7 @@ class IPsecCryptoProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> IPsecCryptoProfileResponseModel:
-        """
-        Fetches a single IPsec crypto profile by name.
+        """Fetches a single IPsec crypto profile by name.
 
         Args:
             name: The name of the IPsec crypto profile to fetch
@@ -335,6 +334,7 @@ class IPsecCryptoProfile(BaseObject):
 
         Returns:
             IPsecCryptoProfileResponseModel: The fetched IPsec crypto profile object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -429,11 +429,11 @@ class IPsecCryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an IPsec crypto profile.
+        """Deletes an IPsec crypto profile.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

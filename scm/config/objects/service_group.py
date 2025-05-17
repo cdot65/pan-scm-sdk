@@ -15,12 +15,13 @@ from scm.models.objects import (
 
 
 class ServiceGroup(BaseObject):
-    """
-    Manages Service Group objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Service Group objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/service-groups"
@@ -49,8 +50,7 @@ class ServiceGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +60,7 @@ class ServiceGroup(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +97,11 @@ class ServiceGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceGroupResponseModel:
-        """
-        Creates a new service group object.
+        """Creates a new service group object.
 
         Returns:
             ServiceGroupResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         service_group = ServiceGroupCreateModel(**data)
@@ -121,11 +122,11 @@ class ServiceGroup(BaseObject):
         self,
         object_id: str,
     ) -> ServiceGroupResponseModel:
-        """
-        Gets a service group object by ID.
+        """Gets a service group object by ID.
 
         Returns:
             ServiceGroupResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +139,14 @@ class ServiceGroup(BaseObject):
         self,
         service_group: ServiceGroupUpdateModel,
     ) -> ServiceGroupResponseModel:
-        """
-        Updates an existing service group object.
+        """Updates an existing service group object.
 
         Args:
             service_group (ServiceGroupUpdateModel):
 
         Returns:
             ServiceGroupResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = service_group.model_dump(exclude_unset=True)
@@ -169,8 +170,7 @@ class ServiceGroup(BaseObject):
         service_groups: List[ServiceGroupResponseModel],
         filters: Dict[str, Any],
     ) -> List[ServiceGroupResponseModel]:
-        """
-        Apply client-side filtering to the list of service groups.
+        """Apply client-side filtering to the list of service groups.
 
         Args:
             service_groups: List of ServiceGroupResponseModel objects
@@ -178,8 +178,8 @@ class ServiceGroup(BaseObject):
 
         Returns:
             List[ServiceGroupResponseModel]: Filtered list of service groups
-        """
 
+        """
         filter_criteria = service_groups
 
         # Filter by values
@@ -240,8 +240,7 @@ class ServiceGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ServiceGroupResponseModel]:
-        """
-        Lists service group objects with optional filtering.
+        """Lists service group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -258,6 +257,7 @@ class ServiceGroup(BaseObject):
 
         Returns:
             List[ServiceGroupResponseModel]: A list of service group objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -381,8 +381,7 @@ class ServiceGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ServiceGroupResponseModel:
-        """
-        Fetches a single service group by name.
+        """Fetches a single service group by name.
 
         Args:
             name (str): The name of the service group to fetch.
@@ -392,6 +391,7 @@ class ServiceGroup(BaseObject):
 
         Returns:
             ServiceGroupResponseModel
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -463,8 +463,7 @@ class ServiceGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a service group object.
+        """Deletes a service group object.
 
         Args:
             object_id (str): The ID of the object to delete.

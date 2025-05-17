@@ -296,8 +296,7 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
     # -------------------- Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """
-        Test that exact_match=True returns only dynamic user groups that match the container exactly.
+        """Test that exact_match=True returns only dynamic user groups that match the container exactly.
         """
         mock_response = {
             "data": [
@@ -321,8 +320,7 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
         assert filtered[0].name == "group_in_texas"
 
     def test_list_exclude_folders(self):
-        """
-        Test that exclude_folders removes dynamic user groups from those folders.
+        """Test that exclude_folders removes dynamic user groups from those folders.
         """
         mock_response = {
             "data": [
@@ -343,8 +341,7 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
         assert all(g.folder != "All" for g in filtered)
 
     def test_list_exclude_snippets(self):
-        """
-        Test that exclude_snippets removes dynamic user groups with those snippets.
+        """Test that exclude_snippets removes dynamic user groups with those snippets.
         """
         mock_response = {
             "data": [
@@ -369,8 +366,7 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
         assert all(g.snippet != "default" for g in filtered)
 
     def test_list_exclude_devices(self):
-        """
-        Test that exclude_devices removes dynamic user groups from those devices.
+        """Test that exclude_devices removes dynamic user groups from those devices.
         """
         mock_response = {
             "data": [
@@ -395,8 +391,7 @@ class TestDynamicUserGroupList(TestDynamicUserGroupBase):
         assert all(g.device != "DeviceA" for g in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """
-        Test combining exact_match with exclusions.
+        """Test combining exact_match with exclusions.
         """
         mock_response = {
             "data": [

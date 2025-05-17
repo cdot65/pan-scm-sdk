@@ -15,12 +15,13 @@ from scm.models.objects import (
 
 
 class ApplicationFilters(BaseObject):
-    """
-    Manages Application filters in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Application filters in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/application-filters"
@@ -49,8 +50,7 @@ class ApplicationFilters(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +60,7 @@ class ApplicationFilters(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +97,11 @@ class ApplicationFilters(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationFiltersResponseModel:
-        """
-        Creates a new application filter object.
+        """Creates a new application filter object.
 
         Returns:
             ApplicationFiltersResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         application_filter = ApplicationFiltersCreateModel(**data)
@@ -121,11 +122,11 @@ class ApplicationFilters(BaseObject):
         self,
         object_id: str,
     ) -> ApplicationFiltersResponseModel:
-        """
-        Gets an application filter object by ID.
+        """Gets an application filter object by ID.
 
         Returns:
             ApplicationFiltersResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +139,14 @@ class ApplicationFilters(BaseObject):
         self,
         application: ApplicationFiltersUpdateModel,
     ) -> ApplicationFiltersResponseModel:
-        """
-        Updates an existing application filter object.
+        """Updates an existing application filter object.
 
         Args:
             application: ApplicationFiltersUpdateModel instance containing the update data
 
         Returns:
             ApplicationFiltersResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = application.model_dump(exclude_unset=True)
@@ -169,8 +170,7 @@ class ApplicationFilters(BaseObject):
         application_filters: List[ApplicationFiltersResponseModel],
         filters: Dict[str, Any],
     ) -> List[ApplicationFiltersResponseModel]:
-        """
-        Apply client-side filtering to the list of application filters.
+        """Apply client-side filtering to the list of application filters.
 
         Args:
             application_filters: List of ApplicationFilterResponseModel objects
@@ -178,6 +178,7 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             List[ApplicationFiltersResponseModel]: Filtered list of application filters
+
         """
         filter_criteria = application_filters
 
@@ -266,8 +267,7 @@ class ApplicationFilters(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationFiltersResponseModel]:
-        """
-        Lists application objects with optional filtering.
+        """Lists application objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -284,6 +284,7 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             List[ApplicationFiltersResponseModel]: A list of application filter objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -399,8 +400,7 @@ class ApplicationFilters(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
     ) -> ApplicationFiltersResponseModel:
-        """
-        Fetches a single application filter by name.
+        """Fetches a single application filter by name.
 
         Args:
             name (str): The name of the application filter to fetch.
@@ -409,6 +409,7 @@ class ApplicationFilters(BaseObject):
 
         Returns:
             ApplicationFiltersResponseModel: The fetched application filter object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -477,11 +478,11 @@ class ApplicationFilters(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an application filter object.
+        """Deletes an application filter object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

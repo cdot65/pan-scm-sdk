@@ -1,5 +1,4 @@
-"""
-Models for interacting with Variables in Palo Alto Networks' Strata Cloud Manager.
+"""Models for interacting with Variables in Palo Alto Networks' Strata Cloud Manager.
 
 This module defines the Pydantic models used for creating, updating, and
 representing Variable resources in the Strata Cloud Manager.
@@ -12,9 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class VariableBaseModel(BaseModel):
-    """
-    Base model for Variable resources per OpenAPI spec.
-    """
+    """Base model for Variable resources per OpenAPI spec."""
 
     name: str = Field(
         ...,  # required

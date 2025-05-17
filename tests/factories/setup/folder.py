@@ -47,8 +47,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
 
     @classmethod
     def with_parent(cls, parent="root", **kwargs):
-        """
-        Create a folder with a specific parent.
+        """Create a folder with a specific parent.
 
         Args:
             parent: The ID of the parent folder
@@ -56,6 +55,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
 
         Returns:
             FolderCreateModel: A model instance with the specified parent
+
         """
         return cls(
             parent=parent,
@@ -64,8 +64,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
 
     @classmethod
     def with_labels(cls, labels=None, **kwargs):
-        """
-        Create a folder with specific labels.
+        """Create a folder with specific labels.
 
         Args:
             labels: List of label strings
@@ -73,6 +72,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
 
         Returns:
             FolderCreateModel: A model instance with the specified labels
+
         """
         if labels is None:
             labels = [fake.word(), fake.word()]
@@ -84,8 +84,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
 
     @classmethod
     def with_snippets(cls, snippets=None, **kwargs):
-        """
-        Create a folder with specific snippets.
+        """Create a folder with specific snippets.
 
         Args:
             snippets: List of snippet IDs
@@ -93,6 +92,7 @@ class FolderCreateApiFactory(FolderBaseFactory):
 
         Returns:
             FolderCreateModel: A model instance with the specified snippets
+
         """
         if snippets is None:
             snippets = [str(uuid4()), str(uuid4())]
@@ -113,8 +113,7 @@ class FolderUpdateApiFactory(FolderBaseFactory):
 
     @classmethod
     def with_new_parent(cls, parent="new_parent_id", **kwargs):
-        """
-        Create a folder update with a new parent (for moving folders).
+        """Create a folder update with a new parent (for moving folders).
 
         Args:
             parent: The ID of the new parent folder
@@ -122,6 +121,7 @@ class FolderUpdateApiFactory(FolderBaseFactory):
 
         Returns:
             FolderUpdateModel: A model instance with the specified parent
+
         """
         return cls(
             parent=parent,
@@ -130,8 +130,7 @@ class FolderUpdateApiFactory(FolderBaseFactory):
 
     @classmethod
     def with_updated_labels(cls, labels=None, **kwargs):
-        """
-        Create a folder update with updated labels.
+        """Create a folder update with updated labels.
 
         Args:
             labels: List of new label strings
@@ -139,6 +138,7 @@ class FolderUpdateApiFactory(FolderBaseFactory):
 
         Returns:
             FolderUpdateModel: A model instance with updated labels
+
         """
         if labels is None:
             labels = [f"updated_{fake.word()}" for _ in range(2)]
@@ -159,8 +159,7 @@ class FolderResponseFactory(FolderBaseFactory):
 
     @classmethod
     def with_parent(cls, parent="parent_id", **kwargs):
-        """
-        Create a response model with a specific parent.
+        """Create a response model with a specific parent.
 
         Args:
             parent: The parent folder ID
@@ -168,6 +167,7 @@ class FolderResponseFactory(FolderBaseFactory):
 
         Returns:
             FolderResponseModel: A model instance with the specified parent
+
         """
         return cls(
             parent=parent,
@@ -176,14 +176,14 @@ class FolderResponseFactory(FolderBaseFactory):
 
     @classmethod
     def root_folder(cls, **kwargs):
-        """
-        Create a response model for a root folder (empty parent).
+        """Create a response model for a root folder (empty parent).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             FolderResponseModel: A root folder model instance
+
         """
         return cls(
             parent="",
@@ -194,8 +194,7 @@ class FolderResponseFactory(FolderBaseFactory):
     def from_request(
         cls, request_model: Union[FolderCreateModel, FolderUpdateModel, Dict[str, Any]], **kwargs
     ):
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create or update request.
 
@@ -205,6 +204,7 @@ class FolderResponseFactory(FolderBaseFactory):
 
         Returns:
             FolderResponseModel instance
+
         """
         # Convert to dict if it's a Pydantic model
         if hasattr(request_model, "model_dump"):
@@ -238,14 +238,14 @@ class FolderCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs):
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for FolderCreateModel
+
         """
         data = {
             "name": f"folder_{fake.word()}",
@@ -258,14 +258,14 @@ class FolderCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_without_parent(cls, **kwargs):
-        """
-        Return data without a parent field (should fail validation).
+        """Return data without a parent field (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for FolderCreateModel without a parent
+
         """
         data = cls.build_valid(**kwargs)
         data.pop("parent", None)
@@ -284,14 +284,14 @@ class FolderUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs):
-        """
-        Return a valid data dict for updating a folder.
+        """Return a valid data dict for updating a folder.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for FolderUpdateModel
+
         """
         data = {
             "id": str(uuid4()),
@@ -305,14 +305,14 @@ class FolderUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_without_id(cls, **kwargs):
-        """
-        Return data without an ID field (should fail validation).
+        """Return data without an ID field (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for FolderUpdateModel without an ID
+
         """
         data = cls.build_valid(**kwargs)
         data.pop("id", None)
@@ -331,14 +331,14 @@ class FolderResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs):
-        """
-        Return a valid data dict for a folder response.
+        """Return a valid data dict for a folder response.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for FolderResponseModel
+
         """
         data = {
             "id": str(uuid4()),
@@ -352,14 +352,14 @@ class FolderResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_root_folder(cls, **kwargs):
-        """
-        Return a valid data dict for a root folder (empty parent).
+        """Return a valid data dict for a root folder (empty parent).
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for a root FolderResponseModel
+
         """
         data = cls.build_valid(**kwargs)
         data["parent"] = ""

@@ -55,11 +55,14 @@ class WildfireAvThreatExceptionEntry(BaseModel):
     notes: Optional[str] = Field(None, description="Notes")
 
 
+"""
+Module for Wildfire Antivirus Profile models and related logic.
+"""
+
+
 # Base Model
 class WildfireAvProfileBase(BaseModel):
-    """
-    Base model for Wildfire Antivirus Profile containing common fields.
-    """
+    """Base model for Wildfire Antivirus Profile containing common fields."""
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -107,8 +110,8 @@ class WildfireAvProfileBase(BaseModel):
 
 # Create Model
 class WildfireAvProfileCreateModel(WildfireAvProfileBase):
-    """
-    Model for creating a new Wildfire Antivirus Profile.
+    """Model for creating a new Wildfire Antivirus Profile.
+
     Inherits from base model and adds container validation.
     """
 
@@ -125,8 +128,8 @@ class WildfireAvProfileCreateModel(WildfireAvProfileBase):
 
 # Update Model
 class WildfireAvProfileUpdateModel(WildfireAvProfileBase):
-    """
-    Model for updating an existing Wildfire Antivirus Profile.
+    """Model for updating an existing Wildfire Antivirus Profile.
+
     All fields are optional to allow partial updates.
     """
 
@@ -138,8 +141,8 @@ class WildfireAvProfileUpdateModel(WildfireAvProfileBase):
 
 # Response Model
 class WildfireAvProfileResponseModel(WildfireAvProfileBase):
-    """
-    Model for Wildfire Antivirus Profile API responses.
+    """Model for Wildfire Antivirus Profile API responses.
+
     Includes all base fields plus the id field.
     """
 

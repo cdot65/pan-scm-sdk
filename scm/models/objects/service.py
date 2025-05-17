@@ -70,8 +70,7 @@ class Protocol(BaseModel):
 
 
 class ServiceBaseModel(BaseModel):
-    """
-    Base model for Service objects containing fields common to all CRUD operations.
+    """Base model for Service objects containing fields common to all CRUD operations.
 
     This model serves as the foundation for create, update, and response models,
     containing all shared fields and validation logic.
@@ -131,8 +130,8 @@ class ServiceBaseModel(BaseModel):
 
 
 class ServiceCreateModel(ServiceBaseModel):
-    """
-    Model for creating a new Service.
+    """Model for creating a new Service.
+
     Inherits from ServiceBaseModel and adds container type validation.
     """
 
@@ -146,8 +145,8 @@ class ServiceCreateModel(ServiceBaseModel):
 
 
 class ServiceUpdateModel(ServiceBaseModel):
-    """
-    Model for updating an existing Service.
+    """Model for updating an existing Service.
+
     All fields are optional to allow partial updates.
     """
 
@@ -159,8 +158,8 @@ class ServiceUpdateModel(ServiceBaseModel):
 
 
 class ServiceResponseModel(ServiceBaseModel):
-    """
-    Model for Service responses.
+    """Model for Service responses.
+
     Includes all base fields plus the optional id field.
     """
 

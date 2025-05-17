@@ -9,7 +9,7 @@ import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import DecodeError, ExpiredSignatureError, PyJWKClientError
 from oauthlib.oauth2 import BackendApplicationClient
-from requests import Response, Session
+from requests import Response
 from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError, RequestException, Timeout
 from requests_oauthlib import OAuth2Session
@@ -24,8 +24,7 @@ logger = setup_logger(__name__)
 
 
 class OAuth2Client:
-    """
-    A client for OAuth2 authentication with Palo Alto Networks' Strata Cloud Manager.
+    """A client for OAuth2 authentication with Palo Alto Networks' Strata Cloud Manager.
 
     This class handles OAuth2 token acquisition, validation, and refresh for authenticating
     with Palo Alto Networks' services. It supports token decoding and expiration checking.
@@ -34,6 +33,7 @@ class OAuth2Client:
         auth_request (AuthRequestModel): An object containing authentication parameters.
         session (OAuth2Session): The authenticated OAuth2 session.
         signing_key (Optional[PyJWK]): The key used for verifying the JWT token.
+
     """
 
     MAX_RETRIES = 3

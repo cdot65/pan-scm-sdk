@@ -15,12 +15,13 @@ from scm.models.objects import (
 
 
 class AddressGroup(BaseObject):
-    """
-    Manages Address Group objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Address Group objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/address-groups"
@@ -49,8 +50,7 @@ class AddressGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +60,7 @@ class AddressGroup(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +97,11 @@ class AddressGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> AddressGroupResponseModel:
-        """
-        Creates a new address group object.
+        """Creates a new address group object.
 
         Returns:
             AddressGroupResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         address_group = AddressGroupCreateModel(**data)
@@ -121,11 +122,11 @@ class AddressGroup(BaseObject):
         self,
         object_id: str,
     ) -> AddressGroupResponseModel:
-        """
-        Gets an address group object by ID.
+        """Gets an address group object by ID.
 
         Returns:
             AddressGroupResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +139,14 @@ class AddressGroup(BaseObject):
         self,
         address_group: AddressGroupUpdateModel,
     ) -> AddressGroupResponseModel:
-        """
-        Updates an existing address group object.
+        """Updates an existing address group object.
 
         Args:
             address_group: AddressGroupUpdateModel instance containing the update data
 
         Returns:
             AddressGroupResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = address_group.model_dump(exclude_unset=True)
@@ -169,8 +170,7 @@ class AddressGroup(BaseObject):
         address_groups: List[AddressGroupResponseModel],
         filters: Dict[str, Any],
     ) -> List[AddressGroupResponseModel]:
-        """
-        Apply client-side filtering to the list of address groups.
+        """Apply client-side filtering to the list of address groups.
 
         Args:
             address_groups: List of AddressGroupResponseModel objects
@@ -178,8 +178,8 @@ class AddressGroup(BaseObject):
 
         Returns:
             List[AddressGroupResponseModel]: Filtered list of address groups
-        """
 
+        """
         filter_criteria = address_groups
 
         # Filter by types
@@ -263,8 +263,7 @@ class AddressGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[AddressGroupResponseModel]:
-        """
-        Lists address group objects with optional filtering.
+        """Lists address group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -282,6 +281,7 @@ class AddressGroup(BaseObject):
 
         Returns:
             List[AddressGroupResponseModel]: A list of address group objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -405,8 +405,7 @@ class AddressGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> AddressGroupResponseModel:
-        """
-        Fetches a single address group by name.
+        """Fetches a single address group by name.
 
         Args:
             name (str): The name of the address group to fetch.
@@ -416,6 +415,7 @@ class AddressGroup(BaseObject):
 
         Returns:
             AddressGroupResponseModel: The fetched address group object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -487,11 +487,11 @@ class AddressGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an address group object.
+        """Deletes an address group object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

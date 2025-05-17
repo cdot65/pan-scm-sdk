@@ -37,8 +37,7 @@ def pytest_configure(config):
 
 @pytest.fixture(scope="session", autouse=True)
 def load_env():
-    """
-    Pytest fixture to load environment variables from a .env file.
+    """Pytest fixture to load environment variables from a .env file.
     This fixture is automatically used by all tests.
     """
     client_id = os.getenv("CLIENT_ID")
@@ -55,8 +54,7 @@ def load_env():
 
 @pytest.fixture
 def mock_scm():
-    """
-    Fixture to provide a mocked Scm instance with mocked OAuth2Client and session.
+    """Fixture to provide a mocked Scm instance with mocked OAuth2Client and session.
     """
     with patch("scm.client.OAuth2Client") as MockOAuth2Client:
         mock_oauth2client_instance = MagicMock()

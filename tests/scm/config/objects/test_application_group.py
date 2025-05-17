@@ -154,8 +154,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
             self.client.list(folder="NonexistentFolder")
 
     def test_list_container_missing_error(self):
-        """
-        Test that InvalidObjectError is raised when no container parameter is provided.
+        """Test that InvalidObjectError is raised when no container parameter is provided.
         """
         # Use the utility function to create the mock HTTP error
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
@@ -297,8 +296,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         # assert "{'errorType': 'Invalid Object'}" in str(error)
 
     def test_list_response_invalid_format(self):
-        """
-        Test that InvalidObjectError is raised when the response is not a dictionary.
+        """Test that InvalidObjectError is raised when the response is not a dictionary.
         """
         # Mock the API client to return a non-dictionary response
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
@@ -311,8 +309,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
     def test_list_response_invalid_data_field_missing(self):
-        """
-        Test that InvalidObjectError is raised when API returns response with missing data field.
+        """Test that InvalidObjectError is raised when API returns response with missing data field.
 
         This tests the case where the API response is a dictionary but missing the required 'data' field,
         expecting an InvalidObjectError with specific error details.
@@ -330,8 +327,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert "HTTP error: 500 - API error: E003" in str(error)
 
     def test_list_response_invalid_data_field_type(self):
-        """
-        Test that InvalidObjectError is raised when API returns non-list data field.
+        """Test that InvalidObjectError is raised when API returns non-list data field.
 
         This tests the case where the API response's 'data' field is not a list,
         expecting an InvalidObjectError with specific error details.
@@ -377,8 +373,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """
-        Test that exact_match=True returns only address groups that match the container exactly.
+        """Test that exact_match=True returns only address groups that match the container exactly.
         """
         mock_response = {
             "data": [
@@ -400,8 +395,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert filtered[0].name == "group_in_texas"
 
     def test_list_exclude_folders(self):
-        """
-        Test that exclude_folders removes address groups from those folders.
+        """Test that exclude_folders removes address groups from those folders.
         """
         mock_response = {
             "data": [
@@ -420,8 +414,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert all(g.folder != "All" for g in filtered)
 
     def test_list_exclude_snippets(self):
-        """
-        Test that exclude_snippets removes address groups with those snippets.
+        """Test that exclude_snippets removes address groups with those snippets.
         """
         mock_response = {
             "data": [
@@ -442,8 +435,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert all(g.snippet != "default" for g in filtered)
 
     def test_list_exclude_devices(self):
-        """
-        Test that exclude_devices removes address groups from those devices.
+        """Test that exclude_devices removes address groups from those devices.
         """
         mock_response = {
             "data": [
@@ -466,8 +458,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert all(g.device != "DeviceA" for g in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """
-        Test combining exact_match with exclusions.
+        """Test combining exact_match with exclusions.
         """
         mock_response = {
             "data": [
@@ -507,8 +498,7 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         assert obj.device != "DeviceA"
 
     def test_list_pagination_multiple_pages(self):
-        """
-        Test that the list method correctly aggregates data from multiple pages.
+        """Test that the list method correctly aggregates data from multiple pages.
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = ApplicationGroup(self.mock_scm, max_limit=2500)  # noqa

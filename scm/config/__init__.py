@@ -11,8 +11,7 @@ from scm.models.operations import (
 
 
 class BaseObject:
-    """
-    Base class for configuration objects in the SDK, providing CRUD operations.
+    """Base class for configuration objects in the SDK, providing CRUD operations.
 
     This class implements common methods for creating, retrieving, updating, deleting,
     and listing configuration objects through the API client.
@@ -26,6 +25,7 @@ class BaseObject:
 
     Return:
         Dict[str, Any] or List[Dict[str, Any]]: API response data for CRUD operations.
+
     """
 
     ENDPOINT: str  # Should be defined in subclasses
@@ -95,8 +95,7 @@ class BaseObject:
         offset: int = 0,
         parent_id: Optional[str] = None,
     ) -> JobListResponse:
-        """
-        List jobs in SCM with pagination support and optional parent ID filtering.
+        """List jobs in SCM with pagination support and optional parent ID filtering.
 
         Args:
             limit: Maximum number of jobs to return (default: 100)
@@ -105,6 +104,7 @@ class BaseObject:
 
         Returns:
             JobListResponse: Paginated list of jobs
+
         """
         return self.api_client.list_jobs(
             limit=limit,
@@ -113,14 +113,14 @@ class BaseObject:
         )
 
     def get_job_status(self, job_id: str) -> JobStatusResponse:
-        """
-        Get the status of a job.
+        """Get the status of a job.
 
         Args:
             job_id: The ID of the job to check
 
         Returns:
             JobStatusResponse: The job status response
+
         """
         return self.api_client.get_job_status(job_id)
 
@@ -132,8 +132,7 @@ class BaseObject:
         sync: bool = False,
         timeout: int = 300,
     ) -> CandidatePushResponseModel:
-        """
-        Commits configuration changes to SCM.
+        """Commits configuration changes to SCM.
 
         This method proxies to the api_client's commit method.
 
@@ -146,6 +145,7 @@ class BaseObject:
 
         Returns:
             CandidatePushResponseModel: Response containing job information
+
         """
         return self.api_client.commit(
             folders=folders,

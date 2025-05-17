@@ -40,8 +40,7 @@ class TestBaseObject:
         self.test_object = self.MockConfigObject(self.mock_scm)
 
     def test_initialization(self):
-        """
-        **Objective:** Test BaseObject initialization.
+        """**Objective:** Test BaseObject initialization.
         **Workflow:**
             1. Verifies proper initialization with API client
             2. Checks endpoint setting
@@ -50,8 +49,7 @@ class TestBaseObject:
         assert self.test_object.ENDPOINT == "/api/v1/test-objects"
 
     def test_create_method(self):
-        """
-        **Objective:** Test create method of BaseObject.
+        """**Objective:** Test create method of BaseObject.
         **Workflow:**
             1. Tests basic object creation
             2. Verifies proper API call
@@ -71,8 +69,7 @@ class TestBaseObject:
         assert response["name"] == "test"
 
     def test_get_method(self):
-        """
-        **Objective:** Test get method of BaseObject.
+        """**Objective:** Test get method of BaseObject.
         **Workflow:**
             1. Tests object retrieval
             2. Verifies endpoint construction
@@ -91,8 +88,7 @@ class TestBaseObject:
         assert response["id"] == object_id
 
     def test_update_method(self):
-        """
-        **Objective:** Test update method of BaseObject.
+        """**Objective:** Test update method of BaseObject.
         **Workflow:**
             1. Tests object update
             2. Verifies proper endpoint construction
@@ -110,8 +106,7 @@ class TestBaseObject:
         assert response == mock_response
 
     def test_delete_method(self):
-        """
-        **Objective:** Test delete method of BaseObject.
+        """**Objective:** Test delete method of BaseObject.
         **Workflow:**
             1. Tests object deletion
             2. Verifies endpoint construction
@@ -127,8 +122,7 @@ class TestBaseObject:
         )
 
     def test_list_method(self):
-        """
-        **Objective:** Test list method of BaseObject.
+        """**Objective:** Test list method of BaseObject.
         **Workflow:**
             1. Tests object listing with various filters
             2. Verifies parameter handling
@@ -158,8 +152,7 @@ class TestBaseObject:
         assert response == mock_response["data"]
 
     def test_list_method_empty_response(self):
-        """
-        **Objective:** Test list method with empty response.
+        """**Objective:** Test list method with empty response.
         **Workflow:**
             1. Tests handling of empty response
             2. Verifies default return value
@@ -171,8 +164,7 @@ class TestBaseObject:
         assert response == []
 
     def test_update_method_missing_id(self):
-        """
-        **Objective:** Test update method with missing ID.
+        """**Objective:** Test update method with missing ID.
         **Workflow:**
             1. Tests error handling when ID is missing
             2. Verifies proper error raising
@@ -184,8 +176,7 @@ class TestBaseObject:
         assert "'id'" in str(exc_info.value)
 
     def test_endpoint_inheritance(self):
-        """
-        **Objective:** Test endpoint inheritance behavior.
+        """**Objective:** Test endpoint inheritance behavior.
         **Workflow:**
             1. Tests endpoint definition requirement
             2. Verifies error when ENDPOINT is not defined
@@ -200,8 +191,7 @@ class TestBaseObject:
         assert "ENDPOINT must be defined in the subclass" in str(exc_info.value)
 
     def test_api_client_type_check(self):
-        """
-        **Objective:** Test API client type validation.
+        """**Objective:** Test API client type validation.
         **Workflow:**
             1. Tests initialization with invalid client type
             2. Verifies type checking
@@ -213,8 +203,7 @@ class TestBaseObject:
         assert "api_client must be an instance of Scm" in str(exc_info.value)
 
     def test_create_method_payload_validation(self):
-        """
-        **Objective:** Test create method payload handling.
+        """**Objective:** Test create method payload handling.
         **Workflow:**
             1. Tests various payload types
             2. Verifies proper handling of different data structures
@@ -238,8 +227,7 @@ class TestBaseObject:
         )
 
     def test_list_jobs(self):
-        """
-        **Objective:** Test list_jobs method return value.
+        """**Objective:** Test list_jobs method return value.
         **Workflow:**
             1. Tests job listing with pagination and filtering
             2. Verifies return type and value
@@ -277,8 +265,7 @@ class TestBaseObject:
         self.mock_scm.list_jobs.assert_called_with(limit=50, offset=10, parent_id="parent123")
 
     def test_get_job_status(self):
-        """
-        **Objective:** Test get_job_status method return value.
+        """**Objective:** Test get_job_status method return value.
         **Workflow:**
             1. Tests job status retrieval
             2. Verifies return type and value
@@ -316,8 +303,7 @@ class TestBaseObject:
         self.mock_scm.get_job_status.assert_called_with("1595")
 
     def test_commit(self):
-        """
-        **Objective:** Test commit method return value.
+        """**Objective:** Test commit method return value.
         **Workflow:**
             1. Tests configuration commit operation
             2. Verifies return type and value

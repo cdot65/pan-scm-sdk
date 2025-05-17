@@ -83,8 +83,7 @@ class TestSnippetCreateModel:
     """Tests for the SnippetCreateModel."""
 
     def test_valid_construction(self):
-        """
-        Test that a valid SnippetCreateModel can be constructed from a dictionary.
+        """Test that a valid SnippetCreateModel can be constructed from a dictionary.
 
         Verifies that the model is an instance of SnippetCreateModel and that the fields
         name, description, labels, and enable_prefix are not empty.
@@ -242,7 +241,6 @@ class TestSnippetCreate(TestSnippetBase):
 
     def test_create_snippet_with_invalid_data(self, snippet_service):
         """Test creating a snippet with invalid data."""
-
         # Test with empty name
         with pytest.raises(ValidationError):
             data = SnippetCreateModelDictFactory.build_valid_dict(name="")

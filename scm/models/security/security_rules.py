@@ -230,8 +230,7 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
 
     @field_validator("device")
     def validate_device(cls, v):
-        """
-        Validate that the device field is None, a string, or an empty dictionary.
+        """Validate that the device field is None, a string, or an empty dictionary.
 
         Args:
             v: The value of the device field to be validated.
@@ -241,6 +240,7 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
 
         Returns:
             The validated value of the device field.
+
         """
         if isinstance(v, dict) and v != {}:
             raise ValueError("If device is a dictionary, it must be empty")

@@ -70,8 +70,7 @@ class BGPRoutingBaseFactory(factory.Factory):
 
 
 class BGPRoutingCreateApiFactory:
-    """
-    Factory for creating dictionaries suitable for BGPRoutingCreateModel
+    """Factory for creating dictionaries suitable for BGPRoutingCreateModel
     with the structure used by the Python SDK calls.
     """
 
@@ -96,50 +95,49 @@ class BGPRoutingCreateApiFactory:
         return data
 
     def with_hot_potato_routing(self, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with hot potato routing preference.
+        """Create a dictionary with hot potato routing preference.
 
         Args:
             **kwargs: Additional attributes to override in the data
 
         Returns:
             Dict[str, Any]: Data with hot potato routing preference
+
         """
         data = self(**kwargs)
         data["routing_preference"] = {"hot_potato_routing": {}}
         return data
 
     def with_asymmetric_routing_only(self, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with asymmetric routing only.
+        """Create a dictionary with asymmetric routing only.
 
         Args:
             **kwargs: Additional attributes to override in the data
 
         Returns:
             Dict[str, Any]: Data with asymmetric routing only
+
         """
         data = self(**kwargs)
         data["backbone_routing"] = "asymmetric-routing-only"
         return data
 
     def with_asymmetric_routing_with_load_share(self, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with asymmetric routing with load share.
+        """Create a dictionary with asymmetric routing with load share.
 
         Args:
             **kwargs: Additional attributes to override in the data
 
         Returns:
             Dict[str, Any]: Data with asymmetric routing with load share
+
         """
         data = self(**kwargs)
         data["backbone_routing"] = "asymmetric-routing-with-load-share"
         return data
 
     def with_custom_outbound_routes(self, routes: List[str], **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with custom outbound routes.
+        """Create a dictionary with custom outbound routes.
 
         Args:
             routes: List of CIDR routes
@@ -147,6 +145,7 @@ class BGPRoutingCreateApiFactory:
 
         Returns:
             Dict[str, Any]: Data with custom outbound routes
+
         """
         data = self(**kwargs)
         data["outbound_routes_for_services"] = routes
@@ -154,8 +153,7 @@ class BGPRoutingCreateApiFactory:
 
 
 class BGPRoutingUpdateApiFactory:
-    """
-    Factory for creating dictionaries suitable for BGPRoutingUpdateModel
+    """Factory for creating dictionaries suitable for BGPRoutingUpdateModel
     with the structure used by the Python SDK calls.
     """
 
@@ -180,36 +178,35 @@ class BGPRoutingUpdateApiFactory:
         return data
 
     def with_default_routing(self, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with default routing preference.
+        """Create a dictionary with default routing preference.
 
         Args:
             **kwargs: Additional attributes to override in the data
 
         Returns:
             Dict[str, Any]: Data with default routing preference
+
         """
         data = self(**kwargs)
         data["routing_preference"] = {"default": {}}
         return data
 
     def with_no_asymmetric_routing(self, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with no asymmetric routing.
+        """Create a dictionary with no asymmetric routing.
 
         Args:
             **kwargs: Additional attributes to override in the data
 
         Returns:
             Dict[str, Any]: Data with no asymmetric routing
+
         """
         data = self(**kwargs)
         data["backbone_routing"] = "no-asymmetric-routing"
         return data
 
     def partial_update(self, fields: List[str], **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with only specified fields for a partial update.
+        """Create a dictionary with only specified fields for a partial update.
 
         Args:
             fields: List of field names to include in the update
@@ -217,6 +214,7 @@ class BGPRoutingUpdateApiFactory:
 
         Returns:
             Dict[str, Any]: Partial update data
+
         """
         data = {}
         full_data = self(**kwargs)
@@ -229,8 +227,7 @@ class BGPRoutingUpdateApiFactory:
 
 
 class BGPRoutingResponseFactory:
-    """
-    Factory for creating dictionaries suitable for BGPRoutingResponseModel
+    """Factory for creating dictionaries suitable for BGPRoutingResponseModel
     to mimic the actual data returned by the SCM API.
     """
 
@@ -255,14 +252,14 @@ class BGPRoutingResponseFactory:
         return data
 
     def with_hot_potato_routing(self, **kwargs) -> Dict[str, Any]:
-        """
-        Create a response dictionary with hot potato routing preference.
+        """Create a response dictionary with hot potato routing preference.
 
         Args:
             **kwargs: Additional attributes to override in the data
 
         Returns:
             Dict[str, Any]: Response data with hot potato routing preference
+
         """
         data = self(**kwargs)
         data["routing_preference"] = {"hot_potato_routing": {}}
@@ -273,8 +270,7 @@ class BGPRoutingResponseFactory:
         request_data: Union[Dict[str, Any], BGPRoutingCreateModel, BGPRoutingUpdateModel],
         **kwargs,
     ) -> Dict[str, Any]:
-        """
-        Create a response dictionary based on a request.
+        """Create a response dictionary based on a request.
 
         This is useful for simulating the API's response to a create or update request.
 
@@ -284,6 +280,7 @@ class BGPRoutingResponseFactory:
 
         Returns:
             Dict[str, Any]: Response data based on the request
+
         """
         # Convert model to dict if needed
         if hasattr(request_data, "model_dump"):
@@ -313,8 +310,7 @@ BGPRoutingResponseFactory = BGPRoutingResponseFactory()
 
 
 class BGPRoutingCreateModelFactory(factory.Factory):
-    """
-    Factory for creating dictionary data suitable for instantiating BGPRoutingCreateModel.
+    """Factory for creating dictionary data suitable for instantiating BGPRoutingCreateModel.
     Useful for direct Pydantic validation tests.
     """
 
@@ -330,14 +326,14 @@ class BGPRoutingCreateModelFactory(factory.Factory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BGPRoutingCreateModel
+
         """
         data = {
             "backbone_routing": BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
@@ -352,14 +348,14 @@ class BGPRoutingCreateModelFactory(factory.Factory):
 
     @classmethod
     def build_with_hot_potato_routing(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with hot potato routing.
+        """Return a data dict with hot potato routing.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for BGPRoutingCreateModel with hot potato routing
+
         """
         data = cls.build_valid(**kwargs)
         data["routing_preference"] = {"hot_potato_routing": {}}
@@ -367,14 +363,14 @@ class BGPRoutingCreateModelFactory(factory.Factory):
 
     @classmethod
     def build_with_default_model_objects(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict using DefaultRoutingModel object instead of dict.
+        """Return a data dict using DefaultRoutingModel object instead of dict.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for BGPRoutingCreateModel with DefaultRoutingModel object
+
         """
         data = cls.build_valid(**kwargs)
         data["routing_preference"] = DefaultRoutingModel()
@@ -382,14 +378,14 @@ class BGPRoutingCreateModelFactory(factory.Factory):
 
     @classmethod
     def build_with_invalid_backbone_routing(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with invalid backbone routing value.
+        """Return a data dict with invalid backbone routing value.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Invalid data for BGPRoutingCreateModel
+
         """
         data = cls.build_valid(**kwargs)
         data["backbone_routing"] = "invalid-routing-value"
@@ -397,8 +393,7 @@ class BGPRoutingCreateModelFactory(factory.Factory):
 
 
 class BGPRoutingUpdateModelFactory(factory.Factory):
-    """
-    Factory for creating dictionary data suitable for instantiating BGPRoutingUpdateModel.
+    """Factory for creating dictionary data suitable for instantiating BGPRoutingUpdateModel.
     Useful for direct Pydantic validation tests.
     """
 
@@ -414,14 +409,14 @@ class BGPRoutingUpdateModelFactory(factory.Factory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BGPRoutingUpdateModel
+
         """
         data = {
             "backbone_routing": BackboneRoutingEnum.ASYMMETRIC_ROUTING_ONLY,
@@ -436,8 +431,7 @@ class BGPRoutingUpdateModelFactory(factory.Factory):
 
     @classmethod
     def build_partial(cls, fields: List[str], **kwargs) -> Dict[str, Any]:
-        """
-        Return a partial update data dict with only specified fields.
+        """Return a partial update data dict with only specified fields.
 
         Args:
             fields: List of field names to include in the update
@@ -445,6 +439,7 @@ class BGPRoutingUpdateModelFactory(factory.Factory):
 
         Returns:
             Dict[str, Any]: Partial data for BGPRoutingUpdateModel
+
         """
         data = {}
         full_data = cls.build_valid(**kwargs)
@@ -457,14 +452,14 @@ class BGPRoutingUpdateModelFactory(factory.Factory):
 
     @classmethod
     def build_with_default_routing(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with default routing preference.
+        """Return a data dict with default routing preference.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for BGPRoutingUpdateModel with default routing
+
         """
         data = cls.build_valid(**kwargs)
         data["routing_preference"] = {"default": {}}
@@ -472,18 +467,17 @@ class BGPRoutingUpdateModelFactory(factory.Factory):
 
     @classmethod
     def build_empty(cls) -> Dict[str, Any]:
-        """
-        Return an empty data dict for testing empty updates.
+        """Return an empty data dict for testing empty updates.
 
         Returns:
             Dict[str, Any]: Empty data for BGPRoutingUpdateModel
+
         """
         return {}
 
 
 class BGPRoutingResponseModelFactory(factory.Factory):
-    """
-    Factory for creating dictionary data suitable for instantiating BGPRoutingResponseModel.
+    """Factory for creating dictionary data suitable for instantiating BGPRoutingResponseModel.
     Useful for direct Pydantic validation tests.
     """
 
@@ -499,14 +493,14 @@ class BGPRoutingResponseModelFactory(factory.Factory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict for a response model.
+        """Return a valid data dict for a response model.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BGPRoutingResponseModel
+
         """
         data = {
             "backbone_routing": BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
@@ -521,14 +515,14 @@ class BGPRoutingResponseModelFactory(factory.Factory):
 
     @classmethod
     def build_with_hot_potato_routing(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with hot potato routing preference.
+        """Return a data dict with hot potato routing preference.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BGPRoutingResponseModel with hot potato routing
+
         """
         data = cls.build_valid(**kwargs)
         data["routing_preference"] = {"hot_potato_routing": {}}
@@ -536,14 +530,14 @@ class BGPRoutingResponseModelFactory(factory.Factory):
 
     @classmethod
     def build_with_model_objects(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with proper model objects instead of dicts.
+        """Return a data dict with proper model objects instead of dicts.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BGPRoutingResponseModel with model objects
+
         """
         data = cls.build_valid(**kwargs)
 

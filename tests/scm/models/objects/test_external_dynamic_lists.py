@@ -80,8 +80,7 @@ class TestExternalDynamicListsUpdateModel:
     #     )
 
     def test_no_type_non_predefined_snippet(self):
-        """
-        Test that an update model with a non-predefined snippet must include a type.
+        """Test that an update model with a non-predefined snippet must include a type.
         """
         # The model appears to allow this, so we won't test for a ValueError
         # Instead, let's verify that the model is created correctly
@@ -94,8 +93,7 @@ class TestExternalDynamicListsUpdateModel:
         assert model.type is None
 
     def test_valid_update(self):
-        """
-        Test that a valid update model can be created.
+        """Test that a valid update model can be created.
         """
         data = ExternalDynamicListsUpdateModelFactory.build_valid()
         model = ExternalDynamicListsUpdateModel(**data)
@@ -106,8 +104,7 @@ class TestExternalDynamicListsUpdateModel:
 
 class TestExternalDynamicListsResponseModel:
     def test_predefined_snippet_no_id_no_type(self):
-        """
-        Test that a predefined snippet response doesn't require id or type.
+        """Test that a predefined snippet response doesn't require id or type.
         """
         data = ExternalDynamicListsResponseModelFactory.build_predefined()
         model = ExternalDynamicListsResponseModel(**data)
@@ -116,8 +113,7 @@ class TestExternalDynamicListsResponseModel:
         assert model.type is None
 
     def test_missing_id_non_predefined_snippet(self):
-        """
-        Test that a non-predefined snippet response requires an id.
+        """Test that a non-predefined snippet response requires an id.
         """
         data = ExternalDynamicListsResponseModelFactory.build_without_id_non_predefined()
         with pytest.raises(ValueError) as exc_info:
@@ -125,8 +121,7 @@ class TestExternalDynamicListsResponseModel:
         assert "id is required if snippet is not 'predefined'" in str(exc_info.value)
 
     def test_missing_type_non_predefined_snippet(self):
-        """
-        Test that a non-predefined snippet response requires a type.
+        """Test that a non-predefined snippet response requires a type.
         """
         data = ExternalDynamicListsResponseModelFactory.build_without_type_non_predefined()
         with pytest.raises(ValueError) as exc_info:
@@ -134,8 +129,7 @@ class TestExternalDynamicListsResponseModel:
         assert "type is required if snippet is not 'predefined'" in str(exc_info.value)
 
     def test_valid_response(self):
-        """
-        Test that a valid response model can be created.
+        """Test that a valid response model can be created.
         """
         data = ExternalDynamicListsResponseModelFactory.build_valid()
         model = ExternalDynamicListsResponseModel(**data)

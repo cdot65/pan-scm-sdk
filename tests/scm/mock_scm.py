@@ -1,5 +1,4 @@
-"""
-Base mock implementation of the Scm client for testing.
+"""Base mock implementation of the Scm client for testing.
 
 This module provides a mock Scm class that can be used in tests to simulate
 API responses without making actual API calls. It can be imported and used
@@ -12,8 +11,7 @@ from scm.client import Scm
 
 
 class MockScm(MagicMock, Scm):
-    """
-    A mock implementation of the Scm client that inherits from both MagicMock and Scm.
+    """A mock implementation of the Scm client that inherits from both MagicMock and Scm.
 
     This allows the mock to pass isinstance(api_client, Scm) checks while still
     providing the mocking functionality of MagicMock.

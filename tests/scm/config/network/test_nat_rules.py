@@ -228,8 +228,7 @@ class TestNatRuleList(TestNatRuleBase):
             self.client.list(folder="Shared")
 
     def test_list_response_missing_data_field(self):
-        """
-        Test that InvalidObjectError is raised when the API response
+        """Test that InvalidObjectError is raised when the API response
         is missing the 'data' field.
         """
         # Simulate an API response without the 'data' key
@@ -244,8 +243,7 @@ class TestNatRuleList(TestNatRuleBase):
         assert "field missing in the response" in error_msg
 
     def test_list_response_invalid_data_field_type(self):
-        """
-        Test that InvalidObjectError is raised when the API response's
+        """Test that InvalidObjectError is raised when the API response's
         'data' field is not a list.
         """
         # Simulate an API response with 'data' not being a list
@@ -261,8 +259,7 @@ class TestNatRuleList(TestNatRuleBase):
         assert "field must be a list" in error_msg
 
     def test_fetch_missing_id_field(self):
-        """
-        Test that fetch() raises an InvalidObjectError when the API response
+        """Test that fetch() raises an InvalidObjectError when the API response
         is missing the 'id' field.
         """
         # Create test data using a factory that produces a valid container (using device)
@@ -738,8 +735,7 @@ class TestNatRuleListFiltering:
 
 class TestNatRuleContainerFiltering(TestNatRuleBase):
     def test_exact_match_filter(self):
-        """
-        Test that when exact_match=True, only objects whose container
+        """Test that when exact_match=True, only objects whose container
         field exactly matches the provided value are returned.
         """
         # Simulate API response with two NAT rule objects:
@@ -766,8 +762,7 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         assert results[0].name == "rule_shared"
 
     def test_exclude_folders_filter(self):
-        """
-        Test that when exclude_folders is provided, any object whose folder is in
+        """Test that when exclude_folders is provided, any object whose folder is in
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects: one with folder "Shared" and one with folder "All"
@@ -791,8 +786,7 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         assert results[0].name == "rule_shared"
 
     def test_exclude_snippets_filter(self):
-        """
-        Test that when exclude_snippets is provided, any object whose snippet is in
+        """Test that when exclude_snippets is provided, any object whose snippet is in
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects having different snippet values.
@@ -818,8 +812,7 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         assert results[0].name == "rule_snippet"
 
     def test_exclude_devices_filter(self):
-        """
-        Test that when exclude_devices is provided, any object whose device is in
+        """Test that when exclude_devices is provided, any object whose device is in
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects having different device values.

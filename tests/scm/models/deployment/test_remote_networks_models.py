@@ -34,8 +34,7 @@ class TestRemoteNetworkCreateModel:
         assert "ecmp_tunnels is required when ecmp_load_balancing is enable" in str(exc_info.value)
 
     def test_disable_ecmp_missing_ipsec_tunnel(self):
-        """
-        Test validation fails when ecmp_load_balancing=disable (the default),
+        """Test validation fails when ecmp_load_balancing=disable (the default),
         but ipsec_tunnel is not provided.
         """
         data = RemoteNetworkCreateModelFactory.build_valid()
@@ -119,8 +118,7 @@ class TestRemoteNetworkUpdateModel:
         assert "spn_name is required when license_type is FWAAS-AGGREGATE" in str(exc_info.value)
 
     def test_disable_ecmp_missing_ipsec_tunnel(self):
-        """
-        Test validation fails when ecmp_load_balancing=disable (the default),
+        """Test validation fails when ecmp_load_balancing=disable (the default),
         but ipsec_tunnel is not provided on update.
         """
         data = RemoteNetworkUpdateModelFactory.build_valid()

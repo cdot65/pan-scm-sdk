@@ -169,14 +169,14 @@ class HIPProfileResponseFactory(HIPProfileBaseFactory):
 
     @classmethod
     def build(cls, **kwargs: Any) -> HIPProfileResponseModel:
-        """
-        Create a basic HIPProfileResponseModel instance.
+        """Create a basic HIPProfileResponseModel instance.
 
         Args:
             **kwargs: Additional keyword arguments to override default values
 
         Returns:
             HIPProfileResponseModel: A configured HIP profile response model
+
         """
         return cls(**kwargs)
 
@@ -230,8 +230,7 @@ class HIPProfileResponseFactory(HIPProfileBaseFactory):
     def from_request(
         cls, request_model: Union[HIPProfileCreateModel, Dict[str, Any]], **kwargs: Any
     ) -> HIPProfileResponseModel:
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create request.
 
@@ -241,6 +240,7 @@ class HIPProfileResponseFactory(HIPProfileBaseFactory):
 
         Returns:
             HIPProfileResponseModel instance
+
         """
         if isinstance(request_model, dict):
             data = request_model.copy()
@@ -429,8 +429,7 @@ class HIPProfileResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_from_request(cls, request_data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
-        """
-        Return a data dictionary based on request data.
+        """Return a data dictionary based on request data.
 
         Args:
             request_data: Request data dictionary to base the response on
@@ -438,6 +437,7 @@ class HIPProfileResponseModelFactory(factory.DictFactory):
 
         Returns:
             Dictionary with response data
+
         """
         data = request_data.copy()
 

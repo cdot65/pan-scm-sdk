@@ -24,12 +24,13 @@ from scm.models.objects.external_dynamic_lists import (
 
 
 class ExternalDynamicLists(BaseObject):
-    """
-    Manages EDLs in Palo Alto Networks' Strata Cloud Manager.
+    """Manages EDLs in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/external-dynamic-lists"
@@ -58,8 +59,7 @@ class ExternalDynamicLists(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -69,6 +69,7 @@ class ExternalDynamicLists(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -105,11 +106,11 @@ class ExternalDynamicLists(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ExternalDynamicListsResponseModel:
-        """
-        Creates a new EDL object.
+        """Creates a new EDL object.
 
         Returns:
             ExternalDynamicListsResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         edl = ExternalDynamicListsCreateModel(**data)
@@ -130,11 +131,11 @@ class ExternalDynamicLists(BaseObject):
         self,
         edl_id: str,
     ) -> ExternalDynamicListsResponseModel:
-        """
-        Gets an EDL by ID.
+        """Gets an EDL by ID.
 
         Returns:
             ExternalDynamicListsResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{edl_id}"
@@ -147,14 +148,14 @@ class ExternalDynamicLists(BaseObject):
         self,
         edl: ExternalDynamicListsUpdateModel,
     ) -> ExternalDynamicListsResponseModel:
-        """
-        Updates an existing EDL.
+        """Updates an existing EDL.
 
         Args:
             edl: ExternalDynamicListsUpdateModel instance containing the update data
 
         Returns:
             ExternalDynamicListsResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = edl.model_dump(exclude_unset=True)
@@ -178,8 +179,7 @@ class ExternalDynamicLists(BaseObject):
         edls: List[ExternalDynamicListsResponseModel],
         filters: Dict[str, Any],
     ) -> List[ExternalDynamicListsResponseModel]:
-        """
-        Apply client-side filtering to the list of EDLs.
+        """Apply client-side filtering to the list of EDLs.
 
         Args:
             edls: List of ExternalDynamicListsResponseModel objects
@@ -187,8 +187,8 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             List[ExternalDynamicListsResponseModel]: Filtered list of EDLs
-        """
 
+        """
         filter_criteria = edls
 
         # Map of filter strings to corresponding type classes for easy filtering
@@ -256,8 +256,7 @@ class ExternalDynamicLists(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ExternalDynamicListsResponseModel]:
-        """
-        Lists address objects with optional filtering.
+        """Lists address objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -275,6 +274,7 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             List[ExternalDynamicListsResponseModel]: A list of EDL objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -398,8 +398,7 @@ class ExternalDynamicLists(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ExternalDynamicListsResponseModel:
-        """
-        Fetches a single EDL by name.
+        """Fetches a single EDL by name.
 
         Args:
             name (str): The name of the address group to fetch.
@@ -409,6 +408,7 @@ class ExternalDynamicLists(BaseObject):
 
         Returns:
             ExternalDynamicListsResponseModel: The fetched address object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -480,8 +480,7 @@ class ExternalDynamicLists(BaseObject):
         self,
         edl_id: str,
     ) -> None:
-        """
-        Deletes an EDL.
+        """Deletes an EDL.
 
         Args:
             edl_id (str): The ID of the object to delete.

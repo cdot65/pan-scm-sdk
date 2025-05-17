@@ -349,8 +349,7 @@ class HIPObjectUpdateApiFactory(HIPObjectBaseFactory):
 
     @classmethod
     def with_additional_encryption_location(cls, **kwargs):
-        """
-        Create a HIPObjectUpdateModel instance with disk encryption and additional locations.
+        """Create a HIPObjectUpdateModel instance with disk encryption and additional locations.
 
         This factory method creates a HIP object update model with disk encryption section
         that includes multiple encrypted locations.
@@ -360,6 +359,7 @@ class HIPObjectUpdateApiFactory(HIPObjectBaseFactory):
 
         Returns:
             HIPObjectUpdateModel: A configured HIP object update model
+
         """
         # Create encryption locations
         encrypted_locations = [
@@ -389,14 +389,14 @@ class HIPObjectResponseFactory(HIPObjectBaseFactory):
 
     @classmethod
     def build(cls, **kwargs):
-        """
-        Create a basic HIPObjectResponseModel instance.
+        """Create a basic HIPObjectResponseModel instance.
 
         Args:
             **kwargs: Additional keyword arguments to override default values
 
         Returns:
             HIPObjectResponseModel: A configured HIP object response model
+
         """
         return cls(**kwargs)
 
@@ -472,8 +472,7 @@ class HIPObjectResponseFactory(HIPObjectBaseFactory):
     def from_request(
         cls, request_model: Union[HIPObjectCreateModel, Dict[str, Any]], **kwargs
     ) -> HIPObjectResponseModel:
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create request.
 
@@ -483,6 +482,7 @@ class HIPObjectResponseFactory(HIPObjectBaseFactory):
 
         Returns:
             HIPObjectResponseModel instance
+
         """
         if isinstance(request_model, dict):
             data = request_model.copy()
@@ -709,8 +709,7 @@ class HIPObjectResponseModelFactory:
 
     @classmethod
     def build_from_request(cls, request_data: dict, **kwargs):
-        """
-        Return a data dictionary based on request data.
+        """Return a data dictionary based on request data.
 
         Args:
             request_data: Request data dictionary to base the response on
@@ -718,6 +717,7 @@ class HIPObjectResponseModelFactory:
 
         Returns:
             Dictionary with response data
+
         """
         data = request_data.copy()
 

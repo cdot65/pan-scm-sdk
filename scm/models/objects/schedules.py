@@ -17,8 +17,7 @@ TIME_RANGE_PATTERN = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)-([01]\d|2[0-3]):([0
 
 
 class WeeklyScheduleModel(BaseModel):
-    """
-    Model representing weekly schedule time ranges.
+    """Model representing weekly schedule time ranges.
 
     Attributes:
         sunday (Optional[List[str]]): List of time ranges for Sunday.
@@ -28,6 +27,7 @@ class WeeklyScheduleModel(BaseModel):
         thursday (Optional[List[str]]): List of time ranges for Thursday.
         friday (Optional[List[str]]): List of time ranges for Friday.
         saturday (Optional[List[str]]): List of time ranges for Saturday.
+
     """
 
     sunday: Optional[List[str]] = None
@@ -71,11 +71,11 @@ class WeeklyScheduleModel(BaseModel):
 
 
 class DailyScheduleModel(BaseModel):
-    """
-    Model representing daily schedule time ranges.
+    """Model representing daily schedule time ranges.
 
     Attributes:
         daily (List[str]): List of time ranges for every day.
+
     """
 
     daily: List[str]
@@ -94,12 +94,12 @@ class DailyScheduleModel(BaseModel):
 
 
 class RecurringScheduleModel(BaseModel):
-    """
-    Model representing recurring schedules, which can be either weekly or daily.
+    """Model representing recurring schedules, which can be either weekly or daily.
 
     Attributes:
         weekly (Optional[WeeklyScheduleModel]): Weekly schedule configuration.
         daily (Optional[DailyScheduleModel]): Daily schedule configuration.
+
     """
 
     weekly: Optional[WeeklyScheduleModel] = None
@@ -117,11 +117,11 @@ class RecurringScheduleModel(BaseModel):
 
 
 class NonRecurringScheduleModel(BaseModel):
-    """
-    Model representing non-recurring (one-time) schedules.
+    """Model representing non-recurring (one-time) schedules.
 
     Attributes:
         non_recurring (List[str]): List of date/time ranges in format YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm.
+
     """
 
     non_recurring: List[str]
@@ -231,12 +231,12 @@ class NonRecurringScheduleModel(BaseModel):
 
 
 class ScheduleTypeModel(BaseModel):
-    """
-    Model representing schedule type, which can be either recurring or non-recurring.
+    """Model representing schedule type, which can be either recurring or non-recurring.
 
     Attributes:
         recurring (Optional[RecurringScheduleModel]): Recurring schedule configuration.
         non_recurring (Optional[NonRecurringScheduleModel]): Non-recurring schedule configuration.
+
     """
 
     recurring: Optional[RecurringScheduleModel] = None
@@ -254,8 +254,7 @@ class ScheduleTypeModel(BaseModel):
 
 
 class ScheduleBaseModel(BaseModel):
-    """
-    Base model for Schedule objects containing fields common to all CRUD operations.
+    """Base model for Schedule objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the schedule.
@@ -263,6 +262,7 @@ class ScheduleBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -309,8 +309,7 @@ class ScheduleBaseModel(BaseModel):
 
 
 class ScheduleCreateModel(ScheduleBaseModel):
-    """
-    Represents a request to create a new Schedule object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents a request to create a new Schedule object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a Schedule creation request.
     It inherits all fields from the ScheduleBaseModel class and provides additional validation
@@ -319,6 +318,7 @@ class ScheduleCreateModel(ScheduleBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     @model_validator(mode="after")
@@ -336,8 +336,7 @@ class ScheduleCreateModel(ScheduleBaseModel):
 
 
 class ScheduleUpdateModel(ScheduleBaseModel):
-    """
-    Represents an update to an existing Schedule object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents an update to an existing Schedule object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a Schedule update request.
     It inherits all fields from the ScheduleBaseModel class and adds the id field which is required
@@ -345,6 +344,7 @@ class ScheduleUpdateModel(ScheduleBaseModel):
 
     Attributes:
         id (UUID): The UUID of the schedule object.
+
     """
 
     id: UUID = Field(
@@ -355,14 +355,14 @@ class ScheduleUpdateModel(ScheduleBaseModel):
 
 
 class ScheduleResponseModel(ScheduleBaseModel):
-    """
-    Represents a response containing a Schedule object from Palo Alto Networks' Strata Cloud Manager.
+    """Represents a response containing a Schedule object from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a Schedule response model.
     It inherits all fields from the ScheduleBaseModel class and adds the required id field.
 
     Attributes:
         id (UUID): The UUID of the schedule object.
+
     """
 
     id: UUID = Field(

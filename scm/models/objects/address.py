@@ -18,8 +18,7 @@ TagString = constr(max_length=64)
 
 
 class AddressBaseModel(BaseModel):
-    """
-    Base model for Address objects containing fields common to all CRUD operations.
+    """Base model for Address objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the address object.
@@ -32,6 +31,7 @@ class AddressBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -148,8 +148,7 @@ class AddressBaseModel(BaseModel):
 
 
 class AddressCreateModel(AddressBaseModel):
-    """
-    Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressCreateModel object,
     it inherits all fields from the AddressBaseModel class, and provides a custom validator
@@ -160,6 +159,7 @@ class AddressCreateModel(AddressBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
@@ -178,8 +178,7 @@ class AddressCreateModel(AddressBaseModel):
 
 
 class AddressUpdateModel(AddressBaseModel):
-    """
-    Represents the update of an existing Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressUpdateModel object.
     """
@@ -192,8 +191,7 @@ class AddressUpdateModel(AddressBaseModel):
 
 
 class AddressResponseModel(AddressBaseModel):
-    """
-    Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressResponseModel object,
     it inherits all fields from the AddressBaseModel class, adds its own attribute for the
@@ -204,6 +202,7 @@ class AddressResponseModel(AddressBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     id: UUID = Field(

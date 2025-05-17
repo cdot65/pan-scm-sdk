@@ -1,5 +1,4 @@
-"""
-Service classes for interacting with Variables in Palo Alto Networks' Strata Cloud Manager.
+"""Service classes for interacting with Variables in Palo Alto Networks' Strata Cloud Manager.
 
 This module provides the Variable class for performing CRUD operations on Variable resources
 in the Strata Cloud Manager.
@@ -20,8 +19,7 @@ from scm.models.setup.variable import (
 
 
 class Variable(BaseObject):
-    """
-    Manages Variable objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Variable objects in Palo Alto Networks' Strata Cloud Manager.
 
     This class provides methods for creating, retrieving, updating, and deleting Variable resources.
 
@@ -29,6 +27,7 @@ class Variable(BaseObject):
         ENDPOINT: The API endpoint for Variable resources.
         DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
         ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
+
     """
 
     ENDPOINT = "/config/setup/v1/variables"
@@ -40,13 +39,13 @@ class Variable(BaseObject):
         api_client,
         max_limit: int = DEFAULT_MAX_LIMIT,
     ):
-        """
-        Initialize the Variable service class.
+        """Initialize the Variable service class.
 
         Args:
             api_client: The API client instance for making HTTP requests.
             max_limit: Maximum number of items to return in a single request.
                       Defaults to DEFAULT_MAX_LIMIT.
+
         """
         super().__init__(api_client)
         self.max_limit = min(max_limit, self.ABSOLUTE_MAX_LIMIT)
@@ -61,8 +60,7 @@ class Variable(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -72,6 +70,7 @@ class Variable(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -103,8 +102,7 @@ class Variable(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> VariableResponseModel:
-        """
-        Create a new Variable in the Strata Cloud Manager.
+        """Create a new Variable in the Strata Cloud Manager.
 
         Args:
             data: Dictionary containing variable data.
@@ -115,6 +113,7 @@ class Variable(BaseObject):
         Raises:
             InvalidObjectError: If the variable data is invalid.
             APIError: If the API request fails.
+
         """
         # Validate and serialize input using Pydantic
         create_model = VariableCreateModel(**data)
@@ -126,8 +125,7 @@ class Variable(BaseObject):
         self,
         variable_id: Union[str, UUID],
     ) -> VariableResponseModel:
-        """
-        Get a variable by its ID.
+        """Get a variable by its ID.
 
         Args:
             variable_id: The ID of the variable to retrieve.
@@ -138,6 +136,7 @@ class Variable(BaseObject):
         Raises:
             ObjectNotPresentError: If the variable doesn't exist.
             APIError: If the API request fails.
+
         """
         variable_id_str = str(variable_id)
         try:
@@ -152,8 +151,7 @@ class Variable(BaseObject):
         self,
         variable: VariableUpdateModel,
     ) -> VariableResponseModel:
-        """
-        Update an existing variable.
+        """Update an existing variable.
 
         Args:
             variable: The VariableUpdateModel containing the updated variable data.
@@ -165,6 +163,7 @@ class Variable(BaseObject):
             InvalidObjectError: If the update data is invalid.
             ObjectNotPresentError: If the variable doesn't exist.
             APIError: If the API request fails.
+
         """
         payload = variable.model_dump(exclude_unset=True)
         object_id = str(variable.id)
@@ -177,8 +176,7 @@ class Variable(BaseObject):
         self,
         variable_id: Union[str, UUID],
     ) -> None:
-        """
-        Delete a variable.
+        """Delete a variable.
 
         Args:
             variable_id: The ID of the variable to delete.
@@ -186,6 +184,7 @@ class Variable(BaseObject):
         Raises:
             ObjectNotPresentError: If the variable doesn't exist.
             APIError: If the API request fails.
+
         """
         try:
             object_id_str = str(variable_id)
@@ -199,8 +198,7 @@ class Variable(BaseObject):
         self,
         **filters: Any,
     ) -> List[VariableResponseModel]:
-        """
-        List variables with optional filters.
+        """List variables with optional filters.
 
         Args:
             **filters: Additional filters for the API.
@@ -210,6 +208,7 @@ class Variable(BaseObject):
 
         Raises:
             APIError: If the API request fails.
+
         """
         params: Dict[str, Any] = {}
         limit = self.max_limit
@@ -232,8 +231,7 @@ class Variable(BaseObject):
         name: str,
         folder: str,
     ) -> Optional[VariableResponseModel]:
-        """
-        Get a variable by its name and folder.
+        """Get a variable by its name and folder.
 
         Args:
             name: The name of the variable to retrieve.
@@ -245,6 +243,7 @@ class Variable(BaseObject):
         Raises:
             MissingQueryParameterError: If name or folder is empty.
             InvalidObjectError: If the response format is invalid.
+
         """
         if not name:
             raise InvalidObjectError(
@@ -287,8 +286,7 @@ class Variable(BaseObject):
         limit: int,
         offset: int = 0,
     ) -> List[Dict[str, Any]]:
-        """
-        Get paginated results from an API endpoint.
+        """Get paginated results from an API endpoint.
 
         Args:
             endpoint: The API endpoint URL.
@@ -301,6 +299,7 @@ class Variable(BaseObject):
 
         Raises:
             APIError: If the API request fails.
+
         """
         # Create a copy of the params to avoid modifying the input
         request_params = params.copy()

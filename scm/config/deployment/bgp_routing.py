@@ -18,13 +18,13 @@ from scm.models.deployment import (
 
 
 class BGPRouting(BaseObject):
-    """
-    Manages BGP routing settings for Service Connections in Palo Alto Networks' Strata Cloud Manager.
+    """Manages BGP routing settings for Service Connections in Palo Alto Networks' Strata Cloud Manager.
 
     This object provides methods to get, create, update, and reset BGP routing configurations.
 
     Args:
         api_client: The API client instance
+
     """
 
     ENDPOINT = "/config/deployment/v1/bgp-routing"
@@ -37,14 +37,14 @@ class BGPRouting(BaseObject):
         self.logger = logging.getLogger(__name__)
 
     def get(self) -> BGPRoutingResponseModel:
-        """
-        Gets the current BGP routing settings.
+        """Gets the current BGP routing settings.
 
         Returns:
             BGPRoutingResponseModel: The current BGP routing configuration
 
         Raises:
             InvalidObjectError: If the response format is invalid
+
         """
         response = self.api_client.get(self.ENDPOINT)
 
@@ -83,8 +83,7 @@ class BGPRouting(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BGPRoutingResponseModel:
-        """
-        Creates a new BGP routing configuration.
+        """Creates a new BGP routing configuration.
 
         Note: Since BGP routing is a singleton object, this method is functionally
         equivalent to update() and will replace any existing configuration.
@@ -98,6 +97,7 @@ class BGPRouting(BaseObject):
         Raises:
             InvalidObjectError: If the provided data is invalid
             MissingQueryParameterError: If required fields are missing
+
         """
         if not data:
             raise MissingQueryParameterError(
@@ -191,8 +191,7 @@ class BGPRouting(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BGPRoutingResponseModel:
-        """
-        Updates the BGP routing settings.
+        """Updates the BGP routing settings.
 
         Args:
             data: Dictionary containing the BGP routing configuration
@@ -203,6 +202,7 @@ class BGPRouting(BaseObject):
         Raises:
             InvalidObjectError: If the provided data is invalid
             MissingQueryParameterError: If required fields are missing
+
         """
         if not data:
             raise MissingQueryParameterError(
@@ -293,14 +293,14 @@ class BGPRouting(BaseObject):
             )
 
     def delete(self) -> None:
-        """
-        Resets the BGP routing configuration to default values.
+        """Resets the BGP routing configuration to default values.
 
         Note: Since BGP routing is a singleton configuration object, it cannot be truly deleted.
         This method resets the configuration to default values instead.
 
         Raises:
             InvalidObjectError: If there's an error resetting the configuration
+
         """
         # Default configuration values based on the API specification
         default_config = {

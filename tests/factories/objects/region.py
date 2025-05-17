@@ -226,8 +226,7 @@ class RegionResponseFactory(RegionBaseFactory):
 
     @classmethod
     def from_request(cls, request_model, **kwargs):
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create request.
 
@@ -237,6 +236,7 @@ class RegionResponseFactory(RegionBaseFactory):
 
         Returns:
             RegionResponseModel instance
+
         """
         if hasattr(request_model, "model_dump"):
             data = request_model.model_dump(exclude_none=False)
@@ -444,8 +444,7 @@ class RegionResponseModelFactory:
 
     @classmethod
     def build_from_request(cls, request_data, **kwargs):
-        """
-        Return a data dictionary based on request data.
+        """Return a data dictionary based on request data.
 
         Args:
             request_data: Request data dictionary to base the response on
@@ -453,6 +452,7 @@ class RegionResponseModelFactory:
 
         Returns:
             Dictionary with response data
+
         """
         if hasattr(request_data, "model_dump"):
             data = request_data.model_dump(exclude_none=False)

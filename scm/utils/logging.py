@@ -1,12 +1,13 @@
 # scm/utils/logging.py
 
+"""Logging utilities for the SCM SDK."""
+
 import logging
 import sys
 
 
 def setup_logger(name: str, log_level: int = logging.ERROR) -> logging.Logger:
-    """
-    Set up and return a configured logger with the given name.
+    """Set up and return a configured logger with the given name.
 
     This function creates a logger with the specified level, adds a console handler,
     and sets a formatter for consistent log message formatting.
@@ -17,8 +18,8 @@ def setup_logger(name: str, log_level: int = logging.ERROR) -> logging.Logger:
 
     Returns:
         logger (logging.Logger): A configured logger instance.
-    """
 
+    """
     logger = logging.getLogger(name)
     logger.setLevel(log_level)
 

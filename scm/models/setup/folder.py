@@ -1,5 +1,4 @@
-"""
-Models for interacting with Folders in Palo Alto Networks' Strata Cloud Manager.
+"""Models for interacting with Folders in Palo Alto Networks' Strata Cloud Manager.
 
 This module defines the Pydantic models used for creating, updating, and
 representing Folder resources in the Strata Cloud Manager.
@@ -12,8 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class FolderBaseModel(BaseModel):
-    """
-    Base model for Folder resources containing common fields.
+    """Base model for Folder resources containing common fields.
 
     Attributes:
         name: The name of the folder.
@@ -26,6 +24,7 @@ class FolderBaseModel(BaseModel):
         serial_number: Device serial number, if present.
         type: Type of folder or device (e.g., 'on-prem', 'container', 'cloud').
         device_only: True if this is a device-only entry.
+
     """
 
     name: str = Field(
@@ -69,8 +68,7 @@ class FolderBaseModel(BaseModel):
 
 
 class FolderCreateModel(FolderBaseModel):
-    """
-    Model for creating new Folder resources.
+    """Model for creating new Folder resources.
 
     Inherits all fields from FolderBaseModel without additional fields.
     """
@@ -79,11 +77,11 @@ class FolderCreateModel(FolderBaseModel):
 
 
 class FolderUpdateModel(FolderBaseModel):
-    """
-    Model for updating existing Folder resources.
+    """Model for updating existing Folder resources.
 
     Attributes:
         id: The unique identifier of the folder to update.
+
     """
 
     id: UUID = Field(
@@ -92,11 +90,11 @@ class FolderUpdateModel(FolderBaseModel):
 
 
 class FolderResponseModel(FolderBaseModel):
-    """
-    Model for Folder responses from the API.
+    """Model for Folder responses from the API.
 
     Attributes:
         id: The unique identifier of the folder.
+
     """
 
     id: UUID = Field(
@@ -105,14 +103,14 @@ class FolderResponseModel(FolderBaseModel):
 
     @field_validator("parent")
     def validate_parent(cls, v: str) -> str:
-        """
-        Validate parent field. Empty string is allowed for root folders.
+        """Validate parent field. Empty string is allowed for root folders.
 
         Args:
             v: The parent value to validate.
 
         Returns:
             The validated parent value.
+
         """
         # Allow empty string for root folders
         return v

@@ -30,7 +30,7 @@ mypy:
 
 # Run formatting with ruff
 format:
-	$(DC_RUN) poetry run ruff format scm tests
+	$(DC_RUN) poetry run ruff check --select D --fix scm tests
 
 # Check and auto-fix with ruff
 fix:

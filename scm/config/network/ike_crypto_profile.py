@@ -15,13 +15,13 @@ from scm.models.network import (
 
 
 class IKECryptoProfile(BaseObject):
-    """
-    Manages IKE Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages IKE Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/network/v1/ike-crypto-profiles"
@@ -50,8 +50,7 @@ class IKECryptoProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +60,7 @@ class IKECryptoProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +97,14 @@ class IKECryptoProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> IKECryptoProfileResponseModel:
-        """
-        Creates a new IKE crypto profile object.
+        """Creates a new IKE crypto profile object.
 
         Args:
             data: Dictionary containing the IKE crypto profile configuration
 
         Returns:
             IKECryptoProfileResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         ike_crypto_profile = IKECryptoProfileCreateModel(**data)
@@ -128,14 +128,14 @@ class IKECryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> IKECryptoProfileResponseModel:
-        """
-        Gets an IKE crypto profile object by ID.
+        """Gets an IKE crypto profile object by ID.
 
         Args:
             object_id: The ID of the IKE crypto profile to retrieve
 
         Returns:
             IKECryptoProfileResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -145,14 +145,14 @@ class IKECryptoProfile(BaseObject):
         self,
         profile: IKECryptoProfileUpdateModel,
     ) -> IKECryptoProfileResponseModel:
-        """
-        Updates an existing IKE crypto profile object.
+        """Updates an existing IKE crypto profile object.
 
         Args:
             profile: IKECryptoProfileUpdateModel instance containing the update data
 
         Returns:
             IKECryptoProfileResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = profile.model_dump(
@@ -197,8 +197,7 @@ class IKECryptoProfile(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         exclude_devices: Optional[List[str]] = None,
     ) -> List[IKECryptoProfileResponseModel]:
-        """
-        Lists IKE crypto profile objects with optional filtering.
+        """Lists IKE crypto profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -212,6 +211,7 @@ class IKECryptoProfile(BaseObject):
 
         Returns:
             List[IKECryptoProfileResponseModel]: A list of IKE crypto profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -323,8 +323,7 @@ class IKECryptoProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> IKECryptoProfileResponseModel:
-        """
-        Fetches a single IKE crypto profile by name.
+        """Fetches a single IKE crypto profile by name.
 
         Args:
             name: The name of the IKE crypto profile to fetch
@@ -334,6 +333,7 @@ class IKECryptoProfile(BaseObject):
 
         Returns:
             IKECryptoProfileResponseModel: The fetched IKE crypto profile object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -405,11 +405,11 @@ class IKECryptoProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an IKE crypto profile object.
+        """Deletes an IKE crypto profile object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

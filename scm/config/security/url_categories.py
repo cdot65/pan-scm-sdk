@@ -15,12 +15,13 @@ from scm.models.security import (
 
 
 class URLCategories(BaseObject):
-    """
-    Manages URL categories in Palo Alto Networks' Strata Cloud Manager.
+    """Manages URL categories in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/security/v1/url-categories"
@@ -49,8 +50,7 @@ class URLCategories(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +60,7 @@ class URLCategories(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +97,11 @@ class URLCategories(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> URLCategoriesResponseModel:
-        """
-        Creates a new URL Category.
+        """Creates a new URL Category.
 
         Returns:
             URLCategoriesResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         profile = URLCategoriesCreateModel(**data)
@@ -121,11 +122,11 @@ class URLCategories(BaseObject):
         self,
         object_id: str,
     ) -> URLCategoriesResponseModel:
-        """
-        Gets a URL Category by ID.
+        """Gets a URL Category by ID.
 
         Returns:
             URLCategoriesResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +139,14 @@ class URLCategories(BaseObject):
         self,
         profile: URLCategoriesUpdateModel,
     ) -> URLCategoriesResponseModel:
-        """
-        Updates an existing URL Category.
+        """Updates an existing URL Category.
 
         Args:
             profile: URLCategoriesUpdateModel instance containing the update data
 
         Returns:
             URLCategoriesResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
@@ -216,8 +217,7 @@ class URLCategories(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[URLCategoriesResponseModel]:
-        """
-        Lists URL Categories with optional filtering.
+        """Lists URL Categories with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -233,6 +233,7 @@ class URLCategories(BaseObject):
 
         Returns:
             List[URLCategoriesResponseModel]: A list of url category objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -356,8 +357,7 @@ class URLCategories(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> URLCategoriesResponseModel:
-        """
-        Fetches a single URL Category by name.
+        """Fetches a single URL Category by name.
 
         Args:
             name (str): The name of the URL Category to fetch.
@@ -367,6 +367,7 @@ class URLCategories(BaseObject):
 
         Returns:
             URLCategoriesResponseModel: The fetched URL Category object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -438,11 +439,11 @@ class URLCategories(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a URL Category object.
+        """Deletes a URL Category object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

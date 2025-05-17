@@ -11,13 +11,13 @@ from scm.models.mobile_agent.agent_versions import AgentVersionsModel
 
 
 class AgentVersions(BaseObject):
-    """
-    Manages GlobalProtect Agent Version objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages GlobalProtect Agent Version objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 200. Must be between 1 and 1000.
+
     """
 
     ENDPOINT = "/config/mobile-agent/v1/agent-versions"
@@ -46,8 +46,7 @@ class AgentVersions(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -57,6 +56,7 @@ class AgentVersions(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -94,8 +94,7 @@ class AgentVersions(BaseObject):
         versions: List[str],
         filters: Dict[str, Any],
     ) -> List[str]:
-        """
-        Apply client-side filtering to the list of agent versions.
+        """Apply client-side filtering to the list of agent versions.
 
         Args:
             versions: List of version strings
@@ -103,6 +102,7 @@ class AgentVersions(BaseObject):
 
         Returns:
             List[str]: Filtered list of versions
+
         """
         filtered_versions = versions
 
@@ -148,8 +148,7 @@ class AgentVersions(BaseObject):
         self,
         **filters,
     ) -> List[str]:
-        """
-        Lists all available GlobalProtect agent versions with optional filtering.
+        """Lists all available GlobalProtect agent versions with optional filtering.
 
         Args:
             **filters: Additional filters including:
@@ -158,6 +157,7 @@ class AgentVersions(BaseObject):
 
         Returns:
             List[str]: A list of GlobalProtect agent version strings
+
         """
         response = self.api_client.get(
             self.ENDPOINT,
@@ -179,8 +179,7 @@ class AgentVersions(BaseObject):
         self,
         version: str,
     ) -> str:
-        """
-        Fetches a single agent version by exact match.
+        """Fetches a single agent version by exact match.
 
         Args:
             version: The exact version string to fetch
@@ -191,6 +190,7 @@ class AgentVersions(BaseObject):
         Raises:
             InvalidObjectError: If the version is not found
             MissingQueryParameterError: If the version parameter is empty
+
         """
         if not version:
             raise MissingQueryParameterError(

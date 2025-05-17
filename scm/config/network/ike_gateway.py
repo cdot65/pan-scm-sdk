@@ -15,13 +15,13 @@ from scm.models.network import (
 
 
 class IKEGateway(BaseObject):
-    """
-    Manages IKE Gateway objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages IKE Gateway objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/network/v1/ike-gateways"
@@ -50,8 +50,7 @@ class IKEGateway(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +60,7 @@ class IKEGateway(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +97,14 @@ class IKEGateway(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> IKEGatewayResponseModel:
-        """
-        Creates a new IKE Gateway object.
+        """Creates a new IKE Gateway object.
 
         Args:
             data: Dictionary containing the IKE Gateway configuration
 
         Returns:
             IKEGatewayResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         ike_gateway = IKEGatewayCreateModel(**data)
@@ -128,14 +128,14 @@ class IKEGateway(BaseObject):
         self,
         object_id: str,
     ) -> IKEGatewayResponseModel:
-        """
-        Gets an IKE Gateway object by ID.
+        """Gets an IKE Gateway object by ID.
 
         Args:
             object_id: The ID of the IKE Gateway to retrieve
 
         Returns:
             IKEGatewayResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -145,14 +145,14 @@ class IKEGateway(BaseObject):
         self,
         gateway: IKEGatewayUpdateModel,
     ) -> IKEGatewayResponseModel:
-        """
-        Updates an existing IKE Gateway object.
+        """Updates an existing IKE Gateway object.
 
         Args:
             gateway: IKEGatewayUpdateModel instance containing the update data
 
         Returns:
             IKEGatewayResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = gateway.model_dump(
@@ -197,8 +197,7 @@ class IKEGateway(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         exclude_devices: Optional[List[str]] = None,
     ) -> List[IKEGatewayResponseModel]:
-        """
-        Lists IKE Gateway objects with optional filtering.
+        """Lists IKE Gateway objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -212,6 +211,7 @@ class IKEGateway(BaseObject):
 
         Returns:
             List[IKEGatewayResponseModel]: A list of IKE Gateway objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -323,8 +323,7 @@ class IKEGateway(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> IKEGatewayResponseModel:
-        """
-        Fetches a single IKE Gateway by name.
+        """Fetches a single IKE Gateway by name.
 
         Args:
             name: The name of the IKE Gateway to fetch
@@ -334,6 +333,7 @@ class IKEGateway(BaseObject):
 
         Returns:
             IKEGatewayResponseModel: The fetched IKE Gateway object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -409,11 +409,11 @@ class IKEGateway(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an IKE Gateway object.
+        """Deletes an IKE Gateway object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

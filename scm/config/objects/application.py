@@ -15,12 +15,13 @@ from scm.models.objects import (
 
 
 class Application(BaseObject):
-    """
-    Manages Application objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Application objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/applications"
@@ -49,8 +50,7 @@ class Application(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +60,7 @@ class Application(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +97,11 @@ class Application(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationResponseModel:
-        """
-        Creates a new application object.
+        """Creates a new application object.
 
         Returns:
             ApplicationResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         application = ApplicationCreateModel(**data)
@@ -121,11 +122,11 @@ class Application(BaseObject):
         self,
         object_id: str,
     ) -> ApplicationResponseModel:
-        """
-        Gets an application object by ID.
+        """Gets an application object by ID.
 
         Returns:
             ApplicationResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +139,14 @@ class Application(BaseObject):
         self,
         application: ApplicationUpdateModel,
     ) -> ApplicationResponseModel:
-        """
-        Updates an existing application object.
+        """Updates an existing application object.
 
         Args:
             application: ApplicationUpdateModel instance containing the update data
 
         Returns:
             ApplicationResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = application.model_dump(exclude_unset=True)
@@ -169,8 +170,7 @@ class Application(BaseObject):
         applications: List[ApplicationResponseModel],
         filters: Dict[str, Any],
     ) -> List[ApplicationResponseModel]:
-        """
-        Apply client-side filtering to the list of applications.
+        """Apply client-side filtering to the list of applications.
 
         Args:
             applications: List of ApplicationResponseModel objects
@@ -178,6 +178,7 @@ class Application(BaseObject):
 
         Returns:
             List[ApplicationResponseModel]: Filtered list of applications
+
         """
         filter_criteria = applications
 
@@ -248,8 +249,7 @@ class Application(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationResponseModel]:
-        """
-        Lists application objects with optional filtering.
+        """Lists application objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -266,6 +266,7 @@ class Application(BaseObject):
 
         Returns:
             List[ApplicationResponseModel]: A list of application objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -381,8 +382,7 @@ class Application(BaseObject):
         folder: Optional[str] = None,
         snippet: Optional[str] = None,
     ) -> ApplicationResponseModel:
-        """
-        Fetches a single application by name.
+        """Fetches a single application by name.
 
         Args:
             name (str): The name of the application to fetch.
@@ -391,6 +391,7 @@ class Application(BaseObject):
 
         Returns:
             ApplicationResponseModel: The fetched application object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -459,11 +460,11 @@ class Application(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an application object.
+        """Deletes an application object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

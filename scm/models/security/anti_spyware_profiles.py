@@ -27,11 +27,11 @@ class AntiSpywareInlinePolicyAction(str, Enum):
 
 
 class AntiSpywareExemptIpEntry(BaseModel):
-    """
-    Represents an entry in the 'exempt_ip' list within a threat exception.
+    """Represents an entry in the 'exempt_ip' list within a threat exception.
 
     Attributes:
         name (str): Name of the IP address or range to exempt.
+
     """
 
     name: str = Field(
@@ -129,8 +129,7 @@ class AntiSpywareBlockIpAction(BaseModel):
 
 
 class AntiSpywareActionRequest(RootModel[dict]):
-    """
-    Represents the 'action' field in rules and threat exceptions for requests.
+    """Represents the 'action' field in rules and threat exceptions for requests.
 
     Enforces that exactly one action is provided.
     """
@@ -166,8 +165,7 @@ class AntiSpywareActionRequest(RootModel[dict]):
 
 
 class AntiSpywareActionResponse(RootModel[dict]):
-    """
-    Represents the 'action' field in rules and threat exceptions for responses.
+    """Represents the 'action' field in rules and threat exceptions for responses.
 
     Accepts empty dictionaries.
     """
@@ -257,9 +255,7 @@ class AntiSpywareThreatExceptionBase(BaseModel):
 
 
 class AntiSpywareProfileBase(BaseModel):
-    """
-    Base model for Anti-Spyware Profile containing common fields across all operations.
-    """
+    """Base model for Anti-Spyware Profile containing common fields across all operations."""
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -322,8 +318,8 @@ class AntiSpywareProfileBase(BaseModel):
 
 
 class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
-    """
-    Model for creating a new Anti-Spyware Profile.
+    """Model for creating a new Anti-Spyware Profile.
+
     Inherits from base model and adds create-specific validation.
     """
 
@@ -341,8 +337,8 @@ class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
 
 
 class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
-    """
-    Model for updating an existing Anti-Spyware Profile.
+    """Model for updating an existing Anti-Spyware Profile.
+
     All fields are optional to allow partial updates.
     """
 
@@ -353,8 +349,8 @@ class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
 
 
 class AntiSpywareProfileResponseModel(AntiSpywareProfileBase):
-    """
-    Model for Anti-Spyware Profile API responses.
+    """Model for Anti-Spyware Profile API responses.
+
     Includes all base fields plus the id field.
     """
 

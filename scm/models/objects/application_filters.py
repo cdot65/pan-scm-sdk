@@ -7,8 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ApplicationFiltersBaseModel(BaseModel):
-    """
-    Base model for Application filter objects containing fields common to all CRUD operations.
+    """Base model for Application filter objects containing fields common to all CRUD operations.
 
     This model serves as the foundation for create, update, and response models,
     containing all shared fields and validation logic.
@@ -136,8 +135,8 @@ class ApplicationFiltersBaseModel(BaseModel):
 
 
 class ApplicationFiltersCreateModel(ApplicationFiltersBaseModel):
-    """
-    Model for creating a new application filter.
+    """Model for creating a new application filter.
+
     Inherits from ApplicationFiltersBaseModel and adds container type validation.
     """
 
@@ -154,8 +153,8 @@ class ApplicationFiltersCreateModel(ApplicationFiltersBaseModel):
 
 
 class ApplicationFiltersUpdateModel(ApplicationFiltersBaseModel):
-    """
-    Model for updating an existing application filter.
+    """Model for updating an existing application filter.
+
     All fields are optional to allow partial updates.
     """
 
@@ -167,8 +166,8 @@ class ApplicationFiltersUpdateModel(ApplicationFiltersBaseModel):
 
 
 class ApplicationFiltersResponseModel(ApplicationFiltersBaseModel):
-    """
-    Model for application filter responses.
+    """Model for application filter responses.
+
     Includes all base fields plus the (optional!) id field.
     """
 

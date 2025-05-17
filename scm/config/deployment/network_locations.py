@@ -11,13 +11,13 @@ from scm.models.deployment import NetworkLocationModel
 
 
 class NetworkLocations(BaseObject):
-    """
-    Manages Network Location objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Network Location objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 200. Must be between 1 and 1000.
+
     """
 
     ENDPOINT = "/config/deployment/v1/locations"
@@ -46,8 +46,7 @@ class NetworkLocations(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -57,6 +56,7 @@ class NetworkLocations(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -94,8 +94,7 @@ class NetworkLocations(BaseObject):
         locations: List[NetworkLocationModel],
         filters: Dict[str, Any],
     ) -> List[NetworkLocationModel]:
-        """
-        Apply client-side filtering to the list of network locations.
+        """Apply client-side filtering to the list of network locations.
 
         Args:
             locations: List of NetworkLocationModel objects
@@ -103,6 +102,7 @@ class NetworkLocations(BaseObject):
 
         Returns:
             List[NetworkLocationModel]: Filtered list of network locations
+
         """
         filtered_locations = locations
 
@@ -208,8 +208,7 @@ class NetworkLocations(BaseObject):
         self,
         **filters,
     ) -> List[NetworkLocationModel]:
-        """
-        Lists network location objects with optional filtering.
+        """Lists network location objects with optional filtering.
 
         Args:
             **filters: Additional filters including:
@@ -221,6 +220,7 @@ class NetworkLocations(BaseObject):
 
         Returns:
             List[NetworkLocationModel]: A list of network location objects
+
         """
         # For network locations, the API returns a direct list rather than a paginated response
         # So we don't need to implement pagination here
@@ -252,8 +252,7 @@ class NetworkLocations(BaseObject):
         self,
         value: str,
     ) -> NetworkLocationModel:
-        """
-        Fetches a single network location by its value.
+        """Fetches a single network location by its value.
 
         Args:
             value: The system value of the network location to fetch
@@ -263,6 +262,7 @@ class NetworkLocations(BaseObject):
 
         Raises:
             InvalidObjectError: If the network location is not found
+
         """
         if not value:
             raise MissingQueryParameterError(

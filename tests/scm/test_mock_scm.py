@@ -1,5 +1,4 @@
-"""
-Tests for the MockScm class.
+"""Tests for the MockScm class.
 
 This module tests that the MockScm class properly inherits from both MagicMock and Scm,
 and that it can be used to mock API responses.

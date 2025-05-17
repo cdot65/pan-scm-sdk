@@ -15,8 +15,7 @@ from scm.models.objects import (
 
 
 class Schedule(BaseObject):
-    """
-    Manages Schedule objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Schedule objects in Palo Alto Networks' Strata Cloud Manager.
 
     Schedules can be configured as recurring (weekly or daily) or non-recurring,
     and are used to specify when policies should be active.
@@ -25,6 +24,7 @@ class Schedule(BaseObject):
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 200. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/objects/v1/schedules"
@@ -53,8 +53,7 @@ class Schedule(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -64,6 +63,7 @@ class Schedule(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -100,14 +100,14 @@ class Schedule(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ScheduleResponseModel:
-        """
-        Creates a new schedule object.
+        """Creates a new schedule object.
 
         Args:
             data: Dictionary containing schedule data
 
         Returns:
             ScheduleResponseModel: The created schedule
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         schedule = ScheduleCreateModel(**data)
@@ -128,14 +128,14 @@ class Schedule(BaseObject):
         self,
         object_id: str,
     ) -> ScheduleResponseModel:
-        """
-        Gets a schedule object by ID.
+        """Gets a schedule object by ID.
 
         Args:
             object_id: The ID of the schedule to get
 
         Returns:
             ScheduleResponseModel: The requested schedule
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -148,14 +148,14 @@ class Schedule(BaseObject):
         self,
         schedule: ScheduleUpdateModel,
     ) -> ScheduleResponseModel:
-        """
-        Updates an existing schedule object.
+        """Updates an existing schedule object.
 
         Args:
             schedule: ScheduleUpdateModel instance containing the update data
 
         Returns:
             ScheduleResponseModel: The updated schedule
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = schedule.model_dump(exclude_unset=True)
@@ -179,8 +179,7 @@ class Schedule(BaseObject):
         schedules: List[ScheduleResponseModel],
         filters: Dict[str, Any],
     ) -> List[ScheduleResponseModel]:
-        """
-        Apply client-side filtering to the list of schedules.
+        """Apply client-side filtering to the list of schedules.
 
         Args:
             schedules: List of ScheduleResponseModel objects
@@ -188,6 +187,7 @@ class Schedule(BaseObject):
 
         Returns:
             List[ScheduleResponseModel]: Filtered list of schedules
+
         """
         filtered_schedules = schedules
 
@@ -257,8 +257,7 @@ class Schedule(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ScheduleResponseModel]:
-        """
-        Lists schedule objects with optional filtering.
+        """Lists schedule objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -275,6 +274,7 @@ class Schedule(BaseObject):
 
         Returns:
             List[ScheduleResponseModel]: A list of schedule objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -396,8 +396,7 @@ class Schedule(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ScheduleResponseModel:
-        """
-        Fetches a single schedule by name.
+        """Fetches a single schedule by name.
 
         Args:
             name: The name of the schedule to fetch
@@ -411,6 +410,7 @@ class Schedule(BaseObject):
         Raises:
             MissingQueryParameterError: If name is empty
             InvalidObjectError: If container parameters are invalid or response format is invalid
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -478,11 +478,11 @@ class Schedule(BaseObject):
             )
 
     def delete(self, object_id: str) -> None:
-        """
-        Deletes a schedule object.
+        """Deletes a schedule object.
 
         Args:
             object_id: The ID of the schedule to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

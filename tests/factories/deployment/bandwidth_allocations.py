@@ -36,14 +36,14 @@ class QosModelFactory(factory.Factory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for QosModel
+
         """
         data = {
             "enabled": True,
@@ -56,21 +56,20 @@ class QosModelFactory(factory.Factory):
 
     @classmethod
     def disabled(cls, **kwargs):
-        """
-        Create a QosModel with QoS disabled.
+        """Create a QosModel with QoS disabled.
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             QosModel: A model instance with QoS disabled
+
         """
         return cls(enabled=False, **kwargs)
 
     @classmethod
     def customized_profile(cls, profile="custom-profile", ratio=0.75, **kwargs):
-        """
-        Create a QosModel with customized profile settings.
+        """Create a QosModel with customized profile settings.
 
         Args:
             profile: The QoS profile name
@@ -79,6 +78,7 @@ class QosModelFactory(factory.Factory):
 
         Returns:
             QosModel: A model instance with customized QoS profile
+
         """
         return cls(
             enabled=True,
@@ -110,8 +110,7 @@ class BandwidthAllocationBaseFactory(factory.Factory):
 
 
 class BandwidthAllocationCreateApiFactory:
-    """
-    Factory for creating dictionaries suitable for BandwidthAllocationCreateModel
+    """Factory for creating dictionaries suitable for BandwidthAllocationCreateModel
     with the structure used by the Python SDK calls.
     """
 
@@ -136,8 +135,7 @@ class BandwidthAllocationCreateApiFactory:
     def with_qos(
         self, enabled=True, customized=False, profile="default", ratio=0.5, **kwargs
     ) -> Dict[str, Any]:
-        """
-        Create a dictionary with QoS settings.
+        """Create a dictionary with QoS settings.
 
         Args:
             enabled: Whether QoS is enabled
@@ -148,6 +146,7 @@ class BandwidthAllocationCreateApiFactory:
 
         Returns:
             Dict[str, Any]: Data with QoS settings
+
         """
         qos_data = {
             "enabled": enabled,
@@ -168,8 +167,7 @@ class BandwidthAllocationCreateApiFactory:
         }
 
     def with_spn_list(self, spn_list=None, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with specific SPN list.
+        """Create a dictionary with specific SPN list.
 
         Args:
             spn_list: List of SPN names
@@ -177,6 +175,7 @@ class BandwidthAllocationCreateApiFactory:
 
         Returns:
             Dict[str, Any]: Data with specific SPN list
+
         """
         if spn_list is None:
             spn_list = ["custom-spn1", "custom-spn2"]
@@ -189,8 +188,7 @@ class BandwidthAllocationCreateApiFactory:
 
 
 class BandwidthAllocationUpdateApiFactory:
-    """
-    Factory for creating dictionaries suitable for BandwidthAllocationUpdateModel
+    """Factory for creating dictionaries suitable for BandwidthAllocationUpdateModel
     with the structure used by the Python SDK calls.
     """
 
@@ -215,8 +213,7 @@ class BandwidthAllocationUpdateApiFactory:
     def with_qos(
         self, enabled=True, customized=True, profile="updated-profile", ratio=0.8, **kwargs
     ) -> Dict[str, Any]:
-        """
-        Create a dictionary with QoS settings.
+        """Create a dictionary with QoS settings.
 
         Args:
             enabled: Whether QoS is enabled
@@ -227,6 +224,7 @@ class BandwidthAllocationUpdateApiFactory:
 
         Returns:
             Dict[str, Any]: Data with QoS settings
+
         """
         qos_data = {
             "enabled": enabled,
@@ -247,8 +245,7 @@ class BandwidthAllocationUpdateApiFactory:
         }
 
     def with_spn_list(self, spn_list=None, **kwargs) -> Dict[str, Any]:
-        """
-        Create a dictionary with specific SPN list.
+        """Create a dictionary with specific SPN list.
 
         Args:
             spn_list: List of SPN names
@@ -256,6 +253,7 @@ class BandwidthAllocationUpdateApiFactory:
 
         Returns:
             Dict[str, Any]: Data with specific SPN list
+
         """
         if spn_list is None:
             spn_list = ["updated-spn1", "updated-spn2"]
@@ -267,21 +265,20 @@ class BandwidthAllocationUpdateApiFactory:
         }
 
     def partial_update(self, **fields_to_update) -> Dict[str, Any]:
-        """
-        Create a partial update dictionary with just the specified fields.
+        """Create a partial update dictionary with just the specified fields.
 
         Args:
             **fields_to_update: Fields to include in the partial update
 
         Returns:
             Dict[str, Any]: A dictionary with only specified fields
+
         """
         return fields_to_update
 
 
 class BandwidthAllocationResponseFactory:
-    """
-    Factory for creating dictionaries suitable for BandwidthAllocationResponseModel
+    """Factory for creating dictionaries suitable for BandwidthAllocationResponseModel
     to mimic the actual data returned by the SCM API.
     """
 
@@ -306,8 +303,7 @@ class BandwidthAllocationResponseFactory:
     def with_qos(
         self, enabled=True, customized=False, profile="response-profile", ratio=0.6, **kwargs
     ) -> Dict[str, Any]:
-        """
-        Create a dictionary with QoS settings.
+        """Create a dictionary with QoS settings.
 
         Args:
             enabled: Whether QoS is enabled
@@ -318,6 +314,7 @@ class BandwidthAllocationResponseFactory:
 
         Returns:
             Dict[str, Any]: Data with QoS settings
+
         """
         qos_data = {
             "enabled": enabled,
@@ -344,8 +341,7 @@ class BandwidthAllocationResponseFactory:
         ],
         **kwargs,
     ) -> Dict[str, Any]:
-        """
-        Create a response dictionary based on a request.
+        """Create a response dictionary based on a request.
 
         This is useful for simulating the API's response to a create or update request.
 
@@ -355,6 +351,7 @@ class BandwidthAllocationResponseFactory:
 
         Returns:
             Dict[str, Any]: Response data based on the request
+
         """
         if isinstance(
             request_data, (BandwidthAllocationCreateModel, BandwidthAllocationUpdateModel)
@@ -367,8 +364,7 @@ class BandwidthAllocationResponseFactory:
         return data
 
     def list_response(self, items=None, limit=200, offset=0, total=None) -> Dict[str, Any]:
-        """
-        Create a list response dictionary with multiple bandwidth allocation entries.
+        """Create a list response dictionary with multiple bandwidth allocation entries.
 
         Args:
             items: List of bandwidth allocation objects or dictionaries to include
@@ -378,6 +374,7 @@ class BandwidthAllocationResponseFactory:
 
         Returns:
             Dict[str, Any]: A list response with multiple entries
+
         """
         if items is None:
             items = [
@@ -412,8 +409,7 @@ BandwidthAllocationResponseFactory = BandwidthAllocationResponseFactory()
 
 
 class BandwidthAllocationCreateModelFactory(factory.DictFactory):
-    """
-    Factory for creating dictionary data suitable for instantiating BandwidthAllocationCreateModel.
+    """Factory for creating dictionary data suitable for instantiating BandwidthAllocationCreateModel.
     Useful for direct Pydantic validation tests.
     """
 
@@ -423,14 +419,14 @@ class BandwidthAllocationCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BandwidthAllocationCreateModel
+
         """
         data = {
             "name": "test-region",
@@ -442,14 +438,14 @@ class BandwidthAllocationCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_qos(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with QoS settings.
+        """Return a data dict with QoS settings.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for BandwidthAllocationCreateModel with QoS
+
         """
         data = cls.build_valid()
         data["qos"] = {
@@ -463,14 +459,14 @@ class BandwidthAllocationCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_name(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with invalid name pattern.
+        """Return a data dict with invalid name pattern.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Invalid data for BandwidthAllocationCreateModel
+
         """
         data = cls.build_valid()
         data["name"] = "invalid@name#"
@@ -479,14 +475,14 @@ class BandwidthAllocationCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_bandwidth(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with invalid negative bandwidth.
+        """Return a data dict with invalid negative bandwidth.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Invalid data for BandwidthAllocationCreateModel
+
         """
         data = cls.build_valid()
         data["allocated_bandwidth"] = -10.0
@@ -495,8 +491,7 @@ class BandwidthAllocationCreateModelFactory(factory.DictFactory):
 
 
 class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
-    """
-    Factory for creating dictionary data suitable for instantiating BandwidthAllocationUpdateModel.
+    """Factory for creating dictionary data suitable for instantiating BandwidthAllocationUpdateModel.
     Useful for direct Pydantic validation tests.
     """
 
@@ -506,14 +501,14 @@ class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BandwidthAllocationUpdateModel
+
         """
         data = {
             "name": "test-region",
@@ -525,14 +520,14 @@ class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_partial(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a partial update data dict with just name and bandwidth.
+        """Return a partial update data dict with just name and bandwidth.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Partial data for BandwidthAllocationUpdateModel
+
         """
         data = {
             "name": "test-region",
@@ -543,14 +538,14 @@ class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_qos(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with QoS settings.
+        """Return a data dict with QoS settings.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for BandwidthAllocationUpdateModel with QoS
+
         """
         data = cls.build_valid()
         data["qos"] = {
@@ -564,8 +559,7 @@ class BandwidthAllocationUpdateModelFactory(factory.DictFactory):
 
 
 class BandwidthAllocationResponseModelFactory(factory.DictFactory):
-    """
-    Factory for creating dictionary data suitable for instantiating BandwidthAllocationResponseModel.
+    """Factory for creating dictionary data suitable for instantiating BandwidthAllocationResponseModel.
     Useful for direct Pydantic validation tests.
     """
 
@@ -575,14 +569,14 @@ class BandwidthAllocationResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict for a response model.
+        """Return a valid data dict for a response model.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for BandwidthAllocationResponseModel
+
         """
         data = {
             "name": "test-region",
@@ -594,14 +588,14 @@ class BandwidthAllocationResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_minimal(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a minimal data dict with only required fields.
+        """Return a minimal data dict with only required fields.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Minimal data for BandwidthAllocationResponseModel
+
         """
         data = {
             "name": "minimal-region",
@@ -612,8 +606,7 @@ class BandwidthAllocationResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_list_response(cls, count=3, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict for a list response model.
+        """Return a data dict for a list response model.
 
         Args:
             count: Number of items to include in the list
@@ -621,6 +614,7 @@ class BandwidthAllocationResponseModelFactory(factory.DictFactory):
 
         Returns:
             Dict[str, Any]: Valid data for BandwidthAllocationListResponseModel
+
         """
         items = []
         for i in range(count):

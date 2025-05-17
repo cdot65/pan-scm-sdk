@@ -15,13 +15,13 @@ from scm.models.objects import (
 
 
 class LogForwardingProfile(BaseObject):
-    """
-    Manages Log Forwarding Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Log Forwarding Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/objects/v1/log-forwarding-profiles"
@@ -50,8 +50,7 @@ class LogForwardingProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +60,7 @@ class LogForwardingProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +97,14 @@ class LogForwardingProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> LogForwardingProfileResponseModel:
-        """
-        Creates a new log forwarding profile object.
+        """Creates a new log forwarding profile object.
 
         Args:
             data: Dictionary containing profile data
 
         Returns:
             LogForwardingProfileResponseModel
+
         """
         try:
             # Use the dictionary "data" to pass into Pydantic and return a modeled object
@@ -132,14 +132,14 @@ class LogForwardingProfile(BaseObject):
         self,
         object_id: str,
     ) -> LogForwardingProfileResponseModel:
-        """
-        Gets a log forwarding profile object by ID.
+        """Gets a log forwarding profile object by ID.
 
         Args:
             object_id: The UUID of the profile to retrieve
 
         Returns:
             LogForwardingProfileResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -152,14 +152,14 @@ class LogForwardingProfile(BaseObject):
         self,
         profile: LogForwardingProfileUpdateModel,
     ) -> LogForwardingProfileResponseModel:
-        """
-        Updates an existing log forwarding profile object.
+        """Updates an existing log forwarding profile object.
 
         Args:
             profile: LogForwardingProfileUpdateModel instance containing the update data
 
         Returns:
             LogForwardingProfileResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
@@ -183,8 +183,7 @@ class LogForwardingProfile(BaseObject):
         profiles: List[LogForwardingProfileResponseModel],
         filters: Dict[str, Any],
     ) -> List[LogForwardingProfileResponseModel]:
-        """
-        Apply client-side filtering to the list of log forwarding profiles.
+        """Apply client-side filtering to the list of log forwarding profiles.
 
         Args:
             profiles: List of LogForwardingProfileResponseModel objects
@@ -192,6 +191,7 @@ class LogForwardingProfile(BaseObject):
 
         Returns:
             List[LogForwardingProfileResponseModel]: Filtered list of profiles
+
         """
         filter_criteria = profiles
 
@@ -281,8 +281,7 @@ class LogForwardingProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[LogForwardingProfileResponseModel]:
-        """
-        Lists log forwarding profile objects with optional filtering.
+        """Lists log forwarding profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -299,6 +298,7 @@ class LogForwardingProfile(BaseObject):
 
         Returns:
             List[LogForwardingProfileResponseModel]: A list of log forwarding profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -422,8 +422,7 @@ class LogForwardingProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> LogForwardingProfileResponseModel:
-        """
-        Fetches a single log forwarding profile by name.
+        """Fetches a single log forwarding profile by name.
 
         Args:
             name (str): The name of the profile to fetch.
@@ -433,6 +432,7 @@ class LogForwardingProfile(BaseObject):
 
         Returns:
             LogForwardingProfileResponseModel: The fetched profile object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -511,11 +511,11 @@ class LogForwardingProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a log forwarding profile object.
+        """Deletes a log forwarding profile object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

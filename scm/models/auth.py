@@ -4,8 +4,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class AuthRequestModel(BaseModel):
-    """
-    Represents an authentication request for Palo Alto Network's Strata Cloud Manager.
+    """Represents an authentication request for Palo Alto Network's Strata Cloud Manager.
 
     This class defines the structure and validation for authentication requests,
     including client credentials, TSG ID, and scope construction.

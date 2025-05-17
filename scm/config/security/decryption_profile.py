@@ -15,12 +15,13 @@ from scm.models.security import (
 
 
 class DecryptionProfile(BaseObject):
-    """
-    Manages Decryption Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Decryption Profile objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/security/v1/decryption-profiles"
@@ -49,8 +50,7 @@ class DecryptionProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validates the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +60,7 @@ class DecryptionProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +97,11 @@ class DecryptionProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DecryptionProfileResponseModel:
-        """
-        Creates a new decryption profile object.
+        """Creates a new decryption profile object.
 
         Returns:
             DecryptionProfileResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         profile = DecryptionProfileCreateModel(**data)
@@ -121,11 +122,11 @@ class DecryptionProfile(BaseObject):
         self,
         object_id: str,
     ) -> DecryptionProfileResponseModel:
-        """
-        Gets a decryption profile object by ID.
+        """Gets a decryption profile object by ID.
 
         Returns:
             DecryptionProfileResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +139,14 @@ class DecryptionProfile(BaseObject):
         self,
         profile: DecryptionProfileUpdateModel,
     ) -> DecryptionProfileResponseModel:
-        """
-        Updates an existing decryption profile object.
+        """Updates an existing decryption profile object.
 
         Args:
             profile: DecryptionProfileUpdateModel instance containing the update data
 
         Returns:
             DecryptionProfileResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
@@ -169,8 +170,7 @@ class DecryptionProfile(BaseObject):
         profiles: List[DecryptionProfileResponseModel],
         filters: Dict[str, Any],
     ) -> List[DecryptionProfileResponseModel]:
-        """
-        Apply client-side filtering to the list of decryption profiles.
+        """Apply client-side filtering to the list of decryption profiles.
 
         Args:
             profiles: List of DecryptionProfileResponseModel objects
@@ -178,6 +178,7 @@ class DecryptionProfile(BaseObject):
 
         Returns:
             List[DecryptionProfileResponseModel]: Filtered list of profiles
+
         """
         filter_criteria = profiles
 
@@ -231,8 +232,7 @@ class DecryptionProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[DecryptionProfileResponseModel]:
-        """
-        Lists decryption profile objects with optional filtering.
+        """Lists decryption profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -248,6 +248,7 @@ class DecryptionProfile(BaseObject):
 
         Returns:
             List[DecryptionProfileResponseModel]: A list of decryption profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -371,8 +372,7 @@ class DecryptionProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> DecryptionProfileResponseModel:
-        """
-        Fetches a single decryption profile by name.
+        """Fetches a single decryption profile by name.
 
         Args:
             name (str): The name of the decryption profile to fetch.
@@ -382,6 +382,7 @@ class DecryptionProfile(BaseObject):
 
         Returns:
             DecryptionProfileResponseModel: The fetched decryption profile object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -453,11 +454,11 @@ class DecryptionProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a decryption profile object.
+        """Deletes a decryption profile object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
