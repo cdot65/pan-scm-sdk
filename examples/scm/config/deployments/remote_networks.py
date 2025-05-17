@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Remote Network objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Remote Network objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Remote Network configurations and operations commonly
 used in enterprise networks, including:
@@ -151,8 +150,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -232,8 +230,7 @@ def initialize_client():
 
 
 def create_basic_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
-    """
-    Create a basic remote network without complex configurations.
+    """Create a basic remote network without complex configurations.
 
     This function demonstrates creating a simple remote network with
     minimal configuration options.
@@ -316,8 +313,7 @@ def create_basic_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
 
 
 def create_bgp_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
-    """
-    Create a remote network with BGP configuration.
+    """Create a remote network with BGP configuration.
 
     This function demonstrates creating a remote network with
     BGP peering configuration.
@@ -414,8 +410,7 @@ def create_bgp_remote_network(rn_manager, ipsec_tunnel=None, folder=None):
 
 
 def create_ecmp_remote_network(rn_manager, ipsec_tunnels=None, folder=None):
-    """
-    Create a remote network with ECMP load balancing.
+    """Create a remote network with ECMP load balancing.
 
     This function demonstrates creating a remote network with
     ECMP (Equal-Cost Multi-Path) load balancing across multiple tunnels.
@@ -524,8 +519,7 @@ def create_ecmp_remote_network(rn_manager, ipsec_tunnels=None, folder=None):
 def create_advanced_remote_network(
     rn_manager, ipsec_tunnel=None, secondary_tunnel=None, folder=None
 ):
-    """
-    Create a remote network with advanced configuration options.
+    """Create a remote network with advanced configuration options.
 
     This function demonstrates creating a remote network with
     multiple advanced settings enabled.
@@ -639,8 +633,7 @@ def create_advanced_remote_network(
 
 
 def fetch_and_update_remote_network(rn_manager, network_id):
-    """
-    Fetch a remote network by ID and update its configuration.
+    """Fetch a remote network by ID and update its configuration.
 
     This function demonstrates how to:
     1. Retrieve an existing remote network using its ID
@@ -718,8 +711,7 @@ def fetch_and_update_remote_network(rn_manager, network_id):
 
 
 def list_and_filter_remote_networks(rn_manager, folder):
-    """
-    List and filter remote networks.
+    """List and filter remote networks.
 
     This function demonstrates how to:
     1. List all remote networks in a folder
@@ -819,8 +811,7 @@ def list_and_filter_remote_networks(rn_manager, folder):
 
 
 def fetch_remote_network_by_name(rn_manager, network_name, folder):
-    """
-    Fetch a remote network by name.
+    """Fetch a remote network by name.
 
     This function demonstrates how to:
     1. Retrieve a remote network using its name instead of ID
@@ -858,8 +849,7 @@ def fetch_remote_network_by_name(rn_manager, network_name, folder):
 
 
 def cleanup_remote_networks(rn_manager, network_ids):
-    """
-    Delete the remote networks created in this example.
+    """Delete the remote networks created in this example.
 
     This function will try to delete all the created remote networks.
 
@@ -897,8 +887,7 @@ def cleanup_remote_networks(rn_manager, network_ids):
 
 
 def generate_remote_network_report(rn_manager, network_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all remote networks created by the script.
+    """Generate a comprehensive CSV report of all remote networks created by the script.
 
     This function fetches detailed information about each remote network and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -1047,8 +1036,7 @@ def generate_remote_network_report(rn_manager, network_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the remote network example script.
+    """Parse command-line arguments for the remote network example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1126,8 +1114,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of remote network examples for Strata Cloud Manager.
+    """Execute the comprehensive set of remote network examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

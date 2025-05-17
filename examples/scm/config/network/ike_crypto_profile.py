@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with IKE Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with IKE Crypto Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of IKE Crypto Profile configurations and operations commonly
 used in enterprise networks, including:
@@ -154,8 +153,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -235,8 +233,7 @@ def initialize_client():
 
 
 def create_basic_ike_crypto_profile(ike_profile_manager, folder="Texas"):
-    """
-    Create a basic IKE crypto profile with standard settings.
+    """Create a basic IKE crypto profile with standard settings.
 
     This function demonstrates creating a standard IKE crypto profile with
     commonly used settings for VPN tunnels.
@@ -295,8 +292,7 @@ def create_basic_ike_crypto_profile(ike_profile_manager, folder="Texas"):
 
 
 def create_strong_security_ike_profile(ike_profile_manager, folder="Texas"):
-    """
-    Create an IKE crypto profile with stronger security settings.
+    """Create an IKE crypto profile with stronger security settings.
 
     This function demonstrates creating an IKE profile with high security
     settings for sensitive VPN tunnels.
@@ -361,8 +357,7 @@ def create_strong_security_ike_profile(ike_profile_manager, folder="Texas"):
 
 
 def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
-    """
-    Create an IKE crypto profile with legacy algorithm support.
+    """Create an IKE crypto profile with legacy algorithm support.
 
     This function demonstrates creating an IKE profile with compatibility
     settings for legacy VPN endpoints.
@@ -427,8 +422,7 @@ def create_legacy_compatibility_profile(ike_profile_manager, folder="Texas"):
 
 
 def create_custom_lifetime_profile(ike_profile_manager, folder="Texas"):
-    """
-    Create IKE crypto profiles with different lifetime settings.
+    """Create IKE crypto profiles with different lifetime settings.
 
     This function demonstrates creating profiles with various lifetime
     configurations (seconds, minutes, hours, days).
@@ -501,8 +495,7 @@ def create_custom_lifetime_profile(ike_profile_manager, folder="Texas"):
 
 
 def fetch_and_update_profile(ike_profile_manager, profile_id):
-    """
-    Fetch an IKE crypto profile by ID and update its settings.
+    """Fetch an IKE crypto profile by ID and update its settings.
 
     This function demonstrates how to:
     1. Retrieve an existing IKE crypto profile using its ID
@@ -571,8 +564,7 @@ def fetch_and_update_profile(ike_profile_manager, profile_id):
 
 
 def list_and_filter_profiles(ike_profile_manager, folder="Texas"):
-    """
-    List and filter IKE crypto profiles.
+    """List and filter IKE crypto profiles.
 
     This function demonstrates how to:
     1. List all IKE crypto profiles in a folder
@@ -633,8 +625,7 @@ def list_and_filter_profiles(ike_profile_manager, folder="Texas"):
 
 
 def cleanup_profiles(ike_profile_manager, profile_ids):
-    """
-    Delete the IKE crypto profiles created in this example.
+    """Delete the IKE crypto profiles created in this example.
 
     Args:
         ike_profile_manager: The IKECryptoProfile manager instance
@@ -659,8 +650,7 @@ def cleanup_profiles(ike_profile_manager, profile_ids):
 
 
 def generate_profile_report(ike_profile_manager, profile_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all IKE crypto profiles created by the script.
+    """Generate a comprehensive CSV report of all IKE crypto profiles created by the script.
 
     This function fetches detailed information about each profile and writes it to a
     CSV file with a timestamp in the filename.
@@ -802,8 +792,7 @@ def generate_profile_report(ike_profile_manager, profile_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the IKE crypto profile example script.
+    """Parse command-line arguments for the IKE crypto profile example script.
 
     Returns:
         argparse.Namespace: The parsed command-line arguments
@@ -854,8 +843,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of IKE crypto profile examples for Strata Cloud Manager.
+    """Execute the comprehensive set of IKE crypto profile examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

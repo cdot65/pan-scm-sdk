@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with HIP profiles in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with HIP profiles in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a variety of operations for managing Host Information Profiles
 (HIP profiles), which are used to enforce policies based on host information:
@@ -158,8 +157,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -239,8 +237,7 @@ def initialize_client():
 
 
 def create_basic_hip_profile(hip_profiles, folder="Texas"):
-    """
-    Create a basic HIP profile with simple match criteria.
+    """Create a basic HIP profile with simple match criteria.
 
     This function demonstrates creating a simple HIP profile with a basic match expression
     using a dictionary that gets converted to a HIPProfileCreateModel.
@@ -294,8 +291,7 @@ def create_basic_hip_profile(hip_profiles, folder="Texas"):
 
 
 def create_complex_hip_profile(hip_profiles, folder="Texas"):
-    """
-    Create a HIP profile with complex match criteria using AND/OR logic.
+    """Create a HIP profile with complex match criteria using AND/OR logic.
 
     This function demonstrates creating a HIP profile with a more complex match expression
     that uses boolean logic (AND, OR) to combine multiple HIP objects.
@@ -352,8 +348,7 @@ def create_complex_hip_profile(hip_profiles, folder="Texas"):
 
 
 def create_hip_profile_with_snippet(hip_profiles, folder="Texas"):
-    """
-    Create a HIP profile in a snippet container instead of a folder.
+    """Create a HIP profile in a snippet container instead of a folder.
 
     This function demonstrates creating a HIP profile that is stored in a snippet
     container instead of the default folder container.
@@ -407,8 +402,7 @@ def create_hip_profile_with_snippet(hip_profiles, folder="Texas"):
 
 
 def create_hip_profile_with_device(hip_profiles, folder="Texas"):
-    """
-    Create a HIP profile in a device container.
+    """Create a HIP profile in a device container.
 
     This function demonstrates creating a HIP profile that is stored in a device
     container instead of the default folder container.
@@ -462,8 +456,7 @@ def create_hip_profile_with_device(hip_profiles, folder="Texas"):
 
 
 def create_negative_match_hip_profile(hip_profiles, folder="Texas"):
-    """
-    Create a HIP profile with negative match criteria (NOT operator).
+    """Create a HIP profile with negative match criteria (NOT operator).
 
     This function demonstrates creating a HIP profile that uses the NOT operator
     in its match expression to exclude certain HIP objects.
@@ -520,8 +513,7 @@ def create_negative_match_hip_profile(hip_profiles, folder="Texas"):
 
 
 def fetch_and_update_hip_profile(hip_profiles, profile_id):
-    """
-    Fetch a HIP profile by ID and update its description and match criteria.
+    """Fetch a HIP profile by ID and update its description and match criteria.
 
     This function demonstrates how to:
     1. Retrieve an existing HIP profile using its ID
@@ -581,8 +573,7 @@ def fetch_and_update_hip_profile(hip_profiles, profile_id):
 
 
 def list_and_filter_hip_profiles(hip_profiles):
-    """
-    List and filter HIP profiles with various filtering options.
+    """List and filter HIP profiles with various filtering options.
 
     This function demonstrates:
     1. Listing all HIP profiles in a specific folder
@@ -634,8 +625,7 @@ def list_and_filter_hip_profiles(hip_profiles):
 
 
 def fetch_hip_profile_by_name(hip_profiles, profile_name, folder="Texas"):
-    """
-    Fetch a specific HIP profile by name from a folder.
+    """Fetch a specific HIP profile by name from a folder.
 
     This function demonstrates using the fetch method to retrieve a HIP profile
     by its name rather than its ID, which is useful when you know the name but
@@ -677,8 +667,7 @@ def fetch_hip_profile_by_name(hip_profiles, profile_name, folder="Texas"):
 
 
 def delete_hip_profile(hip_profiles, profile_id):
-    """
-    Delete a HIP profile.
+    """Delete a HIP profile.
 
     This function demonstrates deleting a HIP profile using its ID. It handles
     common error cases such as the profile not being found or already deleted.
@@ -713,8 +702,7 @@ def delete_hip_profile(hip_profiles, profile_id):
 
 
 def cleanup_hip_profiles(hip_profiles, profile_ids):
-    """
-    Delete the HIP profiles created in this example.
+    """Delete the HIP profiles created in this example.
 
     Args:
         hip_profiles: The HIP profile manager instance
@@ -736,8 +724,7 @@ def cleanup_hip_profiles(hip_profiles, profile_ids):
 
 
 def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all HIP profiles created by the script.
+    """Generate a comprehensive CSV report of all HIP profiles created by the script.
 
     This function fetches detailed information about each HIP profile and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -869,8 +856,7 @@ def generate_hip_profile_report(hip_profiles, profile_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the HIP profile example script.
+    """Parse command-line arguments for the HIP profile example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -916,8 +902,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of HIP profile examples for Strata Cloud Manager.
+    """Execute the comprehensive set of HIP profile examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

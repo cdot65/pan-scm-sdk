@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Log Forwarding Profile objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Log Forwarding Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Log Forwarding Profile configurations and operations commonly
 used in enterprise networks, including:
@@ -149,8 +148,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -230,8 +228,7 @@ def initialize_client():
 
 
 def create_traffic_log_profile(profiles, folder="Texas"):
-    """
-    Create a log forwarding profile for traffic logs.
+    """Create a log forwarding profile for traffic logs.
 
     This function demonstrates creating a profile for forwarding traffic logs
     to an HTTP server and Panorama.
@@ -295,8 +292,7 @@ def create_traffic_log_profile(profiles, folder="Texas"):
 
 
 def create_threat_log_profile(profiles, folder="Texas"):
-    """
-    Create a log forwarding profile for threat logs.
+    """Create a log forwarding profile for threat logs.
 
     This function demonstrates creating a profile for forwarding threat logs
     to syslog servers.
@@ -360,8 +356,7 @@ def create_threat_log_profile(profiles, folder="Texas"):
 
 
 def create_url_log_profile(profiles, folder="Texas"):
-    """
-    Create a log forwarding profile for URL filtering logs.
+    """Create a log forwarding profile for URL filtering logs.
 
     This function demonstrates creating a profile for forwarding URL logs
     to HTTP servers.
@@ -425,8 +420,7 @@ def create_url_log_profile(profiles, folder="Texas"):
 
 
 def create_wildfire_log_profile(profiles, folder="Texas"):
-    """
-    Create a log forwarding profile for WildFire logs.
+    """Create a log forwarding profile for WildFire logs.
 
     This function demonstrates creating a profile for forwarding WildFire logs
     to both HTTP and syslog servers.
@@ -490,8 +484,7 @@ def create_wildfire_log_profile(profiles, folder="Texas"):
 
 
 def create_multi_type_profile(profiles, folder="Texas"):
-    """
-    Create a log forwarding profile with multiple match lists for different log types.
+    """Create a log forwarding profile with multiple match lists for different log types.
 
     This function demonstrates creating a comprehensive profile for managing
     multiple log types in a single profile.
@@ -569,8 +562,7 @@ def create_multi_type_profile(profiles, folder="Texas"):
 
 
 def fetch_and_update_profile(profiles, profile_id):
-    """
-    Fetch a log forwarding profile by ID and update its description and match list.
+    """Fetch a log forwarding profile by ID and update its description and match list.
 
     This function demonstrates how to:
     1. Retrieve an existing log forwarding profile using its ID
@@ -633,8 +625,7 @@ def fetch_and_update_profile(profiles, profile_id):
 
 
 def list_and_filter_profiles(profiles):
-    """
-    List and filter log forwarding profiles.
+    """List and filter log forwarding profiles.
 
     This function demonstrates how to:
     1. List all log forwarding profiles in a folder
@@ -695,8 +686,7 @@ def list_and_filter_profiles(profiles):
 
 
 def cleanup_profiles(profiles, profile_ids):
-    """
-    Delete the log forwarding profiles created in this example.
+    """Delete the log forwarding profiles created in this example.
 
     Args:
         profiles: The LogForwardingProfile manager instance
@@ -715,8 +705,7 @@ def cleanup_profiles(profiles, profile_ids):
 
 
 def create_bulk_profiles(profiles, folder="Texas"):
-    """
-    Create multiple log forwarding profiles in a batch.
+    """Create multiple log forwarding profiles in a batch.
 
     This function demonstrates creating multiple profiles in a batch,
     which is useful for setting up multiple log forwarding profiles at once.
@@ -796,8 +785,7 @@ def create_bulk_profiles(profiles, folder="Texas"):
 
 
 def generate_profile_report(profiles, profile_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all log forwarding profiles created by the script.
+    """Generate a comprehensive CSV report of all log forwarding profiles created by the script.
 
     This function fetches detailed information about each profile and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -951,8 +939,7 @@ def generate_profile_report(profiles, profile_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the log forwarding profile example script.
+    """Parse command-line arguments for the log forwarding profile example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1010,8 +997,7 @@ def parse_arguments():
 
 
 def check_syslog_profile_exists(profiles, folder, syslog_name="test123"):
-    """
-    Verify if the required syslog server profile exists in the environment.
+    """Verify if the required syslog server profile exists in the environment.
 
     Args:
         profiles: The LogForwardingProfile manager instance
@@ -1049,8 +1035,7 @@ def check_syslog_profile_exists(profiles, folder, syslog_name="test123"):
 
 
 def main():
-    """
-    Execute the comprehensive set of log forwarding profile examples for Strata Cloud Manager.
+    """Execute the comprehensive set of log forwarding profile examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

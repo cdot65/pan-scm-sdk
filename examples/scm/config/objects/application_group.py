@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Application Group objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Application Group objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Application Group configurations and operations commonly
 used in enterprise networks, including:
@@ -148,8 +147,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -229,8 +227,7 @@ def initialize_client():
 
 
 def create_basic_application_group(app_groups, folder="Texas"):
-    """
-    Create a basic application group with common predefined applications.
+    """Create a basic application group with common predefined applications.
 
     This function demonstrates creating a standard application group with
     commonly used predefined applications.
@@ -282,8 +279,7 @@ def create_basic_application_group(app_groups, folder="Texas"):
 
 
 def create_custom_application_group(app_groups, folder="Texas"):
-    """
-    Create an application group with custom applications.
+    """Create an application group with custom applications.
 
     This function demonstrates creating an application group with
     custom application names that might be specific to an organization.
@@ -337,8 +333,7 @@ def create_custom_application_group(app_groups, folder="Texas"):
 
 
 def create_nested_application_group(app_groups, basic_group_id, custom_group_id, folder="Texas"):
-    """
-    Create a nested application group containing other application groups.
+    """Create a nested application group containing other application groups.
 
     This function demonstrates creating a hierarchical application group that
     includes references to other application groups.
@@ -399,8 +394,7 @@ def create_nested_application_group(app_groups, basic_group_id, custom_group_id,
 
 
 def create_mixed_application_group(app_groups, basic_group_id, folder="Texas"):
-    """
-    Create a mixed application group with apps and existing groups.
+    """Create a mixed application group with apps and existing groups.
 
     This function demonstrates creating an application group that contains
     both individual applications and references to existing groups.
@@ -464,8 +458,7 @@ def create_mixed_application_group(app_groups, basic_group_id, folder="Texas"):
 
 
 def fetch_and_update_application_group(app_groups, group_id):
-    """
-    Fetch an application group by ID and update its members.
+    """Fetch an application group by ID and update its members.
 
     This function demonstrates how to:
     1. Retrieve an existing application group using its ID
@@ -515,8 +508,7 @@ def fetch_and_update_application_group(app_groups, group_id):
 
 
 def list_and_filter_application_groups(app_groups):
-    """
-    List and filter application group objects.
+    """List and filter application group objects.
 
     This function demonstrates how to:
     1. List all application groups in a folder
@@ -566,8 +558,7 @@ def list_and_filter_application_groups(app_groups):
 
 
 def cleanup_application_group_objects(app_groups, group_ids):
-    """
-    Delete the application group objects created in this example.
+    """Delete the application group objects created in this example.
 
     This function handles dependent groups by making multiple attempts to delete each group,
     with nested groups being deleted before their parent groups.
@@ -623,8 +614,7 @@ def cleanup_application_group_objects(app_groups, group_ids):
 
 
 def create_bulk_application_group_objects(app_groups, folder="Texas"):
-    """
-    Create multiple application group objects in a batch.
+    """Create multiple application group objects in a batch.
 
     This function demonstrates creating multiple application group objects in a batch,
     which is useful for setting up multiple groups at once.
@@ -677,8 +667,7 @@ def create_bulk_application_group_objects(app_groups, folder="Texas"):
 
 
 def generate_application_group_report(app_groups, group_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all application group objects created by the script.
+    """Generate a comprehensive CSV report of all application group objects created by the script.
 
     This function fetches detailed information about each application group object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -806,8 +795,7 @@ def generate_application_group_report(app_groups, group_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the application group example script.
+    """Parse command-line arguments for the application group example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -864,8 +852,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of application group examples for Strata Cloud Manager.
+    """Execute the comprehensive set of application group examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

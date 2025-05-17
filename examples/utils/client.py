@@ -42,8 +42,7 @@ class ClientInitializer:
     """Standardized client initialization for SCM example scripts."""
 
     def __init__(self, logger):
-        """
-        Initialize the client initializer.
+        """Initialize the client initializer.
 
         Args:
             logger: The SDKLogger instance for logging

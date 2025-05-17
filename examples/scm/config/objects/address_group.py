@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Address Group objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Address Group objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Address Group object configurations and operations commonly
 used in enterprise networks, including:
@@ -148,8 +147,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -229,8 +227,7 @@ def initialize_client():
 
 
 def create_address_objects(address_manager, folder="Texas"):
-    """
-    Create address objects to be used in address groups.
+    """Create address objects to be used in address groups.
 
     This function creates several address objects that will be used as members
     in the address groups we create later.
@@ -311,8 +308,7 @@ def create_address_objects(address_manager, folder="Texas"):
 
 
 def create_static_address_group(group_manager, address_objects, folder="Texas"):
-    """
-    Create a static address group with the given address objects as members.
+    """Create a static address group with the given address objects as members.
 
     This function demonstrates creating a static address group, which has
     explicitly defined member addresses.
@@ -371,8 +367,7 @@ def create_static_address_group(group_manager, address_objects, folder="Texas"):
 
 
 def create_dynamic_address_group(group_manager, folder="Texas"):
-    """
-    Create a dynamic address group that matches addresses based on tags.
+    """Create a dynamic address group that matches addresses based on tags.
 
     This function demonstrates creating a dynamic address group, which includes
     members based on tag matching criteria.
@@ -431,8 +426,7 @@ def create_dynamic_address_group(group_manager, folder="Texas"):
 
 
 def create_nested_address_group(group_manager, parent_groups, folder="Texas"):
-    """
-    Create a nested address group that contains other address groups.
+    """Create a nested address group that contains other address groups.
 
     This function demonstrates creating a nested address group, which includes
     other address groups as members.
@@ -491,8 +485,7 @@ def create_nested_address_group(group_manager, parent_groups, folder="Texas"):
 
 
 def create_complex_tag_filter_group(group_manager, folder="Texas"):
-    """
-    Create a dynamic address group with a complex tag filter expression.
+    """Create a dynamic address group with a complex tag filter expression.
 
     This function demonstrates creating a dynamic address group with a more
     complex tag filter expression using logical operators.
@@ -555,8 +548,7 @@ def create_complex_tag_filter_group(group_manager, folder="Texas"):
 
 
 def fetch_and_update_address_group(group_manager, group_id):
-    """
-    Fetch an address group by ID and update its description and static members.
+    """Fetch an address group by ID and update its description and static members.
 
     This function demonstrates how to:
     1. Retrieve an existing address group using its ID
@@ -611,8 +603,7 @@ def fetch_and_update_address_group(group_manager, group_id):
 
 
 def list_and_filter_address_groups(group_manager):
-    """
-    List and filter address groups.
+    """List and filter address groups.
 
     This function demonstrates how to:
     1. List all address groups in a folder
@@ -667,8 +658,7 @@ def list_and_filter_address_groups(group_manager):
 
 
 def cleanup_address_objects(address_manager, address_ids):
-    """
-    Delete the address objects created in this example.
+    """Delete the address objects created in this example.
 
     This function will try multiple times to delete objects, giving groups
     time to be deleted first to resolve reference issues.
@@ -723,8 +713,7 @@ def cleanup_address_objects(address_manager, address_ids):
 
 
 def cleanup_address_groups(group_manager, group_ids):
-    """
-    Delete the address groups created in this example.
+    """Delete the address groups created in this example.
 
     This function tries to handle nested dependencies by first sorting the group IDs
     to attempt to delete nested groups first, then the parent groups.
@@ -790,8 +779,7 @@ def cleanup_address_groups(group_manager, group_ids):
 
 
 def create_bulk_address_groups(group_manager, address_objects, folder="Texas"):
-    """
-    Create multiple address groups in a batch.
+    """Create multiple address groups in a batch.
 
     This function demonstrates creating multiple address groups in a batch,
     which is useful for setting up multiple groups at once.
@@ -860,8 +848,7 @@ def create_bulk_address_groups(group_manager, address_objects, folder="Texas"):
 
 
 def generate_address_group_report(group_manager, group_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all address groups created by the script.
+    """Generate a comprehensive CSV report of all address groups created by the script.
 
     This function fetches detailed information about each address group and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -992,8 +979,7 @@ def generate_address_group_report(group_manager, group_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the address group example script.
+    """Parse command-line arguments for the address group example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1047,8 +1033,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of address group examples for Strata Cloud Manager.
+    """Execute the comprehensive set of address group examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

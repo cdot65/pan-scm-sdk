@@ -1,6 +1,4 @@
-"""
-Example showing how to initialize the ScmClient with a custom token URL.
-"""
+"""Example showing how to initialize the ScmClient with a custom token URL."""
 
 from scm.client import ScmClient
 

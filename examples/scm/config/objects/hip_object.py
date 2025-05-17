@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with HIP (Host Information Profile) objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with HIP (Host Information Profile) objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of HIP object configurations and operations commonly
 used in enterprise networks, including:
@@ -150,8 +149,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -231,8 +229,7 @@ def initialize_client():
 
 
 def create_host_info_hip_object(hip_objects, folder="Texas"):
-    """
-    Create a HIP object based on host information criteria.
+    """Create a HIP object based on host information criteria.
 
     This function demonstrates creating a HIP object with host information criteria,
     including OS type, domain membership, and managed state.
@@ -293,8 +290,7 @@ def create_host_info_hip_object(hip_objects, folder="Texas"):
 
 
 def create_network_info_hip_object(hip_objects, folder="Texas"):
-    """
-    Create a HIP object based on network information criteria.
+    """Create a HIP object based on network information criteria.
 
     This function demonstrates creating a HIP object with network information criteria,
     specifying requirements for the type of network connection.
@@ -347,8 +343,7 @@ def create_network_info_hip_object(hip_objects, folder="Texas"):
 
 
 def create_patch_management_hip_object(hip_objects, folder="Texas"):
-    """
-    Create a HIP object based on patch management criteria.
+    """Create a HIP object based on patch management criteria.
 
     This function demonstrates creating a HIP object with patch management criteria,
     including vendor requirements and patch status checks.
@@ -416,8 +411,7 @@ def create_patch_management_hip_object(hip_objects, folder="Texas"):
 
 
 def create_disk_encryption_hip_object(hip_objects, folder="Texas"):
-    """
-    Create a HIP object based on disk encryption criteria.
+    """Create a HIP object based on disk encryption criteria.
 
     This function demonstrates creating a HIP object with disk encryption criteria,
     specifying requirements for encrypted drives.
@@ -491,8 +485,7 @@ def create_disk_encryption_hip_object(hip_objects, folder="Texas"):
 
 
 def create_mobile_device_hip_object(hip_objects, folder="Texas"):
-    """
-    Create a HIP object based on mobile device criteria.
+    """Create a HIP object based on mobile device criteria.
 
     This function demonstrates creating a HIP object with mobile device criteria,
     including jailbreak detection and encryption requirements.
@@ -560,8 +553,7 @@ def create_mobile_device_hip_object(hip_objects, folder="Texas"):
 
 
 def create_certificate_hip_object(hip_objects, folder="Texas"):
-    """
-    Create a HIP object based on certificate criteria.
+    """Create a HIP object based on certificate criteria.
 
     This function demonstrates creating a HIP object with certificate criteria,
     specifying required certificate attributes.
@@ -630,8 +622,7 @@ def create_certificate_hip_object(hip_objects, folder="Texas"):
 
 
 def fetch_and_update_hip_object(hip_objects, hip_object_id):
-    """
-    Fetch a HIP object by ID and update its description and criteria.
+    """Fetch a HIP object by ID and update its description and criteria.
 
     This function demonstrates how to:
     1. Retrieve an existing HIP object using its ID
@@ -693,8 +684,7 @@ def fetch_and_update_hip_object(hip_objects, hip_object_id):
 
 
 def list_and_filter_hip_objects(hip_objects):
-    """
-    List and filter HIP objects.
+    """List and filter HIP objects.
 
     This function demonstrates how to:
     1. List all HIP objects in a folder
@@ -749,8 +739,7 @@ def list_and_filter_hip_objects(hip_objects):
 
 
 def cleanup_hip_objects(hip_objects, hip_object_ids):
-    """
-    Delete the HIP objects created in this example.
+    """Delete the HIP objects created in this example.
 
     Args:
         hip_objects: The HIPObject manager instance
@@ -769,8 +758,7 @@ def cleanup_hip_objects(hip_objects, hip_object_ids):
 
 
 def create_bulk_hip_objects(hip_objects, folder="Texas"):
-    """
-    Create multiple HIP objects in a batch.
+    """Create multiple HIP objects in a batch.
 
     This function demonstrates creating multiple HIP objects in a batch,
     which is useful for setting up multiple security profiles at once.
@@ -828,8 +816,7 @@ def create_bulk_hip_objects(hip_objects, folder="Texas"):
 
 
 def generate_hip_object_report(hip_objects, hip_object_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all HIP objects created by the script.
+    """Generate a comprehensive CSV report of all HIP objects created by the script.
 
     This function fetches detailed information about each HIP object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -994,8 +981,7 @@ def generate_hip_object_report(hip_objects, hip_object_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the HIP object example script.
+    """Parse command-line arguments for the HIP object example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1056,8 +1042,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of HIP object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of HIP object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

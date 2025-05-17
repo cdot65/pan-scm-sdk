@@ -1,4 +1,5 @@
 # examples/bgp_routing_example.py
+"""Example script for BGP routing management."""
 
 import os
 import sys
@@ -24,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Demonstrate BGP routing configuration with the Strata Cloud Manager SDK."""
-
     # Authentication
     client_id = os.environ.get("SCM_CLIENT_ID")
     client_secret = os.environ.get("SCM_CLIENT_SECRET")

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with NAT rules in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with NAT rules in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of NAT rule configurations and operations commonly
 used in enterprise networks, including:
@@ -176,8 +175,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -257,8 +255,7 @@ def initialize_client():
 
 
 def create_source_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a source NAT rule using dynamic IP and port translation (PAT/overloading).
+    """Create a source NAT rule using dynamic IP and port translation (PAT/overloading).
 
     This function demonstrates creating the most common type of NAT rule used for outbound
     internet access, where multiple internal IP addresses share a pool of public IPs.
@@ -331,8 +328,7 @@ def create_source_nat_rule(nat_rules, folder="Texas"):
 
 
 def create_source_nat_rule_with_interface(nat_rules, folder="Texas"):
-    """
-    Create a source NAT rule using interface address for translation.
+    """Create a source NAT rule using interface address for translation.
 
     This function demonstrates creating a NAT rule that uses the interface's IP address
     for translation, which is common for ISP connections with a single public IP.
@@ -387,8 +383,7 @@ def create_source_nat_rule_with_interface(nat_rules, folder="Texas"):
 
 
 def create_static_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a rule with static IP source translation (1:1 mapping).
+    """Create a rule with static IP source translation (1:1 mapping).
 
     This function demonstrates creating a static NAT rule where a specific internal IP
     is mapped to a specific external IP, often used for servers that need consistent
@@ -438,8 +433,7 @@ def create_static_nat_rule(nat_rules, folder="Texas"):
 
 
 def create_dynamic_ip_with_fallback(nat_rules, folder="Texas"):
-    """
-    Create a NAT rule with dynamic IP source translation and fallback configuration.
+    """Create a NAT rule with dynamic IP source translation and fallback configuration.
 
     This function demonstrates creating a dynamic IP source NAT rule with fallback options,
     which is useful for ensuring connectivity when the primary IP pool is exhausted.
@@ -494,8 +488,7 @@ def create_dynamic_ip_with_fallback(nat_rules, folder="Texas"):
 
 
 def create_destination_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a destination NAT rule for port forwarding.
+    """Create a destination NAT rule for port forwarding.
 
     This function demonstrates creating a basic destination NAT rule for port forwarding,
     commonly used for publishing internal services to external networks.
@@ -542,8 +535,7 @@ def create_destination_nat_rule(nat_rules, folder="Texas"):
 
 
 def create_dns64_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a DNS64 NAT rule for IPv6-only clients to access IPv4 resources.
+    """Create a DNS64 NAT rule for IPv6-only clients to access IPv4 resources.
 
     This function demonstrates creating a DNS64 NAT rule which is used in IPv6 transition
     scenarios to allow IPv6-only clients to access IPv4 resources.
@@ -594,8 +586,7 @@ def create_dns64_nat_rule(nat_rules, folder="Texas"):
 
 
 def create_dynamic_dest_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a dynamic destination NAT rule for load balancing.
+    """Create a dynamic destination NAT rule for load balancing.
 
     This function demonstrates creating a destination NAT rule that could be used
     for load balancing traffic to multiple internal servers.
@@ -647,8 +638,7 @@ def create_dynamic_dest_nat_rule(nat_rules, folder="Texas"):
 
 
 def fetch_and_update_nat_rule(nat_rules, rule_id):
-    """
-    Fetch a NAT rule by ID and update its description, tags, and translated addresses.
+    """Fetch a NAT rule by ID and update its description, tags, and translated addresses.
 
     This function demonstrates how to:
     1. Retrieve an existing NAT rule using its ID
@@ -766,8 +756,7 @@ def cleanup_nat_rules(nat_rules, rule_ids):
 
 
 def create_bidirectional_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a bi-directional NAT rule with static IP translation.
+    """Create a bi-directional NAT rule with static IP translation.
 
     This function demonstrates creating a bi-directional static NAT rule, which allows
     connections to be initiated from both sides of the NAT (inside to outside and outside to inside).
@@ -818,8 +807,7 @@ def create_bidirectional_nat_rule(nat_rules, folder="Texas"):
 
 
 def create_multi_port_forwarding_rule(nat_rules, folder="Texas"):
-    """
-    Create a destination NAT rule for multiple services (ports).
+    """Create a destination NAT rule for multiple services (ports).
 
     This function demonstrates creating a destination NAT rule that could be used
     for forwarding multiple ports to an internal server.
@@ -874,8 +862,7 @@ def create_multi_port_forwarding_rule(nat_rules, folder="Texas"):
 
 
 def create_port_forwarding_rule(nat_rules, folder="Texas"):
-    """
-    Create a port forwarding NAT rule (destination NAT with port translation).
+    """Create a port forwarding NAT rule (destination NAT with port translation).
 
     This function demonstrates creating a simple port forwarding rule, which is
     a common use case for exposing internal services to external networks.
@@ -925,8 +912,7 @@ def create_port_forwarding_rule(nat_rules, folder="Texas"):
 
 
 def create_nptv6_rule(nat_rules, folder="Texas"):
-    """
-    Create an NPTv6 NAT rule for IPv6 prefix translation.
+    """Create an NPTv6 NAT rule for IPv6 prefix translation.
 
     This function demonstrates creating an NPTv6 (Network Prefix Translation for IPv6) rule
     which allows translating IPv6 addresses by changing only the network prefix while
@@ -978,8 +964,7 @@ def create_nptv6_rule(nat_rules, folder="Texas"):
 
 
 def create_outbound_nat_different_interfaces(nat_rules, folder="Texas"):
-    """
-    Create a NAT rule that uses different egress interfaces based on traffic.
+    """Create a NAT rule that uses different egress interfaces based on traffic.
 
     This function demonstrates creating an outbound NAT rule that specifies a particular
     egress interface, which is useful for multi-WAN or SD-WAN scenarios.
@@ -1039,8 +1024,7 @@ def create_outbound_nat_different_interfaces(nat_rules, folder="Texas"):
 
 
 def create_post_nat_rule(nat_rules, folder="Texas"):
-    """
-    Create a post-rulebase NAT rule.
+    """Create a post-rulebase NAT rule.
 
     This function demonstrates creating a NAT rule in the post-rulebase, which is
     processed after security policy rules (unlike pre-rulebase NAT rules that are
@@ -1095,8 +1079,7 @@ def create_post_nat_rule(nat_rules, folder="Texas"):
 
 
 def create_bulk_nat_rules(nat_rules, folder="Texas"):
-    """
-    Create multiple NAT rules in a batch for similar services.
+    """Create multiple NAT rules in a batch for similar services.
 
     This function demonstrates creating multiple similar NAT rules in a batch,
     which is useful for setting up port forwarding for multiple services.
@@ -1154,8 +1137,7 @@ def create_bulk_nat_rules(nat_rules, folder="Texas"):
 
 
 def create_nat_rules_for_multiple_sites(nat_rules, folder="Texas"):
-    """
-    Create NAT rules for multiple branch sites.
+    """Create NAT rules for multiple branch sites.
 
     This function demonstrates creating NAT rules for multiple branch sites,
     which is a common use case in enterprise networks with multiple locations.
@@ -1229,8 +1211,7 @@ def create_nat_rules_for_multiple_sites(nat_rules, folder="Texas"):
 
 
 def generate_nat_rule_report(nat_rules, rule_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all NAT rules created by the script.
+    """Generate a comprehensive CSV report of all NAT rules created by the script.
 
     This function fetches detailed information about each NAT rule and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -1430,8 +1411,7 @@ def generate_nat_rule_report(nat_rules, rule_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the NAT rule example script.
+    """Parse command-line arguments for the NAT rule example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1481,8 +1461,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of NAT rule examples for Strata Cloud Manager.
+    """Execute the comprehensive set of NAT rule examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

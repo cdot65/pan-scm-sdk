@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Example script for managing bandwidth allocations in Strata Cloud Manager.
+"""Example script for managing bandwidth allocations in Strata Cloud Manager.
 
 This script demonstrates how to use the SCM SDK to create, list, update,
 and delete bandwidth allocations.

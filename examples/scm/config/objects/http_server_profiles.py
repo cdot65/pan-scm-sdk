@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with HTTP Server Profiles in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with HTTP Server Profiles in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a variety of operations for managing HTTP Server Profiles
 which are used to define HTTP servers for sending system logs:
@@ -158,8 +157,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -239,8 +237,7 @@ def initialize_client():
 
 
 def create_basic_http_server_profile(http_profiles, folder="Texas"):
-    """
-    Create a basic HTTP server profile with HTTP protocol.
+    """Create a basic HTTP server profile with HTTP protocol.
 
     This function demonstrates creating a simple HTTP server profile with a basic HTTP server
     configuration using a dictionary that gets converted to a HTTPServerProfileCreateModel.
@@ -325,8 +322,7 @@ def create_basic_http_server_profile(http_profiles, folder="Texas"):
 
 
 def create_https_server_profile(http_profiles, folder="Texas"):
-    """
-    Create an HTTP server profile with HTTPS protocol and TLS configuration.
+    """Create an HTTP server profile with HTTPS protocol and TLS configuration.
 
     This function demonstrates creating an HTTP server profile with HTTPS protocol,
     TLS version specification, and certificate configuration.
@@ -408,8 +404,7 @@ def create_https_server_profile(http_profiles, folder="Texas"):
 
 
 def create_multi_server_profile(http_profiles, folder="Texas"):
-    """
-    Create an HTTP server profile with multiple server configurations.
+    """Create an HTTP server profile with multiple server configurations.
 
     This function demonstrates creating an HTTP server profile that includes
     multiple server configurations for redundancy or different log types.
@@ -499,8 +494,7 @@ def create_multi_server_profile(http_profiles, folder="Texas"):
 
 
 def create_http_server_profile_with_snippet(http_profiles, folder="Texas"):
-    """
-    Create an HTTP server profile in a snippet container instead of a folder.
+    """Create an HTTP server profile in a snippet container instead of a folder.
 
     This function demonstrates creating an HTTP server profile that is stored in a snippet
     container instead of the default folder container.
@@ -590,8 +584,7 @@ def create_http_server_profile_with_snippet(http_profiles, folder="Texas"):
 
 
 def create_http_server_profile_with_device(http_profiles, folder="Texas"):
-    """
-    Create an HTTP server profile in a device container.
+    """Create an HTTP server profile in a device container.
 
     This function demonstrates creating an HTTP server profile that is stored in a device
     container instead of the default folder container.
@@ -680,8 +673,7 @@ def create_http_server_profile_with_device(http_profiles, folder="Texas"):
 
 
 def fetch_and_update_http_server_profile(http_profiles, profile_id):
-    """
-    Fetch an HTTP server profile by ID and update its configuration.
+    """Fetch an HTTP server profile by ID and update its configuration.
 
     This function demonstrates how to:
     1. Retrieve an existing HTTP server profile using its ID
@@ -792,8 +784,7 @@ def fetch_and_update_http_server_profile(http_profiles, profile_id):
 
 
 def list_and_filter_http_server_profiles(http_profiles):
-    """
-    List and filter HTTP server profiles with various filtering options.
+    """List and filter HTTP server profiles with various filtering options.
 
     This function demonstrates:
     1. Listing all HTTP server profiles in a specific folder
@@ -859,8 +850,7 @@ def list_and_filter_http_server_profiles(http_profiles):
 
 
 def fetch_http_server_profile_by_name(http_profiles, profile_name, folder="Texas"):
-    """
-    Fetch a specific HTTP server profile by name from a folder.
+    """Fetch a specific HTTP server profile by name from a folder.
 
     This function demonstrates using the fetch method to retrieve an HTTP server profile
     by its name rather than its ID, which is useful when you know the name but
@@ -906,8 +896,7 @@ def fetch_http_server_profile_by_name(http_profiles, profile_name, folder="Texas
 
 
 def delete_http_server_profile(http_profiles, profile_id):
-    """
-    Delete an HTTP server profile.
+    """Delete an HTTP server profile.
 
     This function demonstrates deleting an HTTP server profile using its ID. It handles
     common error cases such as the profile not being found or already deleted.
@@ -942,8 +931,7 @@ def delete_http_server_profile(http_profiles, profile_id):
 
 
 def generate_http_server_profile_report(http_profiles, profile_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all HTTP server profiles created by the script.
+    """Generate a comprehensive CSV report of all HTTP server profiles created by the script.
 
     This function fetches detailed information about each HTTP server profile and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -1120,8 +1108,7 @@ def generate_http_server_profile_report(http_profiles, profile_ids, execution_ti
 
 
 def cleanup_http_server_profiles(http_profiles, profile_ids):
-    """
-    Delete the HTTP server profiles created in this example.
+    """Delete the HTTP server profiles created in this example.
 
     Args:
         http_profiles: The HTTP server profile manager instance
@@ -1143,8 +1130,7 @@ def cleanup_http_server_profiles(http_profiles, profile_ids):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the HTTP server profile example script.
+    """Parse command-line arguments for the HTTP server profile example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1195,8 +1181,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of HTTP server profile examples for Strata Cloud Manager.
+    """Execute the comprehensive set of HTTP server profile examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

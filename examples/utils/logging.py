@@ -58,6 +58,12 @@ except ImportError:
         """Fallback console when Rich is not available."""
 
         def print(self, *args, **kwargs):
+            """Print a message without Rich formatting.
+            
+            Args:
+                *args: Positional arguments to print
+                **kwargs: Keyword arguments (ignored)
+            """
             # Extract the text content without Rich formatting
             message = str(args[0])
             for prefix in ["[info]", "[success]", "[warning]", "[error]", "[section]"]:
@@ -71,40 +77,97 @@ except ImportError:
 
         @staticmethod
         def __call__(*args, **kwargs):
+            """Return the first argument without formatting.
+            
+            Args:
+                *args: Positional arguments
+                **kwargs: Keyword arguments (ignored)
+                
+            Returns:
+                The first positional argument
+            """
             return args[0]
 
     class DummyProgressContext:
         """Dummy context manager for progress tracking when Rich is not available."""
 
         def __init__(self, *args, **kwargs):
+            """Initialize the dummy progress context.
+            
+            Args:
+                *args: Positional arguments (ignored)
+                **kwargs: Keyword arguments (ignored)
+            """
             pass
 
         def __enter__(self):
+            """Enter the context manager.
+            
+            Returns:
+                Self reference for context management
+            """
             return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """Exit the context manager.
+            
+            Args:
+                exc_type: Exception type (if any)
+                exc_val: Exception value (if any)
+                exc_tb: Exception traceback (if any)
+            """
             pass
 
         def add_task(self, description, total=None):
+            """Add a task to the progress tracker.
+            
+            Args:
+                description: Description of the task
+                total: Total steps for the task (optional)
+                
+            Returns:
+                A dummy task ID string
+            """
             print(f"Task started: {description}")
             return "task_id"
 
         def update(self, task_id, advance=None):
+            """Update task progress.
+            
+            Args:
+                task_id: The task identifier
+                advance: How much to advance the progress (optional)
+            """
             pass
 
     class DummyTable:
         """Fallback Table when Rich is not available."""
 
         def __init__(self, title=None):
+            """Initialize the dummy table.
+            
+            Args:
+                title: Optional title for the table
+            """
             self.title = title
             self.columns = []
             self.rows = []
             print(f"Table: {title if title else 'Unnamed'}")
 
         def add_column(self, column):
+            """Add a column to the table.
+            
+            Args:
+                column: Column name to add
+            """
             self.columns.append(column)
 
         def add_row(self, *args):
+            """Add a row to the table.
+            
+            Args:
+                *args: Cell values for the row
+            """
             self.rows.append(args)
             print(" | ".join(str(a) for a in args))
 

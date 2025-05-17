@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Dynamic User Group objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Dynamic User Group objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Dynamic User Group configurations and operations commonly
 used in enterprise networks, including:
@@ -149,8 +148,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -230,8 +228,7 @@ def initialize_client():
 
 
 def create_simple_tag_based_group(user_groups, folder="Texas"):
-    """
-    Create a simple tag-based dynamic user group.
+    """Create a simple tag-based dynamic user group.
 
     This function demonstrates creating a dynamic user group using a simple
     tag expression to filter users based on a single attribute.
@@ -289,8 +286,7 @@ def create_simple_tag_based_group(user_groups, folder="Texas"):
 
 
 def create_complex_boolean_group(user_groups, folder="Texas"):
-    """
-    Create a dynamic user group with complex boolean expressions.
+    """Create a dynamic user group with complex boolean expressions.
 
     This function demonstrates creating a dynamic user group using boolean operators
     (AND, OR, NOT) to create more sophisticated filtering logic.
@@ -349,8 +345,7 @@ def create_complex_boolean_group(user_groups, folder="Texas"):
 
 
 def create_multi_attribute_group(user_groups, folder="Texas"):
-    """
-    Create a dynamic user group filtering on multiple user attributes.
+    """Create a dynamic user group filtering on multiple user attributes.
 
     This function demonstrates creating a group that filters users based on
     multiple attributes to provide fine-grained targeting.
@@ -409,8 +404,7 @@ def create_multi_attribute_group(user_groups, folder="Texas"):
 
 
 def create_department_based_group(user_groups, folder="Texas"):
-    """
-    Create a dynamic user group based on department.
+    """Create a dynamic user group based on department.
 
     This function demonstrates creating a group that filters users based on
     their department, commonly used for role-based access control.
@@ -468,8 +462,7 @@ def create_department_based_group(user_groups, folder="Texas"):
 
 
 def create_role_based_group(user_groups, folder="Texas"):
-    """
-    Create a dynamic user group based on role.
+    """Create a dynamic user group based on role.
 
     This function demonstrates creating a group that filters users based on
     their role within the organization, useful for functional access policies.
@@ -525,8 +518,7 @@ def create_role_based_group(user_groups, folder="Texas"):
 
 
 def fetch_and_update_dynamic_user_group(user_groups, group_id):
-    """
-    Fetch a dynamic user group by ID and update its filter expression.
+    """Fetch a dynamic user group by ID and update its filter expression.
 
     This function demonstrates how to:
     1. Retrieve an existing dynamic user group using its ID
@@ -582,8 +574,7 @@ def fetch_and_update_dynamic_user_group(user_groups, group_id):
 
 
 def list_and_filter_dynamic_user_groups(user_groups):
-    """
-    List and filter dynamic user group objects.
+    """List and filter dynamic user group objects.
 
     This function demonstrates how to:
     1. List all dynamic user groups in a folder
@@ -639,8 +630,7 @@ def list_and_filter_dynamic_user_groups(user_groups):
 
 
 def cleanup_dynamic_user_group_objects(user_groups, group_ids):
-    """
-    Delete the dynamic user group objects created in this example.
+    """Delete the dynamic user group objects created in this example.
 
     Args:
         user_groups: The DynamicUserGroup manager instance
@@ -659,8 +649,7 @@ def cleanup_dynamic_user_group_objects(user_groups, group_ids):
 
 
 def create_bulk_dynamic_user_group_objects(user_groups, folder="Texas"):
-    """
-    Create multiple dynamic user group objects in a batch.
+    """Create multiple dynamic user group objects in a batch.
 
     This function demonstrates creating multiple dynamic user group objects in a batch,
     which is useful for setting up multiple groups at once.
@@ -721,8 +710,7 @@ def create_bulk_dynamic_user_group_objects(user_groups, folder="Texas"):
 
 
 def generate_dynamic_user_group_report(user_groups, group_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all dynamic user group objects created by the script.
+    """Generate a comprehensive CSV report of all dynamic user group objects created by the script.
 
     This function fetches detailed information about each dynamic user group object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -857,8 +845,7 @@ def generate_dynamic_user_group_report(user_groups, group_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the dynamic user group example script.
+    """Parse command-line arguments for the dynamic user group example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -920,8 +907,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of dynamic user group examples for Strata Cloud Manager.
+    """Execute the comprehensive set of dynamic user group examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

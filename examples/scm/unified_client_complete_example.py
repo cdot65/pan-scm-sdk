@@ -1,5 +1,4 @@
-"""
-Complete example demonstrating the unified client interface for the Palo Alto Networks SCM SDK.
+"""Complete example demonstrating the unified client interface for the Palo Alto Networks SCM SDK.
 
 This example shows how to use the unified client to:
 1. Create address objects (FQDN and IP/Netmask)

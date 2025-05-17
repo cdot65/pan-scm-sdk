@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Address objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Address objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Address object configurations and operations commonly
 used in enterprise networks, including:
@@ -149,8 +148,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -230,8 +228,7 @@ def initialize_client():
 
 
 def create_ipv4_network_address(addresses, folder="Texas"):
-    """
-    Create an address object for an IPv4 network.
+    """Create an address object for an IPv4 network.
 
     This function demonstrates creating a standard IPv4 network address object
     with CIDR notation, commonly used for subnets and network segments.
@@ -286,8 +283,7 @@ def create_ipv4_network_address(addresses, folder="Texas"):
 
 
 def create_ipv4_host_address(addresses, folder="Texas"):
-    """
-    Create an address object for a single IPv4 host.
+    """Create an address object for a single IPv4 host.
 
     This function demonstrates creating an IPv4 host address object,
     commonly used for servers, endpoints, or other individual hosts.
@@ -342,8 +338,7 @@ def create_ipv4_host_address(addresses, folder="Texas"):
 
 
 def create_ipv4_range_address(addresses, folder="Texas"):
-    """
-    Create an address object for an IPv4 address range.
+    """Create an address object for an IPv4 address range.
 
     This function demonstrates creating an IPv4 range address object,
     commonly used for DHCP pools, IP blocks, or other address ranges.
@@ -398,8 +393,7 @@ def create_ipv4_range_address(addresses, folder="Texas"):
 
 
 def create_ipv6_address(addresses, folder="Texas"):
-    """
-    Create an address object for an IPv6 network.
+    """Create an address object for an IPv6 network.
 
     This function demonstrates creating an IPv6 network address object,
     useful for IPv6 subnets and segments.
@@ -454,8 +448,7 @@ def create_ipv6_address(addresses, folder="Texas"):
 
 
 def create_fqdn_address(addresses, folder="Texas"):
-    """
-    Create an address object for a fully qualified domain name (FQDN).
+    """Create an address object for a fully qualified domain name (FQDN).
 
     This function demonstrates creating an FQDN address object,
     commonly used for websites, cloud services, or dynamic hosts.
@@ -510,8 +503,7 @@ def create_fqdn_address(addresses, folder="Texas"):
 
 
 def fetch_and_update_address(addresses, address_id):
-    """
-    Fetch an address object by ID and update its description and tags.
+    """Fetch an address object by ID and update its description and tags.
 
     This function demonstrates how to:
     1. Retrieve an existing address object using its ID
@@ -557,8 +549,7 @@ def fetch_and_update_address(addresses, address_id):
 
 
 def list_and_filter_addresses(addresses):
-    """
-    List and filter address objects.
+    """List and filter address objects.
 
     This function demonstrates how to:
     1. List all address objects in a folder
@@ -622,8 +613,7 @@ def list_and_filter_addresses(addresses):
 
 
 def cleanup_address_objects(addresses, address_ids):
-    """
-    Delete the address objects created in this example.
+    """Delete the address objects created in this example.
 
     Args:
         addresses: The Address manager instance
@@ -642,8 +632,7 @@ def cleanup_address_objects(addresses, address_ids):
 
 
 def create_bulk_address_objects(addresses, folder="Texas"):
-    """
-    Create multiple address objects in a batch.
+    """Create multiple address objects in a batch.
 
     This function demonstrates creating multiple address objects in a batch,
     which is useful for setting up multiple addresses at once.
@@ -704,8 +693,7 @@ def create_bulk_address_objects(addresses, folder="Texas"):
 
 
 def generate_address_report(addresses, address_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all address objects created by the script.
+    """Generate a comprehensive CSV report of all address objects created by the script.
 
     This function fetches detailed information about each address object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -848,8 +836,7 @@ def generate_address_report(addresses, address_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the address example script.
+    """Parse command-line arguments for the address example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -895,8 +882,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of address object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of address object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution
