@@ -1,5 +1,7 @@
 # tests/factories/objects/application.py
 
+"""Factory definitions for application objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore
@@ -20,6 +22,8 @@ class ApplicationBaseFactory(factory.Factory):
     """Base factory for Application with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationBaseFactory."""
+
         model = ApplicationBaseModel
         abstract = True
 
@@ -51,6 +55,8 @@ class ApplicationCreateApiFactory(ApplicationBaseFactory):
     """Factory for creating ApplicationCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationCreateModelFactory."""
+
         model = ApplicationCreateModel
 
     # Default to folder container
@@ -87,6 +93,8 @@ class ApplicationUpdateApiFactory(ApplicationBaseFactory):
     """Factory for creating ApplicationUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationUpdateModelFactory."""
+
         model = ApplicationUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -141,6 +149,8 @@ class ApplicationResponseFactory(ApplicationBaseFactory):
     """Factory for creating ApplicationResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationResponseModelFactory."""
+
         model = ApplicationResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

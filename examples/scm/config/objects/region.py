@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Region objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Region objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Region object configurations and operations commonly
 used in enterprise networks, including:
@@ -147,8 +146,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -228,8 +226,7 @@ def initialize_client():
 
 
 def create_region_with_coordinates(regions, folder="Texas"):
-    """
-    Create a region object with geographic coordinates.
+    """Create a region object with geographic coordinates.
 
     This function demonstrates creating a region with latitude and longitude
     coordinates for a geographic location.
@@ -294,8 +291,7 @@ def create_region_with_coordinates(regions, folder="Texas"):
 
 
 def create_region_with_addresses(regions, folder="Texas"):
-    """
-    Create a region object with network addresses.
+    """Create a region object with network addresses.
 
     This function demonstrates creating a region with a list of network
     addresses without specific geographic coordinates.
@@ -357,8 +353,7 @@ def create_region_with_addresses(regions, folder="Texas"):
 
 
 def create_comprehensive_region(regions, folder="Texas"):
-    """
-    Create a comprehensive region object with both coordinates and addresses.
+    """Create a comprehensive region object with both coordinates and addresses.
 
     This function demonstrates creating a region with both geographic coordinates
     and a list of network addresses for a complete definition.
@@ -428,8 +423,7 @@ def create_comprehensive_region(regions, folder="Texas"):
 
 
 def fetch_and_update_region(regions, region_id):
-    """
-    Fetch a region object by ID and update its coordinates and addresses.
+    """Fetch a region object by ID and update its coordinates and addresses.
 
     This function demonstrates how to:
     1. Retrieve an existing region object using its ID
@@ -509,8 +503,7 @@ def fetch_and_update_region(regions, region_id):
 
 
 def list_and_filter_regions(regions, folder="Texas"):
-    """
-    List and filter region objects.
+    """List and filter region objects.
 
     This function demonstrates how to:
     1. List all region objects in a folder
@@ -598,8 +591,7 @@ def list_and_filter_regions(regions, folder="Texas"):
 
 
 def cleanup_region_objects(regions, region_ids):
-    """
-    Delete the region objects created in this example.
+    """Delete the region objects created in this example.
 
     Args:
         regions: The Region manager instance
@@ -618,8 +610,7 @@ def cleanup_region_objects(regions, region_ids):
 
 
 def create_bulk_region_objects(regions, folder="Texas"):
-    """
-    Create multiple region objects in a batch.
+    """Create multiple region objects in a batch.
 
     This function demonstrates creating multiple region objects in a batch,
     which is useful for setting up multiple regions at once.
@@ -681,8 +672,7 @@ def create_bulk_region_objects(regions, folder="Texas"):
 
 
 def generate_region_report(regions, region_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all region objects created by the script.
+    """Generate a comprehensive CSV report of all region objects created by the script.
 
     This function fetches detailed information about each region object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -834,8 +824,7 @@ def generate_region_report(regions, region_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the region example script.
+    """Parse command-line arguments for the region example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -889,8 +878,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of region object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of region object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

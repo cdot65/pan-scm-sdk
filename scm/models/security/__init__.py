@@ -1,3 +1,4 @@
+"""scm.models.security: Security-related models."""
 # scm/models/security/__init__.py
 
 from .anti_spyware_profiles import (

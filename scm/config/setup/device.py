@@ -1,5 +1,4 @@
-"""
-Service classes for interacting with Devices in Palo Alto Networks' Strata Cloud Manager.
+"""Service classes for interacting with Devices in Palo Alto Networks' Strata Cloud Manager.
 
 This module provides the Device class for performing CRUD operations on Device resources
 in the Strata Cloud Manager.
@@ -17,8 +16,7 @@ from scm.models.setup.device import (
 
 
 class Device(BaseObject):
-    """
-    Manages Device objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Device objects in Palo Alto Networks' Strata Cloud Manager.
 
     This class provides methods for creating, retrieving, updating, and deleting Device resources.
 
@@ -26,6 +24,7 @@ class Device(BaseObject):
         ENDPOINT: The API endpoint for Device resources.
         DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
         ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
+
     """
 
     ENDPOINT = "/config/setup/v1/devices"
@@ -37,19 +36,25 @@ class Device(BaseObject):
         api_client,
         max_limit: int = DEFAULT_MAX_LIMIT,
     ):
-        """
-        Initialize the Device service class.
+        """Initialize the Device service class.
 
         Args:
             api_client: The API client instance for making HTTP requests.
             max_limit: Maximum number of items to return in a single request.
                       Defaults to DEFAULT_MAX_LIMIT.
+
         """
         super().__init__(api_client)
         self.max_limit = min(max_limit, self.ABSOLUTE_MAX_LIMIT)
 
     @property
     def max_limit(self) -> int:
+        """Get the maximum number of items to return in a single request.
+
+        Returns:
+            int: The current max_limit value.
+
+        """
         return self._max_limit
 
     @max_limit.setter
@@ -58,8 +63,7 @@ class Device(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -69,6 +73,7 @@ class Device(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -100,8 +105,7 @@ class Device(BaseObject):
         self,
         device_id: str,
     ) -> DeviceResponseModel:
-        """
-        Get a device by its ID.
+        """Get a device by its ID.
 
         Args:
             device_id: The ID of the device to retrieve.
@@ -112,6 +116,7 @@ class Device(BaseObject):
         Raises:
             ObjectNotPresentError: If the device doesn't exist.
             APIError: If the API request fails.
+
         """
         try:
             response = self.api_client.get(f"{self.ENDPOINT}/{device_id}")
@@ -136,14 +141,14 @@ class Device(BaseObject):
         self,
         name: str,
     ) -> DeviceResponseModel | None:
-        """
-        Get a device by its exact name.
+        """Get a device by its exact name.
 
         Args:
             name: The device name to retrieve.
 
         Returns:
             DeviceResponseModel | None: The requested device, or None if not found.
+
         """
         results = self.list()
         if not results:
@@ -213,8 +218,7 @@ class Device(BaseObject):
         self,
         **filters: Any,  # Accept arbitrary filters (type, folder, etc.)
     ) -> List[DeviceResponseModel]:
-        """
-        List devices with optional server-side and client-side filtering.
+        """List devices with optional server-side and client-side filtering.
 
         Args:
             **filters: Additional filters (type, folder, serial_number, etc.).
@@ -225,6 +229,7 @@ class Device(BaseObject):
         Raises:
             APIError: If the API request fails.
             InvalidObjectError: If filter parameters are invalid.
+
         """
         # Prepare API parameters for server-side filtering
         params: Dict[str, Any] = {}

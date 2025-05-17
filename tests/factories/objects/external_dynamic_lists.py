@@ -21,6 +21,8 @@ class ExternalDynamicListsBaseFactory(factory.Factory):
     """Base factory for External Dynamic Lists with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsBaseFactory."""
+
         model = ExternalDynamicListsBaseModel
         abstract = True
 
@@ -35,6 +37,8 @@ class ExternalDynamicListsCreateApiFactory(ExternalDynamicListsBaseFactory):
     """Factory for creating ExternalDynamicListsCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsCreateModelFactory."""
+
         model = ExternalDynamicListsCreateModel
 
     # Default to folder and IP type
@@ -264,6 +268,8 @@ class ExternalDynamicListsUpdateApiFactory(ExternalDynamicListsBaseFactory):
     """Factory for creating ExternalDynamicListsUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsUpdateModelFactory."""
+
         model = ExternalDynamicListsUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -398,6 +404,8 @@ class ExternalDynamicListsResponseFactory(ExternalDynamicListsBaseFactory):
     """Factory for creating ExternalDynamicListsResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ExternalDynamicListsResponseModelFactory."""
+
         model = ExternalDynamicListsResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -468,8 +476,7 @@ class ExternalDynamicListsResponseFactory(ExternalDynamicListsBaseFactory):
     def from_request(
         cls, request_model: Union[ExternalDynamicListsCreateModel, Dict[str, Any]], **kwargs
     ) -> ExternalDynamicListsResponseModel:
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create request.
 
@@ -479,6 +486,7 @@ class ExternalDynamicListsResponseFactory(ExternalDynamicListsBaseFactory):
 
         Returns:
             ExternalDynamicListsResponseModel instance
+
         """
         if isinstance(request_model, ExternalDynamicListsCreateModel):
             data = request_model.model_dump()
@@ -702,8 +710,7 @@ class ExternalDynamicListsResponseModelFactory(factory.DictFactory):
 
     @classmethod
     def build_from_request(cls, request_data: dict, **kwargs) -> dict:
-        """
-        Return a data dictionary based on request data.
+        """Return a data dictionary based on request data.
 
         Args:
             request_data: Request data dictionary to base the response on
@@ -711,6 +718,7 @@ class ExternalDynamicListsResponseModelFactory(factory.DictFactory):
 
         Returns:
             Dictionary with response data
+
         """
         data = request_data.copy()
         data["id"] = str(uuid4())

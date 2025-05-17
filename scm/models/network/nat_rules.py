@@ -1,3 +1,8 @@
+"""NAT Rules models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing NAT rule objects and related data.
+"""
+
 from enum import Enum
 from typing import List, Literal, Optional
 from uuid import UUID
@@ -290,6 +295,18 @@ class NatRuleBaseModel(BaseModel):
         mode="before",
     )
     def ensure_list_of_strings(cls, v):
+        """Ensure value is a list of strings, converting from string if needed.
+
+        Args:
+            v (Any): The value to validate.
+
+        Returns:
+            list[str]: A list of strings.
+
+        Raises:
+            ValueError: If the value is not a string or list of strings.
+
+        """
         if isinstance(v, str):
             v = [v]
         elif not isinstance(v, list):
@@ -306,6 +323,18 @@ class NatRuleBaseModel(BaseModel):
         "tag",
     )
     def ensure_unique_items(cls, v):
+        """Ensure all items in the list are unique.
+
+        Args:
+            v (list): The list to validate.
+
+        Returns:
+            list: The validated list.
+
+        Raises:
+            ValueError: If duplicate items are found.
+
+        """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
         return v
@@ -353,6 +382,15 @@ class NatRuleCreateModel(NatRuleBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "NatRuleCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            NatRuleCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
@@ -403,6 +441,17 @@ class NatRuleMoveModel(BaseModel):
 
     @model_validator(mode="after")
     def validate_move_configuration(self) -> "NatRuleMoveModel":
+        """Validate move configuration for NAT rule reordering.
+
+        Ensures that destination_rule is provided only when destination is BEFORE or AFTER.
+
+        Returns:
+            NatRuleMoveModel: The validated model instance.
+
+        Raises:
+            ValueError: If destination_rule is missing or present in an invalid context.
+
+        """
         if self.destination in (NatMoveDestination.BEFORE, NatMoveDestination.AFTER):
             if not self.destination_rule:
                 raise ValueError(

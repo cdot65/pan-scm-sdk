@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standardized logging utilities for Strata Cloud Manager SDK examples.
+"""Standardized logging utilities for Strata Cloud Manager SDK examples.
 
 This module provides enhanced logging capabilities for SDK examples using
 the Rich library for improved terminal formatting and visual output.
@@ -59,6 +58,12 @@ except ImportError:
         """Fallback console when Rich is not available."""
 
         def print(self, *args, **kwargs):
+            """Print a message without Rich formatting.
+            
+            Args:
+                *args: Positional arguments to print
+                **kwargs: Keyword arguments (ignored)
+            """
             # Extract the text content without Rich formatting
             message = str(args[0])
             for prefix in ["[info]", "[success]", "[warning]", "[error]", "[section]"]:
@@ -72,40 +77,97 @@ except ImportError:
 
         @staticmethod
         def __call__(*args, **kwargs):
+            """Return the first argument without formatting.
+            
+            Args:
+                *args: Positional arguments
+                **kwargs: Keyword arguments (ignored)
+                
+            Returns:
+                The first positional argument
+            """
             return args[0]
 
     class DummyProgressContext:
         """Dummy context manager for progress tracking when Rich is not available."""
 
         def __init__(self, *args, **kwargs):
+            """Initialize the dummy progress context.
+            
+            Args:
+                *args: Positional arguments (ignored)
+                **kwargs: Keyword arguments (ignored)
+            """
             pass
 
         def __enter__(self):
+            """Enter the context manager.
+            
+            Returns:
+                Self reference for context management
+            """
             return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
+            """Exit the context manager.
+            
+            Args:
+                exc_type: Exception type (if any)
+                exc_val: Exception value (if any)
+                exc_tb: Exception traceback (if any)
+            """
             pass
 
         def add_task(self, description, total=None):
+            """Add a task to the progress tracker.
+            
+            Args:
+                description: Description of the task
+                total: Total steps for the task (optional)
+                
+            Returns:
+                A dummy task ID string
+            """
             print(f"Task started: {description}")
             return "task_id"
 
         def update(self, task_id, advance=None):
+            """Update task progress.
+            
+            Args:
+                task_id: The task identifier
+                advance: How much to advance the progress (optional)
+            """
             pass
 
     class DummyTable:
         """Fallback Table when Rich is not available."""
 
         def __init__(self, title=None):
+            """Initialize the dummy table.
+            
+            Args:
+                title: Optional title for the table
+            """
             self.title = title
             self.columns = []
             self.rows = []
             print(f"Table: {title if title else 'Unnamed'}")
 
         def add_column(self, column):
+            """Add a column to the table.
+            
+            Args:
+                column: Column name to add
+            """
             self.columns.append(column)
 
         def add_row(self, *args):
+            """Add a row to the table.
+            
+            Args:
+                *args: Cell values for the row
+            """
             self.rows.append(args)
             print(" | ".join(str(a) for a in args))
 
@@ -151,8 +213,7 @@ class SDKLogger:
     """Unified logger for SDK example scripts with enhanced formatting."""
 
     def __init__(self, name: str, log_level: str = "INFO"):
-        """
-        Initialize the SDK Logger.
+        """Initialize the SDK Logger.
 
         Args:
             name: The logger name (usually the script or module name)
@@ -186,8 +247,7 @@ class SDKLogger:
             )
 
     def section(self, title: str) -> None:
-        """
-        Display a section header with visual separation.
+        """Display a section header with visual separation.
 
         Args:
             title: The section title to display
@@ -207,8 +267,7 @@ class SDKLogger:
             print(f"{COLORS['BOLD']}{COLORS['BRIGHT_CYAN']}{separator}{COLORS['RESET']}")
 
     def operation_start(self, operation: str) -> None:
-        """
-        Log the start of an operation with clear visual indicator.
+        """Log the start of an operation with clear visual indicator.
 
         Args:
             operation: The name of the operation being started
@@ -221,8 +280,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_BLUE']}▶ STARTING: {operation}{COLORS['RESET']}")
 
     def operation_complete(self, operation: str, details: Optional[str] = None) -> None:
-        """
-        Log the completion of an operation with success status.
+        """Log the completion of an operation with success status.
 
         Args:
             operation: The name of the completed operation
@@ -244,8 +302,7 @@ class SDKLogger:
                 print(f"{COLORS['BRIGHT_GREEN']}✓ COMPLETED: {operation}{COLORS['RESET']}")
 
     def warning(self, message: str) -> None:
-        """
-        Log a warning message with clear visual indicator.
+        """Log a warning message with clear visual indicator.
 
         Args:
             message: The warning message to log
@@ -258,8 +315,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_YELLOW']}⚠ WARNING: {message}{COLORS['RESET']}")
 
     def error(self, message: str, error: Optional[Any] = None) -> None:
-        """
-        Log an error message with clear visual indicator.
+        """Log an error message with clear visual indicator.
 
         Args:
             message: The error message to log
@@ -279,8 +335,7 @@ class SDKLogger:
                 print(f"{COLORS['RED']}✘ ERROR: {message}{COLORS['RESET']}")
 
     def info(self, message: str) -> None:
-        """
-        Log an informational message.
+        """Log an informational message.
 
         Args:
             message: The informational message to log
@@ -293,8 +348,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_BLUE']}{message}{COLORS['RESET']}")
 
     def success(self, message: str) -> None:
-        """
-        Log a success message.
+        """Log a success message.
 
         Args:
             message: The success message to log
@@ -307,8 +361,7 @@ class SDKLogger:
             print(f"{COLORS['BRIGHT_GREEN']}✓ {message}{COLORS['RESET']}")
 
     def create_progress(self, description: str = "Processing") -> Progress:
-        """
-        Create a Rich progress bar for operations.
+        """Create a Rich progress bar for operations.
 
         Args:
             description: Default description for the progress bar
@@ -329,8 +382,7 @@ class SDKLogger:
             return Progress()
 
     def create_table(self, title: str, columns: List[str]) -> Table:
-        """
-        Create a Rich table for displaying structured data.
+        """Create a Rich table for displaying structured data.
 
         Args:
             title: The table title

@@ -1,5 +1,4 @@
-"""
-Example script demonstrating the unified client interface for the Palo Alto Networks SCM SDK.
+"""Example script demonstrating the unified client interface for the Palo Alto Networks SCM SDK.
 
 This example shows how to use the new attribute-based access pattern to create, read,
 update, and delete objects without instantiating individual service objects.
@@ -21,7 +20,7 @@ from scm.exceptions import (
 
 
 def demonstrate_fqdn_address(client):
-    """Demonstrate creating and working with an FQDN address"""
+    """Demonstrate creating and working with an FQDN address."""
     print("\n=== Working with FQDN Address ===")
 
     try:
@@ -67,7 +66,7 @@ def demonstrate_fqdn_address(client):
 
 
 def demonstrate_tag(client):
-    """Demonstrate creating and working with tags"""
+    """Demonstrate creating and working with tags."""
     print("\n=== Working with Tags ===")
 
     try:
@@ -105,6 +104,7 @@ def demonstrate_tag(client):
 
 
 def main():
+    """Run the example demonstrations."""
     # Load environment variables from .env file
     # First try to load from current directory
     env_path = Path(".") / ".env"

@@ -1,3 +1,8 @@
+"""HTTP Server Profiles configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing HTTP server profile objects via the SCM API.
+"""
+
 # scm/config/objects/http_server_profiles.py
 
 # Standard library imports
@@ -15,13 +20,13 @@ from scm.models.objects import (
 
 
 class HTTPServerProfile(BaseObject):
-    """
-    Manages HTTP Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages HTTP Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/objects/v1/http-server-profiles"
@@ -33,6 +38,7 @@ class HTTPServerProfile(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the HttpServerProfiles service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -50,8 +56,7 @@ class HTTPServerProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +66,7 @@ class HTTPServerProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +103,14 @@ class HTTPServerProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> HTTPServerProfileResponseModel:
-        """
-        Creates a new HTTP server profile object.
+        """Create a new HTTP server profile object.
 
         Args:
             data: Dictionary containing the HTTP server profile data
 
         Returns:
             HTTPServerProfileResponseModel: The created HTTP server profile
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         http_server_profile = HTTPServerProfileCreateModel(**data)
@@ -130,14 +136,14 @@ class HTTPServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> HTTPServerProfileResponseModel:
-        """
-        Gets an HTTP server profile object by ID.
+        """Get an HTTP server profile object by ID.
 
         Args:
             object_id: The ID of the HTTP server profile to retrieve
 
         Returns:
             HTTPServerProfileResponseModel: The retrieved HTTP server profile
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -150,14 +156,14 @@ class HTTPServerProfile(BaseObject):
         self,
         http_server_profile: HTTPServerProfileUpdateModel,
     ) -> HTTPServerProfileResponseModel:
-        """
-        Updates an existing HTTP server profile object.
+        """Update an existing HTTP server profile object.
 
         Args:
             http_server_profile: HTTPServerProfileUpdateModel instance containing the update data
 
         Returns:
             HTTPServerProfileResponseModel: The updated HTTP server profile
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = http_server_profile.model_dump(exclude_unset=True)
@@ -181,8 +187,7 @@ class HTTPServerProfile(BaseObject):
         http_server_profiles: List[HTTPServerProfileResponseModel],
         filters: Dict[str, Any],
     ) -> List[HTTPServerProfileResponseModel]:
-        """
-        Apply client-side filtering to the list of HTTP server profiles.
+        """Apply client-side filtering to the list of HTTP server profiles.
 
         Args:
             http_server_profiles: List of HTTPServerProfileResponseModel objects
@@ -190,6 +195,7 @@ class HTTPServerProfile(BaseObject):
 
         Returns:
             List[HTTPServerProfileResponseModel]: Filtered list of HTTP server profiles
+
         """
         filter_criteria = http_server_profiles
 
@@ -233,8 +239,7 @@ class HTTPServerProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """
-        Builds container parameters dictionary.
+        """Build container parameters dictionary.
 
         Args:
             folder: Optional folder name
@@ -243,6 +248,7 @@ class HTTPServerProfile(BaseObject):
 
         Returns:
             dict: Dictionary of non-None container parameters
+
         """
         return {
             k: v
@@ -261,8 +267,7 @@ class HTTPServerProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[HTTPServerProfileResponseModel]:
-        """
-        Lists HTTP server profile objects with optional filtering.
+        """List HTTP server profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -279,6 +284,7 @@ class HTTPServerProfile(BaseObject):
 
         Returns:
             List[HTTPServerProfileResponseModel]: A list of HTTP server profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -402,8 +408,7 @@ class HTTPServerProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> HTTPServerProfileResponseModel:
-        """
-        Fetches a single HTTP server profile object by name.
+        """Fetch a single HTTP server profile by name.
 
         Args:
             name (str): The name of the HTTP server profile to fetch.
@@ -413,6 +418,7 @@ class HTTPServerProfile(BaseObject):
 
         Returns:
             HTTPServerProfileResponseModel: The fetched HTTP server profile object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -497,11 +503,11 @@ class HTTPServerProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an HTTP server profile object.
+        """Delete an HTTP server profile object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

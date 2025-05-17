@@ -1,5 +1,7 @@
 # tests/scm/config/objects/test_http_server_profiles.py
 
+"""Tests for HTTP server profile configuration objects."""
+
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Service Connection objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Service Connection objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Service Connection configurations and operations commonly
 used in enterprise networks, including:
@@ -151,8 +150,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -232,8 +230,7 @@ def initialize_client():
 
 
 def create_basic_service_connection(sc_manager, ipsec_tunnel=None):
-    """
-    Create a basic service connection without complex configurations.
+    """Create a basic service connection without complex configurations.
 
     This function demonstrates creating a simple service connection with
     minimal configuration options.
@@ -305,8 +302,7 @@ def create_basic_service_connection(sc_manager, ipsec_tunnel=None):
 
 
 def create_bgp_service_connection(sc_manager, ipsec_tunnel=None):
-    """
-    Create a service connection with BGP configuration.
+    """Create a service connection with BGP configuration.
 
     This function demonstrates creating a service connection with
     BGP peering configuration.
@@ -392,8 +388,7 @@ def create_bgp_service_connection(sc_manager, ipsec_tunnel=None):
 
 
 def create_qos_service_connection(sc_manager, ipsec_tunnel=None):
-    """
-    Create a service connection with QoS configuration.
+    """Create a service connection with QoS configuration.
 
     This function demonstrates creating a service connection with
     Quality of Service settings.
@@ -467,8 +462,7 @@ def create_qos_service_connection(sc_manager, ipsec_tunnel=None):
 
 
 def create_advanced_service_connection(sc_manager, ipsec_tunnel=None, secondary_tunnel=None):
-    """
-    Create a service connection with advanced configuration options.
+    """Create a service connection with advanced configuration options.
 
     This function demonstrates creating a service connection with
     multiple advanced settings enabled.
@@ -576,8 +570,7 @@ def create_advanced_service_connection(sc_manager, ipsec_tunnel=None, secondary_
 
 
 def fetch_and_update_service_connection(sc_manager, connection_id):
-    """
-    Fetch a service connection by ID and update its configuration.
+    """Fetch a service connection by ID and update its configuration.
 
     This function demonstrates how to:
     1. Retrieve an existing service connection using its ID
@@ -655,8 +648,7 @@ def fetch_and_update_service_connection(sc_manager, connection_id):
 
 
 def list_and_filter_service_connections(sc_manager):
-    """
-    List and filter service connections.
+    """List and filter service connections.
 
     This function demonstrates how to:
     1. List all service connections
@@ -752,8 +744,7 @@ def list_and_filter_service_connections(sc_manager):
 
 
 def fetch_service_connection_by_name(sc_manager, connection_name):
-    """
-    Fetch a service connection by name.
+    """Fetch a service connection by name.
 
     This function demonstrates how to:
     1. Retrieve a service connection using its name instead of ID
@@ -790,8 +781,7 @@ def fetch_service_connection_by_name(sc_manager, connection_name):
 
 
 def cleanup_service_connections(sc_manager, connection_ids):
-    """
-    Delete the service connections created in this example.
+    """Delete the service connections created in this example.
 
     This function will try to delete all the created service connections.
 
@@ -829,8 +819,7 @@ def cleanup_service_connections(sc_manager, connection_ids):
 
 
 def generate_service_connection_report(sc_manager, connection_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all service connections created by the script.
+    """Generate a comprehensive CSV report of all service connections created by the script.
 
     This function fetches detailed information about each service connection and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -974,8 +963,7 @@ def generate_service_connection_report(sc_manager, connection_ids, execution_tim
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the service connection example script.
+    """Parse command-line arguments for the service connection example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1045,8 +1033,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of service connection examples for Strata Cloud Manager.
+    """Execute the comprehensive set of service connection examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

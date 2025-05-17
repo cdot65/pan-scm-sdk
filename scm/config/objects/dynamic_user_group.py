@@ -1,3 +1,8 @@
+"""Dynamic User Group configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing dynamic user group objects via the SCM API.
+"""
+
 # scm/config/objects/dynamic_user_group.py
 
 # Standard library imports
@@ -15,13 +20,13 @@ from scm.models.objects import (
 
 
 class DynamicUserGroup(BaseObject):
-    """
-    Manages Dynamic User Group objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Dynamic User Group objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/objects/v1/dynamic-user-groups"
@@ -33,6 +38,7 @@ class DynamicUserGroup(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the DynamicUserGroup service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -50,8 +56,7 @@ class DynamicUserGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +66,7 @@ class DynamicUserGroup(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +103,14 @@ class DynamicUserGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DynamicUserGroupResponseModel:
-        """
-        Creates a new dynamic user group object.
+        """Create a new dynamic user group object.
 
         Args:
             data: Dictionary containing the dynamic user group data
 
         Returns:
             DynamicUserGroupResponseModel: The created dynamic user group
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         dynamic_user_group = DynamicUserGroupCreateModel(**data)
@@ -125,14 +131,14 @@ class DynamicUserGroup(BaseObject):
         self,
         object_id: str,
     ) -> DynamicUserGroupResponseModel:
-        """
-        Gets a dynamic user group object by ID.
+        """Get a dynamic user group object by ID.
 
         Args:
             object_id: The ID of the dynamic user group to retrieve
 
         Returns:
             DynamicUserGroupResponseModel: The retrieved dynamic user group
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -145,14 +151,14 @@ class DynamicUserGroup(BaseObject):
         self,
         dynamic_user_group: DynamicUserGroupUpdateModel,
     ) -> DynamicUserGroupResponseModel:
-        """
-        Updates an existing dynamic user group object.
+        """Update an existing dynamic user group object.
 
         Args:
             dynamic_user_group: DynamicUserGroupUpdateModel instance containing the update data
 
         Returns:
             DynamicUserGroupResponseModel: The updated dynamic user group
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = dynamic_user_group.model_dump(exclude_unset=True)
@@ -176,8 +182,7 @@ class DynamicUserGroup(BaseObject):
         dynamic_user_groups: List[DynamicUserGroupResponseModel],
         filters: Dict[str, Any],
     ) -> List[DynamicUserGroupResponseModel]:
-        """
-        Apply client-side filtering to the list of dynamic user groups.
+        """Apply client-side filtering to the list of dynamic user groups.
 
         Args:
             dynamic_user_groups: List of DynamicUserGroupResponseModel objects
@@ -185,6 +190,7 @@ class DynamicUserGroup(BaseObject):
 
         Returns:
             List[DynamicUserGroupResponseModel]: Filtered list of dynamic user groups
+
         """
         filter_criteria = dynamic_user_groups
 
@@ -228,8 +234,7 @@ class DynamicUserGroup(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """
-        Builds container parameters dictionary.
+        """Build container parameters dictionary.
 
         Args:
             folder: Optional folder name
@@ -238,6 +243,7 @@ class DynamicUserGroup(BaseObject):
 
         Returns:
             dict: Dictionary of non-None container parameters
+
         """
         return {
             k: v
@@ -256,8 +262,7 @@ class DynamicUserGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[DynamicUserGroupResponseModel]:
-        """
-        Lists dynamic user group objects with optional filtering.
+        """List dynamic user group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -274,6 +279,7 @@ class DynamicUserGroup(BaseObject):
 
         Returns:
             List[DynamicUserGroupResponseModel]: A list of dynamic user group objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -397,8 +403,7 @@ class DynamicUserGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> DynamicUserGroupResponseModel:
-        """
-        Fetches a single dynamic user group object by name.
+        """Fetch a single dynamic user group object by name.
 
         Args:
             name (str): The name of the dynamic user group to fetch.
@@ -408,6 +413,7 @@ class DynamicUserGroup(BaseObject):
 
         Returns:
             DynamicUserGroupResponseModel: The fetched dynamic user group object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -479,11 +485,11 @@ class DynamicUserGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a dynamic user group object.
+        """Delete a dynamic user group object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

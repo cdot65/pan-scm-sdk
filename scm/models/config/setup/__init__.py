@@ -1,4 +1,4 @@
-"""SCM Models for Config Setup Endpoints"""
+"""SCM Models for Config Setup Endpoints."""
 
 from .devices import (
     AvailableLicenseModel,

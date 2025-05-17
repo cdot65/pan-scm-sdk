@@ -1,4 +1,9 @@
-# scm/config/network/nat_rule.py
+"""NAT Rules configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing NAT rule objects via the SCM API.
+"""
+
+# scm/config/network/nat_rules.py
 
 # Standard library imports
 import logging
@@ -15,12 +20,13 @@ from scm.models.network import (
 
 
 class NatRule(BaseObject):
-    """
-    Manages NAT Rule objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages NAT Rule objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/network/v1/nat-rules"
@@ -32,6 +38,7 @@ class NatRule(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the NatRules service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,8 +56,7 @@ class NatRule(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +66,7 @@ class NatRule(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,8 +104,7 @@ class NatRule(BaseObject):
         data: Dict[str, Any],
         position: str = "pre",
     ) -> NatRuleResponseModel:
-        """
-        Creates a new NAT rule object.
+        """Create a new NAT rule object.
 
         Args:
             data: Dictionary containing the NAT rule configuration
@@ -106,6 +112,7 @@ class NatRule(BaseObject):
 
         Returns:
             NatRuleResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         nat_rule = NatRuleCreateModel(**data)
@@ -130,14 +137,14 @@ class NatRule(BaseObject):
         self,
         object_id: str,
     ) -> NatRuleResponseModel:
-        """
-        Gets a NAT rule object by ID.
+        """Get a NAT rule object by ID.
 
         Args:
             object_id: The ID of the NAT rule to retrieve
 
         Returns:
             NatRuleResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -148,8 +155,7 @@ class NatRule(BaseObject):
         rule: NatRuleUpdateModel,
         position: str = "pre",
     ) -> NatRuleResponseModel:
-        """
-        Updates an existing NAT rule object.
+        """Update an existing NAT rule object.
 
         Args:
             rule: NatRuleUpdateModel instance containing the update data
@@ -157,6 +163,7 @@ class NatRule(BaseObject):
 
         Returns:
             NatRuleResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = rule.model_dump(
@@ -184,8 +191,7 @@ class NatRule(BaseObject):
         rules: List[NatRuleResponseModel],
         filters: Dict[str, Any],
     ) -> List[NatRuleResponseModel]:
-        """
-        Apply client-side filtering to the list of NAT rules.
+        """Apply client-side filtering to the list of NAT rules.
 
         Args:
             rules: List of NatRuleResponseModel objects
@@ -193,6 +199,7 @@ class NatRule(BaseObject):
 
         Returns:
             List[NatRuleResponseModel]: Filtered list of NAT rules
+
         """
         filter_criteria = rules
 
@@ -286,7 +293,7 @@ class NatRule(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -305,8 +312,7 @@ class NatRule(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[NatRuleResponseModel]:
-        """
-        Lists NAT rule objects with optional filtering.
+        """List NAT rule objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -328,6 +334,7 @@ class NatRule(BaseObject):
 
         Returns:
             List[NatRuleResponseModel]: A list of NAT rule objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -453,8 +460,7 @@ class NatRule(BaseObject):
         device: Optional[str] = None,
         position: str = "pre",
     ) -> NatRuleResponseModel:
-        """
-        Fetches a single NAT rule by name.
+        """Fetch a single NAT rule by name.
 
         Args:
             name: The name of the NAT rule to fetch
@@ -465,6 +471,7 @@ class NatRule(BaseObject):
 
         Returns:
             NatRuleResponseModel: The fetched NAT rule object
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -537,11 +544,11 @@ class NatRule(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a NAT rule object.
+        """Delete a NAT rule object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

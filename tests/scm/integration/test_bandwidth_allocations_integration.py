@@ -1,5 +1,4 @@
-"""
-Integration tests for bandwidth allocations service.
+"""Integration tests for bandwidth allocations service.
 
 These tests verify that the different components of the SDK
 work together correctly to handle bandwidth allocations.
@@ -18,8 +17,7 @@ from scm.models.deployment import (
 
 @pytest.mark.integration
 class TestBandwidthAllocationIntegration:
-    """
-    Integration tests for the bandwidth allocations service.
+    """Integration tests for the bandwidth allocations service.
 
     These tests focus on the integration between the client, service,
     and models rather than the API interactions.

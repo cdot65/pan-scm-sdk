@@ -1,5 +1,4 @@
-"""
-Models for interacting with Labels in Palo Alto Networks' Strata Cloud Manager.
+"""Models for interacting with Labels in Palo Alto Networks' Strata Cloud Manager.
 
 This module defines the Pydantic models used for creating, updating, and
 representing Label resources in the Strata Cloud Manager.
@@ -12,9 +11,7 @@ from pydantic import BaseModel, Field
 
 
 class LabelBaseModel(BaseModel):
-    """
-    Base model for Label resources per OpenAPI spec.
-    """
+    """Base model for Label resources per OpenAPI spec."""
 
     name: str = Field(
         ...,  # required

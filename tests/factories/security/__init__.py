@@ -1,4 +1,7 @@
 # tests/factories/security/__init__.py
+
+"""Factory definitions for security objects."""
+
 from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileBaseFactory,
     AntiSpywareProfileCreateApiFactory,

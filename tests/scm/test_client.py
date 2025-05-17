@@ -1,4 +1,7 @@
 # tests/test_client.py
+
+"""Tests for SCM client functionality."""
+
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -760,6 +763,8 @@ class TestClientJobMethods(TestClientBase):
 
 
 class TestClientCommitMethods(TestClientBase):
+    """Tests for client commit methods."""
+
     @patch("requests.Session.request")
     def test_commit_with_bearer_token(self, mock_request):
         """Test commit method requires admin when using bearer token."""

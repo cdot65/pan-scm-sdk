@@ -1,3 +1,8 @@
+"""IKE Gateway models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing IKE gateway objects and related data.
+"""
+
 from enum import Enum
 from typing import Any, Dict, Optional
 from uuid import UUID
@@ -356,6 +361,15 @@ class IKEGatewayCreateModel(IKEGatewayBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "IKEGatewayCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            IKEGatewayCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:

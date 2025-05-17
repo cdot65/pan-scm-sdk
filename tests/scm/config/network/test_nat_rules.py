@@ -1,3 +1,7 @@
+"""Test module for NAT Rules configuration service.
+
+This module contains unit tests for the NAT Rules configuration service and its related models.
+"""
 # tests/scm/config/network/test_nat_rules.py
 
 from unittest.mock import MagicMock
@@ -228,8 +232,8 @@ class TestNatRuleList(TestNatRuleBase):
             self.client.list(folder="Shared")
 
     def test_list_response_missing_data_field(self):
-        """
-        Test that InvalidObjectError is raised when the API response
+        """Test that InvalidObjectError is raised when the API response.
+
         is missing the 'data' field.
         """
         # Simulate an API response without the 'data' key
@@ -244,8 +248,8 @@ class TestNatRuleList(TestNatRuleBase):
         assert "field missing in the response" in error_msg
 
     def test_list_response_invalid_data_field_type(self):
-        """
-        Test that InvalidObjectError is raised when the API response's
+        """Test that InvalidObjectError is raised when the API response's.
+
         'data' field is not a list.
         """
         # Simulate an API response with 'data' not being a list
@@ -261,8 +265,8 @@ class TestNatRuleList(TestNatRuleBase):
         assert "field must be a list" in error_msg
 
     def test_fetch_missing_id_field(self):
-        """
-        Test that fetch() raises an InvalidObjectError when the API response
+        """Test that fetch() raises an InvalidObjectError when the API response.
+
         is missing the 'id' field.
         """
         # Create test data using a factory that produces a valid container (using device)
@@ -553,8 +557,11 @@ class TestNatRuleFetch(TestNatRuleBase):
 
 
 class TestNatRuleApplyFilters:
+    """Tests for NAT rule filter application."""
+
     @pytest.fixture(autouse=True)
     def setup(self):
+        """Test fixture for setting up NAT rules."""
         # Create two dummy NAT rule objects with varying attributes.
         self.rule1 = NatRuleResponseFactory(
             name="rule1",
@@ -577,38 +584,45 @@ class TestNatRuleApplyFilters:
         self.rules = [self.rule1, self.rule2]
 
     def test_invalid_nat_type_filter(self):
+        """Test invalid NAT type filter raises exception."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"nat_type": "ipv4"})
         # Expect the error message indicating the filter must be a list
         assert exc_info.value.message == "'nat_type' filter must be a list"
 
     def test_invalid_service_filter(self):
+        """Test invalid service filter raises exception."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"service": "http"})
         # Expect the error message indicating the filter must be a list
         assert exc_info.value.message == "'service' filter must be a list"
 
     def test_invalid_destination_filter(self):
+        """Test invalid destination filter raises exception."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"destination": "10.0.0.1"})
         assert exc_info.value.message == "'destination' filter must be a list"
 
     def test_invalid_source_filter(self):
+        """Test invalid source filter raises exception."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"source": "any"})
         assert exc_info.value.message == "'source' filter must be a list"
 
     def test_invalid_tag_filter(self):
+        """Test invalid tag filter raises exception."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"tag": "test"})
         assert exc_info.value.message == "'tag' filter must be a list"
 
     def test_invalid_disabled_filter_string(self):
+        """Test invalid disabled filter with string value."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"disabled": "false"})
         assert exc_info.value.message == "'disabled' filter must be a boolean"
 
     def test_invalid_disabled_filter_int(self):
+        """Test invalid disabled filter with integer value."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"disabled": 0})
         assert exc_info.value.message == "'disabled' filter must be a boolean"
@@ -619,6 +633,7 @@ class TestNatRuleListFiltering:
 
     @pytest.fixture(autouse=True)
     def setup(self):
+        """Test fixture for creating dummy NAT rule response objects."""
         # Create dummy NAT rule response objects.
         # Note: NatRuleResponseModel may not include container attributes,
         # so we define them here in the factory by using extra fields.
@@ -654,6 +669,7 @@ class TestNatRuleListFiltering:
 
     # --- Direct _apply_filters tests remain unchanged ---
     def test_filter_by_nat_type(self):
+        """Test filtering by NAT type."""
         filters = {"nat_type": ["ipv4"]}
         filtered = NatRule._apply_filters(self.rules, filters)
         assert len(filtered) == 2
@@ -701,6 +717,7 @@ class TestNatRuleListFiltering:
     # --- Tests for invalid filter types ---
 
     def test_invalid_nat_type_filter(self):
+        """Test invalid NAT type filter raises exception."""
         with pytest.raises(InvalidObjectError) as exc_info:
             NatRule._apply_filters(self.rules, {"nat_type": "ipv4"})
         assert exc_info.value.message == "'nat_type' filter must be a list"
@@ -737,9 +754,11 @@ class TestNatRuleListFiltering:
 
 
 class TestNatRuleContainerFiltering(TestNatRuleBase):
+    """Tests for NAT rule container filtering."""
+
     def test_exact_match_filter(self):
-        """
-        Test that when exact_match=True, only objects whose container
+        """Test that when exact_match=True, only objects whose container.
+
         field exactly matches the provided value are returned.
         """
         # Simulate API response with two NAT rule objects:
@@ -766,8 +785,8 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         assert results[0].name == "rule_shared"
 
     def test_exclude_folders_filter(self):
-        """
-        Test that when exclude_folders is provided, any object whose folder is in
+        """Test that when exclude_folders is provided, any object whose folder is in.
+
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects: one with folder "Shared" and one with folder "All"
@@ -791,8 +810,8 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         assert results[0].name == "rule_shared"
 
     def test_exclude_snippets_filter(self):
-        """
-        Test that when exclude_snippets is provided, any object whose snippet is in
+        """Test that when exclude_snippets is provided, any object whose snippet is in.
+
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects having different snippet values.
@@ -818,8 +837,8 @@ class TestNatRuleContainerFiltering(TestNatRuleBase):
         assert results[0].name == "rule_snippet"
 
     def test_exclude_devices_filter(self):
-        """
-        Test that when exclude_devices is provided, any object whose device is in
+        """Test that when exclude_devices is provided, any object whose device is in.
+
         the exclusion list is removed from the results.
         """
         # Simulate API response with two objects having different device values.

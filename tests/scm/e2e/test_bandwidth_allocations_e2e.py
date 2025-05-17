@@ -1,5 +1,4 @@
-"""
-End-to-end tests for bandwidth allocations service.
+"""End-to-end tests for bandwidth allocations service.
 
 These tests verify that the bandwidth allocations service properly
 interacts with the SCM API to perform CRUD operations.
@@ -16,8 +15,7 @@ from tests.scm.mock_scm import MockScm
 
 @pytest.mark.e2e
 class TestBandwidthAllocationsE2E(unittest.TestCase):
-    """
-    End-to-end tests for bandwidth allocations service.
+    """End-to-end tests for bandwidth allocations service.
 
     These tests are designed to validate the complete CRUD cycle using mocked API responses.
     This ensures that the service properly interacts with its models and handles API responses.

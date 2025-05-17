@@ -1,3 +1,4 @@
+"""scm.models.deployment: Deployment-related models."""
 # scm/models/deployment/__init__.py
 
 from .bandwidth_allocations import (

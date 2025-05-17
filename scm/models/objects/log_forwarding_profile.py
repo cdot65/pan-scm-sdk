@@ -1,3 +1,8 @@
+"""Log Forwarding Profile models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing log forwarding profile objects and related data.
+"""
+
 # scm/models/objects/log_forwarding_profile.py
 
 # Standard library imports
@@ -9,8 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class MatchListItem(BaseModel):
-    """
-    Represents a match profile configuration within a log forwarding profile.
+    """Represents a match profile configuration within a log forwarding profile.
 
     Attributes:
         name (str): Name of the match profile.
@@ -21,6 +25,7 @@ class MatchListItem(BaseModel):
         send_syslog (Optional[List[str]]): A list of syslog server profiles.
         send_to_panorama (Optional[bool]): Flag to send logs to Panorama.
         quarantine (Optional[bool]): Flag to quarantine matching logs.
+
     """
 
     name: str = Field(..., description="Name of the match profile", max_length=63)
@@ -53,8 +58,7 @@ class MatchListItem(BaseModel):
 
 
 class LogForwardingProfileBaseModel(BaseModel):
-    """
-    Base model for Log Forwarding Profile objects containing fields common to all CRUD operations.
+    """Base model for Log Forwarding Profile objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the log forwarding profile.
@@ -64,6 +68,7 @@ class LogForwardingProfileBaseModel(BaseModel):
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
         enhanced_application_logging (Optional[bool]): Flag for enhanced application logging.
+
     """
 
     # Required fields
@@ -123,8 +128,7 @@ class LogForwardingProfileBaseModel(BaseModel):
 
 
 class LogForwardingProfileCreateModel(LogForwardingProfileBaseModel):
-    """
-    Represents the creation of a new Log Forwarding Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Log Forwarding Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a LogForwardingProfileCreateModel object,
     it inherits all fields from the LogForwardingProfileBaseModel class, and provides a custom validator
@@ -135,12 +139,13 @@ class LogForwardingProfileCreateModel(LogForwardingProfileBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "LogForwardingProfileCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -153,13 +158,13 @@ class LogForwardingProfileCreateModel(LogForwardingProfileBaseModel):
 
 
 class LogForwardingProfileUpdateModel(LogForwardingProfileBaseModel):
-    """
-    Represents the update of an existing Log Forwarding Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Log Forwarding Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a LogForwardingProfileUpdateModel object.
 
     Attributes:
         id (UUID): The UUID of the log forwarding profile.
+
     """
 
     id: UUID = Field(
@@ -170,8 +175,7 @@ class LogForwardingProfileUpdateModel(LogForwardingProfileBaseModel):
 
 
 class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
-    """
-    Represents the response model for a Log Forwarding Profile object from Palo Alto Networks' Strata Cloud Manager.
+    """Represents the response model for a Log Forwarding Profile object from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a LogForwardingProfileResponseModel object,
     it inherits all fields from the LogForwardingProfileBaseModel class, and adds its own attribute for the
@@ -179,6 +183,7 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
 
     Attributes:
         id (Optional[UUID]): The UUID of the log forwarding profile. Not required for predefined snippets.
+
     """
 
     id: Optional[UUID] = Field(
@@ -189,7 +194,7 @@ class LogForwardingProfileResponseModel(LogForwardingProfileBaseModel):
 
     @model_validator(mode="after")
     def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
-        """Validates that non-predefined profiles have an ID."""
+        """Validate that non-predefined profiles have an ID."""
         # Skip validation if snippet is "predefined-snippet"
         if self.snippet == "predefined-snippet":
             return self

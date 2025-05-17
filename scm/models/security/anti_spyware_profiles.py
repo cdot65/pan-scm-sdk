@@ -1,3 +1,8 @@
+"""Anti-Spyware Profiles security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing anti-spyware profile objects and related data.
+"""
+
 # scm/models/security/anti_spyware_profile.py
 
 from enum import Enum
@@ -27,11 +32,11 @@ class AntiSpywareInlinePolicyAction(str, Enum):
 
 
 class AntiSpywareExemptIpEntry(BaseModel):
-    """
-    Represents an entry in the 'exempt_ip' list within a threat exception.
+    """Represents an entry in the 'exempt_ip' list within a threat exception.
 
     Attributes:
         name (str): Name of the IP address or range to exempt.
+
     """
 
     name: str = Field(
@@ -129,8 +134,7 @@ class AntiSpywareBlockIpAction(BaseModel):
 
 
 class AntiSpywareActionRequest(RootModel[dict]):
-    """
-    Represents the 'action' field in rules and threat exceptions for requests.
+    """Represents the 'action' field in rules and threat exceptions for requests.
 
     Enforces that exactly one action is provided.
     """
@@ -138,6 +142,18 @@ class AntiSpywareActionRequest(RootModel[dict]):
     @model_validator(mode="before")
     @classmethod
     def convert_action(cls, values):
+        """Convert and validate the action field, ensuring exactly one action is provided.
+
+        Args:
+            values (Any): The action value to validate and convert.
+
+        Returns:
+            dict: The validated action dictionary.
+
+        Raises:
+            ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+
+        """
         if isinstance(values, str):
             # Convert string to dict
             values = {values: {}}
@@ -162,18 +178,35 @@ class AntiSpywareActionRequest(RootModel[dict]):
         return values
 
     def get_action_name(self) -> str:
+        """Return the name of the action in the root dictionary.
+
+        Returns:
+            str: The action name, or 'unknown' if not set.
+
+        """
         return next(iter(self.root.keys()), "unknown")
 
 
 class AntiSpywareActionResponse(RootModel[dict]):
-    """
-    Represents the 'action' field in rules and threat exceptions for responses.
+    """Represents the 'action' field in rules and threat exceptions for responses.
 
     Accepts empty dictionaries.
     """
 
     @model_validator(mode="before")
     def validate_action(cls, values):
+        """Convert and validate the action field for response models.
+
+        Args:
+            values (Any): The action value to validate and convert.
+
+        Returns:
+            dict: The validated action dictionary.
+
+        Raises:
+            ValueError: If the action is not a string or dict, or if not exactly one action is provided.
+
+        """
         if isinstance(values, str):
             # Convert string to dict
             values = {values: {}}
@@ -199,6 +232,12 @@ class AntiSpywareActionResponse(RootModel[dict]):
         return values
 
     def get_action_name(self) -> str:
+        """Return the name of the action in the root dictionary.
+
+        Returns:
+            str: The action name, or 'unknown' if not set.
+
+        """
         return next(iter(self.root.keys()), "unknown")
 
 
@@ -232,6 +271,15 @@ class AntiSpywareRuleBaseModel(BaseModel):
         mode="before",
     )
     def default_threat_name(cls, v):
+        """Set the default threat name to 'any' if not provided.
+
+        Args:
+            v (Optional[str]): The threat name value.
+
+        Returns:
+            str: The threat name, or 'any' if not provided.
+
+        """
         return v or "any"
 
 
@@ -257,9 +305,7 @@ class AntiSpywareThreatExceptionBase(BaseModel):
 
 
 class AntiSpywareProfileBase(BaseModel):
-    """
-    Base model for Anti-Spyware Profile containing common fields across all operations.
-    """
+    """Base model for Anti-Spyware Profile containing common fields across all operations."""
 
     model_config = ConfigDict(
         validate_assignment=True,
@@ -322,13 +368,22 @@ class AntiSpywareProfileBase(BaseModel):
 
 
 class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
-    """
-    Model for creating a new Anti-Spyware Profile.
+    """Model for creating a new Anti-Spyware Profile.
+
     Inherits from base model and adds create-specific validation.
     """
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "AntiSpywareProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            AntiSpywareProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = [
             "folder",
             "snippet",
@@ -341,8 +396,8 @@ class AntiSpywareProfileCreateModel(AntiSpywareProfileBase):
 
 
 class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
-    """
-    Model for updating an existing Anti-Spyware Profile.
+    """Model for updating an existing Anti-Spyware Profile.
+
     All fields are optional to allow partial updates.
     """
 
@@ -353,8 +408,8 @@ class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
 
 
 class AntiSpywareProfileResponseModel(AntiSpywareProfileBase):
-    """
-    Model for Anti-Spyware Profile API responses.
+    """Model for Anti-Spyware Profile API responses.
+
     Includes all base fields plus the id field.
     """
 

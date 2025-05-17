@@ -1,3 +1,8 @@
+"""Dynamic User Group models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing dynamic user group objects and related data.
+"""
+
 # scm/models/objects/dynamic_user_group.py
 
 # Standard library imports
@@ -18,8 +23,7 @@ TagString = constr(max_length=127)
 
 
 class DynamicUserGroupBaseModel(BaseModel):
-    """
-    Base model for Dynamic User Group objects containing fields common to all CRUD operations.
+    """Base model for Dynamic User Group objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the dynamic user group.
@@ -29,6 +33,7 @@ class DynamicUserGroupBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -104,8 +109,7 @@ class DynamicUserGroupBaseModel(BaseModel):
 
 
 class DynamicUserGroupCreateModel(DynamicUserGroupBaseModel):
-    """
-    Represents the creation of a new Dynamic User Group object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Dynamic User Group object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a DynamicUserGroupCreateModel object,
     it inherits all fields from the DynamicUserGroupBaseModel class, and provides a custom validator
@@ -116,12 +120,13 @@ class DynamicUserGroupCreateModel(DynamicUserGroupBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "DynamicUserGroupCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -134,8 +139,7 @@ class DynamicUserGroupCreateModel(DynamicUserGroupBaseModel):
 
 
 class DynamicUserGroupUpdateModel(DynamicUserGroupBaseModel):
-    """
-    Represents the update of an existing Dynamic User Group object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Dynamic User Group object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a DynamicUserGroupUpdateModel object,
     and includes an optional id field.
@@ -149,8 +153,7 @@ class DynamicUserGroupUpdateModel(DynamicUserGroupBaseModel):
 
 
 class DynamicUserGroupResponseModel(DynamicUserGroupBaseModel):
-    """
-    Represents the response model for a Dynamic User Group object from Palo Alto Networks' Strata Cloud Manager.
+    """Represents the response model for a Dynamic User Group object from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a DynamicUserGroupResponseModel object,
     it inherits all fields from the DynamicUserGroupBaseModel class, and adds its own attribute for the
@@ -158,6 +161,7 @@ class DynamicUserGroupResponseModel(DynamicUserGroupBaseModel):
 
     Attributes:
         id (UUID): The UUID of the dynamic user group.
+
     """
 
     id: UUID = Field(

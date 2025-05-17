@@ -1,5 +1,4 @@
-"""
-Models for interacting with Snippets in Palo Alto Networks' Strata Cloud Manager.
+"""Models for interacting with Snippets in Palo Alto Networks' Strata Cloud Manager.
 
 This module defines the Pydantic models used for creating, updating, and
 representing Snippet resources in the Strata Cloud Manager.
@@ -27,14 +26,14 @@ class FolderReference(BaseModel):
 
 
 class SnippetBaseModel(BaseModel):
-    """
-    Base model for Snippet resources containing common fields.
+    """Base model for Snippet resources containing common fields.
 
     Attributes:
         name: The name of the snippet.
         description: Optional description of the snippet.
         labels: Optional list of labels to apply to the snippet.
         enable_prefix: Whether to enable prefix for the snippet.
+
     """
 
     name: str = Field(
@@ -64,8 +63,7 @@ class SnippetBaseModel(BaseModel):
 
 
 class SnippetCreateModel(SnippetBaseModel):
-    """
-    Model for creating new Snippet resources.
+    """Model for creating new Snippet resources.
 
     Inherits all fields from SnippetBaseModel without additional fields.
     """
@@ -74,11 +72,11 @@ class SnippetCreateModel(SnippetBaseModel):
 
 
 class SnippetUpdateModel(SnippetBaseModel):
-    """
-    Model for updating existing Snippet resources.
+    """Model for updating existing Snippet resources.
 
     Attributes:
         id: The unique identifier of the snippet to update.
+
     """
 
     id: UUID = Field(
@@ -88,8 +86,7 @@ class SnippetUpdateModel(SnippetBaseModel):
 
 
 class SnippetResponseModel(SnippetBaseModel):
-    """
-    Model for Snippet responses from the API.
+    """Model for Snippet responses from the API.
 
     Attributes:
         id: The unique identifier of the snippet.
@@ -99,6 +96,7 @@ class SnippetResponseModel(SnippetBaseModel):
         created_in: Timestamp of when the snippet was created.
         folders: Folders the snippet is applied to.
         shared_in: Sharing scope of the snippet.
+
     """
 
     id: UUID = Field(

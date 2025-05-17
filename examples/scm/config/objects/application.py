@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Application objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Application objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Application object configurations and operations commonly
 used in enterprise networks, including:
@@ -148,8 +147,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -229,8 +227,7 @@ def initialize_client():
 
 
 def create_business_application(applications, folder="Texas"):
-    """
-    Create a standard business application.
+    """Create a standard business application.
 
     This function demonstrates creating a standard business application,
     commonly used for corporate systems.
@@ -291,8 +288,7 @@ def create_business_application(applications, folder="Texas"):
 
 
 def create_secure_application(applications, folder="Texas"):
-    """
-    Create a secure application with special security attributes.
+    """Create a secure application with special security attributes.
 
     This function demonstrates creating a secure application with specific security attributes,
     commonly used for secure messaging, VPN, or other trusted applications.
@@ -359,8 +355,7 @@ def create_secure_application(applications, folder="Texas"):
 
 
 def create_high_risk_application(applications, folder="Texas"):
-    """
-    Create a high-risk application.
+    """Create a high-risk application.
 
     This function demonstrates creating a high-risk application,
     which might represent a potentially dangerous or suspicious application.
@@ -429,8 +424,7 @@ def create_high_risk_application(applications, folder="Texas"):
 
 
 def create_protocol_application(applications, folder="Texas"):
-    """
-    Create a network protocol application.
+    """Create a network protocol application.
 
     This function demonstrates creating a network protocol application,
     commonly used for specific network protocols not covered by predefined applications.
@@ -491,8 +485,7 @@ def create_protocol_application(applications, folder="Texas"):
 
 
 def fetch_and_update_application(applications, application_id):
-    """
-    Fetch an application object by ID and update its description and risk level.
+    """Fetch an application object by ID and update its description and risk level.
 
     This function demonstrates how to:
     1. Retrieve an existing application object using its ID
@@ -539,8 +532,7 @@ def fetch_and_update_application(applications, application_id):
 
 
 def list_and_filter_applications(applications):
-    """
-    List and filter application objects.
+    """List and filter application objects.
 
     This function demonstrates how to:
     1. List the applications we just created (by ID)
@@ -650,8 +642,7 @@ def list_and_filter_applications(applications):
 
 
 def cleanup_application_objects(applications, application_ids):
-    """
-    Delete the application objects created in this example.
+    """Delete the application objects created in this example.
 
     Args:
         applications: The Application manager instance
@@ -670,8 +661,7 @@ def cleanup_application_objects(applications, application_ids):
 
 
 def create_bulk_application_objects(applications, folder="Texas"):
-    """
-    Create multiple application objects in a batch.
+    """Create multiple application objects in a batch.
 
     This function demonstrates creating multiple application objects in a batch,
     which is useful for setting up multiple applications at once.
@@ -735,8 +725,7 @@ def create_bulk_application_objects(applications, folder="Texas"):
 
 
 def generate_application_report(applications, application_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all application objects created by the script.
+    """Generate a comprehensive CSV report of all application objects created by the script.
 
     This function fetches detailed information about each application object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -896,8 +885,7 @@ def generate_application_report(applications, application_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the application example script.
+    """Parse command-line arguments for the application example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -954,8 +942,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of application object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of application object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

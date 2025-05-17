@@ -1,5 +1,7 @@
 # tests/scm/config/setup/test_folder.py
 
+"""Tests for folder setup configuration."""
+
 # Standard library imports
 from unittest.mock import MagicMock, patch
 
@@ -119,6 +121,7 @@ class TestFolderGet(TestFolderBase):
         assert result.parent == mock_response.parent
 
     def test_get_folder_404_and_other_error(self, folder_service, mock_scm_client):
+        """Test get folder with 404 and other errors."""
         # 404 error -> ObjectNotPresentError
         mock_scm_client.get.side_effect = APIError("not found", http_status_code=404)
         with pytest.raises(ObjectNotPresentError):
@@ -246,6 +249,7 @@ class TestFolderList(TestFolderBase):
             assert f.name == "foo"
 
     def test_list_server_side_param_building(self, folder_service, mock_scm_client):
+        """Test list with server-side parameter building."""
         # labels param
         mock_scm_client.get.return_value = {"data": []}
         folder_service.list(labels=["a", "b"])
@@ -295,9 +299,11 @@ class TestFolderMisc(TestFolderBase):
     """Tests for Folder service miscellaneous methods."""
 
     def test_validate_max_limit_none(self, folder_service):
+        """Test validate max limit with None value."""
         assert folder_service._validate_max_limit(None) == folder_service.DEFAULT_MAX_LIMIT
 
     def test_validate_max_limit_invalid_type(self, folder_service):
+        """Test validate max limit with invalid type."""
         with pytest.raises(InvalidObjectError) as exc:
             folder_service._validate_max_limit("not-an-int")
         assert "{'error': 'Invalid max_limit type'} - HTTP error: 400 - API error: E003" in str(
@@ -305,6 +311,7 @@ class TestFolderMisc(TestFolderBase):
         )
 
     def test_validate_max_limit_invalid_value(self, folder_service):
+        """Test validate max limit with invalid value."""
         with pytest.raises(InvalidObjectError) as exc:
             folder_service._validate_max_limit(0)
         assert "{'error': 'Invalid max_limit value'} - HTTP error: 400 - API error: E003" in str(
@@ -312,13 +319,16 @@ class TestFolderMisc(TestFolderBase):
         )
 
     def test_validate_max_limit_exceeds_absolute(self, folder_service):
+        """Test validate max limit when it exceeds absolute limit."""
         over = folder_service.ABSOLUTE_MAX_LIMIT + 100
         assert folder_service._validate_max_limit(over) == folder_service.ABSOLUTE_MAX_LIMIT
 
     def test_validate_max_limit_valid(self, folder_service):
+        """Test validate max limit with valid value."""
         assert folder_service._validate_max_limit(123) == 123
 
     def test_apply_filters_all_branches(self):
+        """Test apply filters with all branches."""
         from scm.models.setup.folder import FolderResponseModel
 
         base = dict(
@@ -358,16 +368,19 @@ class TestFolderMisc(TestFolderBase):
         assert out
 
     def test_list_invalid_response_format(self, folder_service, mock_scm_client):
+        """Test list with invalid response format."""
         mock_scm_client.get.return_value = "not-a-dict"
         with pytest.raises(InvalidObjectError):
             folder_service.list()
 
     def test_list_data_not_list(self, folder_service, mock_scm_client):
+        """Test list with non-list data field."""
         mock_scm_client.get.return_value = {"data": "notalist"}
         with pytest.raises(InvalidObjectError):
             folder_service.list()
 
     def test_list_single_object_response(self, folder_service, mock_scm_client):
+        """Test list with single object response."""
         from scm.models.setup.folder import FolderResponseModel
 
         folder = FolderResponseFactory()
@@ -376,6 +389,7 @@ class TestFolderMisc(TestFolderBase):
         assert isinstance(results[0], FolderResponseModel)
 
     def test_list_pagination(self, folder_service, mock_scm_client):
+        """Test list with pagination."""
         # Simulate two pages
         page1 = [FolderResponseFactory().model_dump() for _ in range(2)]
         page2 = [FolderResponseFactory().model_dump() for _ in range(1)]
@@ -393,6 +407,7 @@ class TestFolderMisc(TestFolderBase):
         assert len(results) == 3
 
     def test_update_folder_api_error(self, folder_service, mock_scm_client):
+        """Test update folder with API error."""
         update_model = FolderUpdateModel(
             id="baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e", name="n", parent="p"
         )
@@ -401,16 +416,19 @@ class TestFolderMisc(TestFolderBase):
             folder_service.update(update_model)
 
     def test_delete_folder_not_found(self, folder_service, mock_scm_client):
+        """Test delete folder when not found."""
         mock_scm_client.delete.side_effect = APIError("fail", http_status_code=404)
         with pytest.raises(ObjectNotPresentError):
             folder_service.delete("notfound")
 
     def test_delete_folder_other_api_error(self, folder_service, mock_scm_client):
+        """Test delete folder with other API error."""
         mock_scm_client.delete.side_effect = APIError("fail", http_status_code=500)
         with pytest.raises(APIError):
             folder_service.delete("notfound")
 
     def test__get_paginated_results_data(self, folder_service, mock_scm_client):
+        """Test get paginated results with data field."""
         # Patch api_client.get to return dict with 'data'
         endpoint = "endpoint"
         params = {"a": 1}
@@ -419,6 +437,7 @@ class TestFolderMisc(TestFolderBase):
         assert out == [1, 2, 3]
 
     def test__get_paginated_results_list(self, folder_service, mock_scm_client):
+        """Test get paginated results with list response."""
         endpoint = "endpoint"
         params = {"a": 1}
         mock_scm_client.get.return_value = [4, 5]
@@ -426,6 +445,7 @@ class TestFolderMisc(TestFolderBase):
         assert out == [4, 5]
 
     def test__get_paginated_results_unexpected(self, folder_service, mock_scm_client):
+        """Test get paginated results with unexpected response."""
         endpoint = "endpoint"
         params = {"a": 1}
         mock_scm_client.get.return_value = "weird"

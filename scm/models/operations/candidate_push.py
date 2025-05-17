@@ -1,3 +1,8 @@
+"""Candidate Push operations models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing candidate push operation objects and related data.
+"""
+
 # scm/models/operations/candidate_push.py
 
 from typing import List
@@ -6,8 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CandidatePushRequestModel(BaseModel):
-    """
-    Represents a commit request for Palo Alto Networks' Strata Cloud Manager.
+    """Represents a commit request for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for commit requests,
     including folder selection, admin users, and commit description.
@@ -19,6 +23,7 @@ class CandidatePushRequestModel(BaseModel):
 
     Error:
         ValueError: Raised when validation fails for folders, admin, or description.
+
     """
 
     folders: List[str] = Field(
@@ -56,6 +61,18 @@ class CandidatePushRequestModel(BaseModel):
 
     @field_validator("admin")
     def validate_admin(cls, v):
+        """Validate that the admin list is non-empty and contains only valid entries.
+
+        Args:
+            v (list): The list of admin entries to validate.
+
+        Returns:
+            list: The validated and normalized list of admin entries.
+
+        Raises:
+            ValueError: If the admin list is empty or contains invalid entries.
+
+        """
         if not v:
             raise ValueError("At least one admin must be specified")
 
@@ -68,8 +85,7 @@ class CandidatePushRequestModel(BaseModel):
 
 
 class CandidatePushResponseModel(BaseModel):
-    """
-    Represents a commit response from Palo Alto Networks' Strata Cloud Manager.
+    """Represents a commit response from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure for commit operation responses,
     including success status, job ID, and response message.
@@ -78,6 +94,7 @@ class CandidatePushResponseModel(BaseModel):
         success (bool): Whether the commit operation was successfully initiated.
         job_id (str): The ID of the commit job.
         message (str): Detailed message about the commit operation.
+
     """
 
     success: bool = Field(

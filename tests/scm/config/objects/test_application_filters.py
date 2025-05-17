@@ -1,3 +1,7 @@
+"""Test module for Application Filters configuration service.
+
+This module contains unit tests for the Application Filters configuration service and its related models.
+"""
 # tests/scm/config/objects/test_application_filters.py
 
 # Standard library imports
@@ -320,9 +324,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """
-        Test that exact_match=True returns only filters that match the container exactly.
-        """
+        """Test that exact_match=True returns only filters that match the container exactly."""
         mock_response = {
             "data": [
                 ApplicationFiltersResponseFactory(
@@ -344,9 +346,7 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
         assert filtered[0].name == "filters_in_texas"
 
     def test_list_exclude_folders(self):
-        """
-        Test that exclude_folders removes filters from those folders.
-        """
+        """Test that exclude_folders removes filters from those folders."""
         mock_response = {
             "data": [
                 ApplicationFiltersResponseFactory(
@@ -366,8 +366,8 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
         assert all(f.folder != "All" for f in filtered)
 
     def test_list_exclude_snippets(self):
-        """
-        Test that exclude_snippets removes filters from those snippets.
+        """Test that exclude_snippets removes filters from those snippets.
+
         Assume snippet is supported by the model/factory.
         """
         mock_response = {
@@ -391,8 +391,8 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
         assert all(f.snippet != "default" for f in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """
-        Test combining exact_match with exclusions.
+        """Test combining exact_match with exclusions.
+
         Assume snippet/device are supported.
         """
         mock_response = {
@@ -428,10 +428,10 @@ class TestApplicationFiltersList(TestApplicationsFilterBase):
         assert obj.folder == "Texas"
         assert obj.snippet != "default"
 
-    def test_list_pagination_multiple_pages(self):
-        """
-        Test that the list method correctly aggregates data from multiple pages.
-        Using a custom client with max_limit=2500 to test pagination.
+    def test_list_with_invalid_items(self):
+        """Test that the list method correctly handles invalid items in the response.
+
+        This tests the logging code in Region.list() that handles invalid items.
         """
         client = ApplicationFilters(self.mock_scm, max_limit=2500)  # noqa
 

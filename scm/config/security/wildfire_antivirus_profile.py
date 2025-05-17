@@ -1,3 +1,8 @@
+"""WildFire Antivirus Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing WildFire antivirus profile objects via the SCM API.
+"""
+
 # scm/config/security/wildfire_antivirus_profiles.py
 
 # Standard library imports
@@ -15,12 +20,13 @@ from scm.models.security.wildfire_antivirus_profiles import (
 
 
 class WildfireAntivirusProfile(BaseObject):
-    """
-    Manages WildFire Antivirus Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages WildFire Antivirus Profile objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/security/v1/wildfire-anti-virus-profiles"
@@ -32,6 +38,7 @@ class WildfireAntivirusProfile(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the WildfireAntivirusProfile service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,8 +56,7 @@ class WildfireAntivirusProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +66,7 @@ class WildfireAntivirusProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +103,11 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> WildfireAvProfileResponseModel:
-        """
-        Creates a new wildfire antivirus profile object.
+        """Create a new wildfire antivirus profile object.
 
         Returns:
             WildfireAntivirusProfileResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         profile = WildfireAvProfileCreateModel(**data)
@@ -121,11 +128,11 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         object_id: str,
     ) -> WildfireAvProfileResponseModel:
-        """
-        Gets a wildfire antivirus profile object by ID.
+        """Get a wildfire antivirus profile object by ID.
 
         Returns:
             WildfireAntivirusProfileResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +145,14 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         profile: WildfireAvProfileUpdateModel,
     ) -> WildfireAvProfileResponseModel:
-        """
-        Updates an existing wildfire antivirus profile object.
+        """Update an existing wildfire antivirus profile object.
 
         Args:
             profile: WildfireAvProfileUpdateModel instance containing the update data
 
         Returns:
             WildfireAvProfileResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
@@ -169,8 +176,7 @@ class WildfireAntivirusProfile(BaseObject):
         profiles: List[WildfireAvProfileResponseModel],
         filters: Dict[str, Any],
     ) -> List[WildfireAvProfileResponseModel]:
-        """
-        Apply client-side filtering to the list of wildfire antivirus profiles.
+        """Apply client-side filtering to the list of wildfire antivirus profiles.
 
         Args:
             profiles: List of WildfireAntivirusProfileResponseModel objects
@@ -178,6 +184,7 @@ class WildfireAntivirusProfile(BaseObject):
 
         Returns:
             List[WildfireAvProfileResponseModel]: Filtered list of profiles
+
         """
         filter_criteria = profiles
 
@@ -205,7 +212,7 @@ class WildfireAntivirusProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -223,8 +230,7 @@ class WildfireAntivirusProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[WildfireAvProfileResponseModel]:
-        """
-        Lists wildfire antivirus profile objects with optional filtering.
+        """List wildfire antivirus profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -240,6 +246,7 @@ class WildfireAntivirusProfile(BaseObject):
 
         Returns:
             List[WildfireAvProfileResponseModel]: A list of wildfire profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -363,8 +370,7 @@ class WildfireAntivirusProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> WildfireAvProfileResponseModel:
-        """
-        Fetches a single wildfire antivirus profile by name.
+        """Fetch a single wildfire antivirus profile by name.
 
         Args:
             name (str): The name of the wildfire antivirus profile to fetch.
@@ -374,6 +380,7 @@ class WildfireAntivirusProfile(BaseObject):
 
         Returns:
             WildfireAvProfileResponseModel: The fetched wildfire antivirus profile object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -445,11 +452,11 @@ class WildfireAntivirusProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a wildfire antivirus profile object.
+        """Delete a wildfire antivirus profile object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

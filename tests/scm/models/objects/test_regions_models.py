@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_regions_models.py
 
+"""Tests for region models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

@@ -1,3 +1,7 @@
+"""Test module for BGP Routing configuration service.
+
+This module contains unit tests for the BGP Routing configuration service and its related models.
+"""
 # tests/scm/config/deployment/test_bgp_routing.py
 
 # Standard library imports

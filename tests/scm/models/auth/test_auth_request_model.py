@@ -1,5 +1,7 @@
 # tests/scm/models/auth/test_auth_request_model.py
 
+"""Tests for authentication request models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

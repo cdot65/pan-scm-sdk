@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with External Dynamic Lists (EDL) in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with External Dynamic Lists (EDL) in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of External Dynamic List configurations and operations commonly
 used in enterprise networks, including:
@@ -179,8 +178,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -260,8 +258,7 @@ def initialize_client():
 
 
 def create_ip_edl_hourly(edl_manager, folder="Texas"):
-    """
-    Create an IP-based External Dynamic List with hourly updates.
+    """Create an IP-based External Dynamic List with hourly updates.
 
     This function demonstrates creating an EDL for IP addresses with
     hourly updates, commonly used for moderate-risk threat intelligence
@@ -327,8 +324,7 @@ def create_ip_edl_hourly(edl_manager, folder="Texas"):
 
 
 def create_domain_edl_daily(edl_manager, folder="Texas"):
-    """
-    Create a domain-based External Dynamic List with daily updates.
+    """Create a domain-based External Dynamic List with daily updates.
 
     This function demonstrates creating an EDL for domain names with
     daily updates, commonly used for standard threat intelligence
@@ -396,8 +392,7 @@ def create_domain_edl_daily(edl_manager, folder="Texas"):
 
 
 def create_url_edl_five_minute(edl_manager, folder="Texas"):
-    """
-    Create a URL-based External Dynamic List with five-minute updates.
+    """Create a URL-based External Dynamic List with five-minute updates.
 
     This function demonstrates creating an EDL for URLs with
     five-minute updates, commonly used for high-priority threat
@@ -471,8 +466,7 @@ def create_url_edl_five_minute(edl_manager, folder="Texas"):
 
 
 def create_predefined_ip_edl(edl_manager, folder="Texas"):
-    """
-    Create a predefined IP External Dynamic List.
+    """Create a predefined IP External Dynamic List.
 
     This function demonstrates creating an EDL using Palo Alto Networks
     predefined IP lists, which are maintained by Palo Alto Networks
@@ -531,8 +525,7 @@ def create_predefined_ip_edl(edl_manager, folder="Texas"):
 
 
 def create_imsi_edl_weekly(edl_manager, folder="Texas"):
-    """
-    Create an IMSI-based External Dynamic List with weekly updates.
+    """Create an IMSI-based External Dynamic List with weekly updates.
 
     This function demonstrates creating an EDL for IMSI (International Mobile
     Subscriber Identity) numbers with weekly updates, commonly used for
@@ -603,8 +596,7 @@ def create_imsi_edl_weekly(edl_manager, folder="Texas"):
 
 
 def create_imei_edl_monthly(edl_manager, folder="Texas"):
-    """
-    Create an IMEI-based External Dynamic List with monthly updates.
+    """Create an IMEI-based External Dynamic List with monthly updates.
 
     This function demonstrates creating an EDL for IMEI (International Mobile
     Equipment Identity) numbers with monthly updates, commonly used for
@@ -675,8 +667,7 @@ def create_imei_edl_monthly(edl_manager, folder="Texas"):
 
 
 def fetch_and_update_edl(edl_manager, edl_id):
-    """
-    Fetch an External Dynamic List by ID and update its configuration.
+    """Fetch an External Dynamic List by ID and update its configuration.
 
     This function demonstrates how to:
     1. Retrieve an existing EDL using its ID
@@ -753,8 +744,7 @@ def fetch_and_update_edl(edl_manager, edl_id):
 
 
 def list_and_filter_edls(edl_manager):
-    """
-    List and filter External Dynamic List objects.
+    """List and filter External Dynamic List objects.
 
     This function demonstrates how to:
     1. List all EDLs in a folder
@@ -884,8 +874,7 @@ def list_and_filter_edls(edl_manager):
 
 
 def cleanup_edl_objects(edl_manager, edl_ids):
-    """
-    Delete the External Dynamic List objects created in this example.
+    """Delete the External Dynamic List objects created in this example.
 
     Args:
         edl_manager: The ExternalDynamicLists manager instance
@@ -904,8 +893,7 @@ def cleanup_edl_objects(edl_manager, edl_ids):
 
 
 def create_bulk_edl_objects(edl_manager, folder="Texas"):
-    """
-    Create multiple External Dynamic List objects in a batch.
+    """Create multiple External Dynamic List objects in a batch.
 
     This function demonstrates creating multiple EDL objects in a batch,
     which is useful for setting up multiple threat intelligence feeds at once.
@@ -989,8 +977,7 @@ def create_bulk_edl_objects(edl_manager, folder="Texas"):
 
 
 def generate_edl_report(edl_manager, edl_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all External Dynamic List objects created by the script.
+    """Generate a comprehensive CSV report of all External Dynamic List objects created by the script.
 
     This function fetches detailed information about each EDL object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -1434,8 +1421,7 @@ def generate_edl_report(edl_manager, edl_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the External Dynamic Lists example script.
+    """Parse command-line arguments for the External Dynamic Lists example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1489,8 +1475,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of External Dynamic Lists examples for Strata Cloud Manager.
+    """Execute the comprehensive set of External Dynamic Lists examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

@@ -1,5 +1,7 @@
 # tests/factories/objects/application_group.py
 
+"""Factory definitions for application group objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore
@@ -19,6 +21,9 @@ class ApplicationGroupBaseFactory(factory.Factory):
     """Base factory for ApplicationGroup with common fields."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationGroupBaseFactory."""
+
+        """Meta class that defines the model for ApplicationGroupBaseFactory."""
         model = ApplicationGroupBaseModel
         abstract = True
 
@@ -36,6 +41,9 @@ class ApplicationGroupCreateApiFactory(ApplicationGroupBaseFactory):
     """Factory for creating ApplicationGroupCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationGroupBaseFactory."""
+
+        """Meta class that defines the model for ApplicationGroupCreateModelFactory."""
         model = ApplicationGroupCreateModel
 
     @classmethod
@@ -68,6 +76,9 @@ class ApplicationGroupUpdateApiFactory(ApplicationGroupBaseFactory):
     """Factory for creating ApplicationGroupUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationGroupBaseFactory."""
+
+        """Meta class that defines the model for ApplicationGroupUpdateModelFactory."""
         model = ApplicationGroupUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -110,6 +121,9 @@ class ApplicationGroupResponseFactory(ApplicationGroupBaseFactory):
     """Factory for creating ApplicationGroupResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ApplicationGroupBaseFactory."""
+
+        """Meta class that defines the model for ApplicationGroupResponseModelFactory."""
         model = ApplicationGroupResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

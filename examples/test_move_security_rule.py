@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""
-Test script for security rule move operation in the SCM SDK.
+"""Test script for security rule move operation in the SCM SDK.
+
 This script tests the fixed UUID serialization issue in the .move() method.
 """
 
@@ -25,7 +25,7 @@ sys.path.insert(0, str(project_root))
 
 
 def load_environment_variables():
-    """Load environment variables from .env file"""
+    """Load environment variables from .env file."""
     env_path = Path(".") / ".env"
     if env_path.exists():
         load_dotenv(dotenv_path=env_path)
@@ -58,7 +58,7 @@ def load_environment_variables():
 
 
 def initialize_client(client_id, client_secret, tsg_id, log_level):
-    """Initialize the SCM client"""
+    """Initialize the SCM client."""
     print("Initializing SCM client...")
     try:
         client = ScmClient(
@@ -82,7 +82,7 @@ def initialize_client(client_id, client_secret, tsg_id, log_level):
 
 
 def list_security_rules(client, folder):
-    """List security rules in a folder"""
+    """List security rules in a folder."""
     print(f"\nListing security rules in folder '{folder}'...")
     try:
         rules = client.security_rule.list(folder=folder, rulebase="pre", exact_match=True)
@@ -102,9 +102,9 @@ def list_security_rules(client, folder):
 
 
 def move_security_rule(client, rules, folder):
-    """
-    Move a security rule to a new position
-    For this example, we'll move the last rule before the second-to-last rule
+    """Move a security rule to a new position.
+    
+    For this example, we'll move the last rule before the second-to-last rule.
     """
     if len(rules) < 2:
         print("Need at least 2 rules to perform a move operation.")

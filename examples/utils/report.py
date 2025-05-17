@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Standardized reporting utilities for Strata Cloud Manager SDK examples.
+"""Standardized reporting utilities for Strata Cloud Manager SDK examples.
 
 This module provides standardized reporting functionality for SDK examples,
 with support for both CSV and PDF report generation.
@@ -65,8 +64,7 @@ class ReportGenerator:
     """Generate standardized reports in both CSV and PDF formats."""
 
     def __init__(self, report_name: str, logger: Any):
-        """
-        Initialize the report generator.
+        """Initialize the report generator.
 
         Args:
             report_name: Base name for the report files (without extension)
@@ -89,8 +87,7 @@ class ReportGenerator:
         data: List[List[Any]],
         summary_data: Optional[Dict[str, Any]] = None,
     ) -> Optional[str]:
-        """
-        Generate CSV report with headers, data rows, and optional summary.
+        """Generate CSV report with headers, data rows, and optional summary.
 
         Args:
             headers: List of column headers
@@ -152,8 +149,7 @@ class ReportGenerator:
         data: List[List[Any]],
         summary_data: Optional[Dict[str, Any]] = None,
     ) -> Optional[str]:
-        """
-        Generate PDF report with headers, data rows, and optional summary.
+        """Generate PDF report with headers, data rows, and optional summary.
 
         Args:
             title: The report title
@@ -376,8 +372,7 @@ class ReportGenerator:
     def _calculate_column_widths(
         self, headers: List[str], data: List[List[Any]], pagesize: Tuple[float, float]
     ) -> List[float]:
-        """
-        Calculate appropriate column widths based on content and page size.
+        """Calculate appropriate column widths based on content and page size.
 
         Args:
             headers: List of column headers

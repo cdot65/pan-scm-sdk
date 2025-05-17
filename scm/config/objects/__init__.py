@@ -1,3 +1,4 @@
+"""scm.config.objects: Object resource service classes."""
 # scm/config/objects/__init__.py
 
 from .address import Address

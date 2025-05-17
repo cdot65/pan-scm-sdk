@@ -1,3 +1,8 @@
+"""Application Group configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing application group objects via the SCM API.
+"""
+
 # scm/config/objects/application_group.py
 
 # Standard library imports
@@ -15,12 +20,13 @@ from scm.models.objects import (
 
 
 class ApplicationGroup(BaseObject):
-    """
-    Manages Application Group objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Application Group objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/application-groups"
@@ -32,6 +38,7 @@ class ApplicationGroup(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the ApplicationGroup service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,8 +56,7 @@ class ApplicationGroup(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +66,7 @@ class ApplicationGroup(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +103,11 @@ class ApplicationGroup(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ApplicationGroupResponseModel:
-        """
-        Creates a new application group object.
+        """Create a new application group object.
 
         Returns:
             ApplicationGroupResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         app_group = ApplicationGroupCreateModel(**data)
@@ -121,11 +128,11 @@ class ApplicationGroup(BaseObject):
         self,
         object_id: str,
     ) -> ApplicationGroupResponseModel:
-        """
-        Gets an application group object by ID.
+        """Get an application group object by ID.
 
         Returns:
             ApplicationGroupResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +145,14 @@ class ApplicationGroup(BaseObject):
         self,
         app_group: ApplicationGroupUpdateModel,
     ) -> ApplicationGroupResponseModel:
-        """
-        Updates an existing application group object.
+        """Update an existing application group object.
 
         Args:
             app_group: ApplicationGroupUpdateModel instance containing the update data
 
         Returns:
             ApplicationGroupResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = app_group.model_dump(exclude_unset=True)
@@ -169,8 +176,7 @@ class ApplicationGroup(BaseObject):
         app_groups: List[ApplicationGroupResponseModel],
         filters: Dict[str, Any],
     ) -> List[ApplicationGroupResponseModel]:
-        """
-        Apply client-side filtering to the list of application groups.
+        """Apply client-side filtering to the list of application groups.
 
         Args:
             app_groups: List of ApplicationGroupResponseModel objects
@@ -178,6 +184,7 @@ class ApplicationGroup(BaseObject):
 
         Returns:
             List[ApplicationGroupResponseModel]: Filtered list of application groups
+
         """
         filter_criteria = app_groups
 
@@ -205,7 +212,7 @@ class ApplicationGroup(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -223,8 +230,7 @@ class ApplicationGroup(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ApplicationGroupResponseModel]:
-        """
-        Lists application group objects with optional filtering.
+        """List application group objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -240,6 +246,7 @@ class ApplicationGroup(BaseObject):
 
         Returns:
             List[ApplicationGroupResponseModel]: A list of application group objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -363,8 +370,7 @@ class ApplicationGroup(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ApplicationGroupResponseModel:
-        """
-        Fetches a single application group by name.
+        """Fetch a single application group by name.
 
         Args:
             name (str): The name of the application group to fetch.
@@ -374,6 +380,7 @@ class ApplicationGroup(BaseObject):
 
         Returns:
             ApplicationGroupResponseModel: The fetched application group object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -445,11 +452,11 @@ class ApplicationGroup(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an application group object.
+        """Delete an application group object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

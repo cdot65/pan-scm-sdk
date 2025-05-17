@@ -1,4 +1,7 @@
 # tests/factories/security/url_categories.py
+
+"""Factory definitions for URL category objects."""
+
 from uuid import uuid4
 
 import factory  # type: ignore
@@ -34,6 +37,8 @@ class URLCategoriesCreateModelFactory(URLCategoriesBaseFactory):
     """Factory for creating URLCategoriesCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for URLCategoriesCreateModelFactory, which inherits from URLCategoriesBaseFactory."""
+
         model = URLCategoriesCreateModel
 
     # Default to folder container
@@ -72,6 +77,8 @@ class URLCategoriesUpdateModelFactory(URLCategoriesBaseFactory):
     """Factory for creating URLCategoriesUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for URLCategoriesUpdateModelFactory, which inherits from URLCategoriesBaseFactory."""
+
         model = URLCategoriesUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -105,6 +112,8 @@ class URLCategoriesResponseModelFactory(URLCategoriesBaseFactory):
     """Factory for creating URLCategoriesResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for URLCategoriesResponseModelFactory, which inherits from URLCategoriesBaseFactory."""
+
         model = URLCategoriesResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))

@@ -1,3 +1,8 @@
+"""Syslog Server Profiles models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing syslog server profile objects and related data.
+"""
+
 # scm/models/objects/syslog_server_profiles.py
 
 # Standard library imports
@@ -9,12 +14,12 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class EscapingModel(BaseModel):
-    """
-    Model for character escaping configuration in syslog server profiles.
+    """Model for character escaping configuration in syslog server profiles.
 
     Attributes:
         escape_character (Optional[str]): Escape sequence delimiter.
         escaped_characters (Optional[str]): A list of all the characters to be escaped (without spaces).
+
     """
 
     escape_character: Optional[str] = Field(
@@ -28,8 +33,7 @@ class EscapingModel(BaseModel):
 
 
 class FormatModel(BaseModel):
-    """
-    Model for log format configuration in syslog server profiles.
+    """Model for log format configuration in syslog server profiles.
 
     Attributes:
         escaping (Optional[EscapingModel]): Character escaping configuration.
@@ -50,6 +54,7 @@ class FormatModel(BaseModel):
         globalprotect (Optional[str]): Format for GlobalProtect logs.
         hip_match (Optional[str]): Format for HIP match logs.
         correlation (Optional[str]): Format for correlation logs.
+
     """
 
     escaping: Optional[EscapingModel] = Field(None, description="Character escaping configuration")
@@ -73,8 +78,7 @@ class FormatModel(BaseModel):
 
 
 class SyslogServerModel(BaseModel):
-    """
-    Model for syslog server configuration in a syslog server profile.
+    """Model for syslog server configuration in a syslog server profile.
 
     Attributes:
         name (str): Syslog server name.
@@ -84,6 +88,7 @@ class SyslogServerModel(BaseModel):
         format (Literal["BSD", "IETF"]): Syslog format.
         facility (Literal["LOG_USER", "LOG_LOCAL0", "LOG_LOCAL1", "LOG_LOCAL2", "LOG_LOCAL3", "LOG_LOCAL4", "LOG_LOCAL5", "LOG_LOCAL6", "LOG_LOCAL7"]):
             Syslog facility.
+
     """
 
     name: str = Field(..., description="Syslog server name")
@@ -105,8 +110,7 @@ class SyslogServerModel(BaseModel):
 
 
 class SyslogServerProfileBaseModel(BaseModel):
-    """
-    Base model for Syslog Server Profile objects containing fields common to all CRUD operations.
+    """Base model for Syslog Server Profile objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the syslog server profile.
@@ -115,6 +119,7 @@ class SyslogServerProfileBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -160,8 +165,7 @@ class SyslogServerProfileBaseModel(BaseModel):
 
 
 class SyslogServerProfileCreateModel(SyslogServerProfileBaseModel):
-    """
-    Represents the creation of a new Syslog Server Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Syslog Server Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a SyslogServerProfileCreateModel object,
     it inherits all fields from the SyslogServerProfileBaseModel class, and provides a custom validator
@@ -172,12 +176,13 @@ class SyslogServerProfileCreateModel(SyslogServerProfileBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "SyslogServerProfileCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -190,13 +195,13 @@ class SyslogServerProfileCreateModel(SyslogServerProfileBaseModel):
 
 
 class SyslogServerProfileUpdateModel(SyslogServerProfileBaseModel):
-    """
-    Represents the update of an existing Syslog Server Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Syslog Server Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a SyslogServerProfileUpdateModel object.
 
     Attributes:
         id (UUID): The UUID of the syslog server profile.
+
     """
 
     id: UUID = Field(
@@ -207,14 +212,14 @@ class SyslogServerProfileUpdateModel(SyslogServerProfileBaseModel):
 
 
 class SyslogServerProfileResponseModel(SyslogServerProfileBaseModel):
-    """
-    Represents a Syslog Server Profile object response from Palo Alto Networks' Strata Cloud Manager.
+    """Represents a Syslog Server Profile object response from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a SyslogServerProfileResponseModel object,
     it inherits all fields from the SyslogServerProfileBaseModel class, and adds an id field.
 
     Attributes:
         id (UUID): The UUID of the syslog server profile.
+
     """
 
     id: UUID = Field(

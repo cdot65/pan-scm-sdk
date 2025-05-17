@@ -1,3 +1,9 @@
+"""Authentication utilities for Strata Cloud Manager SDK.
+
+This module provides OAuth2 client logic, token management, and authentication models
+for securely interacting with Palo Alto Networks Strata Cloud Manager APIs.
+"""
+
 # scm/auth.py
 
 # Standard libraries
@@ -9,7 +15,7 @@ import jwt
 from jwt import PyJWKClient
 from jwt.exceptions import DecodeError, ExpiredSignatureError, PyJWKClientError
 from oauthlib.oauth2 import BackendApplicationClient
-from requests import Response, Session
+from requests import Response
 from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError, RequestException, Timeout
 from requests_oauthlib import OAuth2Session
@@ -24,8 +30,7 @@ logger = setup_logger(__name__)
 
 
 class OAuth2Client:
-    """
-    A client for OAuth2 authentication with Palo Alto Networks' Strata Cloud Manager.
+    """A client for OAuth2 authentication with Palo Alto Networks' Strata Cloud Manager.
 
     This class handles OAuth2 token acquisition, validation, and refresh for authenticating
     with Palo Alto Networks' services. It supports token decoding and expiration checking.
@@ -34,6 +39,7 @@ class OAuth2Client:
         auth_request (AuthRequestModel): An object containing authentication parameters.
         session (OAuth2Session): The authenticated OAuth2 session.
         signing_key (Optional[PyJWK]): The key used for verifying the JWT token.
+
     """
 
     MAX_RETRIES = 3
@@ -44,6 +50,7 @@ class OAuth2Client:
         self,
         auth_request: AuthRequestModel,
     ):
+        """Initialize the Auth class with the provided AuthRequestModel."""
         self.auth_request = auth_request
         self.session = self._create_session()
         self.signing_key = None

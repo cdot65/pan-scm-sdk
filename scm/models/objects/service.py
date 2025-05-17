@@ -1,3 +1,8 @@
+"""Service models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing service objects and related data.
+"""
+
 # scm/models/objects/service.py
 
 from typing import List, Optional
@@ -62,6 +67,15 @@ class Protocol(BaseModel):
 
     @model_validator(mode="after")
     def validate_protocol(self) -> "Protocol":
+        """Ensure exactly one protocol field (tcp or udp) is set.
+
+        Returns:
+            Protocol: The validated protocol instance.
+
+        Raises:
+            ValueError: If zero or more than one protocol field is set.
+
+        """
         protocol_fields = ["tcp", "udp"]
         provided = [field for field in protocol_fields if getattr(self, field) is not None]
         if len(provided) != 1:
@@ -70,8 +84,7 @@ class Protocol(BaseModel):
 
 
 class ServiceBaseModel(BaseModel):
-    """
-    Base model for Service objects containing fields common to all CRUD operations.
+    """Base model for Service objects containing fields common to all CRUD operations.
 
     This model serves as the foundation for create, update, and response models,
     containing all shared fields and validation logic.
@@ -131,13 +144,22 @@ class ServiceBaseModel(BaseModel):
 
 
 class ServiceCreateModel(ServiceBaseModel):
-    """
-    Model for creating a new Service.
+    """Model for creating a new Service.
+
     Inherits from ServiceBaseModel and adds container type validation.
     """
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "ServiceCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            ServiceCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [field for field in container_fields if getattr(self, field) is not None]
         if len(provided) != 1:
@@ -146,8 +168,8 @@ class ServiceCreateModel(ServiceBaseModel):
 
 
 class ServiceUpdateModel(ServiceBaseModel):
-    """
-    Model for updating an existing Service.
+    """Model for updating an existing Service.
+
     All fields are optional to allow partial updates.
     """
 
@@ -159,8 +181,8 @@ class ServiceUpdateModel(ServiceBaseModel):
 
 
 class ServiceResponseModel(ServiceBaseModel):
-    """
-    Model for Service responses.
+    """Model for Service responses.
+
     Includes all base fields plus the optional id field.
     """
 

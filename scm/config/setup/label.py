@@ -1,5 +1,4 @@
-"""
-Service classes for interacting with Labels in Palo Alto Networks' Strata Cloud Manager.
+"""Service classes for interacting with Labels in Palo Alto Networks' Strata Cloud Manager.
 
 This module provides the Label class for performing CRUD operations on Label resources
 in the Strata Cloud Manager.
@@ -20,8 +19,7 @@ from scm.models.setup.label import (
 
 
 class Label(BaseObject):
-    """
-    Manages Label objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Label objects in Palo Alto Networks' Strata Cloud Manager.
 
     This class provides methods for creating, retrieving, updating, and deleting Label resources.
 
@@ -29,6 +27,7 @@ class Label(BaseObject):
         ENDPOINT: The API endpoint for Label resources.
         DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
         ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
+
     """
 
     ENDPOINT = "/config/setup/v1/labels"
@@ -40,19 +39,25 @@ class Label(BaseObject):
         api_client,
         max_limit: int = DEFAULT_MAX_LIMIT,
     ):
-        """
-        Initialize the Label service class.
+        """Initialize the Label service class.
 
         Args:
             api_client: The API client instance for making HTTP requests.
             max_limit: Maximum number of items to return in a single request.
                       Defaults to DEFAULT_MAX_LIMIT.
+
         """
         super().__init__(api_client)
         self.max_limit = min(max_limit, self.ABSOLUTE_MAX_LIMIT)
 
     @property
     def max_limit(self) -> int:
+        """Get the maximum number of items to return in a single request.
+
+        Returns:
+            int: The current max_limit value.
+
+        """
         return self._max_limit
 
     @max_limit.setter
@@ -61,8 +66,7 @@ class Label(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -72,6 +76,7 @@ class Label(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -103,8 +108,7 @@ class Label(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> LabelResponseModel:
-        """
-        Create a new Label in the Strata Cloud Manager.
+        """Create a new label object in the Strata Cloud Manager.
 
         Args:
             data: Dictionary containing label data.
@@ -115,6 +119,7 @@ class Label(BaseObject):
         Raises:
             InvalidObjectError: If the label data is invalid.
             APIError: If the API request fails.
+
         """
         # Validate and serialize input using Pydantic
         create_model = LabelCreateModel(**data)
@@ -126,8 +131,7 @@ class Label(BaseObject):
         self,
         label_id: Union[str, UUID],
     ) -> LabelResponseModel:
-        """
-        Get a label by its ID.
+        """Get a label object by ID.
 
         Args:
             label_id: The ID of the label to retrieve.
@@ -138,6 +142,7 @@ class Label(BaseObject):
         Raises:
             ObjectNotPresentError: If the label doesn't exist.
             APIError: If the API request fails.
+
         """
         label_id_str = str(label_id)
         try:
@@ -152,8 +157,7 @@ class Label(BaseObject):
         self,
         label: Union[LabelUpdateModel, LabelResponseModel],
     ) -> LabelResponseModel:
-        """
-        Update an existing label.
+        """Update an existing label object.
 
         Args:
             label: Either a LabelUpdateModel or LabelResponseModel containing the updated label data.
@@ -165,6 +169,7 @@ class Label(BaseObject):
             InvalidObjectError: If the update data is invalid.
             ObjectNotPresentError: If the label doesn't exist.
             APIError: If the API request fails.
+
         """
         # Handle either model type appropriately
         if isinstance(label, LabelResponseModel):
@@ -196,8 +201,7 @@ class Label(BaseObject):
         self,
         label_id: Union[str, UUID],
     ) -> None:
-        """
-        Delete a label.
+        """Delete a label object.
 
         Args:
             label_id: The ID of the label to delete.
@@ -205,6 +209,7 @@ class Label(BaseObject):
         Raises:
             ObjectNotPresentError: If the label doesn't exist.
             APIError: If the API request fails.
+
         """
         try:
             object_id_str = str(label_id)
@@ -218,8 +223,7 @@ class Label(BaseObject):
         self,
         **filters: Any,
     ) -> List[LabelResponseModel]:
-        """
-        List labels with optional filters.
+        """List label objects with optional filtering.
 
         Args:
             **filters: Additional filters for the API.
@@ -229,6 +233,7 @@ class Label(BaseObject):
 
         Raises:
             APIError: If the API request fails.
+
         """
         params: Dict[str, Any] = {}
         limit = self.max_limit
@@ -250,14 +255,14 @@ class Label(BaseObject):
         self,
         name: str,
     ) -> Optional[LabelResponseModel]:
-        """
-        Get a label by its name.
+        """Fetch a single label by name.
 
         Args:
             name: The name of the label to retrieve.
 
         Returns:
             Optional[LabelResponseModel]: The requested label (exact name match), or None if not found.
+
         """
         # Get all labels
         results = self.list()
@@ -278,8 +283,7 @@ class Label(BaseObject):
         limit: int,
         offset: int = 0,
     ) -> List[Dict[str, Any]]:
-        """
-        Get paginated results from an API endpoint.
+        """Get paginated results from an API endpoint.
 
         Args:
             endpoint: The API endpoint URL.
@@ -292,6 +296,7 @@ class Label(BaseObject):
 
         Raises:
             APIError: If the API request fails.
+
         """
         # Create a copy of the params to avoid modifying the input
         request_params = params.copy()

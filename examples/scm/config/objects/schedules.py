@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Example script to manage Schedule objects in Strata Cloud Manager.
+"""Example script to manage Schedule objects in Strata Cloud Manager.
 
 This script demonstrates how to:
 - Create different types of schedules (daily, weekly, non-recurring)
@@ -112,8 +111,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -512,8 +510,7 @@ def generate_schedules_report(schedules_list, filename: str) -> None:
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the schedule example script.
+    """Parse command-line arguments for the schedule example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -562,8 +559,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of schedule object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of schedule object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

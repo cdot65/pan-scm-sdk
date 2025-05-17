@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Syslog Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Syslog Server Profile objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Syslog Server Profile configurations and operations commonly
 used in enterprise networks, including:
@@ -153,8 +152,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -234,8 +232,7 @@ def initialize_client():
 
 
 def create_udp_syslog_profile(syslog_profiles, folder="Texas"):
-    """
-    Create a syslog server profile with a UDP server.
+    """Create a syslog server profile with a UDP server.
 
     This function demonstrates creating a standard UDP syslog server profile
     commonly used for basic system and traffic logging.
@@ -297,8 +294,7 @@ def create_udp_syslog_profile(syslog_profiles, folder="Texas"):
 
 
 def create_tcp_syslog_profile(syslog_profiles, folder="Texas"):
-    """
-    Create a syslog server profile with a TCP server.
+    """Create a syslog server profile with a TCP server.
 
     This function demonstrates creating a TCP syslog server profile,
     commonly used for more reliable log delivery and critical system events.
@@ -366,8 +362,7 @@ def create_tcp_syslog_profile(syslog_profiles, folder="Texas"):
 
 
 def create_multi_server_profile(syslog_profiles, folder="Texas"):
-    """
-    Create a syslog server profile with multiple servers of different types.
+    """Create a syslog server profile with multiple servers of different types.
 
     This function demonstrates creating a profile with multiple syslog servers,
     commonly used for redundant logging or separating different types of logs.
@@ -458,8 +453,7 @@ def create_multi_server_profile(syslog_profiles, folder="Texas"):
 
 
 def create_escaping_profile(syslog_profiles, folder="Texas"):
-    """
-    Create a syslog server profile with character escaping configuration.
+    """Create a syslog server profile with character escaping configuration.
 
     This function demonstrates creating a syslog profile with character escaping,
     used to handle special characters in log messages.
@@ -530,8 +524,7 @@ def create_escaping_profile(syslog_profiles, folder="Texas"):
 
 
 def fetch_and_update_profile(syslog_profiles, profile_id):
-    """
-    Fetch a syslog server profile by ID and update its servers and format.
+    """Fetch a syslog server profile by ID and update its servers and format.
 
     This function demonstrates how to:
     1. Retrieve an existing syslog server profile using its ID
@@ -607,8 +600,7 @@ def fetch_and_update_profile(syslog_profiles, profile_id):
 
 
 def list_and_filter_profiles(syslog_profiles, folder="Texas"):
-    """
-    List and filter syslog server profiles.
+    """List and filter syslog server profiles.
 
     This function demonstrates how to:
     1. List all syslog server profiles in a folder
@@ -678,8 +670,7 @@ def list_and_filter_profiles(syslog_profiles, folder="Texas"):
 
 
 def cleanup_syslog_profiles(syslog_profiles, profile_ids):
-    """
-    Delete the syslog server profiles created in this example.
+    """Delete the syslog server profiles created in this example.
 
     Args:
         syslog_profiles: The SyslogServerProfile manager instance
@@ -698,8 +689,7 @@ def cleanup_syslog_profiles(syslog_profiles, profile_ids):
 
 
 def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
-    """
-    Create multiple syslog server profiles in a batch.
+    """Create multiple syslog server profiles in a batch.
 
     This function demonstrates creating multiple syslog server profiles in a batch,
     which is useful for setting up multiple logging configurations at once.
@@ -784,8 +774,7 @@ def create_bulk_syslog_profiles(syslog_profiles, folder="Texas"):
 
 
 def generate_syslog_profile_report(syslog_profiles, profile_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all syslog server profiles created by the script.
+    """Generate a comprehensive CSV report of all syslog server profiles created by the script.
 
     This function fetches detailed information about each syslog server profile and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -932,8 +921,7 @@ def generate_syslog_profile_report(syslog_profiles, profile_ids, execution_time)
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the syslog server profile example script.
+    """Parse command-line arguments for the syslog server profile example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -992,8 +980,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of syslog server profile examples for Strata Cloud Manager.
+    """Execute the comprehensive set of syslog server profile examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

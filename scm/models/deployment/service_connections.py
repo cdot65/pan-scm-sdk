@@ -1,3 +1,8 @@
+"""Service Connections models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing service connection objects and related data.
+"""
+
 from enum import Enum
 from typing import List, Optional
 from uuid import UUID

@@ -1,3 +1,4 @@
+"""scm.models.network: Network-related models."""
 # scm/models/network/__init__.py
 
 from .ike_crypto_profile import (

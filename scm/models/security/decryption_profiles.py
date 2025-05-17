@@ -1,3 +1,8 @@
+"""Decryption Profiles security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing decryption profile objects and related data.
+"""
+
 # scm/models/security/decryption_profiles.py
 
 # Standard library imports
@@ -103,6 +108,15 @@ class SSLProtocolSettings(BaseModel):
 
     @model_validator(mode="after")
     def validate_versions(self):
+        """Validate that max_version is not less than min_version.
+
+        Returns:
+            Self: The validated model instance.
+
+        Raises:
+            ValueError: If max_version is less than min_version.
+
+        """
         if SSL_VERSIONS_ORDER.index(self.max_version) < SSL_VERSIONS_ORDER.index(self.min_version):
             raise ValueError("max_version cannot be less than min_version")
         return self
@@ -245,7 +259,7 @@ class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "DecryptionProfileCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",

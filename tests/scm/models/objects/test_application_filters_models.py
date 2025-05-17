@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_application_filters_models.py
 
+"""Tests for application filter models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

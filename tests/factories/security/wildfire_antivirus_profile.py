@@ -1,3 +1,5 @@
+"""Factory definitions for wildfire antivirus profile objects."""
+
 import uuid
 
 import factory
@@ -19,6 +21,8 @@ class WildfireAvRuleBaseFactory(factory.Factory):
     """Factory for creating WildfireAvRuleBase instances."""
 
     class Meta:
+        """Meta class that defines the model for WildfireAvRuleBaseFactory. It is used by WildfireAvRuleBaseFactory."""
+
         model = WildfireAvRuleBase
 
     name = factory.Sequence(lambda n: f"rule_{n}")
@@ -42,6 +46,8 @@ class WildfireAvMlavExceptionEntryFactory(factory.Factory):
     """Factory for creating WildfireAvMlavExceptionEntry instances."""
 
     class Meta:
+        """Meta class that defines the model for WildfireAvMlavExceptionEntryFactory. It is used by WildfireAvMlavExceptionEntryFactory."""
+
         model = WildfireAvMlavExceptionEntry
 
     name = factory.Sequence(lambda n: f"mlav_exception_{n}")
@@ -53,6 +59,8 @@ class WildfireAvThreatExceptionEntryFactory(factory.Factory):
     """Factory for creating WildfireAvThreatExceptionEntry instances."""
 
     class Meta:
+        """Meta class that defines the model for WildfireAvThreatExceptionEntryFactory. It is used by WildfireAvThreatExceptionEntryFactory."""
+
         model = WildfireAvThreatExceptionEntry
 
     name = factory.Sequence(lambda n: f"threat_exception_{n}")
@@ -64,6 +72,8 @@ class WildfireAvProfileCreateApiFactory(factory.Factory):
     """Factory for creating WildfireAvProfileCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for WildfireAvProfileCreateApiFactory. It is used by WildfireAvProfileCreateApiFactory."""
+
         model = WildfireAvProfileCreateModel
 
     name = factory.Sequence(lambda n: f"wildfire_profile_{n}")
@@ -94,6 +104,8 @@ class WildfireAvProfileUpdateApiFactory(factory.Factory):
     """Factory for creating WildfireAvProfileUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for WildfireAvProfileUpdateApiFactory. It is used by WildfireAvProfileUpdateApiFactory."""
+
         model = WildfireAvProfileUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -113,6 +125,8 @@ class WildfireAvProfileResponseFactory(factory.Factory):
     """Factory for creating WildfireAvProfileResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for WildfireAvProfileResponseFactory. It is used by WildfireAvProfileResponseFactory."""
+
         model = WildfireAvProfileResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))

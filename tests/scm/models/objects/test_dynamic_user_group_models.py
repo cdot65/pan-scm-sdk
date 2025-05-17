@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_dynamic_user_group_models.py
 
+"""Tests for dynamic user group models."""
+
 # External libraries
 from uuid import UUID
 

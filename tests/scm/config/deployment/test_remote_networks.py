@@ -1,3 +1,7 @@
+"""Test module for Remote Networks configuration service.
+
+This module contains unit tests for the Remote Networks configuration service and its related models.
+"""
 # tests/scm/config/deployment/test_remote_networks.py
 
 # Standard library imports
@@ -84,9 +88,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
     """Tests for listing RemoteNetwork objects."""
 
     def test_list_valid(self):
-        """
-        **Objective:** Test listing all objects.
-        """
+        """**Objective:** Test listing all objects."""
         mock_response = {
             "data": [
                 RemoteNetworkResponseFactory.with_ecmp_enabled().model_dump(),
@@ -143,9 +145,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
             self.client.list(folder="NonexistentFolder")
 
     def test_list_container_missing_error(self):
-        """
-        Test that InvalidObjectError is raised when no container parameter is provided.
-        """
+        """Test that InvalidObjectError is raised when no container parameter is provided."""
         self.mock_scm.get.side_effect = raise_mock_http_error(  # noqa
             status_code=400,
             error_code="E003",
@@ -324,9 +324,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
             pytest.fail("Unexpected HTTPError raised with valid list filters")
 
     def test_list_response_invalid_format(self):
-        """
-        Test that InvalidObjectError is raised when the response is not a dictionary.
-        """
+        """Test that InvalidObjectError is raised when the response is not a dictionary."""
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -337,9 +335,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
     def test_list_response_invalid_data_field_missing(self):
-        """
-        Test that InvalidObjectError is raised when API returns response with missing data field.
-        """
+        """Test that InvalidObjectError is raised when API returns response with missing data field."""
         self.mock_scm.get.return_value = {"wrong_field": "value"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -352,9 +348,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
 
     def test_list_response_invalid_data_field_type(self):
-        """
-        Test that InvalidObjectError is raised when API returns non-list data field.
-        """
+        """Test that InvalidObjectError is raised when API returns non-list data field."""
         self.mock_scm.get.return_value = {"data": "not a list"}  # noqa
 
         with pytest.raises(InvalidObjectError) as exc_info:
@@ -393,8 +387,8 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
     def test_list_pagination_multiple_pages(self):
-        """
-        Test that the list method correctly aggregates data from multiple pages.
+        """Test that the list method correctly aggregates data from multiple pages.
+
         Using a custom client with max_limit=2500 to test pagination.
         """
         client = RemoteNetworks(self.mock_scm, max_limit=2500)  # noqa
@@ -438,9 +432,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """
-        Test that exact_match=True returns only objects that match the container exactly.
-        """
+        """Test that exact_match=True returns only objects that match the container exactly."""
         mock_response = {
             "data": [
                 RemoteNetworkResponseFactory.build().model_dump(),
@@ -454,9 +446,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         assert len(filtered) == 0
 
     def test_list_exclude_folders(self):
-        """
-        Test that exclude_folders removes objects from those folders.
-        """
+        """Test that exclude_folders removes objects from those folders."""
         mock_response = {
             "data": [
                 RemoteNetworkResponseFactory.build().model_dump(),
@@ -469,9 +459,7 @@ class TestRemoteNetworkList(TestRemoteNetworkBase):
         assert all(a.folder != "All" for a in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """
-        Test combining exact_match with exclusions.
-        """
+        """Test combining exact_match with exclusions."""
         mock_response = {
             "data": [
                 {

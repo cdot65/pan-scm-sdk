@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Quarantined Devices objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Quarantined Devices objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Quarantined Devices operations commonly
 used in enterprise networks, including:
@@ -143,8 +142,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -224,8 +222,7 @@ def initialize_client():
 
 
 def create_quarantined_device(devices, host_id=None, serial_number=None):
-    """
-    Create a quarantined device entry.
+    """Create a quarantined device entry.
 
     This function demonstrates creating a quarantined device entry with the
     specified host ID and optional serial number.
@@ -283,8 +280,7 @@ def create_quarantined_device(devices, host_id=None, serial_number=None):
 
 
 def create_quarantined_device_with_serial(devices):
-    """
-    Create a quarantined device entry with a serial number.
+    """Create a quarantined device entry with a serial number.
 
     This function demonstrates creating a quarantined device entry with both
     a host ID and a serial number.
@@ -305,8 +301,7 @@ def create_quarantined_device_with_serial(devices):
 
 
 def list_and_filter_devices(devices, host_id=None, serial_number=None):
-    """
-    List and filter quarantined devices.
+    """List and filter quarantined devices.
 
     This function demonstrates how to:
     1. List all quarantined devices
@@ -355,8 +350,7 @@ def list_and_filter_devices(devices, host_id=None, serial_number=None):
 
 
 def cleanup_quarantined_devices(devices, host_ids):
-    """
-    Delete the quarantined device entries created in this example.
+    """Delete the quarantined device entries created in this example.
 
     Args:
         devices: The QuarantinedDevices manager instance
@@ -375,8 +369,7 @@ def cleanup_quarantined_devices(devices, host_ids):
 
 
 def create_bulk_devices(devices, count=3):
-    """
-    Create multiple quarantined device entries in a batch.
+    """Create multiple quarantined device entries in a batch.
 
     This function demonstrates creating multiple quarantined device entries in a batch,
     which is useful for setting up multiple entries at once.
@@ -412,8 +405,7 @@ def create_bulk_devices(devices, count=3):
 
 
 def generate_devices_report(devices, host_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all quarantined devices created by the script.
+    """Generate a comprehensive CSV report of all quarantined devices created by the script.
 
     This function fetches detailed information about each device and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -519,8 +511,7 @@ def generate_devices_report(devices, host_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the quarantined devices example script.
+    """Parse command-line arguments for the quarantined devices example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -573,8 +564,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of quarantined devices examples for Strata Cloud Manager.
+    """Execute the comprehensive set of quarantined devices examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

@@ -1,5 +1,7 @@
 # tests/scm/models/security/test_wildfire_antivirus_profiles.py
 
+"""Tests for wildfire antivirus profile security models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

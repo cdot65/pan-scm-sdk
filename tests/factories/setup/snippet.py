@@ -1,3 +1,5 @@
+"""Factory definitions for snippet objects."""
+
 from typing import Any, Dict, Union
 import uuid
 
@@ -17,7 +19,11 @@ fake = Faker()
 
 # --- Folder Reference ModelFactory ---
 class FolderReferenceModelFactory(factory.Factory):
+    """Factory for creating FolderReference instances."""
+
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = FolderReference
 
     id = factory.LazyFunction(lambda: uuid.uuid4())
@@ -26,7 +32,11 @@ class FolderReferenceModelFactory(factory.Factory):
 
 # --- Base ModelFactory for All Snippet Models ---
 class SnippetBaseModelFactory(factory.Factory):
+    """Base factory for creating snippet model instances."""
+
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = SnippetBaseModel
         abstract = True
 
@@ -41,6 +51,8 @@ class SnippetCreateModelFactory(SnippetBaseModelFactory):
     """Factory for creating SnippetCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = SnippetCreateModel
 
     @classmethod
@@ -69,6 +81,8 @@ class SnippetUpdateModelFactory(SnippetBaseModelFactory):
     """Factory for creating SnippetUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = SnippetUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -87,6 +101,7 @@ class SnippetUpdateModelFactory(SnippetBaseModelFactory):
 
     @classmethod
     def build_without_id_model(cls, **kwargs) -> SnippetUpdateModel:
+        """Build SnippetUpdateModel without ID field."""
         fields = dict(name=fake.unique.word())
         fields.update(kwargs)
         fields.pop("id", None)
@@ -98,6 +113,8 @@ class SnippetResponseModelFactory(SnippetBaseModelFactory):
     """Factory for creating SnippetResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for the factory."""
+
         model = SnippetResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -137,6 +154,8 @@ class SnippetCreateModelDictFactory(factory.Factory):
     """Factory for creating data dicts for SnippetCreateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for SnippetCreateModelDictFactory."""
+
         model = dict
 
     name = factory.Sequence(lambda n: f"snippet_{n}")
@@ -170,6 +189,8 @@ class SnippetUpdateModelDictFactory(factory.Factory):
     """Factory for creating data dicts for SnippetUpdateModel validation testing."""
 
     class Meta:
+        """Meta class that defines the model for SnippetUpdateModelDictFactory."""
+
         model = dict
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))

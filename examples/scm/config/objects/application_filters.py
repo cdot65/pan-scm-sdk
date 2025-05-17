@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Application Filters in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Application Filters in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Application Filter configurations and operations commonly
 used in enterprise networks, including:
@@ -149,8 +148,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -230,8 +228,7 @@ def initialize_client():
 
 
 def create_category_filter(app_filters, folder="Texas"):
-    """
-    Create an application filter based on application categories.
+    """Create an application filter based on application categories.
 
     This function demonstrates creating a category-based application filter,
     commonly used to group applications by their primary function.
@@ -286,8 +283,7 @@ def create_category_filter(app_filters, folder="Texas"):
 
 
 def create_technology_filter(app_filters, folder="Texas"):
-    """
-    Create an application filter based on technology characteristics.
+    """Create an application filter based on technology characteristics.
 
     This function demonstrates creating a technology-based application filter,
     commonly used to group applications by their underlying technology.
@@ -340,8 +336,7 @@ def create_technology_filter(app_filters, folder="Texas"):
 
 
 def create_risk_filter(app_filters, folder="Texas"):
-    """
-    Create an application filter based on risk levels.
+    """Create an application filter based on risk levels.
 
     This function demonstrates creating a risk-based application filter,
     commonly used to identify high-risk applications.
@@ -394,8 +389,7 @@ def create_risk_filter(app_filters, folder="Texas"):
 
 
 def create_behavioral_filter(app_filters, folder="Texas"):
-    """
-    Create an application filter based on behavioral characteristics.
+    """Create an application filter based on behavioral characteristics.
 
     This function demonstrates creating a behavior-based application filter,
     commonly used to identify applications with specific security concerns.
@@ -452,8 +446,7 @@ def create_behavioral_filter(app_filters, folder="Texas"):
 
 
 def create_saas_filter(app_filters, folder="Texas"):
-    """
-    Create an application filter for SaaS applications.
+    """Create an application filter for SaaS applications.
 
     This function demonstrates creating a SaaS-based application filter,
     commonly used to identify and manage cloud-based applications.
@@ -508,8 +501,7 @@ def create_saas_filter(app_filters, folder="Texas"):
 
 
 def create_comprehensive_filter(app_filters, folder="Texas"):
-    """
-    Create a comprehensive application filter combining multiple criteria.
+    """Create a comprehensive application filter combining multiple criteria.
 
     This function demonstrates creating a complex application filter with
     multiple criteria types combined, useful for targeted application control.
@@ -570,8 +562,7 @@ def create_comprehensive_filter(app_filters, folder="Texas"):
 
 
 def fetch_and_update_filter(app_filters, filter_id):
-    """
-    Fetch an application filter by ID and update its properties.
+    """Fetch an application filter by ID and update its properties.
 
     This function demonstrates how to:
     1. Retrieve an existing application filter using its ID
@@ -625,8 +616,7 @@ def fetch_and_update_filter(app_filters, filter_id):
 
 
 def list_and_filter_app_filters(app_filters):
-    """
-    List and filter application filter objects.
+    """List and filter application filter objects.
 
     This function demonstrates how to:
     1. List all application filters in a folder
@@ -704,8 +694,7 @@ def list_and_filter_app_filters(app_filters):
 
 
 def cleanup_app_filter_objects(app_filters, filter_ids):
-    """
-    Delete the application filter objects created in this example.
+    """Delete the application filter objects created in this example.
 
     Args:
         app_filters: The ApplicationFilters manager instance
@@ -724,8 +713,7 @@ def cleanup_app_filter_objects(app_filters, filter_ids):
 
 
 def create_bulk_app_filter_objects(app_filters, folder="Texas"):
-    """
-    Create multiple application filter objects in a batch.
+    """Create multiple application filter objects in a batch.
 
     This function demonstrates creating multiple application filter objects in a batch,
     which is useful for setting up multiple filters at once.
@@ -779,8 +767,7 @@ def create_bulk_app_filter_objects(app_filters, folder="Texas"):
 
 
 def generate_app_filter_report(app_filters, filter_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all application filter objects created by the script.
+    """Generate a comprehensive CSV report of all application filter objects created by the script.
 
     This function fetches detailed information about each application filter object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -956,8 +943,7 @@ def generate_app_filter_report(app_filters, filter_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the application filter example script.
+    """Parse command-line arguments for the application filter example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1016,8 +1002,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of application filter examples for Strata Cloud Manager.
+    """Execute the comprehensive set of application filter examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

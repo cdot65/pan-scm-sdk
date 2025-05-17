@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_quarantined_devices_models.py
 
+"""Tests for quarantined device models."""
+
 # Standard library imports
 import pytest
 
@@ -19,9 +21,7 @@ from tests.factories.objects.quarantined_devices import (
 
 
 class TestQuarantinedDevicesBaseModel:
-    """
-    Tests for QuarantinedDevicesBaseModel.
-    """
+    """Tests for QuarantinedDevicesBaseModel."""
 
     def test_valid_model(self):
         """Test with valid required fields."""
@@ -43,9 +43,7 @@ class TestQuarantinedDevicesBaseModel:
 
 
 class TestQuarantinedDevicesCreateModel:
-    """
-    Tests for QuarantinedDevicesCreateModel.
-    """
+    """Tests for QuarantinedDevicesCreateModel."""
 
     def test_valid_model(self):
         """Test with valid required fields."""
@@ -67,9 +65,7 @@ class TestQuarantinedDevicesCreateModel:
 
 
 class TestQuarantinedDevicesResponseModel:
-    """
-    Tests for QuarantinedDevicesResponseModel.
-    """
+    """Tests for QuarantinedDevicesResponseModel."""
 
     def test_valid_model(self):
         """Test with valid required fields."""
@@ -91,9 +87,7 @@ class TestQuarantinedDevicesResponseModel:
 
 
 class TestQuarantinedDevicesListParamsModel:
-    """
-    Tests for QuarantinedDevicesListParamsModel.
-    """
+    """Tests for QuarantinedDevicesListParamsModel."""
 
     def test_empty_model(self):
         """Test with no fields provided."""

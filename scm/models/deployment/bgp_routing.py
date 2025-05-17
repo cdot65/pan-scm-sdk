@@ -1,3 +1,8 @@
+"""BGP Routing models for Strata Cloud Manager SDK.
+
+Contains Pydantic models and enums for representing BGP routing configuration data.
+"""
+
 # scm/models/deployment/bgp_routing.py
 
 from enum import Enum
@@ -40,8 +45,7 @@ class HotPotatoRoutingModel(BaseModel):
 
 
 class BGPRoutingBaseModel(BaseModel):
-    """
-    Base model for BGP Routing configurations containing fields common to all operations.
+    """Base model for BGP Routing configurations containing fields common to all operations.
 
     Attributes:
         routing_preference (Union[DefaultRoutingModel, HotPotatoRoutingModel]):
@@ -56,6 +60,7 @@ class BGPRoutingBaseModel(BaseModel):
             Whether to add host route to IKE peer.
         withdraw_static_route (bool):
             Whether to withdraw static routes.
+
     """
 
     model_config = ConfigDict(
@@ -109,8 +114,8 @@ class BGPRoutingBaseModel(BaseModel):
 
 
 class BGPRoutingCreateModel(BGPRoutingBaseModel):
-    """
-    Model for creating BGP routing settings.
+    """Model for creating BGP routing settings.
+
     Inherits from BGPRoutingBaseModel and enforces required fields for creation.
     """
 
@@ -148,7 +153,7 @@ class BGPRoutingCreateModel(BGPRoutingBaseModel):
 
     @model_validator(mode="after")
     def validate_routing_preference_type(self) -> "BGPRoutingCreateModel":
-        """Validates that routing_preference is the correct type if provided."""
+        """Validate that routing_preference is the correct type if provided."""
         if self.routing_preference is not None:
             if not isinstance(
                 self.routing_preference, (DefaultRoutingModel, HotPotatoRoutingModel)
@@ -160,8 +165,7 @@ class BGPRoutingCreateModel(BGPRoutingBaseModel):
 
 
 class BGPRoutingUpdateModel(BGPRoutingBaseModel):
-    """
-    Model for updating BGP routing settings.
+    """Model for updating BGP routing settings.
 
     All fields are optional to support partial updates.
     """
@@ -202,8 +206,8 @@ class BGPRoutingUpdateModel(BGPRoutingBaseModel):
 
     @model_validator(mode="after")
     def validate_update_model(self) -> "BGPRoutingUpdateModel":
-        """
-        Validates the update model:
+        """Validate the update model.
+
         1. Ensures routing_preference is the correct type if provided
         2. Ensures at least one field is set for update
         """
@@ -236,8 +240,7 @@ class BGPRoutingUpdateModel(BGPRoutingBaseModel):
 
 
 class BGPRoutingResponseModel(BGPRoutingBaseModel):
-    """
-    Model for BGP routing API responses.
+    """Model for BGP routing API responses.
 
     Inherits from BGPRoutingBaseModel but makes all fields required for response validation.
     """

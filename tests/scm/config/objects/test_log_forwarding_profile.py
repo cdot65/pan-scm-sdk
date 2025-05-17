@@ -1,5 +1,7 @@
 # tests/scm/config/objects/test_log_forwarding_profile.py
 
+"""Tests for log forwarding profile configuration objects."""
+
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -414,7 +416,6 @@ class TestLogForwardingProfileListAndFetch:
 
     def test_apply_filters_directly(self):
         """Test applying filters directly on a list of profiles."""
-
         # Create sample profiles
         profile1 = LogForwardingProfileResponseModel(
             **LogForwardingProfileResponseFactory.build().model_dump()
@@ -817,7 +818,9 @@ class TestLogForwardingProfileListAndFetch:
         log_profile = LogForwardingProfile(api_client)
         object_id = "abc-123"
         log_profile.delete(object_id)
-        api_client.delete.assert_called_once_with(f"/config/objects/v1/log-forwarding-profiles/{object_id}")
+        api_client.delete.assert_called_once_with(
+            f"/config/objects/v1/log-forwarding-profiles/{object_id}"
+        )
 
     def test_fetch_error_handling(self):
         """Test error handling in fetch method."""

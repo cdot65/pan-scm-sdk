@@ -1,3 +1,8 @@
+"""URL Categories security models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing URL category objects and related data.
+"""
+
 # scm/models/security/url_categories.py
 
 from enum import Enum
@@ -70,6 +75,15 @@ class URLCategoriesCreateModel(URLCategoriesBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "URLCategoriesCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            URLCategoriesCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = [
             "folder",
             "snippet",

@@ -1,5 +1,7 @@
 # tests/scm/config/test_base_object.py
 
+"""Tests for base configuration object functionality."""
+
 from unittest.mock import MagicMock
 
 import pytest
@@ -40,22 +42,22 @@ class TestBaseObject:
         self.test_object = self.MockConfigObject(self.mock_scm)
 
     def test_initialization(self):
-        """
-        **Objective:** Test BaseObject initialization.
+        """**Objective:** Test BaseObject initialization.
+
         **Workflow:**
             1. Verifies proper initialization with API client
-            2. Checks endpoint setting
+            2. Checks endpoint setting.
         """
         assert isinstance(self.test_object.api_client, Scm)
         assert self.test_object.ENDPOINT == "/api/v1/test-objects"
 
     def test_create_method(self):
-        """
-        **Objective:** Test create method of BaseObject.
+        """**Objective:** Test create method of BaseObject.
+
         **Workflow:**
             1. Tests basic object creation
             2. Verifies proper API call
-            3. Validates response handling
+            3. Validates response handling.
         """
         test_data = {"name": "test", "value": "data"}
         mock_response = {"id": "123", **test_data}
@@ -71,12 +73,12 @@ class TestBaseObject:
         assert response["name"] == "test"
 
     def test_get_method(self):
-        """
-        **Objective:** Test get method of BaseObject.
+        """**Objective:** Test get method of BaseObject.
+
         **Workflow:**
             1. Tests object retrieval
             2. Verifies endpoint construction
-            3. Validates response handling
+            3. Validates response handling.
         """
         object_id = "123"
         mock_response = {"id": object_id, "name": "test"}
@@ -91,12 +93,12 @@ class TestBaseObject:
         assert response["id"] == object_id
 
     def test_update_method(self):
-        """
-        **Objective:** Test update method of BaseObject.
+        """**Objective:** Test update method of BaseObject.
+
         **Workflow:**
             1. Tests object update
             2. Verifies proper endpoint construction
-            3. Validates payload handling
+            3. Validates payload handling.
         """
         update_data = {"id": "123", "name": "updated_test", "value": "new_data"}
         mock_response = update_data.copy()
@@ -110,12 +112,12 @@ class TestBaseObject:
         assert response == mock_response
 
     def test_delete_method(self):
-        """
-        **Objective:** Test delete method of BaseObject.
+        """**Objective:** Test delete method of BaseObject.
+
         **Workflow:**
             1. Tests object deletion
             2. Verifies endpoint construction
-            3. Validates proper API call
+            3. Validates proper API call.
         """
         object_id = "123"
         self.mock_scm.delete.return_value = None  # noqa
@@ -127,12 +129,12 @@ class TestBaseObject:
         )
 
     def test_list_method(self):
-        """
-        **Objective:** Test list method of BaseObject.
+        """**Objective:** Test list method of BaseObject.
+
         **Workflow:**
             1. Tests object listing with various filters
             2. Verifies parameter handling
-            3. Validates response processing
+            3. Validates response processing.
         """
         mock_response = {
             "data": [{"id": "1", "name": "test1"}, {"id": "2", "name": "test2"}],
@@ -158,11 +160,11 @@ class TestBaseObject:
         assert response == mock_response["data"]
 
     def test_list_method_empty_response(self):
-        """
-        **Objective:** Test list method with empty response.
+        """**Objective:** Test list method with empty response.
+
         **Workflow:**
             1. Tests handling of empty response
-            2. Verifies default return value
+            2. Verifies default return value.
         """
         mock_response = {}
         self.mock_scm.get.return_value = mock_response  # noqa
@@ -171,11 +173,11 @@ class TestBaseObject:
         assert response == []
 
     def test_update_method_missing_id(self):
-        """
-        **Objective:** Test update method with missing ID.
+        """**Objective:** Test update method with missing ID.
+
         **Workflow:**
             1. Tests error handling when ID is missing
-            2. Verifies proper error raising
+            2. Verifies proper error raising.
         """
         update_data = {"name": "test", "value": "data"}
 
@@ -184,11 +186,11 @@ class TestBaseObject:
         assert "'id'" in str(exc_info.value)
 
     def test_endpoint_inheritance(self):
-        """
-        **Objective:** Test endpoint inheritance behavior.
+        """**Objective:** Test endpoint inheritance behavior.
+
         **Workflow:**
             1. Tests endpoint definition requirement
-            2. Verifies error when ENDPOINT is not defined
+            2. Verifies error when ENDPOINT is not defined.
         """
 
         class InvalidObject(BaseObject):
@@ -200,11 +202,11 @@ class TestBaseObject:
         assert "ENDPOINT must be defined in the subclass" in str(exc_info.value)
 
     def test_api_client_type_check(self):
-        """
-        **Objective:** Test API client type validation.
+        """**Objective:** Test API client type validation.
+
         **Workflow:**
             1. Tests initialization with invalid client type
-            2. Verifies type checking
+            2. Verifies type checking.
         """
         invalid_client = {"not": "a client"}
 
@@ -213,11 +215,11 @@ class TestBaseObject:
         assert "api_client must be an instance of Scm" in str(exc_info.value)
 
     def test_create_method_payload_validation(self):
-        """
-        **Objective:** Test create method payload handling.
+        """**Objective:** Test create method payload handling.
+
         **Workflow:**
             1. Tests various payload types
-            2. Verifies proper handling of different data structures
+            2. Verifies proper handling of different data structures.
         """
         # Test with empty data
         empty_data = {}
@@ -238,12 +240,12 @@ class TestBaseObject:
         )
 
     def test_list_jobs(self):
-        """
-        **Objective:** Test list_jobs method return value.
+        """**Objective:** Test list_jobs method return value.
+
         **Workflow:**
             1. Tests job listing with pagination and filtering
             2. Verifies return type and value
-            3. Validates parameter passing
+            3. Validates parameter passing.
         """
         mock_response = {
             "data": [
@@ -277,12 +279,12 @@ class TestBaseObject:
         self.mock_scm.list_jobs.assert_called_with(limit=50, offset=10, parent_id="parent123")
 
     def test_get_job_status(self):
-        """
-        **Objective:** Test get_job_status method return value.
+        """**Objective:** Test get_job_status method return value.
+
         **Workflow:**
             1. Tests job status retrieval
             2. Verifies return type and value
-            3. Validates parameter passing
+            3. Validates parameter passing.
         """
         mock_response = {
             "data": [
@@ -316,12 +318,12 @@ class TestBaseObject:
         self.mock_scm.get_job_status.assert_called_with("1595")
 
     def test_commit(self):
-        """
-        **Objective:** Test commit method return value.
+        """**Objective:** Test commit method return value.
+
         **Workflow:**
             1. Tests configuration commit operation
             2. Verifies return type and value
-            3. Validates parameter passing with different combinations
+            3. Validates parameter passing with different combinations.
         """
         mock_response = {
             "success": True,

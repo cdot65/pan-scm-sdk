@@ -1,3 +1,4 @@
+"""scm.models.operations: Operations-related models."""
 # scm/models/operations/__init__.py
 
 from .candidate_push import CandidatePushRequestModel, CandidatePushResponseModel

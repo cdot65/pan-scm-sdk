@@ -1,5 +1,7 @@
 # tests/factories/deployment/__init__.py
 
+"""Factory definitions for deployment objects."""
+
 from tests.factories.deployment.bandwidth_allocations import (
     BandwidthAllocationBaseFactory,
     BandwidthAllocationCreateApiFactory,

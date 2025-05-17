@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_address_group.py
 
+"""Tests for address group models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

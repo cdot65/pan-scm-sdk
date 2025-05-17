@@ -1,3 +1,8 @@
+"""Regions models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing region objects and related data.
+"""
+
 # scm/models/objects/regions.py
 
 # Standard library imports
@@ -9,12 +14,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class GeoLocation(BaseModel):
-    """
-    Geographic location model for region objects.
+    """Geographic location model for region objects.
 
     Attributes:
         latitude (float): The latitudinal position of the region (-90 to 90).
         longitude (float): The longitudinal position of the region (-180 to 180).
+
     """
 
     latitude: float = Field(
@@ -26,8 +31,7 @@ class GeoLocation(BaseModel):
 
 
 class RegionBaseModel(BaseModel):
-    """
-    Base model for Region objects containing fields common to all CRUD operations.
+    """Base model for Region objects containing fields common to all CRUD operations.
 
     Note:
         Although this model supports 'description' and 'tag' fields for consistency
@@ -45,6 +49,7 @@ class RegionBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -126,8 +131,7 @@ class RegionBaseModel(BaseModel):
 
 
 class RegionCreateModel(RegionBaseModel):
-    """
-    Represents the creation of a new Region object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Region object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a RegionCreateModel object,
     it inherits all fields from the RegionBaseModel class, and provides a custom validator
@@ -138,12 +142,13 @@ class RegionCreateModel(RegionBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "RegionCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -156,8 +161,7 @@ class RegionCreateModel(RegionBaseModel):
 
 
 class RegionUpdateModel(RegionBaseModel):
-    """
-    Represents the update of an existing Region object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Region object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an RegionUpdateModel object.
     """
@@ -170,8 +174,7 @@ class RegionUpdateModel(RegionBaseModel):
 
 
 class RegionResponseModel(RegionBaseModel):
-    """
-    Represents a Region object response from Palo Alto Networks' Strata Cloud Manager.
+    """Represents a Region object response from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an RegionResponseModel object,
     it inherits all fields from the RegionBaseModel class, adds an id field, and provides
@@ -179,6 +182,7 @@ class RegionResponseModel(RegionBaseModel):
 
     Attributes:
         id (UUID): The UUID of the region.
+
     """
 
     id: UUID = Field(

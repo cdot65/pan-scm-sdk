@@ -1,5 +1,7 @@
 # tests/scm/models/setup/test_folder.py
 
+"""Tests for folder setup models."""
+
 # Standard library imports
 from uuid import UUID
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Service Group objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Service Group objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Service Group object configurations and operations commonly
 used in enterprise networks, including:
@@ -147,8 +146,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -228,8 +226,7 @@ def initialize_client():
 
 
 def create_basic_service_group(service_groups, folder="Texas"):
-    """
-    Create a service group with basic web services.
+    """Create a service group with basic web services.
 
     This function demonstrates creating a standard service group with common
     built-in service references, like HTTP and HTTPS.
@@ -335,8 +332,7 @@ def create_basic_service_group(service_groups, folder="Texas"):
 
 
 def create_mixed_service_group(service_groups, folder="Texas"):
-    """
-    Create a service group with a mix of standard and custom services.
+    """Create a service group with a mix of standard and custom services.
 
     This function demonstrates creating a service group that references both
     standard built-in services and custom services that might exist in your environment.
@@ -444,8 +440,7 @@ def create_mixed_service_group(service_groups, folder="Texas"):
 
 
 def create_hierarchical_service_group(service_groups, basic_group_name, folder="Texas"):
-    """
-    Create a hierarchical service group that includes other service groups.
+    """Create a hierarchical service group that includes other service groups.
 
     This function demonstrates creating a service group that references
     both individual services and other service groups, creating a hierarchy.
@@ -557,8 +552,7 @@ def create_hierarchical_service_group(service_groups, basic_group_name, folder="
 
 
 def fetch_and_update_service_group(service_groups, group_id):
-    """
-    Fetch a service group object by ID and update its members and tags.
+    """Fetch a service group object by ID and update its members and tags.
 
     This function demonstrates how to:
     1. Retrieve an existing service group object using its ID
@@ -666,8 +660,7 @@ def fetch_and_update_service_group(service_groups, group_id):
 
 
 def list_and_filter_service_groups(service_groups):
-    """
-    List and filter service group objects.
+    """List and filter service group objects.
 
     This function demonstrates how to:
     1. List all service group objects in a folder
@@ -716,8 +709,7 @@ def list_and_filter_service_groups(service_groups):
 
 
 def cleanup_service_group_objects(service_groups, group_ids):
-    """
-    Delete the service group objects created in this example.
+    """Delete the service group objects created in this example.
 
     Args:
         service_groups: The ServiceGroup manager instance
@@ -787,8 +779,7 @@ def cleanup_service_group_objects(service_groups, group_ids):
 
 
 def create_bulk_service_group_objects(service_groups, folder="Texas"):
-    """
-    Create multiple service group objects in a batch.
+    """Create multiple service group objects in a batch.
 
     This function demonstrates creating multiple service group objects in a batch,
     which is useful for setting up multiple service groups at once.
@@ -954,8 +945,7 @@ def create_bulk_service_group_objects(service_groups, folder="Texas"):
 
 
 def generate_service_group_report(service_groups, group_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all service group objects created by the script.
+    """Generate a comprehensive CSV report of all service group objects created by the script.
 
     This function fetches detailed information about each service group object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -1076,8 +1066,7 @@ def generate_service_group_report(service_groups, group_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the service group example script.
+    """Parse command-line arguments for the service group example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -1133,8 +1122,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of service group object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of service group object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

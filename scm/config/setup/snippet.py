@@ -1,5 +1,4 @@
-"""
-Service classes for interacting with Snippets in Palo Alto Networks' Strata Cloud Manager.
+"""Service classes for interacting with Snippets in Palo Alto Networks' Strata Cloud Manager.
 
 This module provides the Snippet class for performing CRUD operations on Snippet resources
 in the Strata Cloud Manager.
@@ -21,8 +20,7 @@ from scm.models.setup.snippet import (
 
 
 class Snippet(BaseObject):
-    """
-    Manages Snippet objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Snippet objects in Palo Alto Networks' Strata Cloud Manager.
 
     This class provides methods for creating, retrieving, updating, and deleting Snippet resources.
 
@@ -30,6 +28,7 @@ class Snippet(BaseObject):
         ENDPOINT: The API endpoint for Snippet resources.
         DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
         ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
+
     """
 
     ENDPOINT = "/config/setup/v1/snippets"
@@ -41,13 +40,13 @@ class Snippet(BaseObject):
         api_client,
         max_limit: Optional[int] = DEFAULT_MAX_LIMIT,
     ):
-        """
-        Initialize the Snippet service class.
+        """Initialize the Snippet service class.
 
         Args:
             api_client: The API client instance for making HTTP requests.
             max_limit: Maximum number of items to return in a single request.
                       Defaults to DEFAULT_MAX_LIMIT.
+
         """
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
@@ -57,6 +56,12 @@ class Snippet(BaseObject):
 
     @property
     def max_limit(self) -> int:
+        """Get the maximum number of items to return in a single request.
+
+        Returns:
+            int: The current max_limit value.
+
+        """
         return self._max_limit
 
     @max_limit.setter
@@ -65,8 +70,7 @@ class Snippet(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -76,6 +80,7 @@ class Snippet(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -107,8 +112,7 @@ class Snippet(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> SnippetResponseModel:
-        """
-        Create a new snippet in Strata Cloud Manager.
+        """Create a new snippet object in Strata Cloud Manager.
 
         Args:
             data: Dictionary containing snippet data.
@@ -119,6 +123,7 @@ class Snippet(BaseObject):
         Raises:
             InvalidObjectError: If the snippet data is invalid.
             APIError: If the API request fails.
+
         """
         # Build and validate request payload
         create_model = SnippetCreateModel(**data)
@@ -139,8 +144,7 @@ class Snippet(BaseObject):
         self,
         object_id: Union[str, UUID],
     ) -> SnippetResponseModel:
-        """
-        Get a snippet by ID.
+        """Get a snippet object by ID.
 
         Args:
             object_id: The UUID of the snippet to retrieve.
@@ -151,6 +155,7 @@ class Snippet(BaseObject):
         Raises:
             ObjectNotPresentError: If the snippet doesn't exist.
             APIError: If the API request fails.
+
         """
         # Convert UUID to string if necessary
         object_id_str = str(object_id)
@@ -224,8 +229,7 @@ class Snippet(BaseObject):
         self,
         **filters: Any,  # Accept arbitrary filters ('labels', 'types')
     ) -> List[SnippetResponseModel]:
-        """
-        List snippets with optional server-side and client-side filtering.
+        """List snippet objects with optional server-side and client-side filtering.
 
         Args:
             **filters: Additional filters:
@@ -238,6 +242,7 @@ class Snippet(BaseObject):
         Raises:
             APIError: If the API request fails.
             InvalidObjectError: If filter parameters are invalid.
+
         """
         # Prepare API parameters
         params: Dict[str, Any] = {}
@@ -309,14 +314,14 @@ class Snippet(BaseObject):
         self,
         name: str,
     ) -> Optional[SnippetResponseModel]:
-        """
-        Get a snippet by its name.
+        """Get a snippet by its name.
 
         Args:
             name: The name of the snippet to retrieve.
 
         Returns:
             Optional[SnippetResponseModel]: The requested snippet (exact name match), or None if not found.
+
         """
         # Get snippets
         results = self.list()
@@ -333,8 +338,7 @@ class Snippet(BaseObject):
     def associate_folder(
         self, snippet_id: Union[str, UUID], folder_id: Union[str, UUID]
     ) -> SnippetResponseModel:
-        """
-        Associate a snippet with a folder.
+        """Associate a snippet with a folder.
 
         Args:
             snippet_id: The ID of the snippet.
@@ -345,6 +349,7 @@ class Snippet(BaseObject):
 
         Raises:
             NotImplementedError: This method is not yet implemented.
+
         """
         # This is a placeholder for future implementation
         snippet_id_str = str(snippet_id)
@@ -364,8 +369,7 @@ class Snippet(BaseObject):
     def disassociate_folder(
         self, snippet_id: Union[str, UUID], folder_id: Union[str, UUID]
     ) -> SnippetResponseModel:
-        """
-        Disassociate a snippet from a folder.
+        """Disassociate a snippet from a folder.
 
         Args:
             snippet_id: The ID of the snippet.
@@ -376,6 +380,7 @@ class Snippet(BaseObject):
 
         Raises:
             NotImplementedError: This method is not yet implemented.
+
         """
         # This is a placeholder for future implementation
         snippet_id_str = str(snippet_id)
@@ -398,8 +403,7 @@ class Snippet(BaseObject):
         limit: int,
         offset: int = 0,
     ) -> List[Dict[str, Any]]:
-        """
-        Get paginated results from an API endpoint.
+        """Get paginated results from an API endpoint.
 
         Args:
             endpoint: The API endpoint URL.
@@ -412,6 +416,7 @@ class Snippet(BaseObject):
 
         Raises:
             APIError: If the API request fails.
+
         """
         # Create a copy of the params to avoid modifying the input
         request_params = params.copy()
@@ -438,8 +443,7 @@ class Snippet(BaseObject):
         self,
         snippet: SnippetUpdateModel,
     ) -> SnippetResponseModel:
-        """
-        Update an existing snippet.
+        """Update an existing snippet object.
 
         Args:
             snippet: The SnippetUpdateModel containing the updated snippet data.
@@ -451,6 +455,7 @@ class Snippet(BaseObject):
             InvalidObjectError: If the update data is invalid.
             ObjectNotPresentError: If the snippet doesn't exist.
             APIError: If the API request fails.
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = snippet.model_dump(exclude_unset=True)
@@ -473,8 +478,7 @@ class Snippet(BaseObject):
         self,
         object_id: Union[str, UUID],
     ) -> None:
-        """
-        Delete a snippet.
+        """Delete a snippet object.
 
         Args:
             object_id: The ID of the snippet to delete.
@@ -482,6 +486,7 @@ class Snippet(BaseObject):
         Raises:
             ObjectNotPresentError: If the snippet doesn't exist.
             APIError: If the API request fails.
+
         """
         try:
             object_id_str = str(object_id)

@@ -1,5 +1,7 @@
 # tests/scm/models/deployment/test_bgp_routing_models.py
 
+"""Tests for BGP routing deployment models."""
+
 from pydantic import ValidationError
 import pytest
 

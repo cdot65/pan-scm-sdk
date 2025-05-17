@@ -1,3 +1,8 @@
+"""Bandwidth Allocations configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing bandwidth allocation objects via the SCM API.
+"""
+
 # scm/config/deployment/bandwidth_allocations.py
 
 # Standard library imports
@@ -16,13 +21,13 @@ from scm.models.deployment import (
 
 
 class BandwidthAllocations(BaseObject):
-    """
-    Manages Bandwidth Allocation objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Bandwidth Allocation objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 200. Must be between 1 and 1000.
+
     """
 
     ENDPOINT = "/config/deployment/v1/bandwidth-allocations"
@@ -34,6 +39,7 @@ class BandwidthAllocations(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the BandwidthAllocations service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -51,8 +57,7 @@ class BandwidthAllocations(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -62,6 +67,7 @@ class BandwidthAllocations(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -98,14 +104,14 @@ class BandwidthAllocations(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BandwidthAllocationResponseModel:
-        """
-        Creates a new Bandwidth Allocation object.
+        """Create a new Bandwidth Allocation object.
 
         Args:
             data: Dictionary containing the bandwidth allocation configuration
 
         Returns:
             BandwidthAllocationResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         bandwidth_allocation = BandwidthAllocationCreateModel(**data)
@@ -126,14 +132,14 @@ class BandwidthAllocations(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> BandwidthAllocationResponseModel:
-        """
-        Updates an existing Bandwidth Allocation object.
+        """Update an existing Bandwidth Allocation object.
 
         Args:
             data: Dictionary containing the bandwidth allocation configuration
 
         Returns:
             BandwidthAllocationResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         bandwidth_allocation = BandwidthAllocationUpdateModel(**data)
@@ -155,12 +161,12 @@ class BandwidthAllocations(BaseObject):
         name: str,
         spn_name_list: str,
     ) -> None:
-        """
-        Deletes a bandwidth allocation.
+        """Delete a bandwidth allocation.
 
         Args:
             name: Name of the aggregated bandwidth region
             spn_name_list: Comma-separated list of SPN names in the region
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -212,8 +218,7 @@ class BandwidthAllocations(BaseObject):
         allocations: List[BandwidthAllocationResponseModel],
         filters: Dict[str, Any],
     ) -> List[BandwidthAllocationResponseModel]:
-        """
-        Apply client-side filtering to the list of bandwidth allocations.
+        """Apply client-side filtering to the list of bandwidth allocations.
 
         Args:
             allocations: List of BandwidthAllocationResponseModel objects
@@ -221,6 +226,7 @@ class BandwidthAllocations(BaseObject):
 
         Returns:
             List[BandwidthAllocationResponseModel]: Filtered list of bandwidth allocations
+
         """
         filtered_allocations = allocations
 
@@ -307,8 +313,7 @@ class BandwidthAllocations(BaseObject):
         self,
         **filters,
     ) -> List[BandwidthAllocationResponseModel]:
-        """
-        Lists bandwidth allocation objects with optional filtering.
+        """List bandwidth allocation objects with optional filtering.
 
         Args:
             **filters: Additional filters including:
@@ -319,6 +324,7 @@ class BandwidthAllocations(BaseObject):
 
         Returns:
             List[BandwidthAllocationResponseModel]: A list of bandwidth allocation objects
+
         """
         # Pagination logic
         limit = self._max_limit
@@ -367,14 +373,14 @@ class BandwidthAllocations(BaseObject):
         self,
         name: str,
     ) -> Optional[BandwidthAllocationResponseModel]:
-        """
-        Gets a bandwidth allocation by name.
+        """Get a bandwidth allocation by name.
 
         Args:
             name: The name of the bandwidth allocation to retrieve
 
         Returns:
             Optional[BandwidthAllocationResponseModel]: The bandwidth allocation or None if not found
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -416,8 +422,7 @@ class BandwidthAllocations(BaseObject):
         self,
         name: str,
     ) -> BandwidthAllocationResponseModel:
-        """
-        Fetches a single bandwidth allocation by name.
+        """Fetch a single bandwidth allocation by name.
 
         Args:
             name: The name of the bandwidth allocation to fetch
@@ -427,6 +432,7 @@ class BandwidthAllocations(BaseObject):
 
         Raises:
             InvalidObjectError: If the allocation is not found
+
         """
         allocation = self.get(name)
 

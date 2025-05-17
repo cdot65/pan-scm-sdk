@@ -1,3 +1,8 @@
+"""Remote Networks configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing remote network objects via the SCM API.
+"""
+
 # scm/config/deployment/remote_networks.py
 
 # Standard library imports
@@ -15,12 +20,13 @@ from scm.models.deployment import (
 
 
 class RemoteNetworks(BaseObject):
-    """
-    Manages Remote Network objects.
+    """Manages Remote Network objects.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/sse/config/v1/remote-networks"
@@ -32,6 +38,7 @@ class RemoteNetworks(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the RemoteNetworks service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -52,8 +59,7 @@ class RemoteNetworks(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -63,6 +69,7 @@ class RemoteNetworks(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -99,11 +106,11 @@ class RemoteNetworks(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> RemoteNetworkResponseModel:
-        """
-        Creates a new Remote Network object.
+        """Create a new Remote Network object.
 
         Returns:
             RemoteNetworkResponseModel
+
         """
         remote_network = RemoteNetworkCreateModel(**data)
         payload = remote_network.model_dump(exclude_unset=True)
@@ -117,11 +124,11 @@ class RemoteNetworks(BaseObject):
         self,
         object_id: str,
     ) -> RemoteNetworkResponseModel:
-        """
-        Gets a Remote Network object by ID.
+        """Get a Remote Network object by ID.
 
         Returns:
             RemoteNetworkResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -131,14 +138,14 @@ class RemoteNetworks(BaseObject):
         self,
         remote_network: RemoteNetworkUpdateModel,
     ) -> RemoteNetworkResponseModel:
-        """
-        Updates an existing Remote Network object.
+        """Update an existing Remote Network object.
 
         Args:
             remote_network: RemoteNetworkUpdateModel instance containing the update data
 
         Returns:
             RemoteNetworkResponseModel
+
         """
         payload = remote_network.model_dump(exclude_unset=True)
         object_id = str(remote_network.id)
@@ -155,8 +162,7 @@ class RemoteNetworks(BaseObject):
         remote_networks: List[RemoteNetworkResponseModel],
         filters: Dict[str, Any],
     ) -> List[RemoteNetworkResponseModel]:
-        """
-        Apply client-side filtering to the list of remote networks.
+        """Apply client-side filtering to the list of remote networks.
 
         For each recognized filter key, we do:
           - If the filter value is an empty list, return [] immediately (no matches).
@@ -178,11 +184,12 @@ class RemoteNetworks(BaseObject):
 
         Returns:
             Filtered list of RemoteNetworkResponseModel
+
         """
 
         def match_field(obj_value, filter_value) -> bool:
-            """
-            Returns True if `obj_value` matches the given `filter_value`.
+            """Return True if `obj_value` matches the given `filter_value`.
+
             - If filter_value is an empty list, we interpret that as returning False overall
               (the calling code can short-circuit the entire result to []).
             - If filter_value is a list, match if obj_value is in that list.
@@ -300,7 +307,7 @@ class RemoteNetworks(BaseObject):
         # snippet: Optional[str],
         # device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {k: v for k, v in {"folder": folder}.items() if v is not None}
 
     def list(
@@ -314,8 +321,7 @@ class RemoteNetworks(BaseObject):
         # exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[RemoteNetworkResponseModel]:
-        """
-        Lists remote networks with optional filtering.
+        """List remote networks with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -328,6 +334,7 @@ class RemoteNetworks(BaseObject):
 
         Returns:
             List[RemoteNetworkResponseModel]: A list of remote network objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -444,8 +451,7 @@ class RemoteNetworks(BaseObject):
         # snippet: Optional[str] = None,
         # device: Optional[str] = None,
     ) -> RemoteNetworkResponseModel:
-        """
-        Fetches a single remote network by name.
+        """Fetch a single remote network by name.
 
         Args:
             name (str): The name of the remote network to fetch.
@@ -453,6 +459,7 @@ class RemoteNetworks(BaseObject):
 
         Returns:
             RemoteNetworkResponseModel: The fetched remote network object.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -520,11 +527,11 @@ class RemoteNetworks(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a remote network object.
+        """Delete a remote network object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

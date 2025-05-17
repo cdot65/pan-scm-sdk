@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_tag_models.py
 
+"""Tests for tag models."""
+
 # External libraries
 from pydantic import ValidationError
 import pytest

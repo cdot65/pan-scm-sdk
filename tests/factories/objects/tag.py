@@ -1,5 +1,7 @@
 # tests/factories/objects/tag.py
 
+"""Factory definitions for tag objects."""
+
 # Standard library imports
 from typing import Any, Dict, Union
 from uuid import uuid4
@@ -24,6 +26,8 @@ class TagBaseFactory(factory.Factory):
     """Base factory for Tag objects with common fields."""
 
     class Meta:
+        """Meta class that defines the model for TagBaseModelFactory."""
+
         model = TagBaseModel
         abstract = True
 
@@ -44,6 +48,8 @@ class TagCreateApiFactory(TagBaseFactory):
     """Factory for creating TagCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for TagCreateModelFactory."""
+
         model = TagCreateModel
 
     # Default to folder container
@@ -51,8 +57,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
     @classmethod
     def with_folder(cls, folder="Texas", **kwargs):
-        """
-        Create a tag with a specific folder.
+        """Create a tag with a specific folder.
 
         Args:
             folder: The folder name
@@ -60,6 +65,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
         Returns:
             TagCreateModel: A model instance with folder container
+
         """
         return cls(
             folder=folder,
@@ -70,8 +76,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
-        """
-        Create a tag with a snippet container.
+        """Create a tag with a snippet container.
 
         Args:
             snippet: The snippet name
@@ -79,6 +84,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
         Returns:
             TagCreateModel: A model instance with snippet container
+
         """
         return cls(
             folder=None,
@@ -89,8 +95,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
     @classmethod
     def with_device(cls, device="TestDevice", **kwargs):
-        """
-        Create a tag with a device container.
+        """Create a tag with a device container.
 
         Args:
             device: The device name
@@ -98,6 +103,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
         Returns:
             TagCreateModel: A model instance with device container
+
         """
         return cls(
             folder=None,
@@ -108,8 +114,7 @@ class TagCreateApiFactory(TagBaseFactory):
 
     @classmethod
     def with_color(cls, color="Red", **kwargs):
-        """
-        Create a tag with a specific color.
+        """Create a tag with a specific color.
 
         Args:
             color: The color name (must be one of the valid Colors enum values)
@@ -117,32 +122,33 @@ class TagCreateApiFactory(TagBaseFactory):
 
         Returns:
             TagCreateModel: A model instance with the specified color
+
         """
         return cls(color=color, **kwargs)
 
     @classmethod
     def build_with_invalid_color(cls, **kwargs):
-        """
-        Create a tag with an invalid color (should fail validation).
+        """Create a tag with an invalid color (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             TagCreateModel: A model instance with an invalid color
+
         """
         return cls(color="InvalidColor", **kwargs)
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs):
-        """
-        Create a tag with multiple containers (should fail validation).
+        """Create a tag with multiple containers (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             TagCreateModel: A model instance with multiple containers
+
         """
         return cls(
             folder="Texas",
@@ -153,14 +159,14 @@ class TagCreateApiFactory(TagBaseFactory):
 
     @classmethod
     def build_with_no_container(cls, **kwargs):
-        """
-        Create a tag without any container (should fail validation).
+        """Create a tag without any container (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             TagCreateModel: A model instance without any container
+
         """
         return cls(
             folder=None,
@@ -174,14 +180,15 @@ class TagUpdateApiFactory(TagBaseFactory):
     """Factory for creating TagUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for TagUpdateModelFactory."""
+
         model = TagUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
 
     @classmethod
     def with_color(cls, color="Blue", **kwargs):
-        """
-        Update a tag with a specific color.
+        """Update a tag with a specific color.
 
         Args:
             color: The color name (must be one of the valid Colors enum values)
@@ -189,19 +196,20 @@ class TagUpdateApiFactory(TagBaseFactory):
 
         Returns:
             TagUpdateModel: A model instance with the specified color
+
         """
         return cls(color=color, **kwargs)
 
     @classmethod
     def build_with_invalid_color(cls, **kwargs):
-        """
-        Create a tag update with an invalid color (should fail validation).
+        """Create a tag update with an invalid color (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the model
 
         Returns:
             TagUpdateModel: A model instance with an invalid color
+
         """
         return cls(color="InvalidColor", **kwargs)
 
@@ -210,6 +218,8 @@ class TagResponseFactory(TagBaseFactory):
     """Factory for creating TagResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for TagResponseModelFactory."""
+
         model = TagResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
@@ -217,8 +227,7 @@ class TagResponseFactory(TagBaseFactory):
 
     @classmethod
     def with_folder(cls, folder="Texas", **kwargs):
-        """
-        Create a response model with a specific folder.
+        """Create a response model with a specific folder.
 
         Args:
             folder: The folder name
@@ -226,6 +235,7 @@ class TagResponseFactory(TagBaseFactory):
 
         Returns:
             TagResponseModel: A model instance with folder container
+
         """
         return cls(
             folder=folder,
@@ -236,8 +246,7 @@ class TagResponseFactory(TagBaseFactory):
 
     @classmethod
     def with_snippet(cls, snippet="TestSnippet", **kwargs):
-        """
-        Create a response model with a snippet container.
+        """Create a response model with a snippet container.
 
         Args:
             snippet: The snippet name
@@ -245,6 +254,7 @@ class TagResponseFactory(TagBaseFactory):
 
         Returns:
             TagResponseModel: A model instance with snippet container
+
         """
         return cls(
             folder=None,
@@ -255,8 +265,7 @@ class TagResponseFactory(TagBaseFactory):
 
     @classmethod
     def with_device(cls, device="TestDevice", **kwargs):
-        """
-        Create a response model with a device container.
+        """Create a response model with a device container.
 
         Args:
             device: The device name
@@ -264,6 +273,7 @@ class TagResponseFactory(TagBaseFactory):
 
         Returns:
             TagResponseModel: A model instance with device container
+
         """
         return cls(
             folder=None,
@@ -274,8 +284,7 @@ class TagResponseFactory(TagBaseFactory):
 
     @classmethod
     def with_color(cls, color="Red", **kwargs):
-        """
-        Create a response model with a specific color.
+        """Create a response model with a specific color.
 
         Args:
             color: The color name (must be one of the valid Colors enum values)
@@ -283,6 +292,7 @@ class TagResponseFactory(TagBaseFactory):
 
         Returns:
             TagResponseModel: A model instance with the specified color
+
         """
         return cls(color=color, **kwargs)
 
@@ -290,8 +300,7 @@ class TagResponseFactory(TagBaseFactory):
     def from_request(
         cls, request_model: Union[TagCreateModel, TagUpdateModel, Dict[str, Any]], **kwargs
     ) -> TagResponseModel:
-        """
-        Create a response model based on a request model.
+        """Create a response model based on a request model.
 
         This is useful for simulating the API's response to a create or update request.
 
@@ -301,6 +310,7 @@ class TagResponseFactory(TagBaseFactory):
 
         Returns:
             TagResponseModel instance
+
         """
         if isinstance(request_model, (TagCreateModel, TagUpdateModel)):
             data = request_model.model_dump()
@@ -332,14 +342,14 @@ class TagCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict with all expected attributes.
+        """Return a valid data dict with all expected attributes.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for TagCreateModel
+
         """
         data = {
             "name": "TestTag",
@@ -352,14 +362,14 @@ class TagCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_color(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with an invalid color.
+        """Return a data dict with an invalid color.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for TagCreateModel with invalid color
+
         """
         data = {
             "name": "InvalidColorTag",
@@ -372,14 +382,14 @@ class TagCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_multiple_containers(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with multiple containers (should fail validation).
+        """Return a data dict with multiple containers (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for TagCreateModel with multiple containers
+
         """
         data = {
             "name": "TestTag",
@@ -392,14 +402,14 @@ class TagCreateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_no_container(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict without any containers (should fail validation).
+        """Return a data dict without any containers (should fail validation).
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for TagCreateModel without containers
+
         """
         data = {
             "name": "TestTag",
@@ -422,14 +432,14 @@ class TagUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_valid(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a valid data dict for updating a tag.
+        """Return a valid data dict for updating a tag.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Valid data for TagUpdateModel
+
         """
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
@@ -442,14 +452,14 @@ class TagUpdateModelFactory(factory.DictFactory):
 
     @classmethod
     def build_with_invalid_color(cls, **kwargs) -> Dict[str, Any]:
-        """
-        Return a data dict with an invalid color.
+        """Return a data dict with an invalid color.
 
         Args:
             **kwargs: Additional attributes to override in the data dict
 
         Returns:
             Dict[str, Any]: Data for TagUpdateModel with invalid color
+
         """
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",

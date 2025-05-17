@@ -1,3 +1,8 @@
+"""Remote Networks models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing remote network objects and related data.
+"""
+
 # scm/models/deployment/remote_networks.py
 
 from enum import Enum
@@ -8,11 +13,15 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class EcmpLoadBalancingEnum(str, Enum):
+    """Enumeration of ECMP load balancing states for remote networks."""
+
     enable = "enable"
     disable = "disable"
 
 
 class PeeringTypeEnum(str, Enum):
+    """Enumeration of supported BGP peering types for remote networks."""
+
     exchange_v4_over_v4 = "exchange-v4-over-v4"
     exchange_v4_v6_over_v4 = "exchange-v4-v6-over-v4"
     exchange_v4_over_v4_v6_over_v6 = "exchange-v4-over-v4-v6-over-v6"
@@ -20,12 +29,16 @@ class PeeringTypeEnum(str, Enum):
 
 
 class BgpPeerModel(BaseModel):
+    """Model representing a BGP peer configuration for remote networks."""
+
     local_ip_address: Optional[str] = None
     peer_ip_address: Optional[str] = None
     secret: Optional[str] = None
 
 
 class BgpModel(BaseModel):
+    """Model representing BGP configuration for remote networks."""
+
     do_not_export_routes: Optional[bool] = None
     enable: Optional[bool] = None
     local_ip_address: Optional[str] = None
@@ -38,11 +51,15 @@ class BgpModel(BaseModel):
 
 
 class ProtocolModel(BaseModel):
+    """Model encapsulating protocol settings (BGP and BGP peer) for remote networks."""
+
     bgp: Optional[BgpModel] = None
     bgp_peer: Optional[BgpPeerModel] = None
 
 
 class EcmpTunnelModel(BaseModel):
+    """Model representing an ECMP tunnel configuration for remote networks."""
+
     name: str = Field(..., max_length=63)
     ipsec_tunnel: str = Field(..., max_length=1023)
     local_ip_address: Optional[str] = None
@@ -56,9 +73,7 @@ class EcmpTunnelModel(BaseModel):
 
 
 class RemoteNetworkBaseModel(BaseModel):
-    """
-    Base model for Remote Network objects containing fields common to all CRUD operations.
-    """
+    """Base model for Remote Network objects containing fields common to all CRUD operations."""
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -135,6 +150,18 @@ class RemoteNetworkBaseModel(BaseModel):
 
     @model_validator(mode="after")
     def validate_remote_network_logic(self) -> "RemoteNetworkBaseModel":
+        """Validate ECMP/load balancing and tunnel logic after model creation.
+
+        Ensures that if ECMP load balancing is enabled, ecmp_tunnels must be set;
+        otherwise, ipsec_tunnel must be set.
+
+        Returns:
+            RemoteNetworkBaseModel: The validated model instance.
+
+        Raises:
+            ValueError: If required fields are missing for the given configuration.
+
+        """
         if self.ecmp_load_balancing == EcmpLoadBalancingEnum.enable:
             if not self.ecmp_tunnels:
                 raise ValueError("ecmp_tunnels is required when ecmp_load_balancing is enable")
@@ -150,13 +177,22 @@ class RemoteNetworkBaseModel(BaseModel):
 
 
 class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
-    """
-    Model for creating a new Remote Network.
+    """Model for creating a new Remote Network.
+
     Ensures exactly one container field is set (folder, snippet, or device).
     """
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "RemoteNetworkCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            RemoteNetworkCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = ["folder", "snippet", "device"]
         provided = [f for f in container_fields if getattr(self, f) is not None]
         if len(provided) != 1:
@@ -165,8 +201,8 @@ class RemoteNetworkCreateModel(RemoteNetworkBaseModel):
 
 
 class RemoteNetworkUpdateModel(RemoteNetworkBaseModel):
-    """
-    Model for updating an existing Remote Network.
+    """Model for updating an existing Remote Network.
+
     Includes optional id field.
     """
 
@@ -178,8 +214,8 @@ class RemoteNetworkUpdateModel(RemoteNetworkBaseModel):
 
 
 class RemoteNetworkResponseModel(RemoteNetworkBaseModel):
-    """
-    Model for Remote Network API responses.
+    """Model for Remote Network API responses.
+
     Includes id as a required field.
     """
 

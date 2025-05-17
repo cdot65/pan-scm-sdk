@@ -1,3 +1,8 @@
+"""Application models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing application objects and related data.
+"""
+
 # scm/models/objects/application.py
 
 from typing import List, Optional
@@ -7,8 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ApplicationBaseModel(BaseModel):
-    """
-    Base model for Application objects containing fields common to all CRUD operations.
+    """Base model for Application objects containing fields common to all CRUD operations.
 
     This model serves as the foundation for create, update, and response models,
     containing all shared fields and validation logic.
@@ -121,13 +125,22 @@ class ApplicationBaseModel(BaseModel):
 
 
 class ApplicationCreateModel(ApplicationBaseModel):
-    """
-    Model for creating a new Application.
+    """Model for creating a new Application.
+
     Inherits from ApplicationBaseModel and adds container type validation.
     """
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "ApplicationCreateModel":
+        """Ensure exactly one container field (folder or snippet) is set.
+
+        Returns:
+            ApplicationCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = [
             "folder",
             "snippet",
@@ -139,8 +152,8 @@ class ApplicationCreateModel(ApplicationBaseModel):
 
 
 class ApplicationUpdateModel(ApplicationBaseModel):
-    """
-    Model for updating an existing Application.
+    """Model for updating an existing Application.
+
     All fields are optional to allow partial updates.
     """
 
@@ -152,8 +165,8 @@ class ApplicationUpdateModel(ApplicationBaseModel):
 
 
 class ApplicationResponseModel(ApplicationBaseModel):
-    """
-    Model for Application responses.
+    """Model for Application responses.
+
     Includes all base fields plus the id field.
     Updates the description field to have a length of 4096 characters. tsk tsk.
     Updates the subcategory field to be optional to account for `unknown-tcp` app-id. tsk tsk.

@@ -1,5 +1,7 @@
 # tests/scm/config/setup/test_label.py
 
+"""Tests for label setup configuration."""
+
 # Standard library imports
 from unittest.mock import MagicMock, patch
 from uuid import UUID

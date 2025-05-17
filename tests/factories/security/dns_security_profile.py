@@ -1,3 +1,5 @@
+"""Factory definitions for DNS security profile objects."""
+
 import uuid
 
 import factory
@@ -25,6 +27,8 @@ class DNSSecurityCategoryEntryFactory(factory.Factory):
     """Factory for creating DNSSecurityCategoryEntryModel instances."""
 
     class Meta:
+        """Meta class that defines the model for DNSSecurityCategoryEntryFactory, the parent factory for creating DNSSecurityCategoryEntryModel instances."""
+
         model = DNSSecurityCategoryEntryModel
 
     name = "pan-dns-sec-malware"
@@ -47,6 +51,8 @@ class ListActionRequestFactory(factory.Factory):
     """Factory for creating ListActionRequestModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ListActionRequestFactory, the parent factory for creating ListActionRequestModel instances."""
+
         model = ListActionRequestModel
 
     root = {"sinkhole": {}}
@@ -61,6 +67,8 @@ class ListEntryBaseFactory(factory.Factory):
     """Factory for creating ListEntryBaseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for ListEntryBaseFactory, the parent factory for creating ListEntryBaseModel instances."""
+
         model = ListEntryBaseModel
 
     name = factory.Faker("word")
@@ -79,6 +87,8 @@ class SinkholeSettingsFactory(factory.Factory):
     """Factory for creating SinkholeSettingsModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SinkholeSettingsFactory, the parent factory for creating SinkholeSettingsModel instances."""
+
         model = SinkholeSettingsModel
 
     ipv4_address = IPv4AddressEnum.default_ip
@@ -99,6 +109,8 @@ class WhitelistEntryFactory(factory.Factory):
     """Factory for creating WhitelistEntryModel instances."""
 
     class Meta:
+        """Meta class that defines the model for WhitelistEntryFactory, the parent factory for creating WhitelistEntryModel instances."""
+
         model = WhitelistEntryModel
 
     name = factory.Faker("domain_name")
@@ -109,6 +121,8 @@ class BotnetDomainsFactory(factory.Factory):
     """Factory for creating BotnetDomainsModel instances."""
 
     class Meta:
+        """Meta class that defines the model for BotnetDomainsFactory, the parent factory for creating BotnetDomainsModel instances."""
+
         model = BotnetDomainsModel
 
     dns_security_categories = factory.List([factory.SubFactory(DNSSecurityCategoryEntryFactory)])
@@ -127,6 +141,8 @@ class DNSSecurityProfileCreateApiFactory(factory.Factory):
     """Factory for creating DNSSecurityProfileCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for DNSSecurityProfileCreateApiFactory, the parent factory for creating DNSSecurityProfileCreateModel instances."""
+
         model = DNSSecurityProfileCreateModel
 
     name = factory.Sequence(lambda n: f"dns_security_profile_{n}")
@@ -156,6 +172,8 @@ class DNSSecurityProfileUpdateApiFactory(factory.Factory):
     """Factory for creating DNSSecurityProfileUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for DNSSecurityProfileUpdateApiFactory, the parent factory for creating DNSSecurityProfileUpdateModel instances."""
+
         model = DNSSecurityProfileUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -178,6 +196,8 @@ class DNSSecurityProfileResponseFactory(factory.Factory):
     """Factory for creating DNSSecurityProfileResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for DNSSecurityProfileResponseModelFactory."""
+
         model = DNSSecurityProfileResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))

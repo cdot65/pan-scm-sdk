@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_syslog_server_profiles_models.py
 
+"""Tests for syslog server profile models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

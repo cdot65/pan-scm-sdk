@@ -1,5 +1,7 @@
 # tests/factories/objects/quarantined_devices.py
 
+"""Factory definitions for quarantined device objects."""
+
 # Standard library imports
 from typing import Any, Dict
 

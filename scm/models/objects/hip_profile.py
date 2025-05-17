@@ -1,3 +1,8 @@
+"""HIP Profile models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing HIP profile objects and related data.
+"""
+
 # scm/models/objects/hip_profile.py
 
 # Standard library imports
@@ -9,8 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class HIPProfileBaseModel(BaseModel):
-    """
-    Base model for HIP Profile objects containing fields common to all CRUD operations.
+    """Base model for HIP Profile objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the HIP profile.
@@ -19,6 +23,7 @@ class HIPProfileBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -73,8 +78,7 @@ class HIPProfileBaseModel(BaseModel):
 
 
 class HIPProfileCreateModel(HIPProfileBaseModel):
-    """
-    Represents the creation of a new HIP Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new HIP Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a HIPProfileCreateModel object,
     it inherits all fields from the HIPProfileBaseModel class, and provides a custom validator
@@ -85,12 +89,13 @@ class HIPProfileCreateModel(HIPProfileBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "HIPProfileCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -103,8 +108,7 @@ class HIPProfileCreateModel(HIPProfileBaseModel):
 
 
 class HIPProfileUpdateModel(HIPProfileBaseModel):
-    """
-    Represents the update of an existing HIP Profile object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing HIP Profile object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a HIPProfileUpdateModel object.
     """
@@ -117,8 +121,7 @@ class HIPProfileUpdateModel(HIPProfileBaseModel):
 
 
 class HIPProfileResponseModel(HIPProfileBaseModel):
-    """
-    Represents the response model for a HIP Profile object from Palo Alto Networks' Strata Cloud Manager.
+    """Represents the response model for a HIP Profile object from Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for a HIPProfileResponseModel object,
     it inherits all fields from the HIPProfileBaseModel class, and adds its own attribute for the
@@ -126,6 +129,7 @@ class HIPProfileResponseModel(HIPProfileBaseModel):
 
     Attributes:
         id (UUID): The UUID of the HIP profile.
+
     """
 
     id: UUID = Field(

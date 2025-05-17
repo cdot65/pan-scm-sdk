@@ -1,5 +1,4 @@
-"""
-Service classes for interacting with Folders in Palo Alto Networks' Strata Cloud Manager.
+"""Service classes for interacting with Folders in Palo Alto Networks' Strata Cloud Manager.
 
 This module provides the Folder class for performing CRUD operations on Folder resources
 in the Strata Cloud Manager.
@@ -20,8 +19,7 @@ from scm.models.setup.folder import (
 
 
 class Folder(BaseObject):
-    """
-    Manages Folder objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Folder objects in Palo Alto Networks' Strata Cloud Manager.
 
     This class provides methods for creating, retrieving, updating, and deleting Folder resources.
 
@@ -29,6 +27,7 @@ class Folder(BaseObject):
         ENDPOINT: The API endpoint for Folder resources.
         DEFAULT_MAX_LIMIT: The default maximum number of items to return in a single request.
         ABSOLUTE_MAX_LIMIT: The maximum allowed number of items to return in a single request.
+
     """
 
     ENDPOINT = "/config/setup/v1/folders"
@@ -40,19 +39,25 @@ class Folder(BaseObject):
         api_client,
         max_limit: int = DEFAULT_MAX_LIMIT,
     ):
-        """
-        Initialize the Folder service class.
+        """Initialize the Folder service class.
 
         Args:
             api_client: The API client instance for making HTTP requests.
             max_limit: Maximum number of items to return in a single request.
                       Defaults to DEFAULT_MAX_LIMIT.
+
         """
         super().__init__(api_client)
         self.max_limit = min(max_limit, self.ABSOLUTE_MAX_LIMIT)
 
     @property
     def max_limit(self) -> int:
+        """Get the maximum number of items to return in a single request.
+
+        Returns:
+            int: The current max_limit value.
+
+        """
         return self._max_limit
 
     @max_limit.setter
@@ -61,8 +66,7 @@ class Folder(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -72,6 +76,7 @@ class Folder(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -103,8 +108,7 @@ class Folder(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> FolderResponseModel:
-        """
-        Create a new Folder in the Strata Cloud Manager.
+        """Create a new Folder in the Strata Cloud Manager.
 
         Args:
             data: Dictionary containing folder data.
@@ -115,6 +119,7 @@ class Folder(BaseObject):
         Raises:
             InvalidObjectError: If the folder data is invalid.
             APIError: If the API request fails.
+
         """
         # Build and validate request payload
         create_model = FolderCreateModel(**data)
@@ -135,8 +140,7 @@ class Folder(BaseObject):
         self,
         folder_id: Union[str, UUID],
     ) -> FolderResponseModel:
-        """
-        Get a folder by its ID.
+        """Get a folder by its ID.
 
         Args:
             folder_id: The ID of the folder to retrieve.
@@ -147,6 +151,7 @@ class Folder(BaseObject):
         Raises:
             ObjectNotPresentError: If the folder doesn't exist.
             APIError: If the API request fails.
+
         """
         # Convert UUID to string if necessary
         folder_id_str = str(folder_id)
@@ -224,8 +229,7 @@ class Folder(BaseObject):
         self,
         **filters: Any,  # Accept arbitrary filters (labels, parent, type, etc.)
     ) -> List[FolderResponseModel]:
-        """
-        List folders with optional server-side and client-side filtering.
+        """List folders with optional server-side and client-side filtering.
 
         Args:
             **filters: Additional filters (labels, parent, type, snippets, etc.).
@@ -236,6 +240,7 @@ class Folder(BaseObject):
         Raises:
             APIError: If the API request fails.
             InvalidObjectError: If filter parameters are invalid.
+
         """
         # Prepare API parameters for server-side filtering (if supported)
         params: Dict[str, Any] = {}
@@ -301,14 +306,14 @@ class Folder(BaseObject):
         self,
         name: str,
     ) -> Optional[FolderResponseModel]:
-        """
-        Get a folder by its name.
+        """Get a folder by its name.
 
         Args:
             name: The name of the folder to retrieve.
 
         Returns:
             Optional[FolderResponseModel]: The requested folder (exact name match), or None if not found.
+
         """
         # Get all folders
         results = self.list()
@@ -329,8 +334,7 @@ class Folder(BaseObject):
         limit: int,
         offset: int = 0,
     ) -> List[Dict[str, Any]]:
-        """
-        Get paginated results from an API endpoint.
+        """Get paginated results from an API endpoint.
 
         Args:
             endpoint: The API endpoint URL.
@@ -343,6 +347,7 @@ class Folder(BaseObject):
 
         Raises:
             APIError: If the API request fails.
+
         """
         # Create a copy of the params to avoid modifying the input
         request_params = params.copy()
@@ -369,8 +374,7 @@ class Folder(BaseObject):
         self,
         folder: FolderUpdateModel,
     ) -> FolderResponseModel:
-        """
-        Update an existing folder.
+        """Update an existing folder.
 
         Args:
             folder: The FolderUpdateModel containing the updated folder data.
@@ -382,6 +386,7 @@ class Folder(BaseObject):
             InvalidObjectError: If the update data is invalid.
             ObjectNotPresentError: If the folder doesn't exist.
             APIError: If the API request fails.
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = folder.model_dump(exclude_unset=True)
@@ -404,8 +409,7 @@ class Folder(BaseObject):
         self,
         folder_id: Union[str, UUID],
     ) -> None:
-        """
-        Delete a folder.
+        """Delete a folder.
 
         Args:
             folder_id: The ID of the folder to delete.
@@ -413,6 +417,7 @@ class Folder(BaseObject):
         Raises:
             ObjectNotPresentError: If the snippet doesn't exist.
             APIError: If the API request fails.
+
         """
         try:
             object_id_str = str(folder_id)

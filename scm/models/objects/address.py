@@ -1,3 +1,8 @@
+"""Address models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing address objects and related data.
+"""
+
 # scm/models/objects/address.py
 
 # Standard library imports
@@ -18,8 +23,7 @@ TagString = constr(max_length=64)
 
 
 class AddressBaseModel(BaseModel):
-    """
-    Base model for Address objects containing fields common to all CRUD operations.
+    """Base model for Address objects containing fields common to all CRUD operations.
 
     Attributes:
         name (str): The name of the address object.
@@ -32,6 +36,7 @@ class AddressBaseModel(BaseModel):
         folder (Optional[str]): The folder in which the resource is defined.
         snippet (Optional[str]): The snippet in which the resource is defined.
         device (Optional[str]): The device in which the resource is defined.
+
     """
 
     # Required fields
@@ -111,6 +116,18 @@ class AddressBaseModel(BaseModel):
     # Custom Validators
     @field_validator("tag", mode="before")
     def ensure_list_of_strings(cls, v):  # noqa
+        """Ensure the tag value is a list of strings, converting from string if needed.
+
+        Args:
+            v (Any): The value to validate.
+
+        Returns:
+            list[str]: A list of strings.
+
+        Raises:
+            ValueError: If the value is not a string or list of strings.
+
+        """
         if isinstance(v, str):
             return [v]
         elif isinstance(v, list):
@@ -120,13 +137,36 @@ class AddressBaseModel(BaseModel):
 
     @field_validator("tag")
     def ensure_unique_items(cls, v):  # noqa
+        """Ensure all items in the tag list are unique.
+
+        Args:
+            v (list): The list to validate.
+
+        Returns:
+            list: The validated list.
+
+        Raises:
+            ValueError: If duplicate items are found.
+
+        """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
         return v
 
     @model_validator(mode="after")
     def validate_address_type(self) -> "AddressBaseModel":
-        """Validates that exactly one address type is provided."""
+        """Validate that exactly one address type is provided.
+
+        Ensures that only one of 'ip_netmask', 'ip_range', 'ip_wildcard', or 'fqdn' is set.
+
+        Returns:
+            AddressBaseModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one address type field is set.
+
+        """
+        """Validate that exactly one address type is provided."""
         address_fields = [
             "ip_netmask",
             "ip_range",
@@ -148,8 +188,7 @@ class AddressBaseModel(BaseModel):
 
 
 class AddressCreateModel(AddressBaseModel):
-    """
-    Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressCreateModel object,
     it inherits all fields from the AddressBaseModel class, and provides a custom validator
@@ -160,12 +199,13 @@ class AddressCreateModel(AddressBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     # Custom Validators
     @model_validator(mode="after")
     def validate_container_type(self) -> "AddressCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",
@@ -178,8 +218,7 @@ class AddressCreateModel(AddressBaseModel):
 
 
 class AddressUpdateModel(AddressBaseModel):
-    """
-    Represents the update of an existing Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the update of an existing Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressUpdateModel object.
     """
@@ -192,8 +231,7 @@ class AddressUpdateModel(AddressBaseModel):
 
 
 class AddressResponseModel(AddressBaseModel):
-    """
-    Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
+    """Represents the creation of a new Address object for Palo Alto Networks' Strata Cloud Manager.
 
     This class defines the structure and validation rules for an AddressResponseModel object,
     it inherits all fields from the AddressBaseModel class, adds its own attribute for the
@@ -204,6 +242,7 @@ class AddressResponseModel(AddressBaseModel):
 
     Error:
         ValueError: Raised when container type validation fails.
+
     """
 
     id: UUID = Field(

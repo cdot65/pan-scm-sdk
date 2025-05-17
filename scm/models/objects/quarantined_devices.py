@@ -1,3 +1,8 @@
+"""Quarantined Devices models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing quarantined device objects and related data.
+"""
+
 # scm/models/objects/quarantined_devices.py
 
 # Standard library imports
@@ -8,12 +13,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class QuarantinedDevicesBaseModel(BaseModel):
-    """
-    Base model for Quarantined Devices objects containing fields common to all CRUD operations.
+    """Base model for Quarantined Devices objects containing fields common to all CRUD operations.
 
     Attributes:
         host_id (str): Device host ID.
         serial_number (Optional[str]): Device serial number.
+
     """
 
     # Required fields
@@ -37,25 +42,20 @@ class QuarantinedDevicesBaseModel(BaseModel):
 
 
 class QuarantinedDevicesCreateModel(QuarantinedDevicesBaseModel):
-    """
-    Represents the creation of a new Quarantined Devices object for Palo Alto Networks' Strata Cloud Manager.
-    """
+    """Represents the creation of a new Quarantined Devices object for Palo Alto Networks' Strata Cloud Manager."""
 
 
 class QuarantinedDevicesResponseModel(QuarantinedDevicesBaseModel):
-    """
-    Represents the response from creating or retrieving a Quarantined Devices object
-    from Palo Alto Networks' Strata Cloud Manager.
-    """
+    """Represents the response from creating or retrieving a Quarantined Devices object."""
 
 
 class QuarantinedDevicesListParamsModel(BaseModel):
-    """
-    Parameters for listing Quarantined Devices.
+    """Parameters for listing Quarantined Devices.
 
     Attributes:
         host_id (Optional[str]): Filter by device host ID.
         serial_number (Optional[str]): Filter by device serial number.
+
     """
 
     host_id: Optional[str] = Field(

@@ -1,3 +1,8 @@
+"""Network Locations models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing network location objects and related data.
+"""
+
 # scm/models/deployment/network_locations.py
 
 from typing import Optional
@@ -6,8 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class NetworkLocationModel(BaseModel):
-    """
-    Model for Network Location objects.
+    """Model for Network Location objects.
 
     Network Locations are read-only resources in the Strata Cloud Manager API,
     only supporting list/get operations.
@@ -20,6 +24,7 @@ class NetworkLocationModel(BaseModel):
         longitude (float): The longitudinal position of the location (-180 to 180)
         region (str): The region code of the location
         aggregate_region (str): The aggregate region identifier
+
     """
 
     model_config = ConfigDict(

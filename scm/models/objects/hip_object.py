@@ -1,3 +1,8 @@
+"""HIP Object models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing HIP object resources and related data.
+"""
+
 # scm/models/objects/hip_object.py
 
 from typing import List, Literal, Optional, Union
@@ -640,7 +645,7 @@ class HIPObjectCreateModel(HIPObjectBaseModel):
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "HIPObjectCreateModel":
-        """Validates that exactly one container type is provided."""
+        """Validate that exactly one container type is provided."""
         container_fields = [
             "folder",
             "snippet",

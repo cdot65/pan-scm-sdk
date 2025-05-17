@@ -1,3 +1,7 @@
+"""Test module for HIP Profile configuration service.
+
+This module contains unit tests for the HIP Profile configuration service and its related models.
+"""
 # tests/scm/config/objects/test_hip_profile.py
 
 # Standard library imports
@@ -141,6 +145,7 @@ class TestHIPProfileList(TestHIPProfileBase):
         assert "HTTP error: 400 - API error: E003" in error_msg
 
     def test_list_no_container(self):
+        """Test list without container parameter."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",
@@ -151,6 +156,7 @@ class TestHIPProfileList(TestHIPProfileBase):
             self.client.list()
 
     def test_list_multiple_containers(self):
+        """Test list with multiple container parameters."""
         self.mock_scm.get.side_effect = raise_mock_http_error(
             status_code=400,
             error_code="E003",

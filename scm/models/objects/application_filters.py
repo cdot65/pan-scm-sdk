@@ -1,3 +1,8 @@
+"""Application Filters models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing application filter objects and related data.
+"""
+
 # scm/models/objects/application_filters.py
 
 from typing import List, Optional
@@ -7,8 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ApplicationFiltersBaseModel(BaseModel):
-    """
-    Base model for Application filter objects containing fields common to all CRUD operations.
+    """Base model for Application filter objects containing fields common to all CRUD operations.
 
     This model serves as the foundation for create, update, and response models,
     containing all shared fields and validation logic.
@@ -136,13 +140,22 @@ class ApplicationFiltersBaseModel(BaseModel):
 
 
 class ApplicationFiltersCreateModel(ApplicationFiltersBaseModel):
-    """
-    Model for creating a new application filter.
+    """Model for creating a new application filter.
+
     Inherits from ApplicationFiltersBaseModel and adds container type validation.
     """
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "ApplicationFiltersCreateModel":
+        """Ensure exactly one container field (folder or snippet) is set.
+
+        Returns:
+            ApplicationFiltersCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
         container_fields = [
             "folder",
             "snippet",
@@ -154,8 +167,8 @@ class ApplicationFiltersCreateModel(ApplicationFiltersBaseModel):
 
 
 class ApplicationFiltersUpdateModel(ApplicationFiltersBaseModel):
-    """
-    Model for updating an existing application filter.
+    """Model for updating an existing application filter.
+
     All fields are optional to allow partial updates.
     """
 
@@ -167,8 +180,8 @@ class ApplicationFiltersUpdateModel(ApplicationFiltersBaseModel):
 
 
 class ApplicationFiltersResponseModel(ApplicationFiltersBaseModel):
-    """
-    Model for application filter responses.
+    """Model for application filter responses.
+
     Includes all base fields plus the (optional!) id field.
     """
 

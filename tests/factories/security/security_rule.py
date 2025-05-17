@@ -1,3 +1,5 @@
+"""Factory definitions for security rule objects."""
+
 from typing import Dict, Union
 import uuid
 
@@ -20,6 +22,8 @@ class SecurityRuleProfileSettingFactory(factory.Factory):
     """Factory for creating ProfileSetting instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleProfileSettingFactory. It is used by the SecurityRuleProfileSettingFactory."""
+
         model = SecurityRuleProfileSetting
 
     group = ["best-practice"]
@@ -40,6 +44,8 @@ class SecurityRuleCreateApiFactory(factory.Factory):
     """Factory for creating SecurityRuleCreateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleCreateApiFactory. It is used by the SecurityRuleCreateApiFactory."""
+
         model = SecurityRuleCreateModel
 
     name = factory.Sequence(lambda n: f"security_rule_{n}")
@@ -98,6 +104,8 @@ class SecurityRuleUpdateApiFactory(factory.Factory):
     """Factory for creating SecurityRuleUpdateModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleUpdateApiFactory. It is used by the SecurityRuleUpdateApiFactory."""
+
         model = SecurityRuleUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -146,6 +154,8 @@ class SecurityRuleResponseFactory(factory.Factory):
     """Factory for creating SecurityRuleResponseModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleResponseFactory. It is used by the SecurityRuleResponseFactory."""
+
         model = SecurityRuleResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid.uuid4()))
@@ -189,8 +199,7 @@ class SecurityRuleResponseFactory(factory.Factory):
 
     @classmethod
     def with_device(cls, device: Union[str, Dict] = "TestDevice", **kwargs):
-        """
-        Create an instance with device container.
+        """Create an instance with device container.
 
         Args:
             device: Either a string device name or an empty dictionary
@@ -198,6 +207,7 @@ class SecurityRuleResponseFactory(factory.Factory):
 
         Returns:
             An instance of SecurityRuleResponseModel
+
         """
         # Validate the device parameter
         if isinstance(device, dict) and device != {}:
@@ -207,11 +217,11 @@ class SecurityRuleResponseFactory(factory.Factory):
 
     @classmethod
     def with_empty_dict_device(cls, **kwargs):
-        """
-        Create an instance with an empty dictionary as device.
+        """Create an instance with an empty dictionary as device.
 
         Returns:
             An instance of SecurityRuleResponseModel with device={}
+
         """
         return cls(folder=None, snippet=None, device={}, **kwargs)
 
@@ -228,6 +238,8 @@ class SecurityRuleMoveApiFactory(factory.Factory):
     """Factory for creating SecurityRuleMoveModel instances."""
 
     class Meta:
+        """Meta class that defines the model for SecurityRuleMoveModelFactory."""
+
         model = SecurityRuleMoveModel
 
     destination = SecurityRuleMoveDestination.TOP

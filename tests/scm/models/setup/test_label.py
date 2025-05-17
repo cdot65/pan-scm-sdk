@@ -1,5 +1,7 @@
 # tests/scm/models/setup/test_label.py
 
+"""Tests for label setup models."""
+
 # Standard library imports
 from uuid import UUID
 

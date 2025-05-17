@@ -1,5 +1,7 @@
 # tests/scm/models/objects/test_log_forwarding_profile_models.py
 
+"""Tests for log forwarding profile models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

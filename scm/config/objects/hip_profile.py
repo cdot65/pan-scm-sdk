@@ -1,3 +1,8 @@
+"""HIP Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing HIP profile objects via the SCM API.
+"""
+
 # scm/config/objects/hip_profile.py
 
 # Standard library imports
@@ -15,13 +20,13 @@ from scm.models.objects import (
 
 
 class HIPProfile(BaseObject):
-    """
-    Manages HIP profiles in Palo Alto Networks' Strata Cloud Manager.
+    """Manages HIP profiles in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/hip-profiles"
@@ -33,6 +38,7 @@ class HIPProfile(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the HipProfile service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -50,8 +56,7 @@ class HIPProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +66,7 @@ class HIPProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -97,14 +103,14 @@ class HIPProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> HIPProfileResponseModel:
-        """
-        Creates a new HIP profile.
+        """Create a new HIP profile.
 
         Args:
             data: Dictionary containing the HIP profile data
 
         Returns:
             HIPProfileResponseModel: The created HIP profile
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         hip_profile = HIPProfileCreateModel(**data)
@@ -125,14 +131,14 @@ class HIPProfile(BaseObject):
         self,
         object_id: str,
     ) -> HIPProfileResponseModel:
-        """
-        Gets a HIP profile by ID.
+        """Get a HIP profile by ID.
 
         Args:
             object_id: The ID of the HIP profile to get
 
         Returns:
             HIPProfileResponseModel: The retrieved HIP profile
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -145,14 +151,14 @@ class HIPProfile(BaseObject):
         self,
         hip_profile: HIPProfileUpdateModel,
     ) -> HIPProfileResponseModel:
-        """
-        Updates an existing HIP profile.
+        """Update an existing HIP profile.
 
         Args:
             hip_profile: HIPProfileUpdateModel instance containing the update data
 
         Returns:
             HIPProfileResponseModel: The updated HIP profile
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = hip_profile.model_dump(exclude_unset=True)
@@ -177,7 +183,7 @@ class HIPProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -194,8 +200,7 @@ class HIPProfile(BaseObject):
         exclude_snippets: Optional[List[str]] = None,
         exclude_devices: Optional[List[str]] = None,
     ) -> List[HIPProfileResponseModel]:
-        """
-        Lists HIP profiles with optional filtering.
+        """List HIP profiles with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -209,6 +214,7 @@ class HIPProfile(BaseObject):
 
         Returns:
             List[HIPProfileResponseModel]: A list of HIP profiles
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -329,8 +335,7 @@ class HIPProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> HIPProfileResponseModel:
-        """
-        Fetches a single HIP profile by name.
+        """Fetch a single HIP profile by name.
 
         Args:
             name (str): The name of the HIP profile to fetch.
@@ -340,6 +345,7 @@ class HIPProfile(BaseObject):
 
         Returns:
             HIPProfileResponseModel: The fetched HIP profile as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -411,11 +417,11 @@ class HIPProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a HIP profile.
+        """Delete a HIP profile.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

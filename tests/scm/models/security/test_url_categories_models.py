@@ -1,5 +1,7 @@
 # tests/scm/models/security/test_url_categories.py
 
+"""Tests for URL category security models."""
+
 # External libraries
 from uuid import UUID
 

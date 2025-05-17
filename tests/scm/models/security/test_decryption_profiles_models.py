@@ -1,5 +1,7 @@
 # tests/scm/models/security/test_decryption_profiles_models.py
 
+"""Tests for decryption profile security models."""
+
 from uuid import UUID
 
 from pydantic import ValidationError

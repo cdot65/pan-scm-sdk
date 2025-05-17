@@ -1,5 +1,7 @@
 # tests/scm/test_unified_client.py
 
+"""Tests for unified SCM client functionality."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest

@@ -1,3 +1,5 @@
+"""Factory definitions for mobile agent models."""
+
 from factory import Factory, Faker  # type: ignore
 import factory.fuzzy  # type: ignore
 from faker import Faker as FakerGenerator
@@ -21,6 +23,8 @@ class AgentVersionModelFactory(Factory):
     """Factory for AgentVersionModel."""
 
     class Meta:
+        """Meta class for AgentVersionModelFactory."""
+
         model = AgentVersionModel
 
     version = factory.LazyFunction(
@@ -34,6 +38,8 @@ class AgentVersionsModelFactory(Factory):
     """Factory for AgentVersionsModel."""
 
     class Meta:
+        """Meta class for AgentVersionsModelFactory."""
+
         model = AgentVersionsModel
 
     agent_versions = factory.LazyFunction(
@@ -48,6 +54,8 @@ class AuthSettingsBaseModelFactory(Factory):
     """Factory for AuthSettingsBaseModel."""
 
     class Meta:
+        """Meta class for AuthSettingsBaseModelFactory."""
+
         model = AuthSettingsBaseModel
 
     name = Faker("pystr", min_chars=5, max_chars=30)
@@ -61,6 +69,8 @@ class AuthSettingsCreateModelFactory(Factory):
     """Factory for AuthSettingsCreateModel."""
 
     class Meta:
+        """Meta class for AuthSettingsCreateModelFactory."""
+
         model = AuthSettingsCreateModel
 
     name = Faker("pystr", min_chars=5, max_chars=30)
@@ -107,6 +117,8 @@ class AuthSettingsResponseModelFactory(Factory):
     """Factory for AuthSettingsResponseModel."""
 
     class Meta:
+        """Meta class for AuthSettingsResponseModelFactory."""
+
         model = AuthSettingsResponseModel
 
     name = Faker("pystr", min_chars=5, max_chars=30)
@@ -120,6 +132,8 @@ class AuthSettingsUpdateModelFactory(Factory):
     """Factory for AuthSettingsUpdateModel."""
 
     class Meta:
+        """Meta class for AuthSettingsUpdateModelFactory."""
+
         model = AuthSettingsUpdateModel
 
     name = Faker("pystr", min_chars=5, max_chars=30)
@@ -166,6 +180,8 @@ class AuthSettingsMoveModelFactory(Factory):
     """Factory for AuthSettingsMoveModel."""
 
     class Meta:
+        """Meta class for AuthSettingsMoveModelFactory."""
+
         model = AuthSettingsMoveModel
 
     name = Faker("pystr", min_chars=5, max_chars=30)

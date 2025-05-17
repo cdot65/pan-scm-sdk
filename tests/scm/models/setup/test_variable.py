@@ -1,5 +1,7 @@
 # tests/scm/models/setup/test_variable.py
 
+"""Tests for variable setup models."""
+
 # Standard library imports
 from uuid import UUID
 

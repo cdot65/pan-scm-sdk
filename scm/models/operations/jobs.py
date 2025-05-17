@@ -1,3 +1,8 @@
+"""Jobs operations models for Strata Cloud Manager SDK.
+
+Contains Pydantic models for representing job operation objects and related data.
+"""
+
 # scm/models/operations/jobs.py
 
 from datetime import datetime

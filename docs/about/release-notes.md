@@ -2,6 +2,20 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.37
+
+**Released:** May 17, 2025
+
+### Improved & Enforced
+- **Docstring Linting:**
+  - Enforced Ruff for all docstrings across the SDK, adopting Google-style docstrings as the project standard.
+  - Suppressed mutually exclusive rule warnings (D203/D211, D212/D213) for a clean, warning-free linting experience.
+  - All docstrings now linted and auto-fixed by Ruff; documentation consistency guaranteed for all modules and releases.
+
+### Improved
+- **OAuth Token Refresh:**
+  - Improved handling of OAuth token refreshing in `scm/auth.py` for more robust and reliable authentication flows.
+
 ## Version 0.3.36
 
 **Released:** May 16, 2025

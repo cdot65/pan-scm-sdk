@@ -1,3 +1,8 @@
+"""Region configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing region objects via the SCM API.
+"""
+
 # scm/config/objects/region.py
 
 # Standard library imports
@@ -11,8 +16,7 @@ from scm.models.objects import RegionCreateModel, RegionResponseModel, RegionUpd
 
 
 class Region(BaseObject):
-    """
-    Manages Region objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Region objects in Palo Alto Networks' Strata Cloud Manager.
 
     Note:
         While the SDK models support 'description' and 'tag' fields for region objects
@@ -24,6 +28,7 @@ class Region(BaseObject):
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/regions"
@@ -35,6 +40,7 @@ class Region(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the Region service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -52,8 +58,7 @@ class Region(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -63,6 +68,7 @@ class Region(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -99,11 +105,11 @@ class Region(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> RegionResponseModel:
-        """
-        Creates a new region object.
+        """Create a new region object.
 
         Returns:
             RegionResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         region = RegionCreateModel(**data)
@@ -125,11 +131,11 @@ class Region(BaseObject):
         self,
         object_id: str,
     ) -> RegionResponseModel:
-        """
-        Gets a region object by ID.
+        """Get a region object by ID.
 
         Returns:
             RegionResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -142,14 +148,14 @@ class Region(BaseObject):
         self,
         region: RegionUpdateModel,
     ) -> RegionResponseModel:
-        """
-        Updates an existing region object.
+        """Update an existing region object.
 
         Args:
             region: RegionUpdateModel instance containing the update data
 
         Returns:
             RegionResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         # Also exclude tag and description fields since they're not supported by the API
@@ -174,8 +180,7 @@ class Region(BaseObject):
         regions: List[RegionResponseModel],
         filters: Dict[str, Any],
     ) -> List[RegionResponseModel]:
-        """
-        Apply client-side filtering to the list of regions.
+        """Apply client-side filtering to the list of regions.
 
         Args:
             regions: List of RegionResponseModel objects
@@ -183,8 +188,8 @@ class Region(BaseObject):
 
         Returns:
             List[RegionResponseModel]: Filtered list of regions
-        """
 
+        """
         filter_criteria = regions
 
         # Filter by geo_location (latitude/longitude ranges)
@@ -247,7 +252,7 @@ class Region(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -265,8 +270,7 @@ class Region(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[RegionResponseModel]:
-        """
-        Lists region objects with optional filtering.
+        """List region objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -283,6 +287,7 @@ class Region(BaseObject):
 
         Returns:
             List[RegionResponseModel]: A list of region objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -416,8 +421,7 @@ class Region(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> RegionResponseModel:
-        """
-        Fetches a single object by name.
+        """Fetch a single region by name.
 
         Args:
             name (str): The name of the region to fetch.
@@ -427,6 +431,7 @@ class Region(BaseObject):
 
         Returns:
             RegionResponseModel: The fetched region object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -498,8 +503,7 @@ class Region(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a region object.
+        """Delete a region object.
 
         Args:
             object_id (str): The ID of the object to delete.

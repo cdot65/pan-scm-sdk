@@ -1,3 +1,9 @@
+"""SCM API client for Strata Cloud Manager SDK.
+
+This module defines the main Scm client class, supporting authentication and
+HTTP operations for interacting with the Palo Alto Networks Strata Cloud Manager REST API.
+"""
+
 # scm/client.py
 
 # Standard library imports
@@ -25,8 +31,7 @@ from scm.models.operations import (
 
 
 class Scm:
-    """
-    A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
+    """A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
 
     This client supports two authentication methods:
     1. OAuth2 client credentials flow (requires client_id, client_secret, and tsg_id)
@@ -42,6 +47,7 @@ class Scm:
         access_token: Pre-acquired OAuth2 bearer token for stateless authentication
             When provided, client_id, client_secret, and tsg_id are not required.
             Token refresh is the caller's responsibility when using this mode.
+
     """
 
     # trunk-ignore(bandit/B107)
@@ -55,6 +61,7 @@ class Scm:
         log_level: str = "ERROR",
         access_token: Optional[str] = None,
     ):
+        """Initialize the ScmClient with the provided client_id, client_secret, tsg_id, API URLs, log level, and access token."""
         self.api_base_url = api_base_url
         self.oauth_client = None
 
@@ -117,13 +124,13 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """
-        Handles the API request and returns the response JSON or None if no content is present.
+        """Handle the API request and return the response JSON or None if no content is present.
 
         Args:
             method: HTTP method to be used for the request (e.g., 'GET', 'POST').
             endpoint: The API endpoint to which the request is made.
             **kwargs: Additional arguments to be passed to the request (e.g., headers, params, data).
+
         """
         url = f"{self.api_base_url}{endpoint}"
         self.logger.debug(f"Making {method} request to {url} with params {kwargs}")
@@ -159,8 +166,7 @@ class Scm:
         params: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
-        """
-        Sends a GET request to the SCM API.
+        """Send a GET request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -180,8 +186,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """
-        Sends a POST request to the SCM API.
+        """Send a POST request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -200,8 +205,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """
-        Sends a PUT request to the SCM API.
+        """Send a PUT request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -220,8 +224,7 @@ class Scm:
         endpoint: str,
         **kwargs,
     ):
-        """
-        Sends a DELETE request to the SCM API.
+        """Send a DELETE request to the SCM API.
 
         In OAuth2 client credentials mode, automatically refreshes the token if expired.
         In bearer token mode, the token is used as-is with no refresh capability.
@@ -241,8 +244,7 @@ class Scm:
         offset: int = 0,
         parent_id: Optional[str] = None,
     ) -> JobListResponse:
-        """
-        List jobs in SCM with pagination support and optional parent ID filtering.
+        """List jobs in SCM with pagination support and optional parent ID filtering.
 
         Args:
             limit: Maximum number of jobs to return (default: 100)
@@ -251,6 +253,7 @@ class Scm:
 
         Returns:
             JobListResponse: Paginated list of jobs
+
         """
         # Make API request with just pagination parameters
         response = self.get(
@@ -273,14 +276,14 @@ class Scm:
         return jobs_response
 
     def get_job_status(self, job_id: str) -> JobStatusResponse:
-        """
-        Get the status of a job.
+        """Get the status of a job.
 
         Args:
             job_id: The ID of the job to check
 
         Returns:
             JobStatusResponse: The job status response
+
         """
         response = self.get(f"/config/operations/v1/jobs/{job_id}")
         return JobStatusResponse(**response)
@@ -288,8 +291,7 @@ class Scm:
     def wait_for_job(
         self, job_id: str, timeout: int = 300, poll_interval: int = 10
     ) -> Optional[JobStatusResponse]:
-        """
-        Wait for a job to complete.
+        """Wait for a job to complete.
 
         Args:
             job_id: The ID of the job to check
@@ -301,6 +303,7 @@ class Scm:
 
         Raises:
             TimeoutError: If the job doesn't complete within the timeout period
+
         """
         start_time = time.time()
         while True:
@@ -326,8 +329,7 @@ class Scm:
         sync: bool = False,
         timeout: int = 300,
     ) -> CandidatePushResponseModel:
-        """
-        Commits configuration changes to SCM.
+        """Commit configuration changes to SCM.
 
         Args:
             folders: List of folder names to commit changes from
@@ -338,6 +340,7 @@ class Scm:
 
         Returns:
             CandidatePushResponseModel: Response containing job information
+
         """
         # If using bearer token mode and admin is None, we need to specify an admin
         if admin is None:
@@ -379,8 +382,7 @@ class Scm:
         return commit_response
 
     def __getattr__(self, name: str) -> Any:
-        """
-        Dynamic attribute access to support unified client access pattern (api_client.service).
+        """Dynamic attribute access to support unified client access pattern (api_client.service).
 
         This method allows accessing service objects as attributes like:
         api_client.address, api_client.tag, etc.
@@ -393,6 +395,7 @@ class Scm:
 
         Raises:
             AttributeError: If the service doesn't exist
+
         """
         # If we already have an instance of this service, return it from cache
         if name in self._services:
@@ -603,8 +606,8 @@ class Scm:
 
 
 class ScmClient(Scm):
-    """
-    Alias for the Scm class to provide a more explicit naming option.
+    """Alias for the Scm class to provide a more explicit naming option.
+
     This class provides all the same functionality as Scm.
 
     This client supports two authentication methods:
@@ -621,6 +624,7 @@ class ScmClient(Scm):
         access_token: Pre-acquired OAuth2 bearer token for stateless authentication
             When provided, client_id, client_secret, and tsg_id are not required.
             Token refresh is the caller's responsibility when using this mode.
+
     """
 
     pass

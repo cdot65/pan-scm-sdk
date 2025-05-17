@@ -1,3 +1,8 @@
+"""Tag configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing tag objects via the SCM API.
+"""
+
 # scm/config/objects/tag.py
 
 # Standard library imports
@@ -13,12 +18,13 @@ from scm.utils.tag_colors import normalize_color_name
 
 
 class Tag(BaseObject):
-    """
-    Manages Tag objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Tag objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/tags"
@@ -30,6 +36,7 @@ class Tag(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the Tag service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -47,8 +54,7 @@ class Tag(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -58,6 +64,7 @@ class Tag(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -94,11 +101,11 @@ class Tag(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> TagResponseModel:
-        """
-        Creates a new tag object.
+        """Create a new tag object.
 
         Returns:
             TagResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         tag = TagCreateModel(**data)
@@ -119,11 +126,11 @@ class Tag(BaseObject):
         self,
         object_id: str,
     ) -> TagResponseModel:
-        """
-        Gets a tag object by ID.
+        """Get a tag object by ID.
 
         Returns:
             TagResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -136,14 +143,14 @@ class Tag(BaseObject):
         self,
         tag: TagUpdateModel,
     ) -> TagResponseModel:
-        """
-        Updates an existing tag object.
+        """Update an existing tag object.
 
         Args:
             tag: TagUpdateModel instance containing the update data
 
         Returns:
             TagResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = tag.model_dump(exclude_unset=True)
@@ -167,8 +174,7 @@ class Tag(BaseObject):
         tags: List[TagResponseModel],
         filters: Dict[str, Any],
     ) -> List[TagResponseModel]:
-        """
-        Apply client-side filtering to the list of tags.
+        """Apply client-side filtering to the list of tags.
 
         Args:
             tags: List of TagResponseModel objects
@@ -176,6 +182,7 @@ class Tag(BaseObject):
 
         Returns:
             List[TagResponseModel]: Filtered list of tags
+
         """
         filter_criteria = tags
 
@@ -217,7 +224,7 @@ class Tag(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -235,8 +242,7 @@ class Tag(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[TagResponseModel]:
-        """
-        Lists tag objects with optional filtering.
+        """List tag objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -252,6 +258,7 @@ class Tag(BaseObject):
 
         Returns:
             List[TagResponseModel]: A list of tag objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -375,8 +382,7 @@ class Tag(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> TagResponseModel:
-        """
-        Fetches a single tag by name.
+        """Fetch a single tag by name.
 
         Args:
             name (str): The name of the tag to fetch.
@@ -386,6 +392,7 @@ class Tag(BaseObject):
 
         Returns:
             TagResponseModel: The fetched tag object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -443,11 +450,11 @@ class Tag(BaseObject):
             )
 
     def delete(self, object_id: str) -> None:
-        """
-        Deletes a tag object.
+        """Delete a tag object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

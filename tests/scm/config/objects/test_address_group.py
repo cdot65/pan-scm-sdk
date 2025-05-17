@@ -1,3 +1,7 @@
+"""Test module for Address Group configuration service.
+
+This module contains unit tests for the Address Group configuration service and its related models.
+"""
 # tests/scm/config/objects/test_address_group.py
 
 # Standard library imports
@@ -335,9 +339,7 @@ class TestAddressGroupList(TestAddressGroupBase):
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
     def test_list_exact_match(self):
-        """
-        Test that exact_match=True returns only address groups that match the container exactly.
-        """
+        """Test that exact_match=True returns only address groups that match the container exactly."""
         mock_response = {
             "data": [
                 AddressGroupResponseFactory.with_static(
@@ -358,9 +360,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         assert filtered[0].name == "group_in_texas"
 
     def test_list_exclude_folders(self):
-        """
-        Test that exclude_folders removes address groups from those folders.
-        """
+        """Test that exclude_folders removes address groups from those folders."""
         mock_response = {
             "data": [
                 AddressGroupResponseFactory.with_static(
@@ -378,9 +378,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         assert all(g.folder != "All" for g in filtered)
 
     def test_list_exclude_snippets(self):
-        """
-        Test that exclude_snippets removes address groups with those snippets.
-        """
+        """Test that exclude_snippets removes address groups with those snippets."""
         mock_response = {
             "data": [
                 AddressGroupResponseFactory.with_static(
@@ -404,9 +402,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         assert all(g.snippet != "default" for g in filtered)
 
     def test_list_exclude_devices(self):
-        """
-        Test that exclude_devices removes address groups from those devices.
-        """
+        """Test that exclude_devices removes address groups from those devices."""
         mock_response = {
             "data": [
                 AddressGroupResponseFactory.with_static(
@@ -430,9 +426,7 @@ class TestAddressGroupList(TestAddressGroupBase):
         assert all(g.device != "DeviceA" for g in filtered)
 
     def test_list_exact_match_and_exclusions(self):
-        """
-        Test combining exact_match with exclusions.
-        """
+        """Test combining exact_match with exclusions."""
         mock_response = {
             "data": [
                 AddressGroupResponseFactory.with_static(

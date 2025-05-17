@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Comprehensive examples of working with Service objects in Palo Alto Networks' Strata Cloud Manager.
+"""Comprehensive examples of working with Service objects in Palo Alto Networks' Strata Cloud Manager.
 
 This script demonstrates a wide range of Service object configurations and operations commonly
 used in enterprise networks, including:
@@ -147,8 +146,7 @@ def log_success(message):
 
 
 def initialize_client():
-    """
-    Initialize the SCM client using credentials from environment variables or .env file.
+    """Initialize the SCM client using credentials from environment variables or .env file.
 
     This function will:
     1. Load credentials from .env file (first in current directory, then in script directory)
@@ -228,8 +226,7 @@ def initialize_client():
 
 
 def create_tcp_single_port_service(services, folder="Texas"):
-    """
-    Create a service object for a single TCP port.
+    """Create a service object for a single TCP port.
 
     This function demonstrates creating a standard TCP service with a single port,
     commonly used for web servers and other applications.
@@ -284,8 +281,7 @@ def create_tcp_single_port_service(services, folder="Texas"):
 
 
 def create_tcp_multi_port_service(services, folder="Texas"):
-    """
-    Create a service object for multiple TCP ports.
+    """Create a service object for multiple TCP ports.
 
     This function demonstrates creating a TCP service with multiple ports,
     useful for applications that use several ports (e.g., web services with HTTP and HTTPS).
@@ -345,8 +341,7 @@ def create_tcp_multi_port_service(services, folder="Texas"):
 
 
 def create_udp_single_port_service(services, folder="Texas"):
-    """
-    Create a service object for a single UDP port.
+    """Create a service object for a single UDP port.
 
     This function demonstrates creating a standard UDP service with a single port,
     typically used for DNS, DHCP, or other UDP-based services.
@@ -401,8 +396,7 @@ def create_udp_single_port_service(services, folder="Texas"):
 
 
 def create_udp_multi_port_service(services, folder="Texas"):
-    """
-    Create a service object for multiple UDP ports.
+    """Create a service object for multiple UDP ports.
 
     This function demonstrates creating a UDP service with multiple ports,
     useful for applications that use several UDP ports (e.g., DHCP client and server).
@@ -457,8 +451,7 @@ def create_udp_multi_port_service(services, folder="Texas"):
 
 
 def fetch_and_update_service(services, service_id):
-    """
-    Fetch a service object by ID and update its description, port and tags.
+    """Fetch a service object by ID and update its description, port and tags.
 
     This function demonstrates how to:
     1. Retrieve an existing service object using its ID
@@ -513,8 +506,7 @@ def fetch_and_update_service(services, service_id):
 
 
 def list_and_filter_services(services):
-    """
-    List and filter service objects.
+    """List and filter service objects.
 
     This function demonstrates how to:
     1. List all service objects in a folder
@@ -574,8 +566,7 @@ def list_and_filter_services(services):
 
 
 def cleanup_service_objects(services, service_ids):
-    """
-    Delete the service objects created in this example.
+    """Delete the service objects created in this example.
 
     Args:
         services: The Service manager instance
@@ -594,8 +585,7 @@ def cleanup_service_objects(services, service_ids):
 
 
 def create_bulk_service_objects(services, folder="Texas"):
-    """
-    Create multiple service objects in a batch.
+    """Create multiple service objects in a batch.
 
     This function demonstrates creating multiple service objects in a batch,
     which is useful for setting up multiple services at once.
@@ -656,8 +646,7 @@ def create_bulk_service_objects(services, folder="Texas"):
 
 
 def generate_service_report(services, service_ids, execution_time):
-    """
-    Generate a comprehensive CSV report of all service objects created by the script.
+    """Generate a comprehensive CSV report of all service objects created by the script.
 
     This function fetches detailed information about each service object and writes it to a
     CSV file with a timestamp in the filename. It provides progress updates during
@@ -787,8 +776,7 @@ def generate_service_report(services, service_ids, execution_time):
 
 
 def parse_arguments():
-    """
-    Parse command-line arguments for the service example script.
+    """Parse command-line arguments for the service example script.
 
     This function sets up the argument parser with various options to customize
     the script's behavior at runtime, including:
@@ -833,8 +821,7 @@ def parse_arguments():
 
 
 def main():
-    """
-    Execute the comprehensive set of service object examples for Strata Cloud Manager.
+    """Execute the comprehensive set of service object examples for Strata Cloud Manager.
 
     This is the main entry point for the script that orchestrates the following workflow:
     1. Parse command-line arguments to customize execution

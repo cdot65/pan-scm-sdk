@@ -1,3 +1,8 @@
+"""HIP Object configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing HIP object resources via the SCM API.
+"""
+
 # scm/config/objects/hip_object.py
 
 # Standard library imports
@@ -15,12 +20,13 @@ from scm.models.objects import (
 
 
 class HIPObject(BaseObject):
-    """
-    Manages HIP objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages HIP objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/hip-objects"
@@ -32,6 +38,7 @@ class HIPObject(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the HipObject service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,8 +56,7 @@ class HIPObject(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +66,7 @@ class HIPObject(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +103,11 @@ class HIPObject(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> HIPObjectResponseModel:
-        """
-        Creates a new HIP object.
+        """Create a new HIP object.
 
         Returns:
             HIPObjectResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         hip_object = HIPObjectCreateModel(**data)
@@ -121,11 +128,11 @@ class HIPObject(BaseObject):
         self,
         object_id: str,
     ) -> HIPObjectResponseModel:
-        """
-        Gets a HIP object by ID.
+        """Get a HIP object by ID.
 
         Returns:
             HIPObjectResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +145,14 @@ class HIPObject(BaseObject):
         self,
         hip_object: HIPObjectUpdateModel,
     ) -> HIPObjectResponseModel:
-        """
-        Updates an existing HIP object.
+        """Update an existing HIP object.
 
         Args:
             hip_object: HIPObjectUpdateModel instance containing the update data
 
         Returns:
             HIPObjectResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = hip_object.model_dump(exclude_unset=True)
@@ -169,8 +176,7 @@ class HIPObject(BaseObject):
         hip_objects: List[HIPObjectResponseModel],
         filters: Dict[str, Any],
     ) -> List[HIPObjectResponseModel]:
-        """
-        Apply client-side filtering to the list of HIP objects.
+        """Apply client-side filtering to the list of HIP objects.
 
         Args:
             hip_objects: List of HIPObjectResponseModel objects
@@ -178,6 +184,7 @@ class HIPObject(BaseObject):
 
         Returns:
             List[HIPObjectResponseModel]: Filtered list of HIP objects
+
         """
         filter_criteria = hip_objects
 
@@ -216,7 +223,7 @@ class HIPObject(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -234,8 +241,7 @@ class HIPObject(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[HIPObjectResponseModel]:
-        """
-        Lists HIP objects with optional filtering.
+        """List HIP objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -251,6 +257,7 @@ class HIPObject(BaseObject):
 
         Returns:
             List[HIPObjectResponseModel]: A list of HIP objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -374,8 +381,7 @@ class HIPObject(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> HIPObjectResponseModel:
-        """
-        Fetches a single HIP object by name.
+        """Fetch a single HIP object by name.
 
         Args:
             name (str): The name of the HIP object to fetch.
@@ -385,6 +391,7 @@ class HIPObject(BaseObject):
 
         Returns:
             HIPObjectResponseModel: The fetched HIP object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -456,11 +463,11 @@ class HIPObject(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a HIP object.
+        """Delete a HIP object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

@@ -1,3 +1,8 @@
+"""Service configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing service objects via the SCM API.
+"""
+
 # scm/config/objects/service.py
 
 # Standard library imports
@@ -15,12 +20,13 @@ from scm.models.objects import (
 
 
 class Service(BaseObject):
-    """
-    Manages Service objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Service objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/objects/v1/services"
@@ -32,6 +38,7 @@ class Service(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the Service service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,8 +56,7 @@ class Service(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +66,7 @@ class Service(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +103,11 @@ class Service(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> ServiceResponseModel:
-        """
-        Creates a new service object.
+        """Create a new service object.
 
         Returns:
             ServiceResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         service = ServiceCreateModel(**data)
@@ -121,11 +128,11 @@ class Service(BaseObject):
         self,
         object_id: str,
     ) -> ServiceResponseModel:
-        """
-        Gets a service object by ID.
+        """Get a service object by ID.
 
         Returns:
             ServiceResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +145,14 @@ class Service(BaseObject):
         self,
         service: ServiceUpdateModel,
     ) -> ServiceResponseModel:
-        """
-        Updates an existing service object.
+        """Update an existing service object.
 
         Args:
             service: ServiceUpdateModel instance containing the update data
 
         Returns:
             ServiceResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = service.model_dump(exclude_unset=True)
@@ -169,8 +176,7 @@ class Service(BaseObject):
         services: List[ServiceResponseModel],
         filters: Dict[str, Any],
     ) -> List[ServiceResponseModel]:
-        """
-        Apply client-side filtering to the list of services.
+        """Apply client-side filtering to the list of services.
 
         Args:
             services: List of ServiceResponseModel objects
@@ -178,6 +184,7 @@ class Service(BaseObject):
 
         Returns:
             List[ServiceResponseModel]: Filtered list of services
+
         """
         filter_criteria = services
 
@@ -224,7 +231,7 @@ class Service(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -242,8 +249,7 @@ class Service(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[ServiceResponseModel]:
-        """
-        Lists service objects with optional filtering.
+        """List service objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -260,6 +266,7 @@ class Service(BaseObject):
 
         Returns:
             List[ServiceResponseModel]: A list of service objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -383,8 +390,7 @@ class Service(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> ServiceResponseModel:
-        """
-        Fetches a single service by name.
+        """Fetch a single service by name.
 
         Args:
             name (str): The name of the service to fetch.
@@ -394,6 +400,7 @@ class Service(BaseObject):
 
         Returns:
             ServiceResponseModel: The fetched service object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -465,11 +472,11 @@ class Service(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a service object.
+        """Delete a service object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

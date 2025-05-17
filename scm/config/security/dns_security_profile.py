@@ -1,3 +1,8 @@
+"""DNS Security Profile configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing DNS security profile objects via the SCM API.
+"""
+
 # scm/config/security/dns_security_profile.py
 
 # Standard library imports
@@ -15,12 +20,13 @@ from scm.models.security import (
 
 
 class DNSSecurityProfile(BaseObject):
-    """
-    Manages DNS Security Profile objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages DNS Security Profile objects in Palo Alto Networks' Strata Cloud Manager.
+
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 5000. Must be between 1 and 10000.
+
     """
 
     ENDPOINT = "/config/security/v1/dns-security-profiles"
@@ -32,6 +38,7 @@ class DNSSecurityProfile(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the DnsSecurityProfile service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -49,8 +56,7 @@ class DNSSecurityProfile(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -60,6 +66,7 @@ class DNSSecurityProfile(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -96,11 +103,11 @@ class DNSSecurityProfile(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> DNSSecurityProfileResponseModel:
-        """
-        Creates a new DNS security profile object.
+        """Create a new DNS security profile object.
 
         Returns:
             DNSSecurityProfileResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         profile = DNSSecurityProfileCreateModel(**data)
@@ -121,11 +128,11 @@ class DNSSecurityProfile(BaseObject):
         self,
         object_id: str,
     ) -> DNSSecurityProfileResponseModel:
-        """
-        Gets a DNS security profile object by ID.
+        """Get a DNS security profile object by ID.
 
         Returns:
             DNSSecurityProfileResponseModel
+
         """
         # Send the request to the remote API
         endpoint = f"{self.ENDPOINT}/{object_id}"
@@ -138,14 +145,14 @@ class DNSSecurityProfile(BaseObject):
         self,
         profile: DNSSecurityProfileUpdateModel,
     ) -> DNSSecurityProfileResponseModel:
-        """
-        Updates an existing DNS security profile object.
+        """Update an existing DNS security profile object.
 
         Args:
             profile: DNSSecurityProfileUpdateModel instance containing the update data
 
         Returns:
             DNSSecurityProfileResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields
         payload = profile.model_dump(exclude_unset=True)
@@ -169,8 +176,7 @@ class DNSSecurityProfile(BaseObject):
         profiles: List[DNSSecurityProfileResponseModel],
         filters: Dict[str, Any],
     ) -> List[DNSSecurityProfileResponseModel]:
-        """
-        Apply client-side filtering to the list of DNS security profiles.
+        """Apply client-side filtering to the list of DNS security profiles.
 
         Args:
             profiles: List of DNSSecurityProfileResponseModel objects
@@ -178,6 +184,7 @@ class DNSSecurityProfile(BaseObject):
 
         Returns:
             List[DNSSecurityProfileResponseModel]: Filtered list of profiles
+
         """
         filter_criteria = profiles
 
@@ -211,7 +218,7 @@ class DNSSecurityProfile(BaseObject):
         snippet: Optional[str],
         device: Optional[str],
     ) -> dict:
-        """Builds container parameters dictionary."""
+        """Build container parameters dictionary."""
         return {
             k: v
             for k, v in {"folder": folder, "snippet": snippet, "device": device}.items()
@@ -229,8 +236,7 @@ class DNSSecurityProfile(BaseObject):
         exclude_devices: Optional[List[str]] = None,
         **filters,
     ) -> List[DNSSecurityProfileResponseModel]:
-        """
-        Lists DNS security profile objects with optional filtering.
+        """List DNS security profile objects with optional filtering.
 
         Args:
             folder: Optional folder name
@@ -246,6 +252,7 @@ class DNSSecurityProfile(BaseObject):
 
         Returns:
             List[DNSSecurityProfileResponseModel]: A list of dns security profile objects
+
         """
         if folder == "":
             raise MissingQueryParameterError(
@@ -369,8 +376,7 @@ class DNSSecurityProfile(BaseObject):
         snippet: Optional[str] = None,
         device: Optional[str] = None,
     ) -> DNSSecurityProfileResponseModel:
-        """
-        Fetches a single DNS security profile by name.
+        """Fetch a single DNS security profile by name.
 
         Args:
             name (str): The name of the DNS security profile to fetch.
@@ -380,6 +386,7 @@ class DNSSecurityProfile(BaseObject):
 
         Returns:
             DNSSecurityProfileResponseModel: The fetched DNS security profile object as a Pydantic model.
+
         """
         if not name:
             raise MissingQueryParameterError(
@@ -451,11 +458,11 @@ class DNSSecurityProfile(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes a DNS security profile object.
+        """Delete a DNS security profile object.
 
         Args:
             object_id (str): The ID of the object to delete.
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

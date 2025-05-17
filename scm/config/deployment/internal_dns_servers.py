@@ -1,3 +1,8 @@
+"""Internal DNS Servers configuration service for Strata Cloud Manager SDK.
+
+Provides service class for managing internal DNS server objects via the SCM API.
+"""
+
 # scm/config/deployment/internal_dns_servers.py
 
 # Standard library imports
@@ -15,13 +20,13 @@ from scm.models.deployment import (
 
 
 class InternalDnsServers(BaseObject):
-    """
-    Manages Internal DNS Server objects in Palo Alto Networks' Strata Cloud Manager.
+    """Manages Internal DNS Server objects in Palo Alto Networks' Strata Cloud Manager.
 
     Args:
         api_client: The API client instance
         max_limit (Optional[int]): Maximum number of objects to return in a single API request.
             Defaults to 2500. Must be between 1 and 5000.
+
     """
 
     ENDPOINT = "/config/deployment/v1/internal-dns-servers"
@@ -33,6 +38,7 @@ class InternalDnsServers(BaseObject):
         api_client,
         max_limit: Optional[int] = None,
     ):
+        """Initialize the InternalDnsServers service with the given API client."""
         super().__init__(api_client)
         self.logger = logging.getLogger(__name__)
 
@@ -50,8 +56,7 @@ class InternalDnsServers(BaseObject):
         self._max_limit = self._validate_max_limit(value)
 
     def _validate_max_limit(self, limit: Optional[int]) -> int:
-        """
-        Validates the max_limit parameter.
+        """Validate the max_limit parameter.
 
         Args:
             limit: The limit to validate
@@ -61,6 +66,7 @@ class InternalDnsServers(BaseObject):
 
         Raises:
             InvalidObjectError: If the limit is invalid
+
         """
         if limit is None:
             return self.DEFAULT_MAX_LIMIT
@@ -100,14 +106,14 @@ class InternalDnsServers(BaseObject):
         self,
         data: Dict[str, Any],
     ) -> InternalDnsServersResponseModel:
-        """
-        Creates a new internal DNS server object.
+        """Create a new internal DNS server object.
 
         Args:
             data: Dictionary containing the internal DNS server configuration
 
         Returns:
             InternalDnsServersResponseModel
+
         """
         # Use the dictionary "data" to pass into Pydantic and return a modeled object
         internal_dns_server = InternalDnsServersCreateModel(**data)
@@ -131,14 +137,14 @@ class InternalDnsServers(BaseObject):
         self,
         object_id: str,
     ) -> InternalDnsServersResponseModel:
-        """
-        Gets an internal DNS server object by ID.
+        """Get an internal DNS server object by ID.
 
         Args:
             object_id: The ID of the internal DNS server to retrieve
 
         Returns:
             InternalDnsServersResponseModel
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.get(endpoint)
@@ -148,14 +154,14 @@ class InternalDnsServers(BaseObject):
         self,
         dns_server: InternalDnsServersUpdateModel,
     ) -> InternalDnsServersResponseModel:
-        """
-        Updates an existing internal DNS server object.
+        """Update an existing internal DNS server object.
 
         Args:
             dns_server: InternalDnsServersUpdateModel instance containing the update data
 
         Returns:
             InternalDnsServersResponseModel
+
         """
         # Convert to dict for API request, excluding unset fields and using aliases
         payload = dns_server.model_dump(
@@ -182,8 +188,7 @@ class InternalDnsServers(BaseObject):
         name: Optional[str] = None,
         **filters,
     ) -> List[InternalDnsServersResponseModel]:
-        """
-        Lists internal DNS server objects with optional filtering.
+        """List internal DNS server objects with optional filtering.
 
         Args:
             name: Optional DNS server name to filter by
@@ -191,6 +196,7 @@ class InternalDnsServers(BaseObject):
 
         Returns:
             List[InternalDnsServersResponseModel]: A list of internal DNS server objects
+
         """
         # Pagination logic
         limit = self._max_limit
@@ -267,14 +273,14 @@ class InternalDnsServers(BaseObject):
         self,
         name: str,
     ) -> InternalDnsServersResponseModel:
-        """
-        Fetches a single internal DNS server by name.
+        """Fetch a single internal DNS server by name.
 
         Args:
             name: The name of the internal DNS server to fetch
 
         Returns:
             InternalDnsServersResponseModel: The fetched internal DNS server object
+
         """
         if not name:
             # Update message to match expected test format
@@ -344,11 +350,11 @@ class InternalDnsServers(BaseObject):
         self,
         object_id: str,
     ) -> None:
-        """
-        Deletes an internal DNS server object.
+        """Delete an internal DNS server object.
 
         Args:
             object_id: The ID of the object to delete
+
         """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)

@@ -1,5 +1,4 @@
-"""
-Integration tests for bearer token authentication.
+"""Integration tests for bearer token authentication.
 
 These tests require a valid bearer token in the SCM_ACCESS_TOKEN environment variable.
 They are skipped by default and can be enabled by setting the SCM_RUN_INTEGRATION_TESTS

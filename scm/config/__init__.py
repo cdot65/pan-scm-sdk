@@ -1,3 +1,4 @@
+"""scm.config: Service classes by resource category."""
 # scm/config/__init__.py
 
 from typing import Any, Dict, List, Optional
@@ -11,8 +12,7 @@ from scm.models.operations import (
 
 
 class BaseObject:
-    """
-    Base class for configuration objects in the SDK, providing CRUD operations.
+    """Base class for configuration objects in the SDK, providing CRUD operations.
 
     This class implements common methods for creating, retrieving, updating, deleting,
     and listing configuration objects through the API client.
@@ -26,11 +26,13 @@ class BaseObject:
 
     Return:
         Dict[str, Any] or List[Dict[str, Any]]: API response data for CRUD operations.
+
     """
 
     ENDPOINT: str  # Should be defined in subclasses
 
     def __init__(self, api_client: Scm):
+        """Initialize the base config service with the provided Scm API client."""
         # Check if ENDPOINT is defined
         if not hasattr(self, "ENDPOINT"):
             raise AttributeError("ENDPOINT must be defined in the subclass")
@@ -46,6 +48,15 @@ class BaseObject:
         self,
         data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        """Create a new object via the API.
+
+        Args:
+            data (Dict[str, Any]): Data for the object to create.
+
+        Returns:
+            Dict[str, Any]: API response containing the created object.
+
+        """
         response = self.api_client.post(
             self.ENDPOINT,
             json=data,
@@ -56,6 +67,15 @@ class BaseObject:
         self,
         object_id: str,
     ) -> Dict[str, Any]:
+        """Retrieve an object by its ID.
+
+        Args:
+            object_id (str): The unique identifier of the object.
+
+        Returns:
+            Dict[str, Any]: API response containing the object data.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response = self.api_client.get(endpoint)
         return response
@@ -64,6 +84,15 @@ class BaseObject:
         self,
         data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        """Update an existing object.
+
+        Args:
+            data (Dict[str, Any]): Updated data for the object (must include 'id').
+
+        Returns:
+            Dict[str, Any]: API response containing the updated object.
+
+        """
         endpoint = f"{self.ENDPOINT}/{data['id']}"
         response = self.api_client.put(
             endpoint,
@@ -75,6 +104,12 @@ class BaseObject:
         self,
         object_id: str,
     ) -> None:
+        """Delete an object by its ID.
+
+        Args:
+            object_id (str): The unique identifier of the object to delete.
+
+        """
         endpoint = f"{self.ENDPOINT}/{object_id}"
         self.api_client.delete(endpoint)
 
@@ -82,6 +117,15 @@ class BaseObject:
         self,
         **filters,
     ) -> List[Dict[str, Any]]:
+        """List objects, optionally filtered by parameters.
+
+        Args:
+            **filters: Arbitrary keyword arguments for filtering results.
+
+        Returns:
+            List[Dict[str, Any]]: List of objects from the API response.
+
+        """
         params = {k: v for k, v in filters.items() if v is not None}
         response = self.api_client.get(
             self.ENDPOINT,
@@ -95,8 +139,7 @@ class BaseObject:
         offset: int = 0,
         parent_id: Optional[str] = None,
     ) -> JobListResponse:
-        """
-        List jobs in SCM with pagination support and optional parent ID filtering.
+        """List jobs in SCM with pagination support and optional parent ID filtering.
 
         Args:
             limit: Maximum number of jobs to return (default: 100)
@@ -105,6 +148,7 @@ class BaseObject:
 
         Returns:
             JobListResponse: Paginated list of jobs
+
         """
         return self.api_client.list_jobs(
             limit=limit,
@@ -113,14 +157,14 @@ class BaseObject:
         )
 
     def get_job_status(self, job_id: str) -> JobStatusResponse:
-        """
-        Get the status of a job.
+        """Get the status of a job.
 
         Args:
             job_id: The ID of the job to check
 
         Returns:
             JobStatusResponse: The job status response
+
         """
         return self.api_client.get_job_status(job_id)
 
@@ -132,8 +176,7 @@ class BaseObject:
         sync: bool = False,
         timeout: int = 300,
     ) -> CandidatePushResponseModel:
-        """
-        Commits configuration changes to SCM.
+        """Commit configuration changes to SCM.
 
         This method proxies to the api_client's commit method.
 
@@ -146,6 +189,7 @@ class BaseObject:
 
         Returns:
             CandidatePushResponseModel: Response containing job information
+
         """
         return self.api_client.commit(
             folders=folders,
