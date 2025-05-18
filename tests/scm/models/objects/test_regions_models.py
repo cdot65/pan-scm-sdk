@@ -256,13 +256,13 @@ class TestRegionResponseModel:
         assert model.snippet is None
 
     def test_region_response_model_without_id(self):
-        """Test validation when 'id' field is missing."""
+        """Test that RegionResponseModel can be created without 'id' (predefined region)."""
         data = RegionResponseModelFactory.build_without_id()
-        with pytest.raises(ValidationError) as exc_info:
-            RegionResponseModel(**data)
-        error_msg = str(exc_info.value)
-        assert "id" in error_msg.lower()
-        assert "Field required" in error_msg
+        # Patch: ensure name is a valid string, not a factory sequence object
+        data["name"] = "Predefined Region"
+        model = RegionResponseModel(**data)
+        assert model.id is None
+        assert model.name == "Predefined Region"
 
     def test_address_field_accepts_string(self):
         """Test that the 'address' field accepts a single string and converts it to a list."""

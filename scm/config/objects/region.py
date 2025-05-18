@@ -369,8 +369,8 @@ class Region(BaseObject):
                 if len(invalid_data) > 3:
                     self.logger.debug(f"... and {len(invalid_data) - 3} more")
 
-            valid_data = [item for item in data if isinstance(item, dict) and "id" in item]
-            object_instances = [RegionResponseModel(**item) for item in valid_data]
+            # Accept all items (with or without 'id')
+            object_instances = [RegionResponseModel(**item) for item in data if isinstance(item, dict)]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end
@@ -489,15 +489,8 @@ class Region(BaseObject):
                 details={"error": "Response is not a dictionary"},
             )
 
-        if "id" in response:
-            return RegionResponseModel(**response)
-        else:
-            raise InvalidObjectError(
-                message="Invalid response format: missing 'id' field",
-                error_code="E003",
-                http_status_code=500,
-                details={"error": "Response missing 'id' field"},
-            )
+        # Allow predefined regions (no 'id') to be returned as well
+        return RegionResponseModel(**response)
 
     def delete(
         self,

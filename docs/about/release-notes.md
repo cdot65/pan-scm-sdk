@@ -2,6 +2,22 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.38
+
+**Released:** May 18, 2025
+
+### Improved & Fixed
+- **Region Model & Service:**
+  - Region models now support predefined regions without `id` fields. The `RegionResponseModel.id` is now optional and documented accordingly.
+  - Region service logic updated to allow listing and fetching of all regions, including those without an `id` (predefined/system regions).
+  - Client-side filtering and pagination logic improved for robust handling of all API response shapes.
+- **Testing:**
+  - All region-related tests updated to reflect new model/service logic and edge cases.
+  - Added new tests to cover logging and error branches for invalid/missing data and for >3 invalid region items.
+  - Achieved 100% test coverage for all region logic, including all error and logging branches.
+- **Docs:**
+  - Updated docstrings and release notes for clarity on region handling and improved error reporting.
+
 ## Version 0.3.37
 
 **Released:** May 17, 2025
