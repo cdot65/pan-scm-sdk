@@ -54,7 +54,10 @@ class RegionBaseModel(BaseModel):
 
     # Required fields
     name: str = Field(
-        ..., description="The name of the region", pattern=r"^[ a-zA-Z\d._-]+$", max_length=31
+        ...,
+        description="The name of the region (may include IPv4, IPv6, ranges, and labels)",
+        pattern=r"^[\w .:/\-]+$",
+        max_length=64,  # Increase if needed for long IPv6 ranges
     )
 
     # Optional fields
@@ -181,12 +184,12 @@ class RegionResponseModel(RegionBaseModel):
     validation logic for predefined responses.
 
     Attributes:
-        id (UUID): The UUID of the region.
+        id (Optional[UUID]): The UUID of the region. May be missing for predefined regions.
 
     """
 
-    id: UUID = Field(
-        ...,
-        description="The UUID of the region",
+    id: Optional[UUID] = Field(
+        None,
+        description="The UUID of the region (may be missing for predefined regions)",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )

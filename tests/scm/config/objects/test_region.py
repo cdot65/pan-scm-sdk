@@ -368,6 +368,24 @@ class TestRegionList(TestRegionBase):
         assert len(filtered_objects) == 1
         assert filtered_objects[0].name == "West Coast US"
 
+    def test_list_logging_more_than_three_invalid_items(self, caplog):
+        """Test that logger logs when more than 3 invalid items (missing 'id') are present."""
+        mock_response = {
+            "data": [
+                {"name": f"Invalid Region {i}", "folder": "Global"} for i in range(5)
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+        caplog.set_level("DEBUG", logger="scm.config.objects.region")
+        results = self.client.list(folder="Global")
+        # All items are included, but logger should log about >3 invalids
+        assert len(results) == 5
+        assert any("Filtering out 5 items without valid ID field" in r for r in caplog.messages)
+        assert any("Invalid item 0" in r for r in caplog.messages)
+        assert any("Invalid item 1" in r for r in caplog.messages)
+        assert any("Invalid item 2" in r for r in caplog.messages)
+        assert any("... and 2 more" in r for r in caplog.messages)
+
     def test_list_response_invalid_format(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]
@@ -475,11 +493,11 @@ class TestRegionList(TestRegionBase):
         )
 
     def test_list_with_invalid_items(self):
-        """Test that the list method correctly handles invalid items in the response.
+        """Test that the list method correctly handles items with and without 'id'.
 
-        This tests the logging code in Region.list() that handles invalid items.
+        This tests the logging code in Region.list() that handles items with missing 'id'.
         """
-        # Create mock response with some invalid items (missing ID)
+        # Create mock response with some items missing ID
         mock_response = {
             "data": [
                 # Valid items
@@ -491,24 +509,25 @@ class TestRegionList(TestRegionBase):
                     name="Valid Region 2",
                     folder="Global",
                 ).model_dump(),
-                # Invalid items (no ID)
-                {"name": "Invalid Region 1", "folder": "Global"},
-                {"name": "Invalid Region 2", "folder": "Global"},
-                {"name": "Invalid Region 3", "folder": "Global"},
-                {"name": "Invalid Region 4", "folder": "Global"},
+                # Predefined (invalid) items (missing ID)
+                {"name": "Predefined Region 1", "folder": "Global"},
+                {"name": "Predefined Region 2", "folder": "Global"},
             ]
         }
 
         self.mock_scm.get.return_value = mock_response
 
-        # Get results - should only include valid items
         results = self.client.list(folder="Global")
 
-        # Verify results
-        assert len(results) == 2
+        # Should include all items
+        assert len(results) == 4
         assert all(isinstance(r, RegionResponseModel) for r in results)
         assert results[0].name == "Valid Region 1"
         assert results[1].name == "Valid Region 2"
+        assert results[2].name == "Predefined Region 1"
+        assert results[2].id is None
+        assert results[3].name == "Predefined Region 2"
+        assert results[3].id is None
 
     # -------------------- New Tests for exact_match and Exclusions --------------------
 
@@ -1164,8 +1183,8 @@ class TestRegionFetch(TestRegionBase):
         assert error_response["_errors"][0]["message"] == "An internal error occurred"
         assert error_response["_errors"][0]["details"]["errorType"] == "Internal Error"
 
-    def test_fetch_missing_id_field_error(self):
-        """Test that InvalidObjectError is raised when the response is missing 'id' field."""
+    def test_fetch_missing_id_field_returns_model_with_none_id(self):
+        """Test that fetch returns a RegionResponseModel with id=None when missing 'id'."""
         mock_response = {
             "name": "test-region",
             "folder": "Global",
@@ -1173,13 +1192,11 @@ class TestRegionFetch(TestRegionBase):
 
         self.mock_scm.get.return_value = mock_response
 
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.fetch(name="test-region", folder="Global")
-
-        error_msg = str(exc_info.value)
-        assert "HTTP error: 500 - API error: E003" in error_msg
-        assert exc_info.value.error_code == "E003"
-        assert exc_info.value.http_status_code == 500
+        result = self.client.fetch(name="test-region", folder="Global")
+        assert isinstance(result, RegionResponseModel)
+        assert result.id is None
+        assert result.name == "test-region"
+        assert result.folder == "Global"
 
     def test_fetch_no_container_provided_error(self):
         """Test that InvalidObjectError is raised when no container parameter is provided."""
