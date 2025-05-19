@@ -19,7 +19,7 @@ from pydantic import (
     model_validator,
 )
 
-TagString = constr(max_length=64)
+TagString = constr(max_length=127)
 
 
 class ServiceGroupBaseModel(BaseModel):
