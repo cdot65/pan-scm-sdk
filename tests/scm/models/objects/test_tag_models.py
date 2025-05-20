@@ -53,12 +53,12 @@ class TestTagCreateModel:
     def test_tag_create_model_name_too_long(self):
         """Test validation when name exceeds maximum length."""
         data = {
-            "name": "a" * 64,  # Max length is 63
+            "name": "a" * 128,  # Max length is 127
             "folder": "Texas",
         }
         with pytest.raises(ValidationError) as exc_info:
             TagCreateModel(**data)
-        assert "String should have at most 63 characters" in str(exc_info.value)
+        assert "String should have at most 127 characters" in str(exc_info.value)
 
     def test_tag_create_model_multiple_containers(self):
         """Test validation when multiple containers are provided."""

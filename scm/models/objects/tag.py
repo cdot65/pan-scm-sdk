@@ -20,7 +20,7 @@ from pydantic import (
 
 from scm.utils.tag_colors import normalize_color_name
 
-TagString = constr(max_length=64)
+TagString = constr(max_length=127)
 
 
 class Colors(str, Enum):
@@ -104,7 +104,7 @@ class TagBaseModel(BaseModel):
     # Required fields
     name: str = Field(
         ...,
-        max_length=63,
+        max_length=127,
         description="The name of the Tag object",
         pattern=r"^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$",
     )
