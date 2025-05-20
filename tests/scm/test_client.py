@@ -2,7 +2,7 @@
 
 """Tests for SCM client functionality."""
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import ANY, MagicMock, Mock, patch
 
 import pytest
 from requests import Session
@@ -52,6 +52,57 @@ class TestClientBase:
 
 class TestClientInit:
     """Tests for Client initialization."""
+
+    @patch("requests.Session")
+    def test_verify_ssl_flag_bearer_token(self, mock_session):
+        """Test that verify_ssl is respected for bearer token mode."""
+        mock_instance = mock_session.return_value
+        Scm(
+            access_token="dummy",
+            verify_ssl=False,
+        )
+        assert mock_instance.verify is False
+        Scm(
+            access_token="dummy",
+            verify_ssl=True,
+        )
+        assert mock_instance.verify is True
+
+    def test_insecure_warning_logged_scm(self):
+        """Test that disabling TLS verification logs a warning in Scm."""
+        from unittest.mock import patch
+
+        with patch("scm.client.logging.getLogger") as mock_get_logger:
+            mock_logger = mock_get_logger.return_value
+            Scm(access_token="dummy", verify_ssl=False)
+            mock_logger.warning.assert_any_call(
+                "TLS certificate verification is disabled (verify_ssl=False). "
+                "This is insecure and exposes you to man-in-the-middle attacks. "
+                "See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings"
+            )
+
+    def test_insecure_warning_logged_oauth2(self, caplog):
+        """Test that disabling TLS verification logs a warning in OAuth2Client."""
+        from unittest.mock import patch
+
+        with patch(
+            "requests_oauthlib.OAuth2Session.fetch_token",
+            return_value={"access_token": "dummy", "token_type": "bearer"},
+        ):
+            with caplog.at_level("WARNING", logger="scm.auth"):
+                Scm(client_id="id", client_secret="secret", tsg_id="tsg", verify_ssl=False)
+        assert any("TLS certificate verification is disabled" in r for r in caplog.messages)
+
+    @patch("scm.client.OAuth2Client")
+    def test_verify_ssl_flag_oauth2(self, mock_oauth2client):
+        """Test that verify_ssl is passed to OAuth2Client."""
+        Scm(
+            client_id="id",
+            client_secret="secret",
+            tsg_id="tsg",
+            verify_ssl=False,
+        )
+        mock_oauth2client.assert_called_with(ANY, verify_ssl=False)
 
     @patch("scm.client.OAuth2Client")
     def test_init_value_error(self, mock_oauth2client):
@@ -662,6 +713,7 @@ class TestClientJobMethods(TestClientBase):
             "GET",
             "https://api.strata.paloaltonetworks.com/config/operations/v1/jobs/1595",
             params=None,
+            verify=ANY,
         )
 
     def test_wait_for_job_success(self):
@@ -853,6 +905,7 @@ class TestClientCommitMethods(TestClientBase):
                 "description": "Test commit",
                 "admin": ["admin@example.com"],
             },
+            verify=ANY,
         )
 
     def test_commit_with_sync(self):
@@ -993,6 +1046,7 @@ class TestClientCommitMethods(TestClientBase):
                 "description": "Test commit with default admin",
                 "admin": ["test@example.com"],
             },
+            verify=ANY,
         )
 
     def test_commit_validation_error(self):
@@ -1041,6 +1095,7 @@ class TestClientCommitMethods(TestClientBase):
                 "description": "Test commit with 'all' admin",
                 "admin": ["all"],
             },
+            verify=ANY,
         )
 
         # Reset mock for the next test
@@ -1065,4 +1120,5 @@ class TestClientCommitMethods(TestClientBase):
                 "description": "Test commit with 'all' admin in list",
                 "admin": ["all"],
             },
+            verify=ANY,
         )

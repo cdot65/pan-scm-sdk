@@ -88,7 +88,23 @@ class TestOAuth2Client:
             timeout=30,
             include_client_id=True,
             client_kwargs={"tsg_id": auth_request.tsg_id},
+            verify=True,
         )
+
+    def test_insecure_warning_logged_oauth2client(self, caplog):
+        """Test that disabling TLS verification logs a warning in OAuth2Client."""
+        from scm.auth import logger as auth_logger
+        from scm.models.auth import AuthRequestModel
+
+        auth_request = AuthRequestModel(
+            client_id="id",
+            client_secret="secret",
+            tsg_id="tsg",
+            token_url="https://example.com/token",
+        )
+        with caplog.at_level("WARNING", logger=auth_logger.name):
+            OAuth2Client(auth_request, verify_ssl=False)
+        assert any("TLS certificate verification is disabled" in r for r in caplog.messages)
 
     def test_get_signing_key_no_token(self, auth_request):
         """Test signing key retrieval with no token available."""
