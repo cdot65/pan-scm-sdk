@@ -11,7 +11,7 @@ and outputs when interacting with the SCM API.
 
 | Attribute | Type | Required | Default | Description                                                                                |
 |-----------|------|----------|---------|--------------------------------------------------------------------------------------------|
-| name      | str  | Yes      | None    | Name of the tag. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$ |
+| name      | str  | Yes      | None    | Name of the tag. Max length: 127 chars. Must match pattern: ^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$ |
 | color     | str  | No       | None    | Color associated with the tag. Must be one of the predefined colors                        |
 | comments  | str  | No       | None    | Comments about the tag. Max length: 1023 chars                                             |
 | folder    | str  | No*      | None    | Folder where tag is defined. Max length: 64 chars                                          |

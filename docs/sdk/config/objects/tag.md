@@ -46,7 +46,7 @@ snippets, or devices as needed.
 
 | Attribute  | Type | Required | Description                                   |
 |------------|------|----------|-----------------------------------------------|
-| `name`     | str  | Yes      | Name of the tag object (max 63 chars)         |
+| `name`     | str  | Yes      | Name of the tag object (max 127 chars)        |
 | `id`       | UUID | Yes*     | Unique identifier (*response only)            |
 | `color`    | str  | No       | Color from a predefined list                  |
 | `comments` | str  | No       | Comments (max 1023 chars)                     |
