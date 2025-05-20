@@ -53,6 +53,29 @@ class TestClientBase:
 class TestClientInit:
     """Tests for Client initialization."""
 
+    def test_logger_handler_block_coverage(self):
+        """Ensure the logger handler creation block (lines 120-124) is executed."""
+        import logging
+        import sys
+
+        from scm.client import Scm
+
+        logger = logging.getLogger("scm")
+        # Remove all handlers
+        logger.handlers.clear()
+        assert not logger.handlers, "Logger should have no handlers before test"
+
+        # Instantiate Scm (should trigger the handler block)
+        Scm(access_token="dummy")
+
+        # Now there should be exactly one handler, and it should be a StreamHandler to sys.stdout
+        assert len(logger.handlers) == 1, "Handler block was not executed"
+        handler = logger.handlers[0]
+        assert isinstance(handler, logging.StreamHandler)
+        assert handler.stream == sys.stdout
+        assert isinstance(handler.formatter, logging.Formatter)
+        assert "%(asctime)s" in handler.formatter._fmt
+
     @patch("requests.Session")
     def test_verify_ssl_flag_bearer_token(self, mock_session):
         """Test that verify_ssl is respected for bearer token mode."""
@@ -103,6 +126,54 @@ class TestClientInit:
             verify_ssl=False,
         )
         mock_oauth2client.assert_called_with(ANY, verify_ssl=False)
+
+    def test_logger_and_services_initialization(self):
+        """Test that logger and _services are initialized as expected (covers lines 114, 122-126)."""
+        import logging
+
+        from scm.client import Scm
+
+        # Remove all handlers from the 'scm' logger to force handler creation
+        logger = logging.getLogger("scm")
+        logger.handlers.clear()
+        # Instantiate Scm
+        client = Scm(access_token="dummy")
+        # Check that a handler was added
+        assert len(logger.handlers) > 0
+        # Check that the handler has a formatter
+        assert logger.handlers[0].formatter is not None
+        # Check that _services is initialized as an empty dict
+        assert hasattr(client, "_services")
+        assert isinstance(client._services, dict)
+        assert client._services == {}
+
+    def test_logger_handler_creation(self):
+        """Test that the logger handler block (lines 120-124) is executed if no handlers exist."""
+        import logging
+        import sys
+
+        from scm.client import Scm
+
+        logger = logging.getLogger("scm")
+        # Remove all handlers to guarantee block is executed
+        logger.handlers.clear()
+        # Instantiate Scm
+        client = Scm(access_token="dummy")
+        # There should now be a handler
+        assert len(logger.handlers) == 1
+        handler = logger.handlers[0]
+        # Handler should be a StreamHandler and output to sys.stdout
+        assert isinstance(handler, logging.StreamHandler)
+        assert handler.stream == sys.stdout
+        # Handler should have the correct formatter
+        assert isinstance(handler.formatter, logging.Formatter)
+        assert "%(asctime)s" in handler.formatter._fmt
+        # Handler should have the correct level
+        assert handler.level == logger.level
+        # _services should be initialized
+        assert hasattr(client, "_services")
+        assert isinstance(client._services, dict)
+        assert client._services == {}
 
     @patch("scm.client.OAuth2Client")
     def test_init_value_error(self, mock_oauth2client):
@@ -159,6 +230,31 @@ class TestClientInit:
         assert client.session is not None
         assert isinstance(client.session, Session)
         assert client.session.headers["Authorization"] == f"Bearer {token}"
+
+    def test_getattr_service_cache(self):
+        """Test that __getattr__ returns cached service instances if they exist."""
+        client = Scm(access_token="dummy_token")
+        # Manually populate the service cache
+        mock_service = object()
+        client._services["address"] = mock_service
+        # Accessing the service should return the cached instance
+        assert client.address is mock_service
+
+    def test_getattr_unknown_service(self):
+        """Test that __getattr__ raises AttributeError for unknown services."""
+        client = Scm(access_token="dummy_token")
+        with pytest.raises(AttributeError) as excinfo:
+            client.nonexistent_service
+        assert "'Scm' object has no attribute 'nonexistent_service'" in str(excinfo.value)
+
+    @patch("importlib.import_module")
+    def test_getattr_import_error(self, mock_import_module):
+        """Test that __getattr__ handles import errors."""
+        mock_import_module.side_effect = ImportError("Module not found")
+        client = Scm(access_token="dummy_token")
+        with pytest.raises(AttributeError) as excinfo:
+            client.address
+        assert "Failed to load service 'address'" in str(excinfo.value)
 
 
 class TestClientRequest(TestClientBase):

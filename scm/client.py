@@ -13,8 +13,6 @@ import sys
 import time
 from typing import Any, Dict, List, Optional
 
-# External dependency for HTTP
-
 # External libraries
 # trunk-ignore(mypy/note)
 # trunk-ignore(mypy/import-untyped)
@@ -30,6 +28,9 @@ from scm.models.operations import (
     JobListResponse,
     JobStatusResponse,
 )
+
+# External dependency for HTTP
+
 
 # Ensure requests is imported at module level for patching in tests
 
@@ -105,26 +106,6 @@ class Scm:
                 "This is insecure and exposes you to man-in-the-middle attacks. "
                 "See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings"
             )
-
-        # Map string log level to numeric level
-        numeric_level = getattr(logging, log_level.upper(), None)
-        if not isinstance(numeric_level, int):
-            raise ValueError(f"Invalid log level: {log_level}")
-
-        # Configure the 'scm' logger
-        self.logger = logging.getLogger("scm")
-        self.logger.setLevel(numeric_level)
-
-        # Add a handler if the logger doesn't have one
-        if not self.logger.handlers:
-            handler = logging.StreamHandler(sys.stdout)
-            handler.setLevel(numeric_level)
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-
-        # Initialize service cache for unified client access
-        self._services = {}
 
         # Bearer token authentication mode
         if access_token:
