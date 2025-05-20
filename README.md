@@ -6,6 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/pan-scm-sdk.svg)](https://badge.fury.io/py/pan-scm-sdk)
 [![Python versions](https://img.shields.io/pypi/pyversions/pan-scm-sdk.svg)](https://pypi.org/project/pan-scm-sdk/)
 [![License](https://img.shields.io/github/license/cdot65/pan-scm-sdk.svg)](https://github.com/cdot65/pan-scm-sdk/blob/main/LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/cdot65/pan-scm-sdk)
 
 Python SDK for Palo Alto Networks Strata Cloud Manager.
 
@@ -14,19 +15,23 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 
 ## Table of Contents
 
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
+- [Strata Cloud Manager SDK](#strata-cloud-manager-sdk)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Development Guidelines](#development-guidelines)
+  - [Installation](#installation)
+  - [Usage](#usage)
     - [Authentication](#authentication)
-    - [Managing Objects](#managing-objects)
-        - [Creating an Address](#creating-an-address)
-- [Development](#development)
+      - [Method 1: OAuth2 Client Credentials passed into a ScmClient instance](#method-1-oauth2-client-credentials-passed-into-a-scmclient-instance)
+      - [Method 2: Bearer Token Authentication](#method-2-bearer-token-authentication)
+    - [Available Client Services](#available-client-services)
+  - [Development](#development)
     - [Setup](#setup)
     - [Code Quality](#code-quality)
     - [Pre-commit Hooks](#pre-commit-hooks)
-- [Contributing](#contributing)
-- [License](#license)
-- [Support](#support)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Support](#support)
 
 ## Features
 
@@ -64,15 +69,15 @@ pip install pan-scm-sdk
 
 ### Authentication
 
-Before interacting with the SDK, you need to authenticate using one of the following methods:
+Before interacting with the SDK, you need to authenticate:
 
-#### Method 1: OAuth2 Client Credentials (Standard)
+#### Method 1: OAuth2 Client Credentials passed into a ScmClient instance
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize the API client with OAuth2 client credentials
-api_client = Scm(
+api_client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id",
@@ -97,6 +102,7 @@ api_client = Scm(
 ```
 
 > **NOTE**: When using bearer token authentication, token refresh is your responsibility. For commit operations with bearer token auth, you must explicitly provide the `admin` parameter.
+
 ```python
 # Example of commit with bearer token authentication
 api_client.commit(
@@ -107,113 +113,12 @@ api_client.commit(
 )
 ```
 
-### Managing Objects
-
-> **NOTE**: Please refer to the [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/) for all
-> examples
-
-#### Unified Client Access Pattern (Recommended)
-
-Starting with version 0.3.13, you can use a unified client access pattern to work with resources:
-
-```python
-from scm.client import Scm
-
-# Create an authenticated session with SCM
-client = Scm(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    tsg_id="your_tsg_id"
-)
-
-# Access services directly through the client object
-# No need to create separate service instances
-
-# === ADDRESS OBJECTS ===
-
-# List addresses in a specific folder
-addresses = client.address.list(folder='Texas')
-for addr in addresses:
-    print(f"Found address: {addr.name}, Type: {'IP' if addr.ip_netmask else 'FQDN'}")
-
-# Fetch a specific address
-web_server = client.address.fetch(name="web-server", folder="Texas")
-print(f"Web server details: {web_server.name}, {web_server.ip_netmask}")
-
-# Update an address
-web_server.description = "Updated via SDK"
-updated_addr = client.address.update(web_server)
-print(f"Updated address description: {updated_addr.description}")
-
-# === INTERNAL DNS SERVERS ===
-
-# Create a new internal DNS server
-dns_server = client.internal_dns_server.create({
-    "name": "main-dns-server",
-    "domain_name": ["example.com", "internal.example.com"],
-    "primary": "192.168.1.10",
-    "secondary": "192.168.1.11"
-})
-print(f"Created DNS server: {dns_server.name} with ID: {dns_server.id}")
-
-# List all internal DNS servers
-dns_servers = client.internal_dns_server.list()
-for server in dns_servers:
-    print(f"DNS Server: {server.name}, Primary: {server.primary}")
-
-# === NETWORK LOCATIONS ===
-
-# List all network locations
-locations = client.network_location.list()
-print(f"Found {len(locations)} network locations")
-
-# Filter locations by continent
-us_locations = client.network_location.list(continent="North America")
-print(f"Found {len(us_locations)} locations in North America")
-
-# Fetch a specific location
-west_coast = client.network_location.fetch("us-west-1")
-print(f"Location: {west_coast.display} ({west_coast.value})")
-print(f"Region: {west_coast.region}, Coordinates: {west_coast.latitude}, {west_coast.longitude}")
-
-# === SECURITY RULES ===
-
-# Fetch a security rule by name
-security_rule = client.security_rule.fetch(name="allow-outbound", folder="Texas")
-print(f"Security rule: {security_rule.name}")
-print(f"  Action: {security_rule.action}")
-print(f"  Source zones: {security_rule.source_zone}")
-print(f"  Destination zones: {security_rule.destination_zone}")
-
-# === NAT RULES ===
-
-# List NAT rules with source zone filtering
-nat_rules = client.nat_rule.list(
-    folder="Texas",
-    source_zone=["trust"]
-)
-print(f"Found {len(nat_rules)} NAT rules with source zone 'trust'")
-
-# Delete a NAT rule
-if nat_rules:
-    client.nat_rule.delete(nat_rules[0].id)
-    print(f"Deleted NAT rule: {nat_rules[0].name}")
-
-    # Commit the changes
-    commit_job = client.commit(
-        folders=["Texas"],
-        description="Deleted NAT rule",
-        sync=True
-    )
-    print(f"Commit job status: {client.get_job_status(commit_job.job_id).data[0].status_str}")
-```
-
 ### Available Client Services
 
 The unified client provides access to the following services through attribute-based access:
 
 | Client Property                    | Description                                                   |
-|------------------------------------|---------------------------------------------------------------|
+| ---------------------------------- | ------------------------------------------------------------- |
 | **Objects**                        |                                                               |
 | `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies    |
 | `address_group`                    | Static or dynamic collections of address objects              |
@@ -265,75 +170,12 @@ The unified client provides access to the following services through attribute-b
 | `snippet`                          | Reusable configuration snippets                               |
 | `variable`                         | Typed variables with flexible container scoping               |
 
-#### Traditional Access Pattern (Legacy Support)
-
-You can also use the traditional pattern where you explicitly create service instances:
-
-```python
-from scm.client import Scm
-from scm.config.objects import Address
-from scm.config.deployment import InternalDnsServers, NetworkLocations
-
-# Create an authenticated session with SCM
-api_client = Scm(
-    client_id="this is an example",
-    client_secret="this is an example",
-    tsg_id="this is an example"
-)
-
-# Create an Address instance by passing the SCM instance into it
-address = Address(api_client)
-
-# List addresses in a specific folder
-addresses = address.list(folder='Prisma Access')
-
-# Iterate through the addresses
-for addr in addresses:
-    print(f"Address Name: {addr.name}, IP: {addr.ip_netmask or addr.fqdn}")
-
-# Create an InternalDnsServers instance
-dns_servers = InternalDnsServers(api_client)
-
-# List all internal DNS servers
-all_dns_servers = dns_servers.list()
-for server in all_dns_servers:
-    print(f"DNS Server: {server.name}, Primary: {server.primary}")
-
-# Create a NetworkLocations instance
-network_locations = NetworkLocations(api_client)
-
-# List all network locations
-locations = network_locations.list()
-for loc in locations:
-    print(f"Location: {loc.display} ({loc.value}), Region: {loc.region}")
-```
-
-#### Creating an Address
-
-```python
-# Define a new address object
-address_data = {
-    "name": "test123",
-    "fqdn": "test123.example.com",
-    "description": "Created via pan-scm-sdk",
-    "folder": "Texas",
-}
-
-# Create the address in Strata Cloud Manager (unified client approach)
-new_address = api_client.address.create(address_data)
-print(f"Created address with ID: {new_address.id}")
-
-# Or using the traditional approach
-address_service = Address(api_client)
-new_address = address_service.create(address_data)
-print(f"Created address with ID: {new_address.id}")
-```
-
 ---
 
 ## Development
 
 Before starting development, please review:
+
 - `SDK_STYLING_GUIDE.md` - Comprehensive guide for writing consistent SDK code
 - `CLAUDE_MODELS.md` - Guidelines for creating Pydantic models
 - `SDK_SERVICE_TEMPLATE.py` - Template for new service files
@@ -342,17 +184,20 @@ Before starting development, please review:
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/cdot65/pan-scm-sdk.git
    cd pan-scm-sdk
    ```
 
 2. Install dependencies and pre-commit hooks:
+
    ```bash
    make setup
    ```
 
    Alternatively, you can install manually:
+
    ```bash
    poetry install
    poetry run pre-commit install
@@ -383,6 +228,7 @@ make pre-commit-all
 ```
 
 The following checks run automatically before each commit:
+
 - ruff linting and formatting
 - Trailing whitespace removal
 - End-of-file fixer
@@ -415,4 +261,4 @@ For support and questions, please refer to the [SUPPORT.md](./SUPPORT.md) file i
 
 ---
 
-*Detailed documentation is available on our [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/).*
+_Detailed documentation is available on our [GitHub Pages documentation site](https://cdot65.github.io/pan-scm-sdk/)._
