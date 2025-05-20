@@ -29,6 +29,11 @@ from scm.models.operations import (
     JobStatusResponse,
 )
 
+# External dependency for HTTP
+
+
+# Ensure requests is imported at module level for patching in tests
+
 
 class Scm:
     """A client for interacting with the Palo Alto Networks Strata Cloud Manager API.
@@ -47,6 +52,7 @@ class Scm:
         access_token: Pre-acquired OAuth2 bearer token for stateless authentication
             When provided, client_id, client_secret, and tsg_id are not required.
             Token refresh is the caller's responsibility when using this mode.
+        verify_ssl: Whether to verify TLS certificates for all requests (default: True). Set to False to bypass TLS verification (insecure!).
 
     """
 
@@ -60,9 +66,11 @@ class Scm:
         token_url: str = "https://auth.apps.paloaltonetworks.com/am/oauth2/access_token",
         log_level: str = "ERROR",
         access_token: Optional[str] = None,
+        verify_ssl: bool = True,
     ):
-        """Initialize the ScmClient with the provided client_id, client_secret, tsg_id, API URLs, log level, and access token."""
+        """Initialize the ScmClient with the provided client_id, client_secret, tsg_id, API URLs, log level, access token, and TLS verification flag."""
         self.api_base_url = api_base_url
+        self.verify_ssl = verify_ssl
         self.oauth_client = None
 
         # Map string log level to numeric level
@@ -85,6 +93,20 @@ class Scm:
         # Initialize service cache for unified client access
         self._services = {}
 
+        # Warn and suppress urllib3 InsecureRequestWarning if TLS verification is disabled
+        if not self.verify_ssl:
+            import warnings
+
+            import urllib3
+
+            warnings.simplefilter("always", urllib3.exceptions.InsecureRequestWarning)
+            warnings.filterwarnings("ignore", category=urllib3.exceptions.InsecureRequestWarning)
+            self.logger.warning(
+                "TLS certificate verification is disabled (verify_ssl=False). "
+                "This is insecure and exposes you to man-in-the-middle attacks. "
+                "See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings"
+            )
+
         # Bearer token authentication mode
         if access_token:
             self.logger.debug("Using bearer token authentication mode")
@@ -94,7 +116,10 @@ class Scm:
 
             self.session = requests.Session()
             self.session.headers["Authorization"] = f"Bearer {access_token}"
-            self.logger.debug(f"Session created with bearer token: {self.session.headers}")
+            self.session.verify = self.verify_ssl
+            self.logger.debug(
+                f"Session created with bearer token: {self.session.headers}, verify_ssl={self.verify_ssl}"
+            )
             return
 
         # OAuth2 client credentials flow authentication mode
@@ -114,9 +139,9 @@ class Scm:
         )
 
         self.logger.debug(f"Auth request: {auth_request.model_dump()}")
-        self.oauth_client = OAuth2Client(auth_request)
+        self.oauth_client = OAuth2Client(auth_request, verify_ssl=self.verify_ssl)
         self.session = self.oauth_client.session
-        self.logger.debug(f"Session created: {self.session.headers}")
+        self.logger.debug(f"Session created: {self.session.headers}, verify_ssl={self.verify_ssl}")
 
     def request(
         self,
@@ -135,6 +160,9 @@ class Scm:
         url = f"{self.api_base_url}{endpoint}"
         self.logger.debug(f"Making {method} request to {url} with params {kwargs}")
 
+        # Always pass verify unless explicitly set by caller
+        if "verify" not in kwargs:
+            kwargs["verify"] = self.verify_ssl
         try:
             response = self.session.request(
                 method,

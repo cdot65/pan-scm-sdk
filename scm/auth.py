@@ -39,6 +39,7 @@ class OAuth2Client:
         auth_request (AuthRequestModel): An object containing authentication parameters.
         session (OAuth2Session): The authenticated OAuth2 session.
         signing_key (Optional[PyJWK]): The key used for verifying the JWT token.
+        verify_ssl (bool): Whether to verify TLS certificates for all requests (default: True). Set to False to bypass TLS verification (insecure!).
 
     """
 
@@ -49,11 +50,27 @@ class OAuth2Client:
     def __init__(
         self,
         auth_request: AuthRequestModel,
+        verify_ssl: bool = True,
     ):
-        """Initialize the Auth class with the provided AuthRequestModel."""
+        """Initialize the OAuth2Client with the provided AuthRequestModel and TLS verification flag."""
         self.auth_request = auth_request
+        self.verify_ssl = verify_ssl
         self.session = self._create_session()
         self.signing_key = None
+
+        # Warn and suppress urllib3 InsecureRequestWarning if TLS verification is disabled
+        if not self.verify_ssl:
+            import warnings
+
+            import urllib3
+
+            warnings.simplefilter("always", urllib3.exceptions.InsecureRequestWarning)
+            warnings.filterwarnings("ignore", category=urllib3.exceptions.InsecureRequestWarning)
+            logger.warning(
+                "TLS certificate verification is disabled (verify_ssl=False). "
+                "This is insecure and exposes you to man-in-the-middle attacks. "
+                "See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings"
+            )
 
         # Only fetch signing key if we have a valid token
         if self.session.token:
@@ -72,6 +89,7 @@ class OAuth2Client:
         """Create an OAuth2 session with retry logic."""
         client = BackendApplicationClient(client_id=self.auth_request.client_id)
         oauth = OAuth2Session(client=client)
+        oauth.verify = self.verify_ssl
 
         # Configure retry strategy
         retry_strategy = self._setup_retry_strategy()
@@ -79,7 +97,7 @@ class OAuth2Client:
         oauth.mount("http://", adapter)  # noqa
         oauth.mount("https://", adapter)
 
-        logger.debug("Fetching initial token...")
+        logger.debug(f"Fetching initial token... (verify_ssl={self.verify_ssl})")
 
         try:
             oauth.fetch_token(
@@ -90,6 +108,7 @@ class OAuth2Client:
                 include_client_id=True,
                 client_kwargs={"tsg_id": self.auth_request.tsg_id},
                 timeout=30,  # Add explicit timeout
+                verify=self.verify_ssl,
             )
             logger.debug("Token fetched successfully.")
             return oauth

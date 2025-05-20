@@ -24,6 +24,7 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
     - [Authentication](#authentication)
       - [Method 1: OAuth2 Client Credentials passed into a ScmClient instance](#method-1-oauth2-client-credentials-passed-into-a-scmclient-instance)
       - [Method 2: Bearer Token Authentication](#method-2-bearer-token-authentication)
+    - [TLS Certificate Verification Control](#tls-certificate-verification-control)
     - [Available Client Services](#available-client-services)
   - [Development](#development)
     - [Setup](#setup)
@@ -66,6 +67,23 @@ pip install pan-scm-sdk
 ```
 
 ## Usage
+
+### TLS Certificate Verification Control
+
+By default, the SDK verifies TLS certificates for all HTTPS requests. You can bypass TLS verification (for development or testing) by setting the `verify_ssl` flag to `False` when initializing `Scm` or `ScmClient`:
+
+```python
+from scm.client import ScmClient
+
+client = ScmClient(
+    client_id="...",
+    client_secret="...",
+    tsg_id="...",
+    verify_ssl=False,  # WARNING: disables TLS verification!
+)
+```
+
+> **Warning:** Disabling TLS verification is insecure and exposes you to man-in-the-middle attacks. Only use `verify_ssl=False` in trusted development environments.
 
 ### Authentication
 

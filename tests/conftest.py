@@ -39,19 +39,24 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope="session", autouse=True)
+def clear_scm_logger_handlers():
+    """Ensure the 'scm' logger has no handlers before any tests run."""
+    import logging
+
+    logger = logging.getLogger("scm")
+    logger.handlers.clear()
+
+
+@pytest.fixture(scope="session", autouse=True)
 def load_env():
     """Pytest fixture to load environment variables from a .env file.
 
     This fixture is automatically used by all tests.
     """
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    tsg_id = os.getenv("TSG_ID")
-
-    if not all([client_id, client_secret, tsg_id]):
-        raise EnvironmentError(
-            "Missing one or more required environment variables: CLIENT_ID, CLIENT_SECRET, TSG_ID"
-        )
+    # For CI/CD environments, we don't want to fail if env vars are missing
+    client_id = os.getenv("CLIENT_ID", "dummy_client_id")
+    client_secret = os.getenv("CLIENT_SECRET", "dummy_client_secret")
+    tsg_id = os.getenv("TSG_ID", "dummy_tsg_id")
 
     return {"client_id": client_id, "client_secret": client_secret, "tsg_id": tsg_id}
 

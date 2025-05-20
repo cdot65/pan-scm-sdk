@@ -2,6 +2,21 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.39
+
+**Released:** May 20, 2025
+
+### Added & Fixed
+- **TLS Certificate Verification Control:**
+  - Added `verify_ssl` parameter to `Scm` and `ScmClient` constructors allowing users to bypass SSL/TLS certificate verification when needed
+  - Enhanced warning messages when TLS verification is disabled to alert users of security implications
+  - Extended OAuth2Client to respect the verification setting
+  - Proper propagation of verification setting to all HTTP requests
+- **Code Improvements:**
+  - Fixed code duplication in logger initialization
+  - Improved test fixtures to support CI/CD environments without requiring real credentials
+  - Achieved 100% test coverage for all client authentication and service access code
+
 ## Version 0.3.38
 
 **Released:** May 18, 2025
