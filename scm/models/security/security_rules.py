@@ -195,11 +195,9 @@ class SecurityRuleBaseModel(BaseModel):
         return v
 
     @field_validator(
-        "from_",
         "source",
         "source_user",
         "source_hip",
-        "to_",
         "destination",
         "destination_hip",
         "application",

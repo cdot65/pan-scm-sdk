@@ -323,4 +323,262 @@ class TestSecurityRuleBaseModel:
         assert "All items must be strings" in str(exc_info.value)
 
 
+class TestSecurityRuleNonUniqueValues:
+    """Tests to verify that non-unique values are allowed in from_ and to_ fields."""
+
+    def test_from_field_allows_non_unique_values(self):
+        """Test that the from_ field allows duplicate values."""
+        # This should NOT raise a validation error
+        data = {
+            "name": "test_rule",
+            "from_": ["trust", "trust", "dmz", "trust"],  # Non-unique values
+            "to_": ["untrust"],
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["any"],
+            "service": ["any"],
+            "folder": "TestFolder",
+        }
+        model = SecurityRuleCreateModel(**data)
+        assert model.from_ == ["trust", "trust", "dmz", "trust"]
+
+    def test_to_field_allows_non_unique_values(self):
+        """Test that the to_ field allows duplicate values."""
+        # This should NOT raise a validation error
+        data = {
+            "name": "test_rule",
+            "from_": ["trust"],
+            "to_": ["untrust", "dmz", "untrust", "untrust"],  # Non-unique values
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["any"],
+            "service": ["any"],
+            "folder": "TestFolder",
+        }
+        model = SecurityRuleCreateModel(**data)
+        assert model.to_ == ["untrust", "dmz", "untrust", "untrust"]
+
+    def test_both_from_and_to_fields_allow_non_unique_values(self):
+        """Test that both from_ and to_ fields can have duplicate values simultaneously."""
+        data = {
+            "name": "test_rule",
+            "from_": ["zone1", "zone1", "zone2", "zone1"],  # Non-unique values
+            "to_": ["zone3", "zone4", "zone3", "zone3"],  # Non-unique values
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["any"],
+            "service": ["any"],
+            "folder": "TestFolder",
+        }
+        model = SecurityRuleCreateModel(**data)
+        assert model.from_ == ["zone1", "zone1", "zone2", "zone1"]
+        assert model.to_ == ["zone3", "zone4", "zone3", "zone3"]
+
+    def test_other_fields_still_require_unique_values(self):
+        """Test that other list fields still enforce uniqueness."""
+        # Test source field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["addr1", "addr1", "addr2"],  # Duplicate values should fail
+                destination=["any"],
+                application=["any"],
+                service=["any"],
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test destination field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["dest1", "dest2", "dest1"],  # Duplicate values should fail
+                application=["any"],
+                service=["any"],
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test application field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["any"],
+                application=["app1", "app1"],  # Duplicate values should fail
+                service=["any"],
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test service field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["any"],
+                application=["any"],
+                service=["tcp/80", "tcp/443", "tcp/80"],  # Duplicate values should fail
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+    def test_update_model_from_and_to_allow_non_unique(self):
+        """Test that SecurityRuleUpdateModel also allows non-unique values in from_ and to_."""
+        data = {
+            "id": str(uuid.uuid4()),
+            "name": "updated_rule",
+            "from_": ["zone1", "zone1", "zone2"],  # Non-unique values
+            "to_": ["zone3", "zone3", "zone4"],  # Non-unique values
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["any"],
+            "service": ["any"],
+        }
+        model = SecurityRuleUpdateModel(**data)
+        assert model.from_ == ["zone1", "zone1", "zone2"]
+        assert model.to_ == ["zone3", "zone3", "zone4"]
+
+    def test_response_model_from_and_to_allow_non_unique(self):
+        """Test that SecurityRuleResponseModel also allows non-unique values in from_ and to_."""
+        data = {
+            "id": str(uuid.uuid4()),
+            "name": "response_rule",
+            "from_": ["zone1", "zone1", "zone2"],  # Non-unique values
+            "to_": ["zone3", "zone3", "zone4"],  # Non-unique values
+            "source": ["any"],
+            "destination": ["any"],
+            "application": ["any"],
+            "service": ["any"],
+            "folder": "TestFolder",
+        }
+        model = SecurityRuleResponseModel(**data)
+        assert model.from_ == ["zone1", "zone1", "zone2"]
+        assert model.to_ == ["zone3", "zone3", "zone4"]
+
+    def test_other_list_fields_still_require_unique_values(self):
+        """Test that other list fields still enforce uniqueness validation."""
+        # Test tag field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust", "trust"],  # Duplicates allowed
+                to_=["untrust", "untrust"],  # Duplicates allowed
+                source=["any"],
+                destination=["any"],
+                application=["any"],
+                service=["any"],
+                tag=["tag1", "tag2", "tag1"],  # Duplicate values should fail
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test source_user field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["any"],
+                application=["any"],
+                service=["any"],
+                source_user=["user1", "user2", "user1"],  # Duplicate values should fail
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test source_hip field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["any"],
+                application=["any"],
+                service=["any"],
+                source_hip=["hip1", "hip1"],  # Duplicate values should fail
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test destination_hip field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["any"],
+                application=["any"],
+                service=["any"],
+                destination_hip=["hip1", "hip2", "hip1"],  # Duplicate values should fail
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+        # Test category field
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(
+                name="test_rule",
+                from_=["trust"],
+                to_=["untrust"],
+                source=["any"],
+                destination=["any"],
+                application=["any"],
+                service=["any"],
+                category=["social", "news", "social"],  # Duplicate values should fail
+                folder="TestFolder",
+            )
+        assert "List items must be unique" in str(exc_info.value)
+
+    def test_real_world_scenario_with_non_unique_zones(self):
+        """Test a real-world scenario where duplicate zones might be needed."""
+        # Scenario: A rule that needs to reference the same zone multiple times
+        # for different logical reasons (though this is an edge case)
+        data = {
+            "name": "complex_zone_rule",
+            "description": "Rule with duplicate zones for specific requirements",
+            "from_": [
+                "internal",
+                "internal",
+                "dmz",
+                "internal",
+            ],  # Same zone referenced multiple times
+            "to_": [
+                "external",
+                "partner",
+                "external",
+                "external",
+            ],  # Same zone referenced multiple times
+            "source": ["10.0.0.0/8", "192.168.0.0/16"],
+            "destination": ["any"],
+            "application": ["web-browsing", "ssl"],
+            "service": ["application-default"],
+            "action": "allow",
+            "folder": "Shared",
+        }
+        model = SecurityRuleCreateModel(**data)
+
+        # Verify the model was created successfully with duplicate zones
+        assert model.from_ == ["internal", "internal", "dmz", "internal"]
+        assert model.to_ == ["external", "partner", "external", "external"]
+        assert len(model.from_) == 4  # Verify all duplicates are preserved
+        assert len(model.to_) == 4  # Verify all duplicates are preserved
+
+        # Verify other fields still maintain uniqueness
+        assert len(model.source) == len(set(model.source))
+        assert len(model.application) == len(set(model.application))
+
+
 # -------------------- End of Test Classes --------------------
