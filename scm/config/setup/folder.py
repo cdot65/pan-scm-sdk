@@ -264,34 +264,18 @@ class Folder(BaseObject):
                 params=params,
             )
 
-            if not isinstance(response, dict):
+            if not isinstance(response, list):
                 raise InvalidObjectError(
-                    message="Invalid response format: expected dictionary",
+                    message="Invalid response format: expected list",
                     error_code="E003",
                     http_status_code=500,
-                    details={"error": "Response is not a dictionary"},
+                    details={"error": "Response is not a list"},
                 )
 
-            # Handle single-item response when filters return one object
-            if "data" not in response:
-                data_items = [response]
-            else:
-                if not isinstance(response["data"], list):
-                    raise InvalidObjectError(
-                        message="Invalid response format: 'data' field must be a list",
-                        error_code="E003",
-                        http_status_code=500,
-                        details={
-                            "field": "data",
-                            "error": '"data" field must be a list',
-                        },
-                    )
-                data_items = response["data"]
-
-            object_instances = [FolderResponseModel.model_validate(item) for item in data_items]
+            object_instances = [FolderResponseModel.model_validate(item) for item in response]
             all_objects.extend(object_instances)
 
-            if len(data_items) < limit:
+            if len(response) < limit:
                 break
             offset += limit
 
