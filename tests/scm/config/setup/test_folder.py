@@ -138,7 +138,7 @@ class TestFolderFetch(TestFolderBase):
     def test_fetch_folder_found(self, folder_service, mock_scm_client):
         """Test fetching a folder by name when it's found."""
         folder = FolderResponseFactory(name="target")
-        api_response = {"data": [folder.model_dump()]}
+        api_response = [folder.model_dump()]
         mock_scm_client.get.return_value = api_response
         result = folder_service.fetch(name="target")
         assert result is not None
@@ -146,7 +146,7 @@ class TestFolderFetch(TestFolderBase):
 
     def test_fetch_folder_empty_results(self, folder_service, mock_scm_client):
         """Test that fetch returns None when list returns empty results."""
-        mock_scm_client.get.return_value = {"data": []}
+        mock_scm_client.get.return_value = []
         result = folder_service.fetch(name="any")
         assert result is None
 
@@ -206,7 +206,7 @@ class TestFolderList(TestFolderBase):
         ]
 
         # Mock API response
-        mock_scm_client.get.return_value = {"data": mock_folders}
+        mock_scm_client.get.return_value = mock_folders
 
         # Call list method
         results = folder_service.list()
@@ -227,7 +227,7 @@ class TestFolderList(TestFolderBase):
         # Setup test data: two folders, only one matches the name exactly
         folder1 = FolderResponseFactory(name="foo")
         folder2 = FolderResponseFactory(name="bar")
-        api_response = {"data": [folder1.model_dump(), folder2.model_dump()]}
+        api_response = [folder1.model_dump(), folder2.model_dump()]
         mock_scm_client.get.return_value = api_response
         # Call list with name filter (client-side filtering)
         results = folder_service.list()
@@ -240,7 +240,7 @@ class TestFolderList(TestFolderBase):
         folder1 = FolderResponseFactory(name="foo")
         folder2 = FolderResponseFactory(name="foo")
         folder3 = FolderResponseFactory(name="bar")
-        api_response = {"data": [folder1.model_dump(), folder2.model_dump(), folder3.model_dump()]}
+        api_response = [folder1.model_dump(), folder2.model_dump(), folder3.model_dump()]
         mock_scm_client.get.return_value = api_response
         results = folder_service.list()
         filtered = [f for f in results if f.name == "foo"]
@@ -251,7 +251,7 @@ class TestFolderList(TestFolderBase):
     def test_list_server_side_param_building(self, folder_service, mock_scm_client):
         """Test list with server-side parameter building."""
         # labels param
-        mock_scm_client.get.return_value = {"data": []}
+        mock_scm_client.get.return_value = []
         folder_service.list(labels=["a", "b"])
         args, kwargs = mock_scm_client.get.call_args
         assert kwargs["params"]["labels"] == "a,b"
@@ -369,13 +369,7 @@ class TestFolderMisc(TestFolderBase):
 
     def test_list_invalid_response_format(self, folder_service, mock_scm_client):
         """Test list with invalid response format."""
-        mock_scm_client.get.return_value = "not-a-dict"
-        with pytest.raises(InvalidObjectError):
-            folder_service.list()
-
-    def test_list_data_not_list(self, folder_service, mock_scm_client):
-        """Test list with non-list data field."""
-        mock_scm_client.get.return_value = {"data": "notalist"}
+        mock_scm_client.get.return_value = "not-a-list"
         with pytest.raises(InvalidObjectError):
             folder_service.list()
 
@@ -397,9 +391,9 @@ class TestFolderMisc(TestFolderBase):
         def side_effect(*args, **kwargs):
             offset = kwargs["params"]["offset"]
             if offset == 0:
-                return {"data": page1}
+                return list(page1)
             else:
-                return {"data": page2}
+                return list(page2)
 
         mock_scm_client.get.side_effect = side_effect
         folder_service.max_limit = 2
@@ -432,7 +426,7 @@ class TestFolderMisc(TestFolderBase):
         # Patch api_client.get to return dict with 'data'
         endpoint = "endpoint"
         params = {"a": 1}
-        mock_scm_client.get.return_value = {"data": [1, 2, 3]}
+        mock_scm_client.get.return_value = [1, 2, 3]
         out = folder_service._get_paginated_results(endpoint, params, 10, 0)
         assert out == [1, 2, 3]
 

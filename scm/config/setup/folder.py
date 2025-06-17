@@ -263,7 +263,9 @@ class Folder(BaseObject):
                 self.ENDPOINT,
                 params=params,
             )
-
+            # Check for single entry:
+            if isinstance(response, dict) and 'id' in response.keys():
+                response = [response]
             if not isinstance(response, list):
                 raise InvalidObjectError(
                     message="Invalid response format: expected list",
