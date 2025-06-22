@@ -280,7 +280,7 @@ try:
     print(f"Name: {new_variable.name}")
     print(f"Type: {new_variable.type}")
     print(f"Value: {new_variable.value}")
-    
+
     # Update the variable with a new value
     update_model = VariableUpdateModel(
         id=new_variable.id,
@@ -292,13 +292,13 @@ try:
     )
     updated = variables.update(update_model)
     print(f"Updated value: {updated.value}")
-    
+
     # List all variables of a specific type
     print("Listing all IP variables:")
     ip_variables = variables.list(type="ip-netmask")
     for var in ip_variables:
         print(f"- {var.name}: {var.value}")
-    
+
 except InvalidObjectError as e:
     print(f"Invalid variable data: {e}")
 except APIError as e:

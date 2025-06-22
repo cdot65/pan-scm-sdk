@@ -36,7 +36,7 @@ class VariableBaseModel(BaseModel):
     folder: Optional[str] = None
     snippet: Optional[str] = None
     device: Optional[str] = None
-    
+
     @model_validator(mode="after")
     def validate_container(self) -> 'VariableBaseModel':
         """Ensure exactly one container is specified"""
@@ -135,10 +135,10 @@ def validate_container(self) -> 'VariableBaseModel':
     """Ensure exactly one container is specified"""
     containers = [self.folder, self.snippet, self.device]
     specified = sum(1 for c in containers if c is not None)
-    
+
     if specified != 1:
         raise ValueError("Exactly one of folder, snippet, or device must be specified")
-    
+
     return self
 ```
 

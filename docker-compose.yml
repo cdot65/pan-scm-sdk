@@ -8,6 +8,7 @@ services:
     working_dir: /app
     environment:
       - POETRY_VIRTUALENVS_CREATE=false
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     tty: true
     command: sleep infinity
 

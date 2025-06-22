@@ -1,6 +1,6 @@
 """Alerts module for Insights API integration."""
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from scm.config.insights import InsightsBaseObject
 from scm.models.insights.alerts import Alert, AlertStatistic
@@ -74,7 +74,7 @@ class Alerts(InsightsBaseObject):
             List[Alert]: List of alert objects
         """
         # Build filter rules
-        filter_rules = []
+        filter_rules: List[Dict[str, Any]] = []
 
         # Add severity filter
         if severity:
@@ -89,7 +89,11 @@ class Alerts(InsightsBaseObject):
             if isinstance(start_time, int) and start_time < 365:
                 # Treat as relative days
                 filter_rules.append(
-                    {"property": "updated_time", "operator": "last_n_days", "values": [start_time]}
+                    {
+                        "property": "updated_time",
+                        "operator": "last_n_days",
+                        "values": [start_time],
+                    }
                 )
             else:
                 # Treat as timestamp
@@ -265,7 +269,7 @@ class Alerts(InsightsBaseObject):
         status: str = "Raised",
         exclude_notifications: bool = True,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> List[AlertStatistic]:
         """Get alert timeline/histogram data.
 
         Args:

@@ -12,10 +12,7 @@ import pytest
 from scm.client import Scm
 from scm.config.setup.folder import Folder
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
-from scm.models.setup.folder import (
-    FolderResponseModel,
-    FolderUpdateModel,
-)
+from scm.models.setup.folder import FolderResponseModel, FolderUpdateModel
 from tests.factories.setup.folder import (
     FolderCreateApiFactory,
     FolderResponseFactory,

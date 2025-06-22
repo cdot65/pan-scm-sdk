@@ -1,9 +1,10 @@
 """Insights API integration for SCM SDK."""
 
-from typing import Dict, Any, List, Optional, TypeVar
 from abc import ABC, abstractmethod
-import requests
+from typing import Any, Dict, List, Optional, TypeVar
+
 from pydantic import BaseModel
+import requests
 
 from scm.models.insights.common import InsightsResponse
 

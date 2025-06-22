@@ -1,7 +1,9 @@
 """Test suite for InsightsBaseObject base class."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from scm.config.insights import InsightsBaseObject
 
 

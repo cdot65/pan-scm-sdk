@@ -113,14 +113,14 @@ while True:
     params = container_parameters.copy()
     params["limit"] = limit
     params["offset"] = offset
-    
+
     response = self.api_client.get(self.ENDPOINT, params=params)
-    
+
     # Process response...
-    
+
     if len(data) < limit:
         break
-    
+
     offset += limit
 ```
 
@@ -188,19 +188,19 @@ tests/config/<category>/test_<resource>.py
 class TestResource:
     def test_create(self, mock_api_client):
         """Test creating a resource."""
-        
+
     def test_get(self, mock_api_client):
         """Test getting a resource by ID."""
-        
+
     def test_list(self, mock_api_client):
         """Test listing resources."""
-        
+
     def test_update(self, mock_api_client):
         """Test updating a resource."""
-        
+
     def test_delete(self, mock_api_client):
         """Test deleting a resource."""
-        
+
     def test_fetch(self, mock_api_client):
         """Test fetching a resource by name."""
 ```

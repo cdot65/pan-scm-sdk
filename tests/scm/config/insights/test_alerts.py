@@ -1,7 +1,9 @@
 """Test suite for Insights Alerts service."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from scm.config.insights.alerts import Alerts
 from scm.models.insights.alerts import Alert
 

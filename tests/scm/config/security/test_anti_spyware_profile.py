@@ -12,9 +12,7 @@ from requests.exceptions import HTTPError
 # Local SDK imports
 from scm.config.security import AntiSpywareProfile
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
-from scm.models.security.anti_spyware_profiles import (
-    AntiSpywareProfileResponseModel,
-)
+from scm.models.security.anti_spyware_profiles import AntiSpywareProfileResponseModel
 from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileCreateApiFactory,
     AntiSpywareProfileResponseFactory,

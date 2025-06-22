@@ -10,9 +10,7 @@ from typing import Any, Dict, List, Optional
 # Local SDK imports
 from scm.config import BaseObject
 from scm.exceptions import APIError, InvalidObjectError, ObjectNotPresentError
-from scm.models.setup.device import (
-    DeviceResponseModel,
-)
+from scm.models.setup.device import DeviceResponseModel
 
 
 class Device(BaseObject):

@@ -105,7 +105,7 @@ class <Resource>ResponseModel(<Resource>BaseModel):
 - [ ] All standards in `WINDSURF_RULES.md` and `SDK_MODELS_STYLING_GUIDE.md` are followed
 
     device: Optional[str] = Field(None, description="Device containing this resource")
-    
+
     model_config = ConfigDict(
         extra="allow",  # Allow extra fields from API
     )
@@ -183,7 +183,7 @@ def validate_combination(cls, v, info):
     """Validate field combinations."""
     field1 = info.data.get("field1")
     field2 = info.data.get("field2")
-    
+
     if field1 and field2:
         raise ValueError("Cannot specify both field1 and field2")
     return v
@@ -288,7 +288,7 @@ def test_model_validation_error():
     """Test model validation errors."""
     with pytest.raises(ValidationError) as exc_info:
         ResourceCreateModel(name="")
-    
+
     errors = exc_info.value.errors()
     assert len(errors) == 1
     assert errors[0]["loc"] == ("name",)

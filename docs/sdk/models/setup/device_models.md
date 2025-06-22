@@ -150,7 +150,7 @@ device_list = devices.list(type="vm")
 # Work with device data
 for device in device_list:
     print(f"Device: {device.name} ({device.model})")
-    
+
     # Access license information
     if device.installed_licenses:
         for license in device.installed_licenses:
