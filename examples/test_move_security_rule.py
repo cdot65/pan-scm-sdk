@@ -103,7 +103,7 @@ def list_security_rules(client, folder):
 
 def move_security_rule(client, rules, folder):
     """Move a security rule to a new position.
-    
+
     For this example, we'll move the last rule before the second-to-last rule.
     """
     if len(rules) < 2:

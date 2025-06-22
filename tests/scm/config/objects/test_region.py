@@ -371,9 +371,7 @@ class TestRegionList(TestRegionBase):
     def test_list_logging_more_than_three_invalid_items(self, caplog):
         """Test that logger logs when more than 3 invalid items (missing 'id') are present."""
         mock_response = {
-            "data": [
-                {"name": f"Invalid Region {i}", "folder": "Global"} for i in range(5)
-            ]
+            "data": [{"name": f"Invalid Region {i}", "folder": "Global"} for i in range(5)]
         }
         self.mock_scm.get.return_value = mock_response
         caplog.set_level("DEBUG", logger="scm.config.objects.region")

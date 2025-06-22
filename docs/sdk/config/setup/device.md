@@ -155,23 +155,23 @@ devices = Device(client)
 try:
     # Get all VM firewalls
     vm_firewalls = devices.list(type="vm")
-    
+
     print(f"Found {len(vm_firewalls)} VM firewalls:")
-    
+
     for device in vm_firewalls:
         print(f"ID: {device.id}")
         print(f"Name: {device.name}")
         print(f"Model: {device.model}")
         print(f"Serial: {device.serial_number}")
-        
+
         # Display licenses
         if device.installed_licenses:
             print("Installed licenses:")
             for license in device.installed_licenses:
                 print(f"  - {license.get('name')}")
-        
+
         print("---")
-        
+
 except APIError as e:
     print(f"Error retrieving devices: {e}")
 ```

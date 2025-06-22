@@ -2,6 +2,42 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.40
+
+**Released:** June 22, 2025
+
+### Added
+
+- **Prisma Access Insights API Support**:
+  - Implemented comprehensive `Insights` namespace with initial support for Alerts
+  - Added `Alerts` service for accessing security and operational alerts from Prisma Access
+  - Created flexible query interface supporting custom properties, filters, and aggregations
+  - Implemented convenience methods for common operations:
+    - `list()`: List alerts with filtering by severity, status, time range, and category
+    - `get_statistics()`: Generate alert statistics grouped by severity, category, or state
+    - `get_timeline()`: Create time-based histograms of alert activity
+  - Added robust Pydantic models for type safety and data validation:
+    - `Alert`: Complete alert data with field mapping (e.g., alert_id → id, message → name)
+    - `AlertStatistic`: Statistical aggregation model for grouped data
+    - `AlertSeverity` and `AlertStatus`: Constants for valid field values
+  - Integrated with unified client interface via `client.insights.alerts`
+  - Added comprehensive documentation with usage examples and best practices
+
+### Improved
+
+- **Code Quality**:
+  - Migrated deprecated Pydantic v1 `Config` classes to v2 `ConfigDict`
+  - Fixed mypy type errors in filter value handling
+  - Enhanced type annotations with proper imports for `Any` and `Dict` types
+  - Achieved 100% test coverage for Insights functionality
+
+### Fixed
+
+- **Docker Environment**:
+  - Fixed `make quality` command failing due to Docker poetry path issues
+  - Added explicit PATH environment variable to docker-compose.yml
+  - Resolved permission errors when running quality checks in Docker
+
 ## Version 0.3.39
 
 **Released:** May 20, 2025

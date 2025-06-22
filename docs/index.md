@@ -161,6 +161,32 @@ if nat_rules:
     client.nat_rule.delete(nat_rules[0].id)
     print(f"Deleted NAT rule: {nat_rules[0].name}")
 
+# Work with Prisma Access Insights - Alerts
+# List recent high-severity alerts
+high_severity_alerts = client.insights.alerts.list(
+    severity=["critical", "high"],
+    status=["Raised"],
+    start_time=7  # Last 7 days
+)
+print(f"Found {len(high_severity_alerts)} high-severity alerts")
+
+# Get alert statistics by severity
+alert_stats = client.insights.alerts.get_statistics(
+    time_range=30,
+    group_by="severity"
+)
+for stat in alert_stats:
+    print(f"{stat.severity}: {stat.count} alerts")
+
+# Generate alert timeline
+timeline = client.insights.alerts.get_timeline(
+    time_range=7,
+    interval="day",
+    status="Raised"
+)
+for point in timeline:
+    print(f"Day {point.state}: {point.count} alerts")
+
 # Make configuration changes
 client.commit(
     folders=["Texas"],

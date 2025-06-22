@@ -8,10 +8,7 @@ import pytest
 
 # Local SDK imports
 from scm.models.objects.tag import TagCreateModel, TagResponseModel, TagUpdateModel
-from tests.factories.objects.tag import (
-    TagCreateModelFactory,
-    TagUpdateModelFactory,
-)
+from tests.factories.objects.tag import TagCreateModelFactory, TagUpdateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
 

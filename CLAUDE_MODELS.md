@@ -8,6 +8,7 @@ This document provides canonical, code-backed guidance for creating Pydantic mod
 ---
 
 ## 1. File & Class Structure
+
 - **One resource per file**, named after the resource (pluralized as needed).
 - **File-level docstring**: Google-style, describing the resource and modeling purpose.
 - **Import order**: Standard library, then Pydantic, then enums, then typing.
@@ -17,6 +18,7 @@ This document provides canonical, code-backed guidance for creating Pydantic mod
 - **Model config**: Use `ConfigDict`/`model_config` for settings (`validate_assignment`, `populate_by_name`, `arbitrary_types_allowed`, `extra="forbid"`).
 
 ## 2. Field/Attribute Conventions
+
 - **Field definitions**: Always use `Field(...)` with type hints, description, and constraints (`min_length`, `max_length`, `pattern`, `examples`).
 - **snake_case** for all fields and models.
 - **ID fields**: Always present in `UpdateModel` and `ResponseModel`, type `UUID` (or `str` if legacy).
@@ -24,6 +26,7 @@ This document provides canonical, code-backed guidance for creating Pydantic mod
 - **Tag fields**: List of strings, validated for uniqueness.
 
 ## 3. Validation & Logic
+
 - **Custom validators**: Use `@field_validator` and `@model_validator` for:
   - Ensuring exactly one of a set of mutually exclusive fields is set (e.g., address type, container, group type).
   - Ensuring lists are unique and/or always lists of strings.
@@ -32,11 +35,13 @@ This document provides canonical, code-backed guidance for creating Pydantic mod
 - **Error handling**: Always raise `ValueError` with clear, actionable messages in validators.
 
 ## 4. Docstrings & Documentation
+
 - **Google-style docstrings**: For all models and validators.
 - **Attributes section**: Always lists all fields with types and descriptions.
 - **Validation logic**: Clearly described in docstrings.
 
 ## 5. Formatting & Style
+
 - **Line length**: 88 chars (ruff default).
 - **Blank lines**: Between class-level constants, classes, methods.
 - **Imports**: Grouped and sorted.
@@ -81,6 +86,7 @@ class <Resource>ResponseModel(<Resource>BaseModel):
 ---
 
 ## 7. Real-World Patterns
+
 - See `scm/models/objects/address.py`, `scm/models/objects/address_group.py`, `scm/models/network/nat_rules.py`, and `scm/models/security/security_rules.py` for canonical field/validator logic.
 - Always validate container exclusivity, tag uniqueness, and mutually exclusive resource types.
 - Use `model_dump(exclude_unset=True)` for API payloads.
@@ -88,6 +94,7 @@ class <Resource>ResponseModel(<Resource>BaseModel):
 ---
 
 ## 8. Further Reading
+
 - [SDK_MODELS_STYLING_GUIDE.md](./SDK_MODELS_STYLING_GUIDE.md): Markdown style guide for all SDK models.
 - [SDK_MODELS_TEMPLATE.py](./SDK_MODELS_TEMPLATE.py): Canonical template for new models.
 - [WINDSURF_RULES.md](./WINDSURF_RULES.md): Project-wide coding and modeling standards.
@@ -96,6 +103,7 @@ class <Resource>ResponseModel(<Resource>BaseModel):
 ---
 
 ## Reviewer/Contributor Checklist
+
 - [ ] File/class structure matches `SDK_MODELS_TEMPLATE.py`
 - [ ] All fields use `Field(...)` with full type hints, constraints, and descriptions
 - [ ] All container/tag fields validated for exclusivity/uniqueness
@@ -104,12 +112,13 @@ class <Resource>ResponseModel(<Resource>BaseModel):
 - [ ] No extra fields unless explicitly allowed in config
 - [ ] All standards in `WINDSURF_RULES.md` and `SDK_MODELS_STYLING_GUIDE.md` are followed
 
-    device: Optional[str] = Field(None, description="Device containing this resource")
-    
-    model_config = ConfigDict(
-        extra="allow",  # Allow extra fields from API
-    )
-```
+  device: Optional[str] = Field(None, description="Device containing this resource")
+
+  model_config = ConfigDict(
+  extra="allow", # Allow extra fields from API
+  )
+
+````
 
 ## Model Patterns
 
@@ -136,7 +145,7 @@ field_name: str = Field(
     pattern=r"^[a-zA-Z0-9_-]+$",
     description="Field description",
 )
-```
+````
 
 ### 2. Complex Fields
 
@@ -183,7 +192,7 @@ def validate_combination(cls, v, info):
     """Validate field combinations."""
     field1 = info.data.get("field1")
     field2 = info.data.get("field2")
-    
+
     if field1 and field2:
         raise ValueError("Cannot specify both field1 and field2")
     return v
@@ -203,6 +212,7 @@ model_config = ConfigDict(
 ## Resource-Specific Patterns
 
 ### 1. Address Models
+
 ```python
 # Address can be one of several types
 ip_netmask: Optional[str] = Field(None, description="IP address with netmask")
@@ -221,6 +231,7 @@ def ensure_single_type(cls, v, info):
 ```
 
 ### 2. Security Rule Models
+
 ```python
 # Enum for rulebase
 class SecurityRuleRulebase(str, Enum):
@@ -242,6 +253,7 @@ destination_hip: Optional[List[str]] = Field(
 ```
 
 ### 3. Service Connection Models
+
 ```python
 # Required fields with defaults
 folder: str = Field(
@@ -288,7 +300,7 @@ def test_model_validation_error():
     """Test model validation errors."""
     with pytest.raises(ValidationError) as exc_info:
         ResourceCreateModel(name="")
-    
+
     errors = exc_info.value.errors()
     assert len(errors) == 1
     assert errors[0]["loc"] == ("name",)
