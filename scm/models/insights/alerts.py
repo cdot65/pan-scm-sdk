@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class AlertSeverity:
@@ -44,10 +44,7 @@ class Alert(BaseModel):
     clear_reason: Optional[str] = None
     age: Optional[int] = None
 
-    class Config:
-        """Pydantic configuration for AlertDetails model."""
-
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     @field_validator("impacted_resources", "metadata", mode="before")
     def parse_json_string(cls, v):
@@ -108,7 +105,4 @@ class AlertStatistic(BaseModel):
     state: Optional[str] = None
     count: Optional[int] = None
 
-    class Config:
-        """Pydantic configuration for AlertStatistic model."""
-
-        extra = "allow"  # Allow additional fields that might be returned
+    model_config = ConfigDict(extra="allow")  # Allow additional fields that might be returned
