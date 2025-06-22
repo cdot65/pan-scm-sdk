@@ -1,4 +1,5 @@
 """scm.models.setup: Setup-related models."""
+
 from .device import (
     DeviceCreateModel,
     DeviceResponseModel,

@@ -442,6 +442,10 @@ class Scm:
                 "scm.config.objects.address_group",
                 "AddressGroup",
             ),
+            "alerts": (
+                "scm.config.insights.alerts",
+                "Alerts",
+            ),
             "agent_version": (
                 "scm.config.mobile_agent.agent_versions",
                 "AgentVersions",

@@ -51,15 +51,21 @@ class DeviceBaseModel(BaseModel):
     """
 
     name: Optional[str] = Field(None, description="Device name.")
-    display_name: Optional[str] = Field(None, alias="displayName", description="Display name for the device.")
-    serial_number: Optional[str] = Field(None, alias="serialNumber", description="Device serial number.")
+    display_name: Optional[str] = Field(
+        None, alias="displayName", description="Display name for the device."
+    )
+    serial_number: Optional[str] = Field(
+        None, alias="serialNumber", description="Device serial number."
+    )
     family: Optional[str] = Field(None, description="Device family (e.g., 'vm').")
     model: Optional[str] = Field(None, description="Device model (e.g., 'PA-VM').")
     folder: Optional[str] = Field(None, description="Folder name containing the device.")
     hostname: Optional[str] = Field(None, description="Device hostname.")
     type: Optional[str] = Field(None, description="Device type (e.g., 'on-prem').")
     device_only: Optional[bool] = Field(None, description="True if device-only entry.")
-    is_connected: Optional[bool] = Field(None, alias="isConnected", description="Connection status.")
+    is_connected: Optional[bool] = Field(
+        None, alias="isConnected", description="Connection status."
+    )
     description: Optional[str] = Field(None, description="Device description.")
 
 
@@ -128,7 +134,9 @@ class DeviceResponseModel(DeviceBaseModel):
     """
 
     id: str = Field(..., description="Unique device identifier (serial number).")
-    connected_since: Optional[str] = Field(None, alias="connectedSince", description="ISO timestamp when connected.")
+    connected_since: Optional[str] = Field(
+        None, alias="connectedSince", description="ISO timestamp when connected."
+    )
     last_disconnect_time: Optional[str] = Field(
         None, description="ISO timestamp when last disconnected."
     )

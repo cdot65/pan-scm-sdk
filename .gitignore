@@ -274,3 +274,5 @@ _test_*.py
 CLAUDE.md
 
 **/.claude/settings.local.json
+prisma_api.md
+prisma_api.pdf

@@ -59,7 +59,7 @@ except ImportError:
 
         def print(self, *args, **kwargs):
             """Print a message without Rich formatting.
-            
+
             Args:
                 *args: Positional arguments to print
                 **kwargs: Keyword arguments (ignored)
@@ -78,11 +78,11 @@ except ImportError:
         @staticmethod
         def __call__(*args, **kwargs):
             """Return the first argument without formatting.
-            
+
             Args:
                 *args: Positional arguments
                 **kwargs: Keyword arguments (ignored)
-                
+
             Returns:
                 The first positional argument
             """
@@ -93,7 +93,7 @@ except ImportError:
 
         def __init__(self, *args, **kwargs):
             """Initialize the dummy progress context.
-            
+
             Args:
                 *args: Positional arguments (ignored)
                 **kwargs: Keyword arguments (ignored)
@@ -102,7 +102,7 @@ except ImportError:
 
         def __enter__(self):
             """Enter the context manager.
-            
+
             Returns:
                 Self reference for context management
             """
@@ -110,7 +110,7 @@ except ImportError:
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             """Exit the context manager.
-            
+
             Args:
                 exc_type: Exception type (if any)
                 exc_val: Exception value (if any)
@@ -120,11 +120,11 @@ except ImportError:
 
         def add_task(self, description, total=None):
             """Add a task to the progress tracker.
-            
+
             Args:
                 description: Description of the task
                 total: Total steps for the task (optional)
-                
+
             Returns:
                 A dummy task ID string
             """
@@ -133,7 +133,7 @@ except ImportError:
 
         def update(self, task_id, advance=None):
             """Update task progress.
-            
+
             Args:
                 task_id: The task identifier
                 advance: How much to advance the progress (optional)
@@ -145,7 +145,7 @@ except ImportError:
 
         def __init__(self, title=None):
             """Initialize the dummy table.
-            
+
             Args:
                 title: Optional title for the table
             """
@@ -156,7 +156,7 @@ except ImportError:
 
         def add_column(self, column):
             """Add a column to the table.
-            
+
             Args:
                 column: Column name to add
             """
@@ -164,7 +164,7 @@ except ImportError:
 
         def add_row(self, *args):
             """Add a row to the table.
-            
+
             Args:
                 *args: Cell values for the row
             """

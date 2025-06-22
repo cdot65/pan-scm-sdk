@@ -370,7 +370,9 @@ class Region(BaseObject):
                     self.logger.debug(f"... and {len(invalid_data) - 3} more")
 
             # Accept all items (with or without 'id')
-            object_instances = [RegionResponseModel(**item) for item in data if isinstance(item, dict)]
+            object_instances = [
+                RegionResponseModel(**item) for item in data if isinstance(item, dict)
+            ]
             all_objects.extend(object_instances)
 
             # If we got fewer than 'limit' objects, we've reached the end

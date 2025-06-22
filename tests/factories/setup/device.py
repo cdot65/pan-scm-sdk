@@ -26,7 +26,9 @@ class DeviceLicenseFactory(factory.Factory):
     expires = factory.Faker("date")
     issued = factory.Faker("date")
     expired = factory.Faker("random_element", elements=["yes", "no", None])
-    authcode = factory.Faker("lexify", text="????????", letters="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    authcode = factory.Faker(
+        "lexify", text="????????", letters="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    )
 
 
 class DeviceLicenseModelFactory(factory.Factory):
@@ -58,7 +60,9 @@ class DeviceLicenseDictFactory(factory.Factory):
     expires = factory.Faker("date")
     issued = factory.Faker("date")
     expired = factory.Faker("random_element", elements=["yes", "no", None])
-    authcode = factory.Faker("lexify", text="????????", letters="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    authcode = factory.Faker(
+        "lexify", text="????????", letters="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    )
 
 
 class DeviceLicenseModelDictFactory(factory.Factory):
@@ -108,15 +112,25 @@ class DeviceResponseFactory(factory.Factory):
     deactivated_by = factory.Faker("email")
     to_be_deactivated_at = factory.Faker("iso8601")
     app_version = factory.Faker("numerify", text="####-####")
-    app_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
-    av_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    app_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
+    av_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     anti_virus_version = factory.Faker("numerify", text="####-####")
     threat_version = factory.Faker("numerify", text="####-####")
-    threat_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    threat_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     wf_ver = factory.Faker("numerify", text="######-######")
-    wf_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    wf_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     iot_version = factory.Faker("numerify", text="###-###")
-    iot_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    iot_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     gp_client_verion = factory.Faker("numerify", text="#.#.#")
     gp_data_version = factory.Faker("numerify", text="#")
     log_db_version = factory.Faker("numerify", text="##.#.#")
@@ -238,15 +252,25 @@ class DeviceResponseDictFactory(factory.Factory):
     dev_cert_detail = None
     dev_cert_expiry_date = None
     app_version = factory.Faker("numerify", text="####-####")
-    app_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
-    av_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    app_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
+    av_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     anti_virus_version = factory.Faker("numerify", text="####-####")
     threat_version = factory.Faker("numerify", text="####-####")
-    threat_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    threat_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     wf_ver = factory.Faker("numerify", text="######-######")
-    wf_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    wf_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     iot_version = factory.Faker("numerify", text="###-###")
-    iot_release_date = factory.LazyFunction(lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z"))
+    iot_release_date = factory.LazyFunction(
+        lambda: fake.date_time().strftime("%Y/%m/%d %H:%M:%S %Z")
+    )
     gp_client_verion = factory.Faker("numerify", text="#.#.#")
     gp_data_version = factory.Faker("numerify", text="#")
     log_db_version = factory.Faker("numerify", text="##.#.#")
@@ -258,8 +282,12 @@ class DeviceResponseDictFactory(factory.Factory):
     url_db_ver = factory.Faker("numerify", text="########.#####")
     url_db_type = None
     license_match = factory.Faker("boolean")
-    availableLicenses = factory.List([factory.SubFactory(DeviceLicenseDictFactory) for _ in range(2)])  # Use API alias
-    installedLicenses = factory.List([factory.SubFactory(DeviceLicenseDictFactory) for _ in range(3)])  # Use API alias
+    availableLicenses = factory.List(
+        [factory.SubFactory(DeviceLicenseDictFactory) for _ in range(2)]
+    )  # Use API alias
+    installedLicenses = factory.List(
+        [factory.SubFactory(DeviceLicenseDictFactory) for _ in range(3)]
+    )  # Use API alias
     ha_state = factory.Faker("random_element", elements=["active", "passive", "unknown"])
     ha_peer_state = factory.Faker("random_element", elements=["active", "passive", "unknown"])
     ha_peer_serial = factory.LazyFunction(lambda: fake.unique.numerify(text="###########"))
