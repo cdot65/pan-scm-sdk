@@ -443,7 +443,7 @@ class Scm:
                 "AddressGroup",
             ),
             "alerts": (
-                "scm.config.insights.alerts",
+                "scm.insights.alerts",
                 "Alerts",
             ),
             "agent_version": (

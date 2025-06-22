@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from scm.config.insights import InsightsBaseObject
+from scm.insights import InsightsBaseObject
 
 
 class ConcreteInsights(InsightsBaseObject):

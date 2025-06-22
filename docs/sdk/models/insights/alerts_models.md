@@ -237,5 +237,5 @@ for stat in stats:
 
 ## Related Documentation
 
-- [Alerts Service](../../config/insights/alerts.md) - Service methods using these models
+- [Alerts Service](../../insights/alerts.md) - Service methods using these models
 - [Insights Overview](index.md) - Overview of all Insights models

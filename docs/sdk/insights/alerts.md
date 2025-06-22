@@ -422,7 +422,7 @@ if __name__ == "__main__":
 
 ## Related Models
 
-- [Alert](../../models/insights/alerts_models.md#alert)
-- [AlertStatistic](../../models/insights/alerts_models.md#alertstatistic)
-- [AlertSeverity](../../models/insights/alerts_models.md#alertseverity)
-- [AlertStatus](../../models/insights/alerts_models.md#alertstatus)
+- [Alert](../models/insights/alerts_models.md#alert)
+- [AlertStatistic](../models/insights/alerts_models.md#alertstatistic)
+- [AlertSeverity](../models/insights/alerts_models.md#alertseverity)
+- [AlertStatus](../models/insights/alerts_models.md#alertstatus)

@@ -1,18 +1,3 @@
-.termynal-comment {
-  color: #4a968f;
-  font-style: italic;
-  display: block;
-}
-
-.termy {
-  /* For right to left languages */
-  direction: ltr;
-}
-
-.termy [data-termynal] {
-  white-space: pre-wrap;
-}
-
 a.external-link {
   /* For right to left languages */
   direction: ltr;

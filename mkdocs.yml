@@ -38,7 +38,6 @@ theme:
 
 plugins:
   - search
-  - termynal
   - autorefs
   - mkdocstrings:
       handlers:
@@ -76,11 +75,9 @@ not_in_nav: |
   guide/operations.md
 
 extra_css:
-  - css/termynal.css
   - css/custom.css
 
 extra_javascript:
-  - js/termynal.js
   - js/custom.js
 
 # Define the navigation menu
@@ -157,8 +154,8 @@ nav:
               - Devices: sdk/config/setup/device.md
               - Variables: sdk/config/setup/variable.md
           - Insights:
-              - Overview: sdk/config/insights/index.md
-              - Alerts: sdk/config/insights/alerts.md
+              - Overview: sdk/insights/index.md
+              - Alerts: sdk/insights/alerts.md
       - Data Models:
           - Deployment:
               - Overview: sdk/models/deployment/index.md

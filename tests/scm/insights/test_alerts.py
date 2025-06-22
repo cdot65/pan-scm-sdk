@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from scm.config.insights.alerts import Alerts
+from scm.insights.alerts import Alerts
 from scm.models.insights.alerts import Alert
 
 
@@ -391,7 +391,7 @@ class TestAlerts:
         mock_post.return_value = mock_response
 
         # Patch Alert to raise exception for None alert_id
-        with patch("scm.config.insights.alerts.Alert") as mock_alert:
+        with patch("scm.insights.alerts.Alert") as mock_alert:
             # First call succeeds
             alert1 = Mock()
             alert1.id = "valid-alert"
@@ -454,7 +454,7 @@ class TestAlerts:
             "not a dict",  # This will trigger line 160
         ]
 
-        with patch("scm.config.insights.InsightsResponse") as mock_resp_class:
+        with patch("scm.insights.InsightsResponse") as mock_resp_class:
             mock_resp_class.return_value = mock_insights_response
 
             # Mock the query method to return our mock response
