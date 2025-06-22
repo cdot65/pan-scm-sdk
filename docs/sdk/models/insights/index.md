@@ -84,5 +84,5 @@ These provide constants for valid field values:
 ## Next Steps
 
 - Review [Alert Models](alerts_models.md) for detailed alert data structures
-- Check the [Alerts Configuration](../../config/insights/alerts.md) for usage examples
+- Check the [Alerts Configuration](../../insights/alerts.md) for usage examples
 - See the main [SDK documentation](../../index.md) for general SDK patterns

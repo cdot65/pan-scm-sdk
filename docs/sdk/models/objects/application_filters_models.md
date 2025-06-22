@@ -247,10 +247,6 @@ except JobFailedError as e:
 
 ## Error Handling
 
-<div class="termy">
-
-<!-- termynal -->
-
 ```python
 from scm.models.objects import ApplicationFiltersCreateModel
 

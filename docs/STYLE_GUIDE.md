@@ -63,9 +63,7 @@ I'll create a comprehensive style guide based on the provided mkdocs files, capt
 
 ### Code Examples
 
-1. **Terminal-Style Code Blocks**
-   - Always wrap code examples in `<div class="termy">` tags
-   - Include `<!-- termynal -->` comment before each code block
+1. **Code Blocks**
    - Use triple backtick code blocks with language specification
    ```
    ```python

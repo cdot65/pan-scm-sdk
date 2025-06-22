@@ -59,7 +59,7 @@ configuration objects and data models used to interact with Palo Alto Networks S
     - [Snippet](config/setup/snippet.md)
     - [Variable](config/setup/variable.md)
   - Insights
-    - [Alerts](config/insights/alerts.md)
+    - [Alerts](insights/alerts.md)
 - Data Models
   - Deployment
     - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)

@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from scm.config.insights import InsightsBaseObject
+from scm.insights import InsightsBaseObject
 from scm.models.insights.alerts import Alert, AlertStatistic
 
 

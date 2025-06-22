@@ -92,5 +92,5 @@ All Insights API responses follow a consistent structure:
 ## Next Steps
 
 - Explore the [Alerts](alerts.md) documentation for detailed usage examples
-- Review the [Alerts Models](../../models/insights/alerts_models.md) for data structure details
+- Review the [Alerts Models](../models/insights/alerts_models.md) for data structure details
 - Check the main [SDK documentation](../../index.md) for general SDK patterns
