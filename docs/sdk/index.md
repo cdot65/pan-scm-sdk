@@ -8,109 +8,113 @@ configuration objects and data models used to interact with Palo Alto Networks S
 - [Auth](auth.md)
 - [Client](client.md)
 - Configuration
-    - [BaseObject](config/base_object.md)
-    - Deployment
-        - [Bandwidth Allocation](config/deployment/bandwidth_allocations.md)
-        - [BGP Routing](config/deployment/bgp_routing.md)
-        - [Internal DNS Server](config/deployment/internal_dns_servers.md)
-        - [Network Location](config/deployment/network_locations.md)
-        - [Remote Network](config/deployment/remote_networks.md)
-        - [Service Connection](config/deployment/service_connections.md)
-    - Mobile Agent
-        - [Authentication Setting](config/mobile_agent/auth_settings.md)
-        - [Agent Version](config/mobile_agent/agent_versions.md)
-    - Network
-        - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
-        - [IKE Gateways](config/network/ike_gateway.md)
-        - [IPsec Crypto Profiles](config/network/ipsec_crypto_profile.md)
-        - [NAT Rules](config/network/nat_rules.md)
-        - [Security Zones](config/network/security_zone.md)
-    - Objects
-        - [Address](config/objects/address.md)
-        - [Address Group](config/objects/address_group.md)
-        - [Application](config/objects/application.md)
-        - [Application Filter](config/objects/application_filters.md)
-        - [Application Group](config/objects/application_group.md)
-        - [Dynamic User Group](config/objects/dynamic_user_group.md)
-        - [External Dynamic List](config/objects/external_dynamic_lists.md)
-        - [HIP Object](config/objects/hip_object.md)
-        - [HIP Profile](config/objects/hip_profile.md)
-        - [HTTP Server Profile](config/objects/http_server_profiles.md)
-        - [Log Forwarding Profile](config/objects/log_forwarding_profile.md)
-        - [Quarantined Device](config/objects/quarantined_devices.md)
-        - [Region](config/objects/region.md)
-        - [Schedule](config/objects/schedules.md)
-        - [Syslog Server Profile](config/objects/syslog_server_profiles.md)
-        - [Service](config/objects/service.md)
-        - [Service Group](config/objects/service_group.md)
-        - [Tag](config/objects/tag.md)
-    - Security Services
-        - [Anti-Spyware Profile](config/security_services/anti_spyware_profile.md)
-        - [Decryption Profile](config/security_services/decryption_profile.md)
-        - [DNS Security Profile](config/security_services/dns_security_profile.md)
-        - [Security Rule](config/security_services/security_rule.md)
-        - [URL Categories](config/security_services/url_categories.md)
-        - [Vulnerability Protection Profile](config/security_services/vulnerability_protection_profile.md)
-        - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
-    - Setup
-        - [Folder](config/setup/folder.md)
-        - [Device](config/setup/device.md)
-        - [Label](config/setup/label.md)
-        - [Snippet](config/setup/snippet.md)
-        - [Variable](config/setup/variable.md)
+  - [BaseObject](config/base_object.md)
+  - Deployment
+    - [Bandwidth Allocation](config/deployment/bandwidth_allocations.md)
+    - [BGP Routing](config/deployment/bgp_routing.md)
+    - [Internal DNS Server](config/deployment/internal_dns_servers.md)
+    - [Network Location](config/deployment/network_locations.md)
+    - [Remote Network](config/deployment/remote_networks.md)
+    - [Service Connection](config/deployment/service_connections.md)
+  - Mobile Agent
+    - [Authentication Setting](config/mobile_agent/auth_settings.md)
+    - [Agent Version](config/mobile_agent/agent_versions.md)
+  - Network
+    - [IKE Crypto Profiles](config/network/ike_crypto_profile.md)
+    - [IKE Gateways](config/network/ike_gateway.md)
+    - [IPsec Crypto Profiles](config/network/ipsec_crypto_profile.md)
+    - [NAT Rules](config/network/nat_rules.md)
+    - [Security Zones](config/network/security_zone.md)
+  - Objects
+    - [Address](config/objects/address.md)
+    - [Address Group](config/objects/address_group.md)
+    - [Application](config/objects/application.md)
+    - [Application Filter](config/objects/application_filters.md)
+    - [Application Group](config/objects/application_group.md)
+    - [Dynamic User Group](config/objects/dynamic_user_group.md)
+    - [External Dynamic List](config/objects/external_dynamic_lists.md)
+    - [HIP Object](config/objects/hip_object.md)
+    - [HIP Profile](config/objects/hip_profile.md)
+    - [HTTP Server Profile](config/objects/http_server_profiles.md)
+    - [Log Forwarding Profile](config/objects/log_forwarding_profile.md)
+    - [Quarantined Device](config/objects/quarantined_devices.md)
+    - [Region](config/objects/region.md)
+    - [Schedule](config/objects/schedules.md)
+    - [Syslog Server Profile](config/objects/syslog_server_profiles.md)
+    - [Service](config/objects/service.md)
+    - [Service Group](config/objects/service_group.md)
+    - [Tag](config/objects/tag.md)
+  - Security Services
+    - [Anti-Spyware Profile](config/security_services/anti_spyware_profile.md)
+    - [Decryption Profile](config/security_services/decryption_profile.md)
+    - [DNS Security Profile](config/security_services/dns_security_profile.md)
+    - [Security Rule](config/security_services/security_rule.md)
+    - [URL Categories](config/security_services/url_categories.md)
+    - [Vulnerability Protection Profile](config/security_services/vulnerability_protection_profile.md)
+    - [Wildfire Antivirus Profile](config/security_services/wildfire_antivirus.md)
+  - Setup
+    - [Folder](config/setup/folder.md)
+    - [Device](config/setup/device.md)
+    - [Label](config/setup/label.md)
+    - [Snippet](config/setup/snippet.md)
+    - [Variable](config/setup/variable.md)
+  - Insights
+    - [Alerts](config/insights/alerts.md)
 - Data Models
-    - Deployment
-        - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
-        - [BGP Routing Models](models/deployment/bgp_routing_models.md)
-        - [Internal DNS Server Models](models/deployment/internal_dns_servers_models.md)
-        - [Network Location Models](models/deployment/network_locations.md)
-        - [Remote Network Models](models/deployment/remote_networks_models.md)
-        - [Service Connection Models](models/deployment/service_connections_models.md)
-    - Mobile Agent
-        - [Authentication Setting Models](models/mobile_agent/auth_settings_models.md)
-        - [Agent Version Models](models/mobile_agent/agent_versions_models.md)
-    - Network
-        - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
-        - [IKE Gateway Models](models/network/ike_gateway_models.md)
-        - [IPsec Crypto Profile Models](models/network/ipsec_crypto_profile_models.md)
-        - [NAT Rules Models](models/network/nat_rule_models.md)
-        - [Security Zone Models](models/network/security_zone_models.md)
-    - Objects
-        - [Address Models](models/objects/address_models.md)
-        - [Address Group Models](models/objects/address_group_models.md)
-        - [Application Models](models/objects/application_models.md)
-        - [Application Filter Models](models/objects/application_filters_models.md)
-        - [Application Group Models](models/objects/application_group_models.md)
-        - [Dynamic User Group Models](models/objects/dynamic_user_group_models.md)
-        - [External Dynamic List Models](models/objects/external_dynamic_lists_models.md)
-        - [HIP Object Models](models/objects/hip_object_models.md)
-        - [HIP Profile Models](models/objects/hip_profile_models.md)
-        - [HTTP Server Profile Models](models/objects/http_server_profiles_models.md)
-        - [Log Forwarding Profile Models](models/objects/log_forwarding_profile_models.md)
-        - [Quarantined Device Models](models/objects/quarantined_devices_models.md)
-        - [Region Models](models/objects/region_models.md)
-        - [Schedule Models](models/objects/schedules_models.md)
-        - [Service Models](models/objects/service_models.md)
-        - [Service Group Models](models/objects/service_group_models.md)
-        - [Syslog Server Profile Models](models/objects/syslog_server_profiles_models.md)
-        - [Tag Models](models/objects/tag_models.md)
-    - Operations
-        - [Candidate Push Models](models/operations/candidate_push.md)
-        - [Jobs Models](models/operations/jobs.md)
-    - Security Services
-        - [Anti-Spyware Profile Models](models/security_services/anti_spyware_profile_models.md)
-        - [Decryption Profile Models](models/security_services/decryption_profile_models.md)
-        - [DNS Security Profile Models](models/security_services/dns_security_profile_models.md)
-        - [Security Rule Models](models/security_services/security_rule_models.md)
-        - [URL Categories Models](models/security_services/url_categories_models.md)
-        - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
-        - [WildFire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
-    - Setup
-        - [Models Setup](models/setup/index.md): Folder, Label, Snippet, Device, Variable models
-        - [Folder Models](models/setup/folder_models.md)
-        - [Label Models](models/setup/label_models.md)
-        - [Snippet Models](models/setup/snippet_models.md)
-        - [Variable Models](models/setup/variable_models.md)
+  - Deployment
+    - [Bandwidth Allocation Models](models/deployment/bandwidth_allocation_models.md)
+    - [BGP Routing Models](models/deployment/bgp_routing_models.md)
+    - [Internal DNS Server Models](models/deployment/internal_dns_servers_models.md)
+    - [Network Location Models](models/deployment/network_locations.md)
+    - [Remote Network Models](models/deployment/remote_networks_models.md)
+    - [Service Connection Models](models/deployment/service_connections_models.md)
+  - Mobile Agent
+    - [Authentication Setting Models](models/mobile_agent/auth_settings_models.md)
+    - [Agent Version Models](models/mobile_agent/agent_versions_models.md)
+  - Network
+    - [IKE Crypto Profile Models](models/network/ike_crypto_profile_models.md)
+    - [IKE Gateway Models](models/network/ike_gateway_models.md)
+    - [IPsec Crypto Profile Models](models/network/ipsec_crypto_profile_models.md)
+    - [NAT Rules Models](models/network/nat_rule_models.md)
+    - [Security Zone Models](models/network/security_zone_models.md)
+  - Objects
+    - [Address Models](models/objects/address_models.md)
+    - [Address Group Models](models/objects/address_group_models.md)
+    - [Application Models](models/objects/application_models.md)
+    - [Application Filter Models](models/objects/application_filters_models.md)
+    - [Application Group Models](models/objects/application_group_models.md)
+    - [Dynamic User Group Models](models/objects/dynamic_user_group_models.md)
+    - [External Dynamic List Models](models/objects/external_dynamic_lists_models.md)
+    - [HIP Object Models](models/objects/hip_object_models.md)
+    - [HIP Profile Models](models/objects/hip_profile_models.md)
+    - [HTTP Server Profile Models](models/objects/http_server_profiles_models.md)
+    - [Log Forwarding Profile Models](models/objects/log_forwarding_profile_models.md)
+    - [Quarantined Device Models](models/objects/quarantined_devices_models.md)
+    - [Region Models](models/objects/region_models.md)
+    - [Schedule Models](models/objects/schedules_models.md)
+    - [Service Models](models/objects/service_models.md)
+    - [Service Group Models](models/objects/service_group_models.md)
+    - [Syslog Server Profile Models](models/objects/syslog_server_profiles_models.md)
+    - [Tag Models](models/objects/tag_models.md)
+  - Operations
+    - [Candidate Push Models](models/operations/candidate_push.md)
+    - [Jobs Models](models/operations/jobs.md)
+  - Security Services
+    - [Anti-Spyware Profile Models](models/security_services/anti_spyware_profile_models.md)
+    - [Decryption Profile Models](models/security_services/decryption_profile_models.md)
+    - [DNS Security Profile Models](models/security_services/dns_security_profile_models.md)
+    - [Security Rule Models](models/security_services/security_rule_models.md)
+    - [URL Categories Models](models/security_services/url_categories_models.md)
+    - [Vulnerability Protection Profile Models](models/security_services/vulnerability_protection_profile_models.md)
+    - [WildFire Antivirus Profile Models](models/security_services/wildfire_antivirus_profile_models.md)
+  - Setup
+    - [Models Setup](models/setup/index.md): Folder, Label, Snippet, Device, Variable models
+    - [Folder Models](models/setup/folder_models.md)
+    - [Label Models](models/setup/label_models.md)
+    - [Snippet Models](models/setup/snippet_models.md)
+    - [Variable Models](models/setup/variable_models.md)
+  - Insights
+    - [Alert Models](models/insights/alerts_models.md)
 - [Exceptions](exceptions.md)
 
 ---
@@ -265,6 +269,32 @@ try:
 except Exception as e:
     print(f"Version not found: {str(e)}")
 
+# ===== WORKING WITH INSIGHTS ALERTS =====
+
+# List recent critical alerts
+critical_alerts = client.insights.alerts.list(
+    severity=["critical"],
+    status=["Raised"],
+    start_time=7  # Last 7 days
+)
+print(f"Found {len(critical_alerts)} critical alerts")
+
+# Get alert statistics
+stats = client.insights.alerts.get_statistics(
+    time_range=30,
+    group_by="severity"
+)
+for stat in stats:
+    print(f"{stat.severity}: {stat.count} alerts")
+
+# Generate alert timeline
+timeline = client.insights.alerts.get_timeline(
+    time_range=7,
+    interval="hour",
+    status="Raised"
+)
+print(f"Generated {len(timeline)} timeline points")
+
 # ===== COMMIT CHANGES =====
 
 # Commit all changes to apply them to the firewall
@@ -284,7 +314,7 @@ print(f"Commit job status: {job_status.data[0].status_str}")
 The following table shows all services available through the unified client interface:
 
 | Client Property                    | Description                                                   |
-|------------------------------------|---------------------------------------------------------------|
+| ---------------------------------- | ------------------------------------------------------------- |
 | **Objects**                        |                                                               |
 | `address`                          | IP addresses, CIDR ranges, and FQDNs for security policies    |
 | `address_group`                    | Static or dynamic collections of address objects              |
@@ -330,6 +360,8 @@ The following table shows all services available through the unified client inte
 | `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection          |
 | **Setup**                          |                                                               |
 | `folder`                           | Folder management for organizing configurations               |
+| **Insights**                       |                                                               |
+| `insights.alerts`                  | Security and operational alerts from Prisma Access            |
 
 Check out the [Client Module](client.md) documentation for more information on the unified client interface and the
 available

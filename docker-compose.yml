@@ -20,7 +20,7 @@ services:
       - .:/app
     working_dir: /app
     ports:
-      - "8000:8000"
+      - "8888:8000"
     environment:
       - POETRY_VIRTUALENVS_CREATE=false
-    command: poetry run mkdocs serve -a 0.0.0.0:8000
+    command: poetry run mkdocs serve -a 0.0.0.0:8888

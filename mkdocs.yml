@@ -69,6 +69,11 @@ markdown_extensions:
 not_in_nav: |
   index.md
   STYLE_GUIDE.md
+  guide/advanced-topics.md
+  guide/configuration-objects.md
+  guide/data-models.md
+  guide/getting-started.md
+  guide/operations.md
 
 extra_css:
   - css/termynal.css
@@ -151,6 +156,9 @@ nav:
               - Snippets: sdk/config/setup/snippet.md
               - Devices: sdk/config/setup/device.md
               - Variables: sdk/config/setup/variable.md
+          - Insights:
+              - Overview: sdk/config/insights/index.md
+              - Alerts: sdk/config/insights/alerts.md
       - Data Models:
           - Deployment:
               - Overview: sdk/models/deployment/index.md
@@ -212,4 +220,7 @@ nav:
               - Snippet Models: sdk/models/setup/snippet_models.md
               - Device Models: sdk/models/setup/device_models.md
               - Variable Models: sdk/models/setup/variable_models.md
+          - Insights:
+              - Overview: sdk/models/insights/index.md
+              - Alert Models: sdk/models/insights/alerts_models.md
       - Exceptions: sdk/exceptions.md
