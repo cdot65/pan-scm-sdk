@@ -2,6 +2,31 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.42
+
+**Released:** June 22, 2025
+
+### Improved
+
+- **Project Architecture**:
+  - Restructured Insights functionality from `scm/config/insights/` to `scm/insights/` as a top-level namespace
+  - This better reflects the unique API pattern and purpose of Insights services
+  - Updated all imports, documentation, and tests to reflect the new structure
+  - Maintains backward compatibility through the unified client interface (`client.insights.alerts`)
+
+- **Documentation**:
+  - Removed all references to the deprecated termynal plugin from mkdocs configuration
+  - Cleaned up custom CSS and JavaScript files by removing termynal-related code
+  - Updated pyproject.toml to remove termynal dependency
+  - Documentation now builds without any plugin-related warnings
+
+### Fixed
+
+- **Test Infrastructure**:
+  - Fixed import paths in test files to use the new insights location
+  - Updated mock patch paths in tests to reflect the new module structure
+  - All tests now pass with the restructured codebase
+
 ## Version 0.3.40
 
 **Released:** June 22, 2025
