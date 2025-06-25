@@ -2,6 +2,15 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.43
+
+**Released:** June 25, 2025
+
+### Fixed
+
+- **Security Rule:**
+  - Removed uniqueness validation for source and destination fields in security rules
+
 ## Version 0.3.42
 
 **Released:** June 22, 2025
@@ -9,6 +18,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 ### Improved
 
 - **Project Architecture**:
+
   - Restructured Insights functionality from `scm/config/insights/` to `scm/insights/` as a top-level namespace
   - This better reflects the unique API pattern and purpose of Insights services
   - Updated all imports, documentation, and tests to reflect the new structure
@@ -68,6 +78,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 20, 2025
 
 ### Added & Fixed
+
 - **TLS Certificate Verification Control:**
   - Added `verify_ssl` parameter to `Scm` and `ScmClient` constructors allowing users to bypass SSL/TLS certificate verification when needed
   - Enhanced warning messages when TLS verification is disabled to alert users of security implications
@@ -83,6 +94,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 18, 2025
 
 ### Improved & Fixed
+
 - **Region Model & Service:**
   - Region models now support predefined regions without `id` fields. The `RegionResponseModel.id` is now optional and documented accordingly.
   - Region service logic updated to allow listing and fetching of all regions, including those without an `id` (predefined/system regions).
@@ -99,12 +111,14 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 17, 2025
 
 ### Improved & Enforced
+
 - **Docstring Linting:**
   - Enforced Ruff for all docstrings across the SDK, adopting Google-style docstrings as the project standard.
   - Suppressed mutually exclusive rule warnings (D203/D211, D212/D213) for a clean, warning-free linting experience.
   - All docstrings now linted and auto-fixed by Ruff; documentation consistency guaranteed for all modules and releases.
 
 ### Improved
+
 - **OAuth Token Refresh:**
   - Improved handling of OAuth token refreshing in `scm/auth.py` for more robust and reliable authentication flows.
 
@@ -113,6 +127,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 16, 2025
 
 ### Fixed & Improved
+
 - **Log Forwarding Profile:**
   - Hotfix: Fetch logic now robustly handles all valid and invalid API response shapes, raising precise exceptions for missing, malformed, or empty data.
   - Full error handling for all edge cases, including missing or non-dict API responses, and explicit validation of container parameters.
@@ -124,6 +139,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 16, 2025
 
 ### Fixed
+
 - **Log Forwarding Profile:**
   - Hotfix: The SDK now always returns a `LogForwardingProfileResponseModel` from API responses, even if the `id` field is missing or `None`. This prevents unnecessary errors for valid profiles where `id` can be `None`.
   - Updated tests to reflect new behavior and ensure robust error handling for all valid API responses.
@@ -133,6 +149,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 16, 2025
 
 ### Fixed
+
 - **Log Forwarding Profile:**
   - Added support for the `dns-security` log_type in LogForwardingProfile models and API validation.
   - Resolves user validation errors when listing or handling profiles containing `dns-security` entries.
@@ -143,6 +160,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 11, 2025
 
 ### Fixed
+
 - **Variable Service:**
   - Fixed bug in the `fetch()` method of the `Variable` class by requiring a `folder` parameter to properly identify variables
   - Updated the method signature to require both `name` and `folder` parameters for more precise variable lookup
@@ -156,6 +174,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 9, 2025
 
 ### Improved
+
 - **Bearer Token Authentication:**
   - Enhanced bearer token authentication with comprehensive testing
   - Improved error handling for commit operations when using bearer token authentication
@@ -164,6 +183,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
   - Achieved 100% test coverage for all client authentication methods
 
 ### Fixed
+
 - **Testing Infrastructure:**
   - Fixed inconsistencies in error message validation in tests
   - Improved test reliability for bearer token authentication
@@ -174,6 +194,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 9, 2025
 
 ### Added
+
 - **Label Support:**
   - Implemented `Label` service for creating, retrieving, updating, and deleting label resources in the SCM API
   - Added Pydantic models for label validation and serialization
@@ -182,6 +203,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
   - Added new Label documentation pages to mkdocs
 
 ### Improved
+
 - **Documentation:**
   - Added Label entry to all index pages and navigation
   - Updated README.md to include Label in the available client services table
@@ -192,6 +214,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 4, 2025
 
 ### Improved
+
 - **Documentation:**
   - Updated documentation for setup module objects (Device, Folder, Snippet, Variable) to use consistent formatting
   - Added unified client interface examples to all setup module documentation
@@ -204,6 +227,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 4, 2025
 
 ### Fixed
+
 - **HTTP Server Profiles:**
   - Fixed inconsistent API response format in the `fetch()` method of HTTP Server Profiles
   - Added support for both direct object response and list-style data array format
@@ -216,6 +240,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** May 4, 2025
 
 ### Added
+
 - **Variable Service:**
   - Implemented `Variable` service for creating, retrieving, updating, and deleting variable resources in the SCM API.
   - Added client-side filtering by labels, parent, type, snippets, model, serial_number, and device_only.
@@ -229,6 +254,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
   - Updated all relevant index and navigation files to include Variable documentation.
 
 ### Improved
+
 - Enhanced model handling for attributes not explicitly defined in OpenAPI specs but present in API responses.
 - Refined client-side filtering mechanisms for better performance across large datasets.
 
@@ -237,6 +263,7 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 **Released:** April 27, 2025
 
 ### Added
+
 - **Device Service:**
   - Implemented `Device` service for listing, filtering, and managing device resources in the SCM API.
   - Added server-side and client-side filtering, pagination, and device-specific operations.
@@ -248,11 +275,13 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
   - Updated all relevant index and navigation files to include Device documentation.
 
 ### Fixed
+
 - Improved test reliability by removing unnecessary skips and clarifying skip reasons.
 - Fixed import errors and naming consistency across device models, factories, and tests.
 - Fixed issue with HIP object validation of response models.
 
 ### Changed
+
 - Refactored device model and service structure for clarity and maintainability.
 - Enhanced test factories and model validation for device-related resources.
 
