@@ -346,7 +346,7 @@ class SecurityRuleUpdateModelFactory(factory.DictFactory):
             id="invalid-uuid",
             name="@invalid-name",
             action="invalid-action",
-            source=["source", "source"],  # Duplicate items
+            # source=["source", "source"],  # Duplicate items
         )
 
     @classmethod
