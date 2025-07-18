@@ -14,7 +14,7 @@ models handle validation of inputs and outputs when interacting with the SCM API
 | description | str           | No       | None    | Description of the address group. Max length: 1023 chars                                 |
 | tag         | List[str]     | No       | None    | List of tags. Each tag max length: 64 chars                                              |
 | dynamic     | DynamicFilter | No*      | None    | Dynamic filter for group membership                                                      |
-| static      | List[str]     | No*      | None    | List of static addresses. Min: 1, Max: 255                                               |
+| static      | List[str]     | No*      | None    | List of static addresses. Min: 1, Max: 4096                                              |
 | folder      | str           | No**     | None    | Folder where group is defined. Max length: 64 chars                                      |
 | snippet     | str           | No**     | None    | Snippet where group is defined. Max length: 64 chars                                     |
 | device      | str           | No**     | None    | Device where group is defined. Max length: 64 chars                                      |
