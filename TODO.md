@@ -2,6 +2,13 @@
 
 This checklist is derived from `project3.md` for tracking the implementation of the Devices SDK functionality.
 
+## Address Group Enhancement
+
+- [ ] Increase the maximum number of entries within an address group of type `static` to 4096
+      - [ ] Update the `max_length` constraint for the `static` field in `scm/models/objects/address_group.py`
+      - [ ] Review and update relevant test files if necessary to ensure all tests pass with 100% coverage
+      - [ ] Verify that the change doesn't break existing functionality
+
 ## Models (`scm/models/config/setup/devices.py`)
 
 - [ ] Define `InstalledLicenseModel`.

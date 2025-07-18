@@ -80,7 +80,7 @@ class AddressGroupBaseModel(BaseModel):
         None,
         description="Container type of Static Address Group",
         min_length=1,
-        max_length=2048,
+        max_length=4096,
         examples=["database-servers"],
     )
     folder: Optional[str] = Field(

@@ -2,6 +2,18 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.3.43
+
+**Released:** July 18, 2025
+
+### Improved
+
+- **Address Group Enhancement**:
+  - Increased the maximum number of entries in static address groups from 255 to 4096
+  - This change aligns with the increased capacity supported by Strata Cloud Manager
+  - Updated validation constraints in the `AddressGroupBaseModel` to support larger address groups
+  - No breaking changes - existing address groups with fewer than 255 entries will continue to work as before
+
 ## Version 0.3.42
 
 **Released:** June 22, 2025
