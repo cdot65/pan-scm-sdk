@@ -371,7 +371,7 @@ class TestNatRuleResponseModel:
         data = NatRuleResponseFactory().model_dump()
 
         # Test with custom tags
-        data["tag"] = ["custom-tag", "another_tag"]
+        data["tag"] = ["custom-tag", "another_tag", "tag with spaces"]
         model = NatRuleResponseModel(**data)
 
         # Verify the custom tags are accepted
@@ -379,7 +379,7 @@ class TestNatRuleResponseModel:
         assert "another_tag" in model.tag
 
         # Test invalid tags
-        invalid_tags = ["", " ", "tag with spaces", "tag@with!symbols"]
+        invalid_tags = ["", " ", "tag@with!symbols"]
         for invalid_tag in invalid_tags:
             data["tag"] = [invalid_tag]
             with pytest.raises(ValueError):
