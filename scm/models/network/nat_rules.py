@@ -345,10 +345,12 @@ class NatRuleBaseModel(BaseModel):
         for tag in v:
             if not tag or not isinstance(tag, str) or not tag.strip():
                 raise ValueError("Tags must be non-empty strings")
-            if not all(c.isalnum() or c in "-_" for c in tag):
+            if not all(c.isalnum() or c in "-_ " for c in tag):
                 raise ValueError(
                     "Tags should only contain alphanumeric characters, hyphens, or underscores"
                 )
+            if tag.startswith(" ") or tag.endswith(" "):
+                raise ValueError("Tags should not start or end with spaces")
         return v
 
     @model_validator(mode="after")
