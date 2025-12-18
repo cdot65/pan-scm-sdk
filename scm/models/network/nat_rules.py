@@ -379,6 +379,11 @@ class NatRuleBaseModel(BaseModel):
 
 class NatRuleCreateModel(NatRuleBaseModel):
     """Model for creating new NAT Rules."""
+    
+    rulebase: Optional[NatRulebase] = Field(
+    None,
+    description="Which rulebase to use (pre or post)",
+    )
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "NatRuleCreateModel":
