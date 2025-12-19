@@ -306,6 +306,27 @@ class BGPRoutingResponseFactory:
 
         return response_data
 
+    def build_empty(self) -> Dict[str, Any]:
+        """Create an empty response (for testing partial API responses).
+
+        Returns:
+            Dict[str, Any]: Empty response data
+
+        """
+        return {}
+
+    def build_partial(self, **kwargs) -> Dict[str, Any]:
+        """Create a partial response with only specified fields.
+
+        Args:
+            **kwargs: Fields to include in the response
+
+        Returns:
+            Dict[str, Any]: Partial response data
+
+        """
+        return kwargs
+
 
 # Create instances of the factories so they can be called directly
 BGPRoutingCreateApiFactory = BGPRoutingCreateApiFactory()
@@ -321,7 +342,8 @@ BGPRoutingResponseFactory = BGPRoutingResponseFactory()
 class BGPRoutingCreateModelFactory(factory.Factory):
     """Factory for creating dictionary data suitable for instantiating BGPRoutingCreateModel.
 
-    Useful for direct Pydantic validation tests.
+    Note: BGPRoutingCreateModel is now an alias for BGPRoutingUpdateModel since
+    the API only supports GET/PUT operations (no POST).
     """
 
     class Meta:
@@ -568,3 +590,26 @@ class BGPRoutingResponseModelFactory(factory.Factory):
                 data["routing_preference"] = HotPotatoRoutingModel(**routing_pref)
 
         return data
+
+    @classmethod
+    def build_empty(cls) -> Dict[str, Any]:
+        """Return an empty data dict for testing empty responses.
+
+        Returns:
+            Dict[str, Any]: Empty data for BGPRoutingResponseModel
+
+        """
+        return {}
+
+    @classmethod
+    def build_partial(cls, **kwargs) -> Dict[str, Any]:
+        """Return a partial data dict with only specified fields.
+
+        Args:
+            **kwargs: Fields to include in the response
+
+        Returns:
+            Dict[str, Any]: Partial data for BGPRoutingResponseModel
+
+        """
+        return kwargs
