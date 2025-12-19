@@ -31,6 +31,11 @@ class PeeringTypeEnum(str, Enum):
 class BgpPeerModel(BaseModel):
     """Model representing a BGP peer configuration for remote networks."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     local_ip_address: Optional[str] = None
     peer_ip_address: Optional[str] = None
     secret: Optional[str] = None
@@ -38,6 +43,11 @@ class BgpPeerModel(BaseModel):
 
 class BgpModel(BaseModel):
     """Model representing BGP configuration for remote networks."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     do_not_export_routes: Optional[bool] = None
     enable: Optional[bool] = None
@@ -53,12 +63,22 @@ class BgpModel(BaseModel):
 class ProtocolModel(BaseModel):
     """Model encapsulating protocol settings (BGP and BGP peer) for remote networks."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     bgp: Optional[BgpModel] = None
     bgp_peer: Optional[BgpPeerModel] = None
 
 
 class EcmpTunnelModel(BaseModel):
     """Model representing an ECMP tunnel configuration for remote networks."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: str = Field(..., max_length=63)
     ipsec_tunnel: str = Field(..., max_length=1023)
@@ -76,6 +96,7 @@ class RemoteNetworkBaseModel(BaseModel):
     """Base model for Remote Network objects containing fields common to all CRUD operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

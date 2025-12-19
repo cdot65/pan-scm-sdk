@@ -6,6 +6,10 @@ from pydantic import ValidationError
 import pytest
 
 from scm.models.deployment.remote_networks import (
+    BgpModel,
+    BgpPeerModel,
+    EcmpTunnelModel,
+    ProtocolModel,
     RemoteNetworkCreateModel,
     RemoteNetworkUpdateModel,
 )
@@ -92,6 +96,14 @@ class TestRemoteNetworkCreateModel:
         with pytest.raises(ValidationError):
             RemoteNetworkCreateModel(**data)
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = RemoteNetworkCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            RemoteNetworkCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestRemoteNetworkUpdateModel:
     """Tests for the RemoteNetworkUpdateModel pydantic validation."""
@@ -132,3 +144,54 @@ class TestRemoteNetworkUpdateModel:
             RemoteNetworkUpdateModel(**data)
 
         assert "ipsec_tunnel is required when ecmp_load_balancing is disable" in str(exc_info.value)
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = RemoteNetworkUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            RemoteNetworkUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+
+class TestNestedModels:
+    """Tests for nested model validation."""
+
+    def test_bgp_peer_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in BgpPeerModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            BgpPeerModel(
+                local_ip_address="192.168.1.1",
+                peer_ip_address="192.168.1.2",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_bgp_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in BgpModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            BgpModel(
+                enable=True,
+                peer_ip_address="192.168.1.2",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_protocol_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ProtocolModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ProtocolModel(
+                bgp={"enable": True},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_ecmp_tunnel_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in EcmpTunnelModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            EcmpTunnelModel(
+                name="tunnel1",
+                ipsec_tunnel="ipsec-tunnel-1",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
