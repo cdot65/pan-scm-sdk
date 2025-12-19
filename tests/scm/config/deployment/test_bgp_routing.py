@@ -142,6 +142,20 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
         assert isinstance(result, BGPRoutingResponseModel)
         assert result.routing_preference is None
 
+    def test_get_response_model_creation_error(self):
+        """Test handling exception during response model creation."""
+        # Create a response with invalid data that will cause model validation to fail
+        mock_response = {
+            "backbone_routing": "no-asymmetric-routing",
+            "outbound_routes_for_services": {"invalid": "type"},  # Should be a list
+        }
+        self.mock_scm.get.return_value = mock_response
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.get()
+
+        assert "Invalid response format" in exc_info.value.message
+
 
 class TestBGPRoutingCreate(TestBGPRoutingBase):
     """Tests for creating BGP routing settings."""
@@ -487,6 +501,36 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         payload = kwargs["json"]
         assert "routing_preference" in payload
         assert "default" in payload["routing_preference"]
+
+    def test_update_response_unknown_routing_preference(self):
+        """Test handling unknown routing_preference in update response."""
+        test_data = {"backbone_routing": "asymmetric-routing-only"}
+        mock_response = {
+            "backbone_routing": "asymmetric-routing-only",
+            "routing_preference": {"unknown_format": {}},
+        }
+        self.mock_scm.put.return_value = mock_response
+
+        result = self.client.update(test_data)
+
+        assert isinstance(result, BGPRoutingResponseModel)
+        # Unknown routing_preference format is removed, so it's None
+        assert result.routing_preference is None
+
+    def test_update_response_model_creation_error(self):
+        """Test handling exception during response model creation in update."""
+        test_data = {"backbone_routing": "asymmetric-routing-only"}
+        # Response with invalid data that will cause model validation to fail
+        mock_response = {
+            "backbone_routing": "asymmetric-routing-only",
+            "outbound_routes_for_services": {"invalid": "type"},  # Should be a list
+        }
+        self.mock_scm.put.return_value = mock_response
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.update(test_data)
+
+        assert "Invalid response format" in exc_info.value.message
 
 
 class TestBGPRoutingDelete(TestBGPRoutingBase):
