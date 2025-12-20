@@ -42,16 +42,19 @@ custom URL categories that can be used in security policies and profiles.
 
 ## URL Category Model Attributes
 
-| Attribute     | Type      | Required | Description                                 |
-|---------------|-----------|----------|---------------------------------------------|
-| `name`        | str       | Yes      | Name of URL category                        |
-| `id`          | UUID      | Yes*     | Unique identifier (*response only)          |
-| `list`        | List[str] | Yes      | List of URLs or patterns                    |
-| `type`        | Enum      | No       | Category type (URL List/Category Match)     |
-| `description` | str       | No       | Category description                        |
-| `folder`      | str       | Yes**    | Folder location (**one container required)  |
-| `snippet`     | str       | Yes**    | Snippet location (**one container required) |
-| `device`      | str       | Yes**    | Device location (**one container required)  |
+| Attribute     | Type                      | Required | Default  | Description                                      |
+|---------------|---------------------------|----------|----------|--------------------------------------------------|
+| `name`        | str                       | Yes      | None     | Name of URL category                             |
+| `id`          | UUID                      | Yes*     | None     | Unique identifier (*response/update only)        |
+| `list`        | List[str]                 | No       | []       | List of URLs or patterns                         |
+| `type`        | URLCategoriesListTypeEnum | No       | URL List | Category type (URL List/Category Match)          |
+| `description` | str                       | No       | None     | Category description                             |
+| `folder`      | str                       | No**     | None     | Folder location. Max 64 chars                    |
+| `snippet`     | str                       | No**     | None     | Snippet location. Max 64 chars                   |
+| `device`      | str                       | No**     | None     | Device location. Max 64 chars                    |
+
+\* Only required for response and update models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
 
 ## Exceptions
 
@@ -67,18 +70,20 @@ custom URL categories that can be used in security policies and profiles.
 
 ## Basic Configuration
 
+The URL Categories service can be accessed using the unified client interface (recommended):
+
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
 # Access URL categories directly through the client
-# No need to initialize a separate URLCategories object
+url_categories = client.url_categories
 ```
 
 ## Usage Examples
@@ -236,20 +241,22 @@ for app in combined_filters:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-# Initialize the client with a custom max_limit for URL categories
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-client = Scm(
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    url_categories_max_limit=4321
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
-all_categories = client.url_category.list(folder='Texas')
+# Configure max_limit using the property setter
+client.url_categories.max_limit = 4000
 
-# 'all_categories' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# List all categories - auto-paginates through results
+all_categories = client.url_categories.list(folder='Texas')
+
+# The categories are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting URL Categories
@@ -384,6 +391,8 @@ the [url_categories.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/
 
 ## Related Models
 
-- [URLCategoriesCreateModel](../../models/security_services/url_categories_models.md)
-- [URLCategoriesUpdateModel](../../models/security_services/url_categories_models.md)
-- [URLCategoriesResponseModel](../../models/security_services/url_categories_models.md)
+- [URLCategoriesBaseModel](../../models/security_services/url_categories_models.md#Overview)
+- [URLCategoriesCreateModel](../../models/security_services/url_categories_models.md#Overview)
+- [URLCategoriesUpdateModel](../../models/security_services/url_categories_models.md#Overview)
+- [URLCategoriesResponseModel](../../models/security_services/url_categories_models.md#Overview)
+- [URLCategoriesListTypeEnum](../../models/security_services/url_categories_models.md#Overview)
