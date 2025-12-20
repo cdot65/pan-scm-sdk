@@ -404,7 +404,9 @@ class TestNatRuleUpdate(TestNatRuleBase):
         update_dict = update_model.model_dump(by_alias=True)
         update_dict["folder"] = "Shared"
         # Prepare a mock response which will generate a new id
-        mock_response = NatRuleResponseFactory.from_request(NatRuleCreateModel(**update_dict))
+        # Remove id before passing to CreateModel since CreateModel doesn't have id field
+        create_dict = {k: v for k, v in update_dict.items() if k != "id"}
+        mock_response = NatRuleResponseFactory.from_request(NatRuleCreateModel(**create_dict))
         self.mock_scm.put.return_value = mock_response.model_dump(by_alias=True)
 
         updated_rule = self.client.update(update_model)
