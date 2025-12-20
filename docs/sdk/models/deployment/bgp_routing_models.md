@@ -6,18 +6,32 @@ The BGP Routing models provide a structured way to manage BGP (Border Gateway Pr
 
 BGP routing in Strata Cloud Manager is implemented as a singleton object, meaning there is only one global BGP routing configuration per tenant. The models handle validation of inputs and outputs when interacting with the SCM API.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `BGPRoutingBaseModel`: Base model with fields common to all BGP routing operations
+- `BGPRoutingUpdateModel`: Model for updating BGP routing settings
+- `BGPRoutingResponseModel`: Response model for BGP routing operations
+- `BGPRoutingCreateModel`: Alias for `BGPRoutingUpdateModel` (BGP routing is a singleton with no POST endpoint)
+- `DefaultRoutingModel`: Model for default routing preference configuration
+- `HotPotatoRoutingModel`: Model for hot potato routing preference configuration
+- `BackboneRoutingEnum`: Enum defining backbone routing options
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
-| Attribute                   | Type                                             | Required     | Default         | Description                                             |
-|----------------------------|--------------------------------------------------|--------------|----------------|---------------------------------------------------------|
-| `routing_preference`        | Union[DefaultRoutingModel, HotPotatoRoutingModel]| Yes*         | None           | The routing preference setting (default or hot potato)   |
-| `backbone_routing`          | BackboneRoutingEnum                              | Yes*         | None           | Controls asymmetric routing options                      |
-| `accept_route_over_SC`      | bool                                             | Yes*         | False          | Whether to accept routes over service connections        |
-| `outbound_routes_for_services`| List[str]                                      | Yes*         | []             | List of outbound routes for services in CIDR format      |
-| `add_host_route_to_ike_peer`| bool                                             | Yes*         | False          | Whether to add host route to IKE peer                    |
-| `withdraw_static_route`     | bool                                             | Yes*         | False          | Whether to withdraw static routes                        |
+| Attribute                     | Type                                              | Required | Default | Description                                            |
+|-------------------------------|---------------------------------------------------|----------|---------|--------------------------------------------------------|
+| `routing_preference`          | Union[DefaultRoutingModel, HotPotatoRoutingModel] | No       | None    | The routing preference setting (default or hot potato) |
+| `backbone_routing`            | BackboneRoutingEnum                               | No       | None    | Controls asymmetric routing options                    |
+| `accept_route_over_SC`        | bool                                              | No       | None    | Whether to accept routes over service connections      |
+| `outbound_routes_for_services`| List[str]                                         | No       | []      | List of outbound routes for services in CIDR format    |
+| `add_host_route_to_ike_peer`  | bool                                              | No       | None    | Whether to add host route to IKE peer                  |
+| `withdraw_static_route`       | bool                                              | No       | None    | Whether to withdraw static routes                      |
 
-\* Required for CreateModel, optional for UpdateModel, required for ResponseModel
+Note: All fields are optional. For update operations, at least one field must be specified.
 
 ## Enums and Sub-Models
 
