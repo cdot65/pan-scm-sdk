@@ -6,7 +6,7 @@ Contains Pydantic models for representing tag objects and related data.
 # scm/models/objects/tag.py
 
 from enum import Enum
-from typing import Annotated, List, Optional
+from typing import Annotated, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import (
@@ -259,4 +259,9 @@ class TagResponseModel(TagBaseModel):
         None,
         description="The UUID of the application group",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
+    # Override comments to accept str or dict (API sometimes returns empty dict)
+    comments: Optional[Union[str, Dict[str, Any]]] = Field(
+        None,
+        description="The comments of the tag object",
     )

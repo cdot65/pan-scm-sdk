@@ -176,3 +176,15 @@ class WildfireAvProfileResponseModel(WildfireAvProfileBase):
         ...,
         description="Profile ID",
     )
+    override_loc: Optional[str] = Field(
+        None,
+        description="Override location (e.g., 'predefined-snippet')",
+    )
+    override_type: Optional[str] = Field(
+        None,
+        description="Override type (e.g., 'snippet')",
+    )
+    override_id: Optional[str] = Field(
+        None,
+        description="Override ID",
+    )

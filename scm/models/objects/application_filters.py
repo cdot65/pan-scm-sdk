@@ -5,7 +5,7 @@ Contains Pydantic models for representing application filter objects and related
 
 # scm/models/objects/application_filters.py
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
@@ -208,4 +208,8 @@ class ApplicationFiltersResponseModel(ApplicationFiltersBaseModel):
         None,
         description="The UUID of the application",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
+    tagging: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Tagging information for the application filter.",
     )

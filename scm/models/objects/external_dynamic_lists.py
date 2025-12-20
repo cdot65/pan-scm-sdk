@@ -527,6 +527,26 @@ class ExternalDynamicListsResponseModel(ExternalDynamicListsBaseModel):
         description="The UUID of the external dynamic list",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
+    display_name: Optional[str] = Field(
+        None,
+        description="Display name for the external dynamic list",
+    )
+    description: Optional[str] = Field(
+        None,
+        description="Description of the external dynamic list",
+    )
+    override_loc: Optional[str] = Field(
+        None,
+        description="Override location (e.g., 'predefined-snippet')",
+    )
+    override_type: Optional[str] = Field(
+        None,
+        description="Override type (e.g., 'snippet')",
+    )
+    override_id: Optional[str] = Field(
+        None,
+        description="Override ID",
+    )
 
     @model_validator(mode="after")
     def validate_predefined_snippet(self) -> "ExternalDynamicListsResponseModel":

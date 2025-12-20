@@ -226,13 +226,16 @@ class TestExtraFieldsForbidden:
             ApplicationUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_application_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in ApplicationResponseModel."""
+    def test_application_response_model_extra_fields_allowed(self):
+        """Test that extra fields are allowed in ApplicationResponseModel.
+
+        ApplicationResponseModel uses extra="allow" because the API returns
+        many undocumented fields (compliance flags, SaaS attributes, etc.).
+        """
         data = ApplicationResponseModelFactory.build_valid()
-        data["unknown_field"] = "should fail"
-        with pytest.raises(ValidationError) as exc_info:
-            ApplicationResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        data["unknown_field"] = "should be allowed"
+        model = ApplicationResponseModel(**data)
+        assert model.name is not None
 
 
 # -------------------- End of Test Classes --------------------
