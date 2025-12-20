@@ -280,7 +280,9 @@ class TestExtraFieldsForbidden:
 
     def test_dns_security_category_entry_rejects_extra_fields(self):
         """Test that extra fields are rejected in DNSSecurityCategoryEntryModel."""
-        from scm.models.security.dns_security_profiles import DNSSecurityCategoryEntryModel
+        from scm.models.security.dns_security_profiles import (
+            DNSSecurityCategoryEntryModel,
+        )
 
         data = {
             "name": "test-category",

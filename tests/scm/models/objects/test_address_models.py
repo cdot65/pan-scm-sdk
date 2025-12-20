@@ -7,7 +7,11 @@ from pydantic import ValidationError
 import pytest
 
 # Local SDK imports
-from scm.models.objects import AddressCreateModel, AddressResponseModel, AddressUpdateModel
+from scm.models.objects import (
+    AddressCreateModel,
+    AddressResponseModel,
+    AddressUpdateModel,
+)
 from tests.factories import AddressCreateModelFactory, AddressUpdateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------

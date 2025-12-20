@@ -2,8 +2,8 @@
 
 """Tests for BGP routing deployment models."""
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from scm.models.deployment.bgp_routing import (
     BackboneRoutingEnum,

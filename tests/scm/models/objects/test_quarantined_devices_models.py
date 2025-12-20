@@ -138,7 +138,10 @@ class TestExtraFieldsForbidden:
     def test_quarantined_devices_list_params_model_extra_fields_forbidden(self):
         """Test that extra fields are rejected in QuarantinedDevicesListParamsModel."""
         from pydantic import ValidationError
-        from scm.models.objects.quarantined_devices import QuarantinedDevicesListParamsModel
+
+        from scm.models.objects.quarantined_devices import (
+            QuarantinedDevicesListParamsModel,
+        )
 
         with pytest.raises(ValidationError) as exc_info:
             QuarantinedDevicesListParamsModel(unknown_field="should fail")

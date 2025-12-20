@@ -9,6 +9,7 @@ from faker import Faker
 from scm.models.objects.hip_object import (
     CertificateAttributeModel,
     CertificateModel,
+    CustomChecksModel,
     DiskEncryptionModel,
     EncryptionLocationModel,
     HIPObjectBaseModel,
@@ -19,6 +20,11 @@ from scm.models.objects.hip_object import (
     MobileDeviceModel,
     NetworkInfoModel,
     PatchManagementModel,
+    PlistKeyModel,
+    PlistModel,
+    ProcessListItemModel,
+    RegistryKeyModel,
+    RegistryValueModel,
     SecurityVendorModel,
     StrContainsModel,
     StrIsModel,
@@ -181,6 +187,125 @@ class CertificateFactory(factory.Factory):
     )
 
 
+# Custom Checks Factories
+class ProcessListItemFactory(factory.Factory):
+    """Factory for creating process list items."""
+
+    class Meta:
+        """Meta class that defines the model for ProcessListItemFactory."""
+
+        model = ProcessListItemModel
+
+    name = factory.Faker("file_name", extension="exe")
+    running = True
+
+
+class RegistryValueFactory(factory.Factory):
+    """Factory for creating registry values."""
+
+    class Meta:
+        """Meta class that defines the model for RegistryValueFactory."""
+
+        model = RegistryValueModel
+
+    name = factory.Faker("word")
+    value_data = factory.Faker("word")
+    negate = False
+
+
+class RegistryKeyFactory(factory.Factory):
+    """Factory for creating registry keys."""
+
+    class Meta:
+        """Meta class that defines the model for RegistryKeyFactory."""
+
+        model = RegistryKeyModel
+
+    name = factory.LazyFunction(lambda: f"HKEY_LOCAL_MACHINE\\SOFTWARE\\{fake.word()}")
+    default_value_data = None
+    negate = False
+    registry_value = None
+
+
+class PlistKeyFactory(factory.Factory):
+    """Factory for creating plist keys."""
+
+    class Meta:
+        """Meta class that defines the model for PlistKeyFactory."""
+
+        model = PlistKeyModel
+
+    name = factory.Faker("word")
+    value = factory.Faker("word")
+    negate = False
+
+
+class PlistFactory(factory.Factory):
+    """Factory for creating plists."""
+
+    class Meta:
+        """Meta class that defines the model for PlistFactory."""
+
+        model = PlistModel
+
+    name = factory.LazyFunction(lambda: f"com.{fake.word()}.{fake.word()}")
+    negate = False
+    key = None
+
+
+class CustomChecksFactory(factory.Factory):
+    """Factory for creating custom checks section."""
+
+    class Meta:
+        """Meta class that defines the model for CustomChecksFactory."""
+
+        model = CustomChecksModel
+
+    criteria = factory.Dict({})
+
+    @classmethod
+    def with_process_list(cls, **kwargs):
+        """Create CustomChecksModel with process list."""
+        return cls(
+            criteria={
+                "process_list": [ProcessListItemFactory() for _ in range(2)]
+            },
+            **kwargs,
+        )
+
+    @classmethod
+    def with_registry_keys(cls, **kwargs):
+        """Create CustomChecksModel with registry keys."""
+        return cls(
+            criteria={
+                "registry_key": [
+                    {
+                        "name": "HKEY_LOCAL_MACHINE\\SOFTWARE\\TestApp",
+                        "registry_value": [
+                            {"name": "Version", "value_data": "1.0.0"}
+                        ],
+                    }
+                ]
+            },
+            **kwargs,
+        )
+
+    @classmethod
+    def with_plist(cls, **kwargs):
+        """Create CustomChecksModel with plist."""
+        return cls(
+            criteria={
+                "plist": [
+                    {
+                        "name": "com.apple.finder",
+                        "key": [{"name": "ShowHardDrivesOnDesktop", "value": "true"}],
+                    }
+                ]
+            },
+            **kwargs,
+        )
+
+
 # Base factory for all HIP object models
 class HIPObjectBaseFactory(factory.Factory):
     """Base factory for HIP Object with common fields."""
@@ -206,6 +331,7 @@ class HIPObjectBaseFactory(factory.Factory):
     disk_encryption = None
     mobile_device = None
     certificate = None
+    custom_checks = None
 
 
 class HIPObjectCreateApiFactory(HIPObjectBaseFactory):
@@ -265,6 +391,14 @@ class HIPObjectCreateApiFactory(HIPObjectBaseFactory):
         """Create a HIPObjectCreateModel instance with certificate."""
         return cls(
             certificate=CertificateFactory(),
+            **kwargs,
+        )
+
+    @classmethod
+    def with_custom_checks(cls, **kwargs):
+        """Create a HIPObjectCreateModel instance with custom checks."""
+        return cls(
+            custom_checks=CustomChecksFactory.with_registry_keys(),
             **kwargs,
         )
 
@@ -346,6 +480,14 @@ class HIPObjectUpdateApiFactory(HIPObjectBaseFactory):
         """Create a HIPObjectUpdateModel instance with certificate."""
         return cls(
             certificate=CertificateFactory(),
+            **kwargs,
+        )
+
+    @classmethod
+    def with_custom_checks(cls, **kwargs):
+        """Create a HIPObjectUpdateModel instance with custom checks."""
+        return cls(
+            custom_checks=CustomChecksFactory.with_registry_keys(),
             **kwargs,
         )
 
@@ -477,6 +619,14 @@ class HIPObjectResponseFactory(HIPObjectBaseFactory):
         """Create a HIPObjectResponseModel instance with certificate."""
         return cls(
             certificate=CertificateFactory(),
+            **kwargs,
+        )
+
+    @classmethod
+    def with_custom_checks(cls, **kwargs):
+        """Create a HIPObjectResponseModel instance with custom checks."""
+        return cls(
+            custom_checks=CustomChecksFactory.with_registry_keys(),
             **kwargs,
         )
 
@@ -655,6 +805,26 @@ class HIPObjectCreateModelFactory:
         }
         return data
 
+    @classmethod
+    def build_valid_custom_checks(cls, **kwargs):
+        """Return a valid data dict with custom checks."""
+        data = {
+            "name": kwargs.get("name", cls.name),
+            "description": kwargs.get("description", cls.description),
+            "folder": kwargs.get("folder", cls.folder),
+            "custom_checks": {
+                "criteria": {
+                    "registry_key": [
+                        {
+                            "name": "HKEY_LOCAL_MACHINE\\SOFTWARE\\TestApp",
+                            "registry_value": [{"name": "Version", "value_data": "1.0.0"}],
+                        }
+                    ]
+                }
+            },
+        }
+        return data
+
 
 class HIPObjectUpdateModelFactory:
     """Factory for creating data dicts for HIPObjectUpdateModel validation testing."""
@@ -734,6 +904,27 @@ class HIPObjectResponseModelFactory:
             "host_info": {
                 "criteria": {
                     "domain": {"contains": "example.com"},
+                }
+            },
+        }
+        return data
+
+    @classmethod
+    def build_valid_custom_checks(cls, **kwargs):
+        """Return a valid data dict with custom checks."""
+        data = {
+            "id": kwargs.get("id", cls.id),
+            "name": kwargs.get("name", cls.name),
+            "description": kwargs.get("description", cls.description),
+            "folder": kwargs.get("folder", cls.folder),
+            "custom_checks": {
+                "criteria": {
+                    "registry_key": [
+                        {
+                            "name": "HKEY_LOCAL_MACHINE\\SOFTWARE\\TestApp",
+                            "registry_value": [{"name": "Version", "value_data": "1.0.0"}],
+                        }
+                    ]
                 }
             },
         }

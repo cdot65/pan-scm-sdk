@@ -579,6 +579,133 @@ class CertificateModel(BaseHIPModel):
     )
 
 
+# Custom Checks Models
+class ProcessListItemModel(BaseHIPModel):
+    """Model for process list item in custom checks."""
+
+    name: str = Field(
+        ...,
+        max_length=1023,
+        description="Process name to check",
+        examples=["notepad.exe"],
+    )
+    running: Optional[bool] = Field(
+        True,
+        description="Whether the process should be running",
+    )
+
+
+class RegistryValueModel(BaseHIPModel):
+    """Model for registry value in custom checks."""
+
+    name: str = Field(
+        ...,
+        max_length=1023,
+        description="Registry value name",
+        examples=["Version"],
+    )
+    value_data: Optional[str] = Field(
+        None,
+        max_length=1024,
+        description="Registry value data to match",
+        examples=["1.0.0"],
+    )
+    negate: Optional[bool] = Field(
+        False,
+        description="Value does not exist or match specified value data",
+    )
+
+
+class RegistryKeyModel(BaseHIPModel):
+    """Model for registry key in custom checks."""
+
+    name: str = Field(
+        ...,
+        max_length=1023,
+        description="Registry key path",
+        examples=["HKEY_LOCAL_MACHINE\\SOFTWARE\\MyApp"],
+    )
+    default_value_data: Optional[str] = Field(
+        None,
+        max_length=1024,
+        description="Registry key default value data",
+    )
+    negate: Optional[bool] = Field(
+        False,
+        description="Key does not exist or match specified value data",
+    )
+    registry_value: Optional[List[RegistryValueModel]] = Field(
+        None,
+        description="Registry values to check within this key",
+    )
+
+
+class PlistKeyModel(BaseHIPModel):
+    """Model for plist key in custom checks."""
+
+    name: str = Field(
+        ...,
+        max_length=1023,
+        description="Plist key name",
+        examples=["CFBundleVersion"],
+    )
+    value: Optional[str] = Field(
+        None,
+        max_length=1024,
+        description="Plist key value to match",
+        examples=["1.0"],
+    )
+    negate: Optional[bool] = Field(
+        False,
+        description="Value does not exist or match specified value data",
+    )
+
+
+class PlistModel(BaseHIPModel):
+    """Model for plist in custom checks (macOS)."""
+
+    name: str = Field(
+        ...,
+        max_length=1023,
+        description="Preference list file path",
+        examples=["com.apple.finder"],
+    )
+    negate: Optional[bool] = Field(
+        False,
+        description="Plist does not exist",
+    )
+    key: Optional[List[PlistKeyModel]] = Field(
+        None,
+        description="Plist keys to check",
+    )
+
+
+class CustomChecksCriteriaModel(BaseHIPModel):
+    """Model for custom checks criteria."""
+
+    process_list: Optional[List[ProcessListItemModel]] = Field(
+        None,
+        description="List of processes to check",
+    )
+    registry_key: Optional[List[RegistryKeyModel]] = Field(
+        None,
+        description="List of Windows registry keys to check",
+    )
+    plist: Optional[List[PlistModel]] = Field(
+        None,
+        description="List of macOS plists to check",
+    )
+
+
+class CustomChecksModel(BaseHIPModel):
+    """Model for custom checks section."""
+
+    criteria: CustomChecksCriteriaModel = Field(
+        ...,
+        description="Custom checks criteria",
+    )
+
+
 class HIPObjectBaseModel(BaseHIPModel):
     """Base model for HIP objects."""
 
@@ -617,6 +744,10 @@ class HIPObjectBaseModel(BaseHIPModel):
     certificate: Optional[CertificateModel] = Field(
         None,
         description="Certificate criteria",
+    )
+    custom_checks: Optional[CustomChecksModel] = Field(
+        None,
+        description="Custom checks criteria (registry keys, process list, plist)",
     )
     folder: Optional[str] = Field(
         None,
