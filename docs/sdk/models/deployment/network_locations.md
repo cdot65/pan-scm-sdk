@@ -1,6 +1,16 @@
 # Network Location Models
 
-This section covers the Pydantic models used for working with Network Locations in the Strata Cloud Manager API.
+## Overview {#Overview}
+
+The Network Location models provide a structured way to manage network location data in Palo Alto Networks' Strata Cloud Manager. Network Locations are read-only resources that represent geographic network locations for service connectivity.
+
+### Models
+
+The module provides the following Pydantic model:
+
+- `NetworkLocationModel`: Model for network location data (read-only)
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
 ## NetworkLocationModel
 
@@ -23,15 +33,15 @@ location = NetworkLocationModel(
 
 ### Attributes
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `value` | `str` | The system value of the location (e.g., 'us-west-1') |
-| `display` | `str` | The human-readable display name of the location |
-| `continent` | `Optional[str]` | The continent in which the location exists |
-| `latitude` | `Optional[float]` | The latitudinal position of the location (-90 to 90) |
-| `longitude` | `Optional[float]` | The longitudinal position of the location (-180 to 180) |
-| `region` | `Optional[str]` | The region code of the location |
-| `aggregate_region` | `Optional[str]` | The aggregate region identifier |
+| Attribute          | Type   | Required | Default | Description                                            |
+|--------------------|--------|----------|---------|--------------------------------------------------------|
+| `value`            | str    | Yes      | None    | The system value of the location (e.g., 'us-west-1')   |
+| `display`          | str    | Yes      | None    | The human-readable display name of the location        |
+| `continent`        | str    | No       | None    | The continent in which the location exists             |
+| `latitude`         | float  | No       | None    | The latitudinal position of the location (-90 to 90)   |
+| `longitude`        | float  | No       | None    | The longitudinal position of the location (-180 to 180)|
+| `region`           | str    | No       | None    | The region code of the location                        |
+| `aggregate_region` | str    | No       | None    | The aggregate region identifier                        |
 
 ### Example Data
 
@@ -54,21 +64,17 @@ Here's an example of the data structure for a network location:
 The model is used automatically when retrieving network locations using the SDK:
 
 ```python
-from scm.client import Scm
-from scm.config.deployment import NetworkLocations
+from scm.client import ScmClient
 
 # Initialize the client
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tsg-id"
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Create a NetworkLocations client instance
-network_locations = NetworkLocations(client)
-
 # List network locations - returns a list of NetworkLocationModel objects
-locations = network_locations.list(continent="North America")
+locations = client.network_location.list(continent="North America")
 
 # Access model attributes
 for location in locations:
