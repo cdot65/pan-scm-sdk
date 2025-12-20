@@ -43,13 +43,15 @@ for GlobalProtect mobile agent configurations.
 
 ## Authentication Settings Model Attributes
 
-| Attribute                               | Type               | Required     | Description                                               |
-|-----------------------------------------|--------------------|--------------|-----------------------------------------------------------|
-| `name`                                  | str                | Yes          | Name of the authentication settings (max 63 chars)        |
-| `authentication_profile`                | str                | Yes          | Name of the authentication profile to use                  |
-| `os`                                    | OperatingSystem    | No           | Target operating system (defaults to "Any")               |
-| `user_credential_or_client_cert_required` | bool             | No           | Whether user credentials or client certificate is required |
-| `folder`                                | str                | Yes          | Must be "Mobile Users" for all operations                 |
+| Attribute                               | Type               | Required     | Default | Description                                               |
+|-----------------------------------------|--------------------|--------------|---------|-----------------------------------------------------------|
+| `name`                                  | str                | Yes          | None    | Name of the authentication settings (max 63 chars)        |
+| `authentication_profile`                | str                | Yes          | None    | Name of the authentication profile to use                  |
+| `os`                                    | OperatingSystem    | No           | Any     | Target operating system                                   |
+| `user_credential_or_client_cert_required` | bool             | No           | None    | Whether user credentials or client certificate is required |
+| `folder`                                | str                | Yes*         | None    | Must be "Mobile Users" for all operations                 |
+
+\* Required for create operations, optional for update
 
 ## Exceptions
 
@@ -158,18 +160,16 @@ print(f"Retrieved authentication settings: {auth_settings_by_id.name}")
 ### Updating Authentication Settings
 
 ```python
-# Prepare update data
-update_data = {
-    "name": "windows_auth_updated",
-    "authentication_profile": "updated-profile",
-    "user_credential_or_client_cert_required": False
-}
+# Fetch existing authentication settings
+existing = client.auth_setting.fetch(name="windows_auth", folder="Mobile Users")
 
-# Get the existing settings
-auth_settings = client.auth_setting.fetch(name="windows_auth", folder="Mobile Users")
+# Modify attributes using dot notation
+existing.name = "windows_auth_updated"
+existing.authentication_profile = "updated-profile"
+existing.user_credential_or_client_cert_required = False
 
-# Update the settings
-updated_settings = client.auth_setting.update(auth_settings.id, update_data)
+# Perform update
+updated_settings = client.auth_setting.update(existing.id, existing.model_dump(exclude_unset=True))
 print(f"Updated authentication settings: {updated_settings.name}")
 ```
 
@@ -228,7 +228,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.mobile_agent import AuthSettings
 
 # Initialize client
 client = ScmClient(
@@ -237,14 +236,11 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.auth_setting.max_limit = 1000
 
-# Option 1: Create a custom AuthSettings instance with max_limit
-auth_settings_service = AuthSettings(client, max_limit=1000)
-all_settings1 = auth_settings_service.list()
-
-# Option 2: Use the unified client interface directly (uses default max_limit of 2500)
-all_settings2 = client.auth_setting.list()
+# List all authentication settings
+all_settings = client.auth_setting.list()
 ```
 
 ### Deleting Authentication Settings
@@ -381,7 +377,10 @@ the [auth_settings.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/e
 
 ## Related Models
 
+- [AuthSettingsBaseModel](../../models/mobile_agent/auth_settings_models.md#Overview)
 - [AuthSettingsCreateModel](../../models/mobile_agent/auth_settings_models.md#Overview)
 - [AuthSettingsUpdateModel](../../models/mobile_agent/auth_settings_models.md#Overview)
 - [AuthSettingsResponseModel](../../models/mobile_agent/auth_settings_models.md#Overview)
 - [AuthSettingsMoveModel](../../models/mobile_agent/auth_settings_models.md#Overview)
+- [OperatingSystem](../../models/mobile_agent/auth_settings_models.md#Overview)
+- [MovePosition](../../models/mobile_agent/auth_settings_models.md#Overview)

@@ -4,6 +4,20 @@
 
 The GlobalProtect Authentication Settings models provide a structured way to manage authentication settings for mobile users in Palo Alto Networks' Strata Cloud Manager. These models support different operating system configurations and authentication preferences. The models handle validation of inputs and outputs when interacting with the SCM API.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `AuthSettingsBaseModel`: Base model with fields common to all authentication settings operations
+- `AuthSettingsCreateModel`: Model for creating new authentication settings
+- `AuthSettingsUpdateModel`: Model for updating existing authentication settings
+- `AuthSettingsResponseModel`: Response model for authentication settings operations
+- `AuthSettingsMoveModel`: Model for moving/reordering authentication settings
+- `OperatingSystem`: Enum for available operating systems
+- `MovePosition`: Enum for move position options
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute                                 | Type              | Required | Default | Description                                                                  |
@@ -126,9 +140,16 @@ except ValueError as e:
 ### Creating Authentication Settings
 
 ```python
-# Using dictionary with the SDK
-from scm.config.mobile_agent import AuthSettings
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 auth_dict = {
     "name": "windows-auth",
     "authentication_profile": "windows-profile",
@@ -137,37 +158,35 @@ auth_dict = {
     "folder": "Mobile Users"
 }
 
-auth_settings = AuthSettings(api_client)
-response = auth_settings.create(auth_dict)
+response = client.auth_setting.create(auth_dict)
+print(f"Created authentication settings: {response.name}")
 
 # Using model directly
 from scm.models.mobile_agent import AuthSettingsCreateModel
 
 auth_obj = AuthSettingsCreateModel(
-    name="windows-auth",
-    authentication_profile="windows-profile",
-    os="Windows",
+    name="ios-auth",
+    authentication_profile="mobile-profile",
+    os="iOS",
     user_credential_or_client_cert_required=True,
     folder="Mobile Users"
 )
 
 payload = auth_obj.model_dump(exclude_unset=True)
-response = auth_settings.create(payload)
+response = client.auth_setting.create(payload)
 ```
 
 ### Creating Authentication Settings for Multiple Operating Systems
 
 ```python
-# Create settings for iOS
-ios_auth = {
-    "name": "ios-auth",
-    "authentication_profile": "mobile-cert-profile",
-    "os": "iOS",
-    "user_credential_or_client_cert_required": False,
-    "folder": "Mobile Users"
-}
+from scm.client import ScmClient
 
-response = auth_settings.create(ios_auth)
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 # Create settings for Android
 android_auth = {
@@ -178,7 +197,7 @@ android_auth = {
     "folder": "Mobile Users"
 }
 
-response = auth_settings.create(android_auth)
+response = client.auth_setting.create(android_auth)
 
 # Create default settings for any OS
 default_auth = {
@@ -189,59 +208,58 @@ default_auth = {
     "folder": "Mobile Users"
 }
 
-response = auth_settings.create(default_auth)
+response = client.auth_setting.create(default_auth)
 ```
 
 ### Updating Authentication Settings
 
 ```python
-# Using dictionary with the SDK
-update_dict = {
-    "name": "windows-auth-updated",
-    "authentication_profile": "updated-profile",
-    "user_credential_or_client_cert_required": False
-}
+from scm.client import ScmClient
 
-# First, fetch the existing object to get its ID
-existing = auth_settings.fetch("windows-auth", folder="Mobile Users")
-
-# Then update it
-response = auth_settings.update(existing.id, update_dict)
-
-# Using model directly
-from scm.models.mobile_agent import AuthSettingsUpdateModel
-
-update_obj = AuthSettingsUpdateModel(
-    name="windows-auth-updated",
-    authentication_profile="updated-profile",
-    user_credential_or_client_cert_required=False
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-payload = update_obj.model_dump(exclude_unset=True)
-response = auth_settings.update(existing.id, payload)
+# Fetch existing authentication settings
+existing = client.auth_setting.fetch(name="windows-auth", folder="Mobile Users")
+
+# Modify attributes using dot notation
+existing.name = "windows-auth-updated"
+existing.authentication_profile = "updated-profile"
+existing.user_credential_or_client_cert_required = False
+
+# Pass modified object to update()
+response = client.auth_setting.update(existing.id, existing.model_dump(exclude_unset=True))
+print(f"Updated authentication settings: {response.name}")
 ```
 
 ### Moving Authentication Settings
 
 ```python
-# Move settings to top of evaluation order
-from scm.models.mobile_agent import AuthSettingsMoveModel
+from scm.client import ScmClient
 
-move_to_top = AuthSettingsMoveModel(
-    name="windows-auth",
-    where="top"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-payload = move_to_top.model_dump()
-auth_settings.move(payload)
+# Move settings to top of evaluation order
+move_to_top = {
+    "name": "windows-auth",
+    "where": "top"
+}
+client.auth_setting.move(move_to_top)
 
 # Move settings before another setting
-move_before = AuthSettingsMoveModel(
-    name="ios-auth",
-    where="before",
-    destination="android-auth"
-)
-
-payload = move_before.model_dump()
-auth_settings.move(payload)
+move_before = {
+    "name": "ios-auth",
+    "where": "before",
+    "destination": "android-auth"
+}
+client.auth_setting.move(move_before)
 ```
