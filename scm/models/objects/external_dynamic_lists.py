@@ -14,6 +14,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class FiveMinuteRecurringModel(BaseModel):
     """Model for a recurring schedule that updates every five minutes."""
 
+    model_config = ConfigDict(extra="forbid")
+
     five_minute: dict = Field(
         ...,
         description="Indicates update every five minutes",
@@ -22,6 +24,8 @@ class FiveMinuteRecurringModel(BaseModel):
 
 class HourlyRecurringModel(BaseModel):
     """Model for a recurring schedule that updates every hour."""
+
+    model_config = ConfigDict(extra="forbid")
 
     hourly: dict = Field(
         ...,
@@ -32,8 +36,12 @@ class HourlyRecurringModel(BaseModel):
 class DailyRecurringModel(BaseModel):
     """Model for a recurring schedule that updates daily at a specified hour."""
 
+    model_config = ConfigDict(extra="forbid")
+
     class DailyModel(BaseModel):
         """Model representing the daily time specification for recurring updates."""
+
+        model_config = ConfigDict(extra="forbid")
 
         at: str = Field(
             default="00",
@@ -52,8 +60,12 @@ class DailyRecurringModel(BaseModel):
 class WeeklyRecurringModel(BaseModel):
     """Model for a recurring schedule that updates weekly on a specified day and hour."""
 
+    model_config = ConfigDict(extra="forbid")
+
     class WeeklyModel(BaseModel):
         """Model representing the day and time specification for weekly recurring updates."""
+
+        model_config = ConfigDict(extra="forbid")
 
         day_of_week: str = Field(
             ...,
@@ -77,8 +89,12 @@ class WeeklyRecurringModel(BaseModel):
 class MonthlyRecurringModel(BaseModel):
     """Model for a recurring schedule that updates monthly on a specified day and hour."""
 
+    model_config = ConfigDict(extra="forbid")
+
     class MonthlyModel(BaseModel):
         """Model representing the day and time specification for monthly recurring updates."""
+
+        model_config = ConfigDict(extra="forbid")
 
         day_of_month: int = Field(
             ...,
@@ -112,6 +128,8 @@ RecurringUnion = Union[
 class AuthModel(BaseModel):
     """Model for authentication credentials used in dynamic list sources."""
 
+    model_config = ConfigDict(extra="forbid")
+
     username: str = Field(
         ...,
         min_length=1,
@@ -127,6 +145,8 @@ class AuthModel(BaseModel):
 
 class PredefinedIpModel(BaseModel):
     """Model for a predefined IP list external dynamic list entry."""
+
+    model_config = ConfigDict(extra="forbid")
 
     exception_list: Optional[List[str]] = Field(
         None,
@@ -146,6 +166,8 @@ class PredefinedIpModel(BaseModel):
 class PredefinedUrlModel(BaseModel):
     """Model for a predefined URL list external dynamic list entry."""
 
+    model_config = ConfigDict(extra="forbid")
+
     exception_list: Optional[List[str]] = Field(
         None,
         description="Exception list entries",
@@ -163,6 +185,8 @@ class PredefinedUrlModel(BaseModel):
 
 class IpModel(BaseModel):
     """Model for an IP external dynamic list entry."""
+
+    model_config = ConfigDict(extra="forbid")
 
     exception_list: Optional[List[str]] = Field(
         None,
@@ -194,6 +218,8 @@ class IpModel(BaseModel):
 
 class DomainModel(BaseModel):
     """Model for a domain external dynamic list entry."""
+
+    model_config = ConfigDict(extra="forbid")
 
     exception_list: Optional[List[str]] = Field(
         None,
@@ -230,6 +256,8 @@ class DomainModel(BaseModel):
 class UrlTypeModel(BaseModel):
     """Model for a URL external dynamic list entry."""
 
+    model_config = ConfigDict(extra="forbid")
+
     exception_list: Optional[List[str]] = Field(
         None,
         description="Exception list entries",
@@ -260,6 +288,8 @@ class UrlTypeModel(BaseModel):
 
 class ImsiModel(BaseModel):
     """Model for an IMSI external dynamic list entry."""
+
+    model_config = ConfigDict(extra="forbid")
 
     exception_list: Optional[List[str]] = Field(
         None,
@@ -292,6 +322,8 @@ class ImsiModel(BaseModel):
 class ImeiModel(BaseModel):
     """Model for an IMEI external dynamic list entry."""
 
+    model_config = ConfigDict(extra="forbid")
+
     exception_list: Optional[List[str]] = Field(
         None,
         description="Exception list entries",
@@ -323,6 +355,8 @@ class ImeiModel(BaseModel):
 class PredefinedIpType(BaseModel):
     """Type wrapper for predefined IP external dynamic list model."""
 
+    model_config = ConfigDict(extra="forbid")
+
     predefined_ip: PredefinedIpModel = Field(
         ...,
         description="Predefined IP configuration",
@@ -331,6 +365,8 @@ class PredefinedIpType(BaseModel):
 
 class PredefinedUrlType(BaseModel):
     """Type wrapper for predefined URL external dynamic list model."""
+
+    model_config = ConfigDict(extra="forbid")
 
     predefined_url: PredefinedUrlModel = Field(
         ...,
@@ -341,6 +377,8 @@ class PredefinedUrlType(BaseModel):
 class IpType(BaseModel):
     """Type wrapper for IP external dynamic list model."""
 
+    model_config = ConfigDict(extra="forbid")
+
     ip: IpModel = Field(
         ...,
         description="IP external dynamic list configuration",
@@ -349,6 +387,8 @@ class IpType(BaseModel):
 
 class DomainType(BaseModel):
     """Type wrapper for domain external dynamic list model."""
+
+    model_config = ConfigDict(extra="forbid")
 
     domain: DomainModel = Field(
         ...,
@@ -359,6 +399,8 @@ class DomainType(BaseModel):
 class UrlType(BaseModel):
     """Type wrapper for URL external dynamic list model."""
 
+    model_config = ConfigDict(extra="forbid")
+
     url: UrlTypeModel = Field(
         ...,
         description="URL external dynamic list configuration",
@@ -368,6 +410,8 @@ class UrlType(BaseModel):
 class ImsiType(BaseModel):
     """Type wrapper for IMSI external dynamic list model."""
 
+    model_config = ConfigDict(extra="forbid")
+
     imsi: ImsiModel = Field(
         ...,
         description="IMSI external dynamic list configuration",
@@ -376,6 +420,8 @@ class ImsiType(BaseModel):
 
 class ImeiType(BaseModel):
     """Type wrapper for IMEI external dynamic list model."""
+
+    model_config = ConfigDict(extra="forbid")
 
     imei: ImeiModel = Field(
         ...,
@@ -398,6 +444,7 @@ class ExternalDynamicListsBaseModel(BaseModel):
     """Base model for external dynamic lists, containing common fields and configuration."""
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
