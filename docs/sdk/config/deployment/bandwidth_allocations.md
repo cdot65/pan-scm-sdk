@@ -30,32 +30,32 @@ The `BandwidthAllocations` class provides functionality to manage bandwidth allo
 
 ## Core Methods
 
-| Method     | Description                        | Parameters                        | Return Type                              |
-|------------|------------------------------------|-----------------------------------|------------------------------------------|
-| `create()` | Creates a new bandwidth allocation | `data: Dict[str, Any]`            | `BandwidthAllocationResponseModel`       |
-| `get()`    | Retrieves an allocation by name    | `name: str`                       | `BandwidthAllocationResponseModel`       |
-| `update()` | Updates an existing allocation     | `data: Dict[str, Any]`            | `BandwidthAllocationResponseModel`       |
-| `delete()` | Deletes an allocation              | `name: str`, `spn_name_list: str` | `None`                                   |
-| `list()`   | Lists allocations with filtering   | `**filters`                       | `List[BandwidthAllocationResponseModel]` |
-| `fetch()`  | Gets allocation by name            | `name: str`                       | `BandwidthAllocationResponseModel`       |
+| Method     | Description                        | Parameters                        | Return Type                                       |
+|------------|------------------------------------|-----------------------------------|---------------------------------------------------|
+| `create()` | Creates a new bandwidth allocation | `data: Dict[str, Any]`            | `BandwidthAllocationResponseModel`                |
+| `get()`    | Retrieves an allocation by name    | `name: str`                       | `Optional[BandwidthAllocationResponseModel]`      |
+| `update()` | Updates an existing allocation     | `data: Dict[str, Any]`            | `BandwidthAllocationResponseModel`                |
+| `delete()` | Deletes an allocation              | `name: str`, `spn_name_list: str` | `None`                                            |
+| `list()`   | Lists allocations with filtering   | `**filters`                       | `List[BandwidthAllocationResponseModel]`          |
+| `fetch()`  | Gets allocation by name            | `name: str`                       | `BandwidthAllocationResponseModel`                |
 
 ## Bandwidth Allocation Model Attributes
 
-| Attribute             | Type      | Required | Description                             |
-|-----------------------|-----------|----------|-----------------------------------------|
-| `name`                | str       | Yes      | Name of the bandwidth allocation region |
-| `allocated_bandwidth` | int       | Yes      | Bandwidth amount in Mbps                |
-| `spn_name_list`       | List[str] | Yes      | List of service provider network names  |
-| `qos`                 | QoSModel  | No       | Quality of Service settings             |
+| Attribute             | Type      | Required | Default | Description                                |
+|-----------------------|-----------|----------|---------|-------------------------------------------|
+| `name`                | str       | Yes      | None    | Name of the bandwidth allocation region (max 63 chars) |
+| `allocated_bandwidth` | float     | Yes      | None    | Bandwidth amount in Mbps (must be > 0)    |
+| `spn_name_list`       | List[str] | No       | None    | List of service provider network names    |
+| `qos`                 | QosModel  | No       | None    | Quality of Service settings               |
 
 ### QoS Model Attributes
 
-| Attribute            | Type  | Required | Description                                          |
-|----------------------|-------|----------|------------------------------------------------------|
-| `enabled`            | bool  | Yes      | Whether QoS is enabled                               |
-| `customized`         | bool  | No       | Whether custom QoS settings are used                 |
-| `profile`            | str   | No       | QoS profile name                                     |
-| `guaranteed_ratio`   | float | No       | Ratio of bandwidth guaranteed (0.0 to 1.0)           |
+| Attribute            | Type  | Required | Default | Description                                |
+|----------------------|-------|----------|---------|-------------------------------------------|
+| `enabled`            | bool  | No       | None    | Whether QoS is enabled                    |
+| `customized`         | bool  | No       | None    | Whether custom QoS settings are used      |
+| `profile`            | str   | No       | None    | QoS profile name                          |
+| `guaranteed_ratio`   | float | No       | None    | Ratio of bandwidth guaranteed             |
 
 ## Exceptions
 
@@ -261,33 +261,27 @@ print(f"Allocations with QoS and 500 Mbps: {len(combined_filters)}")
 
 ### Controlling Pagination with max_limit
 
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 200. If you have a large number of bandwidth allocations, adjusting `max_limit` can help manage retrieval performance and memory usage.
-
-**Example:**
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 200. The API itself imposes a maximum allowed value of 1000. If you set `max_limit` higher than 1000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
 
 ```python
 from scm.client import ScmClient
-from scm.config.deployment import BandwidthAllocations
 
 # Initialize client
 client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit on the bandwidth_allocation service
+client.bandwidth_allocation.max_limit = 500
 
-# Option 1: Use the unified client interface but create a custom BandwidthAllocations instance with max_limit
-bandwidth_allocation_service = BandwidthAllocations(client, max_limit=500)
-all_allocations1 = bandwidth_allocation_service.list()
+# List all allocations - auto-paginates through results
+all_allocations = client.bandwidth_allocation.list()
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (200)
-all_allocations2 = client.bandwidth_allocation.list()
-
-# Both options will auto-paginate through all available objects.
-# The allocations are fetched in chunks according to the max_limit.
+# The list() method will retrieve up to 500 objects per API call
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_allocations)} allocations")
 ```
 
 ### Deleting Bandwidth Allocations
