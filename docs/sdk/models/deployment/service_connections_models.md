@@ -8,6 +8,23 @@ Service Connection models support defining connectivity to cloud service provide
 
 The models handle validation of inputs and outputs when interacting with the SCM API, offering a robust interface for creating, updating, and managing service connections. This abstraction layer simplifies the complex task of configuring cloud connectivity, allowing for more streamlined and error-resistant network management.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `ServiceConnectionBaseModel`: Base model with fields common to all service connection operations
+- `ServiceConnectionCreateModel`: Model for creating new service connections
+- `ServiceConnectionUpdateModel`: Model for updating existing service connections
+- `ServiceConnectionResponseModel`: Response model for service connection operations
+- `BgpPeerModel`: Model for BGP peer configuration
+- `BgpProtocolModel`: Model for BGP protocol configuration
+- `ProtocolModel`: Model for protocol settings
+- `QosModel`: Model for QoS configuration
+- `OnboardingType`: Enum for onboarding types
+- `NoExportCommunity`: Enum for no export community options
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute                | Type                | Required | Default            | Description                                                          |
@@ -29,6 +46,60 @@ The models handle validation of inputs and outputs when interacting with the SCM
 | subnets                  | List[str]           | No       | None               | Subnets for the service connection                                  |
 
 \*** Only required for update and response models
+
+### BgpPeerModel Attributes
+
+| Attribute          | Type | Required | Default | Description                        |
+|--------------------|------|----------|---------|-------------------------------------|
+| local_ip_address   | str  | No       | None    | Local IPv4 address for BGP peering  |
+| local_ipv6_address | str  | No       | None    | Local IPv6 address for BGP peering  |
+| peer_ip_address    | str  | No       | None    | Peer IPv4 address for BGP peering   |
+| peer_ipv6_address  | str  | No       | None    | Peer IPv6 address for BGP peering   |
+| secret             | str  | No       | None    | BGP authentication secret           |
+
+### BgpProtocolModel Attributes
+
+| Attribute                    | Type | Required | Default | Description                    |
+|------------------------------|------|----------|---------|--------------------------------|
+| enable                       | bool | No       | None    | Enable BGP                     |
+| do_not_export_routes         | bool | No       | None    | Do not export routes option    |
+| fast_failover                | bool | No       | None    | Enable fast failover           |
+| local_ip_address             | str  | No       | None    | Local IPv4 address for BGP     |
+| originate_default_route      | bool | No       | None    | Originate default route        |
+| peer_as                      | str  | No       | None    | BGP peer AS number             |
+| peer_ip_address              | str  | No       | None    | Peer IPv4 address for BGP      |
+| secret                       | str  | No       | None    | BGP authentication secret      |
+| summarize_mobile_user_routes | bool | No       | None    | Summarize mobile user routes   |
+
+### ProtocolModel Attributes
+
+| Attribute | Type             | Required | Default | Description                |
+|-----------|------------------|----------|---------|----------------------------|
+| bgp       | BgpProtocolModel | No       | None    | BGP protocol configuration |
+
+### QosModel Attributes
+
+| Attribute   | Type | Required | Default | Description       |
+|-------------|------|----------|---------|-------------------|
+| enable      | bool | No       | None    | Enable QoS        |
+| qos_profile | str  | No       | None    | QoS profile name  |
+
+### Enum Classes
+
+#### OnboardingType
+
+| Value     | Description                      |
+|-----------|----------------------------------|
+| `classic` | Classic onboarding type          |
+
+#### NoExportCommunity
+
+| Value          | Description                              |
+|----------------|------------------------------------------|
+| `Disabled`     | No export community disabled             |
+| `Enabled-In`   | No export community enabled for inbound  |
+| `Enabled-Out`  | No export community enabled for outbound |
+| `Enabled-Both` | No export community enabled for both     |
 
 ## Exceptions
 
@@ -245,24 +316,16 @@ print(f"Created service connection with no export community: {response.name}")
 ### Updating a Service Connection
 
 ```python
-from scm.models.deployment import ServiceConnectionUpdateModel
-from uuid import UUID
+# Fetch existing service connection
+existing = client.service_connection.fetch(name="aws-service-connection")
 
-# Create update model
-update_connection = ServiceConnectionUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="aws-service-connection-updated",
-    ipsec_tunnel="aws-ipsec-tunnel",
-    region="us-east-1",
-    onboarding_type="classic",
-    subnets=["10.0.0.0/24", "192.168.1.0/24", "172.16.0.0/24"],  # Added subnet
-    source_nat=True  # Enable source NAT
-)
+# Modify attributes using dot notation
+existing.subnets = ["10.0.0.0/24", "192.168.1.0/24", "172.16.0.0/24"]
+existing.source_nat = True
 
-# Perform update
-payload = update_connection.model_dump(exclude_unset=True)
-response = client.service_connection.update(payload)
-print(f"Updated service connection subnets: {response.subnets}")
+# Pass modified object to update()
+updated = client.service_connection.update(existing)
+print(f"Updated service connection subnets: {updated.subnets}")
 ```
 
 ### Retrieving and Listing Service Connections
