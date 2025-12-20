@@ -6,11 +6,10 @@ Tests will be skipped if credentials are not configured.
 
 import os
 
-import pytest
 from dotenv import load_dotenv
+import pytest
 
 from scm.client import Scm
-
 
 # Load .env file
 load_dotenv()

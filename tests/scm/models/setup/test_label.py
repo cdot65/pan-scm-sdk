@@ -5,8 +5,8 @@
 # Standard library imports
 from uuid import UUID
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 # Local SDK imports
 from scm.models.setup.label import (

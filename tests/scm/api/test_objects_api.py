@@ -9,11 +9,11 @@ Run with: pytest -m api tests/scm/api/test_objects_api.py -v
 import pytest
 
 from scm.models.objects import (
-    AddressResponseModel,
     AddressGroupResponseModel,
-    ApplicationResponseModel,
+    AddressResponseModel,
     ApplicationFiltersResponseModel,
     ApplicationGroupResponseModel,
+    ApplicationResponseModel,
     DynamicUserGroupResponseModel,
     ExternalDynamicListsResponseModel,
     HIPObjectResponseModel,
@@ -22,8 +22,8 @@ from scm.models.objects import (
     LogForwardingProfileResponseModel,
     RegionResponseModel,
     ScheduleResponseModel,
-    ServiceResponseModel,
     ServiceGroupResponseModel,
+    ServiceResponseModel,
     SyslogServerProfileResponseModel,
     TagResponseModel,
 )
