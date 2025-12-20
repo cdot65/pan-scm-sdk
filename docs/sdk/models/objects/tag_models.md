@@ -7,6 +7,18 @@ These models support defining tags with names, colors, and comments that can be 
 in the system. Tags can be defined in folders, snippets, or devices. The models handle validation of inputs
 and outputs when interacting with the SCM API.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `TagBaseModel`: Base model with fields common to all tag operations
+- `TagCreateModel`: Model for creating new tags
+- `TagUpdateModel`: Model for updating existing tags
+- `TagResponseModel`: Response model for tag operations
+- `Colors`: Enum class defining all valid color values
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute | Type | Required | Default | Description                                                                                |
@@ -33,6 +45,54 @@ The Tag models can raise the following exceptions during validation:
     - When name pattern validation fails
     - When container field pattern validation fails
     - When field length limits are exceeded
+
+## Colors Enum
+
+The `Colors` enum defines all valid color values that can be assigned to tags:
+
+| Color Name | Value |
+|------------|-------|
+| AZURE_BLUE | "Azure Blue" |
+| BLACK | "Black" |
+| BLUE | "Blue" |
+| BLUE_GRAY | "Blue Gray" |
+| BLUE_VIOLET | "Blue Violet" |
+| BROWN | "Brown" |
+| BURNT_SIENNA | "Burnt Sienna" |
+| CERULEAN_BLUE | "Cerulean Blue" |
+| CHESTNUT | "Chestnut" |
+| COBALT_BLUE | "Cobalt Blue" |
+| COPPER | "Copper" |
+| CYAN | "Cyan" |
+| FOREST_GREEN | "Forest Green" |
+| GOLD | "Gold" |
+| GRAY | "Gray" |
+| GREEN | "Green" |
+| LAVENDER | "Lavender" |
+| LIGHT_GRAY | "Light Gray" |
+| LIGHT_GREEN | "Light Green" |
+| LIME | "Lime" |
+| MAGENTA | "Magenta" |
+| MAHOGANY | "Mahogany" |
+| MAROON | "Maroon" |
+| MEDIUM_BLUE | "Medium Blue" |
+| MEDIUM_ROSE | "Medium Rose" |
+| MEDIUM_VIOLET | "Medium Violet" |
+| MIDNIGHT_BLUE | "Midnight Blue" |
+| OLIVE | "Olive" |
+| ORANGE | "Orange" |
+| ORCHID | "Orchid" |
+| PEACH | "Peach" |
+| PURPLE | "Purple" |
+| RED | "Red" |
+| RED_VIOLET | "Red Violet" |
+| RED_ORANGE | "Red-Orange" |
+| SALMON | "Salmon" |
+| THISTLE | "Thistle" |
+| TURQUOISE_BLUE | "Turquoise Blue" |
+| VIOLET_BLUE | "Violet Blue" |
+| YELLOW | "Yellow" |
+| YELLOW_ORANGE | "Yellow-Orange" |
 
 ## Model Validators
 
@@ -92,9 +152,16 @@ except ValueError as e:
 ### Creating a Basic Tag
 
 ```python
-# Using dictionary
-from scm.config.objects import Tag
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 tag_dict = {
     "name": "production",
     "color": "Red",
@@ -102,52 +169,38 @@ tag_dict = {
     "folder": "Texas"
 }
 
-tag = Tag(api_client)
-response = tag.create(tag_dict)
-
-# Using model directly
-from scm.models.objects import TagCreateModel
-
-tag_model = TagCreateModel(
-    name="production",
-    color="Red",
-    comments="Production environment resources",
-    folder="Texas"
-)
-
-payload = tag_model.model_dump(exclude_unset=True)
-response = tag.create(payload)
+response = client.tag.create(tag_dict)
+print(f"Created tag: {response.name} (ID: {response.id})")
 ```
 
 ### Creating Tags with Different Colors
 
 ```python
 # Create multiple tags with different colors
-tag_models = [
-    TagCreateModel(
-        name="development",
-        color="Green",
-        comments="Development environment resources",
-        folder="Texas"
-    ),
-    TagCreateModel(
-        name="staging",
-        color="Yellow",
-        comments="Staging environment resources",
-        folder="Texas"
-    ),
-    TagCreateModel(
-        name="testing",
-        color="Blue",
-        comments="Testing environment resources",
-        folder="Texas"
-    )
+tags_to_create = [
+    {
+        "name": "development",
+        "color": "Green",
+        "comments": "Development environment resources",
+        "folder": "Texas"
+    },
+    {
+        "name": "staging",
+        "color": "Yellow",
+        "comments": "Staging environment resources",
+        "folder": "Texas"
+    },
+    {
+        "name": "testing",
+        "color": "Blue",
+        "comments": "Testing environment resources",
+        "folder": "Texas"
+    }
 ]
 
 # Create each tag
-for tag_model in tag_models:
-    payload = tag_model.model_dump(exclude_unset=True)
-    response = tag.create(payload)
+for tag_data in tags_to_create:
+    response = client.tag.create(tag_data)
     print(f"Created tag: {response.name} with color: {response.color}")
 ```
 
@@ -155,63 +208,51 @@ for tag_model in tag_models:
 
 ```python
 # Create a tag in a snippet instead of a folder
-snippet_tag = TagCreateModel(
-    name="shared-tag",
-    color="Orange",
-    comments="Shared across multiple folders",
-    snippet="Common"  # Using snippet instead of folder
-)
+snippet_tag_data = {
+    "name": "shared-tag",
+    "color": "Orange",
+    "comments": "Shared across multiple folders",
+    "snippet": "Common"  # Using snippet instead of folder
+}
 
-payload = snippet_tag.model_dump(exclude_unset=True)
-response = tag.create(payload)
+response = client.tag.create(snippet_tag_data)
 print(f"Created tag in snippet: {response.name}")
 ```
 
 ### Updating a Tag
 
 ```python
-# Using dictionary
-from scm.config.objects import Tag
+# Fetch existing tag
+existing = client.tag.fetch(name="production", folder="Texas")
 
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "prod-updated",
-    "color": "Blue",
-    "comments": "Updated production tag"
-}
+# Modify attributes using dot notation
+existing.color = "Blue"
+existing.comments = "Updated production tag"
 
-tag = Tag(api_client)
-response = tag.update(update_dict)
-
-# Using model directly
-from scm.models.objects import TagUpdateModel
-
-update_tag = TagUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="prod-updated",
-    color="Blue",
-    comments="Updated production tag"
-)
-
-payload = update_tag.model_dump(exclude_unset=True)
-response = tag.update(payload)
+# Pass modified object to update()
+updated = client.tag.update(existing)
+print(f"Updated tag: {updated.name} with color: {updated.color}")
 ```
 
 ### Retrieving Tags
 
 ```python
+# Fetch tag by name and container
+tag = client.tag.fetch(name="production", folder="Texas")
+print(f"Retrieved tag: {tag.name}, Color: {tag.color}")
+
 # Get tag by ID
 tag_id = "123e4567-e89b-12d3-a456-426655440000"
-tag_response = tag.get(tag_id)
+tag_response = client.tag.get(tag_id)
 print(f"Retrieved tag: {tag_response.name}")
 
-# List tags with filters
-tag_list = tag.list(folder="Texas", color="Red")
+# List tags with color filter
+tag_list = client.tag.list(folder="Texas", colors=["Red"])
 print(f"Found {len(tag_list)} red tags")
 
-# Filter tags by name pattern
-filtered_tags = tag.list(folder="Texas", name="prod")
-for t in filtered_tags:
+# List all tags in a folder
+all_tags = client.tag.list(folder="Texas")
+for t in all_tags:
     print(f"Tag: {t.name}, Color: {t.color}")
 ```
 
@@ -220,6 +261,6 @@ for t in filtered_tags:
 ```python
 # Delete tag by ID
 tag_id = "123e4567-e89b-12d3-a456-426655440000"
-tag.delete(tag_id)
+client.tag.delete(tag_id)
 print(f"Deleted tag with ID: {tag_id}")
 ```
