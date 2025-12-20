@@ -143,20 +143,15 @@ print(f"Retrieved DNS server: {dns_server_by_id.name}")
 ### Updating Internal DNS Servers
 
 ```python
-from scm.models.deployment import InternalDnsServersUpdateModel
-
 # Fetch existing DNS server
 existing_dns_server = client.internal_dns_server.fetch(name="main-dns-server")
 
-# Create update model with ID and only fields to update
-update_model = InternalDnsServersUpdateModel(
-    id=existing_dns_server.id,
-    domain_name=["example.com", "internal.example.com", "new-domain.example.com"],
-    secondary="192.168.1.12"  # Update the secondary DNS server
-)
+# Modify attributes using dot notation
+existing_dns_server.domain_name = ["example.com", "internal.example.com", "new-domain.example.com"]
+existing_dns_server.secondary = "192.168.1.12"
 
-# Perform update
-updated_dns_server = client.internal_dns_server.update(update_model)
+# Pass modified object to update()
+updated_dns_server = client.internal_dns_server.update(existing_dns_server)
 
 print(f"Updated DNS server: {updated_dns_server.name}")
 print(f"Updated domain names: {updated_dns_server.domain_name}")
@@ -215,7 +210,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.deployment import InternalDnsServers
 
 # Initialize client
 client = ScmClient(
@@ -224,18 +218,14 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.internal_dns_server.max_limit = 4000
 
-# Option 1: Create a custom InternalDnsServers instance with max_limit
-dns_servers_service = InternalDnsServers(client, max_limit=4000)
-all_dns_servers = dns_servers_service.list()
-
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
+# List all DNS servers - auto-paginates through results
 all_dns_servers = client.internal_dns_server.list()
 
-# Both options will auto-paginate through all available objects.
 # The DNS servers are fetched in chunks according to the max_limit.
+# All results are returned as a single list.
 ```
 
 ### Deleting Internal DNS Servers
@@ -361,20 +351,18 @@ def create_dns_server():
         print(f"Invalid DNS server data: {e.message}")
         return None
 
-def update_dns_server(dns_id):
+def update_dns_server(dns_name):
     """Update an existing internal DNS server."""
-    from scm.models.deployment import InternalDnsServersUpdateModel
-
     try:
-        # Create update model
-        update_model = InternalDnsServersUpdateModel(
-            id=dns_id,
-            domain_name=["example.com", "internal.example.com", "new-domain.example.com"],
-            secondary="192.168.1.12"
-        )
+        # Fetch existing DNS server
+        existing = client.internal_dns_server.fetch(name=dns_name)
 
-        # Perform update
-        updated = client.internal_dns_server.update(update_model)
+        # Modify attributes using dot notation
+        existing.domain_name = ["example.com", "internal.example.com", "new-domain.example.com"]
+        existing.secondary = "192.168.1.12"
+
+        # Pass modified object to update()
+        updated = client.internal_dns_server.update(existing)
         print(f"Updated DNS server: {updated.name}")
         print(f"Updated domain names: {updated.domain_name}")
         print(f"Updated secondary DNS: {updated.secondary}")
@@ -405,8 +393,8 @@ def main():
     if not dns_id:
         return
 
-    # Update the DNS server
-    update_dns_server(dns_id)
+    # Update the DNS server by name
+    update_dns_server("main-dns-server")
 
     # List all DNS servers
     list_dns_servers()
@@ -420,6 +408,7 @@ if __name__ == "__main__":
 
 ## Related Models
 
+- [InternalDnsServersBaseModel](../../models/deployment/internal_dns_servers_models.md#Overview)
 - [InternalDnsServersCreateModel](../../models/deployment/internal_dns_servers_models.md#Overview)
 - [InternalDnsServersUpdateModel](../../models/deployment/internal_dns_servers_models.md#Overview)
 - [InternalDnsServersResponseModel](../../models/deployment/internal_dns_servers_models.md#Overview)

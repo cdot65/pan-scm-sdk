@@ -4,6 +4,17 @@
 
 The Internal DNS Servers models provide a structured way to manage DNS server configurations in Palo Alto Networks' Strata Cloud Manager. These models handle validation of inputs and outputs when interacting with the SCM API for internal DNS server resources.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `InternalDnsServersBaseModel`: Base model with fields common to all internal DNS server operations
+- `InternalDnsServersCreateModel`: Model for creating new internal DNS servers
+- `InternalDnsServersUpdateModel`: Model for updating existing internal DNS servers
+- `InternalDnsServersResponseModel`: Response model for internal DNS server operations
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute     | Type           | Required | Default | Description                                                                       |
@@ -79,9 +90,16 @@ except ValueError as e:
 ### Creating an Internal DNS Server
 
 ```python
-# Using dictionary with DNS service
-from scm.config.deployment import InternalDnsServers
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 dns_dict = {
     "name": "main-dns-server",
     "domain_name": ["example.com", "internal.example.com"],
@@ -89,51 +107,23 @@ dns_dict = {
     "secondary": "192.168.1.11"
 }
 
-dns_servers = InternalDnsServers(api_client)
-response = dns_servers.create(dns_dict)
-
-# Using model directly
-from scm.models.deployment import InternalDnsServersCreateModel
-
-dns_model = InternalDnsServersCreateModel(
-    name="main-dns-server",
-    domain_name=["example.com", "internal.example.com"],
-    primary="192.168.1.10",
-    secondary="192.168.1.11"
-)
-
-payload = dns_model.model_dump(exclude_unset=True, by_alias=True)
-response = dns_servers.create(payload)
+response = client.internal_dns_server.create(dns_dict)
+print(f"Created DNS server: {response.name} with ID: {response.id}")
 ```
 
 ### Updating an Internal DNS Server
 
 ```python
-# Using dictionary with DNS service
-from uuid import UUID
-from scm.config.deployment import InternalDnsServers
+# Fetch existing DNS server
+existing = client.internal_dns_server.fetch(name="main-dns-server")
 
-dns_id = "123e4567-e89b-12d3-a456-426655440000"
+# Modify attributes using dot notation
+existing.domain_name = ["example.com", "updated.example.com"]
+existing.secondary = "192.168.1.12"
 
-update_dict = {
-    "id": dns_id,
-    "domain_name": ["example.com", "updated.example.com"],
-    "secondary": "192.168.1.12"
-}
-
-dns_servers = InternalDnsServers(api_client)
-response = dns_servers.update(update_dict)
-
-# Using model directly
-from scm.models.deployment import InternalDnsServersUpdateModel
-
-update_model = InternalDnsServersUpdateModel(
-    id=UUID(dns_id),
-    domain_name=["example.com", "updated.example.com"],
-    secondary="192.168.1.12"
-)
-
-response = dns_servers.update(update_model)
+# Pass modified object to update()
+updated = client.internal_dns_server.update(existing)
+print(f"Updated DNS server: {updated.name}")
 ```
 
 ### Working with Response Model
@@ -158,16 +148,11 @@ print(f"Domain Names: {dns_server.domain_name}")
 print(f"Primary DNS: {dns_server.primary}")
 print(f"Secondary DNS: {dns_server.secondary}")
 
-# Use the response model to create an update model
-from scm.models.deployment import InternalDnsServersUpdateModel
-
-update_model = InternalDnsServersUpdateModel(
-    id=dns_server.id,
-    domain_name=dns_server.domain_name + ["new-domain.example.com"]
-)
+# Modify the response model using dot notation
+dns_server.domain_name = dns_server.domain_name + ["new-domain.example.com"]
 
 # Update the DNS server
-updated = client.internal_dns_server.update(update_model)
+updated = client.internal_dns_server.update(dns_server)
 ```
 
 ### Model Serialization
