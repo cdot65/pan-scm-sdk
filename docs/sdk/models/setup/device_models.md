@@ -3,158 +3,225 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Models](#models)
-    - [DeviceLicenseModel](#devicelicensemodel)
-    - [DeviceResponseModel](#deviceresponsemodel)
-    - [DeviceListResponseModel](#devicelistresponsemodel)
-3. [Model Validation Rules](#model-validation-rules)
-4. [Usage Examples](#usage-examples)
-    - [Creating Model Instances](#creating-model-instances)
-    - [Model Validation](#model-validation)
-    - [Model Serialization](#model-serialization)
-    - [API Integration Examples](#api-integration-examples)
+2. [Model Attributes](#model-attributes)
+3. [Supporting Models](#supporting-models)
+4. [Exceptions](#exceptions)
+5. [Usage Examples](#usage-examples)
 
-## Overview
+## Overview {#Overview}
 
-This page documents the Pydantic models used for device operations in the Strata Cloud Manager SDK. These models provide structured data validation and serialization for device data returned by the API.
+The Device models provide a structured way to manage device resources in Palo Alto Networks' Strata Cloud Manager.
+These models represent firewall devices, their configuration, licensing, and status information. The models handle
+validation of inputs and outputs when interacting with the SCM API.
 
-## Models
+### Models
 
-### DeviceLicenseModel
+The module provides the following Pydantic models:
 
-Model representing a license associated with a device.
+- `DeviceBaseModel`: Base model with fields common to all device operations
+- `DeviceCreateModel`: Model for creating new devices
+- `DeviceUpdateModel`: Model for updating existing devices
+- `DeviceResponseModel`: Response model for device operations (includes many additional status fields)
+- `DeviceLicenseModel`: Model for license entries
+- `DeviceListResponseModel`: Model for paginated device list responses
 
-```python
-class DeviceLicenseModel(BaseModel):
-    name: str
-    description: Optional[str] = None
-    expiry: Optional[str] = None
-    feature: Optional[str] = None
-```
+Most models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+The `DeviceResponseModel` uses `extra="allow"` to accommodate new API fields.
+
+## Model Attributes
+
+### DeviceBaseModel
+
+| Attribute     | Type | Required | Default | Description                        |
+|---------------|------|----------|---------|------------------------------------|
+| name          | str  | No       | None    | Device name                        |
+| display_name  | str  | No       | None    | Display name for the device        |
+| serial_number | str  | No       | None    | Device serial number               |
+| family        | str  | No       | None    | Device family (e.g., 'vm')         |
+| model         | str  | No       | None    | Device model (e.g., 'PA-VM')       |
+| folder        | str  | No       | None    | Folder name containing the device  |
+| hostname      | str  | No       | None    | Device hostname                    |
+| type          | str  | No       | None    | Device type (e.g., 'on-prem')      |
+| device_only   | bool | No       | None    | True if device-only entry          |
+| is_connected  | bool | No       | None    | Connection status                  |
+| description   | str  | No       | None    | Device description                 |
+
+### DeviceCreateModel
+
+Inherits all fields from `DeviceBaseModel` without additional fields.
+
+### DeviceUpdateModel
+
+Extends `DeviceBaseModel` by adding:
+
+| Attribute | Type | Required | Default | Description                              |
+|-----------|------|----------|---------|------------------------------------------|
+| id        | str  | Yes      | None    | Unique device identifier (serial number) |
 
 ### DeviceResponseModel
 
-Model for device responses from the API.
+Extends `DeviceBaseModel` by adding many response-specific fields:
 
-```python
-class DeviceResponseModel(BaseModel):
-    id: str
-    name: str
-    serial_number: str
-    model: str
-    type: str
-    available_licenses: Optional[List[DeviceLicenseModel]] = None
-    installed_licenses: Optional[List[DeviceLicenseModel]] = None
-    # Additional fields omitted for brevity
-```
+| Attribute               | Type                     | Required | Default | Description                        |
+|-------------------------|--------------------------|----------|---------|------------------------------------|
+| id                      | str                      | Yes      | None    | Unique device identifier           |
+| connected_since         | str                      | No       | None    | ISO timestamp when connected       |
+| last_disconnect_time    | str                      | No       | None    | ISO timestamp when disconnected    |
+| last_device_update_time | str                      | No       | None    | ISO timestamp of last update       |
+| last_das_update_time    | str                      | No       | None    | ISO timestamp of last DAS update   |
+| deactivate_wait_hrs     | int                      | No       | None    | Deactivation wait hours            |
+| deactivated_by          | str                      | No       | None    | Who deactivated the device         |
+| to_be_deactivated_at    | str                      | No       | None    | Scheduled deactivation time        |
+| dev_cert_detail         | str                      | No       | None    | Device certificate detail          |
+| dev_cert_expiry_date    | str                      | No       | None    | Device certificate expiry          |
+| app_version             | str                      | No       | None    | App version                        |
+| app_release_date        | str                      | No       | None    | App release date                   |
+| av_release_date         | str                      | No       | None    | Antivirus release date             |
+| anti_virus_version      | str                      | No       | None    | Antivirus version                  |
+| threat_version          | str                      | No       | None    | Threat version                     |
+| threat_release_date     | str                      | No       | None    | Threat release date                |
+| wf_ver                  | str                      | No       | None    | WildFire version                   |
+| wf_release_date         | str                      | No       | None    | WildFire release date              |
+| iot_version             | str                      | No       | None    | IoT version                        |
+| iot_release_date        | str                      | No       | None    | IoT release date                   |
+| gp_client_verion        | str                      | No       | None    | GlobalProtect client version       |
+| gp_data_version         | str                      | No       | None    | GlobalProtect data version         |
+| log_db_version          | str                      | No       | None    | Log DB version                     |
+| software_version        | str                      | No       | None    | Software version                   |
+| uptime                  | str                      | No       | None    | Device uptime                      |
+| mac_address             | str                      | No       | None    | MAC address                        |
+| ip_address              | str                      | No       | None    | IPv4 address                       |
+| ipV6_address            | str                      | No       | None    | IPv6 address                       |
+| url_db_ver              | str                      | No       | None    | URL DB version                     |
+| url_db_type             | str                      | No       | None    | URL DB type                        |
+| license_match           | bool                     | No       | None    | License match status               |
+| available_licenses      | List[DeviceLicenseModel] | No       | None    | List of available licenses         |
+| installed_licenses      | List[DeviceLicenseModel] | No       | None    | List of installed licenses         |
+| ha_state                | str                      | No       | None    | HA state                           |
+| ha_peer_state           | str                      | No       | None    | HA peer state                      |
+| ha_peer_serial          | str                      | No       | None    | HA peer serial number              |
+| vm_state                | str                      | No       | None    | VM state                           |
+
+## Supporting Models
+
+### DeviceLicenseModel
+
+| Attribute | Type | Required | Default | Description                              |
+|-----------|------|----------|---------|------------------------------------------|
+| feature   | str  | Yes      | None    | Feature name for the license             |
+| expires   | str  | Yes      | None    | Expiration date (YYYY-MM-DD)             |
+| issued    | str  | Yes      | None    | Issued date (YYYY-MM-DD)                 |
+| expired   | str  | No       | None    | Whether the license is expired (yes/no)  |
+| authcode  | str  | No       | None    | Authorization code for the license       |
 
 ### DeviceListResponseModel
 
-Model for a paginated list of devices from the API.
+| Attribute | Type                     | Required | Default | Description                        |
+|-----------|--------------------------|----------|---------|------------------------------------|
+| data      | List[DeviceResponseModel] | Yes     | None    | List of device objects             |
+| limit     | int                      | Yes      | None    | Max number of devices returned     |
+| offset    | int                      | Yes      | None    | Offset for pagination              |
+| total     | int                      | Yes      | None    | Total number of devices available  |
 
-```python
-class DeviceListResponseModel(BaseModel):
-    items: List[DeviceResponseModel]
-    count: int
-    total: int
-    next_cursor: Optional[str] = None
-```
+## Exceptions
 
-## Model Validation Rules
+The Device models can raise the following exceptions during validation:
 
-| Field              | Validation Rules                                        |
-|--------------------|--------------------------------------------------------|
-| `id`               | String, typically matches the serial_number             |
-| `name`             | Non-empty string                                        |
-| `serial_number`    | String, device unique identifier                        |
-| `model`            | String, device model identifier (e.g., "PA-VM")         |
-| `type`             | String, device type (e.g., "vm", "firewall", "panorama")|
-| `available_licenses`| Optional list of DeviceLicenseModel objects            |
-| `installed_licenses`| Optional list of DeviceLicenseModel objects            |
-
-The DeviceLicenseModel includes validations for:
-- `name`: Required string field for license name
-- `description`: Optional string description
-- `expiry`: Optional ISO8601 timestamp string
-- `feature`: Optional string indicating the feature covered by the license
+- **ValueError**: Raised when field validation fails
+- **ValidationError**: Raised by Pydantic when model validation fails
 
 ## Usage Examples
 
-### Creating Model Instances
+### Listing Devices
 
 ```python
-from scm.models.setup.device import DeviceResponseModel, DeviceLicenseModel
+from scm.client import ScmClient
 
-# Create a license model
-license_model = DeviceLicenseModel(
-    name="VM-300",
-    description="VM-Series Firewall License",
-    expiry="2025-12-31T23:59:59Z",
-    feature="Firewall"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Create a device model
-device = DeviceResponseModel(
-    id="001122334455",
-    name="PA-VM-1",
-    serial_number="001122334455",
-    model="PA-VM",
-    type="vm",
-    available_licenses=[],
-    installed_licenses=[license_model]
+# List all devices
+devices = client.device.list()
+
+for device in devices:
+    print(f"Device: {device.name}")
+    print(f"Model: {device.model}")
+    print(f"Serial: {device.serial_number}")
+    print(f"Software Version: {device.software_version}")
+```
+
+### Getting a Device by ID
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
+
+# Get device by ID
+device = client.device.get("001122334455")
+print(f"Device: {device.name}")
+print(f"IP Address: {device.ip_address}")
+print(f"HA State: {device.ha_state}")
 ```
 
-### Model Validation
+### Fetching a Device by Name
 
 ```python
-from pydantic_core import ValidationError
-from scm.models.setup.device import DeviceResponseModel
+from scm.client import ScmClient
 
-try:
-    # Missing required fields
-    DeviceResponseModel(id="001122334455")
-except ValidationError as e:
-    print("Validation error:", e)
-```
-
-### Model Serialization
-
-```python
-device = DeviceResponseModel(
-    id="001122334455",
-    name="PA-VM-1",
-    serial_number="001122334455",
-    model="PA-VM",
-    type="vm"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
-# Convert to dict
-device_dict = device.model_dump()
-# Convert to JSON
-device_json = device.model_dump_json()
-```
 
-### API Integration Examples
-
-```python
-from scm.config.setup.device import Device
-from scm.client import Scm
-
-# Initialize client and service
-client = Scm(api_key="your-api-key")
-devices = Device(client)
-
-# List devices
-device_list = devices.list(type="vm")
-
-# Work with device data
-for device in device_list:
-    print(f"Device: {device.name} ({device.model})")
+# Fetch device by name
+device = client.device.fetch(name="PA-VM-1")
+if device:
+    print(f"Found device: {device.name}")
+    print(f"Connected: {device.is_connected}")
 
     # Access license information
     if device.installed_licenses:
-        for license in device.installed_licenses:
-            print(f"  License: {license.name}")
-            if license.expiry:
-                print(f"  Expires: {license.expiry}")
+        for lic in device.installed_licenses:
+            print(f"License: {lic.feature}")
+            print(f"Expires: {lic.expires}")
+            print(f"Issued: {lic.issued}")
+else:
+    print("Device not found")
+```
+
+### Filtering Devices
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Filter by type (server-side)
+vm_devices = client.device.list(type="vm")
+
+# Filter by model (server-side)
+pa_vm_devices = client.device.list(model="PA-VM")
+
+# Filter device-only entries (client-side)
+device_only = client.device.list(device_only=True)
+
+for device in vm_devices:
+    print(f"VM Device: {device.name} - {device.model}")
 ```
