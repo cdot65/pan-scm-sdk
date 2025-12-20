@@ -5,7 +5,7 @@ Contains Pydantic models for representing application objects and related data.
 
 # scm/models/objects/application.py
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -185,7 +185,17 @@ class ApplicationResponseModel(ApplicationBaseModel):
     Updates the description field to have a length of 4096 characters. tsk tsk.
     Updates the subcategory field to be optional to account for `unknown-tcp` app-id. tsk tsk.
     Updates the technology field to be optional to account for `unknown-tcp` app-id. tsk tsk.
+
+    Note: Uses extra="allow" because the API returns many undocumented fields
+    (compliance flags, SaaS attributes, etc.) that are not in the OpenAPI spec.
     """
+
+    model_config = ConfigDict(
+        extra="allow",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
 
     id: Optional[UUID] = Field(
         None,
@@ -211,4 +221,80 @@ class ApplicationResponseModel(ApplicationBaseModel):
         max_length=50,
         description="The underlying technology utilized by the application.",
         examples=["peer-to-peer"],
+    )
+    functional_type: Optional[str] = Field(
+        None,
+        description="Functional type of the application.",
+        examples=["base"],
+    )
+    product_name: Optional[str] = Field(
+        None,
+        description="Product name of the application.",
+    )
+    container: Optional[str] = Field(
+        None,
+        description="Container application name.",
+    )
+    depends_on: Optional[List[str]] = Field(
+        None,
+        description="Applications this application depends on.",
+    )
+    base_appid: Optional[str] = Field(
+        None,
+        description="Base application ID.",
+    )
+    can_disable: Optional[bool] = Field(
+        None,
+        description="Whether the application can be disabled.",
+    )
+    # SaaS-related fields
+    is_saas: Optional[bool] = Field(
+        None,
+        description="Whether the application is a SaaS application.",
+    )
+    is_data_breaches: Optional[bool] = Field(
+        None,
+        description="Whether the application has data breach risks.",
+    )
+    is_ip_based_restrictions: Optional[bool] = Field(
+        None,
+        description="Whether the application has IP-based restrictions.",
+    )
+    is_poor_financial_viability: Optional[bool] = Field(
+        None,
+        description="Whether the application has poor financial viability.",
+    )
+    is_poor_terms_of_service: Optional[bool] = Field(
+        None,
+        description="Whether the application has poor terms of service.",
+    )
+    # Override tag to accept list or dict format (API returns dict with 'member' key)
+    tag: Optional[Union[List[TagName], Dict[str, Any]]] = Field(
+        None,
+        description="Tags associated with the application.",
+    )
+    implicit_use_applications: Optional[List[str]] = Field(
+        None,
+        description="List of applications implicitly used by this application.",
+    )
+    functional_appids: Optional[List[str]] = Field(
+        None,
+        description="List of functional application IDs.",
+    )
+    # Compliance-related fields
+    is_hipaa: Optional[bool] = Field(
+        None,
+        description="Whether the application is HIPAA compliant.",
+    )
+    is_soc1: Optional[bool] = Field(
+        None,
+        description="Whether the application is SOC1 compliant.",
+    )
+    is_soc2: Optional[bool] = Field(
+        None,
+        description="Whether the application is SOC2 compliant.",
+    )
+    new_appid: Optional[str] = Field(
+        None,
+        description="Whether this is a new application ID.",
     )

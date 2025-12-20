@@ -286,6 +286,11 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
         description="Which rulebase the rule belongs to (pre or post)",
     )
 
+    policy_type: Optional[str] = Field(
+        None,
+        description="The policy type (e.g., 'Security')",
+    )
+
     # Override the device field to accept None, a string, or an empty dict
     device: Optional[Union[str, Dict]] = Field(
         None,

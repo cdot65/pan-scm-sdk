@@ -1,4 +1,4 @@
-.PHONY: setup lint format test clean install-hooks docs docs-serve docs-stop isort flake8 mypy quality quality-basic lint-format test-cov update-hooks pre-commit-all
+.PHONY: setup lint format test clean install-hooks docs docs-serve docs-stop isort flake8 mypy quality quality-basic lint-format test-cov update-hooks pre-commit-all test-api test-local test-cov-local test-api-local test-file quality-local
 
 # Default goal
 .DEFAULT_GOAL := help
@@ -55,6 +55,37 @@ test:
 test-cov:
 	$(DC_RUN) poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing tests/
 
+# Run live API tests (requires .env with credentials)
+test-api:
+	$(DC_RUN) poetry run pytest -m api tests/scm/api/ -v
+
+# ============== Local Commands (no Docker) ==============
+
+# Run tests locally
+test-local:
+	poetry run pytest
+
+# Run tests with coverage locally
+test-cov-local:
+	poetry run pytest -m "not api" --cov=scm --cov-report=xml --cov-report=term-missing tests/
+
+# Run live API tests locally (requires .env with credentials)
+test-api-local:
+	poetry run pytest -m api tests/scm/api/ -v
+
+# Run a specific test file locally (usage: make test-file FILE=tests/path/to/test.py)
+test-file:
+	poetry run pytest $(FILE) -v
+
+# Run quality checks locally
+quality-local:
+	poetry run isort scm tests
+	poetry run ruff check --fix scm tests
+	poetry run ruff check --select D --fix scm tests
+	poetry run ruff check scm tests
+	poetry run flake8 scm tests
+	@echo "Local quality checks complete!"
+
 # Clean caches (runs locally)
 clean:
 	@echo "Cleaning cache directories..."
@@ -94,22 +125,35 @@ docs-stop:
 
 help:
 	@echo "Available commands:"
-	@echo "  setup           - Install dependencies and pre-commit hooks (in Docker)"
-	@echo "  isort           - Sort imports with isort (in Docker)"
-	@echo "  lint            - Run linting checks with ruff (in Docker)"
-	@echo "  flake8          - Run linting checks with flake8 (in Docker)"
-	@echo "  mypy            - Run type checking with mypy (in Docker)"
-	@echo "  format          - Format code with ruff (in Docker)"
-	@echo "  fix             - Auto-fix linting issues with ruff (in Docker)"
-	@echo "  quality         - Run all code quality checks (in Docker)"
-	@echo "  quality-basic   - Run basic code quality checks (in Docker)"
-	@echo "  lint-format     - Run both linting and formatting (in Docker)"
-	@echo "  test            - Run tests (in Docker)"
-	@echo "  test-cov        - Run tests with coverage (in Docker)"
-	@echo "  clean           - Clean cache directories (local)"
-	@echo "  docs            - Build documentation site (in Docker)"
-	@echo "  docs-serve      - Serve documentation locally on http://localhost:8000/pan-scm-sdk/ (using dedicated docs service)"
+	@echo ""
+	@echo "Docker commands:"
+	@echo "  setup           - Install dependencies and pre-commit hooks"
+	@echo "  test            - Run all tests (excludes live API tests)"
+	@echo "  test-cov        - Run tests with coverage report"
+	@echo "  test-api        - Run live API tests (requires .env credentials)"
+	@echo "  quality         - Run all code quality checks"
+	@echo "  quality-basic   - Run basic code quality checks (skip mypy)"
+	@echo "  lint            - Run linting checks with ruff"
+	@echo "  flake8          - Run linting checks with flake8"
+	@echo "  mypy            - Run type checking with mypy"
+	@echo "  isort           - Sort imports with isort"
+	@echo "  format          - Format code with ruff"
+	@echo "  fix             - Auto-fix linting issues with ruff"
+	@echo ""
+	@echo "Local commands (no Docker):"
+	@echo "  test-local      - Run all tests"
+	@echo "  test-cov-local  - Run tests with coverage report"
+	@echo "  test-api-local  - Run live API tests (requires .env credentials)"
+	@echo "  test-file       - Run specific test (usage: make test-file FILE=path/to/test.py)"
+	@echo "  quality-local   - Run all code quality checks"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  docs            - Build documentation site"
+	@echo "  docs-serve      - Serve docs at http://localhost:8000/pan-scm-sdk/"
 	@echo "  docs-stop       - Stop the documentation server"
-	@echo "  install-hooks   - Install pre-commit hooks (in Docker)"
-	@echo "  update-hooks    - Update pre-commit hooks to the latest versions (in Docker)"
-	@echo "  pre-commit-all  - Run pre-commit on all files (in Docker)"
+	@echo ""
+	@echo "Maintenance:"
+	@echo "  clean           - Clean cache directories"
+	@echo "  install-hooks   - Install pre-commit hooks"
+	@echo "  update-hooks    - Update pre-commit hooks"
+	@echo "  pre-commit-all  - Run pre-commit on all files"
