@@ -45,26 +45,38 @@ that control traffic flow between zones, applications, and users.
 
 ## Security Rule Model Attributes
 
-| Attribute         | Type                | Required | Description                                 |
-|-------------------|---------------------|----------|---------------------------------------------|
-| `name`            | str                 | Yes      | Name of rule (max 63 chars)                 |
-| `id`              | UUID                | Yes*     | Unique identifier (*response only)          |
-| `action`          | SecurityRuleAction  | Yes      | Rule action (allow, deny, etc.)             |
-| `from_`           | List[str]           | Yes      | Source zones                                |
-| `to_`             | List[str]           | Yes      | Destination zones                           |
-| `source`          | List[str]           | Yes      | Source addresses                            |
-| `destination`     | List[str]           | Yes      | Destination addresses                       |
-| `application`     | List[str]           | Yes      | Allowed applications                        |
-| `service`         | List[str]           | Yes      | Allowed services                            |
-| `category`        | List[str]           | Yes      | URL categories                              |
-| `profile_setting` | SecurityRuleProfile | No       | Security profile settings                   |
-| `log_setting`     | str                 | No       | Log forwarding profile                      |
-| `description`     | str                 | No       | Rule description                            |
-| `disabled`        | bool                | No       | Rule enabled/disabled status                |
-| `tag`             | List[str]           | No       | Associated tags                             |
-| `folder`          | str                 | Yes**    | Folder location (**one container required)  |
-| `snippet`         | str                 | Yes**    | Snippet location (**one container required) |
-| `device`          | str                 | Yes**    | Device location (**one container required)  |
+| Attribute            | Type                        | Required | Default      | Description                                              |
+|----------------------|-----------------------------|----------|--------------|----------------------------------------------------------|
+| `name`               | str                         | Yes      | None         | Name of rule. Pattern: `^[a-zA-Z0-9_ \.-]+$`             |
+| `id`                 | UUID                        | Yes*     | None         | Unique identifier (*response/update only)                |
+| `disabled`           | bool                        | No       | False        | Whether the rule is disabled                             |
+| `description`        | str                         | No       | None         | Rule description                                         |
+| `tag`                | List[str]                   | No       | []           | Associated tags                                          |
+| `from_`              | List[str]                   | No       | ["any"]      | Source zones                                             |
+| `source`             | List[str]                   | No       | ["any"]      | Source addresses                                         |
+| `negate_source`      | bool                        | No       | False        | Negate source addresses                                  |
+| `source_user`        | List[str]                   | No       | ["any"]      | Source users/groups                                      |
+| `source_hip`         | List[str]                   | No       | ["any"]      | Source Host Integrity Profiles                           |
+| `to_`                | List[str]                   | No       | ["any"]      | Destination zones                                        |
+| `destination`        | List[str]                   | No       | ["any"]      | Destination addresses                                    |
+| `negate_destination` | bool                        | No       | False        | Negate destination addresses                             |
+| `destination_hip`    | List[str]                   | No       | ["any"]      | Destination Host Integrity Profiles                      |
+| `application`        | List[str]                   | No       | ["any"]      | Allowed applications                                     |
+| `service`            | List[str]                   | No       | ["any"]      | Allowed services                                         |
+| `category`           | List[str]                   | No       | ["any"]      | URL categories                                           |
+| `action`             | SecurityRuleAction          | No       | allow        | Rule action (allow/deny/drop/reset-client/server/both)   |
+| `profile_setting`    | SecurityRuleProfileSetting  | No       | None         | Security profile settings                                |
+| `log_setting`        | str                         | No       | None         | Log forwarding profile                                   |
+| `schedule`           | str                         | No       | None         | Schedule profile                                         |
+| `log_start`          | bool                        | No       | None         | Log at session start                                     |
+| `log_end`            | bool                        | No       | None         | Log at session end                                       |
+| `rulebase`           | SecurityRuleRulebase        | No       | None         | Which rulebase (pre/post)                                |
+| `folder`             | str                         | No**     | None         | Folder location. Max 64 chars                            |
+| `snippet`            | str                         | No**     | None         | Snippet location. Max 64 chars                           |
+| `device`             | str                         | No**     | None         | Device location. Max 64 chars                            |
+
+\* Only required for response and update models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
 
 ## Exceptions
 
@@ -103,7 +115,7 @@ rules = client.security_rule
 
 ```python
 from scm.client import Scm
-from scm.config.security_services import SecurityRule
+from scm.config.security import SecurityRule
 
 # Initialize client
 client = Scm(
@@ -321,7 +333,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.security_services import SecurityRule
 
 # Initialize client
 client = ScmClient(
@@ -330,18 +341,13 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.security_rule.max_limit = 4000
 
-# Option 1: Use the unified client interface but create a custom SecurityRule instance with max_limit
-security_rule_service = SecurityRule(client, max_limit=4321)
-all_rules1 = security_rule_service.list(folder='Texas', rulebase='pre')
+# List all rules - auto-paginates through results
+all_rules = client.security_rule.list(folder='Texas', rulebase='pre')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
-all_rules2 = client.security_rule.list(folder='Texas', rulebase='pre')
-
-# Both options will auto-paginate through all available objects.
-# The rules are fetched in chunks according to the max_limit.
+# The rules are fetched in chunks according to the max_limit setting.
 ```
 
 ### Moving Security Rules
@@ -526,7 +532,12 @@ the [security_rule.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/e
 
 ## Related Models
 
+- [SecurityRuleBaseModel](../../models/security_services/security_rule_models.md#Overview)
 - [SecurityRuleCreateModel](../../models/security_services/security_rule_models.md#Overview)
 - [SecurityRuleUpdateModel](../../models/security_services/security_rule_models.md#Overview)
 - [SecurityRuleResponseModel](../../models/security_services/security_rule_models.md#Overview)
 - [SecurityRuleMoveModel](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleProfileSetting](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleAction](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleRulebase](../../models/security_services/security_rule_models.md#Overview)
+- [SecurityRuleMoveDestination](../../models/security_services/security_rule_models.md#Overview)
