@@ -1,8 +1,10 @@
 # Log Forwarding Profile Models
 
+## Overview {#Overview}
+
 Log Forwarding Profiles allow you to configure how logs are handled and forwarded to external systems in Palo Alto Networks' Strata Cloud Manager. These models define the structure for creating, updating, and retrieving log forwarding profile configurations.
 
-## Models Overview
+### Models
 
 The module provides the following Pydantic models:
 
@@ -12,6 +14,8 @@ The module provides the following Pydantic models:
 - `LogForwardingProfileUpdateModel`: Model for updating existing log forwarding profiles
 - `LogForwardingProfileResponseModel`: Response model for log forwarding profile operations
 
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## MatchListItem
 
 The `MatchListItem` represents a match profile configuration within a log forwarding profile. It defines the criteria for matching specific log types and where to send the matching logs.
@@ -20,7 +24,7 @@ The `MatchListItem` represents a match profile configuration within a log forwar
 |-----------|------|----------|---------|-------------|
 | name | str | Yes | - | Name of the match profile (max length: 63) |
 | action_desc | Optional[str] | No | None | Match profile description (max length: 255) |
-| log_type | Literal["traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption"] | Yes | - | Log type for matching |
+| log_type | Literal["traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption", "dns-security"] | Yes | - | Log type for matching |
 | filter | Optional[str] | No | None | Filter match criteria (max length: 65535) |
 | send_http | Optional[List[str]] | No | None | A list of HTTP server profiles |
 | send_syslog | Optional[List[str]] | No | None | A list of syslog server profiles |
@@ -119,89 +123,89 @@ def validate_id_for_non_predefined(self) -> "LogForwardingProfileResponseModel":
 ### Creating a Log Forwarding Profile
 
 ```python
-from scm.models.objects.log_forwarding_profile import (
-    LogForwardingProfileCreateModel,
-    MatchListItem
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Define a match list item for traffic logs
-traffic_match = MatchListItem(
-    name="traffic-logs",
-    log_type="traffic",
-    filter="addr.src in 192.168.0.0/24",
-    send_http=["http-profile-1"]
-)
+# Using dictionary
+profile = {
+    "name": "my-log-profile",
+    "description": "Log forwarding profile for traffic and threat logs",
+    "match_list": [
+        {
+            "name": "traffic-logs",
+            "log_type": "traffic",
+            "filter": "addr.src in 192.168.0.0/24",
+            "send_http": ["http-profile-1"]
+        },
+        {
+            "name": "threat-logs",
+            "log_type": "threat",
+            "filter": "severity eq critical",
+            "send_syslog": ["syslog-profile-1"]
+        }
+    ],
+    "folder": "Shared"
+}
 
-# Define a match list item for threat logs
-threat_match = MatchListItem(
-    name="threat-logs",
-    log_type="threat",
-    filter="severity eq critical",
-    send_syslog=["syslog-profile-1"]
-)
-
-# Create a log forwarding profile in a folder
-profile = LogForwardingProfileCreateModel(
-    name="my-log-profile",
-    description="Log forwarding profile for traffic and threat logs",
-    match_list=[traffic_match, threat_match],
-    folder="Shared"
-)
+response = client.log_forwarding_profile.create(profile)
 ```
 
 ### Creating a Log Forwarding Profile in a Snippet
 
 ```python
-from scm.models.objects.log_forwarding_profile import (
-    LogForwardingProfileCreateModel,
-    MatchListItem
-)
+# Using dictionary
+profile = {
+    "name": "url-log-profile",
+    "description": "Log forwarding profile for URL logs",
+    "match_list": [
+        {
+            "name": "url-logs",
+            "log_type": "url",
+            "filter": "category eq social-networking",
+            "send_http": ["http-profile-2"]
+        }
+    ],
+    "snippet": "My Snippet"
+}
 
-# Define a match list item for URL logs
-url_match = MatchListItem(
-    name="url-logs",
-    log_type="url",
-    filter="category eq social-networking",
-    send_http=["http-profile-2"]
-)
-
-# Create a log forwarding profile in a snippet
-profile = LogForwardingProfileCreateModel(
-    name="url-log-profile",
-    description="Log forwarding profile for URL logs",
-    match_list=[url_match],
-    snippet="My Snippet"
-)
+response = client.log_forwarding_profile.create(profile)
 ```
 
 ### Updating an Existing Log Forwarding Profile
 
 ```python
-from uuid import UUID
-from scm.models.objects.log_forwarding_profile import (
-    LogForwardingProfileUpdateModel,
-    MatchListItem
+# Fetch existing log forwarding profile
+existing = client.log_forwarding_profile.fetch(
+    name="my-log-profile",
+    folder="Shared"
 )
 
-# Define updated match list items
-updated_match = MatchListItem(
-    name="updated-match",
-    log_type="wildfire",
-    filter="file_type eq pdf",
-    send_http=["updated-http-profile"],
-    send_syslog=["updated-syslog-profile"],
-    send_to_panorama=True,
-    quarantine=True
-)
+# Modify attributes using dot notation
+existing.description = "Updated log forwarding profile"
+existing.enhanced_application_logging = True
 
-# Update an existing log forwarding profile
-updated_profile = LogForwardingProfileUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="updated-profile",
-    description="Updated log forwarding profile",
-    match_list=[updated_match],
-    enhanced_application_logging=True
-)
+# Add a new match item
+if existing.match_list is None:
+    existing.match_list = []
+
+existing.match_list.append({
+    "name": "updated-match",
+    "log_type": "wildfire",
+    "filter": "file_type eq pdf",
+    "send_http": ["updated-http-profile"],
+    "send_syslog": ["updated-syslog-profile"],
+    "send_to_panorama": True,
+    "quarantine": True
+})
+
+# Pass modified object to update()
+updated = client.log_forwarding_profile.update(existing)
 ```
 
 ## Best Practices

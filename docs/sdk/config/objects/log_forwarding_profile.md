@@ -1,6 +1,23 @@
 # Log Forwarding Profile Configuration Object
 
-[TOC]
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Log Forwarding Profile Attributes](#log-forwarding-profile-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating a Log Forwarding Profile](#creating-a-log-forwarding-profile)
+    - [Retrieving a Log Forwarding Profile](#retrieving-a-log-forwarding-profile)
+    - [Updating a Log Forwarding Profile](#updating-a-log-forwarding-profile)
+    - [Listing Log Forwarding Profiles](#listing-log-forwarding-profiles)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
+    - [Deleting a Log Forwarding Profile](#deleting-a-log-forwarding-profile)
+7. [Error Handling](#error-handling)
+8. [Best Practices](#best-practices)
+9. [Example Script](#example-script)
+10. [Related Models](#related-models)
 
 ## Overview
 
@@ -47,28 +64,31 @@ The `LogForwardingProfile` class inherits from the `BaseObject` class and provid
 
 ## Log Forwarding Profile Attributes
 
-| Attribute     | Type                | Required      | Description                                                 |
-|---------------|---------------------|---------------|-------------------------------------------------------------|
-| `name`        | str                 | Yes           | The name of the log forwarding profile (max length: 63)     |
-| `description` | str                 | No            | Description of the log forwarding profile (max length: 255) |
-| `match_list`  | List[MatchListItem] | No            | List of match profile configurations                        |
-| `folder`      | str                 | No*           | The folder in which the resource is defined                 |
-| `snippet`     | str                 | No*           | The snippet in which the resource is defined                |
-| `device`      | str                 | No*           | The device in which the resource is defined                 |
-| `id`          | UUID                | Response only | The UUID of the log forwarding profile (response only)      |
+| Attribute                      | Type                | Required      | Default | Description                                                 |
+|--------------------------------|---------------------|---------------|---------|-------------------------------------------------------------|
+| `name`                         | str                 | Yes           | None    | The name of the log forwarding profile (max length: 63)     |
+| `description`                  | str                 | No            | None    | Description of the log forwarding profile (max length: 255) |
+| `match_list`                   | List[MatchListItem] | No            | None    | List of match profile configurations                        |
+| `enhanced_application_logging` | bool                | No            | None    | Flag for enhanced application logging                       |
+| `folder`                       | str                 | No*           | None    | The folder in which the resource is defined                 |
+| `snippet`                      | str                 | No*           | None    | The snippet in which the resource is defined                |
+| `device`                       | str                 | No*           | None    | The device in which the resource is defined                 |
+| `id`                           | UUID                | Response only | None    | The UUID of the log forwarding profile (response only)      |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ### MatchListItem Attributes
 
-| Attribute     | Type                                                                                    | Required | Description                                 |
-|---------------|-----------------------------------------------------------------------------------------|----------|---------------------------------------------|
-| `name`        | str                                                                                     | Yes      | Name of the match profile (max length: 63)  |
-| `action_desc` | str                                                                                     | No       | Match profile description (max length: 255) |
-| `log_type`    | Literal["traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption"] | Yes      | Log type for matching                       |
-| `filter`      | str                                                                                     | No       | Filter match criteria (max length: 65535)   |
-| `send_http`   | List[str]                                                                               | No       | A list of HTTP server profiles              |
-| `send_syslog` | List[str]                                                                               | No       | A list of syslog server profiles            |
+| Attribute          | Type                                                                                                  | Required | Default | Description                                 |
+|--------------------|-------------------------------------------------------------------------------------------------------|----------|---------|---------------------------------------------|
+| `name`             | str                                                                                                   | Yes      | None    | Name of the match profile (max length: 63)  |
+| `action_desc`      | str                                                                                                   | No       | None    | Match profile description (max length: 255) |
+| `log_type`         | Literal["traffic", "threat", "wildfire", "url", "data", "tunnel", "auth", "decryption", "dns-security"] | Yes      | None    | Log type for matching                       |
+| `filter`           | str                                                                                                   | No       | None    | Filter match criteria (max length: 65535)   |
+| `send_http`        | List[str]                                                                                             | No       | None    | A list of HTTP server profiles              |
+| `send_syslog`      | List[str]                                                                                             | No       | None    | A list of syslog server profiles            |
+| `send_to_panorama` | bool                                                                                                  | No       | None    | Flag to send logs to Panorama               |
+| `quarantine`       | bool                                                                                                  | No       | False   | Flag to quarantine matching logs            |
 
 ## Exceptions
 
@@ -81,26 +101,34 @@ The `LogForwardingProfile` class inherits from the `BaseObject` class and provid
 ## Basic Configuration
 
 ```python
-# Import the client
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the log_forwarding_profile module directly through the client
+# client.log_forwarding_profile is automatically initialized for you
+```
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
+from scm.config.objects import LogForwardingProfile
 
-# Create API client instance
+# Initialize client
 client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Access log forwarding profiles directly through the client
-# No need to initialize a separate LogForwardingProfile object
-
-# You can customize max_limit for log forwarding profiles when initializing the client
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
-    log_forwarding_profile_max_limit=1000  # Default max_limit is 2500 (1-5000)
-)
+# Initialize LogForwardingProfile object
+log_forwarding_profiles = LogForwardingProfile(client)
 ```
 
 ## Usage Examples
@@ -178,34 +206,29 @@ profile_by_name = client.log_forwarding_profile.fetch(
 ### Updating a Log Forwarding Profile
 
 ```python
-from scm.models.objects import LogForwardingProfileUpdateModel, MatchListItem
-
-# First, get the current profile
-existing_profile = client.log_forwarding_profile.get("123e4567-e89b-12d3-a456-426655440000")
-
-# Create an update model with modified fields
-update_data = LogForwardingProfileUpdateModel(
-    id=existing_profile.id,
-    name=existing_profile.name,
-    description="Updated description for log forwarding profile",
-    match_list=[
-        MatchListItem(
-            name="updated-match",
-            log_type="traffic",
-            filter="addr.src in 10.0.0.0/8",
-            send_http=["updated-http-profile"]
-        ),
-        MatchListItem(
-            name="new-match",
-            log_type="url",
-            filter="category eq social-networking",
-            send_syslog=["url-syslog-profile"]
-        )
-    ]
+# Fetch existing log forwarding profile
+existing_profile = client.log_forwarding_profile.fetch(
+    name="security-logs-profile",
+    folder="Shared"
 )
 
-# Update the profile
-updated_profile = client.log_forwarding_profile.update(update_data)
+# Modify attributes using dot notation
+existing_profile.description = "Updated description for log forwarding profile"
+
+# Add a new match item to the existing match_list
+if existing_profile.match_list is None:
+    existing_profile.match_list = []
+
+existing_profile.match_list.append({
+    "name": "new-match",
+    "log_type": "url",
+    "filter": "category eq social-networking",
+    "send_syslog": ["url-syslog-profile"]
+})
+
+# Perform update
+updated_profile = client.log_forwarding_profile.update(existing_profile)
+print(f"Updated profile: {updated_profile.name}")
 ```
 
 ### Listing Log Forwarding Profiles
@@ -245,22 +268,29 @@ for profile in filtered_profiles:
         print(f"  Log Types: {', '.join([match.log_type for match in profile.match_list])}")
 ```
 
-### Pagination and Max Limit
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
 
 ```python
-# Create client with custom pagination limit for log forwarding profiles
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
-    log_forwarding_profile_max_limit=1000
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# List profiles with the custom pagination limit
-profiles = client.log_forwarding_profile.list(folder="Shared")
-print(f"Retrieved {len(profiles)} profiles")
+# Configure max_limit on the log_forwarding_profile service
+client.log_forwarding_profile.max_limit = 1000
 
-# The max_limit is automatically capped at 5000 (the API's maximum)
+# List all log forwarding profiles - auto-paginates through results
+all_profiles = client.log_forwarding_profile.list(folder="Shared")
+
+# The list() method will retrieve up to 1000 objects per API call (max 5000)
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_profiles)} profiles")
 ```
 
 ### Deleting a Log Forwarding Profile
