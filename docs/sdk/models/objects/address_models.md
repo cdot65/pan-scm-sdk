@@ -10,34 +10,37 @@ of inputs and outputs when interacting with the SCM API.
 
 | Attribute   | Type      | Required | Default | Description                                                                        |
 |-------------|-----------|----------|---------|------------------------------------------------------------------------------------|
-| name        | str       | Yes      | None    | Name of the address. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| name        | str       | Yes      | None    | Name of the address. Max length: 63 chars. Pattern: `^[a-zA-Z0-9_ \.-]+$`          |
 | description | str       | No       | None    | Description of the address. Max length: 1023 chars                                 |
-| tag         | List[str] | No       | None    | List of tags. Each tag max length: 64 chars                                        |
+| tag         | List[str] | No       | None    | List of tags. Each tag max length: 127 chars                                       |
 | ip_netmask  | str       | No*      | None    | IP address with optional CIDR notation (e.g. "192.168.80.0/24")                    |
 | ip_range    | str       | No*      | None    | IP address range (e.g. "10.0.0.1-10.0.0.4")                                        |
 | ip_wildcard | str       | No*      | None    | IP wildcard mask (e.g. "10.20.1.0/0.0.248.255")                                    |
-| fqdn        | str       | No*      | None    | Fully qualified domain name. Max length: 255 chars                                 |
-| folder      | str       | No**     | None    | Folder where address is defined. Max length: 64 chars                              |
-| snippet     | str       | No**     | None    | Snippet where address is defined. Max length: 64 chars                             |
-| device      | str       | No**     | None    | Device where address is defined. Max length: 64 chars                              |
-| id          | UUID      | Yes***   | None    | UUID of the address (response only)                                                |
+| fqdn        | str       | No*      | None    | FQDN. Min: 1, Max: 255 chars. Pattern: `^[a-zA-Z0-9_]([a-zA-Z0-9._-])*[a-zA-Z0-9]$`|
+| folder      | str       | No**     | None    | Folder where address is defined. Max: 64 chars. Pattern: `^[a-zA-Z\d\-_. ]+$`      |
+| snippet     | str       | No**     | None    | Snippet where address is defined. Max: 64 chars. Pattern: `^[a-zA-Z\d\-_. ]+$`     |
+| device      | str       | No**     | None    | Device where address is defined. Max: 64 chars. Pattern: `^[a-zA-Z\d\-_. ]+$`      |
+| id          | UUID      | Yes***   | None    | UUID of the address (response/update models)                                       |
 
 \* Exactly one address type (ip_netmask/ip_range/ip_wildcard/fqdn) must be provided
 \** Exactly one container type (folder/snippet/device) must be provided for create operations
-\*** Only required for response model
+\*** Required for response model; required for update model
+
+!!! note
+    All models use `extra="forbid"` in the model config, which means they will reject any fields not explicitly defined in the model.
 
 ## Exceptions
 
 The Address models can raise the following exceptions during validation:
 
 - **ValueError**: Raised in several scenarios:
-    - When no address type or multiple address types are provided
-    - When multiple container types (folder/snippet/device) are specified for create operations
-    - When no container type is specified for create operations
-    - When tag values are not unique in a list
-    - When tag input is neither a string nor a list
-    - When FQDN pattern validation fails
-    - When name pattern validation fails
+  - When no address type or multiple address types are provided
+  - When multiple container types (folder/snippet/device) are specified for create operations
+  - When no container type is specified for create operations
+  - When tag values are not unique in a list
+  - When tag input is neither a string nor a list
+  - When FQDN pattern validation fails
+  - When name pattern validation fails
 
 ## Model Validators
 
@@ -117,9 +120,17 @@ address = AddressCreateModel(
 ### Creating an Address Object
 
 ```python
-# Using dictionary
-from scm.config.objects import Address
+from scm.client import ScmClient
+from scm.models.objects import AddressCreateModel
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 address_dict = {
     "name": "web-server",
     "description": "Primary web server",
@@ -128,12 +139,9 @@ address_dict = {
     "tag": ["web", "production"]
 }
 
-address = Address(api_client)
-response = address.create(address_dict)
+response = client.address.create(address_dict)
 
 # Using model directly
-from scm.models.objects import AddressCreateModel
-
 address_obj = AddressCreateModel(
     name="web-server",
     description="Primary web server",
@@ -143,7 +151,7 @@ address_obj = AddressCreateModel(
 )
 
 payload = address_obj.model_dump(exclude_unset=True)
-response = address.create(payload)
+response = client.address.create(payload)
 ```
 
 ### Creating an FQDN Address
@@ -158,7 +166,7 @@ fqdn_dict = {
     "tag": ["web", "domain"]
 }
 
-response = address.create(fqdn_dict)
+response = client.address.create(fqdn_dict)
 
 # Using model directly
 from scm.models.objects import AddressCreateModel
@@ -172,34 +180,21 @@ fqdn_address = AddressCreateModel(
 )
 
 payload = fqdn_address.model_dump(exclude_unset=True)
-response = address.create(payload)
+response = client.address.create(payload)
 ```
 
 ### Updating an Address
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "web-server-updated",
-    "description": "Updated web server",
-    "ip_netmask": "192.168.1.101/32",
-    "tag": ["web", "production", "updated"]
-}
+# Fetch existing address
+existing = client.address.fetch(name="web-server", folder="Texas")
 
-response = address.update(update_dict)
+# Modify attributes using dot notation
+existing.name = "web-server-updated"
+existing.description = "Updated web server"
+existing.ip_netmask = "192.168.1.101/32"
+existing.tag = ["web", "production", "updated"]
 
-# Using model directly
-from scm.models.objects import AddressUpdateModel
-
-update_address = AddressUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="web-server-updated",
-    description="Updated web server",
-    ip_netmask="192.168.1.101/32",
-    tag=["web", "production", "updated"]
-)
-
-payload = update_address.model_dump(exclude_unset=True)
-response = address.update(payload)
+# Pass the modified object to update()
+response = client.address.update(existing)
 ```
