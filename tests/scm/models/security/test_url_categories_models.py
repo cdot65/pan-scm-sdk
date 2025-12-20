@@ -106,4 +106,61 @@ class TestURLCategoriesResponseModel:
         assert model.list == test_urls
 
 
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all models."""
+
+    def test_create_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in CreateModel."""
+        data = {
+            "name": "TestCategory",
+            "folder": "Texas",
+            "list": ["example.com"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            URLCategoriesCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in UpdateModel."""
+        from scm.models.security.url_categories import URLCategoriesUpdateModel
+
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestCategory",
+            "list": ["example.com"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            URLCategoriesUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ResponseModel."""
+        from scm.models.security.url_categories import URLCategoriesResponseModel
+
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestCategory",
+            "folder": "Texas",
+            "list": ["example.com"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            URLCategoriesResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestEnumValues:
+    """Tests for enum values."""
+
+    def test_list_type_enum_values(self):
+        """Test all URLCategoriesListTypeEnum values."""
+        from scm.models.security.url_categories import URLCategoriesListTypeEnum
+
+        expected = {"URL List", "Category Match"}
+        actual = {v.value for v in URLCategoriesListTypeEnum}
+        assert expected == actual
+
+
 # -------------------- End of Test Classes --------------------

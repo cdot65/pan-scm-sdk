@@ -186,3 +186,38 @@ class TestTagResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             TagResponseModel(**data)
         assert "Input should be a valid UUID" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_tag_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in TagCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            TagCreateModel(
+                name="test-tag",
+                folder="Texas",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_tag_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in TagUpdateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            TagUpdateModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-tag",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_tag_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in TagResponseModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            TagResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-tag",
+                folder="Texas",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()

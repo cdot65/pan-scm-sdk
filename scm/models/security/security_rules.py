@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 # Enums
 class SecurityRuleMoveDestination(str, Enum):
@@ -44,12 +46,18 @@ class SecurityRuleAction(str, Enum):
 class SecurityRuleProfileSetting(BaseModel):
     """Model for security profile settings."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     group: Optional[List[str]] = Field(
         default_factory=lambda: ["best-practice"],
         description="The security profile group",
     )
 
     @field_validator("group")
+    @classmethod
     def validate_unique_items(cls, v):
         """Ensure all items in the group list are unique.
 
@@ -72,6 +80,7 @@ class SecurityRuleBaseModel(BaseModel):
     """Base model for Security Rules containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
@@ -82,7 +91,7 @@ class SecurityRuleBaseModel(BaseModel):
     )
     disabled: bool = Field(False, description="Is the security rule disabled?")
     description: Optional[str] = Field(None, description="The description of the security rule")
-    tag: List[str] = Field(
+    tag: List[TagName] = Field(
         default_factory=list, description="The tags associated with the security rule"
     )
     from_: List[str] = Field(
@@ -173,6 +182,7 @@ class SecurityRuleBaseModel(BaseModel):
         "tag",
         mode="before",
     )
+    @classmethod
     def ensure_list_of_strings(cls, v):
         """Ensure value is a list of strings, converting from string if needed.
 
@@ -205,6 +215,7 @@ class SecurityRuleBaseModel(BaseModel):
         "category",
         "tag",
     )
+    @classmethod
     def ensure_unique_items(cls, v):
         """Ensure all items in the list are unique.
 
@@ -254,7 +265,7 @@ class SecurityRuleUpdateModel(SecurityRuleBaseModel):
 
     rulebase: Optional[SecurityRuleRulebase] = None
 
-    id: Optional[UUID] = Field(
+    id: UUID = Field(
         ...,
         description="The UUID of the security rule",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
@@ -270,6 +281,11 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
         examples=["123e4567-e89b-12d3-a456-426655440000"],
     )
 
+    rulebase: Optional[SecurityRuleRulebase] = Field(
+        None,
+        description="Which rulebase the rule belongs to (pre or post)",
+    )
+
     # Override the device field to accept None, a string, or an empty dict
     device: Optional[Union[str, Dict]] = Field(
         None,
@@ -277,6 +293,7 @@ class SecurityRuleResponseModel(SecurityRuleBaseModel):
     )
 
     @field_validator("device")
+    @classmethod
     def validate_device(cls, v):
         """Validate that the device field is None, a string, or an empty dictionary.
 
@@ -312,8 +329,10 @@ class SecurityRuleMoveModel(BaseModel):
     )
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        populate_by_name=True,
     )
 
     @model_validator(mode="after")

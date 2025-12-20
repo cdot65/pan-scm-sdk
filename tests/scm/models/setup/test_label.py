@@ -6,6 +6,7 @@
 from uuid import UUID
 
 import pytest
+from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.setup.label import (
@@ -38,6 +39,13 @@ class TestLabelBaseModel:
         assert model.name == "minimal_label"
         assert model.description is None
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = {"name": "test_label", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            LabelBaseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 class TestLabelCreateModel:
     """Tests for the LabelCreateModel."""
@@ -55,6 +63,13 @@ class TestLabelCreateModel:
         # Missing name should fail
         with pytest.raises(ValueError):
             LabelCreateModel(description="test description")
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = {"name": "test_label", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            LabelCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestLabelUpdateModel:
@@ -96,6 +111,17 @@ class TestLabelUpdateModel:
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
         assert str(model.id) == "123e4567-e89b-12d3-a456-426655440000"
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test_label",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            LabelUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestLabelResponseModel:
@@ -144,3 +170,14 @@ class TestLabelResponseModel:
         assert response_model.name == create_model.name
         if create_model.description:
             assert response_model.description == create_model.description
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test_label",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            LabelResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)

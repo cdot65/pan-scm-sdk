@@ -18,6 +18,7 @@ class HashAlgorithm(str, Enum):
     SHA256 = "sha256"
     SHA384 = "sha384"
     SHA512 = "sha512"
+    NON_AUTH = "non-auth"
 
 
 class EncryptionAlgorithm(str, Enum):
@@ -46,6 +47,11 @@ class DHGroup(str, Enum):
 class LifetimeSeconds(BaseModel):
     """Lifetime in seconds model."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     seconds: int = Field(
         ...,
         description="Specify lifetime in seconds",
@@ -56,6 +62,11 @@ class LifetimeSeconds(BaseModel):
 
 class LifetimeMinutes(BaseModel):
     """Lifetime in minutes model."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     minutes: int = Field(
         ...,
@@ -68,6 +79,11 @@ class LifetimeMinutes(BaseModel):
 class LifetimeHours(BaseModel):
     """Lifetime in hours model."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     hours: int = Field(
         ...,
         description="Specify lifetime in hours",
@@ -78,6 +94,11 @@ class LifetimeHours(BaseModel):
 
 class LifetimeDays(BaseModel):
     """Lifetime in days model."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     days: int = Field(
         ...,
@@ -95,6 +116,7 @@ class IKECryptoProfileBaseModel(BaseModel):
     """Base model for IKE Crypto Profiles containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
@@ -185,10 +207,10 @@ class IKECryptoProfileResponseModel(IKECryptoProfileBaseModel):
     """Model for IKE Crypto Profile responses."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
-        extra="ignore",  # Ignore extra fields that aren't in our model
     )
 
     id: UUID = Field(

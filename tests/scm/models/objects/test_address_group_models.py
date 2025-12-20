@@ -7,7 +7,11 @@ from pydantic import ValidationError
 import pytest
 
 # Local SDK imports
-from scm.models.objects import AddressGroupCreateModel, AddressGroupUpdateModel
+from scm.models.objects import (
+    AddressGroupCreateModel,
+    AddressGroupResponseModel,
+    AddressGroupUpdateModel,
+)
 from scm.models.objects.address_group import DynamicFilter
 from tests.factories import (
     AddressGroupCreateModelFactory,
@@ -42,9 +46,9 @@ class TestAddressGroupCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupCreateModel(**data)
         error_msg = str(exc_info.value)
-        assert "1 validation error for AddressGroupCreateModel" in error_msg
+        assert "validation error" in error_msg.lower()
         assert "name\n  Field required" in error_msg  # Name is required
-        assert "{'invalid_field': 'test'}" in error_msg  # Group type required
+        assert "extra" in error_msg.lower()  # Extra fields are forbidden
 
     def test_address_group_create_model_multiple_containers_provided(self):
         """Test validation when multiple containers are provided."""
@@ -125,10 +129,9 @@ class TestAddressGroupUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressGroupUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert (
-            "2 validation errors for AddressGroupUpdateModel\nname\n  Field required [type=missing, input_value={'invalid': 'data'}, input_type=dict]"
-            in error_msg
-        )
+        assert "validation error" in error_msg.lower()
+        assert "name\n  Field required" in error_msg
+        assert "extra" in error_msg.lower()  # Extra fields are forbidden
 
     def test_address_group_update_model_multiple_types_provided(self):
         """Test validation when both static and dynamic group types are provided."""
@@ -198,6 +201,48 @@ class TestAddressGroupUpdateModel:
         error_msg = str(exc_info.value)
         assert "1 validation error for AddressGroupUpdateModel" in error_msg
         assert "Exactly one of 'static' or 'dynamic' must be provided." in error_msg
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_dynamic_filter_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in DynamicFilter."""
+        with pytest.raises(ValidationError) as exc_info:
+            DynamicFilter(
+                filter="'tag.name.value'",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_address_group_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AddressGroupCreateModel."""
+        data = AddressGroupCreateModelFactory.build_valid_static()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            AddressGroupCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_address_group_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AddressGroupUpdateModel."""
+        data = AddressGroupUpdateModelFactory.build_valid_static()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            AddressGroupUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_address_group_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AddressGroupResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-address-group",
+            "static": ["address1", "address2"],
+            "folder": "Texas",
+            "unknown_field": "should fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AddressGroupResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
 
 
 # -------------------- End of Test Classes --------------------

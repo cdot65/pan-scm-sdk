@@ -143,3 +143,25 @@ class TestAgentVersionsModel:
         # Invalid assignment should raise ValidationError
         with pytest.raises(ValidationError):
             model.agent_versions = "not-a-list"
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_agent_version_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AgentVersionModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            AgentVersionModel(
+                version="5.3.0",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_agent_versions_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AgentVersionsModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            AgentVersionsModel(
+                agent_versions=["5.3.0", "5.2.8"],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()

@@ -604,4 +604,78 @@ class TestScheduleResponseModel:
         assert "required" in str(exc_info.value)
 
 
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_weekly_schedule_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in WeeklyScheduleModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            WeeklyScheduleModel(monday=["09:00-17:00"], unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_daily_schedule_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in DailyScheduleModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            DailyScheduleModel(daily=["09:00-17:00"], unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_recurring_schedule_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in RecurringScheduleModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            RecurringScheduleModel(daily=["09:00-17:00"], unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_non_recurring_schedule_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in NonRecurringScheduleModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            NonRecurringScheduleModel(
+                non_recurring=["2025/01/01@09:00-2025/01/01@17:00"],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_schedule_type_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ScheduleTypeModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ScheduleTypeModel(
+                recurring={"daily": ["09:00-17:00"]},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_schedule_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ScheduleCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ScheduleCreateModel(
+                name="TestSchedule",
+                folder="Shared",
+                schedule_type={"recurring": {"daily": ["09:00-17:00"]}},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_schedule_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ScheduleUpdateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ScheduleUpdateModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="TestSchedule",
+                schedule_type={"recurring": {"daily": ["09:00-17:00"]}},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_schedule_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ScheduleResponseModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ScheduleResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="TestSchedule",
+                folder="Shared",
+                schedule_type={"recurring": {"daily": ["09:00-17:00"]}},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+
 # -------------------- End of Test Classes --------------------

@@ -14,12 +14,11 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    constr,
     field_validator,
     model_validator,
 )
 
-TagString = constr(max_length=127)
+from scm.models.objects.tag import TagName
 
 
 class ServiceGroupBaseModel(BaseModel):
@@ -51,7 +50,7 @@ class ServiceGroupBaseModel(BaseModel):
     )
 
     # Optional fields
-    tag: Optional[List[str]] = Field(  # type: ignore
+    tag: Optional[List[TagName]] = Field(
         None,
         description="Tags associated with the service group. These must be references to existing tag objects, not just string labels.",
     )
@@ -81,6 +80,7 @@ class ServiceGroupBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,

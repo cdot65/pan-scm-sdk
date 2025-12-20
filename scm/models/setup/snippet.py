@@ -7,11 +7,16 @@ representing Snippet resources in the Strata Cloud Manager.
 from typing import List, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class FolderReference(BaseModel):
     """Reference to a folder that a snippet is applied to."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     id: UUID = Field(..., description="The UUID of the folder")
     name: str = Field(..., description="The name of the folder")
@@ -35,6 +40,11 @@ class SnippetBaseModel(BaseModel):
         enable_prefix: Whether to enable prefix for the snippet.
 
     """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: str = Field(
         ...,

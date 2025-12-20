@@ -160,3 +160,59 @@ class TestIKECryptoProfileModels:
         }
         with pytest.raises(ValidationError):
             IKECryptoProfileResponseModel(**invalid_data)
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = {
+            "name": "test-profile",
+            "hash": ["sha1"],
+            "encryption": ["aes-128-cbc"],
+            "dh_group": ["group2"],
+            "folder": "test-folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            IKECryptoProfileCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "hash": ["sha1"],
+            "encryption": ["aes-128-cbc"],
+            "dh_group": ["group2"],
+            "folder": "test-folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            IKECryptoProfileUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "hash": ["sha1"],
+            "encryption": ["aes-128-cbc"],
+            "dh_group": ["group2"],
+            "folder": "test-folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            IKECryptoProfileResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_non_auth_hash_algorithm(self):
+        """Test that non-auth hash algorithm is supported."""
+        data = {
+            "name": "test-profile",
+            "hash": ["non-auth"],
+            "encryption": ["aes-128-cbc"],
+            "dh_group": ["group2"],
+            "folder": "test-folder",
+        }
+        profile = IKECryptoProfileCreateModel(**data)
+        assert HashAlgorithm.NON_AUTH in profile.hash

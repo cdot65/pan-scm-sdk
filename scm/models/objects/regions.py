@@ -12,6 +12,8 @@ from uuid import UUID
 # External libraries
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class GeoLocation(BaseModel):
     """Geographic location model for region objects.
@@ -21,6 +23,8 @@ class GeoLocation(BaseModel):
         longitude (float): The longitudinal position of the region (-180 to 180).
 
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     latitude: float = Field(
         ..., description="The latitudinal position of the region", ge=-90, le=90
@@ -65,7 +69,7 @@ class RegionBaseModel(BaseModel):
         None,
         description="A description of the region",
     )
-    tag: Optional[List[str]] = Field(
+    tag: Optional[List[TagName]] = Field(
         None,
         description="A list of tags associated with the region",
     )
@@ -103,6 +107,7 @@ class RegionBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

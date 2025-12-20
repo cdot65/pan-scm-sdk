@@ -203,3 +203,11 @@ class TestNetworkLocationModel:
         """Test that model config options are set correctly."""
         assert NetworkLocationModel.model_config["populate_by_name"] is True
         assert NetworkLocationModel.model_config["validate_assignment"] is True
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = NetworkLocationModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NetworkLocationModel(**data)
+        assert "extra" in str(exc_info.value).lower()

@@ -39,6 +39,11 @@ class AntiSpywareExemptIpEntry(BaseModel):
 
     """
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(
         ...,
         description="Exempt IP name",
@@ -67,45 +72,65 @@ class AntiSpywareSeverity(str, Enum):
 class AntiSpywareCategory(str, Enum):
     """Enumeration of threat categories."""
 
-    dns_proxy = "dns-proxy"
-    backdoor = "backdoor"
-    data_theft = "data-theft"
+    # ADNS categories
+    adns_adtracking = "adns-adtracking"
+    adns_benign = "adns-benign"
+    adns_c2 = "adns-c2"
+    adns_ddns = "adns-ddns"
+    adns_dnsmisconfig = "adns-dnsmisconfig"
+    adns_grayware = "adns-grayware"
+    adns_hijacking = "adns-hijacking"
+    adns_malware = "adns-malware"
+    adns_new_domain = "adns-new-domain"
+    adns_parked = "adns-parked"
+    adns_phishing = "adns-phishing"
+    adns_proxy = "adns-proxy"
+    # Standard categories
+    adware = "adware"
+    any = "any"
     autogen = "autogen"
-    spyware = "spyware"
-    dns_security = "dns-security"
-    downloader = "downloader"
-    dns_phishing = "dns-phishing"
-    phishing_kit = "phishing-kit"
-    cryptominer = "cryptominer"
-    hacktool = "hacktool"
-    dns_benign = "dns-benign"
-    dns_wildfire = "dns-wildfire"
+    backdoor = "backdoor"
     botnet = "botnet"
+    browser_hijack = "browser-hijack"
+    command_and_control = "command-and-control"
+    cryptominer = "cryptominer"
+    data_theft = "data-theft"
+    dns = "dns"
+    dns_adtracking = "dns-adtracking"
+    dns_benign = "dns-benign"
+    dns_c2 = "dns-c2"
+    dns_ddns = "dns-ddns"
     dns_grayware = "dns-grayware"
+    dns_malware = "dns-malware"
+    dns_new_domain = "dns-new-domain"
+    dns_parked = "dns-parked"
+    dns_phishing = "dns-phishing"
+    dns_proxy = "dns-proxy"
+    dns_security = "dns-security"
+    dns_wildfire = "dns-wildfire"
+    domain_edl = "domain-edl"
+    downloader = "downloader"
+    fraud = "fraud"
+    hacktool = "hacktool"
     inline_cloud_c2 = "inline-cloud-c2"
     keylogger = "keylogger"
-    p2p_communication = "p2p-communication"
-    domain_edl = "domain-edl"
-    webshell = "webshell"
-    command_and_control = "command-and-control"
-    dns_ddns = "dns-ddns"
     net_worm = "net-worm"
-    tls_fingerprint = "tls-fingerprint"
-    dns_new_domain = "dns-new-domain"
-    dns = "dns"
-    fraud = "fraud"
-    dns_c2 = "dns-c2"
-    adware = "adware"
+    p2p_communication = "p2p-communication"
+    phishing_kit = "phishing-kit"
     post_exploitation = "post-exploitation"
-    dns_malware = "dns-malware"
-    browser_hijack = "browser-hijack"
-    dns_parked = "dns-parked"
-    any = "any"
+    spyware = "spyware"
+    tls_fingerprint = "tls-fingerprint"
+    webshell = "webshell"
 
 
 # Component Models
 class AntiSpywareMicaEngineSpywareEnabledEntry(BaseModel):
     """Represents an entry in the 'mica_engine_spyware_enabled' list."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: str = Field(
         ...,
@@ -119,6 +144,11 @@ class AntiSpywareMicaEngineSpywareEnabledEntry(BaseModel):
 
 class AntiSpywareBlockIpAction(BaseModel):
     """Represents the 'block_ip' action configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     track_by: str = Field(
         ...,
@@ -194,6 +224,7 @@ class AntiSpywareActionResponse(RootModel[dict]):
     """
 
     @model_validator(mode="before")
+    @classmethod
     def validate_action(cls, values):
         """Convert and validate the action field for response models.
 
@@ -244,6 +275,11 @@ class AntiSpywareActionResponse(RootModel[dict]):
 class AntiSpywareRuleBaseModel(BaseModel):
     """Base model for rules."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(
         ...,
         description="Rule name",
@@ -265,11 +301,16 @@ class AntiSpywareRuleBaseModel(BaseModel):
         None,
         description="Packet capture setting",
     )
+    action: Optional[AntiSpywareActionResponse] = Field(
+        None,
+        description="Action to take when rule matches",
+    )
 
     @field_validator(
         "threat_name",
         mode="before",
     )
+    @classmethod
     def default_threat_name(cls, v):
         """Set the default threat name to 'any' if not provided.
 
@@ -286,6 +327,11 @@ class AntiSpywareRuleBaseModel(BaseModel):
 class AntiSpywareThreatExceptionBase(BaseModel):
     """Base model for threat exceptions."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(
         ...,
         description="Threat exception name",
@@ -293,6 +339,10 @@ class AntiSpywareThreatExceptionBase(BaseModel):
     packet_capture: AntiSpywarePacketCapture = Field(
         ...,
         description="Packet capture setting",
+    )
+    action: Optional[AntiSpywareActionResponse] = Field(
+        None,
+        description="Action to take for this threat exception",
     )
     exempt_ip: Optional[List[AntiSpywareExemptIpEntry]] = Field(
         None,
@@ -308,6 +358,7 @@ class AntiSpywareProfileBase(BaseModel):
     """Base model for Anti-Spyware Profile containing common fields across all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
@@ -338,8 +389,8 @@ class AntiSpywareProfileBase(BaseModel):
         None,
         description="List of MICA engine spyware enabled entries",
     )
-    rules: List[AntiSpywareRuleBaseModel] = Field(
-        ...,
+    rules: Optional[List[AntiSpywareRuleBaseModel]] = Field(
+        None,
         description="List of rules",
     )
     threat_exception: Optional[List[AntiSpywareThreatExceptionBase]] = Field(
@@ -401,7 +452,7 @@ class AntiSpywareProfileUpdateModel(AntiSpywareProfileBase):
     All fields are optional to allow partial updates.
     """
 
-    id: Optional[UUID] = Field(
+    id: UUID = Field(
         ...,
         description="Profile ID",
     )

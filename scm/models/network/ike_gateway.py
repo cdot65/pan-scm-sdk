@@ -39,6 +39,11 @@ class ProtocolVersion(str, Enum):
 class PreSharedKey(BaseModel):
     """Pre-shared key authentication configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     key: str = Field(
         ...,
         description="Pre-shared key for authentication",
@@ -48,6 +53,11 @@ class PreSharedKey(BaseModel):
 
 class CertificateAuth(BaseModel):
     """Certificate-based authentication configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     allow_id_payload_mismatch: Optional[bool] = Field(
         None,
@@ -73,6 +83,11 @@ class CertificateAuth(BaseModel):
 
 class Authentication(BaseModel):
     """Authentication configuration for IKE Gateway."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     pre_shared_key: Optional[PreSharedKey] = Field(
         None,
@@ -100,6 +115,11 @@ class Authentication(BaseModel):
 class PeerId(BaseModel):
     """Peer identification configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     type: PeerIdType = Field(
         ...,
         description="Type of peer ID",
@@ -115,6 +135,11 @@ class PeerId(BaseModel):
 
 class LocalId(BaseModel):
     """Local identification configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     type: LocalIdType = Field(
         ...,
@@ -132,6 +157,11 @@ class LocalId(BaseModel):
 class DeadPeerDetection(BaseModel):
     """Dead Peer Detection (DPD) configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     enable: Optional[bool] = Field(
         None,
         description="Enable Dead Peer Detection",
@@ -140,6 +170,11 @@ class DeadPeerDetection(BaseModel):
 
 class IKEv1(BaseModel):
     """IKEv1 protocol configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     ike_crypto_profile: Optional[str] = Field(
         None,
@@ -154,6 +189,11 @@ class IKEv1(BaseModel):
 class IKEv2(BaseModel):
     """IKEv2 protocol configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     ike_crypto_profile: Optional[str] = Field(
         None,
         description="IKE Crypto Profile name for IKEv2",
@@ -166,6 +206,11 @@ class IKEv2(BaseModel):
 
 class Protocol(BaseModel):
     """IKE protocol configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     ikev1: Optional[IKEv1] = Field(
         None,
@@ -201,6 +246,11 @@ class Protocol(BaseModel):
 class NatTraversal(BaseModel):
     """NAT traversal configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     enable: Optional[bool] = Field(
         None,
         description="Enable NAT traversal",
@@ -210,6 +260,11 @@ class NatTraversal(BaseModel):
 class Fragmentation(BaseModel):
     """IKE fragmentation configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     enable: bool = Field(
         False,
         description="Enable IKE fragmentation",
@@ -218,6 +273,11 @@ class Fragmentation(BaseModel):
 
 class ProtocolCommon(BaseModel):
     """Common protocol configuration for IKE Gateway."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     nat_traversal: Optional[NatTraversal] = Field(
         None,
@@ -236,6 +296,11 @@ class ProtocolCommon(BaseModel):
 class IpAddress(BaseModel):
     """IP address configuration for peer."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     ip: str = Field(
         ...,
         description="Static IP address of peer gateway",
@@ -244,6 +309,11 @@ class IpAddress(BaseModel):
 
 class FqdnAddress(BaseModel):
     """FQDN configuration for peer."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     fqdn: str = Field(
         ...,
@@ -255,6 +325,11 @@ class FqdnAddress(BaseModel):
 class DynamicAddress(BaseModel):
     """Dynamic address configuration for peer."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     dynamic: Dict[str, Any] = Field(
         default_factory=dict,
         description="Dynamic peer address configuration",
@@ -263,6 +338,11 @@ class DynamicAddress(BaseModel):
 
 class PeerAddress(BaseModel):
     """Peer address configuration for IKE Gateway."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     ip: Optional[str] = Field(
         None,
@@ -299,6 +379,7 @@ class IKEGatewayBaseModel(BaseModel):
     """Base model for IKE Gateway containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

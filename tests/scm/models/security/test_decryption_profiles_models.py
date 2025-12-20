@@ -159,4 +159,108 @@ class TestDecryptionProfileResponseModel:
         assert model.snippet is None
 
 
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all models."""
+
+    def test_create_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in CreateModel."""
+        data = DecryptionProfileCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            DecryptionProfileCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in UpdateModel."""
+        data = DecryptionProfileUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            DecryptionProfileUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Texas",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            DecryptionProfileResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_ssl_protocol_settings_rejects_extra_fields(self):
+        """Test that extra fields are rejected in SSLProtocolSettings."""
+        from scm.models.security.decryption_profiles import SSLProtocolSettings
+
+        data = {
+            "min_version": "tls1-0",
+            "max_version": "tls1-2",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SSLProtocolSettings(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_ssl_forward_proxy_rejects_extra_fields(self):
+        """Test that extra fields are rejected in SSLForwardProxy."""
+        from scm.models.security.decryption_profiles import SSLForwardProxy
+
+        data = {
+            "block_client_cert": True,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SSLForwardProxy(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_ssl_inbound_proxy_rejects_extra_fields(self):
+        """Test that extra fields are rejected in SSLInboundProxy."""
+        from scm.models.security.decryption_profiles import SSLInboundProxy
+
+        data = {
+            "block_if_hsm_unavailable": True,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SSLInboundProxy(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_ssl_no_proxy_rejects_extra_fields(self):
+        """Test that extra fields are rejected in SSLNoProxy."""
+        from scm.models.security.decryption_profiles import SSLNoProxy
+
+        data = {
+            "block_expired_certificate": True,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SSLNoProxy(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestSSLVersionEnum:
+    """Tests for SSLVersion enum values."""
+
+    def test_all_ssl_version_values(self):
+        """Test all SSLVersion enum values."""
+        from scm.models.security.decryption_profiles import SSLProtocolSettings
+
+        versions = ["sslv3", "tls1-0", "tls1-1", "tls1-2", "tls1-3", "max"]
+        for version in versions:
+            # Test max_version accepts all values
+            settings = SSLProtocolSettings(
+                min_version="sslv3",
+                max_version=version,
+            )
+            assert settings.max_version.value == version
+
+    def test_ssl_version_enum_members(self):
+        """Test that SSLVersion enum has all expected members."""
+        expected = {"sslv3", "tls1_0", "tls1_1", "tls1_2", "tls1_3", "max"}
+        actual = {v.name for v in SSLVersion}
+        assert expected == actual
+
+
 # -------------------- End of Test Classes --------------------

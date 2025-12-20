@@ -6,6 +6,7 @@
 from uuid import UUID
 
 import pytest
+from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.setup.variable import (
@@ -87,6 +88,19 @@ class TestVariableBaseModel:
         )
         assert model3.device == "device1"
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = {
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            VariableBaseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 class TestVariableCreateModel:
     """Tests for the VariableCreateModel."""
@@ -116,6 +130,55 @@ class TestVariableCreateModel:
         # Missing value
         with pytest.raises(ValueError):
             VariableCreateModel(name="test", type="ip-netmask", folder="test")
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = {
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            VariableCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_model_validate_with_container(self):
+        """Test model_validate method with valid container."""
+        data = {
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+        }
+        model = VariableCreateModel.model_validate(data)
+        assert model.name == "test_variable"
+        assert model.folder == "test_folder"
+
+    def test_model_validate_without_container_fails(self):
+        """Test model_validate fails when no container is provided."""
+        data = {
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            VariableCreateModel.model_validate(data)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+
+    def test_model_validate_with_multiple_containers_fails(self):
+        """Test model_validate fails when multiple containers are provided."""
+        data = {
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+            "snippet": "test_snippet",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            VariableCreateModel.model_validate(data)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
 
 
 class TestVariableUpdateModel:
@@ -151,6 +214,45 @@ class TestVariableUpdateModel:
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
         assert model.id == data["id"]
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            VariableUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_model_validate_with_container(self):
+        """Test model_validate method with valid container."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+        }
+        model = VariableUpdateModel.model_validate(data)
+        assert model.name == "test_variable"
+        assert model.folder == "test_folder"
+
+    def test_model_validate_without_container_fails(self):
+        """Test model_validate fails when no container is provided."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+        }
+        with pytest.raises(ValueError) as exc_info:
+            VariableUpdateModel.model_validate(data)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
 
 
 class TestVariableResponseModel:
@@ -218,3 +320,17 @@ class TestVariableResponseModel:
         for valid_type in valid_types:
             model = VariableResponseModelFactory.build(type=valid_type)
             assert model.type == valid_type
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_variable",
+            "type": "ip-netmask",
+            "value": "192.168.1.0/24",
+            "folder": "test_folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            VariableResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)

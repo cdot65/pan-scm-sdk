@@ -361,7 +361,6 @@ class SecurityRuleUpdateModelFactory(factory.DictFactory):
 class SecurityRuleMoveModelFactory(factory.DictFactory):
     """Factory for creating data dicts for SecurityRuleMoveModel validation testing."""
 
-    source_rule = factory.LazyFunction(lambda: str(uuid.uuid4()))
     destination = "top"
     rulebase = "pre"
 
@@ -369,7 +368,6 @@ class SecurityRuleMoveModelFactory(factory.DictFactory):
     def build_valid_before(cls):
         """Return a valid data dict for before move operation."""
         return cls(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination="before",
             destination_rule="987fcdeb-54ba-3210-9876-fedcba098765",
             rulebase="pre",
@@ -379,7 +377,6 @@ class SecurityRuleMoveModelFactory(factory.DictFactory):
     def build_with_invalid_destination(cls):
         """Return a data dict with invalid destination."""
         return cls(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination="invalid",
             rulebase="pre",
         )
@@ -388,7 +385,6 @@ class SecurityRuleMoveModelFactory(factory.DictFactory):
     def build_missing_destination_rule(cls):
         """Return a data dict missing required destination_rule."""
         return cls(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination="before",
             rulebase="pre",
         )

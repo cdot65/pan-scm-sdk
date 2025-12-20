@@ -276,3 +276,4 @@ CLAUDE.md
 **/.claude/settings.local.json
 prisma_api.md
 prisma_api.pdf
+deployment-services_new.yaml

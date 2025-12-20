@@ -331,3 +331,38 @@ class TestRegionResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             RegionResponseModel(**data_dict)
         assert "List of tags must contain unique values" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_geo_location_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in GeoLocation."""
+        with pytest.raises(ValidationError) as exc_info:
+            GeoLocation(latitude=37.7749, longitude=-122.4194, unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_region_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in RegionCreateModel."""
+        data = RegionCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            RegionCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_region_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in RegionUpdateModel."""
+        data = RegionUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            RegionUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_region_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in RegionResponseModel."""
+        data = RegionResponseFactory.build_valid()
+        data_dict = data.model_dump()
+        data_dict["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            RegionResponseModel(**data_dict)
+        assert "extra" in str(exc_info.value).lower()

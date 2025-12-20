@@ -29,7 +29,6 @@ class ScheduleBaseFactory(factory.Factory):
         abstract = True
 
     name = factory.Sequence(lambda n: f"schedule_{n}")
-    description = fake.sentence()
     schedule_type: Dict = {
         "recurring": {
             "weekly": {
@@ -167,7 +166,6 @@ class ScheduleUpdateApiFactory(ScheduleBaseFactory):
         model = ScheduleUpdateModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
-    description = fake.sentence()
     schedule_type: Dict = {
         "recurring": {
             "weekly": {
@@ -240,7 +238,6 @@ class ScheduleResponseFactory(ScheduleBaseFactory):
         model = ScheduleResponseModel
 
     id = factory.LazyFunction(lambda: str(uuid4()))
-    description = fake.sentence()
     folder = "Shared"
     schedule_type: Dict = {
         "recurring": {
@@ -349,7 +346,6 @@ class ScheduleCreateModelFactory(factory.DictFactory):
         model = dict
 
     name = factory.Sequence(lambda n: f"schedule_{n}")
-    description = fake.sentence()
     folder = "Shared"
     schedule_type = {
         "recurring": {
@@ -372,7 +368,6 @@ class ScheduleCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestSchedule",
             folder="Shared",
-            description=fake.sentence(),
             schedule_type={
                 "recurring": {
                     "weekly": {
@@ -395,7 +390,6 @@ class ScheduleCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestSchedule",
             folder="Shared",
-            description=fake.sentence(),
             schedule_type={"recurring": {"daily": ["09:00-17:00", "18:00-20:00"]}},
         )
 
@@ -410,7 +404,6 @@ class ScheduleCreateModelFactory(factory.DictFactory):
         return cls(
             name="TestSchedule",
             folder="Shared",
-            description=fake.sentence(),
             schedule_type={
                 "non_recurring": [
                     "2025/01/01@09:00-2025/01/01@17:00",
@@ -573,7 +566,6 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
 
     id = "123e4567-e89b-12d3-a456-426655440000"
     name = factory.Sequence(lambda n: f"schedule_{n}")
-    description = fake.sentence()
     schedule_type = {
         "recurring": {
             "weekly": {
@@ -595,7 +587,6 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="UpdatedSchedule",
-            description=fake.sentence(),
             schedule_type={
                 "recurring": {
                     "weekly": {
@@ -617,7 +608,6 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="UpdatedSchedule",
-            description=fake.sentence(),
             schedule_type={"recurring": {"daily": ["10:00-18:00"]}},
         )
 
@@ -632,7 +622,6 @@ class ScheduleUpdateModelFactory(factory.DictFactory):
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="UpdatedSchedule",
-            description=fake.sentence(),
             schedule_type={
                 "non_recurring": [
                     "2025/03/01@09:00-2025/03/01@17:00",

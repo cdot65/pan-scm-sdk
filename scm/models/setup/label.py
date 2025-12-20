@@ -7,11 +7,16 @@ representing Label resources in the Strata Cloud Manager.
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LabelBaseModel(BaseModel):
     """Base model for Label resources per OpenAPI spec."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: str = Field(
         ...,  # required

@@ -114,3 +114,32 @@ class TestQuarantinedDevicesListParamsModel:
         )
         assert model.host_id == "test-host"
         assert model.serial_number == "test-serial"
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_quarantined_devices_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in QuarantinedDevicesCreateModel."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError) as exc_info:
+            QuarantinedDevicesCreateModel(host_id="test-host", unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_quarantined_devices_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in QuarantinedDevicesResponseModel."""
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError) as exc_info:
+            QuarantinedDevicesResponseModel(host_id="test-host", unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_quarantined_devices_list_params_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in QuarantinedDevicesListParamsModel."""
+        from pydantic import ValidationError
+        from scm.models.objects.quarantined_devices import QuarantinedDevicesListParamsModel
+
+        with pytest.raises(ValidationError) as exc_info:
+            QuarantinedDevicesListParamsModel(unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()

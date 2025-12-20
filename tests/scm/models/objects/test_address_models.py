@@ -7,7 +7,7 @@ from pydantic import ValidationError
 import pytest
 
 # Local SDK imports
-from scm.models.objects import AddressCreateModel, AddressUpdateModel
+from scm.models.objects import AddressCreateModel, AddressResponseModel, AddressUpdateModel
 from tests.factories import AddressCreateModelFactory, AddressUpdateModelFactory
 
 # -------------------- Test Classes for Pydantic Models --------------------
@@ -43,8 +43,9 @@ class TestAddressCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressCreateModel(**data)
         error_msg = str(exc_info.value)
-        assert "1 validation error for AddressCreateModel" in error_msg
+        assert "validation error" in error_msg.lower()
         assert "name\n  Field required" in error_msg  # Name is required
+        assert "extra" in error_msg.lower()  # Extra fields are forbidden
 
     def test_address_create_model_multiple_containers_provided(self):
         """Test validation when multiple containers are provided."""
@@ -200,6 +201,39 @@ class TestAddressUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             AddressUpdateModel(**data)
         assert "List items must be unique" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_address_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AddressCreateModel."""
+        data = AddressCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            AddressCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_address_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AddressUpdateModel."""
+        data = AddressUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            AddressUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_address_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AddressResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-address",
+            "ip_netmask": "192.168.1.0/24",
+            "folder": "Texas",
+            "unknown_field": "should fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AddressResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
 
 
 # -------------------- End of Test Classes --------------------

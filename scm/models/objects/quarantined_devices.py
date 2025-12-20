@@ -35,6 +35,7 @@ class QuarantinedDevicesBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
@@ -66,3 +67,6 @@ class QuarantinedDevicesListParamsModel(BaseModel):
         None,
         description="Filter by device serial number",
     )
+
+    # Pydantic model configuration
+    model_config = ConfigDict(extra="forbid")

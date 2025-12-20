@@ -13,6 +13,11 @@ from pydantic import BaseModel, ConfigDict, Field
 class QosModel(BaseModel):
     """QoS configuration for bandwidth allocations."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     enabled: Optional[bool] = Field(None, description="Enable QoS for bandwidth allocation")
     customized: Optional[bool] = Field(None, description="Use customized QoS settings")
     profile: Optional[str] = Field(None, description="QoS profile name")
@@ -23,6 +28,7 @@ class BandwidthAllocationBaseModel(BaseModel):
     """Base model for Bandwidth Allocation objects containing fields common to all CRUD operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
@@ -78,6 +84,11 @@ class BandwidthAllocationResponseModel(BandwidthAllocationBaseModel):
 
 class BandwidthAllocationListResponseModel(BaseModel):
     """Model for the list response from the Bandwidth Allocations API."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     data: List[BandwidthAllocationResponseModel] = Field(
         ..., description="List of bandwidth allocations"

@@ -27,6 +27,7 @@ class ApplicationGroupBaseModel(BaseModel):
     """
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
@@ -34,7 +35,7 @@ class ApplicationGroupBaseModel(BaseModel):
 
     name: str = Field(
         ...,
-        max_length=63,
+        max_length=31,
         description="The name of the application group",
         pattern=r"^[a-zA-Z0-9_ \.-]+$",
     )

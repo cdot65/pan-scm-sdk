@@ -35,6 +35,8 @@ class WeeklyScheduleModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     sunday: Optional[List[str]] = None
     monday: Optional[List[str]] = None
     tuesday: Optional[List[str]] = None
@@ -83,6 +85,8 @@ class DailyScheduleModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     daily: List[str]
 
     @field_validator("daily")
@@ -107,6 +111,8 @@ class RecurringScheduleModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     weekly: Optional[WeeklyScheduleModel] = None
     daily: Optional[List[str]] = None
 
@@ -128,6 +134,8 @@ class NonRecurringScheduleModel(BaseModel):
         non_recurring (List[str]): List of date/time ranges in format YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm.
 
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     non_recurring: List[str]
 
@@ -244,6 +252,8 @@ class ScheduleTypeModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     recurring: Optional[RecurringScheduleModel] = None
     non_recurring: Optional[List[str]] = None
 
@@ -307,6 +317,7 @@ class ScheduleBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

@@ -291,3 +291,68 @@ class TestServiceConnectionModels:
             ServiceConnectionResponseModel(**invalid_data)
         assert "Field required" in str(exc_info.value)
         assert "id" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_bgp_peer_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in BgpPeerModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            BgpPeerModel(
+                local_ip_address="192.168.1.1",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_bgp_protocol_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in BgpProtocolModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            BgpProtocolModel(
+                enable=True,
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_protocol_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ProtocolModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ProtocolModel(
+                bgp={"enable": True},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_qos_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in QosModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            QosModel(
+                enable=True,
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_connection_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceConnectionCreateModel."""
+        data = ServiceConnectionCreateApiFactory.build()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceConnectionCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_connection_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceConnectionUpdateModel."""
+        valid_model = ServiceConnectionUpdateModelFactory.build()
+        data = valid_model.model_dump()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceConnectionUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_connection_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceConnectionResponseModel."""
+        data = ServiceConnectionResponseFactory.build()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceConnectionResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()

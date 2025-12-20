@@ -540,8 +540,8 @@ class HIPObjectCreateModelFactory:
     """Factory for creating data dicts for HIPObjectCreateModel validation testing."""
 
     model = dict
-    name = factory.Sequence(lambda n: f"hip_object_{n}")
-    description = fake.sentence()
+    name = "test-hip-object"
+    description = "Test HIP object description"
     folder = "My Folder"
 
     @classmethod
@@ -661,8 +661,8 @@ class HIPObjectUpdateModelFactory:
 
     model = dict
     id = "12345678-1234-5678-1234-567812345678"
-    name = factory.Sequence(lambda n: f"hip_object_{n}")
-    description = fake.sentence()
+    name = "test-hip-object"
+    description = "Test HIP object description"
     folder = "My Folder"
 
     @classmethod
@@ -719,8 +719,8 @@ class HIPObjectResponseModelFactory:
 
     model = dict
     id = "12345678-1234-5678-1234-567812345678"
-    name = factory.Sequence(lambda n: f"hip_object_{n}")
-    description = fake.sentence()
+    name = "test-hip-object"
+    description = "Test HIP object description"
     folder = "My Folder"
 
     @classmethod

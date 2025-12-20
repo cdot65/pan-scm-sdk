@@ -21,6 +21,11 @@ from pydantic import BaseModel, ConfigDict, Field
 class DeviceLicenseModel(BaseModel):
     """Model for a license entry in available_licenses or installed_licenses."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     feature: str = Field(..., description="Feature name for the license.")
     expires: str = Field(..., description="Expiration date (YYYY-MM-DD).")
     issued: str = Field(..., description="Issued date (YYYY-MM-DD).")
@@ -49,6 +54,11 @@ class DeviceBaseModel(BaseModel):
         description: Device description.
 
     """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: Optional[str] = Field(None, description="Device name.")
     display_name: Optional[str] = Field(
@@ -186,12 +196,18 @@ class DeviceResponseModel(DeviceBaseModel):
     vm_state: Optional[str] = Field(None, description="VM state.")
 
     model_config = ConfigDict(
-        extra="allow"  # Allow extra fields if the API adds new ones
+        extra="allow",  # Allow extra fields if the API adds new ones
+        populate_by_name=True,
     )
 
 
 class DeviceListResponseModel(BaseModel):
     """Model for the paginated response from GET /devices."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     data: List[DeviceResponseModel] = Field(..., description="List of device objects.")
     limit: int = Field(..., description="Max number of devices returned.")

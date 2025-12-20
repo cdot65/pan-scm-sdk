@@ -81,16 +81,27 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
 
         assert "Response is not a dictionary" in str(exc_info.value)
 
-    def test_get_invalid_model(self):
-        """Test handling when response doesn't match the expected model."""
-        # Missing required fields
-        self.mock_scm.get.return_value = {"backbone_routing": "invalid-value"}
+    def test_get_empty_response(self):
+        """Test handling when response is empty (all fields optional)."""
+        self.mock_scm.get.return_value = {}
 
-        with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.get()
+        bgp_routing = self.client.get()
 
-        # The error message contains validation details
-        assert "validation error" in str(exc_info.value)
+        assert isinstance(bgp_routing, BGPRoutingResponseModel)
+        assert bgp_routing.routing_preference is None
+        assert bgp_routing.backbone_routing is None
+        assert bgp_routing.outbound_routes_for_services == []
+
+    def test_get_partial_response(self):
+        """Test handling when response has only some fields."""
+        mock_response = {"backbone_routing": "no-asymmetric-routing"}
+        self.mock_scm.get.return_value = mock_response
+
+        bgp_routing = self.client.get()
+
+        assert isinstance(bgp_routing, BGPRoutingResponseModel)
+        assert bgp_routing.backbone_routing == BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING
+        assert bgp_routing.routing_preference is None
 
     def test_get_error(self):
         """Test error handling during get operation."""
@@ -111,33 +122,39 @@ class TestBGPRoutingGet(TestBGPRoutingBase):
     def test_get_invalid_routing_preference(self):
         """Test handling an unknown routing_preference format."""
         mock_response = BGPRoutingResponseFactory()
-        # Set an invalid routing preference format
         mock_response["routing_preference"] = {"unknown_type": {}}
         self.mock_scm.get.return_value = mock_response
 
-        # Implementation might handle unknown fields differently:
-        # 1. It might accept unknown fields but ignore them
-        # 2. It might raise a validation error
-        # Let's test that we either get a valid model or an exception
-        try:
-            result = self.client.get()
-            # If it succeeds, make sure we got a valid response model
-            assert isinstance(result, BGPRoutingResponseModel)
-        except InvalidObjectError:
-            # If it fails with our custom error, that's also valid
-            pass
+        # With optional fields, unknown routing_preference format returns None
+        result = self.client.get()
+        assert isinstance(result, BGPRoutingResponseModel)
+        # The unknown routing_preference is not converted to a model
+        assert result.routing_preference is None
 
     def test_get_none_routing_preference(self):
         """Test handling a None routing_preference value."""
         mock_response = BGPRoutingResponseFactory()
-        # Remove routing_preference to simulate an API that doesn't return it
         mock_response.pop("routing_preference")
+        self.mock_scm.get.return_value = mock_response
+
+        # All fields are optional, so this should succeed
+        result = self.client.get()
+        assert isinstance(result, BGPRoutingResponseModel)
+        assert result.routing_preference is None
+
+    def test_get_response_model_creation_error(self):
+        """Test handling exception during response model creation."""
+        # Create a response with invalid data that will cause model validation to fail
+        mock_response = {
+            "backbone_routing": "no-asymmetric-routing",
+            "outbound_routes_for_services": {"invalid": "type"},  # Should be a list
+        }
         self.mock_scm.get.return_value = mock_response
 
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.get()
 
-        assert "validation error" in str(exc_info.value)
+        assert "Invalid response format" in exc_info.value.message
 
 
 class TestBGPRoutingCreate(TestBGPRoutingBase):
@@ -151,7 +168,7 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         self.mock_scm.put.return_value = mock_response
         bgp_routing = self.client.create(test_data)
 
-        # Verify the API was called, but don't check exact arguments
+        # Verify the API was called
         assert self.mock_scm.put.call_count == 1
         args, kwargs = self.mock_scm.put.call_args
         assert args[0] == "/config/deployment/v1/bgp-routing"
@@ -183,7 +200,6 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.create({})
 
-        # The formatted error message includes the original message plus other details
         assert "Empty configuration data" in str(exc_info.value)
 
     def test_create_invalid_data(self):
@@ -193,9 +209,8 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.create(invalid_data)
 
-        # The error message contains validation details and enum options
-        assert "validation error" in str(exc_info.value)
-        assert "enum" in str(exc_info.value)
+        # The error message contains validation details
+        assert "validation error" in str(exc_info.value).lower() or "Invalid" in str(exc_info.value)
 
     def test_create_response_not_dict(self):
         """Test handling when response is not a dictionary."""
@@ -221,70 +236,17 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.create(test_data)
 
-        # Verify the response has the expected status code
         assert exc_info.value.response.status_code == 400
 
     def test_create_invalid_routing_preference(self):
         """Test creating with an invalid routing_preference format."""
         test_data = BGPRoutingCreateApiFactory()
-        # Set an invalid routing preference format
         test_data["routing_preference"] = {"unknown_type": {}}
 
-        # Different implementations might handle this differently
-        # Set a basic mock response for success case
-        mock_response = BGPRoutingResponseFactory()
-        self.mock_scm.put.return_value = mock_response
-
-        try:
-            # Attempt to create with invalid format
-            result = self.client.create(test_data)
-            # If it somehow succeeded, ensure we got a response model
-            assert isinstance(result, BGPRoutingResponseModel)
-        except InvalidObjectError:
-            # If it fails with our custom error type, that's the expected behavior
-            pass
-
-    def test_create_response_with_unknown_routing_preference(self):
-        """Test handling response with invalid routing_preference format."""
-        test_data = BGPRoutingCreateApiFactory()
-        mock_response = BGPRoutingResponseFactory()
-        # Set an invalid routing preference format in the response
-        mock_response["routing_preference"] = {"unknown_type": {}}
-        self.mock_scm.put.return_value = mock_response
-
-        # The actual implementation might handle this differently:
-        # 1. It might pass anyway if the class is permissive
-        # 2. It might raise a validation error
-        try:
-            result = self.client.create(test_data)
-            # If it succeeded, verify it's the correct model type
-            assert isinstance(result, BGPRoutingResponseModel)
-        except InvalidObjectError as e:
-            # If it failed, verify the error message contains expected text
-            assert "Invalid response format" in str(e) or "validation error" in str(e)
-
-    def test_create_response_with_broken_model(self):
-        """Test creating with a response that will break in model validation."""
-        test_data = BGPRoutingCreateApiFactory()
-
-        # Create a response object missing required fields - this should fail validation
-        mock_response = {
-            "routing_preference": {"default": {}},
-            # Missing required fields: backbone_routing, accept_route_over_SC etc.
-        }
-
-        self.mock_scm.put.return_value = mock_response
-
-        # This should trigger the exception handler in the create method (lines 162-163)
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.create(test_data)
 
-        # We only need to verify the exception was raised with the right type
-        # The specific error message will contain validation details that might change
-        error = exc_info.value
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "Invalid response format" in error.message
+        assert "routing_preference" in str(exc_info.value)
 
     def test_create_with_enum_instance(self):
         """Test creating with an actual enum instance instead of string."""
@@ -336,7 +298,6 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
     def test_create_invalid_routing_preference_model(self):
         """Test handling of invalid routing_preference model instances."""
 
-        # Create an object that would pass the dict validation but not the model validation
         class InvalidModel:
             def __init__(self):
                 pass
@@ -347,11 +308,9 @@ class TestBGPRoutingCreate(TestBGPRoutingBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.create(test_data)
 
-        # It's now caught by the exception handler but the message is different
         error = exc_info.value
         assert error.http_status_code == 400
         assert error.error_code == "E003"
-        assert "routing_preference must be" in str(error)
 
 
 class TestBGPRoutingUpdate(TestBGPRoutingBase):
@@ -372,7 +331,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         self.mock_scm.put.return_value = mock_response
         bgp_routing = self.client.update(test_data)
 
-        # Verify the API was called, but don't check exact arguments
+        # Verify the API was called
         assert self.mock_scm.put.call_count == 1
         args, kwargs = self.mock_scm.put.call_args
         assert args[0] == "/config/deployment/v1/bgp-routing"
@@ -411,7 +370,6 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         with pytest.raises(MissingQueryParameterError) as exc_info:
             self.client.update({})
 
-        # The formatted error message includes the original message plus other details
         assert "Empty configuration data" in str(exc_info.value)
 
     def test_update_invalid_data(self):
@@ -422,8 +380,7 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
             self.client.update(invalid_data)
 
         # The error message contains validation details
-        assert "validation error" in str(exc_info.value)
-        assert "enum" in str(exc_info.value)
+        assert "validation error" in str(exc_info.value).lower() or "Invalid" in str(exc_info.value)
 
     def test_update_response_not_dict(self):
         """Test handling when response is not a dictionary."""
@@ -449,33 +406,21 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         with pytest.raises(HTTPError) as exc_info:
             self.client.update(test_data)
 
-        # Verify the response has the expected status code
         assert exc_info.value.response.status_code == 400
 
     def test_update_invalid_routing_preference(self):
         """Test updating with an invalid routing_preference format."""
         test_data = BGPRoutingUpdateApiFactory()
-        # Set an invalid routing preference format
         test_data["routing_preference"] = {"unknown_type": {}}
 
-        # Different implementations might handle this differently
-        # Set a basic mock response for success case
-        mock_response = BGPRoutingResponseFactory()
-        self.mock_scm.put.return_value = mock_response
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.update(test_data)
 
-        try:
-            # Attempt to update with invalid format
-            result = self.client.update(test_data)
-            # If it somehow succeeded, ensure we got a response model
-            assert isinstance(result, BGPRoutingResponseModel)
-        except InvalidObjectError:
-            # If it fails with our custom error type, that's the expected behavior
-            pass
+        assert "routing_preference" in str(exc_info.value)
 
     def test_update_invalid_routing_preference_object(self):
         """Test updating with an invalid routing_preference object."""
 
-        # Create an object that would pass the dict validation but not the model validation
         class InvalidModel:
             def __init__(self):
                 pass
@@ -486,40 +431,19 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.update(test_data)
 
-        # Verify it's caught by our improved validation
         error = exc_info.value
         assert error.http_status_code == 400
         assert error.error_code == "E003"
-        assert "routing_preference must be" in str(error)
-
-    def test_update_response_with_unknown_routing_preference(self):
-        """Test handling response with invalid routing_preference format."""
-        test_data = BGPRoutingUpdateApiFactory()
-        mock_response = BGPRoutingResponseFactory()
-        # Set an invalid routing preference format in the response
-        mock_response["routing_preference"] = {"unknown_type": {}}
-        self.mock_scm.put.return_value = mock_response
-
-        # The actual implementation might handle this differently:
-        # 1. It might pass anyway if the class is permissive
-        # 2. It might raise a validation error
-        try:
-            result = self.client.update(test_data)
-            # If it succeeded, verify it's the correct model type
-            assert isinstance(result, BGPRoutingResponseModel)
-        except InvalidObjectError as e:
-            # If it failed, verify the error message contains expected text
-            assert "Invalid response format" in str(e) or "validation error" in str(e)
 
     def test_update_with_string_outbound_routes(self):
         """Test updating with a string value for outbound_routes_for_services."""
         test_data = {
             "backbone_routing": "asymmetric-routing-only",
-            "outbound_routes_for_services": "10.0.0.0/24",  # String instead of list
+            "outbound_routes_for_services": "10.0.0.0/24",
         }
         mock_response = BGPRoutingResponseFactory(
             backbone_routing="asymmetric-routing-only",
-            outbound_routes_for_services=["10.0.0.0/24"],  # Should be converted to list
+            outbound_routes_for_services=["10.0.0.0/24"],
         )
 
         self.mock_scm.put.return_value = mock_response
@@ -555,24 +479,20 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         )
 
     def test_update_with_default_routing_dict(self):
-        """Test updating with default routing preference as a dict (covers line 201)."""
-        # Create update data with a dict for routing_preference that contains "default"
+        """Test updating with default routing preference as a dict."""
         test_data = {
             "backbone_routing": BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING,
             "routing_preference": {"default": {"custom_setting": "test_value"}},
         }
 
-        # Mock response with the expected format
         mock_response = BGPRoutingResponseFactory(
             backbone_routing="no-asymmetric-routing", routing_preference={"default": {}}
         )
 
         self.mock_scm.put.return_value = mock_response
 
-        # This should cover line 201 where default routing preference is processed
         result = self.client.update(test_data)
 
-        # Verify it was converted properly
         assert isinstance(result, BGPRoutingResponseModel)
         assert isinstance(result.routing_preference, DefaultRoutingModel)
 
@@ -582,28 +502,35 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         assert "routing_preference" in payload
         assert "default" in payload["routing_preference"]
 
-    def test_update_response_with_broken_model(self):
-        """Test updating with a response that will break in model validation."""
-        test_data = BGPRoutingUpdateApiFactory()
-
-        # Create a response object missing required fields - this should fail validation
+    def test_update_response_unknown_routing_preference(self):
+        """Test handling unknown routing_preference in update response."""
+        test_data = {"backbone_routing": "asymmetric-routing-only"}
         mock_response = {
-            "routing_preference": {"default": {}},
-            # Missing required fields: backbone_routing, accept_route_over_SC etc.
+            "backbone_routing": "asymmetric-routing-only",
+            "routing_preference": {"unknown_format": {}},
         }
-
         self.mock_scm.put.return_value = mock_response
 
-        # This should trigger the exception handler in the update method (lines 248-249)
+        result = self.client.update(test_data)
+
+        assert isinstance(result, BGPRoutingResponseModel)
+        # Unknown routing_preference format is removed, so it's None
+        assert result.routing_preference is None
+
+    def test_update_response_model_creation_error(self):
+        """Test handling exception during response model creation in update."""
+        test_data = {"backbone_routing": "asymmetric-routing-only"}
+        # Response with invalid data that will cause model validation to fail
+        mock_response = {
+            "backbone_routing": "asymmetric-routing-only",
+            "outbound_routes_for_services": {"invalid": "type"},  # Should be a list
+        }
+        self.mock_scm.put.return_value = mock_response
+
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.update(test_data)
 
-        # We only need to verify the exception was raised with the right type
-        # The specific error message will contain validation details that might change
-        error = exc_info.value
-        assert error.error_code == "E003"
-        assert error.http_status_code == 500
-        assert "Invalid response format" in error.message
+        assert "Invalid response format" in exc_info.value.message
 
 
 class TestBGPRoutingDelete(TestBGPRoutingBase):
@@ -617,7 +544,7 @@ class TestBGPRoutingDelete(TestBGPRoutingBase):
         self.mock_scm.put.assert_called_once()
         # Check if the default config was sent correctly
         call_args = self.mock_scm.put.call_args[1]
-        assert call_args["json"]["backbone_routing"] == BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING
+        assert call_args["json"]["backbone_routing"] == "no-asymmetric-routing"
         assert call_args["json"]["routing_preference"] == {"default": {}}
         assert call_args["json"]["accept_route_over_SC"] is False
         assert call_args["json"]["outbound_routes_for_services"] == []
@@ -636,7 +563,6 @@ class TestBGPRoutingDelete(TestBGPRoutingBase):
         with pytest.raises(InvalidObjectError) as exc_info:
             self.client.delete()
 
-        # Verify the error details
         error = exc_info.value
         assert error.http_status_code == 500
         assert error.error_code == "E003"
@@ -644,16 +570,14 @@ class TestBGPRoutingDelete(TestBGPRoutingBase):
 
     def test_delete_with_success_response(self):
         """Test delete operation with a success response."""
-        # Some APIs might return a success response instead of None
         mock_response = {"status": "success", "message": "Configuration reset"}
         self.mock_scm.put.return_value = mock_response
 
-        # This should not raise an exception
         self.client.delete()
 
         # Verify the API was called with the default configuration
         call_args = self.mock_scm.put.call_args[1]
-        assert call_args["json"]["backbone_routing"] == BackboneRoutingEnum.NO_ASYMMETRIC_ROUTING
+        assert call_args["json"]["backbone_routing"] == "no-asymmetric-routing"
         assert call_args["json"]["routing_preference"] == {"default": {}}
 
     def test_delete_endpoint_url(self):

@@ -8,7 +8,9 @@ Contains Pydantic models for representing application filter objects and related
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
+
+from scm.models.objects.tag import TagName
 
 
 class ApplicationFiltersBaseModel(BaseModel):
@@ -45,6 +47,7 @@ class ApplicationFiltersBaseModel(BaseModel):
         max_length=128,
         description="List of the sub categories within the application filter.",
         examples=[["tcp/3468,6346,11300"]],
+        validation_alias=AliasChoices("sub_category", "subcategory"),
     )
 
     technology: Optional[List[str]] = Field(
@@ -115,6 +118,21 @@ class ApplicationFiltersBaseModel(BaseModel):
         description="Indicates if the application filter should specify applications with a SaaS risk.",
     )
 
+    excessive_bandwidth_use: Optional[bool] = Field(
+        False,
+        description="Indicates if the application filter should specify applications that use excessive bandwidth.",
+    )
+
+    exclude: Optional[List[str]] = Field(
+        None,
+        description="List of applications to exclude from the filter.",
+    )
+
+    tag: Optional[List[TagName]] = Field(
+        None,
+        description="Tags associated with the application filter.",
+    )
+
     # Configuration Container
     folder: Optional[str] = Field(
         None,
@@ -133,6 +151,7 @@ class ApplicationFiltersBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

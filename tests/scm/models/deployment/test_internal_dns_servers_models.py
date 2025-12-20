@@ -154,6 +154,17 @@ class TestInternalDnsServersBaseModel:
                 primary="not-an-ip",
             )
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        with pytest.raises(ValidationError) as exc_info:
+            InternalDnsServersBaseModel(
+                name="test-dns-server",
+                domain_name=["example.com"],
+                primary="192.168.1.1",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestInternalDnsServersCreateModel:
     """Tests for the InternalDnsServersCreateModel."""
@@ -197,6 +208,14 @@ class TestInternalDnsServersCreateModel:
         model_data = InternalDnsServersCreateModelFactory.build_without_secondary()
         model = InternalDnsServersCreateModel(**model_data)
         assert model.secondary is None
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        model_data = InternalDnsServersCreateModelFactory.build_valid()
+        model_data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            InternalDnsServersCreateModel(**model_data)
+        assert "extra" in str(exc_info.value).lower()
 
 
 class TestInternalDnsServersUpdateModel:
@@ -268,6 +287,14 @@ class TestInternalDnsServersUpdateModel:
             test_model.validate_update_model()
         assert "domain_name must not be empty if provided" in str(exc_info.value)
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        model_data = InternalDnsServersUpdateModelFactory.build_valid()
+        model_data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            InternalDnsServersUpdateModel(**model_data)
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestInternalDnsServersResponseModel:
     """Tests for the InternalDnsServersResponseModel."""
@@ -313,3 +340,11 @@ class TestInternalDnsServersResponseModel:
         with pytest.raises(ValueError) as exc_info:
             test_model.validate_response_model()
         assert "domain_name must not be empty in response" in str(exc_info.value)
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        model_data = InternalDnsServersResponseModelFactory.build_valid()
+        model_data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            InternalDnsServersResponseModel(**model_data)
+        assert "extra" in str(exc_info.value).lower()

@@ -207,4 +207,32 @@ class TestApplicationResponseModel:
         assert "String should have at most 4094 characters" in str(exc_info.value)
 
 
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_application_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ApplicationCreateModel."""
+        data = ApplicationCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_application_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ApplicationUpdateModel."""
+        data = ApplicationUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_application_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ApplicationResponseModel."""
+        data = ApplicationResponseModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+
 # -------------------- End of Test Classes --------------------

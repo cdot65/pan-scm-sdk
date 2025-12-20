@@ -33,9 +33,10 @@ class TestHIPProfileCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             HIPProfileCreateModel(**data)
         error_msg = str(exc_info.value)
-        assert "2 validation errors for HIPProfileCreateModel" in error_msg
+        assert "3 validation errors for HIPProfileCreateModel" in error_msg
         assert "name\n  Field required" in error_msg
         assert "match\n  Field required" in error_msg
+        assert "Extra inputs are not permitted" in error_msg
 
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
@@ -119,14 +120,14 @@ class TestHIPProfileUpdateModel:
         assert "validation error" in error_msg
         assert "name\n  Field required" in error_msg
         assert "match\n  Field required" in error_msg
-        assert "id\n  Field required" in error_msg
+        assert "Extra inputs are not permitted" in error_msg
 
-    def test_missing_id(self):
-        """Test validation when 'id' field is missing."""
+    def test_id_optional(self):
+        """Test that id field is optional in update model."""
         data = HIPProfileUpdateModelFactory.build_without_id()
-        with pytest.raises(ValidationError) as exc_info:
-            HIPProfileUpdateModel(**data)
-        assert "id\n  Field required" in str(exc_info.value)
+        model = HIPProfileUpdateModel(**data)
+        assert model.id is None
+        assert model.name == data["name"]
 
     def test_invalid_id_format(self):
         """Test validation for invalid UUID format."""
@@ -242,3 +243,31 @@ class TestHIPProfileResponseModel:
         assert model.match == request_data["match"]
         assert model.folder == request_data["folder"]
         assert "id" in response_data
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_hip_profile_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in HIPProfileCreateModel."""
+        data = HIPProfileCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            HIPProfileCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_hip_profile_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in HIPProfileUpdateModel."""
+        data = HIPProfileUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            HIPProfileUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_hip_profile_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in HIPProfileResponseModel."""
+        data = HIPProfileResponseModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            HIPProfileResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()

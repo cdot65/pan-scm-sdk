@@ -80,7 +80,15 @@ from .syslog_server_profiles import (
     SyslogServerProfileResponseModel,
     SyslogServerProfileUpdateModel,
 )
-from .tag import TagCreateModel, TagResponseModel, TagUpdateModel
+from .tag import (
+    TAG_NAME_PATTERN,
+    TagCreateModel,
+    TagList,
+    TagName,
+    TagResponseModel,
+    TagString,
+    TagUpdateModel,
+)
 
 __all__ = [
     "AddressCreateModel",
@@ -134,8 +142,12 @@ __all__ = [
     "ServiceGroupResponseModel",
     "ServiceGroupCreateModel",
     "ServiceGroupUpdateModel",
+    "TAG_NAME_PATTERN",
     "TagCreateModel",
+    "TagList",
+    "TagName",
     "TagResponseModel",
+    "TagString",
     "TagUpdateModel",
     "QuarantinedDevicesCreateModel",
     "QuarantinedDevicesResponseModel",

@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class NatType(str, Enum):
     """NAT types supported by the system."""
@@ -61,6 +63,11 @@ class BiDirectional(str, Enum):
 class InterfaceAddress(BaseModel):
     """Interface address configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     interface: str = Field(..., description="Interface name")
     ip: Optional[str] = Field(None, description="IP address")
     floating_ip: Optional[str] = Field(None, description="Floating IP address")
@@ -69,11 +76,21 @@ class InterfaceAddress(BaseModel):
 class DynamicIpAndPortTranslatedAddress(BaseModel):
     """Dynamic IP and port translated address configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     translated_address: List[str] = Field(..., description="Translated source IP addresses")
 
 
 class DynamicIpAndPortInterfaceAddress(BaseModel):
     """Dynamic IP and port interface address configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     interface: str = Field(..., description="Interface name")
     ip: Optional[str] = Field(None, description="Translated source IP address")
@@ -82,6 +99,11 @@ class DynamicIpAndPortInterfaceAddress(BaseModel):
 
 class DynamicIp(BaseModel):
     """Dynamic IP translation configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     translated_address: List[str] = Field(..., description="Translated IP addresses")
     fallback_type: Optional[str] = Field(
@@ -105,6 +127,11 @@ class DynamicIp(BaseModel):
 class StaticIp(BaseModel):
     """Static IP translation configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     translated_address: str = Field(..., description="Translated IP address")
     bi_directional: Optional[BiDirectional] = Field(
         None,
@@ -112,6 +139,7 @@ class StaticIp(BaseModel):
     )
 
     @field_validator("bi_directional")
+    @classmethod
     def convert_boolean_to_enum(cls, v):
         """Convert boolean to BiDirectional enum if needed."""
         if v is None:
@@ -125,6 +153,11 @@ class StaticIp(BaseModel):
 
 class DynamicIpAndPort(BaseModel):
     """Dynamic IP and port translation configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     # This class uses discriminated union pattern
     # Either translated_address or interface_address should be provided
@@ -149,7 +182,11 @@ class DynamicIpAndPort(BaseModel):
 class SourceTranslation(BaseModel):
     """Source translation configuration."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        validate_assignment=True,
+    )
 
     # Using discriminated union pattern for different source translation types
     dynamic_ip_and_port: Optional[DynamicIpAndPort] = Field(
@@ -176,13 +213,22 @@ class SourceTranslation(BaseModel):
 class DnsRewrite(BaseModel):
     """DNS rewrite configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     direction: DnsRewriteDirection = Field(..., description="DNS rewrite direction")
 
 
 class DestinationTranslation(BaseModel):
     """Destination translation configuration."""
 
-    model_config = ConfigDict(validate_assignment=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        validate_assignment=True,
+    )
 
     translated_address: Optional[str] = Field(None, description="Translated destination IP address")
     translated_port: Optional[int] = Field(
@@ -200,6 +246,7 @@ class NatRuleBaseModel(BaseModel):
     """Base model for NAT Rules containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
@@ -214,7 +261,7 @@ class NatRuleBaseModel(BaseModel):
         None,
         description="The description of the NAT rule",
     )
-    tag: List[str] = Field(
+    tag: List[TagName] = Field(
         default_factory=list,
         description="The tags associated with the NAT rule",
     )
@@ -294,6 +341,7 @@ class NatRuleBaseModel(BaseModel):
         "tag",
         mode="before",
     )
+    @classmethod
     def ensure_list_of_strings(cls, v):
         """Ensure value is a list of strings, converting from string if needed.
 
@@ -322,6 +370,7 @@ class NatRuleBaseModel(BaseModel):
         "destination",
         "tag",
     )
+    @classmethod
     def ensure_unique_items(cls, v):
         """Ensure all items in the list are unique.
 
@@ -337,18 +386,6 @@ class NatRuleBaseModel(BaseModel):
         """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
-        return v
-
-    @field_validator("tag")
-    def validate_tags(cls, v):
-        """Validate tags."""
-        for tag in v:
-            if not tag or not isinstance(tag, str) or not tag.strip():
-                raise ValueError("Tags must be non-empty strings")
-            if not all(c.isalnum() or c in "-_" for c in tag):
-                raise ValueError(
-                    "Tags should only contain alphanumeric characters, hyphens, or underscores"
-                )
         return v
 
     @model_validator(mode="after")
@@ -422,6 +459,8 @@ class NatRuleMoveModel(BaseModel):
     """Model for NAT rule move operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
     )

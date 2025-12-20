@@ -162,7 +162,7 @@ class TestServiceCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             ServiceCreateModel(**data)
         error_msg = str(exc_info.value)
-        assert "2 validation errors for ServiceCreateModel" in error_msg
+        assert "validation error" in error_msg.lower()
         assert "name\n  Field required" in error_msg
         assert "protocol\n  Field required" in error_msg
 
@@ -213,7 +213,7 @@ class TestServiceUpdateModel:
         with pytest.raises(ValidationError) as exc_info:
             ServiceUpdateModel(**data)
         error_msg = str(exc_info.value)
-        assert "3 validation errors for ServiceUpdateModel" in error_msg
+        assert "validation error" in error_msg.lower()
         assert "name\n  Field required" in error_msg
         assert "protocol\n  Field required" in error_msg
         assert "id\n  Field required" in error_msg
@@ -281,6 +281,68 @@ class TestServiceResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             ServiceResponseModel(**data)
         assert "Input should be a valid UUID" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_override_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in Override."""
+        with pytest.raises(ValidationError) as exc_info:
+            Override(timeout=10, unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_tcp_protocol_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in TCPProtocol."""
+        with pytest.raises(ValidationError) as exc_info:
+            TCPProtocol(port="80", unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_udp_protocol_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in UDPProtocol."""
+        with pytest.raises(ValidationError) as exc_info:
+            UDPProtocol(port="53", unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_protocol_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in Protocol."""
+        with pytest.raises(ValidationError) as exc_info:
+            Protocol(tcp={"port": "80"}, unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceCreateModel(
+                name="test-service",
+                folder="Texas",
+                protocol={"tcp": {"port": "80"}},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceUpdateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceUpdateModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-service",
+                protocol={"tcp": {"port": "80"}},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceResponseModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-service",
+                folder="Texas",
+                protocol={"tcp": {"port": "80"}},
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
 
 
 # -------------------- End of Test Classes --------------------

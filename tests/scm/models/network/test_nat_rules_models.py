@@ -367,22 +367,24 @@ class TestNatRuleResponseModel:
         assert model.source_translation.dynamic_ip_and_port.translated_address == ["192.168.1.100"]
 
     def test_nat_rule_custom_tag_accepted(self):
-        """Test that using custom tags is now allowed."""
+        """Test that tags with valid patterns are accepted, including whitespace."""
         data = NatRuleResponseFactory().model_dump()
 
-        # Test with custom tags
-        data["tag"] = ["custom-tag", "another_tag"]
+        # Test with custom tags including whitespace (now valid per OpenAPI spec)
+        data["tag"] = ["custom-tag", "another_tag", "tag with spaces", "My Tag (1)"]
         model = NatRuleResponseModel(**data)
 
         # Verify the custom tags are accepted
         assert "custom-tag" in model.tag
         assert "another_tag" in model.tag
+        assert "tag with spaces" in model.tag
+        assert "My Tag (1)" in model.tag
 
-        # Test invalid tags
-        invalid_tags = ["", " ", "tag with spaces", "tag@with!symbols"]
+        # Test invalid tags (characters not allowed by TagName pattern)
+        invalid_tags = ["tag@with!symbols", "tag#invalid", "tag$bad"]
         for invalid_tag in invalid_tags:
             data["tag"] = [invalid_tag]
-            with pytest.raises(ValueError):
+            with pytest.raises(ValidationError):
                 NatRuleResponseModel(**data)
 
     def test_nat64_dns_rewrite_compatibility(self):
@@ -427,17 +429,43 @@ class TestNatRuleResponseModel:
         )
 
 
-#
-# class TestNatRuleBaseModel:
-#     """Tests for NatRuleBaseModel validation."""
-#
-#     def test_ensure_list_of_strings_with_non_string_items(self):
-#         """Test validation when list contains non-string items."""
-#         data = NatRuleCreateModelFactory.build_valid()
-#         data["tag"] = ["valid", 123, "also-valid"]  # Include a non-string item
-#         with pytest.raises(ValueError) as exc_info:
-#             NatRuleCreateModelFactory(**data)
-#         assert "All items must be strings" in str(exc_info.value)
-#
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all NAT rule models."""
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleCreateModel."""
+        data = NatRuleCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleUpdateModel."""
+        data = NatRuleUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleResponseModel."""
+        data = NatRuleResponseFactory().model_dump()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_move_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleMoveModel."""
+        data = {
+            "destination": NatMoveDestination.TOP,
+            "rulebase": NatRulebase.PRE,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleMoveModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 # -------------------- End of Test Classes --------------------

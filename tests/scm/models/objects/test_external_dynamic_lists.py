@@ -142,3 +142,37 @@ class TestExternalDynamicListsResponseModel:
         assert model.name == data["name"]
         # Compare string representations of UUIDs
         assert str(model.id) == data["id"]
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_external_dynamic_lists_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ExternalDynamicListsCreateModel."""
+        from pydantic import ValidationError
+
+        data = ExternalDynamicListsCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ExternalDynamicListsCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_external_dynamic_lists_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ExternalDynamicListsUpdateModel."""
+        from pydantic import ValidationError
+
+        data = ExternalDynamicListsUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ExternalDynamicListsUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_external_dynamic_lists_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ExternalDynamicListsResponseModel."""
+        from pydantic import ValidationError
+
+        data = ExternalDynamicListsResponseModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ExternalDynamicListsResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()

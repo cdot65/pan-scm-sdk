@@ -633,10 +633,9 @@ class TestTagUpdate(TestTagBase):
     def test_update_http_error_no_response_content(self):
         """Test update method when HTTP error has no response content."""
         # Create test data as Pydantic model
-        update_data = TagUpdateApiFactory.with_color(
+        update_data = TagUpdateApiFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
-            with_color="asdf",
         )
 
         # Create a mock response object without content

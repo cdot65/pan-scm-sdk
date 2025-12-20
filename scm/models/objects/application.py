@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class ApplicationBaseModel(BaseModel):
     """Base model for Application objects containing fields common to all CRUD operations.
@@ -19,6 +21,7 @@ class ApplicationBaseModel(BaseModel):
     """
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
@@ -70,6 +73,10 @@ class ApplicationBaseModel(BaseModel):
         description="List of TCP/UDP ports associated with the application.",
         examples=[["tcp/3468,6346,11300"]],
     )
+    tag: Optional[List[TagName]] = Field(
+        None,
+        description="Tags associated with the application.",
+    )
     folder: Optional[str] = Field(
         None,
         max_length=64,
@@ -83,6 +90,13 @@ class ApplicationBaseModel(BaseModel):
         description="The configuration snippet for the application.",
         pattern=r"^[a-zA-Z\d\-_. ]+$",
         examples=["predefined-snippet"],
+    )
+    device: Optional[str] = Field(
+        None,
+        max_length=64,
+        description="The device where the application configuration is stored.",
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        examples=["DeviceA"],
     )
 
     # Boolean attributes

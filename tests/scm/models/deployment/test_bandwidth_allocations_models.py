@@ -51,6 +51,14 @@ class TestQosModel:
         model = QosModel(**data)
         assert model.guaranteed_ratio == 1.0
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = QosModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            QosModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestBandwidthAllocationBaseModel:
     """Tests for the BandwidthAllocationBaseModel pydantic validation."""
@@ -109,6 +117,13 @@ class TestBandwidthAllocationBaseModel:
         assert "allocated_bandwidth" in error_details
         assert "greater than" in error_details
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = {"name": "test-region", "allocated_bandwidth": 100, "unknown_field": "fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            BandwidthAllocationBaseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestBandwidthAllocationCreateModel:
     """Tests for the BandwidthAllocationCreateModel pydantic validation."""
@@ -130,6 +145,14 @@ class TestBandwidthAllocationCreateModel:
         assert model.qos.enabled is True
         assert model.qos.profile == data["qos"]["profile"]
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected (inherited from BaseModel)."""
+        data = BandwidthAllocationCreateModelFactory.build_valid()
+        data["unknown_field"] = "fail"
+        with pytest.raises(ValidationError) as exc_info:
+            BandwidthAllocationCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestBandwidthAllocationUpdateModel:
     """Tests for the BandwidthAllocationUpdateModel pydantic validation."""
@@ -149,6 +172,14 @@ class TestBandwidthAllocationUpdateModel:
         assert model.name == data["name"]
         assert model.allocated_bandwidth == data["allocated_bandwidth"]
         assert model.spn_name_list is None
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected (inherited from BaseModel)."""
+        data = BandwidthAllocationUpdateModelFactory.build_valid()
+        data["unknown_field"] = "fail"
+        with pytest.raises(ValidationError) as exc_info:
+            BandwidthAllocationUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
 
 
 class TestBandwidthAllocationResponseModel:
@@ -181,6 +212,14 @@ class TestBandwidthAllocationResponseModel:
         assert model.spn_name_list is None
         assert model.qos is None
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected (inherited from BaseModel)."""
+        data = BandwidthAllocationResponseModelFactory.build_valid()
+        data["unknown_field"] = "fail"
+        with pytest.raises(ValidationError) as exc_info:
+            BandwidthAllocationResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
 
 class TestBandwidthAllocationListResponseModel:
     """Tests for the BandwidthAllocationListResponseModel pydantic validation."""
@@ -211,3 +250,11 @@ class TestBandwidthAllocationListResponseModel:
         model = BandwidthAllocationListResponseModel(**data)
         assert len(model.data) == 0
         assert model.total == 0
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = BandwidthAllocationResponseModelFactory.build_list_response()
+        data["unknown_field"] = "fail"
+        with pytest.raises(ValidationError) as exc_info:
+            BandwidthAllocationListResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()

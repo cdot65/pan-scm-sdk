@@ -581,4 +581,84 @@ class TestSecurityRuleNonUniqueValues:
         assert len(model.application) == len(set(model.application))
 
 
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all models."""
+
+    def test_create_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in CreateModel."""
+        data = SecurityRuleCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in UpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRule",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestRule",
+            "folder": "Texas",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_move_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in MoveModel."""
+        data = {
+            "destination": "top",
+            "rulebase": "pre",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleMoveModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_profile_setting_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ProfileSetting."""
+        data = {
+            "group": ["best-practice"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityRuleProfileSetting(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestEnumValues:
+    """Tests for enum values."""
+
+    def test_action_enum_values(self):
+        """Test all SecurityRuleAction enum values."""
+        expected = {"allow", "deny", "drop", "reset-client", "reset-server", "reset-both"}
+        actual = {v.value for v in SecurityRuleAction}
+        assert expected == actual
+
+    def test_move_destination_enum_values(self):
+        """Test all SecurityRuleMoveDestination enum values."""
+        expected = {"top", "bottom", "before", "after"}
+        actual = {v.value for v in SecurityRuleMoveDestination}
+        assert expected == actual
+
+    def test_rulebase_enum_values(self):
+        """Test all SecurityRuleRulebase enum values."""
+        from scm.models.security.security_rules import SecurityRuleRulebase
+
+        expected = {"pre", "post"}
+        actual = {v.value for v in SecurityRuleRulebase}
+        assert expected == actual
+
+
 # -------------------- End of Test Classes --------------------
