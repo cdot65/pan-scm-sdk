@@ -154,6 +154,14 @@ class TestHIPObjectAPI:
             assert obj.id is not None
             assert obj.name is not None
 
+    def test_hip_object_custom_checks_parsing(self, live_client, folder):
+        """Verify HIPObject custom_checks field parses correctly if present."""
+        hip_objects = live_client.hip_object.list(folder=folder, limit=10)
+        for obj in hip_objects:
+            # custom_checks is optional, but if present should be valid
+            if obj.custom_checks is not None:
+                assert obj.custom_checks.criteria is not None
+
 
 @pytest.mark.api
 class TestHIPProfileAPI:
