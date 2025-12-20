@@ -533,7 +533,6 @@ class TestBGPRoutingUpdate(TestBGPRoutingBase):
         assert "Invalid response format" in exc_info.value.message
 
 
-
 class TestBGPRoutingDelete(TestBGPRoutingBase):
     """Tests for resetting BGP routing settings (delete method)."""
 
