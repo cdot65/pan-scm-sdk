@@ -3,11 +3,21 @@
 ## Overview {#Overview}
 
 The Application models provide a structured way to manage custom applications in Palo Alto Networks' Strata Cloud
-Manager.
-These models support defining application characteristics like category, risk level, and behavioral attributes.
-Applications
-can be defined in folders or snippets. The models handle validation of inputs and outputs when interacting with the SCM
-API.
+Manager. These models support defining application characteristics like category, risk level, and behavioral attributes.
+Applications can be defined in folders or snippets. The models handle validation of inputs and outputs when interacting
+with the SCM API.
+
+### Models
+
+| Model                      | Purpose                                          |
+|----------------------------|--------------------------------------------------|
+| `ApplicationBaseModel`     | Base model with common fields for all operations |
+| `ApplicationCreateModel`   | Model for creating new applications              |
+| `ApplicationUpdateModel`   | Model for updating existing applications         |
+| `ApplicationResponseModel` | Model for API responses                          |
+
+The Base, Create, and Update models use `extra="forbid"` configuration, which rejects any fields not explicitly defined.
+The Response model uses `extra="allow"` to handle undocumented API fields (SaaS attributes, compliance flags, etc.).
 
 ## Attributes
 
@@ -20,6 +30,7 @@ API.
 | risk                      | int       | Yes      | None    | Risk level associated with the application                                             |
 | description               | str       | No       | None    | Description of the application. Max length: 1023 chars                                 |
 | ports                     | List[str] | No       | None    | List of TCP/UDP ports                                                                  |
+| tag                       | List[str] | No       | None    | Tags associated with the application                                                   |
 | folder                    | str       | No*      | None    | Folder where application is defined. Max length: 64 chars                              |
 | snippet                   | str       | No*      | None    | Snippet where application is defined. Max length: 64 chars                             |
 | evasive                   | bool      | No       | False   | Uses evasive techniques                                                                |
@@ -94,9 +105,16 @@ except ValueError as e:
 ### Creating a Basic Application
 
 ```python
-# Using dictionary
-from scm.config.objects import Application
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 app_dict = {
     "name": "custom-db",
     "category": "business-systems",
@@ -107,24 +125,7 @@ app_dict = {
     "ports": ["tcp/1433"]
 }
 
-app = Application(api_client)
-response = app.create(app_dict)
-
-# Using model directly
-from scm.models.objects import ApplicationCreateModel
-
-app = ApplicationCreateModel(
-    name="custom-db",
-    category="business-systems",
-    subcategory="database",
-    technology="client-server",
-    risk=3,
-    folder="Custom Apps",
-    ports=["tcp/1433"]
-)
-
-payload = app.model_dump(exclude_unset=True)
-response = app.create(payload)
+response = client.application.create(app_dict)
 ```
 
 ### Creating an Application with Behavioral Attributes
@@ -146,53 +147,20 @@ app_dict = {
     "prone_to_misuse": True
 }
 
-response = app.create(app_dict)
-
-# Using model directly
-app = ApplicationCreateModel(
-    name="file-share",
-    category="collaboration",
-    subcategory="file-sharing",
-    technology="peer-to-peer",
-    risk=4,
-    folder="Texas",
-    description="Custom file sharing application",
-    ports=["tcp/6346", "tcp/6347"],
-    evasive=True,
-    transfers_files=True,
-    excessive_bandwidth_use=True,
-    prone_to_misuse=True
-)
-
-payload = app.model_dump(exclude_unset=True)
-response = app.create(payload)
+response = client.application.create(app_dict)
 ```
 
 ### Updating an Application
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "custom-db-updated",
-    "risk": 4,
-    "description": "Updated database application",
-    "has_known_vulnerabilities": True
-}
+# Fetch existing application
+existing = client.application.fetch(name="custom-db", folder="Texas")
 
-response = app.update(update_dict)
+# Modify attributes using dot notation
+existing.risk = 4
+existing.description = "Updated database application"
+existing.has_known_vulnerabilities = True
 
-# Using model directly
-from scm.models.objects import ApplicationUpdateModel
-
-update = ApplicationUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="custom-db-updated",
-    risk=4,
-    description="Updated database application",
-    has_known_vulnerabilities=True
-)
-
-payload = update.model_dump(exclude_unset=True)
-response = app.update(payload)
+# Pass modified object to update()
+updated = client.application.update(existing)
 ```

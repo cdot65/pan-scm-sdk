@@ -31,38 +31,39 @@ deleting custom applications with specific characteristics, risk levels, and beh
 
 ## Core Methods
 
-| Method     | Description                     | Parameters                            | Return Type                      |
-|------------|---------------------------------|---------------------------------------|----------------------------------|
-| `create()` | Creates a new application       | `data: Dict[str, Any]`                | `ApplicationResponseModel`       |
-| `get()`    | Retrieves an application by ID  | `object_id: str`                      | `ApplicationResponseModel`       |
-| `update()` | Updates an existing application | `application: ApplicationUpdateModel` | `ApplicationResponseModel`       |
-| `delete()` | Deletes an application          | `object_id: str`                      | `None`                           |
-| `list()`   | Lists apps with filtering       | `folder: str`, `**filters`            | `List[ApplicationResponseModel]` |
-| `fetch()`  | Gets app by name and container  | `name: str`, `folder: str`            | `ApplicationResponseModel`       |
+| Method     | Description                     | Parameters                                                      | Return Type                      |
+|------------|---------------------------------|-----------------------------------------------------------------|----------------------------------|
+| `create()` | Creates a new application       | `data: Dict[str, Any]`                                          | `ApplicationResponseModel`       |
+| `get()`    | Retrieves an application by ID  | `object_id: str`                                                | `ApplicationResponseModel`       |
+| `update()` | Updates an existing application | `application: ApplicationUpdateModel`                           | `ApplicationResponseModel`       |
+| `delete()` | Deletes an application          | `object_id: str`                                                | `None`                           |
+| `list()`   | Lists apps with filtering       | `folder: str`, `snippet: str`, `exact_match: bool`, `**filters` | `List[ApplicationResponseModel]` |
+| `fetch()`  | Gets app by name and container  | `name: str`, `folder: str`, `snippet: str`                      | `ApplicationResponseModel`       |
 
 ## Application Model Attributes
 
-| Attribute                   | Type      | Required | Description                                 |
-|-----------------------------|-----------|----------|---------------------------------------------|
-| `name`                      | str       | Yes      | Name of application (max 63 chars)          |
-| `id`                        | UUID      | Yes*     | Unique identifier (*response only)          |
-| `category`                  | str       | Yes      | High-level category (max 50 chars)          |
-| `subcategory`               | str       | Yes      | Specific sub-category (max 50 chars)        |
-| `technology`                | str       | Yes      | Underlying technology (max 50 chars)        |
-| `risk`                      | int       | Yes      | Risk level (1-5)                            |
-| `description`               | str       | No       | Description (max 1023 chars)                |
-| `ports`                     | List[str] | No       | Associated TCP/UDP ports                    |
-| `folder`                    | str       | Yes**    | Folder location (**one container required)  |
-| `snippet`                   | str       | Yes**    | Snippet location (**one container required) |
-| `evasive`                   | bool      | No       | Uses evasive techniques                     |
-| `pervasive`                 | bool      | No       | Widely used                                 |
-| `excessive_bandwidth_use`   | bool      | No       | Uses excessive bandwidth                    |
-| `used_by_malware`           | bool      | No       | Used by malware                             |
-| `transfers_files`           | bool      | No       | Transfers files                             |
-| `has_known_vulnerabilities` | bool      | No       | Has known vulnerabilities                   |
-| `tunnels_other_apps`        | bool      | No       | Tunnels other applications                  |
-| `prone_to_misuse`           | bool      | No       | Prone to misuse                             |
-| `no_certifications`         | bool      | No       | Lacks certifications                        |
+| Attribute                   | Type      | Required | Default | Description                                 |
+|-----------------------------|-----------|----------|---------|---------------------------------------------|
+| `name`                      | str       | Yes      | None    | Name of application (max 63 chars)          |
+| `id`                        | UUID      | Yes*     | None    | Unique identifier (*response only)          |
+| `category`                  | str       | Yes      | None    | High-level category (max 50 chars)          |
+| `subcategory`               | str       | Yes      | None    | Specific sub-category (max 50 chars)        |
+| `technology`                | str       | Yes      | None    | Underlying technology (max 50 chars)        |
+| `risk`                      | int       | Yes      | None    | Risk level (1-5)                            |
+| `description`               | str       | No       | None    | Description (max 1023 chars)                |
+| `ports`                     | List[str] | No       | None    | Associated TCP/UDP ports                    |
+| `tag`                       | List[str] | No       | None    | Tags associated with the application        |
+| `folder`                    | str       | Yes**    | None    | Folder location (**one container required)  |
+| `snippet`                   | str       | Yes**    | None    | Snippet location (**one container required) |
+| `evasive`                   | bool      | No       | False   | Uses evasive techniques                     |
+| `pervasive`                 | bool      | No       | False   | Widely used                                 |
+| `excessive_bandwidth_use`   | bool      | No       | False   | Uses excessive bandwidth                    |
+| `used_by_malware`           | bool      | No       | False   | Used by malware                             |
+| `transfers_files`           | bool      | No       | False   | Transfers files                             |
+| `has_known_vulnerabilities` | bool      | No       | False   | Has known vulnerabilities                   |
+| `tunnels_other_apps`        | bool      | No       | False   | Tunnels other applications                  |
+| `prone_to_misuse`           | bool      | No       | False   | Prone to misuse                             |
+| `no_certifications`         | bool      | No       | False   | Lacks certifications                        |
 
 ## Exceptions
 
@@ -293,7 +294,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.objects import Application
 
 # Initialize client
 client = ScmClient(
@@ -302,18 +302,14 @@ client = ScmClient(
     tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit on the application service
+client.application.max_limit = 4321
 
-# Option 1: Use the unified client interface but create a custom Application instance with max_limit
-app_service = Application(client, max_limit=4321)
-all_apps1 = app_service.list(folder='Texas')
+# List all applications - auto-paginates through results
+all_apps = client.application.list(folder='Texas')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
-all_apps2 = client.application.list(folder='Texas')
-
-# Both options will auto-paginate through all available objects.
-# The applications are fetched in chunks according to the max_limit.
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting Applications
