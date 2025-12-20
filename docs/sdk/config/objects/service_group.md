@@ -43,15 +43,18 @@ that can be used to organize and manage collections of services for security pol
 
 ## Service Group Model Attributes
 
-| Attribute | Type      | Required | Description                                 |
-|-----------|-----------|----------|---------------------------------------------|
-| `name`    | str       | Yes      | Name of group (max 63 chars)                |
-| `id`      | UUID      | Yes*     | Unique identifier (*response only)          |
-| `members` | List[str] | Yes      | List of service members                     |
-| `tag`     | List[str] | No       | List of tags (max 64 chars each)            |
-| `folder`  | str       | Yes**    | Folder location (**one container required)  |
-| `snippet` | str       | Yes**    | Snippet location (**one container required) |
-| `device`  | str       | Yes**    | Device location (**one container required)  |
+| Attribute | Type      | Required | Default | Description                                   |
+|-----------|-----------|----------|---------|-----------------------------------------------|
+| `name`    | str       | Yes      | None    | Name of group (max 63 chars)                  |
+| `id`      | UUID      | Yes*     | None    | Unique identifier (*response only)            |
+| `members` | List[str] | Yes      | None    | List of service members (1-1024 items)        |
+| `tag`     | List[str] | No       | None    | List of tags                                  |
+| `folder`  | str       | No**     | None    | Folder location (max 64 chars)                |
+| `snippet` | str       | No**     | None    | Snippet location (max 64 chars)               |
+| `device`  | str       | No**     | None    | Device location (max 64 chars)                |
+
+\* The `id` field is only present in response models.
+\*\* Exactly one container type (folder, snippet, or device) must be provided for create operations.
 
 ## Exceptions
 
@@ -68,10 +71,10 @@ that can be used to organize and manage collections of services for security pol
 ## Basic Configuration
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -179,76 +182,80 @@ The `list()` method supports additional parameters to refine your query results 
 
 ```python
 # Only return service_groups defined exactly in 'Texas'
-exact_service_groups = service_groups.list(
-   folder='Texas',
-   exact_match=True
+exact_service_groups = client.service_group.list(
+    folder='Texas',
+    exact_match=True
 )
 
-for app in exact_service_groups:
-   print(f"Exact match: {app.name} in {app.folder}")
+for group in exact_service_groups:
+    print(f"Exact match: {group.name} in {group.folder}")
 
 # Exclude all service_groups from the 'All' folder
-no_all_service_groups = service_groups.list(
-   folder='Texas',
-   exclude_folders=['All']
+no_all_service_groups = client.service_group.list(
+    folder='Texas',
+    exclude_folders=['All']
 )
 
-for app in no_all_service_groups:
-   assert app.folder != 'All'
-   print(f"Filtered out 'All': {app.name}")
+for group in no_all_service_groups:
+    assert group.folder != 'All'
+    print(f"Filtered out 'All': {group.name}")
 
 # Exclude service_groups that come from 'default' snippet
-no_default_snippet = service_groups.list(
-   folder='Texas',
-   exclude_snippets=['default']
+no_default_snippet = client.service_group.list(
+    folder='Texas',
+    exclude_snippets=['default']
 )
 
-for app in no_default_snippet:
-   assert app.snippet != 'default'
-   print(f"Filtered out 'default' snippet: {app.name}")
+for group in no_default_snippet:
+    assert group.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {group.name}")
 
 # Exclude service_groups associated with 'DeviceA'
-no_deviceA = service_groups.list(
-   folder='Texas',
-   exclude_devices=['DeviceA']
+no_deviceA = client.service_group.list(
+    folder='Texas',
+    exclude_devices=['DeviceA']
 )
 
-for app in no_deviceA:
-   assert app.device != 'DeviceA'
-   print(f"Filtered out 'DeviceA': {app.name}")
+for group in no_deviceA:
+    assert group.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {group.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = service_groups.list(
-   folder='Texas',
-   exact_match=True,
-   exclude_folders=['All'],
-   exclude_snippets=['default'],
-   exclude_devices=['DeviceA']
+combined_filters = client.service_group.list(
+    folder='Texas',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default'],
+    exclude_devices=['DeviceA']
 )
 
-for app in combined_filters:
-   print(f"Combined filters result: {app.name} in {app.folder}")
+for group in combined_filters:
+    print(f"Combined filters result: {group.name} in {group.folder}")
 ```
 
 ### Controlling Pagination with max_limit
 
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
 
 ```python
-# Initialize the client with a custom max_limit for service groups
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-client = Scm(
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    service_group_max_limit=4321
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
+# Configure max_limit on the service_group service
+client.service_group.max_limit = 1000
+
+# List all service groups - auto-paginates through results
 all_groups = client.service_group.list(folder='Texas')
 
-# 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# The list() method will retrieve up to 1000 objects per API call
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_groups)} service groups")
 ```
 
 ### Deleting Service Groups
