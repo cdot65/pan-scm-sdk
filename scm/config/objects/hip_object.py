@@ -161,11 +161,20 @@ class HIPObject(BaseObject):
         object_id = str(hip_object.id)
         payload.pop("id", None)
 
+        # Extract container fields for query params (API requires these as query params)
+        params = {}
+        for container in ["folder", "snippet", "device"]:
+            if container in payload and payload[container] is not None:
+                params[container] = payload.pop(container)
+            elif container in payload:
+                payload.pop(container)  # Remove None values from payload
+
         # Send the updated object to the remote API as JSON
         endpoint = f"{self.ENDPOINT}/{object_id}"
         response: Dict[str, Any] = self.api_client.put(
             endpoint,
             json=payload,
+            params=params if params else None,
         )
 
         # Return the SCM API response as a new Pydantic model

@@ -640,11 +640,15 @@ class TestHIPObjectUpdate(TestHIPObjectBase):
         updated_object = self.client.update(update_data)
 
         # Exclude fields that are unset/None in the assertion
-        expected_json = update_data.model_dump(exclude={"id"}, exclude_unset=True)
+        # Container fields (folder/snippet/device) are passed as query params, not in JSON body
+        expected_json = update_data.model_dump(
+            exclude={"id", "folder", "snippet", "device"}, exclude_unset=True
+        )
 
         self.mock_scm.put.assert_called_once_with(  # noqa
             f"/config/objects/v1/hip-objects/{update_data.id}",
             json=expected_json,
+            params={"folder": update_data.folder},
         )
 
         assert isinstance(updated_object, HIPObjectResponseModel)
