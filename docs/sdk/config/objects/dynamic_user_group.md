@@ -28,27 +28,27 @@ The `DynamicUserGroup` class provides functionality to manage dynamic user group
 
 ## Core Methods
 
-| Method     | Description                                   | Parameters                                        | Return Type                           |
-|------------|-----------------------------------------------|---------------------------------------------------|---------------------------------------|
-| `create()` | Creates a new dynamic user group object       | `data: Dict[str, Any]`                            | `DynamicUserGroupResponseModel`       |
-| `get()`    | Retrieves a dynamic user group by ID          | `object_id: str`                                  | `DynamicUserGroupResponseModel`       |
-| `update()` | Updates an existing dynamic user group        | `dynamic_user_group: DynamicUserGroupUpdateModel` | `DynamicUserGroupResponseModel`       |
-| `delete()` | Deletes a dynamic user group                  | `object_id: str`                                  | `None`                                |
-| `list()`   | Lists dynamic user groups with filtering      | `folder: str`, `**filters`                        | `List[DynamicUserGroupResponseModel]` |
-| `fetch()`  | Gets dynamic user group by name and container | `name: str`, `folder: str`                        | `DynamicUserGroupResponseModel`       |
+| Method     | Description                                   | Parameters                                                                         | Return Type                           |
+|------------|-----------------------------------------------|------------------------------------------------------------------------------------|---------------------------------------|
+| `create()` | Creates a new dynamic user group object       | `data: Dict[str, Any]`                                                             | `DynamicUserGroupResponseModel`       |
+| `get()`    | Retrieves a dynamic user group by ID          | `object_id: str`                                                                   | `DynamicUserGroupResponseModel`       |
+| `update()` | Updates an existing dynamic user group        | `dynamic_user_group: DynamicUserGroupUpdateModel`                                  | `DynamicUserGroupResponseModel`       |
+| `delete()` | Deletes a dynamic user group                  | `object_id: str`                                                                   | `None`                                |
+| `list()`   | Lists dynamic user groups with filtering      | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `**filters`     | `List[DynamicUserGroupResponseModel]` |
+| `fetch()`  | Gets dynamic user group by name and container | `name: str`, `folder: str`, `snippet: str`, `device: str`                          | `DynamicUserGroupResponseModel`       |
 
 ## Dynamic User Group Model Attributes
 
-| Attribute     | Type      | Required     | Description                                 |
-|---------------|-----------|--------------|---------------------------------------------|
-| `name`        | str       | Yes          | Name of dynamic user group object           |
-| `id`          | UUID      | Yes*         | Unique identifier (*response only)          |
-| `filter`      | str       | Yes          | Filter expression for matching users        |
-| `description` | str       | No           | Object description                          |
-| `tag`         | List[str] | No           | List of tags                                |
-| `folder`      | str       | Yes**        | Folder location (**one container required)  |
-| `snippet`     | str       | Yes**        | Snippet location (**one container required) |
-| `device`      | str       | Yes**        | Device location (**one container required)  |
+| Attribute     | Type      | Required | Default | Description                                          |
+|---------------|-----------|----------|---------|------------------------------------------------------|
+| `name`        | str       | Yes      | None    | Name of dynamic user group (max 63 chars)            |
+| `id`          | UUID      | Yes*     | None    | Unique identifier (*response only)                   |
+| `filter`      | str       | Yes      | None    | Filter expression for matching users (max 2047 chars)|
+| `description` | str       | No       | None    | Object description (max 1023 chars)                  |
+| `tag`         | List[str] | No       | None    | List of tags (each max 127 chars)                    |
+| `folder`      | str       | Yes**    | None    | Folder location (**one container required)           |
+| `snippet`     | str       | Yes**    | None    | Snippet location (**one container required)          |
+| `device`      | str       | Yes**    | None    | Device location (**one container required)           |
 
 ## Exceptions
 
@@ -251,20 +251,23 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 **Example:**
 
 ```python
-# Initialize the ScmClient with a custom max_limit for dynamic user groups
-# This will retrieve up to 4000 objects per API call, up to the API limit of 5000.
+from scm.client import ScmClient
+
+# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    dynamic_user_group_max_limit=4000
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
+# Configure max_limit on the dynamic_user_group service
+client.dynamic_user_group.max_limit = 4000
+
+# List all dynamic user groups - auto-paginates through results
 all_dugs = client.dynamic_user_group.list(folder='Security')
 
-# 'all_dugs' contains all objects from 'Security', fetched in chunks of up to 4000 at a time.
+# The list() method will retrieve up to 4000 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting Dynamic User Groups

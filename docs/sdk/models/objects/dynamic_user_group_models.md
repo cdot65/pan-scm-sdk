@@ -4,6 +4,17 @@
 
 The Dynamic User Group models provide a structured way to manage dynamic user groups in Palo Alto Networks' Strata Cloud Manager. These models support defining user groups based on tag-based filters to dynamically associate users with specific groups for policy management. The models handle validation of inputs and outputs when interacting with the SCM API.
 
+### Models
+
+| Model                           | Purpose                                          |
+|---------------------------------|--------------------------------------------------|
+| `DynamicUserGroupBaseModel`     | Base model with common fields for all operations |
+| `DynamicUserGroupCreateModel`   | Model for creating new dynamic user groups       |
+| `DynamicUserGroupUpdateModel`   | Model for updating existing dynamic user groups  |
+| `DynamicUserGroupResponseModel` | Model for API responses                          |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute   | Type      | Required | Default | Description                                                                 |
@@ -93,9 +104,16 @@ print(dug.tag)  # ["security"]
 ### Creating a Dynamic User Group
 
 ```python
-# Using dictionary
-from scm.config.objects import DynamicUserGroup
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 dug_dict = {
     "name": "high-risk-users",
     "filter": "tag.criticality.high",
@@ -104,22 +122,7 @@ dug_dict = {
     "tag": ["RiskManagement", "Security"]
 }
 
-dug_manager = DynamicUserGroup(api_client)
-response = dug_manager.create(dug_dict)
-
-# Using model directly
-from scm.models.objects import DynamicUserGroupCreateModel
-
-dug_obj = DynamicUserGroupCreateModel(
-    name="high-risk-users",
-    filter="tag.criticality.high",
-    description="Users with high risk classification",
-    folder="Security",
-    tag=["RiskManagement", "Security"]
-)
-
-payload = dug_obj.model_dump(exclude_unset=True)
-response = dug_manager.create(payload)
+response = client.dynamic_user_group.create(dug_dict)
 ```
 
 ### Creating a Dynamic User Group with a Complex Filter
@@ -134,50 +137,22 @@ complex_dug_dict = {
     "tag": ["RiskManagement", "Contractors"]
 }
 
-response = dug_manager.create(complex_dug_dict)
-
-# Using model directly
-from scm.models.objects import DynamicUserGroupCreateModel
-
-complex_dug_obj = DynamicUserGroupCreateModel(
-    name="risky-contractors",
-    filter="tag.user_type.contractor and (tag.criticality.high or tag.risk_score.gt.80)",
-    description="High risk contractors",
-    folder="Security",
-    tag=["RiskManagement", "Contractors"]
-)
-
-payload = complex_dug_obj.model_dump(exclude_unset=True)
-response = dug_manager.create(payload)
+response = client.dynamic_user_group.create(complex_dug_dict)
 ```
 
 ### Updating a Dynamic User Group
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "high-risk-users",
-    "description": "Updated user group for high risk classification",
-    "filter": "tag.criticality.high or tag.risk_score.gt.90",
-    "tag": ["RiskManagement", "Security", "HighPriority"]
-}
+# Fetch existing dynamic user group
+existing = client.dynamic_user_group.fetch(name="high-risk-users", folder="Security")
 
-response = dug_manager.update(update_dict)
+# Modify attributes using dot notation
+existing.description = "Updated user group for high risk classification"
+existing.filter = "tag.criticality.high or tag.risk_score.gt.90"
+existing.tag = ["RiskManagement", "Security", "HighPriority"]
 
-# Using model directly
-from scm.models.objects import DynamicUserGroupUpdateModel
-
-update_dug = DynamicUserGroupUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="high-risk-users",
-    description="Updated user group for high risk classification",
-    filter="tag.criticality.high or tag.risk_score.gt.90",
-    tag=["RiskManagement", "Security", "HighPriority"]
-)
-
-payload = update_dug.model_dump(exclude_unset=True)
-response = dug_manager.update(payload)
+# Pass modified object to update()
+updated = client.dynamic_user_group.update(existing)
 ```
 
 ### Response Model
