@@ -41,6 +41,11 @@ SSL_VERSIONS_ORDER = [
 class SSLProtocolSettings(BaseModel):
     """Represents SSL protocol settings."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     auth_algo_md5: bool = Field(
         True,
         description="Allow MD5 authentication algorithm",
@@ -125,6 +130,11 @@ class SSLProtocolSettings(BaseModel):
 class SSLForwardProxy(BaseModel):
     """Represents SSL Forward Proxy settings."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     auto_include_altname: bool = Field(
         False,
         description="Automatically include alternative names",
@@ -173,6 +183,11 @@ class SSLForwardProxy(BaseModel):
 class SSLInboundProxy(BaseModel):
     """Represents SSL Inbound Proxy settings."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     block_if_hsm_unavailable: bool = Field(
         False,
         description="Block if HSM is unavailable",
@@ -194,6 +209,11 @@ class SSLInboundProxy(BaseModel):
 class SSLNoProxy(BaseModel):
     """Represents SSL No Proxy settings."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     block_expired_certificate: bool = Field(
         False,
         description="Block expired certificates",
@@ -208,8 +228,10 @@ class DecryptionProfileBaseModel(BaseModel):
     """Base model for Decryption Profile containing common fields."""
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        populate_by_name=True,
     )
 
     name: str = Field(
@@ -274,7 +296,7 @@ class DecryptionProfileCreateModel(DecryptionProfileBaseModel):
 class DecryptionProfileUpdateModel(DecryptionProfileBaseModel):
     """Model for updating an existing Decryption Profile."""
 
-    id: Optional[UUID] = Field(
+    id: UUID = Field(
         ...,
         description="UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
