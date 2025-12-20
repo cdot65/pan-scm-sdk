@@ -32,7 +32,7 @@ class AntiSpywareProfileBaseFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"anti_spyware_profile_{n}")
     description = factory.LazyFunction(lambda: fake.sentence())
     rules = factory.List([])
-    threat_exceptions = factory.List([])
+    threat_exception = factory.List([])
     # Container fields default to None
     folder = None
     snippet = None
@@ -182,7 +182,7 @@ class AntiSpywareProfileCreateModelFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"anti_spyware_profile_{n}")
     description = factory.LazyFunction(lambda: fake.sentence())
     rules = factory.LazyFunction(lambda: [AntiSpywareRuleDictFactory.build_valid()])
-    threat_exceptions = factory.LazyFunction(
+    threat_exception = factory.LazyFunction(
         lambda: [AntiSpywareThreatExceptionDictFactory.build_valid()]
     )
     folder = "Texas"
@@ -194,7 +194,7 @@ class AntiSpywareProfileCreateModelFactory(factory.Factory):
         """Build valid anti-spyware profile."""
         return cls(
             rules=[AntiSpywareRuleDictFactory.build_valid()],
-            threat_exceptions=[AntiSpywareThreatExceptionDictFactory.build_valid()],
+            threat_exception=[AntiSpywareThreatExceptionDictFactory.build_valid()],
             folder="Texas",
             snippet=None,
             device=None,
@@ -239,7 +239,7 @@ class AntiSpywareProfileUpdateModelFactory(factory.Factory):
     name = factory.Sequence(lambda n: f"anti_spyware_profile_{n}")
     description = factory.LazyFunction(lambda: fake.sentence())
     rules = factory.LazyFunction(lambda: [AntiSpywareRuleDictFactory.build_valid()])
-    threat_exceptions = factory.LazyFunction(
+    threat_exception = factory.LazyFunction(
         lambda: [AntiSpywareThreatExceptionDictFactory.build_valid()]
     )
     folder = "Texas"
@@ -252,7 +252,7 @@ class AntiSpywareProfileUpdateModelFactory(factory.Factory):
         return cls(
             id="123e4567-e89b-12d3-a456-426655440000",
             rules=[AntiSpywareRuleDictFactory.build_valid()],
-            threat_exceptions=[AntiSpywareThreatExceptionDictFactory.build_valid()],
+            threat_exception=[AntiSpywareThreatExceptionDictFactory.build_valid()],
             folder="Texas",
             snippet=None,
             device=None,

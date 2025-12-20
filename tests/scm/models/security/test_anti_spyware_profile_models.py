@@ -68,7 +68,7 @@ class TestRuleBaseModel:
         }
         with pytest.raises(ValidationError) as exc_info:
             AntiSpywareRuleBaseModel(**data)
-        assert "Input should be 'dns-proxy'" in str(exc_info.value)
+        assert "Input should be 'adns-adtracking'" in str(exc_info.value)
 
 
 class TestThreatExceptionBase:
@@ -325,6 +325,171 @@ class TestActionModels:
         for action_type in valid_actions:
             model = AntiSpywareActionResponse.model_validate({action_type: {}})
             assert model.get_action_name() == action_type
+
+
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all models."""
+
+    def test_profile_create_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in CreateModel."""
+        data = AntiSpywareProfileCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareProfileCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_profile_update_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in UpdateModel."""
+        data = AntiSpywareProfileUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareProfileUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_profile_response_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Texas",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareProfileResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_rule_base_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in RuleBaseModel."""
+        data = {
+            "name": "TestRule",
+            "severity": [AntiSpywareSeverity.critical],
+            "category": AntiSpywareCategory.spyware,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareRuleBaseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_threat_exception_base_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ThreatExceptionBase."""
+        data = {
+            "name": "TestException",
+            "packet_capture": AntiSpywarePacketCapture.disable,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareThreatExceptionBase(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_block_ip_action_rejects_extra_fields(self):
+        """Test that extra fields are rejected in BlockIpAction."""
+        data = {
+            "track_by": "source",
+            "duration": 300,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareBlockIpAction(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_exempt_ip_entry_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ExemptIpEntry."""
+        data = {
+            "name": "192.168.1.1",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareExemptIpEntry(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_mica_engine_entry_rejects_extra_fields(self):
+        """Test that extra fields are rejected in MicaEngineSpywareEnabledEntry."""
+        from scm.models.security.anti_spyware_profiles import (
+            AntiSpywareMicaEngineSpywareEnabledEntry,
+        )
+
+        data = {
+            "name": "Test Detector",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            AntiSpywareMicaEngineSpywareEnabledEntry(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestRuleWithAction:
+    """Tests for rules with action field."""
+
+    def test_rule_with_action(self):
+        """Test rule with action field."""
+        data = {
+            "name": "TestRule",
+            "severity": [AntiSpywareSeverity.critical],
+            "category": AntiSpywareCategory.spyware,
+            "action": {"alert": {}},
+        }
+        model = AntiSpywareRuleBaseModel(**data)
+        assert model.action is not None
+        assert model.action.get_action_name() == "alert"
+
+    def test_rule_without_action(self):
+        """Test rule without action field defaults to None."""
+        data = {
+            "name": "TestRule",
+            "severity": [AntiSpywareSeverity.critical],
+            "category": AntiSpywareCategory.spyware,
+        }
+        model = AntiSpywareRuleBaseModel(**data)
+        assert model.action is None
+
+
+class TestThreatExceptionWithAction:
+    """Tests for threat exceptions with action field."""
+
+    def test_threat_exception_with_action(self):
+        """Test threat exception with action field."""
+        data = {
+            "name": "TestException",
+            "packet_capture": AntiSpywarePacketCapture.disable,
+            "action": {"default": {}},
+        }
+        model = AntiSpywareThreatExceptionBase(**data)
+        assert model.action is not None
+        assert model.action.get_action_name() == "default"
+
+    def test_threat_exception_without_action(self):
+        """Test threat exception without action defaults to None."""
+        data = {
+            "name": "TestException",
+            "packet_capture": AntiSpywarePacketCapture.disable,
+        }
+        model = AntiSpywareThreatExceptionBase(**data)
+        assert model.action is None
+
+
+class TestOptionalRulesField:
+    """Tests for optional rules field."""
+
+    def test_profile_without_rules(self):
+        """Test profile creation without rules field."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Texas",
+        }
+        model = AntiSpywareProfileResponseModel(**data)
+        assert model.rules is None
+
+    def test_profile_with_empty_rules(self):
+        """Test profile creation with empty rules list."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Texas",
+            "rules": [],
+        }
+        model = AntiSpywareProfileResponseModel(**data)
+        assert model.rules == []
 
 
 # -------------------- End of Test Classes --------------------
