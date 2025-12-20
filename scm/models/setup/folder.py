@@ -7,7 +7,7 @@ representing Folder resources in the Strata Cloud Manager.
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class FolderBaseModel(BaseModel):
@@ -26,6 +26,11 @@ class FolderBaseModel(BaseModel):
         device_only: True if this is a device-only entry.
 
     """
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: str = Field(
         description="The name of the folder",
@@ -102,6 +107,7 @@ class FolderResponseModel(FolderBaseModel):
     )
 
     @field_validator("parent")
+    @classmethod
     def validate_parent(cls, v: str) -> str:
         """Validate parent field. Empty string is allowed for root folders.
 

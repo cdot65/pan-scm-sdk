@@ -6,6 +6,7 @@
 from uuid import UUID
 
 import pytest
+from pydantic import ValidationError
 
 # Local SDK imports
 from scm.models.setup.folder import (
@@ -51,6 +52,17 @@ class TestFolderBaseModel:
         assert model.labels is None
         assert model.snippets is None
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = {
+            "name": "test_folder",
+            "parent": "parent_id",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            FolderBaseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 class TestFolderCreateModel:
     """Tests for the FolderCreateModel."""
@@ -75,6 +87,14 @@ class TestFolderCreateModel:
             FolderCreateModel(**data)
 
         assert "parent" in str(excinfo.value)
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = FolderCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            FolderCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestFolderUpdateModel:
@@ -102,6 +122,14 @@ class TestFolderUpdateModel:
 
         assert "id" in str(excinfo.value)
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = FolderUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            FolderUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 class TestFolderResponseModel:
     """Tests for the FolderResponseModel."""
@@ -128,3 +156,11 @@ class TestFolderResponseModel:
         assert model.id == UUID(data["id"])
         assert model.name == data["name"]
         assert model.parent == ""  # Empty parent for root folder
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on ResponseModel."""
+        data = FolderResponseModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            FolderResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
