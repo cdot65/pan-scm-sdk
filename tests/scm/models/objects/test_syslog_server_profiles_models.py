@@ -12,6 +12,7 @@ import pytest
 # Local SDK imports
 from scm.models.objects.syslog_server_profiles import (
     EscapingModel,
+    FormatModel,
     SyslogServerModel,
     SyslogServerProfileCreateModel,
     SyslogServerProfileResponseModel,
@@ -287,3 +288,94 @@ class TestSyslogServerProfileResponseModel:
         with pytest.raises(ValidationError) as exc_info:
             SyslogServerProfileResponseModel(**model_data)
         assert "id\n  Field required" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_escaping_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in EscapingModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            EscapingModel(escape_character="\\", unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_format_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in FormatModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            FormatModel(traffic="$format", unknown_field="should fail")
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_syslog_server_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in SyslogServerModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            SyslogServerModel(
+                name="test-server",
+                server="192.168.1.1",
+                transport="UDP",
+                port=514,
+                format="BSD",
+                facility="LOG_USER",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_syslog_server_profile_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in SyslogServerProfileCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            SyslogServerProfileCreateModel(
+                name="test-profile",
+                folder="Shared",
+                server=[
+                    {
+                        "name": "server1",
+                        "server": "192.168.1.1",
+                        "transport": "UDP",
+                        "port": 514,
+                        "format": "BSD",
+                        "facility": "LOG_USER",
+                    }
+                ],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_syslog_server_profile_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in SyslogServerProfileUpdateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            SyslogServerProfileUpdateModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-profile",
+                server=[
+                    {
+                        "name": "server1",
+                        "server": "192.168.1.1",
+                        "transport": "UDP",
+                        "port": 514,
+                        "format": "BSD",
+                        "facility": "LOG_USER",
+                    }
+                ],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_syslog_server_profile_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in SyslogServerProfileResponseModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            SyslogServerProfileResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-profile",
+                folder="Shared",
+                server=[
+                    {
+                        "name": "server1",
+                        "server": "192.168.1.1",
+                        "transport": "UDP",
+                        "port": 514,
+                        "format": "BSD",
+                        "facility": "LOG_USER",
+                    }
+                ],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()

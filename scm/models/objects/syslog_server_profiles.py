@@ -22,6 +22,8 @@ class EscapingModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     escape_character: Optional[str] = Field(
         None, max_length=1, description="Escape sequence delimiter"
     )
@@ -57,6 +59,8 @@ class FormatModel(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     escaping: Optional[EscapingModel] = Field(None, description="Character escaping configuration")
     traffic: Optional[str] = Field(None, description="Format for traffic logs")
     threat: Optional[str] = Field(None, description="Format for threat logs")
@@ -90,6 +94,8 @@ class SyslogServerModel(BaseModel):
             Syslog facility.
 
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     name: str = Field(..., description="Syslog server name")
     server: str = Field(..., description="Syslog server address")
@@ -158,6 +164,7 @@ class SyslogServerProfileBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
