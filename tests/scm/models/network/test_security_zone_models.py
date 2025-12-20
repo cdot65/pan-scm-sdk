@@ -221,3 +221,72 @@ class TestSecurityZoneModels:
         del invalid_data["id"]
         with pytest.raises(ValidationError):
             SecurityZoneResponseModel(**invalid_data)
+
+
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all Security Zone models."""
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on SecurityZoneCreateModel."""
+        data = {
+            "name": "test-zone",
+            "folder": "Test Folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityZoneCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on SecurityZoneUpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-zone",
+            "folder": "Test Folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityZoneUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on SecurityZoneResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-zone",
+            "folder": "Test Folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SecurityZoneResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_network_config_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NetworkConfig."""
+        data = {
+            "layer3": ["ethernet1/1"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            NetworkConfig(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_user_acl_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UserAcl."""
+        data = {
+            "include_list": ["user1"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            UserAcl(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_device_acl_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on DeviceAcl."""
+        data = {
+            "include_list": ["device1"],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceAcl(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)

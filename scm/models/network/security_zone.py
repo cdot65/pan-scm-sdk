@@ -24,6 +24,11 @@ class NetworkInterfaceType(str, Enum):
 class UserAcl(BaseModel):
     """User access control list configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     include_list: Optional[List[str]] = Field(
         default_factory=list,
         description="List of users to include",
@@ -36,6 +41,11 @@ class UserAcl(BaseModel):
 
 class DeviceAcl(BaseModel):
     """Device access control list configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     include_list: Optional[List[str]] = Field(
         default_factory=list,
@@ -102,6 +112,7 @@ class SecurityZoneBaseModel(BaseModel):
     """Base model for Security Zones containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
