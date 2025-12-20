@@ -427,17 +427,43 @@ class TestNatRuleResponseModel:
         )
 
 
-#
-# class TestNatRuleBaseModel:
-#     """Tests for NatRuleBaseModel validation."""
-#
-#     def test_ensure_list_of_strings_with_non_string_items(self):
-#         """Test validation when list contains non-string items."""
-#         data = NatRuleCreateModelFactory.build_valid()
-#         data["tag"] = ["valid", 123, "also-valid"]  # Include a non-string item
-#         with pytest.raises(ValueError) as exc_info:
-#             NatRuleCreateModelFactory(**data)
-#         assert "All items must be strings" in str(exc_info.value)
-#
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all NAT rule models."""
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleCreateModel."""
+        data = NatRuleCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleUpdateModel."""
+        data = NatRuleUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleResponseModel."""
+        data = NatRuleResponseFactory().model_dump()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_move_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on NatRuleMoveModel."""
+        data = {
+            "destination": NatMoveDestination.TOP,
+            "rulebase": NatRulebase.PRE,
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            NatRuleMoveModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 # -------------------- End of Test Classes --------------------

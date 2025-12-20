@@ -42,9 +42,8 @@ class SourceTranslationFactory(factory.Factory):
     """Factory for creating SourceTranslation instances."""
 
     class Meta:
-        """Meta class that defines the model for InterfaceAddressFactory."""
-
         """Meta class that defines the model for SourceTranslationFactory."""
+
         model = SourceTranslation
 
     # Need to explicitly set one of the three source translation types
@@ -54,16 +53,6 @@ class SourceTranslationFactory(factory.Factory):
     }
     dynamic_ip = None
     static_ip = None
-
-    # These fields aren't direct attributes of SourceTranslation
-    # but can be used in other contexts
-    bi_directional = False
-    translated_address = ["10.0.0.1"]  # Used by specific translation types
-    fallback = None
-    disabled = False
-    nat_type = "ipv4"
-    source = ["any"]
-    destination = ["any"]
 
     @classmethod
     def with_static_ip(cls, **kwargs):
@@ -369,7 +358,6 @@ class NatRuleUpdateModelFactory(factory.DictFactory):
 class NatRuleMoveModelFactory(factory.DictFactory):
     """Factory for creating data dicts for NatRuleMoveModel validation testing."""
 
-    source_rule = factory.LazyFunction(lambda: str(uuid.uuid4()))
     destination = NatMoveDestination.TOP
     rulebase = NatRulebase.PRE
 
@@ -377,7 +365,6 @@ class NatRuleMoveModelFactory(factory.DictFactory):
     def build_valid_before(cls):
         """Return a valid data dict for before move operation."""
         return cls(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination=NatMoveDestination.BEFORE,
             destination_rule="987fcdeb-54ba-3210-9876-fedcba098765",
             rulebase=NatRulebase.PRE,
@@ -387,7 +374,6 @@ class NatRuleMoveModelFactory(factory.DictFactory):
     def build_with_invalid_destination(cls):
         """Return a data dict with invalid destination."""
         return cls(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination="invalid",
             rulebase=NatRulebase.PRE,
         )
@@ -396,7 +382,6 @@ class NatRuleMoveModelFactory(factory.DictFactory):
     def build_missing_destination_rule(cls):
         """Return a data dict missing required destination_rule."""
         return cls(
-            source_rule="123e4567-e89b-12d3-a456-426655440000",
             destination=NatMoveDestination.BEFORE,
             rulebase=NatRulebase.PRE,
         )
