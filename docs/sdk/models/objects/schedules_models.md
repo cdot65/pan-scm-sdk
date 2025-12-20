@@ -4,6 +4,21 @@
 
 The Schedule models provide a structured way to manage time-based schedules in Palo Alto Networks' Strata Cloud Manager. These models support defining recurring schedules (weekly or daily) and non-recurring schedules. Schedules are used to specify time periods when security policies should be active, and can be defined in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with the SCM API, including format validation for time ranges and date-time specifications.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `ScheduleBaseModel`: Base model with fields common to all schedule operations
+- `ScheduleCreateModel`: Model for creating new schedules
+- `ScheduleUpdateModel`: Model for updating existing schedules
+- `ScheduleResponseModel`: Response model for schedule operations
+- `ScheduleTypeModel`: Container for recurring or non-recurring schedule types
+- `RecurringScheduleModel`: Container for weekly or daily schedule configurations
+- `WeeklyScheduleModel`: Weekly time ranges for each day of the week
+- `NonRecurringScheduleModel`: One-time schedules with date-time ranges
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Model Hierarchy
 
 The Schedule models use a hierarchical structure to represent different schedule types:
@@ -256,8 +271,17 @@ except ValueError as e:
 ### Creating a Weekly Schedule
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
 # Using dictionary
-weekly_schedule_dict = {
+weekly_schedule_data = {
     "name": "BusinessHours",
     "folder": "Shared",
     "schedule_type": {
@@ -273,38 +297,15 @@ weekly_schedule_dict = {
     }
 }
 
-schedule = Schedule(api_client)
-response = schedule.create(weekly_schedule_dict)
-
-# Using model directly
-from scm.models.objects import ScheduleCreateModel
-from scm.models.objects.schedules import WeeklyScheduleModel
-
-weekly_schedule = ScheduleCreateModel(
-    name="BusinessHours",
-    folder="Shared",
-    schedule_type={
-        "recurring": {
-            "weekly": {
-                "monday": ["09:00-17:00"],
-                "tuesday": ["09:00-17:00"],
-                "wednesday": ["09:00-17:00"],
-                "thursday": ["09:00-17:00"],
-                "friday": ["09:00-17:00"]
-            }
-        }
-    }
-)
-
-payload = weekly_schedule.model_dump(exclude_unset=True)
-response = schedule.create(payload)
+response = client.schedule.create(weekly_schedule_data)
+print(f"Created schedule: {response.name} (ID: {response.id})")
 ```
 
 ### Creating a Daily Schedule
 
 ```python
 # Using dictionary
-daily_schedule_dict = {
+daily_schedule_data = {
     "name": "DailyBackup",
     "folder": "Shared",
     "schedule_type": {
@@ -314,31 +315,15 @@ daily_schedule_dict = {
     }
 }
 
-schedule = Schedule(api_client)
-response = schedule.create(daily_schedule_dict)
-
-# Using model directly
-from scm.models.objects import ScheduleCreateModel
-
-daily_schedule = ScheduleCreateModel(
-    name="DailyBackup",
-    folder="Shared",
-    schedule_type={
-        "recurring": {
-            "daily": ["01:00-03:00"]
-        }
-    }
-)
-
-payload = daily_schedule.model_dump(exclude_unset=True)
-response = schedule.create(payload)
+response = client.schedule.create(daily_schedule_data)
+print(f"Created daily schedule: {response.name}")
 ```
 
 ### Creating a Non-Recurring Schedule
 
 ```python
 # Using dictionary
-non_recurring_schedule_dict = {
+non_recurring_data = {
     "name": "MaintenanceWindow",
     "folder": "Shared",
     "schedule_type": {
@@ -348,72 +333,32 @@ non_recurring_schedule_dict = {
     }
 }
 
-schedule = Schedule(api_client)
-response = schedule.create(non_recurring_schedule_dict)
-
-# Using model directly
-from scm.models.objects import ScheduleCreateModel
-
-non_recurring_schedule = ScheduleCreateModel(
-    name="MaintenanceWindow",
-    folder="Shared",
-    schedule_type={
-        "non_recurring": [
-            "2025/06/15@01:00-2025/06/15@05:00"
-        ]
-    }
-)
-
-payload = non_recurring_schedule.model_dump(exclude_unset=True)
-response = schedule.create(payload)
+response = client.schedule.create(non_recurring_data)
+print(f"Created non-recurring schedule: {response.name}")
 ```
 
 ### Updating a Schedule
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "BusinessHours-Extended",
-    "folder": "Shared",
-    "schedule_type": {
-        "recurring": {
-            "weekly": {
-                "monday": ["08:00-18:00"],
-                "tuesday": ["08:00-18:00"],
-                "wednesday": ["08:00-18:00"],
-                "thursday": ["08:00-18:00"],
-                "friday": ["08:00-18:00"],
-                "saturday": ["10:00-14:00"]
-            }
-        }
-    }
-}
+# Fetch existing schedule
+existing = client.schedule.fetch(name="BusinessHours", folder="Shared")
 
-response = schedule.update(update_dict)
+# Modify attributes using dot notation
+existing.name = "BusinessHours-Extended"
 
-# Using model directly
-from scm.models.objects import ScheduleUpdateModel
+# Update weekly schedule to include Saturday
+if existing.schedule_type.recurring and existing.schedule_type.recurring.weekly:
+    existing.schedule_type.recurring.weekly.saturday = ["10:00-14:00"]
+    # Extend weekday hours
+    existing.schedule_type.recurring.weekly.monday = ["08:00-18:00"]
+    existing.schedule_type.recurring.weekly.tuesday = ["08:00-18:00"]
+    existing.schedule_type.recurring.weekly.wednesday = ["08:00-18:00"]
+    existing.schedule_type.recurring.weekly.thursday = ["08:00-18:00"]
+    existing.schedule_type.recurring.weekly.friday = ["08:00-18:00"]
 
-update_schedule = ScheduleUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="BusinessHours-Extended",
-    folder="Shared",
-    schedule_type={
-        "recurring": {
-            "weekly": {
-                "monday": ["08:00-18:00"],
-                "tuesday": ["08:00-18:00"],
-                "wednesday": ["08:00-18:00"],
-                "thursday": ["08:00-18:00"],
-                "friday": ["08:00-18:00"],
-                "saturday": ["10:00-14:00"]
-            }
-        }
-    }
-)
-
-response = schedule.update(update_schedule)
+# Pass modified object to update()
+updated = client.schedule.update(existing)
+print(f"Updated schedule: {updated.name}")
 ```
 
 ## Best Practices
