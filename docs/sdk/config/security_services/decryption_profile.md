@@ -44,39 +44,73 @@ decryption profiles that control SSL/TLS inspection settings for both forward pr
 
 ### Base Profile Attributes
 
-| Attribute | Type | Required | Description                                 |
-|-----------|------|----------|---------------------------------------------|
-| `name`    | str  | Yes      | Profile name (alphanumeric)                 |
-| `id`      | UUID | Yes*     | Unique identifier (*response only)          |
-| `folder`  | str  | Yes**    | Folder location (**one container required)  |
-| `snippet` | str  | Yes**    | Snippet location (**one container required) |
-| `device`  | str  | Yes**    | Device location (**one container required)  |
+| Attribute             | Type                | Required | Default | Description                                                          |
+|-----------------------|---------------------|----------|---------|----------------------------------------------------------------------|
+| `name`                | str                 | Yes      | None    | Profile name. Pattern: `^[A-Za-z0-9][A-Za-z0-9_\-\.\s]*$`            |
+| `id`                  | UUID                | Yes*     | None    | Unique identifier (*response/update only)                            |
+| `ssl_forward_proxy`   | SSLForwardProxy     | No       | None    | SSL Forward Proxy settings                                           |
+| `ssl_inbound_proxy`   | SSLInboundProxy     | No       | None    | SSL Inbound Proxy settings                                           |
+| `ssl_no_proxy`        | SSLNoProxy          | No       | None    | SSL No Proxy settings                                                |
+| `ssl_protocol_settings` | SSLProtocolSettings | No     | None    | SSL Protocol settings                                                |
+| `folder`              | str                 | No**     | None    | Folder location. Max 64 chars                                        |
+| `snippet`             | str                 | No**     | None    | Snippet location. Max 64 chars                                       |
+| `device`              | str                 | No**     | None    | Device location. Max 64 chars                                        |
+
+\* Only required for update and response models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
 
 ### SSL Protocol Settings
 
-| Attribute              | Type | Required | Description                  |
-|------------------------|------|----------|------------------------------|
-| `min_version`          | str  | No       | Minimum SSL/TLS version      |
-| `max_version`          | str  | No       | Maximum SSL/TLS version      |
-| `auth_algo_md5`        | bool | No       | Allow MD5 authentication     |
-| `auth_algo_sha1`       | bool | No       | Allow SHA1 authentication    |
-| `auth_algo_sha256`     | bool | No       | Allow SHA256 authentication  |
-| `auth_algo_sha384`     | bool | No       | Allow SHA384 authentication  |
-| `enc_algo_3des`        | bool | No       | Allow 3DES encryption        |
-| `enc_algo_aes_128_cbc` | bool | No       | Allow AES-128-CBC encryption |
-| `enc_algo_aes_256_cbc` | bool | No       | Allow AES-256-CBC encryption |
-| `enc_algo_rc4`         | bool | No       | Allow RC4 encryption         |
+| Attribute                    | Type       | Required | Default  | Description                         |
+|------------------------------|------------|----------|----------|-------------------------------------|
+| `min_version`                | SSLVersion | No       | tls1-0   | Minimum SSL/TLS version             |
+| `max_version`                | SSLVersion | No       | tls1-2   | Maximum SSL/TLS version             |
+| `auth_algo_md5`              | bool       | No       | True     | Allow MD5 authentication            |
+| `auth_algo_sha1`             | bool       | No       | True     | Allow SHA1 authentication           |
+| `auth_algo_sha256`           | bool       | No       | True     | Allow SHA256 authentication         |
+| `auth_algo_sha384`           | bool       | No       | True     | Allow SHA384 authentication         |
+| `enc_algo_3des`              | bool       | No       | True     | Allow 3DES encryption               |
+| `enc_algo_aes_128_cbc`       | bool       | No       | True     | Allow AES-128-CBC encryption        |
+| `enc_algo_aes_128_gcm`       | bool       | No       | True     | Allow AES-128-GCM encryption        |
+| `enc_algo_aes_256_cbc`       | bool       | No       | True     | Allow AES-256-CBC encryption        |
+| `enc_algo_aes_256_gcm`       | bool       | No       | True     | Allow AES-256-GCM encryption        |
+| `enc_algo_chacha20_poly1305` | bool       | No       | True     | Allow ChaCha20-Poly1305 encryption  |
+| `enc_algo_rc4`               | bool       | No       | True     | Allow RC4 encryption                |
+| `keyxchg_algo_dhe`           | bool       | No       | True     | Allow DHE key exchange              |
+| `keyxchg_algo_ecdhe`         | bool       | No       | True     | Allow ECDHE key exchange            |
+| `keyxchg_algo_rsa`           | bool       | No       | True     | Allow RSA key exchange              |
 
-### Forward Proxy Settings
+### Forward Proxy Settings (SSLForwardProxy)
 
-| Attribute                   | Type | Required | Description                |
-|-----------------------------|------|----------|----------------------------|
-| `auto_include_altname`      | bool | No       | Include alternative names  |
-| `block_client_cert`         | bool | No       | Block client certificates  |
-| `block_expired_certificate` | bool | No       | Block expired certificates |
-| `block_untrusted_issuer`    | bool | No       | Block untrusted issuers    |
-| `block_unsupported_cipher`  | bool | No       | Block unsupported ciphers  |
-| `block_unsupported_version` | bool | No       | Block unsupported versions |
+| Attribute                          | Type | Required | Default | Description                              |
+|------------------------------------|------|----------|---------|------------------------------------------|
+| `auto_include_altname`             | bool | No       | False   | Include alternative names                |
+| `block_client_cert`                | bool | No       | False   | Block client certificates                |
+| `block_expired_certificate`        | bool | No       | False   | Block expired certificates               |
+| `block_timeout_cert`               | bool | No       | False   | Block certificates that timed out        |
+| `block_tls13_downgrade_no_resource`| bool | No       | False   | Block TLS 1.3 downgrade when no resource |
+| `block_unknown_cert`               | bool | No       | False   | Block unknown certificates               |
+| `block_unsupported_cipher`         | bool | No       | False   | Block unsupported ciphers                |
+| `block_unsupported_version`        | bool | No       | False   | Block unsupported versions               |
+| `block_untrusted_issuer`           | bool | No       | False   | Block untrusted issuers                  |
+| `restrict_cert_exts`               | bool | No       | False   | Restrict certificate extensions          |
+| `strip_alpn`                       | bool | No       | False   | Strip ALPN                               |
+
+### Inbound Proxy Settings (SSLInboundProxy)
+
+| Attribute                 | Type | Required | Default | Description                    |
+|---------------------------|------|----------|---------|--------------------------------|
+| `block_if_hsm_unavailable`| bool | No       | False   | Block if HSM is unavailable    |
+| `block_if_no_resource`    | bool | No       | False   | Block if no resources available|
+| `block_unsupported_cipher`| bool | No       | False   | Block unsupported ciphers      |
+| `block_unsupported_version`| bool| No       | False   | Block unsupported versions     |
+
+### No Proxy Settings (SSLNoProxy)
+
+| Attribute                 | Type | Required | Default | Description                    |
+|---------------------------|------|----------|---------|--------------------------------|
+| `block_expired_certificate`| bool| No       | False   | Block expired certificates     |
+| `block_untrusted_issuer`  | bool | No       | False   | Block untrusted issuers        |
 
 ## Exceptions
 
@@ -92,18 +126,20 @@ decryption profiles that control SSL/TLS inspection settings for both forward pr
 
 ## Basic Configuration
 
+The Decryption Profile service can be accessed using the unified client interface (recommended):
+
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
 # Access decryption profiles directly through the client
-# No need to initialize a separate DecryptionProfile object
+profiles = client.decryption_profile
 ```
 
 ## Usage Examples
@@ -225,47 +261,47 @@ The `list()` method supports additional parameters to refine your query results 
 **Examples:**
 
 ```python
-# Only return decryption_profiles defined exactly in 'Texas'
-exact_decryption_profiles = decryption_profiles.list(
+# Only return profiles defined exactly in 'Texas'
+exact_profiles = client.decryption_profile.list(
     folder='Texas',
     exact_match=True
 )
 
-for app in exact_decryption_profiles:
-    print(f"Exact match: {app.name} in {app.folder}")
+for profile in exact_profiles:
+    print(f"Exact match: {profile.name} in {profile.folder}")
 
-# Exclude all decryption_profiles from the 'All' folder
-no_all_decryption_profiles = decryption_profiles.list(
+# Exclude all profiles from the 'All' folder
+no_all_profiles = client.decryption_profile.list(
     folder='Texas',
     exclude_folders=['All']
 )
 
-for app in no_all_decryption_profiles:
-    assert app.folder != 'All'
-    print(f"Filtered out 'All': {app.name}")
+for profile in no_all_profiles:
+    assert profile.folder != 'All'
+    print(f"Filtered out 'All': {profile.name}")
 
-# Exclude decryption_profiles that come from 'default' snippet
-no_default_snippet = decryption_profiles.list(
+# Exclude profiles that come from 'default' snippet
+no_default_snippet = client.decryption_profile.list(
     folder='Texas',
     exclude_snippets=['default']
 )
 
-for app in no_default_snippet:
-    assert app.snippet != 'default'
-    print(f"Filtered out 'default' snippet: {app.name}")
+for profile in no_default_snippet:
+    assert profile.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {profile.name}")
 
-# Exclude decryption_profiles associated with 'DeviceA'
-no_deviceA = decryption_profiles.list(
+# Exclude profiles associated with 'DeviceA'
+no_deviceA = client.decryption_profile.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
 
-for app in no_deviceA:
-    assert app.device != 'DeviceA'
-    print(f"Filtered out 'DeviceA': {app.name}")
+for profile in no_deviceA:
+    assert profile.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {profile.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = decryption_profiles.list(
+combined_filters = client.decryption_profile.list(
     folder='Texas',
     exact_match=True,
     exclude_folders=['All'],
@@ -273,8 +309,8 @@ combined_filters = decryption_profiles.list(
     exclude_devices=['DeviceA']
 )
 
-for app in combined_filters:
-    print(f"Combined filters result: {app.name} in {app.folder}")
+for profile in combined_filters:
+    print(f"Combined filters result: {profile.name} in {profile.folder}")
 ```
 
 ### Controlling Pagination with max_limit
@@ -282,20 +318,22 @@ for app in combined_filters:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-# Initialize the client with a custom max_limit for decryption profiles
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-client = Scm(
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    decryption_profile_max_limit=4321
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
+# Configure max_limit using the property setter
+client.decryption_profile.max_limit = 4000
+
+# List all profiles - auto-paginates through results
 all_profiles = client.decryption_profile.list(folder='Texas')
 
-# 'all_profiles' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# The profiles are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting Profiles
@@ -431,6 +469,12 @@ the [decryption_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob/m
 
 ## Related Models
 
+- [DecryptionProfileBaseModel](../../models/security_services/decryption_profile_models.md#Overview)
 - [DecryptionProfileCreateModel](../../models/security_services/decryption_profile_models.md#Overview)
 - [DecryptionProfileUpdateModel](../../models/security_services/decryption_profile_models.md#Overview)
 - [DecryptionProfileResponseModel](../../models/security_services/decryption_profile_models.md#Overview)
+- [SSLProtocolSettings](../../models/security_services/decryption_profile_models.md#Overview)
+- [SSLForwardProxy](../../models/security_services/decryption_profile_models.md#Overview)
+- [SSLInboundProxy](../../models/security_services/decryption_profile_models.md#Overview)
+- [SSLNoProxy](../../models/security_services/decryption_profile_models.md#Overview)
+- [SSLVersion](../../models/security_services/decryption_profile_models.md#Overview)
