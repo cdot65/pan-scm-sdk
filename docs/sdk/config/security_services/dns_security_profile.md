@@ -42,19 +42,50 @@ deleting profiles that protect against DNS-based threats including botnet domain
 
 ## DNS Security Profile Model Attributes
 
-| Attribute                 | Type                 | Required | Description                                 |
-|---------------------------|----------------------|----------|---------------------------------------------|
-| `name`                    | str                  | Yes      | Profile name (max 63 chars)                 |
-| `id`                      | UUID                 | Yes*     | Unique identifier (*response only)          |
-| `description`             | str                  | No       | Profile description                         |
-| `botnet_domains`          | BotnetDomainsModel   | No       | Botnet domains configuration                |
-| `dns_security_categories` | List[CategoryEntry]  | No       | DNS security category settings              |
-| `lists`                   | List[ListEntry]      | No       | Custom domain lists                         |
-| `sinkhole`                | SinkholeSettings     | No       | Sinkhole configuration                      |
-| `whitelist`               | List[WhitelistEntry] | No       | Whitelisted domains                         |
-| `folder`                  | str                  | Yes**    | Folder location (**one container required)  |
-| `snippet`                 | str                  | Yes**    | Snippet location (**one container required) |
-| `device`                  | str                  | Yes**    | Device location (**one container required)  |
+| Attribute        | Type              | Required | Default | Description                                                      |
+|------------------|-------------------|----------|---------|------------------------------------------------------------------|
+| `name`           | str               | Yes      | None    | Profile name. Pattern: `^[a-zA-Z0-9][a-zA-Z0-9_\-\.\s]*$`        |
+| `id`             | UUID              | Yes*     | None    | Unique identifier (*response/update only)                        |
+| `description`    | str               | No       | None    | Profile description                                              |
+| `botnet_domains` | BotnetDomainsModel| No       | None    | Botnet domains configuration                                     |
+| `folder`         | str               | No**     | None    | Folder location. Max 64 chars                                    |
+| `snippet`        | str               | No**     | None    | Snippet location. Max 64 chars                                   |
+| `device`         | str               | No**     | None    | Device location. Max 64 chars                                    |
+
+\* Only required for response and update models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
+
+### BotnetDomainsModel Attributes
+
+| Attribute                 | Type                              | Required | Default | Description                    |
+|---------------------------|-----------------------------------|----------|---------|--------------------------------|
+| `dns_security_categories` | List[DNSSecurityCategoryEntryModel] | No     | None    | DNS security categories        |
+| `lists`                   | List[ListEntryBaseModel]          | No       | None    | Lists of DNS domains           |
+| `sinkhole`                | SinkholeSettingsModel             | No       | None    | DNS sinkhole settings          |
+| `whitelist`               | List[WhitelistEntryModel]         | No       | None    | DNS security overrides         |
+
+### DNSSecurityCategoryEntryModel Attributes
+
+| Attribute        | Type              | Required | Default   | Description                 |
+|------------------|-------------------|----------|-----------|-----------------------------|
+| `name`           | str               | Yes      | None      | DNS Security Category Name  |
+| `action`         | ActionEnum        | No       | default   | Action to be taken          |
+| `log_level`      | LogLevelEnum      | No       | default   | Log level                   |
+| `packet_capture` | PacketCaptureEnum | No       | None      | Packet capture setting      |
+
+### SinkholeSettingsModel Attributes
+
+| Attribute      | Type            | Required | Default | Description               |
+|----------------|-----------------|----------|---------|---------------------------|
+| `ipv4_address` | IPv4AddressEnum | Yes      | None    | IPv4 address for sinkhole |
+| `ipv6_address` | IPv6AddressEnum | Yes      | None    | IPv6 address for sinkhole |
+
+### WhitelistEntryModel Attributes
+
+| Attribute     | Type | Required | Default | Description                        |
+|---------------|------|----------|---------|------------------------------------|
+| `name`        | str  | Yes      | None    | DNS domain or FQDN to be whitelisted |
+| `description` | str  | No       | None    | Description                        |
 
 ## Exceptions
 
@@ -70,18 +101,20 @@ deleting profiles that protect against DNS-based threats including botnet domain
 
 ## Basic Configuration
 
+The DNS Security Profile service can be accessed using the unified client interface (recommended):
+
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
 # Access DNS security profiles directly through the client
-# No need to initialize a separate DNSSecurityProfile object
+profiles = client.dns_security_profile
 ```
 
 ## Usage Examples
@@ -217,47 +250,47 @@ The `list()` method supports additional parameters to refine your query results 
 **Examples:**
 
 ```python
-# Only return dns_security_profiles defined exactly in 'Texas'
-exact_dns_security_profiles = dns_security_profiles.list(
+# Only return profiles defined exactly in 'Texas'
+exact_profiles = client.dns_security_profile.list(
     folder='Texas',
     exact_match=True
 )
 
-for app in exact_dns_security_profiles:
-    print(f"Exact match: {app.name} in {app.folder}")
+for profile in exact_profiles:
+    print(f"Exact match: {profile.name} in {profile.folder}")
 
-# Exclude all dns_security_profiles from the 'All' folder
-no_all_dns_security_profiles = dns_security_profiles.list(
+# Exclude all profiles from the 'All' folder
+no_all_profiles = client.dns_security_profile.list(
     folder='Texas',
     exclude_folders=['All']
 )
 
-for app in no_all_dns_security_profiles:
-    assert app.folder != 'All'
-    print(f"Filtered out 'All': {app.name}")
+for profile in no_all_profiles:
+    assert profile.folder != 'All'
+    print(f"Filtered out 'All': {profile.name}")
 
-# Exclude dns_security_profiles that come from 'default' snippet
-no_default_snippet = dns_security_profiles.list(
+# Exclude profiles that come from 'default' snippet
+no_default_snippet = client.dns_security_profile.list(
     folder='Texas',
     exclude_snippets=['default']
 )
 
-for app in no_default_snippet:
-    assert app.snippet != 'default'
-    print(f"Filtered out 'default' snippet: {app.name}")
+for profile in no_default_snippet:
+    assert profile.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {profile.name}")
 
-# Exclude dns_security_profiles associated with 'DeviceA'
-no_deviceA = dns_security_profiles.list(
+# Exclude profiles associated with 'DeviceA'
+no_deviceA = client.dns_security_profile.list(
     folder='Texas',
     exclude_devices=['DeviceA']
 )
 
-for app in no_deviceA:
-    assert app.device != 'DeviceA'
-    print(f"Filtered out 'DeviceA': {app.name}")
+for profile in no_deviceA:
+    assert profile.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {profile.name}")
 
 # Combine exact_match with multiple exclusions
-combined_filters = dns_security_profiles.list(
+combined_filters = client.dns_security_profile.list(
     folder='Texas',
     exact_match=True,
     exclude_folders=['All'],
@@ -265,8 +298,8 @@ combined_filters = dns_security_profiles.list(
     exclude_devices=['DeviceA']
 )
 
-for app in combined_filters:
-    print(f"Combined filters result: {app.name} in {app.folder}")
+for profile in combined_filters:
+    print(f"Combined filters result: {profile.name} in {profile.folder}")
 ```
 
 ### Controlling Pagination with max_limit
@@ -274,20 +307,22 @@ for app in combined_filters:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-# Initialize the client with a custom max_limit for DNS security profiles
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-client = Scm(
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    dns_security_profile_max_limit=4321
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
+# Configure max_limit using the property setter
+client.dns_security_profile.max_limit = 4000
+
+# List all profiles - auto-paginates through results
 all_profiles = client.dns_security_profile.list(folder='Texas')
 
-# 'all_profiles' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# The profiles are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting DNS Security Profiles
@@ -424,6 +459,17 @@ the [dns_security_profile.py example](https://github.com/cdot65/pan-scm-sdk/blob
 
 ## Related Models
 
+- [DNSSecurityProfileBaseModel](../../models/security_services/dns_security_profile_models.md#Overview)
 - [DNSSecurityProfileCreateModel](../../models/security_services/dns_security_profile_models.md#Overview)
 - [DNSSecurityProfileUpdateModel](../../models/security_services/dns_security_profile_models.md#Overview)
 - [DNSSecurityProfileResponseModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [BotnetDomainsModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [DNSSecurityCategoryEntryModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [ListEntryBaseModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [SinkholeSettingsModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [WhitelistEntryModel](../../models/security_services/dns_security_profile_models.md#Overview)
+- [ActionEnum](../../models/security_services/dns_security_profile_models.md#Overview)
+- [LogLevelEnum](../../models/security_services/dns_security_profile_models.md#Overview)
+- [PacketCaptureEnum](../../models/security_services/dns_security_profile_models.md#Overview)
+- [IPv4AddressEnum](../../models/security_services/dns_security_profile_models.md#Overview)
+- [IPv6AddressEnum](../../models/security_services/dns_security_profile_models.md#Overview)
