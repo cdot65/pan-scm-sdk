@@ -32,6 +32,11 @@ class WildfireAvDirection(str, Enum):
 class WildfireAvRuleBase(BaseModel):
     """Base class for Rule configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(..., description="Rule name")
     analysis: Optional[WildfireAvAnalysis] = Field(None, description="Analysis type")
     application: List[str] = Field(
@@ -48,6 +53,11 @@ class WildfireAvRuleBase(BaseModel):
 class WildfireAvMlavExceptionEntry(BaseModel):
     """Represents an entry in the 'mlav_exception' list."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(..., description="Exception name")
     description: Optional[str] = Field(None, description="Description")
     filename: str = Field(..., description="Filename")
@@ -56,13 +66,13 @@ class WildfireAvMlavExceptionEntry(BaseModel):
 class WildfireAvThreatExceptionEntry(BaseModel):
     """Represents an entry in the 'threat_exception' list."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(..., description="Threat exception name")
     notes: Optional[str] = Field(None, description="Notes")
-
-
-"""
-Module for Wildfire Antivirus Profile models and related logic.
-"""
 
 
 # Base Model
@@ -70,8 +80,10 @@ class WildfireAvProfileBase(BaseModel):
     """Base model for Wildfire Antivirus Profile containing common fields."""
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        populate_by_name=True,
     )
 
     name: str = Field(
@@ -147,7 +159,7 @@ class WildfireAvProfileUpdateModel(WildfireAvProfileBase):
     All fields are optional to allow partial updates.
     """
 
-    id: Optional[UUID] = Field(
+    id: UUID = Field(
         ...,
         description="Profile ID",
     )
