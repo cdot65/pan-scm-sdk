@@ -7,11 +7,16 @@ representing Variable resources in the Strata Cloud Manager.
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class VariableBaseModel(BaseModel):
     """Base model for Variable resources per OpenAPI spec."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     name: str = Field(
         ...,  # required
@@ -53,6 +58,7 @@ class VariableBaseModel(BaseModel):
     )
 
     @field_validator("type")
+    @classmethod
     def validate_type_enum(cls, v):
         """Validate that the type is one of the allowed values."""
         allowed = [
