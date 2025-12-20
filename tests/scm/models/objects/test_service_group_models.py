@@ -231,4 +231,42 @@ class TestServiceGroupResponseModel:
         assert "String should match pattern" in str(exc_info.value)
 
 
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_service_group_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceGroupCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceGroupCreateModel(
+                name="test-group",
+                folder="Texas",
+                members=["service1"],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_group_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceGroupUpdateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceGroupUpdateModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-group",
+                members=["service1"],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_service_group_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ServiceGroupResponseModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            ServiceGroupResponseModel(
+                id="123e4567-e89b-12d3-a456-426655440000",
+                name="test-group",
+                folder="Texas",
+                members=["service1"],
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+
 # -------------------- End of Test Classes --------------------
