@@ -116,4 +116,32 @@ class TestApplicationFilterResponseModel:
         assert len(model.technology) > 0
 
 
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_application_filters_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ApplicationFiltersCreateModel."""
+        data = ApplicationFiltersCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationFiltersCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_application_filters_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ApplicationFiltersUpdateModel."""
+        data = ApplicationFiltersUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationFiltersUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_application_filters_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in ApplicationFiltersResponseModel."""
+        data = ApplicationFiltersResponseModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            ApplicationFiltersResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+
 # -------------------- End of Test Classes --------------------

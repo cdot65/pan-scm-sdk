@@ -675,7 +675,7 @@ class TestApplicationFiltersUpdate(TestApplicationsFilterBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="updated-app-filter",
             category=["networking"],
-            subcategory=["networking"],
+            sub_category=["networking"],
             technology=["client-server"],
             risk=[2],
         )
@@ -699,7 +699,7 @@ class TestApplicationFiltersUpdate(TestApplicationsFilterBase):
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
             category=["general-internet"],
-            subcategory=["file-sharing"],
+            sub_category=["file-sharing"],
             technology=["peer-to-peer"],
             risk=[2],
         )

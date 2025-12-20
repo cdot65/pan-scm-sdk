@@ -379,10 +379,10 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         mock_response = {
             "data": [
                 ApplicationGroupResponseFactory(
-                    name="group_in_texas", folder="Texas", static=["address1"]
+                    name="group_in_texas", folder="Texas", members=["app1"]
                 ).model_dump(),
                 ApplicationGroupResponseFactory(
-                    name="group_in_all", folder="All", static=["address2"]
+                    name="group_in_all", folder="All", members=["app2"]
                 ).model_dump(),
             ]
         }
@@ -400,10 +400,10 @@ class TestApplicationGroupList(TestApplicationGroupBase):
         mock_response = {
             "data": [
                 ApplicationGroupResponseFactory(
-                    name="group_in_texas", folder="Texas", static=["address1"]
+                    name="group_in_texas", folder="Texas", members=["app1"]
                 ).model_dump(),
                 ApplicationGroupResponseFactory(
-                    name="group_in_all", folder="All", static=["address2"]
+                    name="group_in_all", folder="All", members=["app2"]
                 ).model_dump(),
             ]
         }
