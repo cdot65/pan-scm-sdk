@@ -6,21 +6,31 @@ Contains Pydantic models for representing tag objects and related data.
 # scm/models/objects/tag.py
 
 from enum import Enum
-from typing import Optional
+from typing import Annotated, List, Optional
 from uuid import UUID
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    constr,
     field_validator,
     model_validator,
 )
 
 from scm.utils.tag_colors import normalize_color_name
 
-TagString = constr(max_length=127)
+# Pattern allows: alphanumeric, spaces, underscores, dots, hyphens, brackets, ampersands, parentheses
+# Matches the Tag model's name pattern from OpenAPI spec
+TAG_NAME_PATTERN = r"^[a-zA-Z0-9_ \.\-\[\]\&\(\)]+$"
+
+# Annotated type for tag names - use this for tag reference fields across all models
+TagName = Annotated[str, Field(max_length=127, pattern=TAG_NAME_PATTERN)]
+
+# Type alias for a list of tag names
+TagList = Optional[List[TagName]]
+
+# Backward compatibility alias
+TagString = TagName
 
 
 class Colors(str, Enum):

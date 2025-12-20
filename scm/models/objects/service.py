@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class Override(BaseModel):
     """Settings for protocol override configurations."""
@@ -125,7 +127,7 @@ class ServiceBaseModel(BaseModel):
         max_length=1023,
         description="Description about the service.",
     )
-    tag: Optional[List[str]] = Field(
+    tag: Optional[List[TagName]] = Field(
         None,
         description="The tag(s) associated with the service.",
     )

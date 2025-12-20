@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class ApplicationFiltersBaseModel(BaseModel):
     """Base model for Application filter objects containing fields common to all CRUD operations.
@@ -126,7 +128,7 @@ class ApplicationFiltersBaseModel(BaseModel):
         description="List of applications to exclude from the filter.",
     )
 
-    tag: Optional[List[str]] = Field(
+    tag: Optional[List[TagName]] = Field(
         None,
         description="Tags associated with the application filter.",
     )

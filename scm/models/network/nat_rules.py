@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class NatType(str, Enum):
     """NAT types supported by the system."""
@@ -259,7 +261,7 @@ class NatRuleBaseModel(BaseModel):
         None,
         description="The description of the NAT rule",
     )
-    tag: List[str] = Field(
+    tag: List[TagName] = Field(
         default_factory=list,
         description="The tags associated with the NAT rule",
     )
@@ -384,19 +386,6 @@ class NatRuleBaseModel(BaseModel):
         """
         if len(v) != len(set(v)):
             raise ValueError("List items must be unique")
-        return v
-
-    @field_validator("tag")
-    @classmethod
-    def validate_tags(cls, v):
-        """Validate tags."""
-        for tag in v:
-            if not tag or not isinstance(tag, str) or not tag.strip():
-                raise ValueError("Tags must be non-empty strings")
-            if not all(c.isalnum() or c in "-_" for c in tag):
-                raise ValueError(
-                    "Tags should only contain alphanumeric characters, hyphens, or underscores"
-                )
         return v
 
     @model_validator(mode="after")

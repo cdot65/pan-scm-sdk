@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 # Enums
 class SecurityRuleMoveDestination(str, Enum):
@@ -89,7 +91,7 @@ class SecurityRuleBaseModel(BaseModel):
     )
     disabled: bool = Field(False, description="Is the security rule disabled?")
     description: Optional[str] = Field(None, description="The description of the security rule")
-    tag: List[str] = Field(
+    tag: List[TagName] = Field(
         default_factory=list, description="The tags associated with the security rule"
     )
     from_: List[str] = Field(

@@ -10,6 +10,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from scm.models.objects.tag import TagName
+
 
 class ApplicationBaseModel(BaseModel):
     """Base model for Application objects containing fields common to all CRUD operations.
@@ -71,7 +73,7 @@ class ApplicationBaseModel(BaseModel):
         description="List of TCP/UDP ports associated with the application.",
         examples=[["tcp/3468,6346,11300"]],
     )
-    tag: Optional[List[str]] = Field(
+    tag: Optional[List[TagName]] = Field(
         None,
         description="Tags associated with the application.",
     )
