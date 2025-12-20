@@ -88,6 +88,13 @@ class TestSnippetBaseModel:
         model = SnippetBaseModel(name="test_snippet", labels=None)
         assert model.labels is None
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = {"name": "test_snippet", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            SnippetBaseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 class TestSnippetCreateModel:
     """Tests for the SnippetCreateModel."""
@@ -114,6 +121,13 @@ class TestSnippetCreateModel:
             # Empty name should fail validation
             SnippetCreateModel(name="")
         assert "name" in str(excinfo.value).lower()
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = {"name": "test_snippet", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            SnippetCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestSnippetUpdateModel:
@@ -152,6 +166,17 @@ class TestSnippetUpdateModel:
         # Verify the id was converted to UUID
         assert isinstance(model.id, UUID)
         assert model.id == data["id"]
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_snippet",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SnippetUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestSnippetResponseModel:
@@ -235,6 +260,17 @@ class TestSnippetResponseModel:
 
         assert model.type == "custom"
 
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_snippet",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SnippetResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
 
 class TestFolderReference:
     """Tests for the FolderReference model."""
@@ -289,3 +325,14 @@ class TestFolderReference:
         with pytest.raises(ValueError) as exc_info:
             FolderReference.validate_name("   ")
         assert "folder name cannot be empty" in str(exc_info.value).lower()
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on FolderReference."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426614174000",
+            "name": "test_folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            FolderReference(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
