@@ -15,6 +15,7 @@ class BaseHIPModel(BaseModel):
     """Base model with common configuration for all HIP object models."""
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
@@ -462,7 +463,7 @@ class DiskEncryptionModel(SecurityProductModel):
     )
 
 
-class EncryptionStateIs(BaseModel):
+class EncryptionStateIs(BaseHIPModel):
     """Model for encryption state 'is' condition."""
 
     is_: Literal["encrypted", "unencrypted", "partial", "unknown"] = Field(
@@ -472,7 +473,7 @@ class EncryptionStateIs(BaseModel):
     )
 
 
-class EncryptionStateIsNot(BaseModel):
+class EncryptionStateIsNot(BaseHIPModel):
     """Model for encryption state 'is_not' condition."""
 
     is_not: Literal["encrypted", "unencrypted", "partial", "unknown"] = Field(
