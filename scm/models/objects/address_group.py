@@ -28,6 +28,11 @@ class DynamicFilter(BaseModel):
 
     """
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     filter: str = Field(
         ...,
         max_length=1024,
@@ -52,6 +57,7 @@ class AddressGroupBaseModel(BaseModel):
     """
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
