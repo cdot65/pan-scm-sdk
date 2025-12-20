@@ -14,6 +14,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class Override(BaseModel):
     """Settings for protocol override configurations."""
 
+    model_config = ConfigDict(extra="forbid")
+
     timeout: Optional[int] = Field(
         None,
         description="Timeout in seconds.",
@@ -34,6 +36,8 @@ class Override(BaseModel):
 class TCPProtocol(BaseModel):
     """TCP protocol configuration."""
 
+    model_config = ConfigDict(extra="forbid")
+
     port: str = Field(
         ...,
         description="TCP port(s) associated with the service.",
@@ -48,6 +52,8 @@ class TCPProtocol(BaseModel):
 class UDPProtocol(BaseModel):
     """UDP protocol configuration."""
 
+    model_config = ConfigDict(extra="forbid")
+
     port: str = Field(
         ...,
         description="UDP port(s) associated with the service.",
@@ -61,6 +67,8 @@ class UDPProtocol(BaseModel):
 
 class Protocol(BaseModel):
     """Protocol configuration with TCP/UDP validation."""
+
+    model_config = ConfigDict(extra="forbid")
 
     tcp: Optional[TCPProtocol] = None
     udp: Optional[UDPProtocol] = None
@@ -91,6 +99,7 @@ class ServiceBaseModel(BaseModel):
     """
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
