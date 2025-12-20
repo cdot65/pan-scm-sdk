@@ -4,9 +4,12 @@ from pydantic import ValidationError
 import pytest
 
 from scm.models.setup.device import (
+    DeviceBaseModel,
+    DeviceCreateModel,
     DeviceLicenseModel,
     DeviceListResponseModel,
     DeviceResponseModel,
+    DeviceUpdateModel,
 )
 from tests.factories.setup.device import (
     DeviceLicenseDictFactory,
@@ -41,6 +44,39 @@ class TestDeviceLicenseModel:
         model = DeviceLicenseModel.model_validate(data)
         assert model.authcode is None or isinstance(model.authcode, str)
         assert model.expired is None or isinstance(model.expired, str)
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = DeviceLicenseDictFactory.build()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceLicenseModel.model_validate(data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestDeviceBaseModel:
+    """Tests for device base model validation."""
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = {"name": "test-device", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceBaseModel.model_validate(data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = {"name": "test-device", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceCreateModel.model_validate(data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = {"id": "123456", "name": "test-device", "unknown_field": "should_fail"}
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceUpdateModel.model_validate(data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestDeviceResponseModel:
@@ -83,6 +119,14 @@ class TestDeviceResponseModel:
         with pytest.raises(ValidationError):
             DeviceResponseModel.model_validate(data)
 
+    def test_extra_fields_allowed(self):
+        """Test that extra fields are allowed on ResponseModel (API compatibility)."""
+        data = {"id": "123456789012345", "future_api_field": "should_work"}
+        model = DeviceResponseModel.model_validate(data)
+        assert model.id == "123456789012345"
+        # Extra field should be accessible via model_extra or __pydantic_extra__
+        assert hasattr(model, "__pydantic_extra__")
+
 
 class TestDeviceListResponseModel:
     """Tests for device list response model validation."""
@@ -112,3 +156,11 @@ class TestDeviceListResponseModel:
         assert isinstance(model.limit, int)
         assert isinstance(model.offset, int)
         assert isinstance(model.total, int)
+
+    def test_extra_fields_forbidden(self):
+        """Test that extra fields are rejected."""
+        data = DeviceListResponseModelDictFactory.build()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            DeviceListResponseModel.model_validate(data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
