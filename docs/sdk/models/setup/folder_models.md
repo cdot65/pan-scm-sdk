@@ -3,203 +3,215 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Models](#models)
-    - [FolderBaseModel](#folderbasemodel)
-    - [FolderCreateModel](#foldercreatemodel)
-    - [FolderUpdateModel](#folderupdatemodel)
-    - [FolderResponseModel](#folderresponsemodel)
-3. [Model Validation Rules](#model-validation-rules)
-4. [Usage Examples](#usage-examples)
-    - [Creating Model Instances](#creating-model-instances)
-    - [Model Validation](#model-validation)
-    - [Model Serialization](#model-serialization)
-    - [API Integration Examples](#api-integration-examples)
+2. [Model Attributes](#model-attributes)
+3. [Exceptions](#exceptions)
+4. [Model Validators](#model-validators)
+5. [Usage Examples](#usage-examples)
 
-## Overview
+## Overview {#Overview}
 
-This page documents the Pydantic models used for folder operations in the Strata Cloud Manager SDK. These models provide structured data validation and serialization for folder creation, updates, and API responses.
+The Folder models provide a structured way to manage folder resources in Palo Alto Networks' Strata Cloud Manager.
+These models represent folder hierarchies used to organize configuration objects. The models handle validation of
+inputs and outputs when interacting with the SCM API.
 
-## Models
+### Models
+
+The module provides the following Pydantic models:
+
+- `FolderBaseModel`: Base model with fields common to all folder operations
+- `FolderCreateModel`: Model for creating new folders
+- `FolderUpdateModel`: Model for updating existing folders
+- `FolderResponseModel`: Response model for folder operations
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
+## Model Attributes
 
 ### FolderBaseModel
 
-The base model for folder resources containing common fields.
-
-```python
-class FolderBaseModel(BaseModel):
-    name: str
-    parent: str
-    description: Optional[str] = None
-    labels: Optional[List[str]] = None
-    snippets: Optional[List[str]] = None
-    display_name: Optional[str] = None
-    model: Optional[str] = None
-    serial_number: Optional[str] = None
-    type: Optional[str] = None
-    device_only: Optional[bool] = None
-```
+| Attribute     | Type      | Required | Default | Description                                                |
+|---------------|-----------|----------|---------|------------------------------------------------------------|
+| name          | str       | Yes      | None    | The name of the folder                                     |
+| parent        | str       | Yes      | None    | Name of the parent folder. Empty string for root folders   |
+| description   | str       | No       | None    | Optional description of the folder                         |
+| labels        | List[str] | No       | None    | Optional list of labels to apply to the folder             |
+| snippets      | List[str] | No       | None    | Optional list of snippet IDs associated with the folder    |
+| display_name  | str       | No       | None    | Display name for the folder/device                         |
+| model         | str       | No       | None    | Device model, if present (e.g., 'PA-VM')                   |
+| serial_number | str       | No       | None    | Device serial number, if present                           |
+| type          | str       | No       | None    | Type of folder or device (e.g., 'on-prem', 'container')    |
+| device_only   | bool      | No       | None    | True if this is a device-only entry                        |
 
 ### FolderCreateModel
 
-Model for creating new folder resources.
-
-```python
-class FolderCreateModel(FolderBaseModel):
-    # Inherits all fields from FolderBaseModel without additional fields
-    pass
-```
+Inherits all fields from `FolderBaseModel` without additional fields.
 
 ### FolderUpdateModel
 
-Model for updating existing folder resources.
+Extends `FolderBaseModel` by adding:
 
-```python
-class FolderUpdateModel(FolderBaseModel):
-    id: UUID
-```
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the folder  |
 
 ### FolderResponseModel
 
-Model for folder responses from the API.
+Extends `FolderBaseModel` by adding:
+
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the folder  |
+
+## Exceptions
+
+The Folder models can raise the following exceptions during validation:
+
+- **ValueError**: Raised when field validation fails
+- **ValidationError**: Raised by Pydantic when model validation fails
+
+## Model Validators
+
+### Parent Field Validation
+
+The `FolderResponseModel` includes a validator for the parent field that allows empty strings for root folders:
 
 ```python
-class FolderResponseModel(FolderBaseModel):
-    id: UUID
-    @field_validator("parent")
-    @classmethod
-    def validate_parent(cls, v: str) -> str:
-        """
-        Validate parent field. Empty string is allowed for root folders.
-        """
-        # Allow empty string for root folders
-        return v
-```
+from scm.models.setup.folder import FolderResponseModel
 
-## Model Validation Rules
+# Root folder with empty parent
+root_folder = FolderResponseModel(
+    id="baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e",
+    name="RootFolder",
+    parent=""  # Empty string allowed for root folders
+)
 
-| Field           | Validation Rules                                           |
-|-----------------|------------------------------------------------------------|
-| `name`          | Non-empty string, max 255 characters                       |
-| `parent`        | String, empty string for root folders                      |
-| `id`            | Valid UUID format (required in response and update models) |
-| `description`   | Optional text description                                  |
-| `labels`        | Optional list of string labels                             |
-| `snippets`      | Optional list of snippet IDs (usually UUIDs as strings)    |
-| `display_name`  | Optional string                                            |
-| `model`         | Optional string                                            |
-| `serial_number` | Optional string                                            |
-| `type`          | Optional string                                            |
-| `device_only`   | Optional boolean                                           |
-
-The `FolderResponseModel` includes a validator for the parent field:
-
-```python
-@field_validator("parent")
-@classmethod
-def validate_parent(cls, v: str) -> str:
-    """
-    Validate parent field. Empty string is allowed for root folders.
-    """
-    # Allow empty string for root folders
-    return v
+# Child folder with parent name
+child_folder = FolderResponseModel(
+    id="caf4dc4c-9ea2-4a3d-92bb-6f8a9e60822f",
+    name="ChildFolder",
+    parent="RootFolder"
+)
 ```
 
 ## Usage Examples
 
-### Creating Model Instances
+### Creating a Folder
 
 ```python
-from uuid import UUID
-from scm.models.setup.folder import (
-    FolderBaseModel,
-    FolderCreateModel,
-    FolderUpdateModel,
-    FolderResponseModel
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Create a base folder model
-base_folder = FolderBaseModel(
-    name="Projects",
-    parent="",  # Root folder
-    description="Main projects folder",
-    labels=["root", "projects"],
-    display_name="Projects (Root)",
-)
+# Using dictionary
+folder_data = {
+    "name": "Engineering",
+    "parent": "",  # Root folder
+    "description": "Engineering team folder",
+    "labels": ["team", "eng"]
+}
 
-# Create a folder creation model
-create_folder = FolderCreateModel(
-    name="Development",
-    parent="Projects",
-    description="Development projects folder",
-    labels=["development"]
-)
-
-# Create a folder update model
-update_folder = FolderUpdateModel(
-    id=UUID("baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e"),
-    name="Development",
-    parent="Projects",
-    description="Updated folder",
-    labels=["dev", "updated"]
-)
-
-# Parse a folder API response
-response = FolderResponseModel(
-    id=UUID("baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e"),
-    name="Engineering",
-    parent="root",
-    display_name="Engineering",
-    model="PA-VM",
-    serial_number="0123456789",
-    type="container",
-    device_only=False
-)
+response = client.folder.create(folder_data)
+print(f"Created folder: {response.name} with ID: {response.id}")
 ```
 
-### Model Validation
+### Creating a Child Folder
 
 ```python
-from pydantic_core import ValidationError
-try:
-    FolderCreateModel(name="", parent="root")
-except ValidationError as e:
-    print("Validation error:", e)
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Create a child folder under Engineering
+child_folder = {
+    "name": "Development",
+    "parent": "Engineering",
+    "description": "Development projects folder",
+    "labels": ["development"]
+}
+
+response = client.folder.create(child_folder)
+print(f"Created child folder: {response.name}")
 ```
 
-### Model Serialization
+### Updating a Folder
 
 ```python
-folder = FolderResponseModel(
-    id=UUID("baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e"),
-    name="Engineering",
-    parent="root"
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
-# Convert to dict
-folder_dict = folder.model_dump()
-# Convert to JSON
-folder_json = folder.model_dump_json()
+
+# Fetch existing folder
+existing = client.folder.fetch(name="Engineering")
+
+# Modify attributes using dot notation
+existing.description = "Updated Engineering folder"
+existing.labels = ["engineering", "updated"]
+
+# Pass modified object to update()
+updated = client.folder.update(existing)
+print(f"Updated folder: {updated.name}")
 ```
 
-### API Integration Examples
+### Listing Folders
 
 ```python
-from scm.config.setup.folder import Folder
-folders = Folder(client)
+from scm.client import ScmClient
 
-# Create and send a folder
-new_folder = FolderCreateModel(
-    name="QA",
-    parent="Engineering",
-    description="Quality Assurance folder"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
-created = folders.create(new_folder.model_dump(exclude_unset=True))
 
-# Update a folder
-update = FolderUpdateModel(
-    id=created.id,
-    name="QA",
-    parent="Engineering",
-    description="QA and Testing"
+# List all folders
+all_folders = client.folder.list()
+
+for folder in all_folders:
+    print(f"Folder: {folder.name}")
+    print(f"Parent: {folder.parent}")
+    print(f"Type: {folder.type}")
+
+# Filter by parent
+child_folders = client.folder.list(parent="Engineering")
+
+# Filter by labels
+labeled_folders = client.folder.list(labels=["engineering"])
+```
+
+### Fetching a Folder by Name
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
-folders.update(update)
+
+# Fetch folder by name
+folder = client.folder.fetch(name="Engineering")
+if folder:
+    print(f"Found folder: {folder.name}")
+    print(f"ID: {folder.id}")
+    print(f"Description: {folder.description}")
+else:
+    print("Folder not found")
 ```
