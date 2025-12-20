@@ -689,20 +689,19 @@ class TestLogForwardingProfileListAndFetch:
         """Test filtering with tags parameter."""
         api_client = MagicMock(spec=Scm)
 
-        # Create test profiles with tags - ensure tag is properly formatted as a Pydantic model expects
+        # Create test profiles - use valid model data
         profile1 = LogForwardingProfileResponseFactory.build().model_dump()
-        # Add tags directly to the profile model
-        profile1["tag"] = ["tag1", "tag2"]
-
         profile2 = LogForwardingProfileResponseFactory.build().model_dump()
         profile2["name"] = "test-profile-2"
-        profile2["tag"] = ["tag3"]
+
+        # Create a valid response model for the mock return value
+        mock_profile = LogForwardingProfileResponseModel(**profile1)
 
         # Mock the _apply_filters method to properly handle our tags filter
         with patch.object(
             LogForwardingProfile,
             "_apply_filters",
-            return_value=[LogForwardingProfileResponseModel(**profile1)],
+            return_value=[mock_profile],
         ) as mock_apply_filters:
             # Create a mock response
             api_client.get.return_value = {

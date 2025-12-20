@@ -49,11 +49,11 @@ class MatchListItem(BaseModel):
     send_to_panorama: Optional[bool] = Field(None, description="Flag to send logs to Panorama")
     quarantine: Optional[bool] = Field(False, description="Flag to quarantine matching logs")
 
-    # Pydantic model configuration to allow for more flexible deserialization
+    # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
-        extra="ignore",  # Ignore extra fields not defined in the model
     )
 
 
@@ -120,10 +120,10 @@ class LogForwardingProfileBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
-        extra="ignore",  # Ignore extra fields not defined in the model
     )
 
 

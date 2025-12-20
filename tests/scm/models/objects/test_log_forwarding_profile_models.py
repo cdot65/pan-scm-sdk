@@ -33,8 +33,9 @@ class TestLogForwardingProfileCreateModel:
         with pytest.raises(ValidationError) as exc_info:
             LogForwardingProfileCreateModel(**data)
         error_msg = str(exc_info.value)
-        assert "validation error for LogForwardingProfileCreateModel" in error_msg
+        assert "validation errors for LogForwardingProfileCreateModel" in error_msg
         assert "name\n  Field required" in error_msg
+        assert "Extra inputs are not permitted" in error_msg
 
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
@@ -240,3 +241,31 @@ class TestLogForwardingProfileResponseModel:
         error_msg = str(exc_info.value)
         assert "validation error" in error_msg
         assert "name\n  Field required" in error_msg
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_log_forwarding_profile_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in LogForwardingProfileCreateModel."""
+        data = LogForwardingProfileCreateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            LogForwardingProfileCreateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_log_forwarding_profile_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in LogForwardingProfileUpdateModel."""
+        data = LogForwardingProfileUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            LogForwardingProfileUpdateModel(**data)
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_log_forwarding_profile_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in LogForwardingProfileResponseModel."""
+        data = LogForwardingProfileResponseModelFactory.build_valid()
+        data["unknown_field"] = "should fail"
+        with pytest.raises(ValidationError) as exc_info:
+            LogForwardingProfileResponseModel(**data)
+        assert "extra" in str(exc_info.value).lower()
