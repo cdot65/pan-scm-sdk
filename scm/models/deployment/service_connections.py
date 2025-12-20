@@ -28,6 +28,11 @@ class NoExportCommunity(str, Enum):
 class BgpPeerModel(BaseModel):
     """BGP peer configuration for service connections."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     local_ip_address: Optional[str] = Field(None, description="Local IPv4 address for BGP peering")
     local_ipv6_address: Optional[str] = Field(
         None, description="Local IPv6 address for BGP peering"
@@ -39,6 +44,11 @@ class BgpPeerModel(BaseModel):
 
 class BgpProtocolModel(BaseModel):
     """BGP protocol configuration for service connections."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     do_not_export_routes: Optional[bool] = Field(None, description="Do not export routes option")
     enable: Optional[bool] = Field(None, description="Enable BGP")
@@ -56,11 +66,21 @@ class BgpProtocolModel(BaseModel):
 class ProtocolModel(BaseModel):
     """Protocol configuration for service connections."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     bgp: Optional[BgpProtocolModel] = Field(None, description="BGP protocol configuration")
 
 
 class QosModel(BaseModel):
     """QoS configuration for service connections."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     enable: Optional[bool] = Field(None, description="Enable QoS")
     qos_profile: Optional[str] = Field(None, description="QoS profile name")
@@ -70,6 +90,7 @@ class ServiceConnectionBaseModel(BaseModel):
     """Base model for Service Connections containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
