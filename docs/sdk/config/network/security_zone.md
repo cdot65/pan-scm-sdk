@@ -41,22 +41,23 @@ The `SecurityZone` class manages security zone objects in Palo Alto Networks' St
 
 ## Security Zone Model Attributes
 
-| Attribute                      | Type          | Required      | Description                                             |
-|--------------------------------|---------------|---------------|---------------------------------------------------------|
-| `name`                         | str           | Yes           | The name of the security zone                           |
-| `id`                           | UUID          | Yes*          | Unique identifier (response only)                       |
-| `enable_user_identification`   | bool          | No            | Enables user identification                             |
-| `enable_device_identification` | bool          | No            | Enables device identification                           |
-| `dos_profile`                  | str           | No            | Denial of Service profile name                          |
-| `dos_log_setting`              | str           | No            | DoS log setting name                                    |
-| `network`                      | NetworkConfig | No            | Network configuration for the zone                      |
-| `user_acl`                     | UserAcl       | No            | User access control list configuration                  |
-| `device_acl`                   | DeviceAcl     | No            | Device access control list configuration                |
-| `folder`                       | str           | Conditionally | The folder container where the security zone is defined |
-| `snippet`                      | str           | Conditionally | The snippet container (if applicable)                   |
-| `device`                       | str           | Conditionally | The device container (if applicable)                    |
+| Attribute                      | Type          | Required      | Default | Description                                             |
+|--------------------------------|---------------|---------------|---------|--------------------------------------------------------|
+| `name`                         | str           | Yes           | None    | Name of security zone. Max 63 chars. Pattern: `^[0-9a-zA-Z._\- ]+$` |
+| `id`                           | UUID          | Yes*          | None    | Unique identifier (*response/update only)              |
+| `enable_user_identification`   | bool          | No            | None    | Enables user identification                            |
+| `enable_device_identification` | bool          | No            | None    | Enables device identification                          |
+| `dos_profile`                  | str           | No            | None    | Denial of Service profile name                         |
+| `dos_log_setting`              | str           | No            | None    | DoS log setting name                                   |
+| `network`                      | NetworkConfig | No            | None    | Network configuration for the zone                     |
+| `user_acl`                     | UserAcl       | No            | None    | User access control list configuration                 |
+| `device_acl`                   | DeviceAcl     | No            | None    | Device access control list configuration               |
+| `folder`                       | str           | No**          | None    | Folder location. Max 64 chars                          |
+| `snippet`                      | str           | No**          | None    | Snippet location. Max 64 chars                         |
+| `device`                       | str           | No**          | None    | Device location. Max 64 chars                          |
 
-*\* The `id` field is assigned by the system and is only present in response objects.*
+\* Only required for update and response models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
 
 ## Network Interface Types
 
@@ -404,7 +405,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.network import SecurityZone
 
 # Initialize client
 client = ScmClient(
@@ -413,18 +413,13 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.security_zone.max_limit = 4000
 
-# Option 1: Use the unified client interface but create a custom SecurityZone instance with max_limit
-security_zone_service = SecurityZone(client, max_limit=4321)
-all_zones1 = security_zone_service.list(folder='Security Zones')
+# List all security zones - auto-paginates through results
+all_zones = client.security_zone.list(folder='Security Zones')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
-all_zones2 = client.security_zone.list(folder='Security Zones')
-
-# Both options will auto-paginate through all available objects.
-# The security zones are fetched in chunks according to the max_limit.
+# The security zones are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting Security Zones
@@ -570,9 +565,11 @@ the [security_zone.py example](https://github.com/cdot65/pan-scm-sdk/blob/main/e
 
 ## Related Models
 
+- [SecurityZoneBaseModel](../../models/network/security_zone_models.md#Overview)
 - [SecurityZoneCreateModel](../../models/network/security_zone_models.md#Overview)
 - [SecurityZoneUpdateModel](../../models/network/security_zone_models.md#Overview)
 - [SecurityZoneResponseModel](../../models/network/security_zone_models.md#Overview)
 - [NetworkConfig](../../models/network/security_zone_models.md#Overview)
 - [UserAcl](../../models/network/security_zone_models.md#Overview)
 - [DeviceAcl](../../models/network/security_zone_models.md#Overview)
+- [NetworkInterfaceType](../../models/network/security_zone_models.md#Overview)
