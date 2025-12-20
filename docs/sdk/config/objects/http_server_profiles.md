@@ -1,6 +1,23 @@
 # HTTP Server Profile Configuration Object
 
-[TOC]
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [HTTP Server Profile Attributes](#http-server-profile-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating an HTTP Server Profile](#creating-an-http-server-profile)
+    - [Retrieving an HTTP Server Profile](#retrieving-an-http-server-profile)
+    - [Updating an HTTP Server Profile](#updating-an-http-server-profile)
+    - [Listing HTTP Server Profiles](#listing-http-server-profiles)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
+    - [Deleting an HTTP Server Profile](#deleting-an-http-server-profile)
+7. [Error Handling](#error-handling)
+8. [Best Practices](#best-practices)
+9. [Example Script](#example-script)
+10. [Related Models](#related-models)
 
 ## Overview
 
@@ -50,31 +67,33 @@ updating, listing, and deleting HTTP server profile configurations.
 
 ## HTTP Server Profile Attributes
 
-| Attribute          | Type                          | Required      | Description                                          |
-|--------------------|-------------------------------|---------------|------------------------------------------------------|
-| `name`             | str                           | Yes           | The name of the HTTP server profile (max length: 63) |
-| `server`           | List[ServerModel]             | Yes           | List of server configurations                        |
-| `tag_registration` | bool                          | No            | Whether to register tags on match                    |
-| `description`      | str                           | No            | Description of the HTTP server profile               |
-| `format`           | Dict[str, PayloadFormatModel] | No            | Format settings for different log types              |
-| `folder`           | str                           | No*           | The folder in which the resource is defined          |
-| `snippet`          | str                           | No*           | The snippet in which the resource is defined         |
-| `device`           | str                           | No*           | The device in which the resource is defined          |
-| `id`               | UUID                          | Response only | The UUID of the HTTP server profile (response only)  |
+| Attribute          | Type                          | Required      | Default | Description                                          |
+|--------------------|-------------------------------|---------------|---------|------------------------------------------------------|
+| `name`             | str                           | Yes           | None    | The name of the HTTP server profile (max length: 63) |
+| `server`           | List[ServerModel]             | Yes           | None    | List of server configurations                        |
+| `tag_registration` | bool                          | No            | None    | Whether to register tags on match                    |
+| `description`      | str                           | No            | None    | Description of the HTTP server profile               |
+| `format`           | Dict[str, PayloadFormatModel] | No            | None    | Format settings for different log types              |
+| `folder`           | str                           | No*           | None    | The folder in which the resource is defined          |
+| `snippet`          | str                           | No*           | None    | The snippet in which the resource is defined         |
+| `device`           | str                           | No*           | None    | The device in which the resource is defined          |
+| `id`               | UUID                          | Response only | None    | The UUID of the HTTP server profile (response only)  |
 
 *\* Exactly one of folder, snippet, or device must be provided.*
 
 ### Server Model Attributes
 
-| Attribute             | Type                                              | Required | Description                     |
-|-----------------------|---------------------------------------------------|----------|---------------------------------|
-| `name`                | str                                               | Yes      | HTTP server name                |
-| `address`             | str                                               | Yes      | HTTP server address             |
-| `protocol`            | Literal["HTTP", "HTTPS"]                          | Yes      | HTTP server protocol            |
-| `port`                | int                                               | Yes      | HTTP server port                |
-| `tls_version`         | Optional[Literal["1.0", "1.1", "1.2", "1.3"]]     | No       | HTTP server TLS version         |
-| `certificate_profile` | Optional[str]                                     | No       | HTTP server certificate profile |
-| `http_method`         | Optional[Literal["GET", "POST", "PUT", "DELETE"]] | No       | HTTP operation to perform       |
+| Attribute             | Type                                              | Required | Default | Description                               |
+|-----------------------|---------------------------------------------------|----------|---------|-------------------------------------------|
+| `name`                | str                                               | Yes      | None    | HTTP server name                          |
+| `address`             | str                                               | Yes      | None    | HTTP server address                       |
+| `protocol`            | Literal["HTTP", "HTTPS"]                          | Yes      | None    | HTTP server protocol                      |
+| `port`                | int                                               | Yes      | None    | HTTP server port                          |
+| `tls_version`         | Optional[Literal["1.0", "1.1", "1.2", "1.3"]]     | No       | None    | HTTP server TLS version                   |
+| `certificate_profile` | Optional[str]                                     | No       | None    | HTTP server certificate profile           |
+| `http_method`         | Optional[Literal["GET", "POST", "PUT", "DELETE"]] | No       | None    | HTTP operation to perform                 |
+| `username`            | Optional[str]                                     | No       | None    | Username for HTTP server authentication   |
+| `password`            | Optional[str]                                     | No       | None    | Password for HTTP server authentication   |
 
 ## Exceptions
 
@@ -87,26 +106,34 @@ updating, listing, and deleting HTTP server profile configurations.
 ## Basic Configuration
 
 ```python
-# Import the client
+from scm.client import ScmClient
+
+# Initialize client using the unified client approach
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Access the http_server_profile module directly through the client
+# client.http_server_profile is automatically initialized for you
+```
+
+You can also use the traditional approach if preferred:
+
+```python
 from scm.client import Scm
+from scm.config.objects import HTTPServerProfile
 
-# Create API client instance
+# Initialize client
 client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Access HTTP server profiles directly through the client
-# No need to initialize a separate HTTPServerProfile object
-
-# You can customize max_limit for HTTP server profiles when initializing the client
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
-    http_server_profile_max_limit=1000  # Default max_limit is 2500 (1-5000)
-)
+# Initialize HTTPServerProfile object
+http_server_profiles = HTTPServerProfile(client)
 ```
 
 ## Usage Examples
@@ -174,35 +201,26 @@ profile_by_name = client.http_server_profile.fetch(
 ### Updating an HTTP Server Profile
 
 ```python
-from scm.models.objects import HTTPServerProfileUpdateModel, ServerModel
-
-# First, get the current profile
-existing_profile = client.http_server_profile.get("123e4567-e89b-12d3-a456-426655440000")
-
-# Create an update model with modified fields
-update_data = HTTPServerProfileUpdateModel(
-    id=existing_profile.id,
-    name=existing_profile.name,
-    description="Updated description for HTTP server profile",
-    server=[
-        ServerModel(
-            name="primary-server",
-            address="10.0.0.1",
-            protocol="HTTP",
-            port=8080
-        ),
-        ServerModel(
-            name="backup-server",
-            address="10.0.0.2",
-            protocol="HTTP",
-            port=8080
-        )
-    ],
+# Fetch existing HTTP server profile
+existing_profile = client.http_server_profile.fetch(
+    name="secure-logging-profile",
     folder="Prisma Access"
 )
 
-# Update the profile
-updated_profile = client.http_server_profile.update(update_data)
+# Modify attributes using dot notation
+existing_profile.description = "Updated description for HTTP server profile"
+
+# Add a backup server to the existing server list
+existing_profile.server.append({
+    "name": "backup-server",
+    "address": "10.0.0.2",
+    "protocol": "HTTP",
+    "port": 8080
+})
+
+# Perform update
+updated_profile = client.http_server_profile.update(existing_profile)
+print(f"Updated profile: {updated_profile.name}")
 ```
 
 ### Listing HTTP Server Profiles
@@ -242,22 +260,29 @@ for profile in filtered_profiles:
         print(f"  Server: {server.protocol}://{server.address}:{server.port}")
 ```
 
-### Pagination and Max Limit
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
 
 ```python
-# Create client with custom pagination limit for HTTP server profiles
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
-    http_server_profile_max_limit=1000
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# List profiles with the custom pagination limit
-profiles = client.http_server_profile.list(folder="Prisma Access")
-print(f"Retrieved {len(profiles)} profiles")
+# Configure max_limit on the http_server_profile service
+client.http_server_profile.max_limit = 1000
 
-# The max_limit is automatically capped at 5000 (the API's maximum)
+# List all HTTP server profiles - auto-paginates through results
+all_profiles = client.http_server_profile.list(folder="Prisma Access")
+
+# The list() method will retrieve up to 1000 objects per API call (max 5000)
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_profiles)} profiles")
 ```
 
 ### Deleting an HTTP Server Profile
