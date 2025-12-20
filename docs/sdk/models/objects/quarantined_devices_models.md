@@ -1,160 +1,113 @@
 # Quarantined Devices Models
 
-This document describes the data models used for Quarantined Devices in the Palo Alto Networks Strata Cloud Manager SDK.
+## Overview {#Overview}
 
-## Model Hierarchy
+Quarantined Devices allow you to manage devices that have been quarantined in Palo Alto Networks' Strata Cloud Manager. These models define the structure for creating and retrieving quarantined device configurations.
 
-The Quarantined Devices models follow a hierarchical structure:
+### Models
 
-1. `QuarantinedDevicesBaseModel` - Base model containing common fields
-2. `QuarantinedDevicesCreateModel` - Model for creating new quarantined devices
-3. `QuarantinedDevicesResponseModel` - Model for API responses
-4. `QuarantinedDevicesListParamsModel` - Model for list operation parameters
+The module provides the following Pydantic models:
+
+- `QuarantinedDevicesBaseModel`: Base model with fields common to all quarantined device operations
+- `QuarantinedDevicesCreateModel`: Model for creating new quarantined devices
+- `QuarantinedDevicesResponseModel`: Response model for quarantined device operations
+- `QuarantinedDevicesListParamsModel`: Model for list operation filter parameters
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
 ## QuarantinedDevicesBaseModel
 
-Base model for Quarantined Devices objects containing fields common to all CRUD operations.
+The `QuarantinedDevicesBaseModel` contains fields common to all quarantined device CRUD operations.
 
-```python
-class QuarantinedDevicesBaseModel(BaseModel):
-    """
-    Base model for Quarantined Devices objects containing fields common to all CRUD operations.
-
-    Attributes:
-        host_id (str): Device host ID.
-        serial_number (Optional[str]): Device serial number.
-    """
-
-    # Required fields
-    host_id: str = Field(
-        ...,
-        description="Device host ID",
-    )
-
-    # Optional fields
-    serial_number: Optional[str] = Field(
-        None,
-        description="Device serial number",
-    )
-
-    # Pydantic model configuration
-    model_config = ConfigDict(
-        populate_by_name=True,
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
-```
-
-### Fields
-
-| Field Name | Type | Required | Description |
-|------------|------|----------|-------------|
-| `host_id` | str | Yes | Device host ID |
-| `serial_number` | Optional[str] | No | Device serial number |
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| host_id | str | Yes | - | Device host ID |
+| serial_number | Optional[str] | No | None | Device serial number |
 
 ## QuarantinedDevicesCreateModel
 
-Model used for creating new Quarantined Devices.
+The `QuarantinedDevicesCreateModel` extends the base model for creating new quarantined devices.
 
-```python
-class QuarantinedDevicesCreateModel(QuarantinedDevicesBaseModel):
-    """
-    Represents the creation of a new Quarantined Devices object for Palo Alto Networks' Strata Cloud Manager.
-    """
-```
-
-This model inherits all fields from `QuarantinedDevicesBaseModel`.
-
-### Example Usage
-
-```python
-from scm.models.objects import QuarantinedDevicesCreateModel
-
-# Create a minimal instance with required fields
-device = QuarantinedDevicesCreateModel(host_id="device-1234")
-
-# Create an instance with all fields
-device_with_all_fields = QuarantinedDevicesCreateModel(
-    host_id="device-1234",
-    serial_number="PA-987654321"
-)
-
-# Convert to dictionary for API request
-payload = device_with_all_fields.model_dump(exclude_unset=True)
-```
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| *All attributes from QuarantinedDevicesBaseModel* |  |  |  |  |
 
 ## QuarantinedDevicesResponseModel
 
-Model representing the response from the API when creating or retrieving Quarantined Devices.
+The `QuarantinedDevicesResponseModel` extends the base model and represents the API response.
 
-```python
-class QuarantinedDevicesResponseModel(QuarantinedDevicesBaseModel):
-    """
-    Represents the response from creating or retrieving a Quarantined Devices object
-    from Palo Alto Networks' Strata Cloud Manager.
-    """
-```
-
-This model inherits all fields from `QuarantinedDevicesBaseModel`.
-
-### Example Usage
-
-```python
-from scm.models.objects import QuarantinedDevicesResponseModel
-
-# Parse API response into model
-api_response = {
-    "host_id": "device-1234",
-    "serial_number": "PA-987654321"
-}
-
-device = QuarantinedDevicesResponseModel(**api_response)
-print(f"Host ID: {device.host_id}")
-print(f"Serial Number: {device.serial_number}")
-```
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| *All attributes from QuarantinedDevicesBaseModel* |  |  |  |  |
 
 ## QuarantinedDevicesListParamsModel
 
-Model for the parameters used in the list operation to filter Quarantined Devices.
+The `QuarantinedDevicesListParamsModel` defines parameters for filtering list operations.
+
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| host_id | Optional[str] | No | None | Filter by device host ID |
+| serial_number | Optional[str] | No | None | Filter by device serial number |
+
+## Usage Examples
+
+### Creating a Quarantined Device
 
 ```python
-class QuarantinedDevicesListParamsModel(BaseModel):
-    """
-    Parameters for listing Quarantined Devices.
+from scm.client import ScmClient
 
-    Attributes:
-        host_id (Optional[str]): Filter by device host ID.
-        serial_number (Optional[str]): Filter by device serial number.
-    """
-
-    host_id: Optional[str] = Field(
-        None,
-        description="Filter by device host ID",
-    )
-    serial_number: Optional[str] = Field(
-        None,
-        description="Filter by device serial number",
-    )
-```
-
-### Fields
-
-| Field Name | Type | Required | Description |
-|------------|------|----------|-------------|
-| `host_id` | Optional[str] | No | Filter by device host ID |
-| `serial_number` | Optional[str] | No | Filter by device serial number |
-
-### Example Usage
-
-```python
-from scm.models.objects import QuarantinedDevicesListParamsModel
-
-# Create filter parameters model
-filter_params = QuarantinedDevicesListParamsModel(
-    host_id="device-1234",
-    serial_number="PA-987654321"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Convert to dictionary for API request parameters, excluding None values
-params = filter_params.model_dump(exclude_none=True)
+# Using dictionary
+device_data = {
+    "host_id": "device-12345",
+    "serial_number": "PA-987654321"
+}
+
+response = client.quarantined_device.create(device_data)
+print(f"Created device: {response.host_id}")
 ```
+
+### Listing Quarantined Devices with Filters
+
+```python
+# List all quarantined devices
+all_devices = client.quarantined_device.list()
+
+# List with host_id filter
+filtered = client.quarantined_device.list(host_id="device-12345")
+
+# List with serial_number filter
+by_serial = client.quarantined_device.list(serial_number="PA-987654321")
+
+# List with both filters
+specific = client.quarantined_device.list(
+    host_id="device-12345",
+    serial_number="PA-987654321"
+)
+```
+
+### Deleting a Quarantined Device
+
+```python
+# Delete by host_id
+client.quarantined_device.delete("device-12345")
+print("Device deleted successfully")
+```
+
+## Best Practices
+
+### Device Management
+- Always provide a valid `host_id` when creating quarantined devices
+- Use the `serial_number` field when available for better device identification
+- Verify device existence before deletion using the `list()` method
+
+### Error Handling
+- Handle `InvalidObjectError` for invalid request payloads
+- Handle `MissingQueryParameterError` when host_id is missing for delete operations
+- Validate `host_id` is not empty before calling `delete()`
