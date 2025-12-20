@@ -58,6 +58,11 @@ class EspAuthentication(str, Enum):
 class LifetimeSeconds(BaseModel):
     """Lifetime specified in seconds."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     seconds: int = Field(
         ...,
         description="Specify lifetime in seconds",
@@ -68,6 +73,11 @@ class LifetimeSeconds(BaseModel):
 
 class LifetimeMinutes(BaseModel):
     """Lifetime specified in minutes."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     minutes: int = Field(
         ...,
@@ -80,6 +90,11 @@ class LifetimeMinutes(BaseModel):
 class LifetimeHours(BaseModel):
     """Lifetime specified in hours."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     hours: int = Field(
         ...,
         description="Specify lifetime in hours",
@@ -90,6 +105,11 @@ class LifetimeHours(BaseModel):
 
 class LifetimeDays(BaseModel):
     """Lifetime specified in days."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     days: int = Field(
         ...,
@@ -102,6 +122,11 @@ class LifetimeDays(BaseModel):
 class LifesizeKB(BaseModel):
     """Lifesize specified in kilobytes."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     kb: int = Field(
         ...,
         description="Specify lifesize in kilobytes(KB)",
@@ -112,6 +137,11 @@ class LifesizeKB(BaseModel):
 
 class LifesizeMB(BaseModel):
     """Lifesize specified in megabytes."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     mb: int = Field(
         ...,
@@ -124,6 +154,11 @@ class LifesizeMB(BaseModel):
 class LifesizeGB(BaseModel):
     """Lifesize specified in gigabytes."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     gb: int = Field(
         ...,
         description="Specify lifesize in gigabytes(GB)",
@@ -135,6 +170,11 @@ class LifesizeGB(BaseModel):
 class LifesizeTB(BaseModel):
     """Lifesize specified in terabytes."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     tb: int = Field(
         ...,
         description="Specify lifesize in terabytes(TB)",
@@ -145,6 +185,11 @@ class LifesizeTB(BaseModel):
 
 class EspConfig(BaseModel):
     """ESP configuration for IPsec crypto profiles."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     encryption: List[EspEncryption] = Field(
         ...,
@@ -169,6 +214,11 @@ class EspConfig(BaseModel):
 class AhConfig(BaseModel):
     """AH configuration for IPsec crypto profiles."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     authentication: List[AhAuthentication] = Field(
         ...,
         description="Authentication algorithm",
@@ -179,6 +229,7 @@ class IPsecCryptoProfileBaseModel(BaseModel):
     """Base model for IPsec Crypto Profiles containing fields common to all operations."""
 
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

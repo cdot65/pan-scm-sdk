@@ -390,3 +390,53 @@ class TestIPsecCryptoProfileModels:
         values = {"name": "test", "lifetime": {"seconds": 3600}, "lifesize": {"mb": 10}}
         result = IPsecCryptoProfileBaseModel.process_lifetime_and_lifesize(values)
         assert result == values
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on CreateModel."""
+        data = {
+            "name": "test-profile",
+            "lifetime": {"seconds": 3600},
+            "esp": {
+                "encryption": ["aes-128-cbc"],
+                "authentication": ["sha1"],
+            },
+            "folder": "Test Folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            IPsecCryptoProfileCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on UpdateModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "lifetime": {"seconds": 3600},
+            "esp": {
+                "encryption": ["aes-128-cbc"],
+                "authentication": ["sha1"],
+            },
+            "folder": "Test Folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            IPsecCryptoProfileUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "test-profile",
+            "lifetime": {"seconds": 3600},
+            "esp": {
+                "encryption": ["aes-128-cbc"],
+                "authentication": ["sha1"],
+            },
+            "folder": "Test Folder",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            IPsecCryptoProfileResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
