@@ -31,25 +31,25 @@ application groups that organize collections of applications for use in security
 
 ## Core Methods
 
-| Method     | Description                   | Parameters                               | Return Type                           |
-|------------|-------------------------------|------------------------------------------|---------------------------------------|
-| `create()` | Creates a new app group       | `data: Dict[str, Any]`                   | `ApplicationGroupResponseModel`       |
-| `get()`    | Retrieves a group by ID       | `object_id: str`                         | `ApplicationGroupResponseModel`       |
-| `update()` | Updates an existing group     | `app_group: ApplicationGroupUpdateModel` | `ApplicationGroupResponseModel`       |
-| `delete()` | Deletes a group               | `object_id: str`                         | `None`                                |
-| `list()`   | Lists groups with filtering   | `folder: str`, `**filters`               | `List[ApplicationGroupResponseModel]` |
-| `fetch()`  | Gets group by name and folder | `name: str`, `folder: str`               | `ApplicationGroupResponseModel`       |
+| Method     | Description                       | Parameters                                                                    | Return Type                           |
+|------------|-----------------------------------|-------------------------------------------------------------------------------|---------------------------------------|
+| `create()` | Creates a new app group           | `data: Dict[str, Any]`                                                        | `ApplicationGroupResponseModel`       |
+| `get()`    | Retrieves a group by ID           | `object_id: str`                                                              | `ApplicationGroupResponseModel`       |
+| `update()` | Updates an existing group         | `app_group: ApplicationGroupUpdateModel`                                      | `ApplicationGroupResponseModel`       |
+| `delete()` | Deletes a group                   | `object_id: str`                                                              | `None`                                |
+| `list()`   | Lists groups with filtering       | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `**filters` | `List[ApplicationGroupResponseModel]` |
+| `fetch()`  | Gets group by name and container  | `name: str`, `folder: str`, `snippet: str`, `device: str`                     | `ApplicationGroupResponseModel`       |
 
 ## Application Group Model Attributes
 
-| Attribute | Type      | Required | Description                                 |
-|-----------|-----------|----------|---------------------------------------------|
-| `name`    | str       | Yes      | Name of group (max 63 chars)                |
-| `id`      | UUID      | Yes*     | Unique identifier (*response only)          |
-| `members` | List[str] | Yes      | List of application names                   |
-| `folder`  | str       | Yes**    | Folder location (**one container required)  |
-| `snippet` | str       | Yes**    | Snippet location (**one container required) |
-| `device`  | str       | Yes**    | Device location (**one container required)  |
+| Attribute | Type      | Required | Default | Description                                         |
+|-----------|-----------|----------|---------|-----------------------------------------------------|
+| `name`    | str       | Yes      | None    | Name of group (max 31 chars)                        |
+| `id`      | UUID      | Yes*     | None    | Unique identifier (*response only)                  |
+| `members` | List[str] | Yes      | None    | List of application names (min 1, max 1024 entries) |
+| `folder`  | str       | Yes**    | None    | Folder location (**one container required)          |
+| `snippet` | str       | Yes**    | None    | Snippet location (**one container required)         |
+| `device`  | str       | Yes**    | None    | Device location (**one container required)          |
 
 ## Exceptions
 
@@ -236,20 +236,23 @@ You can also use the traditional approach if preferred:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-    # Initialize the ScmClient with a custom max_limit for application groups
-    # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-    client = ScmClient(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        application_group_max_limit=4321
-    )
+from scm.client import ScmClient
 
-    # Now when we call list(), it will use the specified max_limit for each request
-    # while auto-paginating through all available objects.
-    all_groups = client.application_group.list(folder='Texas')
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-    # 'all_groups' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Configure max_limit on the application_group service
+client.application_group.max_limit = 4321
+
+# List all groups - auto-paginates through results
+all_groups = client.application_group.list(folder='Texas')
+
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting Application Groups
