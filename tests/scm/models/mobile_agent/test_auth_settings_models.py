@@ -394,3 +394,47 @@ class TestAuthSettingsMoveModel:
         with pytest.raises(ValidationError) as exc_info:
             AuthSettingsMoveModel(**data)
         assert "where\n  Input should be" in str(exc_info.value)
+
+
+class TestExtraFieldsForbidden:
+    """Test that extra fields are rejected by all models."""
+
+    def test_auth_settings_base_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AuthSettingsBaseModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            AuthSettingsBaseModel(
+                name="test-settings",
+                authentication_profile="test-profile",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_auth_settings_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AuthSettingsCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            AuthSettingsCreateModel(
+                name="test-settings",
+                authentication_profile="test-profile",
+                folder="Mobile Users",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_auth_settings_update_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AuthSettingsUpdateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            AuthSettingsUpdateModel(
+                name="test-settings",
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
+
+    def test_auth_settings_move_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected in AuthSettingsMoveModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            AuthSettingsMoveModel(
+                name="test-settings",
+                where=MovePosition.TOP,
+                unknown_field="should fail",
+            )
+        assert "extra" in str(exc_info.value).lower()
