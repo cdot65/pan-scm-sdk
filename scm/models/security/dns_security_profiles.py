@@ -73,6 +73,7 @@ class ListActionRequestModel(ListActionBaseModel):
     """Action field validator for requests requiring exactly one action."""
 
     @model_validator(mode="before")
+    @classmethod
     def convert_action(cls, values):
         """Convert and validate the action field, ensuring exactly one action is provided.
 
@@ -107,6 +108,11 @@ class ListActionRequestModel(ListActionBaseModel):
 class DNSSecurityCategoryEntryModel(BaseModel):
     """DNS Security Category configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(
         ...,
         description="DNS Security Category Name",
@@ -128,6 +134,11 @@ class DNSSecurityCategoryEntryModel(BaseModel):
 class ListEntryBaseModel(BaseModel):
     """Base configuration for list entries."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(
         ...,
         description="List name",
@@ -145,6 +156,11 @@ class ListEntryBaseModel(BaseModel):
 class SinkholeSettingsModel(BaseModel):
     """Sinkhole configuration settings."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     ipv4_address: IPv4AddressEnum = Field(
         ...,
         description="IPv4 address for sinkhole",
@@ -158,6 +174,11 @@ class SinkholeSettingsModel(BaseModel):
 class WhitelistEntryModel(BaseModel):
     """Whitelist entry configuration."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
+
     name: str = Field(
         ...,
         description="DNS domain or FQDN to be whitelisted",
@@ -170,6 +191,11 @@ class WhitelistEntryModel(BaseModel):
 
 class BotnetDomainsModel(BaseModel):
     """Botnet domains configuration."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+    )
 
     dns_security_categories: Optional[List[DNSSecurityCategoryEntryModel]] = Field(
         None,
@@ -193,6 +219,7 @@ class DNSSecurityProfileBaseModel(BaseModel):
     """Base model for DNS Security Profile containing common fields."""
 
     model_config = ConfigDict(
+        extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
         populate_by_name=True,
@@ -261,7 +288,7 @@ class DNSSecurityProfileCreateModel(DNSSecurityProfileBaseModel):
 class DNSSecurityProfileUpdateModel(DNSSecurityProfileBaseModel):
     """Model for updating an existing DNS Security Profile."""
 
-    id: Optional[UUID] = Field(
+    id: UUID = Field(
         ...,
         description="UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],

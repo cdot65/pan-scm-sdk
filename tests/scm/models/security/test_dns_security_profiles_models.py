@@ -247,4 +247,125 @@ class TestDNSSecurityProfileResponseModel:
         assert model.snippet is None
 
 
+class TestExtraFieldsForbidden:
+    """Tests for extra='forbid' validation on all models."""
+
+    def test_create_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in CreateModel."""
+        data = DNSSecurityProfileCreateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            DNSSecurityProfileCreateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_update_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in UpdateModel."""
+        data = DNSSecurityProfileUpdateModelFactory.build_valid()
+        data["unknown_field"] = "should_fail"
+        with pytest.raises(ValidationError) as exc_info:
+            DNSSecurityProfileUpdateModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_response_model_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ResponseModel."""
+        data = {
+            "id": "123e4567-e89b-12d3-a456-426655440000",
+            "name": "TestProfile",
+            "folder": "Texas",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            DNSSecurityProfileResponseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_dns_security_category_entry_rejects_extra_fields(self):
+        """Test that extra fields are rejected in DNSSecurityCategoryEntryModel."""
+        from scm.models.security.dns_security_profiles import DNSSecurityCategoryEntryModel
+
+        data = {
+            "name": "test-category",
+            "action": "block",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            DNSSecurityCategoryEntryModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_list_entry_base_rejects_extra_fields(self):
+        """Test that extra fields are rejected in ListEntryBaseModel."""
+        from scm.models.security.dns_security_profiles import ListEntryBaseModel
+
+        data = {
+            "name": "test-list",
+            "action": {"block": {}},
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            ListEntryBaseModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_sinkhole_settings_rejects_extra_fields(self):
+        """Test that extra fields are rejected in SinkholeSettingsModel."""
+        from scm.models.security.dns_security_profiles import SinkholeSettingsModel
+
+        data = {
+            "ipv4_address": "127.0.0.1",
+            "ipv6_address": "::1",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            SinkholeSettingsModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_whitelist_entry_rejects_extra_fields(self):
+        """Test that extra fields are rejected in WhitelistEntryModel."""
+        from scm.models.security.dns_security_profiles import WhitelistEntryModel
+
+        data = {
+            "name": "example.com",
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            WhitelistEntryModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+    def test_botnet_domains_rejects_extra_fields(self):
+        """Test that extra fields are rejected in BotnetDomainsModel."""
+        from scm.models.security.dns_security_profiles import BotnetDomainsModel
+
+        data = {
+            "dns_security_categories": [],
+            "unknown_field": "should_fail",
+        }
+        with pytest.raises(ValidationError) as exc_info:
+            BotnetDomainsModel(**data)
+        assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestEnumValues:
+    """Tests for enum values."""
+
+    def test_action_enum_values(self):
+        """Test all ActionEnum values."""
+        expected = {"default", "allow", "block", "sinkhole"}
+        actual = {v.value for v in ActionEnum}
+        assert expected == actual
+
+    def test_log_level_enum_values(self):
+        """Test all LogLevelEnum values."""
+        from scm.models.security.dns_security_profiles import LogLevelEnum
+
+        expected = {"default", "none", "low", "informational", "medium", "high", "critical"}
+        actual = {v.value for v in LogLevelEnum}
+        assert expected == actual
+
+    def test_packet_capture_enum_values(self):
+        """Test all PacketCaptureEnum values."""
+        from scm.models.security.dns_security_profiles import PacketCaptureEnum
+
+        expected = {"disable", "single-packet", "extended-capture"}
+        actual = {v.value for v in PacketCaptureEnum}
+        assert expected == actual
+
+
 # -------------------- End of Test Classes --------------------
