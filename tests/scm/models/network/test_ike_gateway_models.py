@@ -177,3 +177,35 @@ def test_model_serialization():
     assert serialized["authentication"]["pre_shared_key"]["key"] == "secret-key"
     assert serialized["peer_id"]["type"] == "ipaddr"
     assert serialized["peer_address"]["ip"] == "10.0.0.1"
+
+
+def test_create_model_extra_fields_forbidden():
+    """Test that extra fields are rejected on CreateModel."""
+    data = VALID_IKE_GATEWAY.copy()
+    data["unknown_field"] = "should_fail"
+
+    with pytest.raises(ValidationError) as exc_info:
+        IKEGatewayCreateModel(**data)
+    assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+def test_update_model_extra_fields_forbidden():
+    """Test that extra fields are rejected on UpdateModel."""
+    data = VALID_IKE_GATEWAY.copy()
+    data["id"] = "123e4567-e89b-12d3-a456-426655440000"
+    data["unknown_field"] = "should_fail"
+
+    with pytest.raises(ValidationError) as exc_info:
+        IKEGatewayUpdateModel(**data)
+    assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+def test_response_model_extra_fields_forbidden():
+    """Test that extra fields are rejected on ResponseModel."""
+    data = VALID_IKE_GATEWAY.copy()
+    data["id"] = "123e4567-e89b-12d3-a456-426655440000"
+    data["unknown_field"] = "should_fail"
+
+    with pytest.raises(ValidationError) as exc_info:
+        IKEGatewayResponseModel(**data)
+    assert "Extra inputs are not permitted" in str(exc_info.value)
