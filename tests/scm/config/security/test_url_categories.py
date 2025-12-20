@@ -754,7 +754,6 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
         update_data = URLCategoriesUpdateModelFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
-            botnet_domains={},
         )
 
         # Create mock response without content
@@ -776,7 +775,6 @@ class TestURLCategoriesUpdate(TestURLCategoriesBase):
         update_data = URLCategoriesUpdateModelFactory(
             id="123e4567-e89b-12d3-a456-426655440000",
             name="test",
-            botnet_domains={},
         )
 
         self.mock_scm.put.side_effect = Exception("Generic error")  # noqa

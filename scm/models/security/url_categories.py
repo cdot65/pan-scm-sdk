@@ -23,6 +23,13 @@ class URLCategoriesListTypeEnum(str, Enum):
 class URLCategoriesBaseModel(BaseModel):
     """URL Category base model."""
 
+    model_config = ConfigDict(
+        extra="forbid",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     # Required Fields
     name: str = Field(
         ...,
@@ -41,12 +48,6 @@ class URLCategoriesBaseModel(BaseModel):
     type: Optional[URLCategoriesListTypeEnum] = Field(
         default=URLCategoriesListTypeEnum.url_list,
         description="Type of the URL category",
-    )
-
-    model_config = ConfigDict(
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-        populate_by_name=True,
     )
 
     # Configuration containers
@@ -71,7 +72,7 @@ class URLCategoriesBaseModel(BaseModel):
 
 
 class URLCategoriesCreateModel(URLCategoriesBaseModel):
-    """Model for creating a new DNS Security Profile."""
+    """Model for creating a new URL Category."""
 
     @model_validator(mode="after")
     def validate_container_type(self) -> "URLCategoriesCreateModel":
@@ -98,9 +99,9 @@ class URLCategoriesCreateModel(URLCategoriesBaseModel):
 
 
 class URLCategoriesUpdateModel(URLCategoriesBaseModel):
-    """Model for updating an existing DNS Security Profile."""
+    """Model for updating an existing URL Category."""
 
-    id: Optional[UUID] = Field(
+    id: UUID = Field(
         ...,
         description="UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
@@ -108,7 +109,7 @@ class URLCategoriesUpdateModel(URLCategoriesBaseModel):
 
 
 class URLCategoriesResponseModel(URLCategoriesBaseModel):
-    """Model for DNS Security Profile API responses."""
+    """Model for URL Category API responses."""
 
     id: UUID = Field(
         ...,
