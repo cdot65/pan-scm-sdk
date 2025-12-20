@@ -42,26 +42,29 @@ definitions that specify network protocols and ports for use in security policie
 
 ## Service Model Attributes
 
-| Attribute      | Type        | Required     | Description                                 |
-|----------------|-------------|--------------|---------------------------------------------|
-| `name`         | str         | Yes          | Name of service (max 63 chars)              |
-| `id`           | UUID        | Yes*         | Unique identifier (*response only)          |
-| `protocol`     | Protocol    | Yes          | Protocol configuration (TCP/UDP)            |
-| `protocol.tcp` | TCPProtocol | One Required | TCP protocol settings                       |
-| `protocol.udp` | UDPProtocol | One Required | UDP protocol settings                       |
-| `description`  | str         | No           | Description (max 1023 chars)                |
-| `tag`          | List[str]   | No           | List of tags                                |
-| `folder`       | str         | Yes**        | Folder location (**one container required)  |
-| `snippet`      | str         | Yes**        | Snippet location (**one container required) |
-| `device`       | str         | Yes**        | Device location (**one container required)  |
+| Attribute      | Type        | Required     | Default | Description                                 |
+|----------------|-------------|--------------|---------|---------------------------------------------|
+| `name`         | str         | Yes          | None    | Name of service (max 63 chars)              |
+| `id`           | UUID        | Yes*         | None    | Unique identifier (*response only)          |
+| `protocol`     | Protocol    | Yes          | None    | Protocol configuration (TCP/UDP)            |
+| `protocol.tcp` | TCPProtocol | One Required | None    | TCP protocol settings                       |
+| `protocol.udp` | UDPProtocol | One Required | None    | UDP protocol settings                       |
+| `description`  | str         | No           | None    | Description (max 1023 chars)                |
+| `tag`          | List[str]   | No           | None    | List of tags                                |
+| `folder`       | str         | No**         | None    | Folder location (max 64 chars)              |
+| `snippet`      | str         | No**         | None    | Snippet location (max 64 chars)             |
+| `device`       | str         | No**         | None    | Device location (max 64 chars)              |
+
+\* The `id` field is only present in response models.
+\*\* Exactly one container type (folder, snippet, or device) must be provided for create operations.
 
 ### Protocol Override Settings
 
-| Attribute           | Type | Required | Description                  |
-|---------------------|------|----------|------------------------------|
-| `timeout`           | int  | No       | Connection timeout (seconds) |
-| `halfclose_timeout` | int  | No       | Half-close timeout (seconds) |
-| `timewait_timeout`  | int  | No       | Time-wait timeout (seconds)  |
+| Attribute           | Type | Required | Default | Description                  |
+|---------------------|------|----------|---------|------------------------------|
+| `timeout`           | int  | No       | None    | Connection timeout (seconds) |
+| `halfclose_timeout` | int  | No       | None    | Half-close timeout (seconds) |
+| `timewait_timeout`  | int  | No       | None    | Time-wait timeout (seconds)  |
 
 ## Exceptions
 
@@ -302,33 +305,27 @@ for svc in combined_filters:
 
 ### Controlling Pagination with max_limit
 
-The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
-
-**Example:**
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
 
 ```python
 from scm.client import ScmClient
-from scm.config.objects import Service
 
 # Initialize client
 client = ScmClient(
-   client_id="your_client_id",
-   client_secret="your_client_secret",
-   tsg_id="your_tsg_id"
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit on the service service
+client.service.max_limit = 1000
 
-# Option 1: Use the unified client interface but create a custom Service instance with max_limit
-service_service = Service(client, max_limit=4321)
-all_services1 = service_service.list(folder='Texas')
+# List all services - auto-paginates through results
+all_services = client.service.list(folder='Texas')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
-all_services2 = client.service.list(folder='Texas')
-
-# Both options will auto-paginate through all available objects.
-# The services are fetched in chunks according to the max_limit.
+# The list() method will retrieve up to 1000 objects per API call
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_services)} services")
 ```
 
 ### Deleting Services
