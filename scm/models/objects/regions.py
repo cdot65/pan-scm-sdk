@@ -22,6 +22,8 @@ class GeoLocation(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     latitude: float = Field(
         ..., description="The latitudinal position of the region", ge=-90, le=90
     )
@@ -103,6 +105,7 @@ class RegionBaseModel(BaseModel):
 
     # Pydantic model configuration
     model_config = ConfigDict(
+        extra="forbid",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
