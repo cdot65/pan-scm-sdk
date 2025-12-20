@@ -40,20 +40,23 @@ The `RemoteNetworks` class provides functionality to manage remote network confi
 
 ## Remote Network Model Attributes
 
-| Attribute             | Type          | Required | Description                                  |
-|-----------------------|---------------|----------|----------------------------------------------|
-| `name`                | str           | Yes      | Name of network (max 63 chars)               |
-| `id`                  | UUID          | Yes*     | Unique identifier (*response only)           |
-| `region`              | str           | Yes      | AWS region for deployment                    |
-| `license_type`        | str           | Yes      | License type (default: FWAAS-AGGREGATE)      |
-| `spn_name`            | str           | Yes**    | Service Provider Name (**required for FWAAS) |
-| `description`         | str           | No       | Description (max 1023 chars)                 |
-| `subnets`             | List[str]     | No       | List of network subnets                      |
-| `ecmp_load_balancing` | str           | Yes      | ECMP mode (enable/disable)                   |
-| `ecmp_tunnels`        | List[Dict]    | Yes***   | ECMP tunnel configs (***if ECMP enabled)     |
-| `ipsec_tunnel`        | str           | Yes***   | IPSec tunnel name (***if ECMP disabled)      |
-| `protocol`            | ProtocolModel | No       | BGP protocol configuration                   |
-| `folder`              | str           | Yes      | Folder location                              |
+| Attribute               | Type                  | Required | Default          | Description                                      |
+|-------------------------|-----------------------|----------|------------------|--------------------------------------------------|
+| `name`                  | str                   | Yes      | None             | Name of network (max 63 chars)                   |
+| `id`                    | UUID                  | Yes*     | None             | Unique identifier (*response only)               |
+| `region`                | str                   | Yes      | None             | Region for deployment                            |
+| `license_type`          | str                   | No       | FWAAS-AGGREGATE  | License type                                     |
+| `spn_name`              | str                   | Yes**    | None             | Service Provider Name (**required for FWAAS)     |
+| `description`           | str                   | No       | None             | Description (max 1023 chars)                     |
+| `subnets`               | List[str]             | No       | None             | List of network subnets                          |
+| `ecmp_load_balancing`   | EcmpLoadBalancingEnum | No       | disable          | ECMP mode (enable/disable)                       |
+| `ecmp_tunnels`          | List[EcmpTunnelModel] | Yes***   | None             | ECMP tunnel configs (***if ECMP enabled)         |
+| `ipsec_tunnel`          | str                   | Yes***   | None             | IPSec tunnel name (***if ECMP disabled)          |
+| `secondary_ipsec_tunnel`| str                   | No       | None             | Secondary IPSec tunnel name                      |
+| `protocol`              | ProtocolModel         | No       | None             | BGP protocol configuration                       |
+| `folder`                | str                   | No       | None             | Folder location (max 64 chars)                   |
+| `snippet`               | str                   | No       | None             | Snippet location (max 64 chars)                  |
+| `device`                | str                   | No       | None             | Device location (max 64 chars)                   |
 
 ## Exceptions
 
@@ -295,7 +298,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.deployment import RemoteNetworks
 
 # Initialize client
 client = ScmClient(
@@ -304,18 +306,14 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.remote_network.max_limit = 4000
 
-# Option 1: Use the unified client interface but create a custom RemoteNetworks instance with max_limit
-remote_networks_service = RemoteNetworks(client, max_limit=4321)
-all_networks1 = remote_networks_service.list(folder='Remote Networks')
+# List all remote networks - auto-paginates through results
+all_networks = client.remote_network.list(folder='Remote Networks')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
-all_networks2 = client.remote_network.list(folder='Remote Networks')
-
-# Both options will auto-paginate through all available objects.
 # The networks are fetched in chunks according to the max_limit.
+# All results are returned as a single list.
 ```
 
 ### Deleting Remote Networks
@@ -461,6 +459,13 @@ the [remote_networks.py example](https://github.com/cdot65/pan-scm-sdk/blob/main
 
 ## Related Models
 
+- [RemoteNetworkBaseModel](../../models/deployment/remote_networks_models.md#Overview)
 - [RemoteNetworkCreateModel](../../models/deployment/remote_networks_models.md#Overview)
 - [RemoteNetworkUpdateModel](../../models/deployment/remote_networks_models.md#Overview)
 - [RemoteNetworkResponseModel](../../models/deployment/remote_networks_models.md#Overview)
+- [EcmpTunnelModel](../../models/deployment/remote_networks_models.md#Overview)
+- [ProtocolModel](../../models/deployment/remote_networks_models.md#Overview)
+- [BgpModel](../../models/deployment/remote_networks_models.md#Overview)
+- [BgpPeerModel](../../models/deployment/remote_networks_models.md#Overview)
+- [EcmpLoadBalancingEnum](../../models/deployment/remote_networks_models.md#Overview)
+- [PeeringTypeEnum](../../models/deployment/remote_networks_models.md#Overview)
