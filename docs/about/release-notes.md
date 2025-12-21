@@ -2,6 +2,49 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.4.1
+
+**Released:** December 21, 2025
+
+### Security
+
+- **CVE-2025-47273 Fix**: Updated setuptools from ^75.1.0 to ^78.1.1 to address path traversal vulnerability (CVSS 7.7 HIGH)
+
+### Updated
+
+- **Dependency Updates**:
+  - Core: pydantic ^2.12.0, cryptography ^46.0.0, oauthlib ^3.3.0
+  - Dev: pytest ^9.0.0, pytest-cov ^7.0.0, ruff ^0.14.0, mypy ^1.19.0, isort ^7.0.0
+  - Organized dev dependencies into logical categories (Testing, Linting, Type stubs, Docs, Utilities)
+  - Removed duplicate `types-requests` from main dependencies
+
+### Fixed
+
+- **Pydantic Deprecation**: Fixed `@model_validator(mode="after")` deprecation warnings in schedules.py
+  - Migrated from classmethod pattern (`cls, values`) to instance method pattern (`self`)
+  - Affected models: `WeeklyScheduleModel`, `RecurringScheduleModel`, `ScheduleTypeModel`
+
+### Documentation
+
+- **Style Guide**: Added Pydantic model guidelines section covering:
+  - Model validator patterns (instance vs classmethod)
+  - Field validator usage
+  - ConfigDict configuration
+
+## Version 0.4.0
+
+**Released:** December 2025
+
+### Added
+
+- **Bearer Token Authentication**: Support for API authentication using bearer tokens
+- **Custom Checks for HIP Objects**: Support for custom_checks field in HIP Object models
+
+### Improved
+
+- **BGP Routing**: Migrated to Pydantic v2 patterns
+- **Model Validation**: Enforced `extra=forbid` across all Pydantic models with unified TagName validation
+
 ## Version 0.3.44
 
 **Released:** July 18, 2025

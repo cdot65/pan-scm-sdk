@@ -58,23 +58,23 @@ class WeeklyScheduleModel(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def ensure_at_least_one_day(cls, values):
+    def ensure_at_least_one_day(self) -> "WeeklyScheduleModel":
         """Validate that at least one day has time ranges defined."""
         days = [
-            values.sunday,
-            values.monday,
-            values.tuesday,
-            values.wednesday,
-            values.thursday,
-            values.friday,
-            values.saturday,
+            self.sunday,
+            self.monday,
+            self.tuesday,
+            self.wednesday,
+            self.thursday,
+            self.friday,
+            self.saturday,
         ]
 
         # Check if at least one day has time ranges
         if not any(day is not None and len(day) > 0 for day in days):
             raise ValueError("Weekly schedule must define time ranges for at least one day")
 
-        return values
+        return self
 
 
 class DailyScheduleModel(BaseModel):
@@ -117,14 +117,14 @@ class RecurringScheduleModel(BaseModel):
     daily: Optional[List[str]] = None
 
     @model_validator(mode="after")
-    def ensure_exactly_one_type(cls, values):
+    def ensure_exactly_one_type(self) -> "RecurringScheduleModel":
         """Validate that exactly one of weekly or daily is provided."""
-        if values.weekly is not None and values.daily is not None:
+        if self.weekly is not None and self.daily is not None:
             raise ValueError("Exactly one of 'weekly' or 'daily' must be provided")
-        if values.weekly is None and values.daily is None:
+        if self.weekly is None and self.daily is None:
             raise ValueError("Either 'weekly' or 'daily' must be provided")
 
-        return values
+        return self
 
 
 class NonRecurringScheduleModel(BaseModel):
@@ -258,14 +258,14 @@ class ScheduleTypeModel(BaseModel):
     non_recurring: Optional[List[str]] = None
 
     @model_validator(mode="after")
-    def ensure_exactly_one_type(cls, values):
+    def ensure_exactly_one_type(self) -> "ScheduleTypeModel":
         """Validate that exactly one of recurring or non_recurring is provided."""
-        if values.recurring is not None and values.non_recurring is not None:
+        if self.recurring is not None and self.non_recurring is not None:
             raise ValueError("Exactly one of 'recurring' or 'non_recurring' must be provided")
-        if values.recurring is None and values.non_recurring is None:
+        if self.recurring is None and self.non_recurring is None:
             raise ValueError("Either 'recurring' or 'non_recurring' must be provided")
 
-        return values
+        return self
 
 
 class ScheduleBaseModel(BaseModel):
