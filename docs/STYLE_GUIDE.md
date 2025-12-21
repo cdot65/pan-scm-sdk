@@ -224,6 +224,60 @@ except ExceptionType2 as e:
 ```
 ```
 
+## Pydantic Model Guidelines
+
+### Model Validators
+
+When using `@model_validator(mode="after")`, always use instance methods (with `self`), not classmethods (with `cls`):
+
+```python
+# ✅ Correct - instance method
+@model_validator(mode="after")
+def validate_container_type(self) -> "MyCreateModel":
+    """Validate that exactly one container type is provided."""
+    container_fields = ["folder", "snippet", "device"]
+    provided = [f for f in container_fields if getattr(self, f) is not None]
+    if len(provided) != 1:
+        raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
+    return self
+
+# ❌ Deprecated - classmethod pattern (removed in Pydantic v3)
+@model_validator(mode="after")
+def validate_container_type(cls, values):  # Don't use this pattern
+    ...
+    return values
+```
+
+This pattern was deprecated in Pydantic v2.12 and will be removed in v3.0.
+
+### Field Validators
+
+Field validators using `@field_validator` should continue using `cls` as the first parameter:
+
+```python
+@field_validator("name")
+def validate_name(cls, v):
+    """Validate name format."""
+    if not v:
+        raise ValueError("Name cannot be empty")
+    return v
+```
+
+### Model Configuration
+
+Always use `ConfigDict` for model configuration:
+
+```python
+from pydantic import BaseModel, ConfigDict
+
+class MyModel(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        populate_by_name=True,
+        validate_assignment=True,
+    )
+```
+
 ## Final Recommendations
 
 1. **Consistency** - Maintain consistent formatting, terminology, and structure across all documentation

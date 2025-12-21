@@ -199,6 +199,36 @@ For more detailed usage instructions and examples, refer to the [User Guide](abo
 
 ---
 
+## Documentation Guide
+
+This documentation is organized into two main developer sections:
+
+### SDK Reference
+
+**[Go to SDK Reference →](sdk/index.md)**
+
+Service classes for performing CRUD operations on Strata Cloud Manager resources.
+
+Use when you need to:
+
+- Create, read, update, or delete configurations
+- List and filter resources
+- See method signatures and usage examples
+
+### Data Models
+
+**[Go to Data Models →](sdk/models/index.md)**
+
+Pydantic schemas that define validation rules and field constraints.
+
+Use when you need to:
+
+- Understand required vs optional fields
+- Check allowed values and patterns
+- Pre-validate configurations before API calls
+
+---
+
 ## Contributing
 
 Contributions are welcome and greatly appreciated. Visit the [Contributing](about/contributing.md) page for guidelines
@@ -207,5 +237,3 @@ on how to contribute.
 ## License
 
 This project is licensed under the Apache 2.0 License - see the [License](about/license.md) page for details.
-
-- [SDK Reference](sdk/index.md): API, config, and data models for Folder, Label, Snippet, Device, Variable, and more.
