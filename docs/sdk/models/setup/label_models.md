@@ -1,172 +1,160 @@
 # Label Models
 
-## Overview
+## Table of Contents
 
-The Label models provide a structured way to manage labels in Palo Alto Networks' Strata Cloud Manager.
-These models handle validation of inputs and outputs when interacting with the SCM API.
+1. [Overview](#overview)
+2. [Model Attributes](#model-attributes)
+3. [Exceptions](#exceptions)
+4. [Model Validators](#model-validators)
+5. [Usage Examples](#usage-examples)
 
-## Attributes
+## Overview {#Overview}
 
-| Attribute   | Type      | Required | Default | Description                                                    |
-|-------------|-----------|----------|---------|----------------------------------------------------------------|
-| name        | str       | Yes      | None    | Name of the label. Max length: 63 chars.                       |
-| description | str       | No       | None    | Description of the label                                       |
-| id          | UUID      | Yes*     | None    | UUID of the label (required only for update and response models)|
+The Label models provide a structured way to manage label resources in Palo Alto Networks' Strata Cloud Manager.
+These models represent simple key-value labels used for resource classification and organization. The models handle
+validation of inputs and outputs when interacting with the SCM API.
 
-\* Only required for update and response models
+### Models
+
+The module provides the following Pydantic models:
+
+- `LabelBaseModel`: Base model with fields common to all label operations
+- `LabelCreateModel`: Model for creating new labels
+- `LabelUpdateModel`: Model for updating existing labels
+- `LabelResponseModel`: Response model for label operations
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
+## Model Attributes
+
+### LabelBaseModel
+
+| Attribute   | Type | Required | Default | Description                             |
+|-------------|------|----------|---------|-----------------------------------------|
+| name        | str  | Yes      | None    | Name of label. Max length: 63 chars     |
+| description | str  | No       | None    | Description of the label                |
+
+### LabelCreateModel
+
+Inherits all fields from `LabelBaseModel` without additional fields.
+
+### LabelUpdateModel
+
+Extends `LabelBaseModel` by adding:
+
+| Attribute | Type | Required | Default | Description                         |
+|-----------|------|----------|---------|-------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the label  |
+
+### LabelResponseModel
+
+Extends `LabelBaseModel` by adding:
+
+| Attribute | Type | Required | Default | Description                         |
+|-----------|------|----------|---------|-------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the label  |
 
 ## Exceptions
 
 The Label models can raise the following exceptions during validation:
 
-- **ValueError**: Raised when validation fails for any field, such as missing required fields or invalid formats
+- **ValueError**: Raised when field validation fails
+- **ValidationError**: Raised by Pydantic when model validation fails
 
 ## Model Validators
 
-The Label models utilize Pydantic validators to ensure data integrity:
+The Label models include validators to ensure data integrity:
 
-- Name validation ensures the name meets length requirements
-- Description validation ensures proper formatting if provided
-- ID validation for update and response models
+- **Name validation**: Ensures the name meets the maximum length requirement of 63 characters
+- **ID validation**: Ensures valid UUID format for update and response models
 
 ## Usage Examples
 
-### Creating a Label Object
+### Creating a Label
 
 ```python
-# Using dictionary
-from scm.config.setup import Label
+from scm.client import ScmClient
 
-label_dict = {
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
+label_data = {
     "name": "environment",
     "description": "Environment classification label"
 }
 
-label_service = Label(api_client)
-response = label_service.create(label_dict)
-
-# Using model directly
-from scm.models.setup import LabelCreateModel
-
-label_obj = LabelCreateModel(
-    name="environment",
-    description="Environment classification label"
-)
-
-payload = label_obj.model_dump(exclude_unset=True)
-response = label_service.create(payload)
+response = client.label.create(label_data)
+print(f"Created label: {response.name} with ID: {response.id}")
 ```
 
 ### Updating a Label
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "environment-updated",
-    "description": "Updated environment classification label"
-}
+from scm.client import ScmClient
 
-response = label_service.update(update_dict)
-
-# Using model directly
-from scm.models.setup import LabelUpdateModel
-
-update_label = LabelUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="environment-updated",
-    description="Updated environment classification label"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-payload = update_label.model_dump(exclude_unset=True)
-response = label_service.update(payload)
+# Fetch existing label
+existing = client.label.fetch(name="environment")
+
+# Modify attributes using dot notation
+existing.description = "Updated environment classification label"
+
+# Pass modified object to update()
+updated = client.label.update(existing)
+print(f"Updated label: {updated.name}")
 ```
 
-## Model Hierarchy
-
-The Label models follow a hierarchical structure:
-
-- **LabelBaseModel**: Base model containing common attributes shared across all label models
-  - **LabelCreateModel**: Extends base model for label creation operations
-  - **LabelUpdateModel**: Extends base model with required ID field for updates
-  - **LabelResponseModel**: Extends base model with fields specific to API responses
-
-## Working with Label Models
-
-### LabelBaseModel
-
-The base model defines common attributes needed for all label operations:
+### Listing Labels
 
 ```python
-from scm.models.setup import LabelBaseModel
+from scm.client import ScmClient
 
-base = LabelBaseModel(
-    name="environment",
-    description="Environment label"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
+
+# List all labels
+all_labels = client.label.list()
+
+for label in all_labels:
+    print(f"Label: {label.name}")
+    print(f"ID: {label.id}")
+    print(f"Description: {label.description}")
 ```
 
-### LabelCreateModel
-
-Used when creating new labels:
+### Fetching a Label by Name
 
 ```python
-from scm.models.setup import LabelCreateModel
+from scm.client import ScmClient
 
-create_model = LabelCreateModel(
-    name="environment",
-    description="Environment label"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Convert to dictionary for API request
-payload = create_model.model_dump(exclude_unset=True)
+# Fetch label by name
+label = client.label.fetch(name="environment")
+if label:
+    print(f"Found label: {label.name}")
+    print(f"ID: {label.id}")
+    print(f"Description: {label.description}")
+else:
+    print("Label not found")
 ```
 
-### LabelUpdateModel
-
-Used when updating existing labels:
-
-```python
-from scm.models.setup import LabelUpdateModel
-
-update_model = LabelUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="environment",
-    description="Updated environment label"
-)
-
-# Convert to dictionary for API request
-payload = update_model.model_dump(exclude_unset=True)
-```
-
-### LabelResponseModel
-
-Represents labels returned from the API:
-
-```python
-from scm.models.setup import LabelResponseModel
-
-# Typically constructed from API response
-response_model = LabelResponseModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="environment",
-    description="Environment label"
-)
-
-# Access attributes
-print(f"Label ID: {response_model.id}")
-print(f"Label Name: {response_model.name}")
-print(f"Label Description: {response_model.description}")
-```
-
-## Best Practices
-
-1. **Validation**: Leverage Pydantic model validation by using the models directly rather than raw dictionaries when possible.
-
-2. **Type Checking**: Use type hints and the models' typing support to catch errors early in development.
-
-3. **Excluding Unset Values**: When converting models to dictionaries, use `model_dump(exclude_unset=True)` to only include fields that have been explicitly set.
-
-4. **Error Handling**: Wrap model creation in try/except blocks to catch and handle validation errors gracefully.
-
-5. **Response Parsing**: Use the LabelResponseModel to parse API responses and access attributes in a type-safe manner.
