@@ -4,12 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2024-12-20
+
 ### Added
 - Bearer token authentication support for stateless automation scenarios
 - New `access_token` parameter in Scm and ScmClient constructors
 - Example scripts demonstrating bearer token usage
 - Unit and integration tests for bearer token functionality
 - Support for Ansible and other automation frameworks
+
+### Changed
+- Comprehensive documentation updates for setup services (device, folder, label, snippet, variable)
+- All documentation now uses unified ScmClient interface pattern
+- Update examples use fetch → dot notation → update workflow
+- Added Default column to all model attribute tables
+- Added Filter Parameters tables documenting server-side and client-side filters
+- Expanded Related Models sections with links to all model types
+- Added Variable Types and Enum documentation throughout
+
+### Fixed
+- Documentation inconsistencies between config class and model docs
+- Corrected parameter types in Core Methods tables
 
 ## [0.3.14] - 2025-02-28
 
