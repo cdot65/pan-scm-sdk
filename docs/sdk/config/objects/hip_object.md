@@ -12,6 +12,8 @@
     - [Retrieving HIP Objects](#retrieving-hip-objects)
     - [Updating HIP Objects](#updating-hip-objects)
     - [Listing HIP Objects](#listing-hip-objects)
+    - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting HIP Objects](#deleting-hip-objects)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -29,31 +31,32 @@ HIP objects that define security posture requirements for endpoints.
 
 ## Core Methods
 
-| Method     | Description                      | Parameters                         | Return Type                    |
-|------------|----------------------------------|------------------------------------|--------------------------------|
-| `create()` | Creates a new HIP object         | `data: Dict[str, Any]`             | `HIPObjectResponseModel`       |
-| `get()`    | Retrieves a HIP object by ID     | `object_id: str`                   | `HIPObjectResponseModel`       |
-| `update()` | Updates an existing HIP object   | `hip_object: HIPObjectUpdateModel` | `HIPObjectResponseModel`       |
-| `delete()` | Deletes a HIP object             | `object_id: str`                   | `None`                         |
-| `list()`   | Lists HIP objects with filtering | `folder: str`, `**filters`         | `List[HIPObjectResponseModel]` |
-| `fetch()`  | Gets HIP object by name          | `name: str`, `folder: str`         | `HIPObjectResponseModel`       |
+| Method     | Description                      | Parameters                                                                    | Return Type                    |
+|------------|----------------------------------|-------------------------------------------------------------------------------|--------------------------------|
+| `create()` | Creates a new HIP object         | `data: Dict[str, Any]`                                                        | `HIPObjectResponseModel`       |
+| `get()`    | Retrieves a HIP object by ID     | `object_id: str`                                                              | `HIPObjectResponseModel`       |
+| `update()` | Updates an existing HIP object   | `hip_object: HIPObjectUpdateModel`                                            | `HIPObjectResponseModel`       |
+| `delete()` | Deletes a HIP object             | `object_id: str`                                                              | `None`                         |
+| `list()`   | Lists HIP objects with filtering | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `**filters` | `List[HIPObjectResponseModel]` |
+| `fetch()`  | Gets HIP object by name          | `name: str`, `folder: str`, `snippet: str`, `device: str`                     | `HIPObjectResponseModel`       |
 
 ## HIP Object Model Attributes
 
-| Attribute          | Type                 | Required | Description                                 |
-|--------------------|----------------------|----------|---------------------------------------------|
-| `name`             | str                  | Yes      | Name of HIP object (max 31 chars)           |
-| `id`               | UUID                 | Yes*     | Unique identifier (*response only)          |
-| `description`      | str                  | No       | Object description (max 255 chars)          |
-| `host_info`        | HostInfoModel        | No       | Host information criteria                   |
-| `network_info`     | NetworkInfoModel     | No       | Network information criteria                |
-| `patch_management` | PatchManagementModel | No       | Patch management criteria                   |
-| `disk_encryption`  | DiskEncryptionModel  | No       | Disk encryption criteria                    |
-| `mobile_device`    | MobileDeviceModel    | No       | Mobile device criteria                      |
-| `certificate`      | CertificateModel     | No       | Certificate criteria                        |
-| `folder`           | str                  | Yes**    | Folder location (**one container required)  |
-| `snippet`          | str                  | Yes**    | Snippet location (**one container required) |
-| `device`           | str                  | Yes**    | Device location (**one container required)  |
+| Attribute          | Type                 | Required | Default | Description                                 |
+|--------------------|----------------------|----------|---------|---------------------------------------------|
+| `name`             | str                  | Yes      | None    | Name of HIP object (max 31 chars)           |
+| `id`               | UUID                 | Yes*     | None    | Unique identifier (*response only)          |
+| `description`      | str                  | No       | None    | Object description (max 255 chars)          |
+| `host_info`        | HostInfoModel        | No       | None    | Host information criteria                   |
+| `network_info`     | NetworkInfoModel     | No       | None    | Network information criteria                |
+| `patch_management` | PatchManagementModel | No       | None    | Patch management criteria                   |
+| `disk_encryption`  | DiskEncryptionModel  | No       | None    | Disk encryption criteria                    |
+| `mobile_device`    | MobileDeviceModel    | No       | None    | Mobile device criteria                      |
+| `certificate`      | CertificateModel     | No       | None    | Certificate criteria                        |
+| `custom_checks`    | CustomChecksModel    | No       | None    | Custom checks (registry, process, plist)    |
+| `folder`           | str                  | Yes**    | None    | Folder location (**one container required)  |
+| `snippet`          | str                  | Yes**    | None    | Snippet location (**one container required) |
+| `device`           | str                  | Yes**    | None    | Device location (**one container required)  |
 
 ## Exceptions
 
@@ -76,8 +79,7 @@ from scm.client import ScmClient
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    hip_object_max_limit=5000  # Optional: set custom max_limit
+    tsg_id="your_tsg_id"
 )
 
 # Access the hip_object module directly through the client
@@ -97,8 +99,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize HIPObject with custom max_limit
-hip_objects = HIPObject(client, max_limit=5000)
+# Initialize HIPObject object
+hip_objects = HIPObject(client)
 ```
 
 ## Usage Examples
@@ -186,8 +188,7 @@ updated_hip = client.hip_object.update(existing_hip)
 # List with direct filter parameters
 filtered_hips = client.hip_object.list(
     folder='Shared',
-    criteria_types=['host_info', 'disk_encryption'],
-    exact_match=True
+    criteria_types=['host_info', 'disk_encryption']
 )
 
 # Process results
@@ -201,12 +202,103 @@ for hip in filtered_hips:
 # Define filter parameters as dictionary
 list_params = {
     "folder": "Shared",
-    "criteria_types": ["mobile_device"],
-    "exclude_folders": ["Test", "Development"]
+    "criteria_types": ["mobile_device"]
 }
 
 # List with filters as kwargs
 filtered_hips = client.hip_object.list(**list_params)
+```
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `criteria_types`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return HIP objects defined exactly in 'Shared'
+exact_hips = client.hip_object.list(
+    folder='Shared',
+    exact_match=True
+)
+
+for hip in exact_hips:
+    print(f"Exact match: {hip.name} in {hip.folder}")
+
+# Exclude all HIP objects from the 'All' folder
+no_all_hips = client.hip_object.list(
+    folder='Shared',
+    exclude_folders=['All']
+)
+
+for hip in no_all_hips:
+    assert hip.folder != 'All'
+    print(f"Filtered out 'All': {hip.name}")
+
+# Exclude HIP objects that come from 'default' snippet
+no_default_snippet = client.hip_object.list(
+    folder='Shared',
+    exclude_snippets=['default']
+)
+
+for hip in no_default_snippet:
+    assert hip.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {hip.name}")
+
+# Exclude HIP objects associated with 'DeviceA'
+no_deviceA = client.hip_object.list(
+    folder='Shared',
+    exclude_devices=['DeviceA']
+)
+
+for hip in no_deviceA:
+    assert hip.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {hip.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = client.hip_object.list(
+    folder='Shared',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default'],
+    exclude_devices=['DeviceA']
+)
+
+for hip in combined_filters:
+    print(f"Combined filters result: {hip.name} in {hip.folder}")
+```
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit on the hip_object service
+client.hip_object.max_limit = 4321
+
+# List all HIP objects - auto-paginates through results
+all_hips = client.hip_object.list(folder='Shared')
+
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting HIP Objects

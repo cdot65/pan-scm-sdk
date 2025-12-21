@@ -1,472 +1,440 @@
 # IPsec Crypto Profile Models
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Model Attributes](#model-attributes)
+3. [Enum Types](#enum-types)
+4. [Supporting Models](#supporting-models)
+5. [Lifetime Models](#lifetime-models)
+6. [Lifesize Models](#lifesize-models)
+7. [Exceptions](#exceptions)
+8. [Model Validators](#model-validators)
+9. [Usage Examples](#usage-examples)
+
 ## Overview {#Overview}
 
-IPsec Crypto Profile models define the data structures for configuring IPsec VPN encryption and authentication settings in Palo Alto Networks' Strata Cloud Manager. These models provide validation of security protocols, encryption algorithms, authentication methods, and lifetime settings.
+The IPsec Crypto Profile models provide a structured way to manage IPsec crypto profile configurations in Palo Alto Networks' Strata Cloud Manager. These models support defining security protocols, encryption algorithms, authentication methods, and lifetime/lifesize settings for IPsec VPN tunnels. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-## Model Hierarchy
+### Models
 
-The IPsec Crypto Profile models follow a standard pattern with several related models:
+The module provides the following Pydantic models:
 
-- **Base Model**: `IPsecCryptoProfileBaseModel` - Common attributes for all IPsec crypto profile objects
-- **Create Model**: `IPsecCryptoProfileCreateModel` - Used when creating a new IPsec crypto profile
-- **Update Model**: `IPsecCryptoProfileUpdateModel` - Used when updating an existing IPsec crypto profile
-- **Response Model**: `IPsecCryptoProfileResponseModel` - Returned from API responses
+- `IPsecCryptoProfileBaseModel`: Base model with fields common to all IPsec crypto profile operations
+- `IPsecCryptoProfileCreateModel`: Model for creating new IPsec crypto profiles
+- `IPsecCryptoProfileUpdateModel`: Model for updating existing IPsec crypto profiles
+- `IPsecCryptoProfileResponseModel`: Response model for IPsec crypto profile operations
+- `EspConfig`: ESP (Encapsulating Security Payload) configuration model
+- `AhConfig`: AH (Authentication Header) configuration model
+- `LifetimeSeconds`: Lifetime in seconds model
+- `LifetimeMinutes`: Lifetime in minutes model
+- `LifetimeHours`: Lifetime in hours model
+- `LifetimeDays`: Lifetime in days model
+- `LifesizeKB`: Lifesize in kilobytes model
+- `LifesizeMB`: Lifesize in megabytes model
+- `LifesizeGB`: Lifesize in gigabytes model
+- `LifesizeTB`: Lifesize in terabytes model
+- `DhGroup`: Enum for Diffie-Hellman group options
+- `EspEncryption`: Enum for ESP encryption algorithm options
+- `EspAuthentication`: Enum for ESP authentication algorithm options
+- `AhAuthentication`: Enum for AH authentication algorithm options
 
-## Data Models
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
-### IPsecCryptoProfileBaseModel
+## Model Attributes
 
-Base model with fields common to all IPsec crypto profile operations.
+| Attribute  | Type           | Required | Default  | Description                                                |
+|------------|----------------|----------|----------|------------------------------------------------------------|
+| `name`     | str            | Yes      | None     | Profile name. Max 31 chars. Pattern: `^[0-9a-zA-Z._-]+$`   |
+| `id`       | UUID           | Yes*     | None     | Unique identifier (*response/update only)                  |
+| `dh_group` | DhGroup        | No       | group2   | Phase-2 DH group (PFS DH group)                            |
+| `lifetime` | dict           | Yes      | None     | Lifetime configuration (seconds, minutes, hours, or days)  |
+| `lifesize` | dict           | No       | None     | Lifesize configuration (kb, mb, gb, or tb)                 |
+| `esp`      | EspConfig      | No*      | None     | ESP configuration (encryption and authentication)          |
+| `ah`       | AhConfig       | No*      | None     | AH configuration (authentication only)                     |
+| `folder`   | str            | No**     | None     | Folder containing the profile. Max 64 chars                |
+| `snippet`  | str            | No**     | None     | Snippet containing the profile. Max 64 chars               |
+| `device`   | str            | No**     | None     | Device containing the profile. Max 64 chars                |
 
-```python
-class IPsecCryptoProfileBaseModel(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
+\* Only required for update and response models
+\* Exactly one of `esp` or `ah` must be provided
+\** Exactly one container field (folder/snippet/device) must be provided for create operations
 
-    name: str = Field(
-        ...,
-        description="Alphanumeric string begin with letter: [0-9a-zA-Z._-]",
-        pattern=r"^[0-9a-zA-Z._\-]+$",
-        max_length=31,
-    )
-    dh_group: Optional[DhGroup] = Field(
-        default=DhGroup.GROUP2,
-        description="Phase-2 DH group (PFS DH group)",
-    )
-    lifetime: Union[LifetimeSeconds, LifetimeMinutes, LifetimeHours, LifetimeDays] = Field(
-        ...,
-        description="Lifetime configuration",
-    )
-    lifesize: Optional[Union[LifesizeKB, LifesizeMB, LifesizeGB, LifesizeTB]] = Field(
-        None,
-        description="Lifesize configuration",
-    )
-    esp: Optional[EspConfig] = Field(
-        None,
-        description="ESP configuration",
-    )
-    ah: Optional[AhConfig] = Field(
-        None,
-        description="AH configuration",
-    )
+## Enum Types
 
-    # Container fields
-    folder: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The folder in which the resource is defined",
-    )
-    snippet: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The snippet in which the resource is defined",
-    )
-    device: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The device in which the resource is defined",
-    )
-```
+### DhGroup
 
-### IPsecCryptoProfileCreateModel
+Defines the Diffie-Hellman group options for IPsec key exchange:
 
-Model used when creating new IPsec Crypto Profiles.
+| Value     | Description                         |
+|-----------|-------------------------------------|
+| `no-pfs`  | No Perfect Forward Secrecy          |
+| `group1`  | DH Group 1 (768-bit)                |
+| `group2`  | DH Group 2 (1024-bit) - default     |
+| `group5`  | DH Group 5 (1536-bit)               |
+| `group14` | DH Group 14 (2048-bit)              |
+| `group19` | DH Group 19 (256-bit ECP)           |
+| `group20` | DH Group 20 (384-bit ECP)           |
 
-```python
-class IPsecCryptoProfileCreateModel(IPsecCryptoProfileBaseModel):
-    """Model for creating new IPsec Crypto Profiles."""
+### EspEncryption
 
-    @model_validator(mode="after")
-    def validate_container(self) -> "IPsecCryptoProfileCreateModel":
-        """Validate that exactly one container field is provided."""
-        container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
-        if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
-        return self
-```
+Defines the ESP encryption algorithm options:
 
-### IPsecCryptoProfileUpdateModel
+| Value         | Description                    |
+|---------------|--------------------------------|
+| `des`         | DES encryption (deprecated)    |
+| `3des`        | Triple DES encryption          |
+| `aes-128-cbc` | AES-128 CBC encryption         |
+| `aes-192-cbc` | AES-192 CBC encryption         |
+| `aes-256-cbc` | AES-256 CBC encryption         |
+| `aes-128-gcm` | AES-128 GCM encryption         |
+| `aes-256-gcm` | AES-256 GCM encryption         |
+| `null`        | No encryption                  |
 
-Model used when updating existing IPsec Crypto Profiles.
+### EspAuthentication
 
-```python
-class IPsecCryptoProfileUpdateModel(IPsecCryptoProfileBaseModel):
-    """Model for updating existing IPsec Crypto Profiles."""
+Defines the ESP authentication algorithm options:
 
-    id: UUID = Field(
-        ...,
-        description="The UUID of the IPsec crypto profile",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
-```
+| Value    | Description                    |
+|----------|--------------------------------|
+| `md5`    | MD5 hash (deprecated)          |
+| `sha1`   | SHA-1 hash                     |
+| `sha256` | SHA-256 hash                   |
+| `sha384` | SHA-384 hash                   |
+| `sha512` | SHA-512 hash                   |
 
-### IPsecCryptoProfileResponseModel
+### AhAuthentication
 
-Model representing IPsec Crypto Profile responses from the API.
+Defines the AH authentication algorithm options:
 
-```python
-class IPsecCryptoProfileResponseModel(IPsecCryptoProfileBaseModel):
-    """Model for IPsec Crypto Profile responses."""
+| Value    | Description                    |
+|----------|--------------------------------|
+| `md5`    | MD5 hash (deprecated)          |
+| `sha1`   | SHA-1 hash                     |
+| `sha256` | SHA-256 hash                   |
+| `sha384` | SHA-384 hash                   |
+| `sha512` | SHA-512 hash                   |
 
-    id: UUID = Field(
-        ...,
-        description="The UUID of the IPsec crypto profile",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
-```
+## Supporting Models
 
-## Auxiliary Models
+### EspConfig Model
 
-### DhGroup Enum
+Encapsulating Security Payload (ESP) configuration:
 
-Defines the available Diffie-Hellman groups for IPsec key exchange.
+| Attribute        | Type               | Required | Default | Description              |
+|------------------|--------------------|----------|---------|--------------------------|
+| `encryption`     | List[EspEncryption]| Yes      | None    | Encryption algorithms    |
+| `authentication` | List[str]          | Yes      | None    | Authentication algorithms|
 
-```python
-class DhGroup(str, Enum):
-    """DH group options for IPsec crypto profiles."""
+### AhConfig Model
 
-    NO_PFS = "no-pfs"
-    GROUP1 = "group1"
-    GROUP2 = "group2"
-    GROUP5 = "group5"
-    GROUP14 = "group14"
-    GROUP19 = "group19"
-    GROUP20 = "group20"
-```
+Authentication Header (AH) configuration:
 
-### ESP Algorithms
+| Attribute        | Type                 | Required | Default | Description              |
+|------------------|----------------------|----------|---------|--------------------------|
+| `authentication` | List[AhAuthentication]| Yes     | None    | Authentication algorithms|
 
-Encapsulating Security Payload (ESP) encryption and authentication algorithms.
+## Lifetime Models
 
-```python
-class EspEncryption(str, Enum):
-    """ESP encryption algorithm options."""
+IPsec Crypto Profiles support four different lifetime units. Each has its own model with validation:
 
-    DES = "des"
-    TRIPLE_DES = "3des"
-    AES_128_CBC = "aes-128-cbc"
-    AES_192_CBC = "aes-192-cbc"
-    AES_256_CBC = "aes-256-cbc"
-    AES_128_GCM = "aes-128-gcm"
-    AES_256_GCM = "aes-256-gcm"
-    NULL = "null"
+### LifetimeSeconds
 
-class EspAuthentication(str, Enum):
-    """ESP authentication algorithm options."""
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `seconds` | int  | Yes      | None    | Lifetime in seconds (range: 180-65535) |
 
-    MD5 = "md5"
-    SHA1 = "sha1"
-    SHA256 = "sha256"
-    SHA384 = "sha384"
-    SHA512 = "sha512"
-```
+### LifetimeMinutes
 
-### AH Authentication
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `minutes` | int  | Yes      | None    | Lifetime in minutes (range: 3-65535) |
 
-Authentication Header (AH) authentication algorithms.
+### LifetimeHours
 
-```python
-class AhAuthentication(str, Enum):
-    """AH authentication algorithm options."""
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `hours`   | int  | Yes      | None    | Lifetime in hours (range: 1-65535)   |
 
-    MD5 = "md5"
-    SHA1 = "sha1"
-    SHA256 = "sha256"
-    SHA384 = "sha384"
-    SHA512 = "sha512"
-```
+### LifetimeDays
 
-### ESP and AH Configuration Models
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `days`    | int  | Yes      | None    | Lifetime in days (range: 1-365)      |
 
-```python
-class EspConfig(BaseModel):
-    """ESP configuration for IPsec crypto profiles."""
+## Lifesize Models
 
-    encryption: List[EspEncryption] = Field(
-        ...,
-        description="Encryption algorithm",
-    )
-    authentication: List[str] = Field(
-        ...,
-        description="Authentication algorithm",
-    )
+IPsec Crypto Profiles support four different lifesize units. Each has its own model with validation:
 
-class AhConfig(BaseModel):
-    """AH configuration for IPsec crypto profiles."""
+### LifesizeKB
 
-    authentication: List[AhAuthentication] = Field(
-        ...,
-        description="Authentication algorithm",
-    )
-```
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `kb`      | int  | Yes      | None    | Lifesize in kilobytes (range: 1-65535) |
 
-### Lifetime Models
+### LifesizeMB
 
-Models for specifying IPsec security association lifetimes in different time units.
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `mb`      | int  | Yes      | None    | Lifesize in megabytes (range: 1-65535) |
+
+### LifesizeGB
+
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `gb`      | int  | Yes      | None    | Lifesize in gigabytes (range: 1-65535) |
+
+### LifesizeTB
+
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| `tb`      | int  | Yes      | None    | Lifesize in terabytes (range: 1-65535) |
+
+## Exceptions
+
+The IPsec Crypto Profile models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When name doesn't match the required pattern `^[0-9a-zA-Z._-]+$`
+    - When name exceeds 31 characters
+    - When both ESP and AH are configured (only one allowed)
+    - When neither ESP nor AH is configured (one required)
+    - When container validation fails (not exactly one of folder/snippet/device provided)
+    - When lifetime values are outside their valid ranges
+    - When lifesize values are outside their valid ranges
+
+## Model Validators
+
+### Security Protocol Validation
+
+The models enforce that exactly one security protocol (ESP or AH) must be configured:
 
 ```python
-class LifetimeSeconds(BaseModel):
-    """Lifetime specified in seconds."""
+from scm.models.network.ipsec_crypto_profile import IPsecCryptoProfileCreateModel
 
-    seconds: int = Field(
-        ...,
-        description="Specify lifetime in seconds",
-        ge=180,
-        le=65535,
+# This will raise a validation error - both protocols provided
+try:
+    profile = IPsecCryptoProfileCreateModel(
+        name="test-profile",
+        lifetime={"hours": 8},
+        esp={"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+        ah={"authentication": ["sha512"]},  # Can't have both
+        folder="Texas"
     )
+except ValueError as e:
+    print(e)  # "Only one security protocol (ESP or AH) can be configured at a time"
 
-class LifetimeMinutes(BaseModel):
-    """Lifetime specified in minutes."""
-
-    minutes: int = Field(
-        ...,
-        description="Specify lifetime in minutes",
-        ge=3,
-        le=65535,
+# This will raise a validation error - no protocol provided
+try:
+    profile = IPsecCryptoProfileCreateModel(
+        name="test-profile",
+        lifetime={"hours": 8},
+        # Missing esp or ah
+        folder="Texas"
     )
-
-class LifetimeHours(BaseModel):
-    """Lifetime specified in hours."""
-
-    hours: int = Field(
-        ...,
-        description="Specify lifetime in hours",
-        ge=1,
-        le=65535,
-    )
-
-class LifetimeDays(BaseModel):
-    """Lifetime specified in days."""
-
-    days: int = Field(
-        ...,
-        description="Specify lifetime in days",
-        ge=1,
-        le=365,
-    )
+except ValueError as e:
+    print(e)  # "At least one security protocol (ESP or AH) must be configured"
 ```
 
-### Lifesize Models
+### Container Type Validation
 
-Models for specifying IPsec security association lifesizes in different data units.
+For create operations, exactly one container type must be specified:
 
 ```python
-class LifesizeKB(BaseModel):
-    """Lifesize specified in kilobytes."""
+from scm.models.network.ipsec_crypto_profile import IPsecCryptoProfileCreateModel
 
-    kb: int = Field(
-        ...,
-        description="Specify lifesize in kilobytes(KB)",
-        ge=1,
-        le=65535,
+# This will raise a validation error - multiple containers specified
+try:
+    profile = IPsecCryptoProfileCreateModel(
+        name="test-profile",
+        lifetime={"hours": 8},
+        esp={"encryption": ["aes-256-cbc"], "authentication": ["sha256"]},
+        folder="Texas",
+        device="fw01"  # Can't specify both folder and device
     )
-
-class LifesizeMB(BaseModel):
-    """Lifesize specified in megabytes."""
-
-    mb: int = Field(
-        ...,
-        description="Specify lifesize in megabytes(MB)",
-        ge=1,
-        le=65535,
-    )
-
-class LifesizeGB(BaseModel):
-    """Lifesize specified in gigabytes."""
-
-    gb: int = Field(
-        ...,
-        description="Specify lifesize in gigabytes(GB)",
-        ge=1,
-        le=65535,
-    )
-
-class LifesizeTB(BaseModel):
-    """Lifesize specified in terabytes."""
-
-    tb: int = Field(
-        ...,
-        description="Specify lifesize in terabytes(TB)",
-        ge=1,
-        le=65535,
-    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-## Model Validation
+### Lifetime Value Validation
 
-The IPsec Crypto Profile models include several validations:
+Each lifetime model enforces valid ranges:
 
-1. **Protocol Validation**: Ensures exactly one of ESP or AH is configured
-   ```python
-   @model_validator(mode="after")
-   def validate_security_protocol(self) -> "IPsecCryptoProfileBaseModel":
-       """Validate that exactly one security protocol (ESP or AH) is configured."""
-       if self.esp is not None and self.ah is not None:
-           raise ValueError("Only one security protocol (ESP or AH) can be configured at a time")
+```python
+from scm.models.network.ipsec_crypto_profile import LifetimeSeconds, LifetimeDays
 
-       if self.esp is None and self.ah is None:
-           raise ValueError("At least one security protocol (ESP or AH) must be configured")
+# This will raise a validation error - seconds below minimum
+try:
+    lifetime = LifetimeSeconds(seconds=100)  # Minimum is 180
+except ValueError as e:
+    print(e)  # "Input should be greater than or equal to 180"
 
-       return self
-   ```
-
-2. **Container Validation**: Ensures exactly one of folder, snippet, or device is provided
-   ```python
-   @model_validator(mode="after")
-   def validate_container(self) -> "IPsecCryptoProfileCreateModel":
-       """Validate that exactly one container field is provided."""
-       container_fields = ["folder", "snippet", "device"]
-       provided = [
-           field for field in container_fields if getattr(self, field) is not None
-       ]
-       if len(provided) != 1:
-           raise ValueError(
-               "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-           )
-       return self
-   ```
-
-3. **Name Format Validation**: Ensures name follows the required pattern
-   ```python
-   name: str = Field(
-       ...,
-       description="Alphanumeric string begin with letter: [0-9a-zA-Z._-]",
-       pattern=r"^[0-9a-zA-Z._\-]+$",
-       max_length=31,
-   )
-   ```
-
-4. **Value Range Validation**: Enforces appropriate ranges for lifetime and lifesize values
-   ```python
-   seconds: int = Field(
-       ...,
-       description="Specify lifetime in seconds",
-       ge=180,
-       le=65535,
-   )
-   ```
+# This will raise a validation error - days above maximum
+try:
+    lifetime = LifetimeDays(days=400)  # Maximum is 365
+except ValueError as e:
+    print(e)  # "Input should be less than or equal to 365"
+```
 
 ## Usage Examples
 
 ### Creating an ESP-based IPsec Crypto Profile
 
 ```python
-from scm.models.network import (
-    IPsecCryptoProfileCreateModel,
-    DhGroup,
-    EspEncryption,
-    LifetimeHours,
-    LifesizeGB,
-    EspConfig,
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Define the lifetime in hours
-lifetime = LifetimeHours(hours=8)
+# Using dictionary
+esp_config = {
+    "name": "esp-aes256-sha256",
+    "dh_group": "group14",
+    "lifetime": {"hours": 8},
+    "lifesize": {"gb": 50},
+    "esp": {
+        "encryption": ["aes-256-cbc", "aes-256-gcm"],
+        "authentication": ["sha256", "sha384"]
+    },
+    "folder": "Texas"
+}
 
-# Define the lifesize in gigabytes
-lifesize = LifesizeGB(gb=50)
-
-# Define ESP configuration with encryption and authentication
-esp_config = EspConfig(
-    encryption=[EspEncryption.AES_256_CBC],
-    authentication=["sha256"]
-)
-
-# Create the IPsec crypto profile model
-esp_profile = IPsecCryptoProfileCreateModel(
-    name="esp-aes256-sha256",
-    dh_group=DhGroup.GROUP14,
-    lifetime=lifetime,
-    lifesize=lifesize,
-    esp=esp_config,
-    folder="Shared"
-)
-
-# Convert to dictionary for API request
-profile_dict = esp_profile.model_dump(exclude_unset=True)
+response = client.ipsec_crypto_profile.create(esp_config)
+print(f"Created profile: {response.name} (ID: {response.id})")
 ```
 
 ### Creating an AH-based IPsec Crypto Profile
 
 ```python
-from scm.models.network import (
-    IPsecCryptoProfileCreateModel,
-    DhGroup,
-    AhAuthentication,
-    LifetimeDays,
-    AhConfig,
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Define the lifetime in days
-lifetime = LifetimeDays(days=1)
+# Using dictionary
+ah_config = {
+    "name": "ah-sha512",
+    "dh_group": "group19",
+    "lifetime": {"days": 1},
+    "ah": {
+        "authentication": ["sha512"]
+    },
+    "folder": "Texas"
+}
 
-# Define AH configuration with authentication
-ah_config = AhConfig(
-    authentication=[AhAuthentication.SHA512]
-)
-
-# Create the IPsec crypto profile model
-ah_profile = IPsecCryptoProfileCreateModel(
-    name="ah-sha512",
-    dh_group=DhGroup.GROUP19,
-    lifetime=lifetime,
-    ah=ah_config,
-    folder="Shared"
-)
-
-# Convert to dictionary for API request
-profile_dict = ah_profile.model_dump(exclude_unset=True)
+response = client.ipsec_crypto_profile.create(ah_config)
+print(f"Created profile: {response.name} (ID: {response.id})")
 ```
 
 ### Updating an IPsec Crypto Profile
 
 ```python
-from scm.models.network import (
-    IPsecCryptoProfileUpdateModel,
-    DhGroup,
-    EspEncryption,
-    LifetimeMinutes,
-    EspConfig,
-)
-from uuid import UUID
+from scm.client import ScmClient
 
-# Define the new lifetime in minutes
-lifetime = LifetimeMinutes(minutes=30)
-
-# Define updated ESP configuration
-esp_config = EspConfig(
-    encryption=[EspEncryption.AES_128_GCM, EspEncryption.AES_256_GCM],
-    authentication=["sha1", "sha256"]
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Create the update model
-update_model = IPsecCryptoProfileUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="esp-aes-gcm",
-    dh_group=DhGroup.GROUP20,
-    lifetime=lifetime,
-    esp=esp_config,
-    folder="Shared"
+# Fetch existing profile
+existing = client.ipsec_crypto_profile.fetch(
+    name="esp-aes256-sha256",
+    folder="Texas"
 )
 
-# Convert to dictionary for API request, excluding unset fields
-update_dict = update_model.model_dump(exclude_unset=True)
+# Modify attributes using dot notation
+existing.dh_group = "group20"
+existing.lifetime = {"hours": 24}
+existing.esp = {
+    "encryption": ["aes-256-gcm"],
+    "authentication": ["sha384"]
+}
+
+# Pass modified object to update()
+updated = client.ipsec_crypto_profile.update(existing)
+print(f"Updated profile: {updated.name}")
 ```
 
-## See Also
+### Working with Enums
 
-- [IPsec Crypto Profile Service](../../config/network/ipsec_crypto_profile.md) - Service for managing IPsec crypto profiles
-- [IKE Crypto Profile Models](ike_crypto_profile_models.md) - Data models for IKE crypto profiles
-- [IKE Gateway Models](ike_gateway_models.md) - Data models for IKE gateways
+```python
+from scm.models.network.ipsec_crypto_profile import (
+    DhGroup,
+    EspEncryption,
+)
+
+# Using enum values in configuration
+profile_config = {
+    "name": "esp-enum-example",
+    "dh_group": DhGroup.GROUP14.value,
+    "lifetime": {"hours": 8},
+    "esp": {
+        "encryption": [EspEncryption.AES_256_CBC.value, EspEncryption.AES_256_GCM.value],
+        "authentication": ["sha256"]
+    },
+    "folder": "Texas"
+}
+
+response = client.ipsec_crypto_profile.create(profile_config)
+
+# Get string values from enums
+print(f"DH Group: {DhGroup.GROUP14.value}")  # "group14"
+print(f"Encryption: {EspEncryption.AES_256_GCM.value}")  # "aes-256-gcm"
+```
+
+### Handling Different Lifetime Configurations
+
+```python
+# Different lifetime options
+seconds_lifetime = {"seconds": 28800}  # 8 hours in seconds (min: 180)
+minutes_lifetime = {"minutes": 480}     # 8 hours in minutes (min: 3)
+hours_lifetime = {"hours": 8}           # 8 hours (min: 1)
+days_lifetime = {"days": 1}             # 1 day (max: 365)
+
+# Create profile with specific lifetime
+profile_config = {
+    "name": "ipsec-crypto-daily",
+    "lifetime": days_lifetime,
+    "esp": {
+        "encryption": ["aes-256-cbc"],
+        "authentication": ["sha256"]
+    },
+    "folder": "Texas"
+}
+
+response = client.ipsec_crypto_profile.create(profile_config)
+```
+
+### Handling Different Lifesize Configurations
+
+```python
+# Different lifesize options
+kb_lifesize = {"kb": 1024}    # 1 MB in kilobytes
+mb_lifesize = {"mb": 100}     # 100 megabytes
+gb_lifesize = {"gb": 10}      # 10 gigabytes
+tb_lifesize = {"tb": 1}       # 1 terabyte
+
+# Create profile with lifesize limit
+profile_config = {
+    "name": "ipsec-crypto-lifesize",
+    "lifetime": {"hours": 8},
+    "lifesize": gb_lifesize,
+    "esp": {
+        "encryption": ["aes-256-gcm"],
+        "authentication": ["sha256"]
+    },
+    "folder": "Texas"
+}
+
+response = client.ipsec_crypto_profile.create(profile_config)
+```

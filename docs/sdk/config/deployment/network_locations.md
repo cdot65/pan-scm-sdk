@@ -21,10 +21,10 @@ There are two approaches to configure and use the NetworkLocations service:
 ### Unified Client Interface (Recommended)
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize the SCM client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -34,7 +34,7 @@ client = Scm(
 locations = client.network_location.list()
 ```
 
-### Traditional Service Instantiation
+### Traditional Service Instantiation (Legacy)
 
 ```python
 from scm.client import Scm
@@ -51,6 +51,9 @@ client = Scm(
 network_locations = NetworkLocations(client)
 ```
 
+!!! note
+    While both approaches work, the unified client interface is recommended for new development as it provides a more streamlined developer experience and ensures proper token refresh handling across all services.
+
 ## Core Methods
 
 | Method     | Description                           | Parameters                | Return Type               |
@@ -60,15 +63,15 @@ network_locations = NetworkLocations(client)
 
 ## Model Attributes
 
-| Attribute        | Type    | Description                                           |
-|------------------|---------|-------------------------------------------------------|
-| `value`          | str     | Unique identifier for the location (e.g., "us-west-1") |
-| `display`        | str     | Human-readable location name                          |
-| `continent`      | str     | Continent where the location exists                   |
-| `region`         | str     | Geographic region of the location                     |
-| `latitude`       | float   | Latitude coordinate                                   |
-| `longitude`      | float   | Longitude coordinate                                  |
-| `aggregate_region` | str   | Higher-level regional grouping                        |
+| Attribute          | Type   | Required | Default | Description                                            |
+|--------------------|--------|----------|---------|--------------------------------------------------------|
+| `value`            | str    | Yes      | None    | Unique identifier for the location (e.g., "us-west-1") |
+| `display`          | str    | Yes      | None    | Human-readable location name                           |
+| `continent`        | str    | No       | None    | Continent where the location exists                    |
+| `region`           | str    | No       | None    | Geographic region of the location                      |
+| `latitude`         | float  | No       | None    | Latitude coordinate (-90 to 90)                        |
+| `longitude`        | float  | No       | None    | Longitude coordinate (-180 to 180)                     |
+| `aggregate_region` | str    | No       | None    | Higher-level regional grouping                         |
 
 ## Exceptions
 
@@ -82,11 +85,11 @@ network_locations = NetworkLocations(client)
 ### List Network Locations
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 from scm.exceptions import APIError
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -108,11 +111,11 @@ except APIError as e:
 ### Filter Network Locations
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 from scm.exceptions import APIError
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -140,11 +143,11 @@ except APIError as e:
 ### Fetch a Specific Network Location
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -193,10 +196,10 @@ Lists network location objects with optional filtering.
 **Example:**
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -235,11 +238,11 @@ Fetches a single network location by its value.
 **Example:**
 
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
@@ -262,21 +265,20 @@ except InvalidObjectError:
 The `NetworkLocations` client can be configured with a custom maximum limit for API requests:
 
 ```python
-from scm.client import Scm
-from scm.config.deployment import NetworkLocations
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Option 1: Set a custom maximum limit during initialization (default is 200)
-network_locations = NetworkLocations(client, max_limit=500)
+# Configure max_limit using the property setter (default is 200, max is 1000)
+client.network_location.max_limit = 500
 
-# Option 2: Update it later
-network_locations.max_limit = 300
+# List all network locations
+locations = client.network_location.list()
 ```
 
 ## Best Practices
@@ -297,7 +299,7 @@ network_locations.max_limit = 300
 
 ## Related Models
 
-- [`NetworkLocationModel`](../../models/deployment/network_locations.md)
+- [NetworkLocationModel](../../models/deployment/network_locations.md#Overview)
 
 !!! note "Read-Only Operations"
     The NetworkLocations API only supports read operations (list and fetch). Create, update, and delete operations are not available for this endpoint.

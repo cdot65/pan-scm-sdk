@@ -29,9 +29,9 @@ The `AgentVersions` class provides read-only access to GlobalProtect agent versi
 
 ## Agent Version Model Attributes
 
-| Attribute       | Type      | Description                                   |
-|-----------------|-----------|-----------------------------------------------|
-| `agent_versions`| List[str] | List of available GlobalProtect agent versions|
+| Attribute       | Type      | Required | Default | Description                                    |
+|-----------------|-----------|----------|---------|------------------------------------------------|
+| `agent_versions`| List[str] | Yes      | None    | List of available GlobalProtect agent versions |
 
 ## Exceptions
 
@@ -169,7 +169,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.mobile_agent.agent_versions import AgentVersions
 
 # Initialize client
 client = ScmClient(
@@ -178,18 +177,13 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.agent_version.max_limit = 1000
 
-# Option 1: Use the unified client interface but create a custom AgentVersions instance with max_limit
-agent_versions_service = AgentVersions(client, max_limit=1000)
-all_versions1 = agent_versions_service.list()
+# List all agent versions
+all_versions = client.agent_version.list()
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (200)
-all_versions2 = client.agent_version.list()
-
-# Both options will retrieve all available versions,
-# but the first one will do it in larger batches.
+# The versions are fetched according to the max_limit setting.
 ```
 
 ## Error Handling

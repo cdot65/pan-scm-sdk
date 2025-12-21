@@ -10,8 +10,10 @@
 6. [Usage Examples](#usage-examples)
     - [Creating Label Objects](#creating-label-objects)
     - [Retrieving Labels](#retrieving-labels)
+    - [Fetching a Label by Name](#fetching-a-label-by-name)
     - [Updating Labels](#updating-labels)
     - [Listing Labels](#listing-labels)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting Labels](#deleting-labels)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -27,22 +29,24 @@ Labels are simple key-value objects that can be used for resource classification
 
 ## Core Methods
 
-| Method     | Description                     | Parameters                  | Return Type                |
-|------------|---------------------------------|-----------------------------|----------------------------|
-| `create()` | Creates a new label object      | `data: Dict[str, Any]`      | `LabelResponseModel`       |
-| `get()`    | Retrieves a label by ID         | `label_id: str`             | `LabelResponseModel`       |
-| `update()` | Updates an existing label       | `label: LabelUpdateModel`   | `LabelResponseModel`       |
-| `delete()` | Deletes a label                 | `label_id: str`             | `None`                     |
-| `list()`   | Lists labels with filtering     | `**filters`                 | `List[LabelResponseModel]` |
-| `fetch()`  | Gets label by name              | `name: str`                 | `Optional[LabelResponseModel]` |
+| Method     | Description                     | Parameters                                            | Return Type                    |
+|------------|---------------------------------|-------------------------------------------------------|--------------------------------|
+| `create()` | Creates a new label object      | `data: Dict[str, Any]`                                | `LabelResponseModel`           |
+| `get()`    | Retrieves a label by ID         | `label_id: Union[str, UUID]`                          | `LabelResponseModel`           |
+| `update()` | Updates an existing label       | `label: Union[LabelUpdateModel, LabelResponseModel]`  | `LabelResponseModel`           |
+| `delete()` | Deletes a label                 | `label_id: Union[str, UUID]`                          | `None`                         |
+| `list()`   | Lists labels with filtering     | `**filters`                                           | `List[LabelResponseModel]`     |
+| `fetch()`  | Gets label by name              | `name: str`                                           | `Optional[LabelResponseModel]` |
 
 ## Label Model Attributes
 
-| Attribute     | Type      | Required | Description                              |
-|---------------|-----------|----------|------------------------------------------|
-| `name`        | str       | Yes      | Name of label object (max 63 chars)      |
-| `id`          | UUID      | Yes*     | Unique identifier (*response only)       |
-| `description` | str       | No       | Object description                       |
+| Attribute     | Type | Required | Default | Description                                |
+|---------------|------|----------|---------|--------------------------------------------|
+| `name`        | str  | Yes      | None    | Name of label object. Max length: 63 chars |
+| `id`          | UUID | Yes*     | None    | Unique identifier (*response/update only)  |
+| `description` | str  | No       | None    | Object description                         |
+
+\* Only required for response and update models
 
 ## Exceptions
 
@@ -121,13 +125,21 @@ print(f"Created label with ID: {new_label.id}")
 ### Retrieving Labels
 
 ```python
-# Fetch by name
-label = client.label.fetch(name="environment")
-print(f"Found label: {label.name}")
-
 # Get by ID
-label_by_id = client.label.get(label.id)
-print(f"Retrieved label: {label_by_id.name}")
+label = client.label.get("123e4567-e89b-12d3-a456-426655440000")
+print(f"Retrieved label: {label.name}")
+```
+
+### Fetching a Label by Name
+
+```python
+# Fetch by name (returns None if not found)
+label = client.label.fetch(name="environment")
+if label:
+    print(f"Found label: {label.name}")
+    print(f"Label ID: {label.id}")
+else:
+    print("Label not found")
 ```
 
 ### Updating Labels
@@ -154,6 +166,27 @@ print(f"Found {len(all_labels)} labels")
 # Process results
 for label in all_labels:
    print(f"Label: {label.name}, Description: {label.description}")
+```
+
+### Controlling Pagination with max_limit
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit using the property setter
+client.label.max_limit = 100
+
+# List all labels - auto-paginates through results
+all_labels = client.label.list()
+
+# The labels are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting Labels
@@ -256,6 +289,7 @@ except APIError as e:
 
 ## Related Models
 
-- [LabelCreateModel](../../models/setup/label_models.md)
-- [LabelUpdateModel](../../models/setup/label_models.md)
-- [LabelResponseModel](../../models/setup/label_models.md)
+- [LabelBaseModel](../../models/setup/label_models.md#Overview)
+- [LabelCreateModel](../../models/setup/label_models.md#Overview)
+- [LabelUpdateModel](../../models/setup/label_models.md#Overview)
+- [LabelResponseModel](../../models/setup/label_models.md#Overview)

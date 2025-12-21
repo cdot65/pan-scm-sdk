@@ -4,14 +4,24 @@
 
 The Application Group models provide a structured way to manage application groups in Palo Alto Networks' Strata Cloud
 Manager. These models support grouping applications together and defining them within folders, snippets, or devices. The
-models
-handle validation of inputs and outputs when interacting with the SCM API.
+models handle validation of inputs and outputs when interacting with the SCM API.
+
+### Models
+
+| Model                           | Purpose                                          |
+|---------------------------------|--------------------------------------------------|
+| `ApplicationGroupBaseModel`     | Base model with common fields for all operations |
+| `ApplicationGroupCreateModel`   | Model for creating new application groups        |
+| `ApplicationGroupUpdateModel`   | Model for updating existing application groups   |
+| `ApplicationGroupResponseModel` | Model for API responses                          |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
 ## Attributes
 
 | Attribute | Type      | Required | Default | Description                                                                                  |
 |-----------|-----------|----------|---------|----------------------------------------------------------------------------------------------|
-| name      | str       | Yes      | None    | Name of the application group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| name      | str       | Yes      | None    | Name of the application group. Max length: 31 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
 | members   | List[str] | Yes      | None    | List of application names. Min length: 1, Max length: 1024                                   |
 | folder    | str       | No*      | None    | Folder where group is defined. Max length: 64 chars                                          |
 | snippet   | str       | No*      | None    | Snippet where group is defined. Max length: 64 chars                                         |
@@ -72,29 +82,23 @@ except ValueError as e:
 ### Creating an Application Group
 
 ```python
-# Using dictionary
-from scm.config.objects import ApplicationGroup
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 app_group_dict = {
     "name": "web-apps",
     "members": ["http", "https", "web-browsing"],
     "folder": "Texas",
 }
 
-app_group = ApplicationGroup(api_client)
-response = app_group.create(app_group_dict)
-
-# Using model directly
-from scm.models.objects import ApplicationGroupCreateModel
-
-app_group = ApplicationGroupCreateModel(
-    name="web-apps",
-    members=["http", "https", "web-browsing"],
-    folder="Texas"
-)
-
-payload = app_group.model_dump(exclude_unset=True)
-response = app_group.create(payload)
+response = client.application_group.create(app_group_dict)
 ```
 
 ### Creating an Application Group in a Snippet
@@ -107,40 +111,18 @@ snippet_group_dict = {
     "snippet": "Database Config"
 }
 
-response = app_group.create(snippet_group_dict)
-
-# Using model directly
-snippet_group = ApplicationGroupCreateModel(
-    name="database-apps",
-    members=["mysql", "postgresql", "mongodb"],
-    snippet="Database Config"
-)
-
-payload = snippet_group.model_dump(exclude_unset=True)
-response = app_group.create(payload)
+response = client.application_group.create(snippet_group_dict)
 ```
 
 ### Updating an Application Group
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "web-apps-updated",
-    "members": ["http", "https", "web-browsing", "ssl"],
-}
+# Fetch existing group
+existing = client.application_group.fetch(name="web-apps", folder="Texas")
 
-response = app_group.update(update_dict)
+# Modify attributes using dot notation
+existing.members = ["http", "https", "web-browsing", "ssl"]
 
-# Using model directly
-from scm.models.objects import ApplicationGroupUpdateModel
-
-update_group = ApplicationGroupUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="web-apps-updated",
-    members=["http", "https", "web-browsing", "ssl"]
-)
-
-payload = update_group.model_dump(exclude_unset=True)
-response = app_group.update(payload)
+# Pass modified object to update()
+updated = client.application_group.update(existing)
 ```

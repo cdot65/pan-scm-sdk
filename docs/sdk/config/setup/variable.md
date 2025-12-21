@@ -39,25 +39,67 @@ The `Variable` class provides methods for creating, retrieving, updating, and de
 
 ## Variable Model Attributes
 
-| Attribute       | Type                | Required | Description                                              |
-|-----------------|---------------------|----------|----------------------------------------------------------|
-| `name`          | str                 | Yes      | Name of the variable (max 63 characters)                 |
-| `type`          | str                 | Yes      | Variable type (e.g., "ip-netmask", "count", "percent")   |
-| `value`         | str                 | Yes      | Value of the variable                                    |
-| `id`            | UUID                | Yes*     | Unique identifier (*response only)                       |
-| `description`   | Optional[str]       | No       | Optional description of the variable                     |
-| `folder`        | Optional[str]       | No**     | Folder in which the variable is defined                  |
-| `snippet`       | Optional[str]       | No**     | Snippet in which the variable is defined                 |
-| `device`        | Optional[str]       | No**     | Device in which the variable is defined                  |
-| `overridden`    | Optional[bool]      | No       | Indicates if the variable is overridden (response only)  |
-| `labels`        | Optional[List[str]] | No       | Optional list of labels (response only)                  |
-| `parent`        | Optional[str]       | No       | Parent folder or container (response only)               |
-| `snippets`      | Optional[List[str]] | No       | Snippets associated with the variable (response only)    |
-| `model`         | Optional[str]       | No       | Device model information (response only)                 |
-| `serial_number` | Optional[str]       | No       | Device serial number (response only)                     |
-| `device_only`   | Optional[bool]      | No       | Whether variable is device-only (response only)          |
+| Attribute       | Type      | Required | Default | Description                                              |
+|-----------------|-----------|----------|---------|----------------------------------------------------------|
+| `name`          | str       | Yes      | None    | Name of the variable. Max length: 63 chars               |
+| `type`          | str       | Yes      | None    | Variable type (see Variable Types below)                 |
+| `value`         | str       | Yes      | None    | Value of the variable                                    |
+| `id`            | UUID      | Yes*     | None    | Unique identifier (*response/update only)                |
+| `description`   | str       | No       | None    | Optional description of the variable                     |
+| `folder`        | str       | No**     | None    | Folder in which the variable is defined. Max: 64 chars   |
+| `snippet`       | str       | No**     | None    | Snippet in which the variable is defined. Max: 64 chars  |
+| `device`        | str       | No**     | None    | Device in which the variable is defined. Max: 64 chars   |
+| `overridden`    | bool      | No       | None    | Indicates if the variable is overridden (response only)  |
+| `labels`        | List[str] | No       | None    | Optional list of labels (response only)                  |
+| `parent`        | str       | No       | None    | Parent folder or container (response only)               |
+| `snippets`      | List[str] | No       | None    | Snippets associated with the variable (response only)    |
+| `model`         | str       | No       | None    | Device model information (response only)                 |
+| `serial_number` | str       | No       | None    | Device serial number (response only)                     |
+| `device_only`   | bool      | No       | None    | Whether variable is device-only (response only)          |
 
-** Exactly one of `folder`, `snippet`, or `device` must be provided
+\* Only required for response and update models
+
+\*\* Exactly one of `folder`, `snippet`, or `device` must be provided
+
+### Variable Types
+
+The `type` field must be one of the following values:
+
+| Type            | Description                    |
+|-----------------|--------------------------------|
+| `percent`       | Percentage value               |
+| `count`         | Count/number value             |
+| `ip-netmask`    | IP address with subnet mask    |
+| `zone`          | Security zone                  |
+| `ip-range`      | IP address range               |
+| `ip-wildcard`   | IP wildcard mask               |
+| `device-priority` | Device priority value        |
+| `device-id`     | Device identifier              |
+| `egress-max`    | Maximum egress value           |
+| `as-number`     | AS number                      |
+| `fqdn`          | Fully qualified domain name    |
+| `port`          | Port number                    |
+| `link-tag`      | Link tag                       |
+| `group-id`      | Group identifier               |
+| `rate`          | Rate value                     |
+| `router-id`     | Router identifier              |
+| `qos-profile`   | QoS profile                    |
+| `timer`         | Timer value                    |
+
+### Filter Parameters
+
+The `list()` method supports the following filters:
+
+| Parameter       | Type       | Description                              |
+|-----------------|------------|------------------------------------------|
+| `folder`        | str        | Filter by folder (server-side)           |
+| `labels`        | List[str]  | Filter by labels (client-side, any match)|
+| `parent`        | str        | Filter by parent (client-side, exact)    |
+| `type`          | str        | Filter by type (client-side, exact)      |
+| `snippets`      | List[str]  | Filter by snippets (client-side, any)    |
+| `model`         | str        | Filter by device model (client-side)     |
+| `serial_number` | str        | Filter by serial number (client-side)    |
+| `device_only`   | bool       | Filter device-only entries (client-side) |
 
 ## Exceptions
 
@@ -139,17 +181,18 @@ if variable_by_name:
 ```
 
 ### Updating Variables
+
 ```python
-from scm.models.setup.variable import VariableUpdateModel
-update_model = VariableUpdateModel(
-    id="12345678-1234-1234-1234-123456789012",
-    name="subnet-variable",
-    type="ip-netmask",
-    value="10.0.0.0/16",  # Updated value
-    folder="department-a"
-)
-updated = variables.update(update_model)
-print(updated.value)
+# Fetch existing variable
+existing = client.variable.fetch(name="subnet-variable", folder="department-a")
+
+# Modify attributes using dot notation
+existing.value = "10.0.0.0/16"  # Updated value
+existing.description = "Updated network subnet"
+
+# Pass modified object to update()
+updated = client.variable.update(existing)
+print(f"Updated value: {updated.value}")
 ```
 
 ### Listing Variables
@@ -184,9 +227,24 @@ device_only_variables = variables.list(device_only=True)
 ```
 
 ### Controlling Pagination with max_limit
+
 ```python
-variables = Variable(client, max_limit=100)
-results = variables.list()
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit using the property setter
+client.variable.max_limit = 100
+
+# List all variables - auto-paginates through results
+all_variables = client.variable.list()
+
+# The variables are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting Variables
@@ -257,14 +315,15 @@ except InvalidObjectError as e:
 ## Full Script Examples
 
 ```python
-from scm.client import Scm
-from scm.config.setup.variable import Variable
-from scm.models.setup.variable import VariableUpdateModel
+from scm.client import ScmClient
 from scm.exceptions import APIError, InvalidObjectError
 
-# Initialize the client and service
-client = Scm(api_key="your-api-key")
-variables = Variable(client)
+# Initialize the client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 try:
     # Create a new IP variable
@@ -275,29 +334,28 @@ try:
         "description": "Web server subnet",
         "folder": "web-infrastructure",
     }
-    new_variable = variables.create(variable_data)
+    new_variable = client.variable.create(variable_data)
     print(f"Created variable: {new_variable.id}")
     print(f"Name: {new_variable.name}")
     print(f"Type: {new_variable.type}")
     print(f"Value: {new_variable.value}")
 
-    # Update the variable with a new value
-    update_model = VariableUpdateModel(
-        id=new_variable.id,
-        name=new_variable.name,
-        type=new_variable.type,
-        value="10.0.1.0/23",  # Updated subnet
-        description="Updated web server subnet",
-        folder="web-infrastructure"
-    )
-    updated = variables.update(update_model)
+    # Update the variable with a new value using fetch → update workflow
+    existing = client.variable.fetch(name="web-servers", folder="web-infrastructure")
+    existing.value = "10.0.1.0/23"  # Updated subnet
+    existing.description = "Updated web server subnet"
+    updated = client.variable.update(existing)
     print(f"Updated value: {updated.value}")
 
     # List all variables of a specific type
     print("Listing all IP variables:")
-    ip_variables = variables.list(type="ip-netmask")
+    ip_variables = client.variable.list(type="ip-netmask")
     for var in ip_variables:
         print(f"- {var.name}: {var.value}")
+
+    # Delete a variable
+    client.variable.delete(new_variable.id)
+    print(f"Deleted variable: {new_variable.id}")
 
 except InvalidObjectError as e:
     print(f"Invalid variable data: {e}")
@@ -306,4 +364,8 @@ except APIError as e:
 ```
 
 ## Related Models
-- See [Variable Models](../../models/setup/variable_models.md) for model details.
+
+- [VariableBaseModel](../../models/setup/variable_models.md#Overview)
+- [VariableCreateModel](../../models/setup/variable_models.md#Overview)
+- [VariableUpdateModel](../../models/setup/variable_models.md#Overview)
+- [VariableResponseModel](../../models/setup/variable_models.md#Overview)

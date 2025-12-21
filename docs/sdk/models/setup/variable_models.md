@@ -3,287 +3,254 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Models](#models)
-    - [VariableBaseModel](#variablebasemodel)
-    - [VariableCreateModel](#variablecreatemodel)
-    - [VariableUpdateModel](#variableupdatemodel)
-    - [VariableResponseModel](#variableresponsemodel)
-3. [Model Validation Rules](#model-validation-rules)
-4. [Variable Types](#variable-types)
-5. [Container Validation](#container-validation)
+2. [Model Attributes](#model-attributes)
+3. [Variable Types](#variable-types)
+4. [Exceptions](#exceptions)
+5. [Model Validators](#model-validators)
 6. [Usage Examples](#usage-examples)
-    - [Creating Model Instances](#creating-model-instances)
-    - [Model Validation](#model-validation)
-    - [Model Serialization](#model-serialization)
-    - [API Integration Examples](#api-integration-examples)
 
-## Overview
+## Overview {#Overview}
 
-This page documents the Pydantic models used for variable operations in the Strata Cloud Manager SDK. These models provide structured data validation and serialization for variable creation, updates, and API responses.
+The Variable models provide a structured way to manage variable resources in Palo Alto Networks' Strata Cloud Manager.
+These models represent reusable values that can be referenced across configurations. The models handle validation
+of inputs and outputs when interacting with the SCM API.
 
-## Models
+### Models
+
+The module provides the following Pydantic models:
+
+- `VariableBaseModel`: Base model with fields common to all variable operations
+- `VariableCreateModel`: Model for creating new variables
+- `VariableUpdateModel`: Model for updating existing variables
+- `VariableResponseModel`: Response model for variable operations
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
+## Model Attributes
 
 ### VariableBaseModel
 
-The base model for variable resources containing common fields.
+| Attribute   | Type | Required | Default | Description                                       |
+|-------------|------|----------|---------|---------------------------------------------------|
+| name        | str  | Yes      | None    | Name of the variable. Max length: 63 chars        |
+| type        | str  | Yes      | None    | Variable type (see Variable Types)                |
+| value       | str  | Yes      | None    | Value of the variable                             |
+| description | str  | No       | None    | Description of the variable                       |
+| folder      | str  | No*      | None    | Folder scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
+| snippet     | str  | No*      | None    | Snippet scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
+| device      | str  | No*      | None    | Device scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
 
-```python
-class VariableBaseModel(BaseModel):
-    name: str
-    type: str
-    value: str
-    description: Optional[str] = None
-    folder: Optional[str] = None
-    snippet: Optional[str] = None
-    device: Optional[str] = None
-
-    @model_validator(mode="after")
-    def validate_container(self) -> 'VariableBaseModel':
-        """Ensure exactly one container is specified"""
-        # Validation logic omitted for brevity
-```
+\* Exactly one of `folder`, `snippet`, or `device` must be provided
 
 ### VariableCreateModel
 
-Model for creating new variable resources.
-
-```python
-class VariableCreateModel(VariableBaseModel):
-    pass  # Inherits all fields from VariableBaseModel
-```
+Inherits all fields from `VariableBaseModel` without additional fields. Includes container validation.
 
 ### VariableUpdateModel
 
-Model for updating existing variable resources.
+Extends `VariableBaseModel` by adding:
 
-```python
-class VariableUpdateModel(VariableBaseModel):
-    id: UUID
-```
+| Attribute | Type | Required | Default | Description                            |
+|-----------|------|----------|---------|----------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the variable  |
 
 ### VariableResponseModel
 
-Model for variable responses from the API.
+Extends `VariableBaseModel` by adding:
 
-```python
-class VariableResponseModel(VariableBaseModel):
-    id: UUID
-    overridden: Optional[bool] = None
-    labels: Optional[List[str]] = None
-    parent: Optional[str] = None
-    snippets: Optional[List[str]] = None
-    model: Optional[str] = None
-    serial_number: Optional[str] = None
-    device_only: Optional[bool] = None
-```
-
-## Model Validation Rules
-
-| Field           | Validation Rules                                           |
-|-----------------|------------------------------------------------------------|
-| `name`          | Non-empty string, max 63 characters                        |
-| `type`          | Must be one of the supported variable types                |
-| `value`         | String value appropriate for the selected type             |
-| `id`            | Valid UUID format (required in response and update models) |
-| `description`   | Optional text description                                  |
-| `folder`        | Optional string, container validation applies              |
-| `snippet`       | Optional string, container validation applies              |
-| `device`        | Optional string, container validation applies              |
-| `overridden`    | Optional boolean (response only)                           |
-| `labels`        | Optional list of string labels (response only)             |
-| `parent`        | Optional string (response only)                            |
-| `snippets`      | Optional list of string IDs (response only)                |
-| `model`         | Optional string (response only)                            |
-| `serial_number` | Optional string (response only)                            |
-| `device_only`   | Optional boolean (response only)                           |
+| Attribute     | Type      | Required | Default | Description                              |
+|---------------|-----------|----------|---------|------------------------------------------|
+| id            | UUID      | Yes      | None    | The unique identifier of the variable    |
+| overridden    | bool      | No       | None    | Whether the variable is overridden       |
+| labels        | List[str] | No       | None    | Labels assigned to the variable          |
+| parent        | str       | No       | None    | Parent folder or container               |
+| snippets      | List[str] | No       | None    | Snippets associated with the variable    |
+| model         | str       | No       | None    | Device model information                 |
+| serial_number | str       | No       | None    | Device serial number                     |
+| device_only   | bool      | No       | None    | Whether variable is device-only          |
 
 ## Variable Types
 
-The `type` field in variable models must be one of the following supported values:
+The `type` field must be one of the following values:
 
-- `percent`
-- `count`
-- `ip-netmask`
-- `zone`
-- `ip-range`
-- `ip-wildcard`
-- `device-priority`
-- `device-id`
-- `egress-max`
-- `as-number`
-- `fqdn`
-- `port`
-- `link-tag`
-- `group-id`
-- `rate`
-- `router-id`
-- `qos-profile`
-- `timer`
+| Type            | Description                    |
+|-----------------|--------------------------------|
+| `percent`       | Percentage value               |
+| `count`         | Count/number value             |
+| `ip-netmask`    | IP address with subnet mask    |
+| `zone`          | Security zone                  |
+| `ip-range`      | IP address range               |
+| `ip-wildcard`   | IP wildcard mask               |
+| `device-priority` | Device priority value        |
+| `device-id`     | Device identifier              |
+| `egress-max`    | Maximum egress value           |
+| `as-number`     | AS number                      |
+| `fqdn`          | Fully qualified domain name    |
+| `port`          | Port number                    |
+| `link-tag`      | Link tag                       |
+| `group-id`      | Group identifier               |
+| `rate`          | Rate value                     |
+| `router-id`     | Router identifier              |
+| `qos-profile`   | QoS profile                    |
+| `timer`         | Timer value                    |
 
-## Container Validation
+## Exceptions
 
-Variables must have exactly one container field set:
-- `folder`: The folder in which the variable is defined
-- `snippet`: The snippet in which the variable is defined
-- `device`: The device in which the variable is defined
+The Variable models can raise the following exceptions during validation:
 
-The model validator ensures that exactly one of these three fields is provided:
+- **ValueError**: Raised when field validation fails (e.g., invalid type, missing container)
+- **ValidationError**: Raised by Pydantic when model validation fails
+
+## Model Validators
+
+### Type Validation
+
+The `type` field is validated to ensure it matches one of the allowed variable types:
 
 ```python
-@model_validator(mode="after")
-def validate_container(self) -> 'VariableBaseModel':
-    """Ensure exactly one container is specified"""
-    containers = [self.folder, self.snippet, self.device]
-    specified = sum(1 for c in containers if c is not None)
+from scm.models.setup.variable import VariableCreateModel
 
-    if specified != 1:
-        raise ValueError("Exactly one of folder, snippet, or device must be specified")
+# This will raise a validation error
+try:
+    variable = VariableCreateModel(
+        name="test-var",
+        type="invalid-type",
+        value="test",
+        folder="Texas"
+    )
+except ValueError as e:
+    print(f"Validation error: {e}")
+    # Output: type must be one of [...], got invalid-type
+```
 
-    return self
+### Container Validation
+
+Variables must have exactly one container field set (`folder`, `snippet`, or `device`):
+
+```python
+from scm.models.setup.variable import VariableCreateModel
+
+# Error: No container specified
+try:
+    VariableCreateModel(
+        name="test-var",
+        type="ip-netmask",
+        value="192.168.1.0/24"
+    )
+except ValueError as e:
+    print(f"Error: {e}")
+
+# Error: Multiple containers specified
+try:
+    VariableCreateModel(
+        name="test-var",
+        type="ip-netmask",
+        value="192.168.1.0/24",
+        folder="Texas",
+        snippet="web-config"
+    )
+except ValueError as e:
+    print(f"Error: {e}")
 ```
 
 ## Usage Examples
 
-### Creating Model Instances
+### Creating a Variable
 
 ```python
-from uuid import UUID
-from scm.models.setup.variable import (
-    VariableBaseModel,
-    VariableCreateModel,
-    VariableUpdateModel,
-    VariableResponseModel
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Create a base variable model
-base_variable = VariableBaseModel(
-    name="subnet-var",
-    type="ip-netmask",
-    value="192.168.1.0/24",
-    description="Subnet variable",
-    folder="network"
-)
+# Using dictionary
+variable_data = {
+    "name": "subnet-variable",
+    "type": "ip-netmask",
+    "value": "192.168.1.0/24",
+    "description": "Network subnet for department A",
+    "folder": "Texas"
+}
 
-# Create a variable creation model
-create_variable = VariableCreateModel(
-    name="port-var",
-    type="port",
-    value="8080",
-    description="Web server port",
-    snippet="web-config"
-)
-
-# Create a variable update model
-update_variable = VariableUpdateModel(
-    id=UUID("12345678-1234-1234-1234-123456789012"),
-    name="port-var",
-    type="port",
-    value="8443",  # Updated port
-    description="Updated web server port",
-    snippet="web-config"
-)
-
-# Create a variable response model
-response_variable = VariableResponseModel(
-    id=UUID("12345678-1234-1234-1234-123456789012"),
-    name="subnet-var",
-    type="ip-netmask",
-    value="192.168.1.0/24",
-    description="Subnet variable",
-    folder="network",
-    overridden=False,
-    labels=["network", "infrastructure"],
-    parent="root",
-    snippets=["web-config", "security-config"],
-    device_only=False
-)
+response = client.variable.create(variable_data)
+print(f"Created variable: {response.name} with ID: {response.id}")
 ```
 
-### Model Validation
+### Updating a Variable
 
 ```python
-from pydantic_core import ValidationError
-try:
-    # Error: No container specified
-    VariableCreateModel(
-        name="invalid-var",
-        type="ip-netmask",
-        value="192.168.1.0/24"
-    )
-except ValidationError as e:
-    print("Validation error:", e)
+from scm.client import ScmClient
 
-try:
-    # Error: Multiple containers specified
-    VariableCreateModel(
-        name="invalid-var",
-        type="ip-netmask",
-        value="192.168.1.0/24",
-        folder="network",
-        snippet="web-config"
-    )
-except ValidationError as e:
-    print("Validation error:", e)
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-try:
-    # Error: Invalid variable type
-    VariableCreateModel(
-        name="invalid-var",
-        type="invalid-type",
-        value="192.168.1.0/24",
-        folder="network"
-    )
-except ValidationError as e:
-    print("Validation error:", e)
+# Fetch existing variable
+existing = client.variable.fetch(name="subnet-variable", folder="Texas")
+
+# Modify attributes using dot notation
+existing.value = "10.0.0.0/16"
+existing.description = "Updated network subnet"
+
+# Pass modified object to update()
+updated = client.variable.update(existing)
+print(f"Updated variable: {updated.name}")
 ```
 
-### Model Serialization
+### Listing Variables
 
 ```python
-variable = VariableResponseModel(
-    id=UUID("12345678-1234-1234-1234-123456789012"),
-    name="subnet-var",
-    type="ip-netmask",
-    value="192.168.1.0/24",
-    description="Subnet variable",
-    folder="network"
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
-# Convert to dict
-variable_dict = variable.model_dump()
-# Convert to JSON
-variable_json = variable.model_dump_json()
+
+# List all variables
+all_variables = client.variable.list()
+
+for variable in all_variables:
+    print(f"Variable: {variable.name}")
+    print(f"Type: {variable.type}")
+    print(f"Value: {variable.value}")
+
+# Filter by type
+ip_variables = client.variable.list(type="ip-netmask")
+
+# Filter by labels
+labeled_variables = client.variable.list(labels=["network"])
 ```
 
-### API Integration Examples
+### Fetching a Variable by Name
 
 ```python
-from scm.config.setup.variable import Variable
-from scm.models.setup.variable import VariableCreateModel, VariableUpdateModel
-variables = Variable(client)
+from scm.client import ScmClient
 
-# Create and send a variable
-new_variable = VariableCreateModel(
-    name="web-port",
-    type="port",
-    value="8080",
-    description="Web server port",
-    folder="network-services"
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
-created = variables.create(new_variable.model_dump(exclude_unset=True))
 
-# Update a variable
-update = VariableUpdateModel(
-    id=created.id,
-    name="web-port",
-    type="port",
-    value="8443",  # Changed port to HTTPS
-    description="Secure web server port",
-    folder="network-services"
-)
-updated = variables.update(update)
-
-# List variables of a specific type
-port_variables = variables.list(type="port")
-for var in port_variables:
-    print(f"{var.name}: {var.value}")
+# Fetch variable by name and folder
+variable = client.variable.fetch(name="subnet-variable", folder="Texas")
+if variable:
+    print(f"Found variable: {variable.name}")
+    print(f"ID: {variable.id}")
+    print(f"Type: {variable.type}")
+    print(f"Value: {variable.value}")
+else:
+    print("Variable not found")
 ```
+

@@ -4,6 +4,19 @@
 
 The Bandwidth Allocation models provide a structured way to manage bandwidth allocation configurations in Palo Alto Networks' Strata Cloud Manager. These models allow you to create, update, and manage bandwidth allocations for different regions, supporting optional Quality of Service (QoS) configurations.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `BandwidthAllocationBaseModel`: Base model with fields common to all bandwidth allocation operations
+- `BandwidthAllocationCreateModel`: Model for creating new bandwidth allocations
+- `BandwidthAllocationUpdateModel`: Model for updating existing bandwidth allocations
+- `BandwidthAllocationResponseModel`: Response model for bandwidth allocation operations
+- `BandwidthAllocationListResponseModel`: Response model for list operations (includes pagination)
+- `QosModel`: Model for Quality of Service configuration
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute           | Type          | Required | Default | Description                                                     |
@@ -35,35 +48,30 @@ The Bandwidth Allocation models enforce data validation through Pydantic:
 ### Creating a Bandwidth Allocation
 
 ```python
-# Using dictionary
-from scm.config.deployment import BandwidthAllocations
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 allocation_dict = {
     "name": "west-region",
     "allocated_bandwidth": 100,
     "spn_name_list": ["spn1", "spn2"]
 }
 
-bandwidth_allocations = BandwidthAllocations(api_client)
-response = bandwidth_allocations.create(allocation_dict)
-
-# Using model directly
-from scm.models.deployment import BandwidthAllocationCreateModel
-
-allocation = BandwidthAllocationCreateModel(
-    name="west-region",
-    allocated_bandwidth=100,
-    spn_name_list=["spn1", "spn2"]
-)
-
-payload = allocation.model_dump(exclude_unset=True)
-response = bandwidth_allocations.create(payload)
+response = client.bandwidth_allocation.create(allocation_dict)
+print(f"Created allocation: {response.name} with {response.allocated_bandwidth} Mbps")
 ```
 
 ### Creating a Bandwidth Allocation with QoS
 
 ```python
-# Using dictionary
+# Using dictionary with QoS configuration
 qos_dict = {
     "name": "east-region",
     "allocated_bandwidth": 200,
@@ -76,82 +84,58 @@ qos_dict = {
     }
 }
 
-response = bandwidth_allocations.create(qos_dict)
-
-# Using model directly
-from scm.models.deployment import BandwidthAllocationCreateModel, QosModel
-
-qos = QosModel(
-    enabled=True,
-    customized=True,
-    profile="high-priority",
-    guaranteed_ratio=0.7
-)
-
-allocation = BandwidthAllocationCreateModel(
-    name="east-region",
-    allocated_bandwidth=200,
-    spn_name_list=["spn3", "spn4"],
-    qos=qos
-)
-
-payload = allocation.model_dump(exclude_unset=True)
-response = bandwidth_allocations.create(payload)
+response = client.bandwidth_allocation.create(qos_dict)
+print(f"Created QoS allocation: {response.name}")
+if response.qos:
+    print(f"QoS profile: {response.qos.profile}")
 ```
 
 ### Updating a Bandwidth Allocation
 
 ```python
-# Using dictionary
-update_dict = {
-    "name": "west-region",
-    "allocated_bandwidth": 150,
-    "spn_name_list": ["spn1", "spn2", "spn5"]
-}
+# Fetch existing allocation
+existing = client.bandwidth_allocation.fetch(name="west-region")
 
-response = bandwidth_allocations.update(update_dict)
+# Modify attributes using dot notation
+existing.allocated_bandwidth = 150
+existing.spn_name_list = ["spn1", "spn2", "spn5"]
 
-# Using model directly
-from scm.models.deployment import BandwidthAllocationUpdateModel
-
-update_allocation = BandwidthAllocationUpdateModel(
-    name="west-region",
-    allocated_bandwidth=150,
-    spn_name_list=["spn1", "spn2", "spn5"]
-)
-
-payload = update_allocation.model_dump(exclude_unset=True)
-response = bandwidth_allocations.update(payload)
+# Pass modified object to update() as dictionary
+updated = client.bandwidth_allocation.update(existing.model_dump())
+print(f"Updated allocation: {updated.name} to {updated.allocated_bandwidth} Mbps")
 ```
 
 ### List Bandwidth Allocations
 
 ```python
 # List all bandwidth allocations
-all_allocations = bandwidth_allocations.list()
+all_allocations = client.bandwidth_allocation.list()
 
 # Filter by name
-filtered_allocations = bandwidth_allocations.list(name="west-region")
+filtered_allocations = client.bandwidth_allocation.list(name="west-region")
 
 # Filter by allocated bandwidth
-high_bandwidth = bandwidth_allocations.list(allocated_bandwidth=200)
+high_bandwidth = client.bandwidth_allocation.list(allocated_bandwidth=200)
 
 # Filter by SPN name
-allocations_with_spn = bandwidth_allocations.list(spn_name_list="spn1")
+allocations_with_spn = client.bandwidth_allocation.list(spn_name_list="spn1")
 
 # Filter by QoS enabled status
-qos_enabled_allocations = bandwidth_allocations.list(qos_enabled=True)
+qos_enabled_allocations = client.bandwidth_allocation.list(qos_enabled=True)
 ```
 
 ### Get a Single Bandwidth Allocation
 
 ```python
-# Get a bandwidth allocation by name
-allocation = bandwidth_allocations.get("west-region")
+# Get a bandwidth allocation by name (returns None if not found)
+allocation = client.bandwidth_allocation.get("west-region")
+if allocation:
+    print(f"Found: {allocation.name}")
 
 # Fetch will raise an exception if not found
 try:
-    allocation = bandwidth_allocations.fetch("west-region")
+    allocation = client.bandwidth_allocation.fetch("west-region")
+    print(f"Fetched: {allocation.name}")
 except InvalidObjectError:
     print("Bandwidth allocation not found")
 ```
@@ -160,7 +144,8 @@ except InvalidObjectError:
 
 ```python
 # Delete a bandwidth allocation by name and SPN name list (comma-separated)
-bandwidth_allocations.delete("west-region", "spn1,spn2")
+client.bandwidth_allocation.delete("west-region", "spn1,spn2")
+print("Bandwidth allocation deleted")
 ```
 
 ## List Response Format

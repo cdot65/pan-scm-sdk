@@ -1,8 +1,10 @@
 # Region Models
 
+## Overview {#Overview}
+
 Region objects define geographic locations and network addresses in Palo Alto Networks' Strata Cloud Manager. These models provide the structure for creating, updating, and retrieving region configurations.
 
-## Models Overview
+### Models
 
 The module provides the following Pydantic models:
 
@@ -11,6 +13,10 @@ The module provides the following Pydantic models:
 - `RegionCreateModel`: Model for creating new region objects
 - `RegionUpdateModel`: Model for updating existing region objects
 - `RegionResponseModel`: Response model for region operations
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
+**Note:** The `description` and `tag` fields are included in the SDK models for consistency with other object types, but they are **not supported** by the Strata Cloud Manager API for Region objects. They will be automatically excluded when sending requests to the API.
 
 ## GeoLocation
 
@@ -25,38 +31,45 @@ The `GeoLocation` model defines the geographic coordinates of a region with vali
 
 The `RegionBaseModel` contains fields common to all region CRUD operations.
 
-| Attribute     | Type                    | Required | Default | Description                                                   |
-|---------------|-------------------------|----------|---------|---------------------------------------------------------------|
-| name          | str                     | Yes      | -       | The name of the region (max length: 31)                       |
-| geo_location  | Optional[GeoLocation]   | No       | None    | The geographic location of the region                         |
-| address       | Optional[List[str]]     | No       | None    | A list of addresses associated with the region                |
-| folder        | Optional[str]           | No       | None    | The folder in which the resource is defined (max length: 64)  |
-| snippet       | Optional[str]           | No       | None    | The snippet in which the resource is defined (max length: 64) |
-| device        | Optional[str]           | No       | None    | The device in which the resource is defined (max length: 64)  |
+| Attribute     | Type                    | Required | Default | Description                                                     |
+|---------------|-------------------------|----------|---------|-----------------------------------------------------------------|
+| name          | str                     | Yes      | -       | The name of the region (max length: 64)                         |
+| description   | Optional[str]           | No       | None    | A description of the region (not sent to API)                   |
+| tag           | Optional[List[str]]     | No       | None    | A list of tags associated with the region (not sent to API)     |
+| geo_location  | Optional[GeoLocation]   | No       | None    | The geographic location of the region                           |
+| address       | Optional[List[str]]     | No       | None    | A list of addresses associated with the region                  |
+| folder        | Optional[str]           | No       | None    | The folder in which the resource is defined (max length: 64)    |
+| snippet       | Optional[str]           | No       | None    | The snippet in which the resource is defined (max length: 64)   |
+| device        | Optional[str]           | No       | None    | The device in which the resource is defined (max length: 64)    |
 
-### Address Validation
+### Field Validators
 
-The model includes validators for the `address` field to ensure:
-
-1. The field contains a list of strings (or can be converted to one)
-2. All addresses in the list are unique
+The model includes validators for the `address` and `tag` fields:
 
 ```python
-@field_validator("address", mode="before")
+@field_validator("address", "tag", mode="before")
 def ensure_list_of_strings(cls, v):
+    """Converts single string to list if needed."""
     if v is None:
         return v
     if isinstance(v, str):
         return [v]
     if isinstance(v, list):
         return v
-    # Catch all other types
-    raise ValueError("Address must be a string or a list of strings")
+    raise ValueError("Value must be a string or a list of strings")
 
 @field_validator("address")
 def ensure_unique_addresses(cls, v):
+    """Ensures all addresses in the list are unique."""
     if v is not None and len(v) != len(set(v)):
         raise ValueError("List of addresses must contain unique values")
+    return v
+
+@field_validator("tag")
+def ensure_unique_tags(cls, v):
+    """Ensures all tags in the list are unique."""
+    if v is not None and len(v) != len(set(v)):
+        raise ValueError("List of tags must contain unique values")
     return v
 ```
 
@@ -109,88 +122,101 @@ The `RegionUpdateModel` extends the base model and adds the ID field required fo
 
 The `RegionResponseModel` extends the base model and includes the ID field returned in API responses.
 
-| Attribute                              | Type | Required | Default | Description               |
-|----------------------------------------|------|----------|---------|---------------------------|
-| id                                     | UUID | Yes      | -       | The UUID of the region    |
-| *All attributes from RegionBaseModel*  |      |          |         |                           |
+| Attribute                              | Type          | Required | Default | Description                                               |
+|----------------------------------------|---------------|----------|---------|-----------------------------------------------------------|
+| id                                     | Optional[UUID]| No       | None    | The UUID of the region (may be missing for predefined)    |
+| *All attributes from RegionBaseModel*  |               |          |         |                                                           |
+
+**Note:** The `id` field is optional because predefined regions may not have an ID.
 
 ## Usage Examples
 
-### Creating a New Region
+### Creating a Region
 
 ```python
-from scm.models.objects.regions import RegionCreateModel, GeoLocation
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 # Create a region with a geographic location
-region = RegionCreateModel(
-    name="us-west-region",
-    folder="Global",
-    geo_location=GeoLocation(
-        latitude=37.7749,
-        longitude=-122.4194
-    ),
-    address=["10.0.0.0/8", "192.168.1.0/24"]
-)
+region_data = {
+    "name": "us-west-region",
+    "folder": "Global",
+    "geo_location": {
+        "latitude": 37.7749,
+        "longitude": -122.4194
+    },
+    "address": ["10.0.0.0/8", "192.168.1.0/24"]
+}
 
-# Create a region without geo_location but with addresses
-region_addresses_only = RegionCreateModel(
-    name="internal-networks",
-    folder="Global",
-    address=["172.16.0.0/16", "192.168.0.0/16"]
-)
+response = client.region.create(region_data)
+print(f"Created region: {response.name} (ID: {response.id})")
+```
 
+### Creating a Region in a Snippet
+
+```python
 # Create a region in a snippet
-region_in_snippet = RegionCreateModel(
-    name="europe-region",
-    snippet="EU Configs",
-    geo_location=GeoLocation(
-        latitude=51.5074,
-        longitude=-0.1278
-    )
-)
+region_data = {
+    "name": "europe-region",
+    "snippet": "EU Configs",
+    "geo_location": {
+        "latitude": 51.5074,
+        "longitude": -0.1278
+    }
+}
+
+response = client.region.create(region_data)
 ```
 
 ### Updating an Existing Region
 
 ```python
-from uuid import UUID
-from scm.models.objects.regions import RegionUpdateModel, GeoLocation
+# Fetch existing region
+existing = client.region.fetch(name="us-west-region", folder="Global")
 
-# Update an existing region
-updated_region = RegionUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="updated-region-name",
-    geo_location=GeoLocation(
-        latitude=40.7128,
-        longitude=-74.0060
-    ),
-    address=["10.0.0.0/8", "172.16.0.0/16", "192.168.0.0/16"]
-)
+# Modify attributes using dot notation
+existing.address = existing.address + ["172.16.0.0/16"]
+existing.geo_location = {
+    "latitude": 40.7128,
+    "longitude": -74.0060
+}
+
+# Pass modified object to update()
+updated = client.region.update(existing)
+print(f"Updated region addresses: {updated.address}")
 ```
 
 ### Working with Response Models
 
 ```python
-from scm.models.objects.regions import RegionResponseModel
+# List and process regions
+regions = client.region.list(folder="Global")
 
-# Process a region response
-def process_region(region: RegionResponseModel):
-    print(f"Region ID: {region.id}")
-    print(f"Region Name: {region.name}")
+for region in regions:
+    print(f"Region: {region.name}")
+
+    if region.id:
+        print(f"  ID: {region.id}")
+    else:
+        print("  ID: (predefined region)")
 
     if region.geo_location:
-        print(f"Geographic Location: {region.geo_location.latitude}, {region.geo_location.longitude}")
+        print(f"  Location: {region.geo_location.latitude}, {region.geo_location.longitude}")
 
     if region.address:
-        print("Associated Addresses:")
-        for addr in region.address:
-            print(f"  - {addr}")
+        print(f"  Addresses: {', '.join(region.address)}")
 ```
 
 ## Best Practices
 
 ### Geographic Locations
-- Provide accurate latitude and longitude coordinates when defining regions
+- Provide accurate latitude and longitude coordinates
 - Use decimal degrees format for coordinates
 - Ensure coordinates are within valid ranges (latitude: -90 to 90, longitude: -180 to 180)
 
@@ -206,9 +232,9 @@ def process_region(region: RegionResponseModel):
 - Organize regions logically by geographic location or network function
 
 ### Validation
-- Validate responses using the `RegionResponseModel`
 - Handle validation errors appropriately in your application
 - Check for input errors, especially with latitude/longitude ranges
+- Remember that predefined regions may not have an ID
 
 ## Related Models
 

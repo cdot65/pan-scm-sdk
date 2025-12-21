@@ -1,6 +1,27 @@
 # Syslog Server Profile Configuration Object
 
-[TOC]
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Core Methods](#core-methods)
+3. [Syslog Server Profile Attributes](#syslog-server-profile-attributes)
+4. [Exceptions](#exceptions)
+5. [Basic Configuration](#basic-configuration)
+6. [Usage Examples](#usage-examples)
+    - [Creating Syslog Server Profiles](#creating-a-syslog-server-profile)
+    - [Retrieving Syslog Server Profiles](#retrieving-a-syslog-server-profile)
+    - [Updating Syslog Server Profiles](#updating-a-syslog-server-profile)
+    - [Listing Syslog Server Profiles](#listing-syslog-server-profiles)
+    - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#pagination-and-max-limit)
+    - [Deleting Syslog Server Profiles](#deleting-a-syslog-server-profile)
+7. [Managing Configuration Changes](#managing-configuration-changes)
+    - [Performing Commits](#performing-commits)
+    - [Monitoring Jobs](#monitoring-jobs)
+8. [Error Handling](#error-handling)
+9. [Best Practices](#best-practices)
+10. [Full Script Examples](#example-script)
+11. [Related Models](#related-models)
 
 ## Overview
 
@@ -47,28 +68,29 @@ The `SyslogServerProfile` class inherits from the `BaseObject` class and provide
 
 ## Syslog Server Profile Attributes
 
-| Attribute | Type                  | Required      | Description                                            |
-|-----------|-----------------------|---------------|--------------------------------------------------------|
-| `name`    | str                   | Yes           | The name of the syslog server profile (max length: 31) |
-| `servers` | Dict[str, Any]        | Yes           | Dictionary of server configurations                    |
-| `format`  | Optional[FormatModel] | No            | Format settings for different log types                |
-| `folder`  | str                   | No*           | The folder in which the resource is defined            |
-| `snippet` | str                   | No*           | The snippet in which the resource is defined           |
-| `device`  | str                   | No*           | The device in which the resource is defined            |
-| `id`      | UUID                  | Response only | The UUID of the syslog server profile (response only)  |
+| Attribute | Type                     | Required | Default | Description                                            |
+|-----------|--------------------------|----------|---------|--------------------------------------------------------|
+| `name`    | str                      | Yes      | None    | The name of the syslog server profile (max length: 31) |
+| `server`  | List[SyslogServerModel]  | Yes      | None    | List of server configurations                          |
+| `format`  | Optional[FormatModel]    | No       | None    | Format settings for different log types                |
+| `folder`  | str                      | No*      | None    | The folder in which the resource is defined            |
+| `snippet` | str                      | No*      | None    | The snippet in which the resource is defined           |
+| `device`  | str                      | No*      | None    | The device in which the resource is defined            |
+| `id`      | UUID                     | Yes**    | None    | The UUID of the syslog server profile                  |
 
-*\* Exactly one of folder, snippet, or device must be provided.*
+\* Exactly one of folder, snippet, or device must be provided for create operations.
+\*\* Only required for response model.
 
 ### Server Configuration Attributes
 
-| Attribute   | Type                                   | Required | Description                              |
-|-------------|----------------------------------------|----------|------------------------------------------|
-| `name`      | str                                    | Yes      | Syslog server name                       |
-| `server`    | str                                    | Yes      | Syslog server address                    |
-| `transport` | Literal["UDP", "TCP"]                  | Yes      | Transport protocol for the syslog server |
-| `port`      | int                                    | Yes      | Syslog server port (1-65535)             |
-| `format`    | Literal["BSD", "IETF"]                 | Yes      | Syslog format                            |
-| `facility`  | Literal["LOG_USER", "LOG_LOCAL0", ...] | Yes      | Syslog facility                          |
+| Attribute   | Type                                   | Required | Default | Description                              |
+|-------------|----------------------------------------|----------|---------|------------------------------------------|
+| `name`      | str                                    | Yes      | None    | Syslog server name                       |
+| `server`    | str                                    | Yes      | None    | Syslog server address                    |
+| `transport` | Literal["UDP", "TCP"]                  | Yes      | None    | Transport protocol for the syslog server |
+| `port`      | int                                    | Yes      | None    | Syslog server port (1-65535)             |
+| `format`    | Literal["BSD", "IETF"]                 | Yes      | None    | Syslog format                            |
+| `facility`  | Literal["LOG_USER", "LOG_LOCAL0", ...] | Yes      | None    | Syslog facility                          |
 
 ## Exceptions
 
@@ -81,26 +103,17 @@ The `SyslogServerProfile` class inherits from the `BaseObject` class and provide
 ## Basic Configuration
 
 ```python
-# Import the client
-from scm.client import Scm
+from scm.client import ScmClient
 
-# Create API client instance
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
 # Access syslog server profiles directly through the client
 # No need to initialize a separate SyslogServerProfile object
-
-# You can customize max_limit for syslog server profiles when initializing the client
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
-    syslog_server_profile_max_limit=1000  # Default max_limit is 2500 (1-5000)
-)
 ```
 
 ## Usage Examples
@@ -111,8 +124,8 @@ client = Scm(
 # Create a basic syslog server profile with a single UDP server
 syslog_profile = client.syslog_server_profile.create({
     "name": "my-syslog-profile",
-    "servers": {
-        "server1": {
+    "server": [
+        {
             "name": "server1",
             "server": "192.168.1.100",
             "transport": "UDP",
@@ -120,15 +133,15 @@ syslog_profile = client.syslog_server_profile.create({
             "format": "BSD",
             "facility": "LOG_USER"
         }
-    },
+    ],
     "folder": "Prisma Access"
 })
 
-# Create a profile with TCP servers
+# Create a profile with multiple TCP servers
 tcp_profile = client.syslog_server_profile.create({
     "name": "tcp-logging-profile",
-    "servers": {
-        "primary": {
+    "server": [
+        {
             "name": "primary",
             "server": "logs.example.com",
             "transport": "TCP",
@@ -136,7 +149,7 @@ tcp_profile = client.syslog_server_profile.create({
             "format": "IETF",
             "facility": "LOG_LOCAL0"
         },
-        "backup": {
+        {
             "name": "backup",
             "server": "backup-logs.example.com",
             "transport": "TCP",
@@ -144,7 +157,7 @@ tcp_profile = client.syslog_server_profile.create({
             "format": "IETF",
             "facility": "LOG_LOCAL1"
         }
-    },
+    ],
     "format": {
         "traffic": "traffic-format",
         "threat": "threat-format",
@@ -166,9 +179,9 @@ syslog_profile = client.syslog_server_profile.get(profile_id)
 
 # Access profile attributes
 print(f"Profile Name: {syslog_profile.name}")
-print(f"Number of servers: {len(syslog_profile.servers)}")
-for server_name, server_data in syslog_profile.servers.items():
-    print(f"  - {server_name}: {server_data['transport']}://{server_data['server']}:{server_data['port']}")
+print(f"Number of servers: {len(syslog_profile.server)}")
+for srv in syslog_profile.server:
+    print(f"  - {srv.name}: {srv.transport}://{srv.server}:{srv.port}")
 
 # Fetch profile by name (requires exactly one container parameter)
 profile_by_name = client.syslog_server_profile.fetch(
@@ -180,42 +193,25 @@ profile_by_name = client.syslog_server_profile.fetch(
 ### Updating a Syslog Server Profile
 
 ```python
-from scm.models.objects import SyslogServerProfileUpdateModel
-import uuid
+# Fetch existing profile
+existing_profile = client.syslog_server_profile.fetch(
+    name="tcp-logging-profile",
+    folder="Prisma Access"
+)
 
-# First, get the current profile
-existing_profile = client.syslog_server_profile.get("123e4567-e89b-12d3-a456-426655440000")
+# Modify server configuration using dot notation
+# Update the first server's address
+existing_profile.server[0].server = "new-logs.example.com"
 
-# Create an update model with modified servers
-update_data = {
-    "id": existing_profile.id,
-    "name": existing_profile.name,
-    "servers": {
-        "primary": {
-            "name": "primary",
-            "server": "new-logs.example.com",  # Updated server address
-            "transport": "TCP",
-            "port": 1514,
-            "format": "IETF",
-            "facility": "LOG_LOCAL0"
-        },
-        "backup": {
-            "name": "backup",
-            "server": "backup-logs.example.com",
-            "transport": "TCP",
-            "port": 1514,
-            "format": "IETF",
-            "facility": "LOG_LOCAL1"
-        }
-    },
-    "folder": "Prisma Access"
+# Add format settings
+existing_profile.format = {
+    "traffic": "updated-traffic-format",
+    "threat": "updated-threat-format"
 }
 
-# Convert to update model
-update_model = SyslogServerProfileUpdateModel(**update_data)
-
-# Update the profile
-updated_profile = client.syslog_server_profile.update(update_model)
+# Pass modified object to update()
+updated_profile = client.syslog_server_profile.update(existing_profile)
+print(f"Updated profile: {updated_profile.name}")
 ```
 
 ### Listing Syslog Server Profiles
@@ -251,26 +247,80 @@ filtered_profiles = client.syslog_server_profile.list(
 # Print profile information
 for profile in filtered_profiles:
     print(f"ID: {profile.id}, Name: {profile.name}")
-    for server_name, server_data in profile.servers.items():
-        print(f"  Server: {server_name} - {server_data['transport']}://{server_data['server']}:{server_data['port']}")
+    for srv in profile.server:
+        print(f"  Server: {srv.name} - {srv.transport}://{srv.server}:{srv.port}")
 ```
 
-### Pagination and Max Limit
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. Alongside basic filters
+(like `transport` and `format`), you can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and
+`exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
 
 ```python
-# Create client with custom pagination limit for syslog server profiles
-client = Scm(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
-    tsg_id="your-tenant-id",
-    syslog_server_profile_max_limit=1000
+# Only return profiles defined exactly in 'Prisma Access'
+exact_profiles = client.syslog_server_profile.list(
+    folder='Prisma Access',
+    exact_match=True
 )
 
-# List profiles with the custom pagination limit
-profiles = client.syslog_server_profile.list(folder="Prisma Access")
-print(f"Retrieved {len(profiles)} profiles")
+for profile in exact_profiles:
+    print(f"Exact match: {profile.name} in {profile.folder}")
 
-# The max_limit is automatically capped at 5000 (the API's maximum)
+# Exclude all profiles from the 'All' folder
+no_all_profiles = client.syslog_server_profile.list(
+    folder='Prisma Access',
+    exclude_folders=['All']
+)
+
+for profile in no_all_profiles:
+    assert profile.folder != 'All'
+    print(f"Filtered out 'All': {profile.name}")
+
+# Combine exact_match with exclusions
+combined_filters = client.syslog_server_profile.list(
+    folder='Prisma Access',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default']
+)
+
+for profile in combined_filters:
+    print(f"Combined filters result: {profile.name} in {profile.folder}")
+```
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved.
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit on the syslog_server_profile service
+client.syslog_server_profile.max_limit = 1000
+
+# List all profiles - auto-paginates through results
+all_profiles = client.syslog_server_profile.list(folder='Prisma Access')
+
+# The list() method will retrieve up to 1000 objects per API call
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_profiles)} profiles")
 ```
 
 ### Deleting a Syslog Server Profile
@@ -280,6 +330,38 @@ print(f"Retrieved {len(profiles)} profiles")
 profile_id = "123e4567-e89b-12d3-a456-426655440000"
 client.syslog_server_profile.delete(profile_id)
 print(f"Profile {profile_id} deleted successfully")
+```
+
+## Managing Configuration Changes
+
+### Performing Commits
+
+```python
+# Prepare commit parameters
+commit_params = {
+    "folders": ["Prisma Access"],
+    "description": "Updated syslog server profiles",
+    "sync": True,
+    "timeout": 300  # 5 minute timeout
+}
+
+# Commit the changes directly on the client
+result = client.commit(**commit_params)
+
+print(f"Commit job ID: {result.job_id}")
+```
+
+### Monitoring Jobs
+
+```python
+# Get status of specific job directly from the client
+job_status = client.get_job_status(result.job_id)
+print(f"Job status: {job_status.data[0].status_str}")
+
+# List recent jobs directly from the client
+recent_jobs = client.list_jobs(limit=10)
+for job in recent_jobs.data:
+    print(f"Job {job.id}: {job.type_str} - {job.status_str}")
 ```
 
 ## Error Handling
@@ -314,37 +396,32 @@ except InvalidObjectError as e:
 
 ## Best Practices
 
-### Client Usage
+1. **Client Usage**
+    - Use the unified client interface (`client.syslog_server_profile`) for simpler code
+    - Create a single client instance and reuse it across your application
+    - Perform commit operations directly on the client object (`client.commit()`)
 
-- Use the unified client interface (`client.syslog_server_profile`) for simpler code
-- Initialize the client once and reuse across different object types
-- Set appropriate max_limit parameters during client initialization
+2. **Container Management**
+    - Always specify exactly one container type (folder, snippet, or device)
+    - Use consistent container references across operations
+    - Consider environment-specific folder structures for organization
 
-### Container Management
+3. **Performance**
+    - Set an appropriate `max_limit` using the property setter pattern
+    - Use specific filters to reduce the number of results when listing profiles
+    - Use `exact_match=True` when you know the exact container path
+    - Consider pagination for large datasets
 
-- Always specify exactly one container type (folder, snippet, or device) in operations
-- Use consistent container references across operations for the same profiles
-- Consider environment-specific folder structures for organization
+4. **Error Handling**
+    - Always handle specific exceptions (`InvalidObjectError`, `MissingQueryParameterError`)
+    - Implement retry logic for transient network errors
+    - Log detailed error information for troubleshooting
 
-### Performance
-
-- Set an appropriate `syslog_server_profile_max_limit` when initializing the client
-- Use specific filters to reduce the number of results when listing profiles
-- Use `exact_match=True` when you know the exact container path
-- Consider pagination for large datasets
-
-### Error Handling
-
-- Always handle specific exceptions (`InvalidObjectError`, `MissingQueryParameterError`)
-- Implement retry logic for transient network errors
-- Log detailed error information for troubleshooting
-
-### Syslog Server Configuration
-
-- Follow RFC 3164 (BSD) or RFC 5424 (IETF) standards for syslog messages
-- Consider using TCP transport for critical logs where reliability is important
-- Use appropriate syslog facilities to categorize different types of logs
-- Configure server redundancy for critical logging
+5. **Syslog Server Configuration**
+    - Follow RFC 3164 (BSD) or RFC 5424 (IETF) standards for syslog messages
+    - Consider using TCP transport for critical logs where reliability is important
+    - Use appropriate syslog facilities to categorize different types of logs
+    - Configure server redundancy for critical logging
 
 ## Example Script
 

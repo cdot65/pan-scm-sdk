@@ -39,19 +39,22 @@ The `IKEGateway` class provides functionality to manage Internet Key Exchange (I
 
 ## IKE Gateway Model Attributes
 
-| Attribute          | Type       | Required     | Description                                  |
-|--------------------|------------|--------------|----------------------------------------------|
-| `name`             | str        | Yes          | Name of IKE gateway (max 63 chars)          |
-| `id`               | UUID       | Yes*         | Unique identifier (*response only)           |
-| `authentication`   | dict       | Yes          | Authentication configuration (pre-shared key or certificate) |
-| `peer_id`          | dict       | No           | Peer identification information              |
-| `local_id`         | dict       | No           | Local identification information             |
-| `protocol`         | dict       | Yes          | IKE protocol configuration                   |
-| `protocol_common`  | dict       | No           | Common protocol settings                     |
-| `peer_address`     | dict       | Yes          | Peer address configuration (IP, FQDN, or dynamic) |
-| `folder`           | str        | Yes**        | Folder location (**one container required)   |
-| `snippet`          | str        | Yes**        | Snippet location (**one container required)  |
-| `device`           | str        | Yes**        | Device location (**one container required)   |
+| Attribute          | Type           | Required | Default | Description                                           |
+|--------------------|----------------|----------|---------|-------------------------------------------------------|
+| `name`             | str            | Yes      | None    | Name of IKE gateway. Max 63 chars. Pattern: `^[0-9a-zA-Z._\-]+$` |
+| `id`               | UUID           | Yes*     | None    | Unique identifier (*response/update only)             |
+| `authentication`   | Authentication | Yes      | None    | Authentication configuration (pre-shared key or certificate) |
+| `peer_id`          | PeerId         | No       | None    | Peer identification information                       |
+| `local_id`         | LocalId        | No       | None    | Local identification information                      |
+| `protocol`         | Protocol       | Yes      | None    | IKE protocol configuration                            |
+| `protocol_common`  | ProtocolCommon | No       | None    | Common protocol settings (NAT traversal, fragmentation) |
+| `peer_address`     | PeerAddress    | Yes      | None    | Peer address configuration (IP, FQDN, or dynamic)     |
+| `folder`           | str            | No**     | None    | Folder location. Max 64 chars                         |
+| `snippet`          | str            | No**     | None    | Snippet location. Max 64 chars                        |
+| `device`           | str            | No**     | None    | Device location. Max 64 chars                         |
+
+\* Only required for update and response models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
 
 ## Exceptions
 
@@ -196,31 +199,22 @@ print(f"Retrieved gateway: {gateway_by_id.name}")
 
 ```python
 # Fetch existing IKE gateway
-existing_gateway = client.ike_gateway.fetch(name="site-a-gateway", folder="VPN")
+existing = client.ike_gateway.fetch(name="site-a-gateway", folder="VPN")
 
-# Create an update model with new values
-from scm.models.network import IKEGatewayUpdateModel
-
-# Update specific attributes
-update_data = {
-    "id": str(existing_gateway.id),
-    "name": existing_gateway.name,
-    "peer_id": {
-        "type": "ipaddr",
-        "id": "203.0.113.2"  # Updated peer ID
-    },
-    "protocol_common": {
-        "nat_traversal": {
-            "enable": True
-        }
+# Modify attributes using dot notation
+existing.peer_id = {
+    "type": "ipaddr",
+    "id": "203.0.113.2"  # Updated peer ID
+}
+existing.protocol_common = {
+    "nat_traversal": {
+        "enable": True
     }
 }
 
-# Create update model
-gateway_update = IKEGatewayUpdateModel(**update_data)
-
 # Perform update
-updated_gateway = client.ike_gateway.update(gateway_update)
+updated_gateway = client.ike_gateway.update(existing)
+print(f"Updated gateway: {updated_gateway.name}")
 ```
 
 ### Listing IKE Gateways
@@ -304,7 +298,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.network import IKEGateway
 
 # Initialize client
 client = ScmClient(
@@ -313,18 +306,13 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.ike_gateway.max_limit = 4000
 
-# Option 1: Use the unified client interface but create a custom IKEGateway instance with max_limit
-ike_gateway_service = IKEGateway(client, max_limit=4000)
-all_gateways1 = ike_gateway_service.list(folder='VPN')
+# List all IKE gateways - auto-paginates through results
+all_gateways = client.ike_gateway.list(folder='VPN')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
-all_gateways2 = client.ike_gateway.list(folder='VPN')
-
-# Both options will auto-paginate through all available objects.
-# The gateways are fetched in chunks according to the max_limit.
+# The gateways are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting IKE Gateways
@@ -475,7 +463,21 @@ except MissingQueryParameterError as e:
 
 ## Related Models
 
+- [IKEGatewayBaseModel](../../models/network/ike_gateway_models.md#Overview)
 - [IKEGatewayCreateModel](../../models/network/ike_gateway_models.md#Overview)
 - [IKEGatewayUpdateModel](../../models/network/ike_gateway_models.md#Overview)
 - [IKEGatewayResponseModel](../../models/network/ike_gateway_models.md#Overview)
+- [Authentication](../../models/network/ike_gateway_models.md#Overview)
+- [PreSharedKey](../../models/network/ike_gateway_models.md#Overview)
+- [CertificateAuth](../../models/network/ike_gateway_models.md#Overview)
+- [PeerId](../../models/network/ike_gateway_models.md#Overview)
+- [LocalId](../../models/network/ike_gateway_models.md#Overview)
+- [Protocol](../../models/network/ike_gateway_models.md#Overview)
+- [IKEv1](../../models/network/ike_gateway_models.md#Overview)
+- [IKEv2](../../models/network/ike_gateway_models.md#Overview)
+- [ProtocolCommon](../../models/network/ike_gateway_models.md#Overview)
+- [PeerAddress](../../models/network/ike_gateway_models.md#Overview)
+- [PeerIdType](../../models/network/ike_gateway_models.md#Overview)
+- [LocalIdType](../../models/network/ike_gateway_models.md#Overview)
+- [ProtocolVersion](../../models/network/ike_gateway_models.md#Overview)
 - [IKE Crypto Profile](ike_crypto_profile.md) - Related configuration for IKE crypto profiles

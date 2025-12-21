@@ -34,38 +34,41 @@ and behaviors.
 
 ## Core Methods
 
-| Method     | Description                       | Parameters                                   | Return Type                             |
-|------------|-----------------------------------|----------------------------------------------|-----------------------------------------|
-| `create()` | Creates a new filter              | `data: Dict[str, Any]`                       | `ApplicationFiltersResponseModel`       |
-| `get()`    | Retrieves a filter by ID          | `object_id: str`                             | `ApplicationFiltersResponseModel`       |
-| `update()` | Updates an existing filter        | `application: ApplicationFiltersUpdateModel` | `ApplicationFiltersResponseModel`       |
-| `delete()` | Deletes a filter                  | `object_id: str`                             | `None`                                  |
-| `list()`   | Lists filters with filtering      | `folder: str`, `**filters`                   | `List[ApplicationFiltersResponseModel]` |
-| `fetch()`  | Gets filter by name and container | `name: str`, `folder: str`                   | `ApplicationFiltersResponseModel`       |
+| Method     | Description                       | Parameters                                                              | Return Type                             |
+|------------|-----------------------------------|-------------------------------------------------------------------------|-----------------------------------------|
+| `create()` | Creates a new filter              | `data: Dict[str, Any]`                                                  | `ApplicationFiltersResponseModel`       |
+| `get()`    | Retrieves a filter by ID          | `object_id: str`                                                        | `ApplicationFiltersResponseModel`       |
+| `update()` | Updates an existing filter        | `application: ApplicationFiltersUpdateModel`                            | `ApplicationFiltersResponseModel`       |
+| `delete()` | Deletes a filter                  | `object_id: str`                                                        | `None`                                  |
+| `list()`   | Lists filters with filtering      | `folder: str`, `snippet: str`, `exact_match: bool`, `**filters`         | `List[ApplicationFiltersResponseModel]` |
+| `fetch()`  | Gets filter by name and container | `name: str`, `folder: str`, `snippet: str`                              | `ApplicationFiltersResponseModel`       |
 
 ## Application Filter Model Attributes
 
-| Attribute                   | Type      | Required | Description                                 |
-|-----------------------------|-----------|----------|---------------------------------------------|
-| `name`                      | str       | Yes      | Name of filter (max 31 chars)               |
-| `id`                        | UUID      | Yes*     | Unique identifier (*response only)          |
-| `category`                  | List[str] | No       | List of application categories              |
-| `sub_category`              | List[str] | No       | List of application subcategories           |
-| `technology`                | List[str] | No       | List of application technologies            |
-| `risk`                      | List[int] | No       | List of risk levels (1-5)                   |
-| `folder`                    | str       | Yes**    | Folder location (**one container required)  |
-| `snippet`                   | str       | Yes**    | Snippet location (**one container required) |
-| `evasive`                   | bool      | No       | Filter evasive applications                 |
-| `used_by_malware`           | bool      | No       | Filter malware-associated apps              |
-| `transfers_files`           | bool      | No       | Filter file-transferring apps               |
-| `has_known_vulnerabilities` | bool      | No       | Filter apps with vulnerabilities            |
-| `tunnels_other_apps`        | bool      | No       | Filter tunneling applications               |
-| `prone_to_misuse`           | bool      | No       | Filter misuse-prone applications            |
-| `pervasive`                 | bool      | No       | Filter pervasive applications               |
-| `is_saas`                   | bool      | No       | Filter SaaS applications                    |
-| `new_appid`                 | bool      | No       | Filter new applications                     |
-| `saas_risk`                 | List[str] | No       | Filter by SaaS risk levels                  |
-| `saas_certifications`       | List[str] | No       | Filter by SaaS certifications               |
+| Attribute                   | Type      | Required | Default | Description                                 |
+|-----------------------------|-----------|----------|---------|---------------------------------------------|
+| `name`                      | str       | Yes      | None    | Name of filter (max 31 chars)               |
+| `id`                        | UUID      | Yes*     | None    | Unique identifier (*response only)          |
+| `category`                  | List[str] | No       | None    | List of application categories              |
+| `sub_category`              | List[str] | No       | None    | List of application subcategories           |
+| `technology`                | List[str] | No       | None    | List of application technologies            |
+| `risk`                      | List[int] | No       | None    | List of risk levels (1-5)                   |
+| `folder`                    | str       | Yes**    | None    | Folder location (**one container required)  |
+| `snippet`                   | str       | Yes**    | None    | Snippet location (**one container required) |
+| `evasive`                   | bool      | No       | False   | Filter evasive applications                 |
+| `used_by_malware`           | bool      | No       | False   | Filter malware-associated apps              |
+| `transfers_files`           | bool      | No       | False   | Filter file-transferring apps               |
+| `has_known_vulnerabilities` | bool      | No       | False   | Filter apps with vulnerabilities            |
+| `tunnels_other_apps`        | bool      | No       | False   | Filter tunneling applications               |
+| `prone_to_misuse`           | bool      | No       | False   | Filter misuse-prone applications            |
+| `pervasive`                 | bool      | No       | False   | Filter pervasive applications               |
+| `is_saas`                   | bool      | No       | False   | Filter SaaS applications                    |
+| `new_appid`                 | bool      | No       | False   | Filter new applications                     |
+| `excessive_bandwidth_use`   | bool      | No       | False   | Filter apps using excessive bandwidth       |
+| `saas_risk`                 | List[str] | No       | None    | Filter by SaaS risk levels                  |
+| `saas_certifications`       | List[str] | No       | None    | Filter by SaaS certifications               |
+| `exclude`                   | List[str] | No       | None    | List of applications to exclude             |
+| `tag`                       | List[str] | No       | None    | Tags associated with the filter             |
 
 ## Exceptions
 
@@ -201,6 +204,16 @@ You can also use the traditional approach if preferred:
 
 ### Filtering Responses
 
+The `list()` method supports additional parameters to refine your query results. Alongside basic filters
+(like `category`, `subcategory`, `technology`, and `risk`), you can leverage `exact_match`, `exclude_folders`, and
+`exclude_snippets` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder` or `snippet`) are returned.
+- `exclude_folders (List[str])`: List of folder names to exclude from results.
+- `exclude_snippets (List[str])`: List of snippet values to exclude from results.
+
 ```python
     # Only return filters defined exactly in 'Texas'
     exact_filters = client.application_filter.list(
@@ -231,23 +244,12 @@ You can also use the traditional approach if preferred:
         assert f.snippet != 'default'
         print(f"Filtered out 'default' snippet: {f.name}")
 
-    # Exclude filters associated with 'DeviceA'
-    no_deviceA = client.application_filter.list(
-        folder='Texas',
-        exclude_devices=['DeviceA']
-    )
-
-    for f in no_deviceA:
-        assert f.device != 'DeviceA'
-        print(f"Filtered out 'DeviceA': {f.name}")
-
-    # Combine exact_match with multiple exclusions
+    # Combine exact_match with exclusions
     combined_filters = client.application_filter.list(
         folder='Texas',
         exact_match=True,
         exclude_folders=['All'],
-        exclude_snippets=['default'],
-        exclude_devices=['DeviceA']
+        exclude_snippets=['default']
     )
 
     for f in combined_filters:
@@ -259,20 +261,23 @@ You can also use the traditional approach if preferred:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-    # Initialize the ScmClient with a custom max_limit for application filters
-    # This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-    client = ScmClient(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        tsg_id="your_tsg_id",
-        application_filters_max_limit=4321
-    )
+from scm.client import ScmClient
 
-    # Now when we call list(), it will use the specified max_limit for each request
-    # while auto-paginating through all available objects.
-    all_filters = client.application_filter.list(folder='Texas')
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
-    # 'all_filters' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# Configure max_limit on the application_filter service
+client.application_filter.max_limit = 4321
+
+# List all filters - auto-paginates through results
+all_filters = client.application_filter.list(folder='Texas')
+
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting Application Filters

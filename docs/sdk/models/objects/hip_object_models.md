@@ -4,7 +4,18 @@
 
 The HIP Object models provide a structured way to manage Host Information Profile (HIP) objects in Palo Alto Networks'
 Strata Cloud Manager. These models support comprehensive host profiling including host information, network details,
-security products, mobile device management, and certificate validation.
+security products, mobile device management, certificate validation, and custom checks.
+
+### Models
+
+| Model                    | Purpose                                          |
+|--------------------------|--------------------------------------------------|
+| `HIPObjectBaseModel`     | Base model with common fields for all operations |
+| `HIPObjectCreateModel`   | Model for creating new HIP objects               |
+| `HIPObjectUpdateModel`   | Model for updating existing HIP objects          |
+| `HIPObjectResponseModel` | Model for API responses                          |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
 ## Attributes
 
@@ -18,6 +29,7 @@ security products, mobile device management, and certificate validation.
 | disk_encryption  | DiskEncryptionModel  | No       | None    | Disk encryption criteria                                               |
 | mobile_device    | MobileDeviceModel    | No       | None    | Mobile device criteria                                                 |
 | certificate      | CertificateModel     | No       | None    | Certificate criteria                                                   |
+| custom_checks    | CustomChecksModel    | No       | None    | Custom checks criteria (registry keys, process list, plist)            |
 | folder           | str                  | No*      | None    | Folder where object is defined. Max length: 64 chars                   |
 | snippet          | str                  | No*      | None    | Snippet where object is defined. Max length: 64 chars                  |
 | device           | str                  | No*      | None    | Device where object is defined. Max length: 64 chars                   |
@@ -67,7 +79,14 @@ except ValueError as e:
 ### Creating a Windows Host Profile
 
 ```python
-from scm.config.objects import HIPObject
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 # Using dictionary
 windows_profile = {
@@ -92,60 +111,75 @@ windows_profile = {
     }
 }
 
-hip_object = HIPObject(api_client)
-response = hip_object.create(windows_profile)
+response = client.hip_object.create(windows_profile)
 ```
 
 ### Creating a Mobile Device Profile
 
 ```python
-# Using model directly
-from scm.models.objects import (
-    HIPObjectCreateModel,
-    MobileDeviceModel,
-    MobileDeviceCriteriaModel,
-    MobileApplicationsModel
-)
+# Using dictionary
+mobile_profile = {
+    "name": "mobile-device",
+    "description": "Mobile device profile",
+    "folder": "Mobile",
+    "mobile_device": {
+        "criteria": {
+            "jailbroken": False,
+            "disk_encrypted": True,
+            "passcode_set": True,
+            "applications": {
+                "has_malware": False,
+                "has_unmanaged_app": False
+            }
+        }
+    }
+}
 
-mobile_profile = HIPObjectCreateModel(
-    name="mobile-device",
-    description="Mobile device profile",
-    folder="Mobile",
-    mobile_device=MobileDeviceModel(
-        criteria=MobileDeviceCriteriaModel(
-            jailbroken=False,
-            disk_encrypted=True,
-            passcode_set=True,
-            applications=MobileApplicationsModel(
-                has_malware=False,
-                has_unmanaged_app=False
-            )
-        )
-    )
-)
+response = client.hip_object.create(mobile_profile)
+```
 
-payload = mobile_profile.model_dump(exclude_unset=True)
-response = hip_object.create(payload)
+### Creating a Custom Checks Profile
+
+```python
+# Using dictionary with custom checks for Windows registry and process list
+custom_checks_profile = {
+    "name": "custom-security-checks",
+    "description": "Custom security checks for Windows endpoints",
+    "folder": "Shared",
+    "custom_checks": {
+        "criteria": {
+            "process_list": [
+                {"name": "antivirus.exe", "running": True},
+                {"name": "malware.exe", "running": False}
+            ],
+            "registry_key": [
+                {
+                    "name": "HKEY_LOCAL_MACHINE\\SOFTWARE\\SecurityApp",
+                    "registry_value": [
+                        {"name": "Enabled", "value_data": "1"}
+                    ]
+                }
+            ]
+        }
+    }
+}
+
+response = client.hip_object.create(custom_checks_profile)
 ```
 
 ### Updating a HIP Object
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "windows-workstation-updated",
-    "description": "Updated Windows workstation profile",
-    "host_info": {
-        "criteria": {
-            "os": {"contains": {"Microsoft": "All"}},
-            "domain": {"contains": "company.local"},
-            "managed": True
-        }
-    }
-}
+# Fetch existing HIP object
+existing = client.hip_object.fetch(name="windows-workstation", folder="Shared")
 
-response = hip_object.update(update_dict)
+# Modify attributes using dot notation
+existing.description = "Updated Windows workstation profile"
+if existing.host_info and existing.host_info.criteria:
+    existing.host_info.criteria.managed = True
+
+# Pass modified object to update()
+updated = client.hip_object.update(existing)
 ```
 
 ## Best Practices
@@ -185,5 +219,6 @@ response = hip_object.update(update_dict)
 - DiskEncryptionModel
 - MobileDeviceModel
 - CertificateModel
+- CustomChecksModel (includes ProcessListItemModel, RegistryKeyModel, RegistryValueModel, PlistModel, PlistKeyModel)
 
 These related models are defined within the same file and described in the Attributes section above.

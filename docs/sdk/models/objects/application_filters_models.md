@@ -28,44 +28,58 @@
 The Application Filters models provide a structured way to manage application filters in Palo Alto Networks' Strata
 Cloud Manager.
 These models support filtering applications based on various criteria including categories, technologies, risk levels,
-and behavioral
-characteristics.
+and behavioral characteristics.
+
+### Models
+
+| Model                             | Purpose                                          |
+|-----------------------------------|--------------------------------------------------|
+| `ApplicationFiltersBaseModel`     | Base model with common fields for all operations |
+| `ApplicationFiltersCreateModel`   | Model for creating new application filters       |
+| `ApplicationFiltersUpdateModel`   | Model for updating existing application filters  |
+| `ApplicationFiltersResponseModel` | Model for API responses                          |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
 ## Core Methods
 
-| Method     | Description                  | Parameters                              | Return Type                             |
-|------------|------------------------------|-----------------------------------------|-----------------------------------------|
-| `create()` | Creates a new filter         | `data: Dict[str, Any]`                  | `ApplicationFiltersResponseModel`       |
-| `get()`    | Retrieves a filter by ID     | `object_id: str`                        | `ApplicationFiltersResponseModel`       |
-| `update()` | Updates an existing filter   | `filter: ApplicationFiltersUpdateModel` | `ApplicationFiltersResponseModel`       |
-| `delete()` | Deletes a filter             | `object_id: str`                        | `None`                                  |
-| `list()`   | Lists filters with filtering | `folder: str`, `**filters`              | `List[ApplicationFiltersResponseModel]` |
+| Method     | Description                       | Parameters                                      | Return Type                             |
+|------------|-----------------------------------|-------------------------------------------------|-----------------------------------------|
+| `create()` | Creates a new filter              | `data: Dict[str, Any]`                          | `ApplicationFiltersResponseModel`       |
+| `get()`    | Retrieves a filter by ID          | `object_id: str`                                | `ApplicationFiltersResponseModel`       |
+| `update()` | Updates an existing filter        | `application: ApplicationFiltersUpdateModel`    | `ApplicationFiltersResponseModel`       |
+| `delete()` | Deletes a filter                  | `object_id: str`                                | `None`                                  |
+| `list()`   | Lists filters with filtering      | `folder: str`, `snippet: str`, `**filters`      | `List[ApplicationFiltersResponseModel]` |
+| `fetch()`  | Gets filter by name and container | `name: str`, `folder: str`, `snippet: str`      | `ApplicationFiltersResponseModel`       |
 
 ## Application Filters Model Attributes
 
-| Attribute                   | Type      | Required | Description                                  |
-|-----------------------------|-----------|----------|----------------------------------------------|
-| `name`                      | str       | Yes      | Name of filter (max 31 chars)                |
-| `id`                        | UUID      | No*      | Unique identifier (*response only)           |
-| `category`                  | List[str] | No       | List of application categories               |
-| `sub_category`              | List[str] | No       | List of application subcategories            |
-| `technology`                | List[str] | No       | List of technologies                         |
-| `risk`                      | List[int] | No       | List of risk levels                          |
-| `evasive`                   | bool      | No       | Filter for evasive applications              |
-| `used_by_malware`           | bool      | No       | Filter for applications used by malware      |
-| `transfers_files`           | bool      | No       | Filter for file transfer applications        |
-| `has_known_vulnerabilities` | bool      | No       | Filter for applications with vulnerabilities |
-| `tunnels_other_apps`        | bool      | No       | Filter for tunneling applications            |
-| `prone_to_misuse`           | bool      | No       | Filter for applications prone to misuse      |
-| `pervasive`                 | bool      | No       | Filter for pervasive applications            |
-| `is_saas`                   | bool      | No       | Filter for SaaS applications                 |
-| `new_appid`                 | bool      | No       | Filter for applications with new AppID       |
-| `saas_certifications`       | List[str] | No       | Filter by SaaS certifications                |
-| `saas_risk`                 | List[str] | No       | Filter by SaaS risk levels                   |
-| `folder`                    | str       | Yes**    | Folder location (**one container required)   |
-| `snippet`                   | str       | Yes**    | Snippet location (**one container required)  |
+| Attribute                   | Type      | Required | Default | Description                                  |
+|-----------------------------|-----------|----------|---------|----------------------------------------------|
+| `name`                      | str       | Yes      | None    | Name of filter (max 31 chars)                |
+| `id`                        | UUID      | No*      | None    | Unique identifier (*response only)           |
+| `category`                  | List[str] | No       | None    | List of application categories               |
+| `sub_category`              | List[str] | No       | None    | List of application subcategories            |
+| `technology`                | List[str] | No       | None    | List of technologies                         |
+| `risk`                      | List[int] | No       | None    | List of risk levels                          |
+| `evasive`                   | bool      | No       | False   | Filter for evasive applications              |
+| `used_by_malware`           | bool      | No       | False   | Filter for applications used by malware      |
+| `transfers_files`           | bool      | No       | False   | Filter for file transfer applications        |
+| `has_known_vulnerabilities` | bool      | No       | False   | Filter for applications with vulnerabilities |
+| `tunnels_other_apps`        | bool      | No       | False   | Filter for tunneling applications            |
+| `prone_to_misuse`           | bool      | No       | False   | Filter for applications prone to misuse      |
+| `pervasive`                 | bool      | No       | False   | Filter for pervasive applications            |
+| `is_saas`                   | bool      | No       | False   | Filter for SaaS applications                 |
+| `new_appid`                 | bool      | No       | False   | Filter for applications with new AppID       |
+| `excessive_bandwidth_use`   | bool      | No       | False   | Filter for apps using excessive bandwidth    |
+| `saas_certifications`       | List[str] | No       | None    | Filter by SaaS certifications                |
+| `saas_risk`                 | List[str] | No       | None    | Filter by SaaS risk levels                   |
+| `exclude`                   | List[str] | No       | None    | List of applications to exclude              |
+| `tag`                       | List[str] | No       | None    | Tags associated with the filter              |
+| `folder`                    | str       | Yes**    | None    | Folder location (**one container required)   |
+| `snippet`                   | str       | Yes**    | None    | Snippet location (**one container required)  |
 
-\* Optional in create/update operations, required in response
+\* Optional in create/update operations, present in response
 \** Exactly one container type (folder/snippet) must be provided
 
 ## Exceptions
@@ -81,18 +95,17 @@ The Application Filters models can raise the following exceptions during validat
 ## Basic Configuration
 
 ```python
-from scm.client import Scm
-from scm.config.objects import ApplicationFilters
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
-# Initialize ApplicationFilters object
-app_filters = ApplicationFilters(client)
+# Access the application_filter service directly through the client
+# No need to create a separate ApplicationFilters instance
 ```
 
 ## Usage Examples
@@ -100,6 +113,15 @@ app_filters = ApplicationFilters(client)
 ### Creating Application Filters
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
 # Basic filter configuration
 basic_filter = {
     "name": "high-risk-apps",
@@ -109,7 +131,7 @@ basic_filter = {
 }
 
 # Create basic filter
-basic_filter_obj = app_filters.create(basic_filter)
+basic_filter_obj = client.application_filter.create(basic_filter)
 
 # Advanced filter configuration
 saas_filter = {
@@ -122,7 +144,7 @@ saas_filter = {
 }
 
 # Create SaaS filter
-saas_filter_obj = app_filters.create(saas_filter)
+saas_filter_obj = client.application_filter.create(saas_filter)
 ```
 
 ### Retrieving Application Filters
@@ -130,11 +152,11 @@ saas_filter_obj = app_filters.create(saas_filter)
 ```python
 # Fetch by ID
 filter_id = "123e4567-e89b-12d3-a456-426655440000"
-filter_obj = app_filters.get(filter_id)
+filter_obj = client.application_filter.get(filter_id)
 print(f"Retrieved filter: {filter_obj.name}")
 
 # Fetch by name and folder
-filter_obj = app_filters.fetch(name="high-risk-apps", folder="Security")
+filter_obj = client.application_filter.fetch(name="high-risk-apps", folder="Security")
 print(f"Found filter: {filter_obj.name}")
 print(f"Risk levels: {filter_obj.risk}")
 print(f"Has vulnerabilities: {filter_obj.has_known_vulnerabilities}")
@@ -143,24 +165,23 @@ print(f"Has vulnerabilities: {filter_obj.has_known_vulnerabilities}")
 ### Updating Application Filters
 
 ```python
-# Update filter configuration
-update_filter = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "high-risk-apps-updated",
-    "risk": [3, 4, 5],
-    "has_known_vulnerabilities": True,
-    "used_by_malware": True
-}
+# Fetch existing filter
+existing = client.application_filter.fetch(name="high-risk-apps", folder="Security")
 
-# Perform update
-updated_filter = app_filters.update(update_filter)
+# Modify attributes using dot notation
+existing.risk = [3, 4, 5]
+existing.has_known_vulnerabilities = True
+existing.used_by_malware = True
+
+# Pass modified object to update()
+updated = client.application_filter.update(existing)
 ```
 
 ### Listing Application Filters
 
 ```python
 # List all filters in a folder
-all_filters = app_filters.list(folder="Security")
+all_filters = client.application_filter.list(folder="Security")
 
 # Process results
 for filter_obj in all_filters:
@@ -171,14 +192,14 @@ for filter_obj in all_filters:
         print(f"Categories: {', '.join(filter_obj.category)}")
 
 # List with specific criteria
-saas_filters = app_filters.list(
+saas_filters = client.application_filter.list(
     folder="Cloud",
     is_saas=True,
     transfers_files=True
 )
 
 # List with multiple filter parameters
-high_risk_filters = app_filters.list(
+high_risk_filters = client.application_filter.list(
     folder="Security",
     risk=[4, 5],
     has_known_vulnerabilities=True
@@ -188,11 +209,13 @@ high_risk_filters = app_filters.list(
 ### Deleting Application Filters
 
 ```python
+from scm.exceptions import ObjectNotPresentError, ReferenceNotZeroError
+
 # Delete by ID
 filter_id = "123e4567-e89b-12d3-a456-426655440000"
 
 try:
-    app_filters.delete(filter_id)
+    client.application_filter.delete(filter_id)
     print(f"Successfully deleted filter {filter_id}")
 except ObjectNotPresentError:
     print("Filter not found")
@@ -213,73 +236,67 @@ commit_params = {
     "timeout": 300  # 5 minute timeout
 }
 
-# Commit the changes
-try:
-    result = app_filters.commit(**commit_params)
-    print(f"Commit job ID: {result.job_id}")
-except CommitInProgressError:
-    print("Another commit is already in progress")
-except CommitFailedError as e:
-    print(f"Commit failed: {str(e)}")
+# Commit the changes directly on the client
+result = client.commit(**commit_params)
+print(f"Commit job ID: {result.job_id}")
 ```
 
 ### Monitoring Jobs
 
 ```python
-# Get status of specific job
-job_status = app_filters.get_job_status(result.job_id)
+# Get status of specific job directly on the client
+job_status = client.get_job_status(result.job_id)
 print(f"Job status: {job_status.data[0].status_str}")
 
-# List recent jobs
-recent_jobs = app_filters.list_jobs(limit=10)
+# List recent jobs directly on the client
+recent_jobs = client.list_jobs(limit=10)
 for job in recent_jobs.data:
     print(f"Job {job.id}: {job.type_str} - {job.status_str}")
-
-# Wait for job completion
-try:
-    app_filters.wait_for_job(result.job_id, timeout=300)
-    print("Configuration changes applied successfully")
-except JobTimeoutError:
-    print("Job timed out waiting for completion")
-except JobFailedError as e:
-    print(f"Job failed: {str(e)}")
 ```
 
 ## Error Handling
 
 ```python
-from scm.models.objects import ApplicationFiltersCreateModel
+from scm.client import ScmClient
+from scm.exceptions import InvalidObjectError, ValidationError
+
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 try:
-    # This will raise a validation error
-    invalid_filter = ApplicationFiltersCreateModel(
-        name="invalid-filter",
-        risk=[6],  # Invalid risk level
-        folder="Security",
-        snippet="MySnippet"  # Can't specify both folder and snippet
-    )
+    # This will raise a validation error - can't specify both folder and snippet
+    invalid_filter = {
+        "name": "invalid-filter",
+        "risk": [4, 5],
+        "folder": "Security",
+        "snippet": "MySnippet"
+    }
+    client.application_filter.create(invalid_filter)
 except ValueError as e:
     print(f"Validation error: {str(e)}")
 
 try:
     # This will raise a validation error for missing container
-    invalid_filter = ApplicationFiltersCreateModel(
-        name="invalid-filter",
-        risk=[3, 4]
+    invalid_filter = {
+        "name": "invalid-filter",
+        "risk": [3, 4]
         # No folder or snippet specified
-    )
+    }
+    client.application_filter.create(invalid_filter)
 except ValueError as e:
     print(f"Validation error: {str(e)}")
 ```
 
-## Error Handling {#error-handling}
+## Model Validation {#error-handling}
 
 Application Filters models implement validation to ensure correct data:
 
 - Container validation ensures exactly one container type (folder/snippet) is specified
-- Name validation enforces length and character constraints
-- Field validation ensures risk levels are within range (1-5)
-- Boolean fields are properly formatted
+- Name validation enforces length (max 31 chars) and pattern constraints
+- Boolean fields default to `False` if not specified
 
 ## Best Practices {#best-practices}
 

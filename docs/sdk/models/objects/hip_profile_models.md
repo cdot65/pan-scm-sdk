@@ -6,6 +6,17 @@ The HIP Profile models provide a structured way to manage Host Information Profi
 Strata Cloud Manager. These models define the match criteria expressions used to associate HIP objects with policy rules,
 enabling dynamic security policy enforcement based on host posture assessments.
 
+### Models
+
+| Model                     | Purpose                                          |
+|---------------------------|--------------------------------------------------|
+| `HIPProfileBaseModel`     | Base model with common fields for all operations |
+| `HIPProfileCreateModel`   | Model for creating new HIP profiles              |
+| `HIPProfileUpdateModel`   | Model for updating existing HIP profiles         |
+| `HIPProfileResponseModel` | Model for API responses                          |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute        | Type                 | Required | Default | Description                                                            |
@@ -58,7 +69,14 @@ except ValueError as e:
 ### Creating a Basic HIP Profile
 
 ```python
-from scm.config.objects import HIPProfile
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 # Using dictionary
 basic_profile = {
@@ -68,25 +86,21 @@ basic_profile = {
     "match": '"is-win"'  # Single HIP object reference
 }
 
-hip_profile = HIPProfile(api_client)
-response = hip_profile.create(basic_profile)
+response = client.hip_profile.create(basic_profile)
 ```
 
 ### Creating a Complex HIP Profile with Boolean Operators
 
 ```python
-# Using model directly
-from scm.models.objects import HIPProfileCreateModel
+# Using dictionary with complex match expression
+complex_profile = {
+    "name": "secure-workstation",
+    "description": "Secure Windows workstation profile",
+    "folder": "Shared",
+    "match": '"is-win" and "is-firewall-enabled" and "is-antivirus-running"'
+}
 
-complex_profile = HIPProfileCreateModel(
-    name="secure-workstation",
-    description="Secure Windows workstation profile",
-    folder="Shared",
-    match='"is-win" and "is-firewall-enabled" and "is-antivirus-running"'
-)
-
-payload = complex_profile.model_dump(exclude_unset=True)
-response = hip_profile.create(payload)
+response = client.hip_profile.create(complex_profile)
 ```
 
 ### Creating a HIP Profile with Negative Match
@@ -100,24 +114,21 @@ negative_profile = {
     "match": 'not ("is-win")'  # NOT operator with parentheses
 }
 
-response = hip_profile.create(negative_profile)
+response = client.hip_profile.create(negative_profile)
 ```
 
 ### Updating a HIP Profile
 
 ```python
-from scm.models.objects import HIPProfileUpdateModel
-from uuid import UUID
+# Fetch existing HIP profile
+existing = client.hip_profile.fetch(name="secure-workstation", folder="Shared")
 
-# Using model directly
-update_model = HIPProfileUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="secure-workstation",
-    description="Updated secure Windows workstation profile",
-    match='"is-win" and "is-firewall-enabled" and "is-antivirus-running" and "is-disk-encrypted"'
-)
+# Modify attributes using dot notation
+existing.description = "Updated secure Windows workstation profile"
+existing.match = '"is-win" and "is-firewall-enabled" and "is-antivirus-running" and "is-disk-encrypted"'
 
-response = hip_profile.update(update_model)
+# Pass modified object to update()
+updated = client.hip_profile.update(existing)
 ```
 
 ## Match Expression Syntax

@@ -1,8 +1,10 @@
 # HTTP Server Profile Models
 
+## Overview {#Overview}
+
 HTTP Server Profiles allow you to configure HTTP servers that can receive logs from Palo Alto Networks' Strata Cloud Manager. These models define the structure for creating, updating, and retrieving HTTP server profile configurations.
 
-## Models Overview
+### Models
 
 The module provides the following Pydantic models:
 
@@ -115,87 +117,78 @@ The `HTTPServerProfileResponseModel` extends the base model and includes the ID 
 ### Creating a Basic HTTP Server Profile
 
 ```python
-from scm.models.objects.http_server_profiles import (
-    HTTPServerProfileCreateModel,
-    ServerModel
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-# Define a server configuration
-server = ServerModel(
-    name="my-http-server",
-    address="10.0.0.1",
-    protocol="HTTP",
-    port=8080
-)
+# Using dictionary
+http_profile = {
+    "name": "my-http-profile",
+    "server": [
+        {
+            "name": "my-http-server",
+            "address": "10.0.0.1",
+            "protocol": "HTTP",
+            "port": 8080
+        }
+    ],
+    "folder": "Prisma Access"
+}
 
-# Create an HTTP server profile in a folder
-http_profile = HTTPServerProfileCreateModel(
-    name="my-http-profile",
-    server=[server],
-    folder="Prisma Access"
-)
+response = client.http_server_profile.create(http_profile)
 ```
 
 ### Creating an HTTPS Server with TLS Configuration
 
 ```python
-from scm.models.objects.http_server_profiles import (
-    HTTPServerProfileCreateModel,
-    ServerModel
-)
+# Using dictionary with TLS configuration
+https_profile = {
+    "name": "secure-http-profile",
+    "description": "Secure HTTP server profile for logging",
+    "server": [
+        {
+            "name": "secure-server",
+            "address": "secure.example.com",
+            "protocol": "HTTPS",
+            "port": 443,
+            "tls_version": "1.2",
+            "certificate_profile": "default-cert-profile"
+        }
+    ],
+    "tag_registration": True,
+    "folder": "Prisma Access"
+}
 
-# Define a server configuration with TLS
-server = ServerModel(
-    name="secure-server",
-    address="secure.example.com",
-    protocol="HTTPS",
-    port=443,
-    tls_version="1.2",
-    certificate_profile="default-cert-profile"
-)
-
-# Create an HTTP server profile in a device
-http_profile = HTTPServerProfileCreateModel(
-    name="secure-http-profile",
-    server=[server],
-    tag_registration=True,
-    description="Secure HTTP server profile for logging",
-    device="My Device"
-)
+response = client.http_server_profile.create(https_profile)
 ```
 
 ### Updating an Existing HTTP Server Profile
 
 ```python
-from uuid import UUID
-from scm.models.objects.http_server_profiles import (
-    HTTPServerProfileUpdateModel,
-    ServerModel
-)
-
-# Define updated server configurations
-server1 = ServerModel(
-    name="primary-server",
-    address="10.0.0.1",
-    protocol="HTTP",
-    port=8080
-)
-
-server2 = ServerModel(
-    name="backup-server",
-    address="10.0.0.2",
-    protocol="HTTP",
-    port=8080
-)
-
-# Update an existing HTTP server profile
-updated_profile = HTTPServerProfileUpdateModel(
-    id=UUID("123e4567-e89b-12d3-a456-426655440000"),
-    name="updated-profile",
-    server=[server1, server2],
-    description="Updated profile with primary and backup servers",
+# Fetch existing HTTP server profile
+existing = client.http_server_profile.fetch(
+    name="my-http-profile",
     folder="Prisma Access"
 )
+
+# Modify attributes using dot notation
+existing.description = "Updated profile with primary and backup servers"
+
+# Add a backup server
+existing.server.append({
+    "name": "backup-server",
+    "address": "10.0.0.2",
+    "protocol": "HTTP",
+    "port": 8080
+})
+
+# Pass modified object to update()
+updated = client.http_server_profile.update(existing)
 ```
 
 ## Best Practices

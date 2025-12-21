@@ -40,14 +40,17 @@ The `Schedule` class provides functionality to manage schedule objects in Palo A
 
 ## Schedule Model Attributes
 
-| Attribute       | Type              | Required | Description                                       |
-|-----------------|-------------------|----------|---------------------------------------------------|
-| `name`          | str               | Yes      | Name of the schedule object (max 31 chars)        |
-| `id`            | UUID              | Yes*     | Unique identifier (*response only)                |
-| `schedule_type` | ScheduleTypeModel | Yes      | The type of schedule (recurring or non-recurring) |
-| `folder`        | str               | Yes**    | Folder location (**one container required**)      |
-| `snippet`       | str               | Yes**    | Snippet location (**one container required**)     |
-| `device`        | str               | Yes**    | Device location (**one container required**)      |
+| Attribute       | Type              | Required | Default | Description                                       |
+|-----------------|-------------------|----------|---------|---------------------------------------------------|
+| `name`          | str               | Yes      | None    | Name of the schedule object (max 31 chars)        |
+| `id`            | UUID              | Yes*     | None    | Unique identifier (*response only)                |
+| `schedule_type` | ScheduleTypeModel | Yes      | None    | The type of schedule (recurring or non-recurring) |
+| `folder`        | str               | No**     | None    | Folder location (max 64 chars)                    |
+| `snippet`       | str               | No**     | None    | Snippet location (max 64 chars)                   |
+| `device`        | str               | No**     | None    | Device location (max 64 chars)                    |
+
+\* The `id` field is only present in response models.
+\*\* Exactly one container type (folder, snippet, or device) must be provided for create operations.
 
 ## Exceptions
 
@@ -328,7 +331,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.objects import Schedule
 
 # Initialize client
 client = ScmClient(
@@ -337,18 +339,15 @@ client = ScmClient(
     tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit on the schedule service
+client.schedule.max_limit = 1000
 
-# Option 1: Use the unified client interface but create a custom Schedule instance with max_limit
-schedule_service = Schedule(client, max_limit=1000)
-all_schedules1 = schedule_service.list(folder='Shared')
+# List all schedules - auto-paginates through results
+all_schedules = client.schedule.list(folder='Shared')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (200)
-all_schedules2 = client.schedule.list(folder='Shared')
-
-# Both options will auto-paginate through all available objects.
-# The schedules are fetched in chunks according to the max_limit.
+# The list() method will retrieve up to 1000 objects per API call
+# and auto-paginate through all available objects.
+print(f"Retrieved {len(all_schedules)} schedules")
 ```
 
 ### Deleting Schedules

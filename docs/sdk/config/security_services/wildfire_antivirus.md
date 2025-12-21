@@ -42,28 +42,34 @@ deleting profiles that define malware analysis settings, file inspection rules, 
 
 ## Profile Model Attributes
 
-| Attribute          | Type                  | Required | Description                                 |
-|--------------------|-----------------------|----------|---------------------------------------------|
-| `name`             | str                   | Yes      | Profile name (max 63 chars)                 |
-| `id`               | UUID                  | Yes*     | Unique identifier (*response only)          |
-| `description`      | str                   | No       | Profile description                         |
-| `packet_capture`   | bool                  | No       | Enable packet capture                       |
-| `rules`            | List[Rule]            | Yes      | List of analysis rules                      |
-| `mlav_exception`   | List[MlavException]   | No       | MLAV exception entries                      |
-| `threat_exception` | List[ThreatException] | No       | Threat exception entries                    |
-| `folder`           | str                   | Yes**    | Folder location (**one container required)  |
-| `snippet`          | str                   | Yes**    | Snippet location (**one container required) |
-| `device`           | str                   | Yes**    | Device location (**one container required)  |
+| Attribute          | Type                                   | Required | Default | Description                                      |
+|--------------------|----------------------------------------|----------|---------|--------------------------------------------------|
+| `name`             | str                                    | Yes      | None    | Profile name. Pattern: `^[a-zA-Z0-9._-]+$`       |
+| `id`               | UUID                                   | Yes*     | None    | Unique identifier (*response/update only)        |
+| `description`      | str                                    | No       | None    | Profile description                              |
+| `packet_capture`   | bool                                   | No       | False   | Enable packet capture                            |
+| `rules`            | List[WildfireAvRuleBase]               | Yes      | None    | List of analysis rules                           |
+| `mlav_exception`   | List[WildfireAvMlavExceptionEntry]     | No       | None    | MLAV exception entries                           |
+| `threat_exception` | List[WildfireAvThreatExceptionEntry]   | No       | None    | Threat exception entries                         |
+| `folder`           | str                                    | No**     | None    | Folder location. Max 64 chars                    |
+| `snippet`          | str                                    | No**     | None    | Snippet location. Max 64 chars                   |
+| `device`           | str                                    | No**     | None    | Device location. Max 64 chars                    |
+| `override_loc`     | str                                    | No       | None    | Override location (response only)                |
+| `override_type`    | str                                    | No       | None    | Override type (response only)                    |
+| `override_id`      | str                                    | No       | None    | Override ID (response only)                      |
+
+\* Only required for response and update models
+\** Exactly one container (folder/snippet/device) must be provided for create operations
 
 ### Rule Attributes
 
-| Attribute     | Type      | Required | Description                          |
-|---------------|-----------|----------|--------------------------------------|
-| `name`        | str       | Yes      | Rule name                            |
-| `analysis`    | Analysis  | No       | Analysis type (public/private cloud) |
-| `direction`   | Direction | Yes      | Traffic direction (up/down/both)     |
-| `application` | List[str] | No       | List of applications (default: any)  |
-| `file_type`   | List[str] | No       | List of file types (default: any)    |
+| Attribute     | Type                 | Required | Default   | Description                      |
+|---------------|----------------------|----------|-----------|----------------------------------|
+| `name`        | str                  | Yes      | None      | Rule name                        |
+| `analysis`    | WildfireAvAnalysis   | No       | None      | Analysis type (public/private)   |
+| `direction`   | WildfireAvDirection  | Yes      | None      | Traffic direction                |
+| `application` | List[str]            | No       | ["any"]   | List of applications             |
+| `file_type`   | List[str]            | No       | ["any"]   | List of file types               |
 
 ## Exceptions
 
@@ -79,18 +85,20 @@ deleting profiles that define malware analysis settings, file inspection rules, 
 
 ## Basic Configuration
 
+The WildFire Antivirus Profile service can be accessed using the unified client interface (recommended):
+
 ```python
-from scm.client import Scm
+from scm.client import ScmClient
 
 # Initialize client
-client = Scm(
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
     tsg_id="your_tsg_id"
 )
 
 # Access WildFire profiles directly through the client
-# No need to initialize a separate WildfireAntivirusProfile object
+profiles = client.wildfire_antivirus_profile
 ```
 
 ## Usage Examples
@@ -289,20 +297,22 @@ for app in combined_filters:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-# Initialize the client with a custom max_limit for WildFire profiles
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-client = Scm(
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    wildfire_antivirus_profile_max_limit=4321
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
+# Configure max_limit using the property setter
+client.wildfire_antivirus_profile.max_limit = 4000
+
+# List all profiles - auto-paginates through results
 all_profiles = client.wildfire_antivirus_profile.list(folder='Texas')
 
-# 'all_profiles' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# The profiles are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting Profiles
@@ -447,6 +457,12 @@ the [wildfire_antivirus_profile.py example](https://github.com/cdot65/pan-scm-sd
 
 ## Related Models
 
+- [WildfireAvProfileBaseModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
 - [WildfireAvProfileCreateModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
 - [WildfireAvProfileUpdateModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
 - [WildfireAvProfileResponseModel](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAvRuleBase](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAvMlavExceptionEntry](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAvThreatExceptionEntry](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAvAnalysis](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)
+- [WildfireAvDirection](../../models/security_services/wildfire_antivirus_profile_models.md#Overview)

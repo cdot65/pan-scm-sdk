@@ -12,6 +12,8 @@
     - [Retrieving HIP Profiles](#retrieving-hip-profiles)
     - [Updating HIP Profiles](#updating-hip-profiles)
     - [Listing HIP Profiles](#listing-hip-profiles)
+    - [Filtering Responses](#filtering-responses)
+    - [Controlling Pagination with max_limit](#controlling-pagination-with-max_limit)
     - [Deleting HIP Profiles](#deleting-hip-profiles)
 7. [Managing Configuration Changes](#managing-configuration-changes)
     - [Performing Commits](#performing-commits)
@@ -29,26 +31,26 @@ HIP profiles. HIP profiles define security posture matching criteria that can be
 
 ## Core Methods
 
-| Method     | Description                       | Parameters                           | Return Type                     |
-|------------|-----------------------------------|--------------------------------------|---------------------------------|
-| `create()` | Creates a new HIP profile         | `data: Dict[str, Any]`               | `HIPProfileResponseModel`       |
-| `get()`    | Retrieves a HIP profile by ID     | `object_id: str`                     | `HIPProfileResponseModel`       |
-| `update()` | Updates an existing HIP profile   | `hip_profile: HIPProfileUpdateModel` | `HIPProfileResponseModel`       |
-| `delete()` | Deletes a HIP profile             | `object_id: str`                     | `None`                          |
-| `list()`   | Lists HIP profiles with filtering | `folder: str`, `**filters`           | `List[HIPProfileResponseModel]` |
-| `fetch()`  | Gets HIP profile by name          | `name: str`, `folder: str`           | `HIPProfileResponseModel`       |
+| Method     | Description                       | Parameters                                                                     | Return Type                     |
+|------------|-----------------------------------|--------------------------------------------------------------------------------|---------------------------------|
+| `create()` | Creates a new HIP profile         | `data: Dict[str, Any]`                                                         | `HIPProfileResponseModel`       |
+| `get()`    | Retrieves a HIP profile by ID     | `object_id: str`                                                               | `HIPProfileResponseModel`       |
+| `update()` | Updates an existing HIP profile   | `hip_profile: HIPProfileUpdateModel`                                           | `HIPProfileResponseModel`       |
+| `delete()` | Deletes a HIP profile             | `object_id: str`                                                               | `None`                          |
+| `list()`   | Lists HIP profiles with filtering | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `**filters` | `List[HIPProfileResponseModel]` |
+| `fetch()`  | Gets HIP profile by name          | `name: str`, `folder: str`, `snippet: str`, `device: str`                      | `HIPProfileResponseModel`       |
 
 ## HIP Profile Model Attributes
 
-| Attribute          | Type                 | Required | Description                                 |
-|--------------------|----------------------|----------|---------------------------------------------|
-| `name`             | str                  | Yes      | Name of HIP profile (max 31 chars)          |
-| `id`               | UUID                 | Yes*     | Unique identifier (*response only)          |
-| `description`      | str                  | No       | Profile description (max 255 chars)         |
-| `match`            | str                  | Yes      | Match expression for the profile            |
-| `folder`           | str                  | Yes**    | Folder location (**one container required)  |
-| `snippet`          | str                  | Yes**    | Snippet location (**one container required) |
-| `device`           | str                  | Yes**    | Device location (**one container required)  |
+| Attribute          | Type                 | Required | Default | Description                                      |
+|--------------------|----------------------|----------|---------|--------------------------------------------------|
+| `name`             | str                  | Yes      | None    | Name of HIP profile (max 31 chars)               |
+| `id`               | UUID                 | Yes*     | None    | Unique identifier (*response only)               |
+| `description`      | str                  | No       | None    | Profile description (max 255 chars)              |
+| `match`            | str                  | Yes      | None    | Match expression for the profile (max 2048 chars)|
+| `folder`           | str                  | Yes**    | None    | Folder location (**one container required)       |
+| `snippet`          | str                  | Yes**    | None    | Snippet location (**one container required)      |
+| `device`           | str                  | Yes**    | None    | Device location (**one container required)       |
 
 ## Exceptions
 
@@ -71,8 +73,7 @@ from scm.client import ScmClient
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    hip_profile_max_limit=5000  # Optional: set custom max_limit
+    tsg_id="your_tsg_id"
 )
 
 # Access the hip_profile module directly through the client
@@ -92,8 +93,8 @@ client = Scm(
     tsg_id="your_tsg_id"
 )
 
-# Initialize HIPProfile with custom max_limit
-hip_profiles = HIPProfile(client, max_limit=5000)
+# Initialize HIPProfile object
+hip_profiles = HIPProfile(client)
 ```
 
 ## Usage Examples
@@ -154,18 +155,12 @@ print(f"Match expression: {hip_by_id.match}")
 # Fetch existing HIP profile
 existing_profile = client.hip_profile.fetch(name="secure-workstations", folder="Shared")
 
-# Create update model with modified match expression
-from scm.models.objects import HIPProfileUpdateModel
-
-update_model = HIPProfileUpdateModel(
-    id=existing_profile.id,
-    name=existing_profile.name,
-    description="Enhanced security requirements for workstations",
-    match='"is-win" and "is-firewall-enabled" and "is-disk-encrypted"'
-)
+# Modify attributes using dot notation
+existing_profile.description = "Enhanced security requirements for workstations"
+existing_profile.match = '"is-win" and "is-firewall-enabled" and "is-disk-encrypted"'
 
 # Perform update
-updated_profile = client.hip_profile.update(update_model)
+updated_profile = client.hip_profile.update(existing_profile)
 print(f"Updated match expression: {updated_profile.match}")
 ```
 
@@ -174,8 +169,7 @@ print(f"Updated match expression: {updated_profile.match}")
 ```python
 # List with direct filter parameters
 filtered_profiles = client.hip_profile.list(
-    folder='Shared',
-    exact_match=True
+    folder='Shared'
 )
 
 # Process results
@@ -185,12 +179,101 @@ for profile in filtered_profiles:
 
 # Define filter parameters as dictionary
 list_params = {
-    "folder": "Shared",
-    "exclude_folders": ["Test", "Development"]
+    "folder": "Shared"
 }
 
 # List with filters as kwargs
 filtered_profiles = client.hip_profile.list(**list_params)
+```
+
+### Filtering Responses
+
+The `list()` method supports additional parameters to refine your query results even further. You can leverage the `exact_match`, `exclude_folders`, `exclude_snippets`, and `exclude_devices` parameters to control which objects are included or excluded after the initial API response is fetched.
+
+**Parameters:**
+
+- `exact_match (bool)`: When `True`, only objects defined exactly in the specified container (`folder`, `snippet`, or `device`) are returned. Inherited or propagated objects are filtered out.
+- `exclude_folders (List[str])`: Provide a list of folder names that you do not want included in the results.
+- `exclude_snippets (List[str])`: Provide a list of snippet values to exclude from the results.
+- `exclude_devices (List[str])`: Provide a list of device values to exclude from the results.
+
+**Examples:**
+
+```python
+# Only return HIP profiles defined exactly in 'Shared'
+exact_profiles = client.hip_profile.list(
+    folder='Shared',
+    exact_match=True
+)
+
+for profile in exact_profiles:
+    print(f"Exact match: {profile.name} in {profile.folder}")
+
+# Exclude all HIP profiles from the 'All' folder
+no_all_profiles = client.hip_profile.list(
+    folder='Shared',
+    exclude_folders=['All']
+)
+
+for profile in no_all_profiles:
+    assert profile.folder != 'All'
+    print(f"Filtered out 'All': {profile.name}")
+
+# Exclude HIP profiles that come from 'default' snippet
+no_default_snippet = client.hip_profile.list(
+    folder='Shared',
+    exclude_snippets=['default']
+)
+
+for profile in no_default_snippet:
+    assert profile.snippet != 'default'
+    print(f"Filtered out 'default' snippet: {profile.name}")
+
+# Exclude HIP profiles associated with 'DeviceA'
+no_deviceA = client.hip_profile.list(
+    folder='Shared',
+    exclude_devices=['DeviceA']
+)
+
+for profile in no_deviceA:
+    assert profile.device != 'DeviceA'
+    print(f"Filtered out 'DeviceA': {profile.name}")
+
+# Combine exact_match with multiple exclusions
+combined_filters = client.hip_profile.list(
+    folder='Shared',
+    exact_match=True,
+    exclude_folders=['All'],
+    exclude_snippets=['default'],
+    exclude_devices=['DeviceA']
+)
+
+for profile in combined_filters:
+    print(f"Combined filters result: {profile.name} in {profile.folder}")
+```
+
+### Controlling Pagination with max_limit
+
+The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit on the hip_profile service
+client.hip_profile.max_limit = 4321
+
+# List all HIP profiles - auto-paginates through results
+all_profiles = client.hip_profile.list(folder='Shared')
+
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting HIP Profiles

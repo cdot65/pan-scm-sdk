@@ -1,46 +1,148 @@
 # Security Rule Models
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Model Attributes](#model-attributes)
+3. [Enum Types](#enum-types)
+4. [Supporting Models](#supporting-models)
+5. [Exceptions](#exceptions)
+6. [Model Validators](#model-validators)
+7. [Usage Examples](#usage-examples)
+
 ## Overview {#Overview}
 
 The Security Rule models provide a structured way to manage security rules in Palo Alto Networks' Strata Cloud Manager.
 These models support defining security policies with source/destination zones, addresses, applications, and actions.
 Rules can be defined in folders, snippets, or devices and placed in either pre or post rulebases. The models handle
-validation
-of inputs and outputs when interacting with the SCM API.
+validation of inputs and outputs when interacting with the SCM API.
 
-## Attributes
+### Models
 
-| Attribute          | Type           | Required | Default | Description                                                                     |
-|--------------------|----------------|----------|---------|---------------------------------------------------------------------------------|
-| name               | str            | Yes      | None    | Name of the rule. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
-| disabled           | bool           | No       | False   | Whether the rule is disabled                                                    |
-| description        | str            | No       | None    | Description of the rule                                                         |
-| tag                | List[str]      | No       | []      | List of tags                                                                    |
-| from_              | List[str]      | No       | ["any"] | Source security zones                                                           |
-| source             | List[str]      | No       | ["any"] | Source addresses                                                                |
-| negate_source      | bool           | No       | False   | Negate source addresses                                                         |
-| source_user        | List[str]      | No       | ["any"] | Source users/groups                                                             |
-| source_hip         | List[str]      | No       | ["any"] | Source Host Integrity Profiles                                                  |
-| to_                | List[str]      | No       | ["any"] | Destination security zones                                                      |
-| destination        | List[str]      | No       | ["any"] | Destination addresses                                                           |
-| negate_destination | bool           | No       | False   | Negate destination addresses                                                    |
-| destination_hip    | List[str]      | No       | ["any"] | Destination Host Integrity Profiles                                             |
-| application        | List[str]      | No       | ["any"] | Applications                                                                    |
-| service            | List[str]      | No       | ["any"] | Services                                                                        |
-| category           | List[str]      | No       | ["any"] | URL categories                                                                  |
-| action             | Action         | No       | "allow" | Rule action (allow/deny/drop/reset-client/reset-server/reset-both)              |
-| profile_setting    | ProfileSetting | No       | None    | Security profile settings                                                       |
-| log_setting        | str            | No       | None    | Log forwarding profile                                                          |
-| schedule           | str            | No       | None    | Schedule profile                                                                |
-| log_start          | bool           | No       | None    | Log at session start                                                            |
-| log_end            | bool           | No       | None    | Log at session end                                                              |
-| folder             | str            | No*      | None    | Folder where rule is defined. Max length: 64 chars                              |
-| snippet            | str            | No*      | None    | Snippet where rule is defined. Max length: 64 chars                             |
-| device             | str            | No*      | None    | Device where rule is defined. Max length: 64 chars                              |
-| id                 | UUID           | Yes**    | None    | UUID of the rule (response only)                                                |
+The module provides the following Pydantic models:
 
-\* Exactly one container type (folder/snippet/device) must be provided
-\** Only required for response model
+- `SecurityRuleBaseModel`: Base model with fields common to all rule operations
+- `SecurityRuleCreateModel`: Model for creating new security rules
+- `SecurityRuleUpdateModel`: Model for updating existing security rules
+- `SecurityRuleResponseModel`: Response model for security rule operations
+- `SecurityRuleMoveModel`: Model for moving rules within a rulebase
+- `SecurityRuleProfileSetting`: Model for security profile settings
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
+## Model Attributes
+
+### SecurityRuleBaseModel
+
+| Attribute            | Type                       | Required | Default         | Description                                    |
+|----------------------|----------------------------|----------|-----------------|------------------------------------------------|
+| name                 | str                        | Yes      | None            | Name of the rule. Pattern: `^[a-zA-Z0-9_ \.-]+$` |
+| disabled             | bool                       | No       | False           | Whether the rule is disabled                   |
+| description          | str                        | No       | None            | Description of the rule                        |
+| tag                  | List[str]                  | No       | []              | List of tags                                   |
+| from_                | List[str]                  | No       | ["any"]         | Source security zones                          |
+| source               | List[str]                  | No       | ["any"]         | Source addresses                               |
+| negate_source        | bool                       | No       | False           | Negate source addresses                        |
+| source_user          | List[str]                  | No       | ["any"]         | Source users/groups                            |
+| source_hip           | List[str]                  | No       | ["any"]         | Source Host Integrity Profiles                 |
+| to_                  | List[str]                  | No       | ["any"]         | Destination security zones                     |
+| destination          | List[str]                  | No       | ["any"]         | Destination addresses                          |
+| negate_destination   | bool                       | No       | False           | Negate destination addresses                   |
+| destination_hip      | List[str]                  | No       | ["any"]         | Destination Host Integrity Profiles            |
+| application          | List[str]                  | No       | ["any"]         | Applications                                   |
+| service              | List[str]                  | No       | ["any"]         | Services                                       |
+| category             | List[str]                  | No       | ["any"]         | URL categories                                 |
+| action               | SecurityRuleAction         | No       | allow           | Rule action                                    |
+| profile_setting      | SecurityRuleProfileSetting | No       | None            | Security profile settings                      |
+| log_setting          | str                        | No       | None            | Log forwarding profile                         |
+| schedule             | str                        | No       | None            | Schedule profile                               |
+| log_start            | bool                       | No       | None            | Log at session start                           |
+| log_end              | bool                       | No       | None            | Log at session end                             |
+| folder               | str                        | No**     | None            | Folder location. Max 64 chars                  |
+| snippet              | str                        | No**     | None            | Snippet location. Max 64 chars                 |
+| device               | str                        | No**     | None            | Device location. Max 64 chars                  |
+
+\** Exactly one container (folder/snippet/device) must be provided for create operations
+
+### SecurityRuleCreateModel
+
+Inherits all fields from `SecurityRuleBaseModel` and adds:
+
+| Attribute | Type                 | Required | Default | Description                   |
+|-----------|----------------------|----------|---------|-------------------------------|
+| rulebase  | SecurityRuleRulebase | No       | None    | Which rulebase to use (pre/post) |
+
+Enforces that **exactly one** of `folder`, `snippet`, or `device` is provided during creation.
+
+### SecurityRuleUpdateModel
+
+Extends `SecurityRuleBaseModel` by adding:
+
+| Attribute | Type                 | Required | Default | Description                      |
+|-----------|----------------------|----------|---------|----------------------------------|
+| id        | UUID                 | Yes      | None    | The unique identifier of the rule |
+| rulebase  | SecurityRuleRulebase | No       | None    | Which rulebase to use (pre/post)  |
+
+### SecurityRuleResponseModel
+
+Extends `SecurityRuleBaseModel` by adding:
+
+| Attribute   | Type                 | Required | Default | Description                       |
+|-------------|----------------------|----------|---------|-----------------------------------|
+| id          | UUID                 | Yes      | None    | The unique identifier of the rule |
+| rulebase    | SecurityRuleRulebase | No       | None    | Which rulebase the rule belongs to |
+| policy_type | str                  | No       | None    | The policy type (e.g., 'Security') |
+
+### SecurityRuleMoveModel
+
+| Attribute        | Type                        | Required | Default | Description                                    |
+|------------------|-----------------------------| ---------|---------|------------------------------------------------|
+| destination      | SecurityRuleMoveDestination | Yes      | None    | Where to move (top/bottom/before/after)        |
+| rulebase         | SecurityRuleRulebase        | Yes      | None    | Which rulebase to use (pre/post)               |
+| destination_rule | UUID                        | No       | None    | UUID of reference rule (for before/after moves) |
+
+## Enum Types
+
+### SecurityRuleAction
+
+Defines the available rule actions:
+
+| Value          | Description             |
+|----------------|-------------------------|
+| `allow`        | Allow the traffic       |
+| `deny`         | Deny the traffic        |
+| `drop`         | Drop the traffic        |
+| `reset-client` | Reset client connection |
+| `reset-server` | Reset server connection |
+| `reset-both`   | Reset both connections  |
+
+### SecurityRuleRulebase
+
+Defines the available rulebases:
+
+| Value  | Description      |
+|--------|------------------|
+| `pre`  | Pre-rulebase     |
+| `post` | Post-rulebase    |
+
+### SecurityRuleMoveDestination
+
+Defines the move destinations:
+
+| Value    | Description                      |
+|----------|----------------------------------|
+| `top`    | Move to top of rulebase          |
+| `bottom` | Move to bottom of rulebase       |
+| `before` | Move before a specific rule      |
+| `after`  | Move after a specific rule       |
+
+## Supporting Models
+
+### SecurityRuleProfileSetting
+
+| Attribute | Type       | Required | Default           | Description              |
+|-----------|------------|----------|-------------------|--------------------------|
+| group     | List[str]  | No       | ["best-practice"] | Security profile group   |
 
 ## Exceptions
 
@@ -56,6 +158,7 @@ The Security Rule models can raise the following exceptions during validation:
     - When container field pattern validation fails
     - When field length limits are exceeded
     - When invalid move configurations are provided (e.g. missing destination_rule for before/after moves)
+    - When destination_rule is provided for top/bottom moves
 
 ## Model Validators
 
@@ -64,24 +167,18 @@ The Security Rule models can raise the following exceptions during validation:
 For create operations, exactly one container type must be specified:
 
 ```python
-# Using dictionary
-from scm.config.security import SecurityRule
+from scm.models.security import SecurityRuleCreateModel
 
 # Error: multiple containers specified
 try:
-    rule_dict = {
-        "name": "invalid-rule",
-        "folder": "Texas",
-        "device": "fw01",  # Can't specify both folder and device
-        "action": "allow"
-    }
-    security_rule = SecurityRule(api_client)
-    response = security_rule.create(rule_dict)
+    rule = SecurityRuleCreateModel(
+        name="invalid-rule",
+        folder="Texas",
+        device="fw01",  # Can't specify both folder and device
+        action="allow"
+    )
 except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-
-# Using model directly
-from scm.models.security import SecurityRuleCreateModel
 
 # Error: no container specified
 try:
@@ -98,27 +195,45 @@ except ValueError as e:
 All list fields are validated to ensure they contain only unique string values:
 
 ```python
-# Using dictionary
-try:
-    rule_dict = {
-        "name": "invalid-rule",
-        "folder": "Texas",
-        "source": ["10.0.0.0/8", "10.0.0.0/8"],  # Duplicate values not allowed
-        "action": "allow"
-    }
-    response = security_rule.create(rule_dict)
-except ValueError as e:
-    print(e)  # "List items must be unique"
+from scm.models.security import SecurityRuleCreateModel
 
-# Using model directly
+# Error: duplicate values
 try:
     rule = SecurityRuleCreateModel(
         name="invalid-rule",
         folder="Texas",
-        source=["10.0.0.0/8", "10.0.0.0/8"]
+        source=["10.0.0.0/8", "10.0.0.0/8"]  # Duplicate values not allowed
     )
 except ValueError as e:
     print(e)  # "List items must be unique"
+```
+
+### Move Configuration Validation
+
+The SecurityRuleMoveModel validates that destination_rule is provided only for before/after moves:
+
+```python
+from scm.models.security import SecurityRuleMoveModel
+
+# Error: missing destination_rule for 'before' move
+try:
+    move = SecurityRuleMoveModel(
+        destination="before",
+        rulebase="pre"
+        # destination_rule is required for before/after
+    )
+except ValueError as e:
+    print(e)  # "destination_rule is required when destination is 'before'"
+
+# Error: destination_rule provided for 'top' move
+try:
+    move = SecurityRuleMoveModel(
+        destination="top",
+        rulebase="pre",
+        destination_rule="987fcdeb-51d3-a456-426655440000"  # Not allowed for top/bottom
+    )
+except ValueError as e:
+    print(e)  # "destination_rule should not be provided when destination is 'top'"
 ```
 
 ## Usage Examples
@@ -126,6 +241,15 @@ except ValueError as e:
 ### Creating a Basic Security Rule
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
 # Using dictionary
 rule_dict = {
     "name": "allow-web",
@@ -141,30 +265,22 @@ rule_dict = {
     "log_end": True
 }
 
-response = security_rule.create(rule_dict)
-
-# Using model directly
-rule = SecurityRuleCreateModel(
-    name="allow-web",
-    description="Allow web traffic",
-    folder="Texas",
-    from_=["trust"],
-    to_=["untrust"],
-    source=["10.0.0.0/8"],
-    destination=["any"],
-    application=["web-browsing", "ssl"],
-    service=["application-default"],
-    action="allow",
-    log_end=True
-)
-
-payload = rule.model_dump(exclude_unset=True)
-response = security_rule.create(payload)
+response = client.security_rule.create(rule_dict, rulebase="pre")
+print(f"Created rule: {response.name}")
 ```
 
 ### Creating a Rule with Security Profiles
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
 # Using dictionary
 rule_dict = {
     "name": "secure-web",
@@ -183,53 +299,68 @@ rule_dict = {
     "log_end": True
 }
 
-response = security_rule.create(rule_dict)
+response = client.security_rule.create(rule_dict, rulebase="pre")
+print(f"Created rule with profile: {response.name}")
+```
 
-# Using model directly
-from scm.models.security import SecurityRuleCreateModel, SecurityRuleProfileSetting
+### Updating a Security Rule
 
-rule = SecurityRuleCreateModel(
-    name="secure-web",
-    folder="Texas",
-    from_=["trust"],
-    to_=["untrust"],
-    source=["10.0.0.0/8"],
-    destination=["any"],
-    application=["web-browsing", "ssl"],
-    action="allow",
-    profile_setting=SecurityRuleProfileSetting(
-        group=["strict-security"]
-    ),
-    log_setting="detailed-logging",
-    log_start=True,
-    log_end=True
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-payload = rule.model_dump(exclude_unset=True)
-response = security_rule.create(payload)
+# Fetch existing rule
+existing = client.security_rule.fetch(name="allow-web", folder="Texas", rulebase="pre")
+
+# Modify attributes using dot notation
+existing.description = "Updated web access rule"
+existing.application = ["web-browsing", "ssl", "http2"]
+
+# Update profile setting
+existing.profile_setting = {"group": ["strict-security"]}
+
+# Enable logging
+existing.log_start = True
+existing.log_end = True
+
+# Pass modified object to update()
+updated = client.security_rule.update(existing, rulebase="pre")
+print(f"Updated rule: {updated.name}")
 ```
 
 ### Moving a Security Rule
 
 ```python
-# Using dictionary
-move_dict = {
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Fetch the rule to move
+rule = client.security_rule.fetch(name="allow-web", folder="Texas", rulebase="pre")
+
+# Move to top of rulebase
+move_config = {
+    "destination": "top",
+    "rulebase": "pre"
+}
+client.security_rule.move(rule.id, move_config)
+
+# Move before another rule
+move_before = {
     "destination": "before",
     "rulebase": "pre",
     "destination_rule": "987fcdeb-51d3-a456-426655440000"
 }
-
-security_rule.move("123e4567-e89b-12d3-a456-426655440000", move_dict)
-
-# Using model directly
-from scm.models.security import SecurityRuleMoveModel, SecurityRuleMoveDestination, SecurityRuleRulebase
-
-move_config = SecurityRuleMoveModel(
-    destination=SecurityRuleMoveDestination.BEFORE,
-    rulebase=SecurityRuleRulebase.PRE,
-    destination_rule="987fcdeb-51d3-a456-426655440000"
-)
-
-payload = move_config.model_dump(exclude_unset=True)
-security_rule.move("123e4567-e89b-12d3-a456-426655440000", payload)
+client.security_rule.move(rule.id, move_before)
 ```

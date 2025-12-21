@@ -6,13 +6,25 @@ The Address Group models provide a structured way to manage address groups in Pa
 These models support both static and dynamic address groups, which can be defined in folders, snippets, or devices. The
 models handle validation of inputs and outputs when interacting with the SCM API.
 
+### Models
+
+| Model                       | Purpose                                           |
+|-----------------------------|---------------------------------------------------|
+| `DynamicFilter`             | Represents dynamic filter with tag-based criteria |
+| `AddressGroupBaseModel`     | Base model with common fields for all operations  |
+| `AddressGroupCreateModel`   | Model for creating new address groups             |
+| `AddressGroupUpdateModel`   | Model for updating existing address groups        |
+| `AddressGroupResponseModel` | Model for API responses                           |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute   | Type          | Required | Default | Description                                                                              |
 |-------------|---------------|----------|---------|------------------------------------------------------------------------------------------|
 | name        | str           | Yes      | None    | Name of the address group. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
 | description | str           | No       | None    | Description of the address group. Max length: 1023 chars                                 |
-| tag         | List[str]     | No       | None    | List of tags. Each tag max length: 64 chars                                              |
+| tag         | List[str]     | No       | None    | List of tags. Each tag max length: 127 chars                                             |
 | dynamic     | DynamicFilter | No*      | None    | Dynamic filter for group membership                                                      |
 | static      | List[str]     | No*      | None    | List of static addresses. Min: 1, Max: 4096                                              |
 | folder      | str           | No**     | None    | Folder where group is defined. Max length: 64 chars                                      |
@@ -24,16 +36,24 @@ models handle validation of inputs and outputs when interacting with the SCM API
 \** Exactly one container type (folder/snippet/device) must be provided
 \*** Only required for response model
 
+### DynamicFilter Model
+
+The `DynamicFilter` model represents tag-based filter criteria for dynamic address groups.
+
+| Attribute | Type | Required | Default | Description                                       |
+|-----------|------|----------|---------|---------------------------------------------------|
+| filter    | str  | Yes      | None    | Tag-based filter defining group membership. Max length: 1024 chars |
+
 ## Exceptions
 
 The Address Group models can raise the following exceptions during validation:
 
 - **ValueError**: Raised in several scenarios:
-    - When neither or both static and dynamic fields are provided
-    - When multiple container types (folder/snippet/device) are specified
-    - When no container type is specified for create operations
-    - When tag values are not unique in a list
-    - When tag input is neither a string nor a list
+  - When neither or both static and dynamic fields are provided
+  - When multiple container types (folder/snippet/device) are specified
+  - When no container type is specified for create operations
+  - When tag values are not unique in a list
+  - When tag input is neither a string nor a list
 
 ## Model Validators
 
@@ -113,9 +133,16 @@ group = AddressGroupCreateModel(
 ### Creating a Static Address Group
 
 ```python
-# Using dictionary
-from scm.config.objects import AddressGroup
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 static_group_dict = {
     "name": "web-servers",
     "description": "Web server group",
@@ -124,22 +151,7 @@ static_group_dict = {
     "tag": ["web", "production"]
 }
 
-address_group = AddressGroup(api_client)
-response = address_group.create(static_group_dict)
-
-# Using model directly
-from scm.models.objects import AddressGroupCreateModel
-
-static_group = AddressGroupCreateModel(
-    name="web-servers",
-    description="Web server group",
-    static=["web1", "web2", "web3"],
-    folder="Texas",
-    tag=["web", "production"]
-)
-
-payload = static_group.model_dump(exclude_unset=True)
-response = address_group.create(payload)
+response = client.address_group.create(static_group_dict)
 ```
 
 ### Creating a Dynamic Address Group
@@ -156,48 +168,20 @@ dynamic_group_dict = {
     "tag": ["aws", "dynamic"]
 }
 
-response = address_group.create(dynamic_group_dict)
-
-# Using model directly
-from scm.models.objects import AddressGroupCreateModel, DynamicFilter
-
-dynamic_group = AddressGroupCreateModel(
-    name="aws-instances",
-    description="AWS EC2 instances",
-    dynamic=DynamicFilter(filter="'aws-tag' and 'production'"),
-    folder="Cloud",
-    tag=["aws", "dynamic"]
-)
-
-payload = dynamic_group.model_dump(exclude_unset=True)
-response = address_group.create(payload)
+response = client.address_group.create(dynamic_group_dict)
 ```
 
 ### Updating an Address Group
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "web-servers-updated",
-    "description": "Updated web server group",
-    "static": ["web1", "web2", "web3", "web4"],
-    "tag": ["web", "production", "updated"]
-}
+# Fetch existing group
+existing = client.address_group.fetch(name="web-servers", folder="Texas")
 
-response = address_group.update(update_dict)
+# Modify attributes using dot notation
+existing.description = "Updated web server group"
+existing.static = ["web1", "web2", "web3", "web4"]
+existing.tag = ["web", "production", "updated"]
 
-# Using model directly
-from scm.models.objects import AddressGroupUpdateModel
-
-update_group = AddressGroupUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="web-servers-updated",
-    description="Updated web server group",
-    static=["web1", "web2", "web3", "web4"],
-    tag=["web", "production", "updated"]
-)
-
-payload = update_group.model_dump(exclude_unset=True)
-response = address_group.update(payload)
+# Pass modified object to update()
+updated = client.address_group.update(existing)
 ```

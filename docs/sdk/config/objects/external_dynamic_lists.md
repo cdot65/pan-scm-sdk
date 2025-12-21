@@ -31,30 +31,30 @@ EDLs of various types including IP, Domain, URL, IMSI, and IMEI lists with confi
 
 ## Core Methods
 
-| Method     | Description               | Parameters                             | Return Type                               |
-|------------|---------------------------|----------------------------------------|-------------------------------------------|
-| `create()` | Creates a new EDL         | `data: Dict[str, Any]`                 | `ExternalDynamicListsResponseModel`       |
-| `get()`    | Retrieves an EDL by ID    | `edl_id: str`                          | `ExternalDynamicListsResponseModel`       |
-| `update()` | Updates an existing EDL   | `edl: ExternalDynamicListsUpdateModel` | `ExternalDynamicListsResponseModel`       |
-| `delete()` | Deletes an EDL            | `edl_id: str`                          | `None`                                    |
-| `list()`   | Lists EDLs with filtering | `folder: str`, `**filters`             | `List[ExternalDynamicListsResponseModel]` |
-| `fetch()`  | Gets EDL by name          | `name: str`, `folder: str`             | `ExternalDynamicListsResponseModel`       |
+| Method     | Description                    | Parameters                                                                     | Return Type                               |
+|------------|--------------------------------|--------------------------------------------------------------------------------|-------------------------------------------|
+| `create()` | Creates a new EDL              | `data: Dict[str, Any]`                                                         | `ExternalDynamicListsResponseModel`       |
+| `get()`    | Retrieves an EDL by ID         | `edl_id: str`                                                                  | `ExternalDynamicListsResponseModel`       |
+| `update()` | Updates an existing EDL        | `edl: ExternalDynamicListsUpdateModel`                                         | `ExternalDynamicListsResponseModel`       |
+| `delete()` | Deletes an EDL                 | `edl_id: str`                                                                  | `None`                                    |
+| `list()`   | Lists EDLs with filtering      | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `**filters` | `List[ExternalDynamicListsResponseModel]` |
+| `fetch()`  | Gets EDL by name and container | `name: str`, `folder: str`, `snippet: str`, `device: str`                      | `ExternalDynamicListsResponseModel`       |
 
 ## EDL Model Attributes
 
-| Attribute        | Type           | Required | Description                                 |
-|------------------|----------------|----------|---------------------------------------------|
-| `name`           | str            | Yes      | Name of EDL (max 63 chars)                  |
-| `id`             | UUID           | Yes*     | Unique identifier (*response only)          |
-| `type`           | TypeUnion      | Yes      | EDL type configuration                      |
-| `url`            | str            | Yes      | Source URL for EDL content                  |
-| `description`    | str            | No       | Description (max 255 chars)                 |
-| `exception_list` | List[str]      | No       | List of exceptions                          |
-| `auth`           | AuthModel      | No       | Authentication credentials                  |
-| `recurring`      | RecurringUnion | Yes      | Update schedule configuration               |
-| `folder`         | str            | Yes**    | Folder location (**one container required)  |
-| `snippet`        | str            | Yes**    | Snippet location (**one container required) |
-| `device`         | str            | Yes**    | Device location (**one container required)  |
+| Attribute        | Type           | Required | Default | Description                                 |
+|------------------|----------------|----------|---------|---------------------------------------------|
+| `name`           | str            | Yes      | None    | Name of EDL (max 63 chars)                  |
+| `id`             | UUID           | Yes*     | None    | Unique identifier (*response only)          |
+| `type`           | TypeUnion      | Yes      | None    | EDL type configuration                      |
+| `url`            | str            | Yes      | http:// | Source URL for EDL content                  |
+| `description`    | str            | No       | None    | Description (max 255 chars)                 |
+| `exception_list` | List[str]      | No       | None    | List of exceptions                          |
+| `auth`           | AuthModel      | No       | None    | Authentication credentials                  |
+| `recurring`      | RecurringUnion | Yes      | None    | Update schedule configuration               |
+| `folder`         | str            | Yes**    | None    | Folder location (**one container required)  |
+| `snippet`        | str            | Yes**    | None    | Snippet location (**one container required) |
+| `device`         | str            | Yes**    | None    | Device location (**one container required)  |
 
 ## Exceptions
 
@@ -265,20 +265,23 @@ for app in combined_filters:
 The SDK supports pagination through the `max_limit` parameter, which defines how many objects are retrieved per API call. By default, `max_limit` is set to 2500. The API itself imposes a maximum allowed value of 5000. If you set `max_limit` higher than 5000, it will be capped to the API's maximum. The `list()` method will continue to iterate through all objects until all results have been retrieved. Adjusting `max_limit` can help manage retrieval performance and memory usage when working with large datasets.
 
 ```python
-# Initialize the ScmClient with a custom max_limit for EDLs
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
+from scm.client import ScmClient
+
+# Initialize client
 client = ScmClient(
     client_id="your_client_id",
     client_secret="your_client_secret",
-    tsg_id="your_tsg_id",
-    external_dynamic_lists_max_limit=4321
+    tsg_id="your_tsg_id"
 )
 
-# Now when we call list(), it will use the specified max_limit for each request
-# while auto-paginating through all available objects.
+# Configure max_limit on the external_dynamic_list service
+client.external_dynamic_list.max_limit = 4321
+
+# List all EDLs - auto-paginates through results
 all_edls = client.external_dynamic_list.list(folder='Texas')
 
-# 'all_edls' contains all objects from 'Texas', fetched in chunks of up to 4321 at a time.
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting EDLs

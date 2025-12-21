@@ -31,14 +31,14 @@ of various types including IP/Netmask, IP Range, IP Wildcard, and FQDN (Fully Qu
 
 ## Core Methods
 
-| Method     | Description                        | Parameters                    | Return Type                  |
-|------------|------------------------------------|-------------------------------|------------------------------|
-| `create()` | Creates a new address object       | `data: Dict[str, Any]`        | `AddressResponseModel`       |
-| `get()`    | Retrieves an address by ID         | `object_id: str`              | `AddressResponseModel`       |
-| `update()` | Updates an existing address        | `address: AddressUpdateModel` | `AddressResponseModel`       |
-| `delete()` | Deletes an address                 | `object_id: str`              | `None`                       |
-| `list()`   | Lists addresses with filtering     | `folder: str`, `**filters`    | `List[AddressResponseModel]` |
-| `fetch()`  | Gets address by name and container | `name: str`, `folder: str`    | `AddressResponseModel`       |
+| Method     | Description                        | Parameters                                                                                   | Return Type                  |
+|------------|------------------------------------|----------------------------------------------------------------------------------------------|------------------------------|
+| `create()` | Creates a new address object       | `data: Dict[str, Any]`                                                                       | `AddressResponseModel`       |
+| `get()`    | Retrieves an address by ID         | `object_id: str`                                                                             | `AddressResponseModel`       |
+| `update()` | Updates an existing address        | `address: AddressUpdateModel`                                                                | `AddressResponseModel`       |
+| `delete()` | Deletes an address                 | `object_id: Union[str, UUID]`                                                                | `None`                       |
+| `list()`   | Lists addresses with filtering     | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `exclude_folders: List[str]`, `exclude_snippets: List[str]`, `exclude_devices: List[str]`, `**filters` | `List[AddressResponseModel]` |
+| `fetch()`  | Gets address by name and container | `name: str`, `folder: str`, `snippet: str`, `device: str`                                    | `AddressResponseModel`       |
 
 ## Address Model Attributes
 
@@ -51,7 +51,7 @@ of various types including IP/Netmask, IP Range, IP Wildcard, and FQDN (Fully Qu
 | `ip_wildcard` | str       | One Required | IP wildcard mask format                     |
 | `fqdn`        | str       | One Required | Fully qualified domain name                 |
 | `description` | str       | No           | Object description (max 1023 chars)         |
-| `tag`         | List[str] | No           | List of tags (max 64 chars each)            |
+| `tag`         | List[str] | No           | List of tags (max 127 chars each)           |
 | `folder`      | str       | Yes**        | Folder location (**one container required)  |
 | `snippet`     | str       | Yes**        | Snippet location (**one container required) |
 | `device`      | str       | Yes**        | Device location (**one container required)  |
@@ -176,7 +176,7 @@ print(f"Retrieved address: {address_by_id.name}")
 # Fetch existing address
 existing_address = client.address.fetch(name="internal_network", folder="Texas")
 
-# Update specific attributes
+# Modify attributes directly
 existing_address.description = "Updated network segment"
 existing_address.tag = ["Network", "Internal", "Updated"]
 
@@ -300,16 +300,14 @@ client = ScmClient(
 
 # Two options for setting max_limit:
 
-# Option 1: Use the unified client interface but create a custom Address instance with max_limit
+# Option 1: Create a custom Address instance with max_limit
 address_service = Address(client, max_limit=4321)
 all_addresses1 = address_service.list(folder='Texas')
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (2500)
+# Option 2: Use the unified client interface directly (default max_limit: 2500)
 all_addresses2 = client.address.list(folder='Texas')
 
-# Both options will auto-paginate through all available objects.
-# The addresses are fetched in chunks according to the max_limit.
+# Both options auto-paginate through all available objects.
 ```
 
 ### Deleting Addresses

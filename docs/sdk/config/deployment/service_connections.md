@@ -42,23 +42,23 @@ which are used to establish connectivity to cloud service providers.
 
 ## Service Connection Model Attributes
 
-| Attribute                | Type              | Required | Description                               |
-|--------------------------|-------------------|----------|-------------------------------------------|
-| `name`                   | str               | Yes      | Name of service connection (max 63 chars) |
-| `id`                     | UUID              | Yes*     | Unique identifier (*response only)        |
-| `folder`                 | str               | Yes      | Always "Service Connections"              |
-| `ipsec_tunnel`           | str               | Yes      | IPsec tunnel for the service connection   |
-| `onboarding_type`        | OnboardingType    | Yes      | Onboarding type (default: "classic")      |
-| `region`                 | str               | Yes      | Region for the service connection         |
-| `backup_SC`              | str               | No       | Backup service connection                 |
-| `bgp_peer`               | BgpPeerModel      | No       | BGP peer configuration                    |
-| `nat_pool`               | str               | No       | NAT pool for the service connection       |
-| `no_export_community`    | NoExportCommunity | No       | No export community configuration         |
-| `protocol`               | ProtocolModel     | No       | Protocol configuration                    |
-| `qos`                    | QosModel          | No       | QoS configuration                         |
-| `secondary_ipsec_tunnel` | str               | No       | Secondary IPsec tunnel                    |
-| `source_nat`             | bool              | No       | Enable source NAT                         |
-| `subnets`                | List[str]         | No       | Subnets for the service connection        |
+| Attribute                | Type              | Required | Default             | Description                               |
+|--------------------------|-------------------|----------|---------------------|-------------------------------------------|
+| `name`                   | str               | Yes      | None                | Name of service connection (max 63 chars) |
+| `id`                     | UUID              | Yes*     | None                | Unique identifier (*response only)        |
+| `folder`                 | str               | No       | Service Connections | Folder containing the service connection  |
+| `ipsec_tunnel`           | str               | Yes      | None                | IPsec tunnel for the service connection   |
+| `onboarding_type`        | OnboardingType    | No       | classic             | Onboarding type for the service connection|
+| `region`                 | str               | Yes      | None                | Region for the service connection         |
+| `backup_SC`              | str               | No       | None                | Backup service connection                 |
+| `bgp_peer`               | BgpPeerModel      | No       | None                | BGP peer configuration                    |
+| `nat_pool`               | str               | No       | None                | NAT pool for the service connection       |
+| `no_export_community`    | NoExportCommunity | No       | None                | No export community configuration         |
+| `protocol`               | ProtocolModel     | No       | None                | Protocol configuration                    |
+| `qos`                    | QosModel          | No       | None                | QoS configuration                         |
+| `secondary_ipsec_tunnel` | str               | No       | None                | Secondary IPsec tunnel                    |
+| `source_nat`             | bool              | No       | None                | Enable source NAT                         |
+| `subnets`                | List[str]         | No       | None                | Subnets for the service connection        |
 
 ## Exceptions
 
@@ -211,7 +211,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.deployment import ServiceConnection
 
 # Initialize client
 client = ScmClient(
@@ -220,18 +219,14 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit using the property setter
+client.service_connection.max_limit = 500
 
-# Option 1: Use the unified client interface but create a custom ServiceConnection instance with max_limit
-service_connection_service = ServiceConnection(client, max_limit=500)
-all_connections1 = service_connection_service.list()
+# List all service connections - auto-paginates through results
+all_connections = client.service_connection.list()
 
-# Option 2: Use the unified client interface directly
-# This will use the default max_limit (200)
-all_connections2 = client.service_connection.list()
-
-# Both options will auto-paginate through all available objects.
 # The connections are fetched in chunks according to the max_limit.
+# All results are returned as a single list.
 ```
 
 ### Deleting Service Connections
@@ -358,6 +353,13 @@ Refer to the [unified_client_example.py](https://github.com/cdot65/pan-scm-sdk/b
 
 ## Related Models
 
+- [ServiceConnectionBaseModel](../../models/deployment/service_connections_models.md#Overview)
 - [ServiceConnectionCreateModel](../../models/deployment/service_connections_models.md#Overview)
 - [ServiceConnectionUpdateModel](../../models/deployment/service_connections_models.md#Overview)
 - [ServiceConnectionResponseModel](../../models/deployment/service_connections_models.md#Overview)
+- [BgpPeerModel](../../models/deployment/service_connections_models.md#Overview)
+- [BgpProtocolModel](../../models/deployment/service_connections_models.md#Overview)
+- [ProtocolModel](../../models/deployment/service_connections_models.md#Overview)
+- [QosModel](../../models/deployment/service_connections_models.md#Overview)
+- [OnboardingType](../../models/deployment/service_connections_models.md#Overview)
+- [NoExportCommunity](../../models/deployment/service_connections_models.md#Overview)

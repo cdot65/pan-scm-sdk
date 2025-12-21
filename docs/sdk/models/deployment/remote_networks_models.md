@@ -8,6 +8,23 @@ These models support configuration of remote network sites with options for IPse
 
 The models handle validation of inputs and outputs when interacting with the SCM API, providing a robust interface for programmatic management of remote network configurations.
 
+### Models
+
+The module provides the following Pydantic models:
+
+- `RemoteNetworkBaseModel`: Base model with fields common to all remote network operations
+- `RemoteNetworkCreateModel`: Model for creating new remote networks
+- `RemoteNetworkUpdateModel`: Model for updating existing remote networks
+- `RemoteNetworkResponseModel`: Response model for remote network operations
+- `EcmpTunnelModel`: Model for ECMP tunnel configuration
+- `ProtocolModel`: Model for protocol settings (BGP and BGP peer)
+- `BgpModel`: Model for BGP configuration
+- `BgpPeerModel`: Model for BGP peer configuration
+- `EcmpLoadBalancingEnum`: Enum for ECMP load balancing states (enable/disable)
+- `PeeringTypeEnum`: Enum for BGP peering types
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute           | Type           | Required  | Default | Description                                                      |
@@ -29,32 +46,67 @@ The models handle validation of inputs and outputs when interacting with the SCM
 \** Required when license_type is FWAAS-AGGREGATE
 \*** One of these is required based on ecmp_load_balancing setting
 
-### Tunnel Model Attributes
+### EcmpTunnelModel Attributes
 
-| Attribute       | Type     | Required | Default | Description                          |
-|-----------------|----------|----------|---------|--------------------------------------|
-| name            | str      | Yes      | None    | Tunnel name                          |
-| ipsec_tunnel    | str      | Yes      | None    | IPSec tunnel name                    |
-| local_ip_address| str      | Yes      | None    | Local IP address                     |
-| peer_ip_address | str      | Yes      | None    | Peer IP address                      |
-| peer_as         | str      | Yes      | None    | Peer Autonomous System number        |
+| Attribute                    | Type            | Required | Default | Description                              |
+|------------------------------|-----------------|----------|---------|------------------------------------------|
+| name                         | str             | Yes      | None    | Tunnel name (max 63 chars)               |
+| ipsec_tunnel                 | str             | Yes      | None    | IPSec tunnel name (max 1023 chars)       |
+| local_ip_address             | str             | No       | None    | Local IP address                         |
+| peer_ip_address              | str             | No       | None    | Peer IP address                          |
+| peer_as                      | str             | No       | None    | Peer Autonomous System number            |
+| peering_type                 | PeeringTypeEnum | No       | None    | BGP peering type                         |
+| secret                       | str             | No       | None    | Authentication secret                    |
+| summarize_mobile_user_routes | bool            | No       | None    | Summarize mobile user routes             |
+| do_not_export_routes         | bool            | No       | None    | Do not export routes                     |
+| originate_default_route      | bool            | No       | None    | Originate default route                  |
 
-### Protocol Model Attributes
+### ProtocolModel Attributes
 
-| Attribute           | Type    | Required | Default | Description                       |
-|---------------------|---------|----------|---------|-----------------------------------|
-| bgp                 | BGP     | No       | None    | BGP protocol configuration        |
+| Attribute | Type         | Required | Default | Description                |
+|-----------|--------------|----------|---------|----------------------------|
+| bgp       | BgpModel     | No       | None    | BGP protocol configuration |
+| bgp_peer  | BgpPeerModel | No       | None    | BGP peer configuration     |
 
-### BGP Model Attributes
+### BgpModel Attributes
 
-| Attribute           | Type    | Required | Default | Description                       |
-|---------------------|---------|----------|---------|-----------------------------------|
-| enable              | bool    | No       | None    | Enable BGP                        |
-| local_ip_address    | str     | No       | None    | Local IP address for BGP          |
-| peer_ip_address     | str     | No       | None    | Peer IP address for BGP           |
-| peer_as             | str     | No       | None    | Peer AS number                    |
-| local_as            | str     | No       | None    | Local AS number                   |
-| secret              | str     | No       | None    | BGP authentication secret         |
+| Attribute                    | Type            | Required | Default | Description                       |
+|------------------------------|-----------------|----------|---------|-----------------------------------|
+| enable                       | bool            | No       | None    | Enable BGP                        |
+| local_ip_address             | str             | No       | None    | Local IP address for BGP          |
+| peer_ip_address              | str             | No       | None    | Peer IP address for BGP           |
+| peer_as                      | str             | No       | None    | Peer AS number                    |
+| peering_type                 | PeeringTypeEnum | No       | None    | BGP peering type                  |
+| secret                       | str             | No       | None    | BGP authentication secret         |
+| do_not_export_routes         | bool            | No       | None    | Do not export routes              |
+| originate_default_route      | bool            | No       | None    | Originate default route           |
+| summarize_mobile_user_routes | bool            | No       | None    | Summarize mobile user routes      |
+
+### BgpPeerModel Attributes
+
+| Attribute        | Type | Required | Default | Description              |
+|------------------|------|----------|---------|--------------------------|
+| local_ip_address | str  | No       | None    | Local IP address         |
+| peer_ip_address  | str  | No       | None    | Peer IP address          |
+| secret           | str  | No       | None    | Authentication secret    |
+
+### Enum Classes
+
+#### EcmpLoadBalancingEnum
+
+| Value     | Description                    |
+|-----------|--------------------------------|
+| `enable`  | Enable ECMP load balancing     |
+| `disable` | Disable ECMP load balancing    |
+
+#### PeeringTypeEnum
+
+| Value                           | Description                              |
+|---------------------------------|------------------------------------------|
+| `exchange-v4-over-v4`           | Exchange IPv4 routes over IPv4           |
+| `exchange-v4-v6-over-v4`        | Exchange IPv4 and IPv6 routes over IPv4  |
+| `exchange-v4-over-v4-v6-over-v6`| Exchange IPv4 over IPv4, IPv6 over IPv6  |
+| `exchange-v6-over-v6`           | Exchange IPv6 routes over IPv6           |
 
 ## Exceptions
 
@@ -154,9 +206,16 @@ except ValueError as e:
 ### Creating a Standard Remote Network
 
 ```python
-# Using dictionary
-from scm.config.deployment import RemoteNetworks
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 standard_config = {
     "name": "branch-office-1",
     "region": "us-east-1",
@@ -169,26 +228,8 @@ standard_config = {
     "ipsec_tunnel": "branch-1-tunnel"
 }
 
-remote_networks = RemoteNetworks(api_client)
-response = remote_networks.create(standard_config)
-
-# Using model directly
-from scm.models.deployment import RemoteNetworkCreateModel
-
-standard_network = RemoteNetworkCreateModel(
-    name="branch-office-1",
-    region="us-east-1",
-    license_type="FWAAS-AGGREGATE",
-    spn_name="us-east-1-spn",
-    folder="Remote Networks",
-    description="Branch office VPN connection",
-    subnets=["10.0.0.0/24", "10.0.1.0/24"],
-    ecmp_load_balancing="disable",
-    ipsec_tunnel="branch-1-tunnel"
-)
-
-payload = standard_network.model_dump(exclude_unset=True)
-response = remote_networks.create(payload)
+response = client.remote_network.create(standard_config)
+print(f"Created remote network: {response.name} with ID: {response.id}")
 ```
 
 ### Creating an ECMP-Enabled Remote Network
@@ -222,42 +263,8 @@ ecmp_config = {
     ]
 }
 
-response = remote_networks.create(ecmp_config)
-
-# Using model directly
-from scm.models.deployment import RemoteNetworkCreateModel, Tunnel
-
-ecmp_tunnels = [
-    Tunnel(
-        name="tunnel-1",
-        ipsec_tunnel="branch-2-tunnel-1",
-        local_ip_address="10.0.1.1",
-        peer_as="65515",
-        peer_ip_address="10.0.1.2"
-    ),
-    Tunnel(
-        name="tunnel-2",
-        ipsec_tunnel="branch-2-tunnel-2",
-        local_ip_address="10.0.2.1",
-        peer_as="65515",
-        peer_ip_address="10.0.2.2"
-    )
-]
-
-ecmp_network = RemoteNetworkCreateModel(
-    name="branch-office-2",
-    region="us-west-2",
-    license_type="FWAAS-AGGREGATE",
-    spn_name="us-west-2-spn",
-    folder="Remote Networks",
-    description="Branch office with ECMP",
-    subnets=["172.16.0.0/24", "172.16.1.0/24"],
-    ecmp_load_balancing="enable",
-    ecmp_tunnels=ecmp_tunnels
-)
-
-payload = ecmp_network.model_dump(exclude_unset=True)
-response = remote_networks.create(payload)
+response = client.remote_network.create(ecmp_config)
+print(f"Created ECMP remote network: {response.name}")
 ```
 
 ### Creating a Remote Network with BGP Protocol
@@ -280,84 +287,39 @@ bgp_config = {
             "local_ip_address": "10.1.1.1",
             "peer_ip_address": "10.1.1.2",
             "peer_as": "65000",
-            "local_as": "65001",
             "secret": "bgp-auth-key"
         }
     }
 }
 
-response = remote_networks.create(bgp_config)
-
-# Using model directly
-from scm.models.deployment import RemoteNetworkCreateModel, Protocol, BGP
-
-bgp = BGP(
-    enable=True,
-    local_ip_address="10.1.1.1",
-    peer_ip_address="10.1.1.2",
-    peer_as="65000",
-    local_as="65001",
-    secret="bgp-auth-key"
-)
-
-protocol = Protocol(bgp=bgp)
-
-bgp_network = RemoteNetworkCreateModel(
-    name="branch-office-3",
-    region="eu-west-1",
-    license_type="FWAAS-AGGREGATE",
-    spn_name="eu-west-1-spn",
-    folder="Remote Networks",
-    description="Branch office with BGP",
-    subnets=["192.168.1.0/24"],
-    ecmp_load_balancing="disable",
-    ipsec_tunnel="branch-3-tunnel",
-    protocol=protocol
-)
-
-payload = bgp_network.model_dump(exclude_unset=True)
-response = remote_networks.create(payload)
+response = client.remote_network.create(bgp_config)
+print(f"Created BGP remote network: {response.name}")
 ```
 
 ### Updating a Remote Network
 
 ```python
-# Using dictionary
-update_dict = {
-    "name": "branch-office-1",
-    "description": "Updated branch office configuration",
-    "subnets": ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"],  # Added a new subnet
-    "protocol": {
-        "bgp": {
-            "enable": True,
-            "peer_as": "65515",
-            "peer_ip_address": "10.0.0.1",
-            "local_ip_address": "10.0.0.2"
-        }
+# Fetch existing remote network
+existing = client.remote_network.fetch(
+    name="branch-office-1",
+    folder="Remote Networks"
+)
+
+# Modify attributes using dot notation
+existing.description = "Updated branch office configuration"
+existing.subnets = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
+
+# Add BGP configuration
+existing.protocol = {
+    "bgp": {
+        "enable": True,
+        "peer_as": "65515",
+        "peer_ip_address": "10.0.0.1",
+        "local_ip_address": "10.0.0.2"
     }
 }
 
-response = remote_networks.update(update_dict)
-
-# Using model directly
-from scm.models.deployment import RemoteNetworkUpdateModel, Protocol, BGP
-
-protocol = Protocol(
-    bgp=BGP(
-        enable=True,
-        peer_as="65515",
-        peer_ip_address="10.0.0.1",
-        local_ip_address="10.0.0.2"
-    )
-)
-
-update_network = RemoteNetworkUpdateModel(
-    name="branch-office-1",
-    description="Updated branch office configuration",
-    subnets=["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"],
-    protocol=protocol
-)
-
-payload = update_network.model_dump(exclude_unset=True)
-response = remote_networks.update(payload)
+# Pass modified object to update()
+updated = client.remote_network.update(existing)
+print(f"Updated remote network: {updated.name}")
 ```

@@ -1,23 +1,54 @@
 # IKE Crypto Profile Models
 
-The IKE Crypto Profile models provide data validation and serialization for IKE Crypto Profiles in Strata Cloud Manager (SCM).
+## Table of Contents
 
-## Model Imports
+1. [Overview](#overview)
+2. [Model Attributes](#model-attributes)
+3. [Enum Types](#enum-types)
+4. [Lifetime Models](#lifetime-models)
+5. [Exceptions](#exceptions)
+6. [Model Validators](#model-validators)
+7. [Usage Examples](#usage-examples)
 
-```python
-from scm.models.network import (
-    IKECryptoProfileCreateModel,
-    IKECryptoProfileUpdateModel,
-    IKECryptoProfileResponseModel,
-    HashAlgorithm,
-    EncryptionAlgorithm,
-    DHGroup,
-    LifetimeSeconds,
-    LifetimeMinutes,
-    LifetimeHours,
-    LifetimeDays,
-)
-```
+## Overview {#Overview}
+
+The IKE Crypto Profile models provide data validation and serialization for IKE Crypto Profiles in Palo Alto Networks' Strata Cloud Manager. These models define encryption, authentication, and key exchange parameters used for IPsec VPN tunnels.
+
+### Models
+
+The module provides the following Pydantic models:
+
+- `IKECryptoProfileBaseModel`: Base model with fields common to all IKE crypto profile operations
+- `IKECryptoProfileCreateModel`: Model for creating new IKE crypto profiles
+- `IKECryptoProfileUpdateModel`: Model for updating existing IKE crypto profiles
+- `IKECryptoProfileResponseModel`: Response model for IKE crypto profile operations
+- `LifetimeSeconds`: Model for lifetime in seconds
+- `LifetimeMinutes`: Model for lifetime in minutes
+- `LifetimeHours`: Model for lifetime in hours
+- `LifetimeDays`: Model for lifetime in days
+- `HashAlgorithm`: Enum for hash algorithm options
+- `EncryptionAlgorithm`: Enum for encryption algorithm options
+- `DHGroup`: Enum for Diffie-Hellman group options
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
+## Model Attributes
+
+| Attribute                | Type                       | Required | Default | Description                                                    |
+|--------------------------|----------------------------|----------|---------|----------------------------------------------------------------|
+| `name`                   | str                        | Yes      | None    | Profile name. Max 31 chars. Pattern: `^[0-9a-zA-Z._-]+$`       |
+| `id`                     | UUID                       | Yes*     | None    | Unique identifier (*response/update only)                      |
+| `hash`                   | List[HashAlgorithm]        | Yes      | None    | Hashing algorithms                                             |
+| `encryption`             | List[EncryptionAlgorithm]  | Yes      | None    | Encryption algorithms                                          |
+| `dh_group`               | List[DHGroup]              | Yes      | None    | Phase-1 DH groups                                              |
+| `lifetime`               | LifetimeType               | No       | None    | Lifetime configuration (seconds, minutes, hours, or days)      |
+| `authentication_multiple`| int                        | No       | 0       | IKEv2 SA reauthentication interval multiplier (0-50)           |
+| `folder`                 | str                        | No**     | None    | Folder containing the profile. Max 64 chars                    |
+| `snippet`                | str                        | No**     | None    | Snippet containing the profile. Max 64 chars                   |
+| `device`                 | str                        | No**     | None    | Device containing the profile. Max 64 chars                    |
+
+\* Only required for update and response models
+\** Exactly one container field (folder/snippet/device) must be provided for create operations
 
 ## Enum Types
 
@@ -25,43 +56,41 @@ from scm.models.network import (
 
 Defines the hash algorithm options for IKE crypto profiles:
 
-```python
-class HashAlgorithm(str, Enum):
-    MD5 = "md5"
-    SHA1 = "sha1"
-    SHA256 = "sha256"
-    SHA384 = "sha384"
-    SHA512 = "sha512"
-```
+| Value      | Description                    |
+|------------|--------------------------------|
+| `md5`      | MD5 hash (deprecated)          |
+| `sha1`     | SHA-1 hash                     |
+| `sha256`   | SHA-256 hash                   |
+| `sha384`   | SHA-384 hash                   |
+| `sha512`   | SHA-512 hash                   |
+| `non-auth` | No authentication              |
 
 ### EncryptionAlgorithm
 
 Defines the encryption algorithm options for IKE crypto profiles:
 
-```python
-class EncryptionAlgorithm(str, Enum):
-    DES = "des"
-    THREE_DES = "3des"
-    AES_128_CBC = "aes-128-cbc"
-    AES_192_CBC = "aes-192-cbc"
-    AES_256_CBC = "aes-256-cbc"
-    AES_128_GCM = "aes-128-gcm"
-    AES_256_GCM = "aes-256-gcm"
-```
+| Value         | Description                    |
+|---------------|--------------------------------|
+| `des`         | DES encryption (deprecated)    |
+| `3des`        | Triple DES encryption          |
+| `aes-128-cbc` | AES-128 CBC encryption         |
+| `aes-192-cbc` | AES-192 CBC encryption         |
+| `aes-256-cbc` | AES-256 CBC encryption         |
+| `aes-128-gcm` | AES-128 GCM encryption         |
+| `aes-256-gcm` | AES-256 GCM encryption         |
 
 ### DHGroup
 
 Defines the Diffie-Hellman group options for IKE crypto profiles:
 
-```python
-class DHGroup(str, Enum):
-    GROUP1 = "group1"
-    GROUP2 = "group2"
-    GROUP5 = "group5"
-    GROUP14 = "group14"
-    GROUP19 = "group19"
-    GROUP20 = "group20"
-```
+| Value     | Description                    |
+|-----------|--------------------------------|
+| `group1`  | DH Group 1 (768-bit)           |
+| `group2`  | DH Group 2 (1024-bit)          |
+| `group5`  | DH Group 5 (1536-bit)          |
+| `group14` | DH Group 14 (2048-bit)         |
+| `group19` | DH Group 19 (256-bit ECP)      |
+| `group20` | DH Group 20 (384-bit ECP)      |
 
 ## Lifetime Models
 
@@ -69,243 +98,226 @@ IKE Crypto Profiles support four different lifetime units. Each has its own mode
 
 ### LifetimeSeconds
 
-```python
-class LifetimeSeconds(BaseModel):
-    seconds: int = Field(
-        ...,
-        description="Specify lifetime in seconds",
-        ge=180,
-        le=65535,
-    )
-```
+| Attribute | Type | Required | Default | Description                         |
+|-----------|------|----------|---------|-------------------------------------|
+| `seconds` | int  | Yes      | None    | Lifetime in seconds (range: 180-65535) |
 
 ### LifetimeMinutes
 
-```python
-class LifetimeMinutes(BaseModel):
-    minutes: int = Field(
-        ...,
-        description="Specify lifetime in minutes",
-        ge=3,
-        le=65535,
-    )
-```
+| Attribute | Type | Required | Default | Description                         |
+|-----------|------|----------|---------|-------------------------------------|
+| `minutes` | int  | Yes      | None    | Lifetime in minutes (range: 3-65535) |
 
 ### LifetimeHours
 
-```python
-class LifetimeHours(BaseModel):
-    hours: int = Field(
-        ...,
-        description="Specify lifetime in hours",
-        ge=1,
-        le=65535,
-    )
-```
+| Attribute | Type | Required | Default | Description                         |
+|-----------|------|----------|---------|-------------------------------------|
+| `hours`   | int  | Yes      | None    | Lifetime in hours (range: 1-65535)  |
 
 ### LifetimeDays
 
+| Attribute | Type | Required | Default | Description                         |
+|-----------|------|----------|---------|-------------------------------------|
+| `days`    | int  | Yes      | None    | Lifetime in days (range: 1-365)     |
+
+### LifetimeType
+
+A union type representing any of the lifetime models:
+
 ```python
-class LifetimeDays(BaseModel):
-    days: int = Field(
-        ...,
-        description="Specify lifetime in days",
-        ge=1,
-        le=365,
-    )
+LifetimeType = Union[LifetimeSeconds, LifetimeMinutes, LifetimeHours, LifetimeDays]
 ```
 
-## Base Model
+## Exceptions
 
-The `IKECryptoProfileBaseModel` serves as the foundation for all IKE Crypto Profile models:
+The IKE Crypto Profile models can raise the following exceptions during validation:
+
+- **ValueError**: Raised in several scenarios:
+    - When name doesn't match the required pattern `^[0-9a-zA-Z._-]+$`
+    - When name exceeds 31 characters
+    - When required fields (hash, encryption, dh_group) are not provided
+    - When container validation fails (not exactly one of folder/snippet/device provided)
+    - When authentication_multiple is outside range 0-50
+    - When lifetime values are outside their valid ranges
+
+## Model Validators
+
+### Container Validation (Create Model)
+
+The create model enforces that exactly one container field is provided:
 
 ```python
-class IKECryptoProfileBaseModel(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
+from scm.models.network import IKECryptoProfileCreateModel
 
-    name: str = Field(
-        ...,
-        description="The name of the IKE crypto profile",
-        pattern=r"^[0-9a-zA-Z._-]+$",
-        max_length=31,
+# This will raise a validation error - no container provided
+try:
+    profile = IKECryptoProfileCreateModel(
+        name="test-profile",
+        hash=["sha256"],
+        encryption=["aes-256-cbc"],
+        dh_group=["group14"]
+        # Missing folder, snippet, or device
     )
-    hash: List[HashAlgorithm] = Field(
-        ...,
-        description="Hashing algorithms",
-    )
-    encryption: List[EncryptionAlgorithm] = Field(
-        ...,
-        description="Encryption algorithms",
-    )
-    dh_group: List[DHGroup] = Field(
-        ...,
-        description="Phase-1 DH group",
-    )
-    lifetime: Optional[LifetimeType] = Field(
-        None,
-        description="Lifetime configuration",
-    )
-    authentication_multiple: Optional[int] = Field(
-        0,
-        description="IKEv2 SA reauthentication interval equals authetication-multiple * rekey-lifetime; 0 means reauthentication disabled",
-        ge=0,
-        le=50,
-    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 
-    # Container fields
-    folder: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The folder in which the resource is defined",
+# This will raise a validation error - multiple containers provided
+try:
+    profile = IKECryptoProfileCreateModel(
+        name="test-profile",
+        hash=["sha256"],
+        encryption=["aes-256-cbc"],
+        dh_group=["group14"],
+        folder="Texas",
+        snippet="my-snippet"  # Can't have both
     )
-    snippet: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The snippet in which the resource is defined",
-    )
-    device: Optional[str] = Field(
-        None,
-        pattern=r"^[a-zA-Z\d\-_. ]+$",
-        max_length=64,
-        description="The device in which the resource is defined",
-    )
+except ValueError as e:
+    print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-## Create Model
+### Lifetime Value Validation
 
-Used for creating new IKE Crypto Profiles:
-
-```python
-class IKECryptoProfileCreateModel(IKECryptoProfileBaseModel):
-    """Model for creating new IKE Crypto Profiles."""
-
-    @model_validator(mode="after")
-    def validate_container(self) -> "IKECryptoProfileCreateModel":
-        container_fields = ["folder", "snippet", "device"]
-        provided = [
-            field for field in container_fields if getattr(self, field) is not None
-        ]
-        if len(provided) != 1:
-            raise ValueError(
-                "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-            )
-        return self
-```
-
-## Update Model
-
-Used for updating existing IKE Crypto Profiles:
+Each lifetime model enforces valid ranges:
 
 ```python
-class IKECryptoProfileUpdateModel(IKECryptoProfileBaseModel):
-    """Model for updating existing IKE Crypto Profiles."""
+from scm.models.network import LifetimeSeconds, LifetimeDays
 
-    id: UUID = Field(
-        ...,
-        description="The UUID of the IKE crypto profile",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
-```
+# This will raise a validation error - seconds below minimum
+try:
+    lifetime = LifetimeSeconds(seconds=100)  # Minimum is 180
+except ValueError as e:
+    print(e)  # "Input should be greater than or equal to 180"
 
-## Response Model
-
-Represents IKE Crypto Profiles returned from the API:
-
-```python
-class IKECryptoProfileResponseModel(IKECryptoProfileBaseModel):
-    """Model for IKE Crypto Profile responses."""
-
-    id: UUID = Field(
-        ...,
-        description="The UUID of the IKE crypto profile",
-        examples=["123e4567-e89b-12d3-a456-426655440000"],
-    )
+# This will raise a validation error - days above maximum
+try:
+    lifetime = LifetimeDays(days=400)  # Maximum is 365
+except ValueError as e:
+    print(e)  # "Input should be less than or equal to 365"
 ```
 
 ## Usage Examples
 
-### Creating a Profile
+### Creating an IKE Crypto Profile
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
+profile_dict = {
+    "name": "ike-crypto-strong",
+    "hash": ["sha256", "sha384"],
+    "encryption": ["aes-256-cbc", "aes-256-gcm"],
+    "dh_group": ["group14", "group19"],
+    "lifetime": {"hours": 8},
+    "authentication_multiple": 3,
+    "folder": "Texas"
+}
+
+response = client.ike_crypto_profile.create(profile_dict)
+print(f"Created profile: {response.name} (ID: {response.id})")
+
+# Using model directly
+from scm.models.network import IKECryptoProfileCreateModel
+
+profile_model = IKECryptoProfileCreateModel(
+    name="ike-crypto-gcm",
+    hash=["sha384"],
+    encryption=["aes-256-gcm"],
+    dh_group=["group19", "group20"],
+    lifetime={"days": 1},
+    folder="Texas"
+)
+
+payload = profile_model.model_dump(exclude_unset=True)
+response = client.ike_crypto_profile.create(payload)
+```
+
+### Updating an IKE Crypto Profile
+
+```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Fetch existing profile
+existing = client.ike_crypto_profile.fetch(
+    name="ike-crypto-strong",
+    folder="Texas"
+)
+
+# Modify attributes using dot notation
+existing.hash = ["sha384", "sha512"]
+existing.encryption = ["aes-256-gcm"]
+existing.lifetime = {"days": 1}
+
+# Pass modified object to update()
+updated = client.ike_crypto_profile.update(existing)
+print(f"Updated profile: {updated.name}")
+```
+
+### Working with Enums
 
 ```python
 from scm.models.network import (
-    IKECryptoProfileCreateModel,
     HashAlgorithm,
     EncryptionAlgorithm,
     DHGroup,
 )
 
-# Using the model directly
-profile_data = {
-    "name": "example-ike-crypto",
-    "hash": [HashAlgorithm.SHA1, HashAlgorithm.SHA256],
-    "encryption": [
-        EncryptionAlgorithm.AES_128_CBC,
-        EncryptionAlgorithm.AES_256_CBC
-    ],
-    "dh_group": [DHGroup.GROUP2, DHGroup.GROUP5],
-    "lifetime": {"hours": 8},
-    "folder": "Example-Folder",
-}
-
-# Create the model and validate
-profile_model = IKECryptoProfileCreateModel(**profile_data)
-
-# Access properties
-print(f"Profile name: {profile_model.name}")
-print(f"Hash algorithms: {[h.value for h in profile_model.hash]}")
-```
-
-### Updating a Profile
-
-```python
-from scm.models.network import IKECryptoProfileUpdateModel
-
-# Create update model
-update_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "example-ike-crypto",
+# Using enum values in configuration
+profile_config = {
+    "name": "ike-crypto-enum-example",
     "hash": [HashAlgorithm.SHA256, HashAlgorithm.SHA384],
     "encryption": [
         EncryptionAlgorithm.AES_256_CBC,
-        EncryptionAlgorithm.AES_256_GCM,
+        EncryptionAlgorithm.AES_256_GCM
     ],
-    "dh_group": [DHGroup.GROUP5, DHGroup.GROUP14],
-    "lifetime": {"days": 1},
-    "folder": "Example-Folder"
+    "dh_group": [DHGroup.GROUP14, DHGroup.GROUP19],
+    "lifetime": {"hours": 8},
+    "folder": "Texas"
 }
 
-update_model = IKECryptoProfileUpdateModel(**update_data)
+response = client.ike_crypto_profile.create(profile_config)
 
-# Convert model to dict for API request
-payload = update_model.model_dump(exclude_unset=True, by_alias=True)
+# Checking enum values in response
+if HashAlgorithm.SHA256 in response.hash:
+    print("Profile uses SHA-256")
+
+# Get string values from enums
+hash_values = [h.value for h in response.hash]
+print(f"Hash algorithms: {hash_values}")
 ```
 
-### Handling Responses
+### Handling Lifetime Configurations
 
 ```python
-from scm.models.network import IKECryptoProfileResponseModel
+# Different lifetime options
+seconds_lifetime = {"seconds": 28800}  # 8 hours in seconds (min: 180)
+minutes_lifetime = {"minutes": 480}     # 8 hours in minutes (min: 3)
+hours_lifetime = {"hours": 8}           # 8 hours (min: 1)
+days_lifetime = {"days": 1}             # 1 day (max: 365)
 
-# Parse API response into model
-response_data = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "example-ike-crypto",
-    "hash": ["sha1", "sha256"],
-    "encryption": ["aes-128-cbc", "aes-256-cbc"],
-    "dh_group": ["group2", "group5"],
-    "lifetime": {"hours": 8},
-    "folder": "Example-Folder",
+# Create profile with specific lifetime
+profile_config = {
+    "name": "ike-crypto-daily",
+    "hash": ["sha256"],
+    "encryption": ["aes-256-cbc"],
+    "dh_group": ["group14"],
+    "lifetime": days_lifetime,
+    "folder": "Texas"
 }
 
-response_model = IKECryptoProfileResponseModel(**response_data)
-
-# Access model properties
-print(f"Profile ID: {response_model.id}")
-print(f"Hash algorithms: {[h.value for h in response_model.hash]}")
-print(f"Using SHA1: {HashAlgorithm.SHA1 in response_model.hash}")
+response = client.ike_crypto_profile.create(profile_config)
 ```

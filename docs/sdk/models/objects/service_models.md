@@ -5,8 +5,22 @@
 The Service models provide a structured way to manage network services in Palo Alto Networks' Strata Cloud Manager.
 These models support both TCP and UDP protocols with port configurations and protocol-specific overrides. Services can
 be defined in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with
-the
-SCM API.
+the SCM API.
+
+### Models
+
+The module provides the following Pydantic models:
+
+- `ServiceBaseModel`: Base model with fields common to all service operations
+- `ServiceCreateModel`: Model for creating new services
+- `ServiceUpdateModel`: Model for updating existing services
+- `ServiceResponseModel`: Response model for service operations
+- `Protocol`: Protocol configuration container (TCP or UDP)
+- `TCPProtocol`: TCP protocol settings with port and override options
+- `UDPProtocol`: UDP protocol settings with port and override options
+- `Override`: Protocol override settings (timeout, halfclose_timeout, timewait_timeout)
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
 ## Attributes
 
@@ -119,10 +133,17 @@ except ValueError as e:
 ### Creating a TCP Service
 
 ```python
-# Using dictionary
-from scm.config.objects import Service
+from scm.client import ScmClient
 
-tcp_dict = {
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
+tcp_data = {
     "name": "web-service",
     "protocol": {
         "tcp": {
@@ -138,37 +159,15 @@ tcp_dict = {
     "tag": ["web", "production"]
 }
 
-service = Service(api_client)
-response = service.create(tcp_dict)
-
-# Using model directly
-from scm.models.objects import ServiceCreateModel, Protocol, TCPProtocol, Override
-
-tcp_service = ServiceCreateModel(
-    name="web-service",
-    protocol=Protocol(
-        tcp=TCPProtocol(
-            port="80,443",
-            override=Override(
-                timeout=30,
-                halfclose_timeout=15
-            )
-        )
-    ),
-    description="Web service ports",
-    folder="Texas",
-    tag=["web", "production"]
-)
-
-payload = tcp_service.model_dump(exclude_unset=True)
-response = service.create(payload)
+response = client.service.create(tcp_data)
+print(f"Created service: {response.name} (ID: {response.id})")
 ```
 
 ### Creating a UDP Service
 
 ```python
 # Using dictionary
-udp_dict = {
+udp_data = {
     "name": "dns-service",
     "protocol": {
         "udp": {
@@ -180,64 +179,39 @@ udp_dict = {
     "tag": ["dns", "network"]
 }
 
-response = service.create(udp_dict)
-
-# Using model directly
-from scm.models.objects import ServiceCreateModel, Protocol, UDPProtocol
-
-udp_service = ServiceCreateModel(
-    name="dns-service",
-    protocol=Protocol(
-        udp=UDPProtocol(
-            port="53"
-        )
-    ),
-    description="DNS service",
-    snippet="Network Services",
-    tag=["dns", "network"]
-)
-
-payload = udp_service.model_dump(exclude_unset=True)
-response = service.create(payload)
+response = client.service.create(udp_data)
+print(f"Created UDP service: {response.name}")
 ```
 
 ### Updating a Service
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "web-service-updated",
-    "protocol": {
-        "tcp": {
-            "port": "80,443,8080",
-            "override": {
-                "timeout": 60
-            }
-        }
-    },
-    "tag": ["web", "production", "updated"]
-}
+# Fetch existing service
+existing = client.service.fetch(name="web-service", folder="Texas")
 
-response = service.update(update_dict)
+# Modify attributes using dot notation
+existing.protocol.tcp.port = "80,443,8080"
+existing.protocol.tcp.override.timeout = 60
+existing.tag = ["web", "production", "updated"]
 
-# Using model directly
-from scm.models.objects import ServiceUpdateModel, Protocol, TCPProtocol, Override
+# Pass modified object to update()
+updated = client.service.update(existing)
+print(f"Updated service: {updated.name}")
+print(f"New ports: {updated.protocol.tcp.port}")
+```
 
-update = ServiceUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="web-service-updated",
-    protocol=Protocol(
-        tcp=TCPProtocol(
-            port="80,443,8080",
-            override=Override(
-                timeout=60
-            )
-        )
-    ),
-    tag=["web", "production", "updated"]
-)
+### Working with Response Models
 
-payload = update.model_dump(exclude_unset=True)
-response = service.update(payload)
+```python
+# List and process services
+services = client.service.list(folder="Texas")
+
+for svc in services:
+    print(f"Service: {svc.name} (ID: {svc.id})")
+    if svc.protocol.tcp:
+        print(f"  TCP Ports: {svc.protocol.tcp.port}")
+        if svc.protocol.tcp.override:
+            print(f"  Timeout: {svc.protocol.tcp.override.timeout}")
+    elif svc.protocol.udp:
+        print(f"  UDP Ports: {svc.protocol.udp.port}")
 ```

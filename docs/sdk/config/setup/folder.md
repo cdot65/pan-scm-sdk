@@ -39,19 +39,35 @@ The `Folder` class provides functionality to manage folder objects in Palo Alto 
 
 ## Folder Model Attributes
 
-| Attribute       | Type                | Required | Description                                                           |
-|-----------------|---------------------|----------|-----------------------------------------------------------------------|
-| `name`          | str                 | Yes      | Name of the folder                                                    |
-| `parent`        | str                 | Yes      | Name of the parent folder (not the ID). Empty string for root folders |
-| `id`            | UUID                | Yes*     | Unique identifier (*response only)                                    |
-| `description`   | Optional[str]       | No       | Optional description of the folder                                    |
-| `labels`        | Optional[List[str]] | No       | Optional list of labels to apply to the folder                        |
-| `snippets`      | Optional[List[str]] | No       | Optional list of snippet IDs associated with the folder               |
-| `display_name`  | Optional[str]       | No       | Display name for the folder/device, if present                        |
-| `model`         | Optional[str]       | No       | Device model, if present (e.g., 'PA-VM')                              |
-| `serial_number` | Optional[str]       | No       | Device serial number, if present                                      |
-| `type`          | Optional[str]       | No       | Type of folder or device (e.g., 'on-prem', 'container', 'cloud')      |
-| `device_only`   | Optional[bool]      | No       | True if this is a device-only entry                                   |
+| Attribute       | Type                | Required | Default | Description                                                           |
+|-----------------|---------------------|----------|---------|-----------------------------------------------------------------------|
+| `name`          | str                 | Yes      | None    | Name of the folder                                                    |
+| `parent`        | str                 | Yes      | None    | Name of the parent folder (not the ID). Empty string for root folders |
+| `id`            | UUID                | Yes*     | None    | Unique identifier (*response/update only)                             |
+| `description`   | str                 | No       | None    | Optional description of the folder                                    |
+| `labels`        | List[str]           | No       | None    | Optional list of labels to apply to the folder                        |
+| `snippets`      | List[str]           | No       | None    | Optional list of snippet IDs associated with the folder               |
+| `display_name`  | str                 | No       | None    | Display name for the folder/device, if present                        |
+| `model`         | str                 | No       | None    | Device model, if present (e.g., 'PA-VM')                              |
+| `serial_number` | str                 | No       | None    | Device serial number, if present                                      |
+| `type`          | str                 | No       | None    | Type of folder or device (e.g., 'on-prem', 'container', 'cloud')      |
+| `device_only`   | bool                | No       | None    | True if this is a device-only entry                                   |
+
+\* Only required for response and update models
+
+### Filter Parameters
+
+The `list()` method supports the following filters:
+
+| Parameter       | Type       | Description                                      |
+|-----------------|------------|--------------------------------------------------|
+| `labels`        | List[str]  | Filter by labels (server-side, comma-joined)     |
+| `type`          | str        | Filter by folder type (server-side)              |
+| `parent`        | str        | Filter by parent folder name (server-side)       |
+| `snippets`      | List[str]  | Filter by snippets (client-side, any match)      |
+| `model`         | str        | Filter by device model (client-side, exact)      |
+| `serial_number` | str        | Filter by serial number (client-side, exact)     |
+| `device_only`   | bool       | Filter device-only entries (client-side)         |
 
 ## Exceptions
 
@@ -133,16 +149,17 @@ if folder_by_name:
 ```
 
 ### Updating Folders
+
 ```python
-from scm.models.setup.folder import FolderUpdateModel
-update_model = FolderUpdateModel(
-    id="baf4dc4c-9ea2-4a3d-92bb-6f8a9e60822e",
-    name="Engineering",
-    parent="root",
-    description="Updated description",
-    labels=["updated"],
-)
-updated = folders.update(update_model)
+# Fetch existing folder
+existing = client.folder.fetch(name="Engineering")
+
+# Modify attributes using dot notation
+existing.description = "Updated description"
+existing.labels = ["updated", "engineering"]
+
+# Pass modified object to update()
+updated = client.folder.update(existing)
 print(updated.description)
 ```
 
@@ -162,9 +179,24 @@ container_folders = folders.list(type="container")
 ```
 
 ### Controlling Pagination with max_limit
+
 ```python
-folders = Folder(client, max_limit=100)
-results = folders.list()
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit using the property setter
+client.folder.max_limit = 100
+
+# List all folders - auto-paginates through results
+all_folders = client.folder.list()
+
+# The folders are fetched in chunks according to the max_limit setting.
 ```
 
 ### Working with Folder Hierarchies
@@ -204,4 +236,8 @@ except InvalidObjectError as e:
 See the test suite in `tests/scm/config/setup/test_folder.py` for comprehensive usage and edge cases.
 
 ## Related Models
-- See [Folder Models](../../models/setup/folder_models.md) for model details.
+
+- [FolderBaseModel](../../models/setup/folder_models.md#Overview)
+- [FolderCreateModel](../../models/setup/folder_models.md#Overview)
+- [FolderUpdateModel](../../models/setup/folder_models.md#Overview)
+- [FolderResponseModel](../../models/setup/folder_models.md#Overview)

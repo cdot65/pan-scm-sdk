@@ -1,43 +1,165 @@
 # DNS Security Profile Models
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Model Attributes](#model-attributes)
+3. [Enum Types](#enum-types)
+4. [Supporting Models](#supporting-models)
+5. [Exceptions](#exceptions)
+6. [Model Validators](#model-validators)
+7. [Usage Examples](#usage-examples)
+
 ## Overview {#Overview}
 
 The DNS Security Profile models provide a structured way to manage DNS Security profiles in Palo Alto Networks' Strata Cloud Manager. These models support configuration of profiles that protect against DNS-based threats, including domain filtering and DNS sinkhole operations. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-## Attributes
+### Models
 
-| Attribute       | Type          | Required | Default | Description                                                                        |
-|-----------------|---------------|----------|---------|------------------------------------------------------------------------------------|
-| name            | str           | Yes      | None    | Name of the profile. Max length: 63 chars. Pattern: ^[a-zA-Z0-9_ \.-]+$            |
-| description     | str           | No       | None    | Description of the profile. Max length: 1023 chars                                 |
-| botnet_domains  | BotnetDomains | No       | None    | Botnet domain filtering configuration                                              |
-| folder          | str           | No*      | None    | Folder where profile is defined. Max length: 64 chars                              |
-| snippet         | str           | No*      | None    | Snippet where profile is defined. Max length: 64 chars                             |
-| device          | str           | No*      | None    | Device where profile is defined. Max length: 64 chars                              |
-| id              | UUID          | Yes**    | None    | UUID of the profile (response only)                                                |
+The module provides the following Pydantic models:
 
-\* Exactly one container type (folder/snippet/device) must be provided for create operations
-\** Only required for response model
+- `DNSSecurityProfileBaseModel`: Base model with fields common to all profile operations
+- `DNSSecurityProfileCreateModel`: Model for creating new DNS security profiles
+- `DNSSecurityProfileUpdateModel`: Model for updating existing DNS security profiles
+- `DNSSecurityProfileResponseModel`: Response model for DNS security profile operations
+- `BotnetDomainsModel`: Model for botnet domains configuration
+- `DNSSecurityCategoryEntryModel`: Model for DNS security category entries
+- `ListEntryBaseModel`: Model for custom domain list entries
+- `SinkholeSettingsModel`: Model for sinkhole configuration
+- `WhitelistEntryModel`: Model for whitelist entries
 
-### BotnetDomains Model Attributes
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
-| Attribute         | Type           | Required | Default | Description                                                |
-|-------------------|----------------|----------|---------|------------------------------------------------------------|
-| enable            | bool           | No       | None    | Enable botnet domain filtering                             |
-| packet_capture    | bool           | No       | None    | Enable packet capture for botnet domains                   |
-| dns_security_categories | List[DNSSecurityCategory] | No     | None  | List of DNS security categories                |
-| sinkhole_ipv4     | str            | No       | None    | IPv4 sinkhole address                                      |
-| sinkhole_ipv6     | str            | No       | None    | IPv6 sinkhole address                                      |
-| whitelist         | List[str]      | No       | None    | List of domains to whitelist                               |
+## Model Attributes
 
-### DNSSecurityCategory Model Attributes
+### DNSSecurityProfileBaseModel
 
-| Attribute         | Type           | Required | Default | Description                                                |
-|-------------------|----------------|----------|---------|------------------------------------------------------------|
-| name              | str            | Yes      | None    | Category name                                              |
-| action            | str            | Yes      | None    | Action to take (alert, allow, block, sinkhole)             |
-| log_level         | str            | No       | None    | Log level (default, disable, medium, high, critical)       |
-| packet_capture    | str            | No       | None    | Packet capture setting (disable, single-packet, extended)  |
+| Attribute        | Type              | Required | Default | Description                                                      |
+|------------------|-------------------|----------|---------|------------------------------------------------------------------|
+| name             | str               | Yes      | None    | Profile name. Pattern: `^[a-zA-Z0-9][a-zA-Z0-9_\-\.\s]*$`        |
+| description      | str               | No       | None    | Description of the profile                                       |
+| botnet_domains   | BotnetDomainsModel| No       | None    | Botnet domains settings                                          |
+| folder           | str               | No**     | None    | Folder location. Max 64 chars                                    |
+| snippet          | str               | No**     | None    | Snippet location. Max 64 chars                                   |
+| device           | str               | No**     | None    | Device location. Max 64 chars                                    |
+
+\** Exactly one container (folder/snippet/device) must be provided for create operations
+
+### DNSSecurityProfileCreateModel
+
+Inherits all fields from `DNSSecurityProfileBaseModel` and enforces that **exactly one** of `folder`, `snippet`, or `device` is provided during creation.
+
+### DNSSecurityProfileUpdateModel
+
+Extends `DNSSecurityProfileBaseModel` by adding:
+
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the profile |
+
+### DNSSecurityProfileResponseModel
+
+Extends `DNSSecurityProfileBaseModel` by adding:
+
+| Attribute | Type | Required | Default | Description                          |
+|-----------|------|----------|---------|--------------------------------------|
+| id        | UUID | Yes      | None    | The unique identifier of the profile |
+
+## Enum Types
+
+### ActionEnum
+
+Defines the allowed actions for DNS security categories:
+
+| Value      | Description         |
+|------------|---------------------|
+| `default`  | Use default action  |
+| `allow`    | Allow the traffic   |
+| `block`    | Block the traffic   |
+| `sinkhole` | Sinkhole the domain |
+
+### LogLevelEnum
+
+Defines the log levels:
+
+| Value           | Description             |
+|-----------------|-------------------------|
+| `default`       | Default log level       |
+| `none`          | No logging              |
+| `low`           | Low priority logging    |
+| `informational` | Informational logging   |
+| `medium`        | Medium priority logging |
+| `high`          | High priority logging   |
+| `critical`      | Critical priority logging |
+
+### PacketCaptureEnum
+
+Defines the packet capture options:
+
+| Value              | Description              |
+|--------------------|--------------------------|
+| `disable`          | Disable packet capture   |
+| `single-packet`    | Capture a single packet  |
+| `extended-capture` | Extended packet capture  |
+
+### IPv4AddressEnum
+
+Defines the allowed IPv4 sinkhole addresses:
+
+| Value                     | Description                |
+|---------------------------|----------------------------|
+| `pan-sinkhole-default-ip` | Default sinkhole IP        |
+| `127.0.0.1`               | Localhost                  |
+
+### IPv6AddressEnum
+
+Defines the allowed IPv6 sinkhole addresses:
+
+| Value | Description |
+|-------|-------------|
+| `::1` | Localhost   |
+
+## Supporting Models
+
+### BotnetDomainsModel
+
+| Attribute                 | Type                                | Required | Default | Description                    |
+|---------------------------|-------------------------------------|----------|---------|--------------------------------|
+| dns_security_categories   | List[DNSSecurityCategoryEntryModel] | No       | None    | DNS security categories        |
+| lists                     | List[ListEntryBaseModel]            | No       | None    | Lists of DNS domains           |
+| sinkhole                  | SinkholeSettingsModel               | No       | None    | DNS sinkhole settings          |
+| whitelist                 | List[WhitelistEntryModel]           | No       | None    | DNS security overrides         |
+
+### DNSSecurityCategoryEntryModel
+
+| Attribute      | Type              | Required | Default   | Description                 |
+|----------------|-------------------|----------|-----------|-----------------------------|
+| name           | str               | Yes      | None      | DNS Security Category Name  |
+| action         | ActionEnum        | No       | default   | Action to be taken          |
+| log_level      | LogLevelEnum      | No       | default   | Log level                   |
+| packet_capture | PacketCaptureEnum | No       | None      | Packet capture setting      |
+
+### ListEntryBaseModel
+
+| Attribute      | Type                   | Required | Default | Description            |
+|----------------|------------------------|----------|---------|------------------------|
+| name           | str                    | Yes      | None    | List name              |
+| packet_capture | PacketCaptureEnum      | No       | None    | Packet capture setting |
+| action         | ListActionRequestModel | Yes      | None    | Action                 |
+
+### SinkholeSettingsModel
+
+| Attribute      | Type            | Required | Default | Description               |
+|----------------|-----------------|----------|---------|---------------------------|
+| ipv4_address   | IPv4AddressEnum | Yes      | None    | IPv4 address for sinkhole |
+| ipv6_address   | IPv6AddressEnum | Yes      | None    | IPv6 address for sinkhole |
+
+### WhitelistEntryModel
+
+| Attribute   | Type | Required | Default | Description                          |
+|-------------|------|----------|---------|--------------------------------------|
+| name        | str  | Yes      | None    | DNS domain or FQDN to be whitelisted |
+| description | str  | No       | None    | Description                          |
 
 ## Exceptions
 
@@ -51,6 +173,7 @@ The DNS Security Profile models can raise the following exceptions during valida
     - When field length limits are exceeded
     - When invalid action or log level values are provided
     - When invalid packet capture settings are provided
+    - When multiple actions are specified in list entry action field
 
 ## Model Validators
 
@@ -59,8 +182,7 @@ The DNS Security Profile models can raise the following exceptions during valida
 For create operations, exactly one container type must be specified:
 
 ```python
-# This will raise a validation error
-from scm.models.security_services import DNSSecurityProfileCreateModel
+from scm.models.security import DNSSecurityProfileCreateModel
 
 # Error: multiple containers specified
 try:
@@ -81,39 +203,24 @@ except ValueError as e:
     print(e)  # "Exactly one of 'folder', 'snippet', or 'device' must be provided."
 ```
 
-### Category Action Validation
+### Action Validation
 
-The category action must be one of the allowed values:
-
-```python
-from scm.models.security_services import DNSSecurityCategory
-
-# Error: invalid action
-try:
-    category = DNSSecurityCategory(
-        name="command-and-control",
-        action="invalid-action"  # Must be alert, allow, block, or sinkhole
-    )
-except ValueError as e:
-    print(e)  # "Value error, action must be one of ['alert', 'allow', 'block', 'sinkhole']"
-```
-
-### Log Level Validation
-
-The log level must be one of the allowed values:
+For list entries, exactly one action type must be specified:
 
 ```python
-from scm.models.security_services import DNSSecurityCategory
+from scm.models.security import ListActionRequestModel
 
-# Error: invalid log level
+# Error: multiple actions specified
 try:
-    category = DNSSecurityCategory(
-        name="command-and-control",
-        action="block",
-        log_level="invalid-level"  # Must be default, disable, medium, high, or critical
-    )
+    action = ListActionRequestModel(root={
+        "alert": {},
+        "block": {}  # Can't specify multiple actions
+    })
 except ValueError as e:
-    print(e)  # "Value error, log_level must be one of ['default', 'disable', 'medium', 'high', 'critical']"
+    print(e)  # "Exactly one action must be provided in 'action' field."
+
+# Correct way to specify an action
+action = ListActionRequestModel(root={"block": {}})
 ```
 
 ## Usage Examples
@@ -121,195 +228,136 @@ except ValueError as e:
 ### Creating a DNS Security Profile
 
 ```python
-# Using dictionary
-from scm.config.security_services import DNSSecurityProfile
+from scm.client import ScmClient
 
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Using dictionary
 profile_dict = {
     "name": "dns-sec-profile",
     "description": "DNS security profile for production",
     "botnet_domains": {
-        "enable": True,
-        "packet_capture": True,
         "dns_security_categories": [
             {
-                "name": "command-and-control",
+                "name": "pan-dns-sec-malware",
                 "action": "block",
                 "log_level": "critical",
-                "packet_capture": "extended"
+                "packet_capture": "extended-capture"
             },
             {
-                "name": "malware",
+                "name": "pan-dns-sec-phishing",
                 "action": "sinkhole",
                 "log_level": "high",
                 "packet_capture": "single-packet"
             }
         ],
-        "sinkhole_ipv4": "10.0.0.1",
-        "whitelist": ["trusted-domain.com"]
+        "sinkhole": {
+            "ipv4_address": "pan-sinkhole-default-ip",
+            "ipv6_address": "::1"
+        },
+        "whitelist": [
+            {"name": "trusted-domain.com", "description": "Trusted domain"}
+        ]
     },
     "folder": "Texas"
 }
 
-dns_security = DNSSecurityProfile(api_client)
-response = dns_security.create(profile_dict)
-
-# Using model directly
-from scm.models.security_services import (
-    DNSSecurityProfileCreateModel,
-    BotnetDomains,
-    DNSSecurityCategory
-)
-
-botnet_domains = BotnetDomains(
-    enable=True,
-    packet_capture=True,
-    dns_security_categories=[
-        DNSSecurityCategory(
-            name="command-and-control",
-            action="block",
-            log_level="critical",
-            packet_capture="extended"
-        ),
-        DNSSecurityCategory(
-            name="malware",
-            action="sinkhole",
-            log_level="high",
-            packet_capture="single-packet"
-        )
-    ],
-    sinkhole_ipv4="10.0.0.1",
-    whitelist=["trusted-domain.com"]
-)
-
-profile = DNSSecurityProfileCreateModel(
-    name="dns-sec-profile",
-    description="DNS security profile for production",
-    botnet_domains=botnet_domains,
-    folder="Texas"
-)
-
-payload = profile.model_dump(exclude_unset=True)
-response = dns_security.create(payload)
+response = client.dns_security_profile.create(profile_dict)
+print(f"Created profile: {response.name}")
 ```
 
 ### Creating a Profile with Multiple Categories
 
 ```python
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
 # Using dictionary
 profile_dict = {
     "name": "comprehensive-dns-profile",
     "description": "Comprehensive DNS security profile",
     "botnet_domains": {
-        "enable": True,
         "dns_security_categories": [
             {
-                "name": "command-and-control",
+                "name": "pan-dns-sec-cc",
                 "action": "block",
                 "log_level": "critical"
             },
             {
-                "name": "malware",
+                "name": "pan-dns-sec-malware",
                 "action": "sinkhole",
                 "log_level": "high"
             },
             {
-                "name": "phishing",
+                "name": "pan-dns-sec-phishing",
                 "action": "block",
                 "log_level": "high"
             },
             {
-                "name": "grayware",
+                "name": "pan-dns-sec-grayware",
                 "action": "alert",
                 "log_level": "medium"
-            },
-            {
-                "name": "dns-tunneling",
-                "action": "block",
-                "log_level": "high"
             }
         ],
-        "sinkhole_ipv4": "10.0.0.1",
-        "sinkhole_ipv6": "2001:db8::1"
+        "sinkhole": {
+            "ipv4_address": "pan-sinkhole-default-ip",
+            "ipv6_address": "::1"
+        }
     },
     "folder": "Texas"
 }
 
-response = dns_security.create(profile_dict)
+response = client.dns_security_profile.create(profile_dict)
+print(f"Created profile with {len(response.botnet_domains.dns_security_categories)} categories")
 ```
 
 ### Updating a DNS Security Profile
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "dns-sec-profile",
-    "description": "Updated DNS security profile",
-    "botnet_domains": {
-        "enable": True,
-        "packet_capture": False,  # Changed from True to False
-        "dns_security_categories": [
-            {
-                "name": "command-and-control",
-                "action": "block",
-                "log_level": "critical",
-                "packet_capture": "single-packet"  # Changed from extended to single-packet
-            },
-            {
-                "name": "malware",
-                "action": "sinkhole",
-                "log_level": "high",
-                "packet_capture": "single-packet"
-            },
-            {
-                "name": "phishing",  # Added new category
-                "action": "block",
-                "log_level": "high"
-            }
-        ],
-        "whitelist": ["trusted-domain.com", "another-trusted.org"]  # Added new domain
-    }
-}
+from scm.client import ScmClient
 
-response = dns_security.update(update_dict)
-
-# Using model directly
-from scm.models.security_services import (
-    DNSSecurityProfileUpdateModel,
-    BotnetDomains,
-    DNSSecurityCategory
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
 )
 
-update_profile = DNSSecurityProfileUpdateModel(
-    id="123e4567-e89b-12d3-a456-426655440000",
-    name="dns-sec-profile",
-    description="Updated DNS security profile",
-    botnet_domains=BotnetDomains(
-        enable=True,
-        packet_capture=False,
-        dns_security_categories=[
-            DNSSecurityCategory(
-                name="command-and-control",
-                action="block",
-                log_level="critical",
-                packet_capture="single-packet"
-            ),
-            DNSSecurityCategory(
-                name="malware",
-                action="sinkhole",
-                log_level="high",
-                packet_capture="single-packet"
-            ),
-            DNSSecurityCategory(
-                name="phishing",
-                action="block",
-                log_level="high"
-            )
-        ],
-        whitelist=["trusted-domain.com", "another-trusted.org"]
-    )
-)
+# Fetch existing profile
+existing = client.dns_security_profile.fetch(name="dns-sec-profile", folder="Texas")
 
-payload = update_profile.model_dump(exclude_unset=True)
-response = dns_security.update(payload)
+# Modify attributes using dot notation
+existing.description = "Updated DNS security profile"
+
+# Add a new category to the existing list
+if existing.botnet_domains and existing.botnet_domains.dns_security_categories:
+    existing.botnet_domains.dns_security_categories.append({
+        "name": "pan-dns-sec-recent",
+        "action": "alert",
+        "log_level": "medium"
+    })
+
+# Add whitelist entry if needed
+if existing.botnet_domains:
+    if existing.botnet_domains.whitelist is None:
+        existing.botnet_domains.whitelist = []
+    existing.botnet_domains.whitelist.append({
+        "name": "new-trusted.com",
+        "description": "Newly trusted domain"
+    })
+
+# Pass modified object to update()
+updated = client.dns_security_profile.update(existing)
+print(f"Updated profile: {updated.name}")
 ```

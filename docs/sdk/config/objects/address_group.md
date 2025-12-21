@@ -32,14 +32,14 @@ that can be either static (explicit list of addresses) or dynamic (tag-based fil
 
 ## Core Methods
 
-| Method     | Description                      | Parameters                               | Return Type                       |
-|------------|----------------------------------|------------------------------------------|-----------------------------------|
-| `create()` | Creates a new address group      | `data: Dict[str, Any]`                   | `AddressGroupResponseModel`       |
-| `get()`    | Retrieves a group by ID          | `object_id: str`                         | `AddressGroupResponseModel`       |
-| `update()` | Updates an existing group        | `address_group: AddressGroupUpdateModel` | `AddressGroupResponseModel`       |
-| `delete()` | Deletes a group                  | `object_id: str`                         | `None`                            |
-| `list()`   | Lists groups with filtering      | `folder: str`, `**filters`               | `List[AddressGroupResponseModel]` |
-| `fetch()`  | Gets group by name and container | `name: str`, `folder: str`               | `AddressGroupResponseModel`       |
+| Method     | Description                      | Parameters                                                                                    | Return Type                       |
+|------------|----------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------|
+| `create()` | Creates a new address group      | `data: Dict[str, Any]`                                                                        | `AddressGroupResponseModel`       |
+| `get()`    | Retrieves a group by ID          | `object_id: str`                                                                              | `AddressGroupResponseModel`       |
+| `update()` | Updates an existing group        | `address_group: AddressGroupUpdateModel`                                                      | `AddressGroupResponseModel`       |
+| `delete()` | Deletes a group                  | `object_id: str`                                                                              | `None`                            |
+| `list()`   | Lists groups with filtering      | `folder: str`, `snippet: str`, `device: str`, `exact_match: bool`, `exclude_folders`, `**filters` | `List[AddressGroupResponseModel]` |
+| `fetch()`  | Gets group by name and container | `name: str`, `folder: str`, `snippet: str`, `device: str`                                     | `AddressGroupResponseModel`       |
 
 ## Address Group Model Attributes
 
@@ -50,7 +50,7 @@ that can be either static (explicit list of addresses) or dynamic (tag-based fil
 | `static`      | List[str]     | One Required | List of static addresses                    |
 | `dynamic`     | DynamicFilter | One Required | Tag-based filter for dynamic membership     |
 | `description` | str           | No           | Object description (max 1023 chars)         |
-| `tag`         | List[str]     | No           | List of tags (max 64 chars each)            |
+| `tag`         | List[str]     | No           | List of tags (max 127 chars each)           |
 | `folder`      | str           | Yes**        | Folder location (**one container required)  |
 | `snippet`     | str           | Yes**        | Snippet location (**one container required) |
 | `device`      | str           | Yes**        | Device location (**one container required)  |
@@ -281,7 +281,6 @@ The SDK supports pagination through the `max_limit` parameter, which defines how
 
 ```python
 from scm.client import ScmClient
-from scm.config.objects import AddressGroup
 
 # Initialize client
 client = ScmClient(
@@ -290,18 +289,14 @@ client = ScmClient(
    tsg_id="your_tsg_id"
 )
 
-# Two options for setting max_limit:
+# Configure max_limit on the address_group service
+client.address_group.max_limit = 4321
 
-# Option 1: Use the unified client interface but create a custom AddressGroup instance with max_limit
-address_group_service = AddressGroup(client, max_limit=4321)
-all_groups1 = address_group_service.list(folder='Texas')
+# List all address groups - auto-paginates through results
+all_groups = client.address_group.list(folder='Texas')
 
-# Option 2 (traditional approach): Create a dedicated AddressGroup instance
-# This will retrieve up to 4321 objects per API call, up to the API limit of 5000.
-all_groups2 = client.address_group.list(folder='Texas')
-
-# Both options will auto-paginate through all available objects.
-# 'all_groups' contains all objects from 'Texas', fetched in chunks according to the max_limit.
+# The list() method will retrieve up to 4321 objects per API call (max 5000)
+# and auto-paginate through all available objects.
 ```
 
 ### Deleting Address Groups

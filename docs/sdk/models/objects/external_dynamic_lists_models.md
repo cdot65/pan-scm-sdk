@@ -6,6 +6,17 @@ The External Dynamic Lists models provide a structured way to manage external dy
 Cloud Manager. These models support various types of dynamic lists including IP, domain, URL, IMSI, and IMEI lists, with
 configurable update intervals and authentication options.
 
+### Models
+
+| Model                               | Purpose                                          |
+|-------------------------------------|--------------------------------------------------|
+| `ExternalDynamicListsBaseModel`     | Base model with common fields for all operations |
+| `ExternalDynamicListsCreateModel`   | Model for creating new external dynamic lists    |
+| `ExternalDynamicListsUpdateModel`   | Model for updating existing lists                |
+| `ExternalDynamicListsResponseModel` | Model for API responses                          |
+
+All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
+
 ## Attributes
 
 | Attribute           | Type           | Required | Default   | Description                                                                       |
@@ -105,7 +116,14 @@ edl = ExternalDynamicListsCreateModel(
 ### Creating an IP List
 
 ```python
-from scm.config.objects import ExternalDynamicLists
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
 
 # Using dictionary
 ip_list = {
@@ -124,60 +142,46 @@ ip_list = {
     }
 }
 
-edl = ExternalDynamicLists(api_client)
-response = edl.create(ip_list)
+response = client.external_dynamic_list.create(ip_list)
 ```
 
 ### Creating a Domain List
 
 ```python
-# Using model directly
-from scm.models.objects import (
-    ExternalDynamicListsCreateModel,
-    DomainType,
-    DomainModel,
-    AuthModel,
-    HourlyRecurringModel
-)
+# Using dictionary
+domain_list = {
+    "name": "blocked-domains",
+    "folder": "Shared",
+    "type": {
+        "domain": {
+            "description": "Blocked domains",
+            "url": "http://example.com/domains.txt",
+            "auth": {
+                "username": "user1",
+                "password": "pass123"
+            },
+            "recurring": {"hourly": {}},
+            "expand_domain": True
+        }
+    }
+}
 
-domain_list = ExternalDynamicListsCreateModel(
-    name="blocked-domains",
-    folder="Shared",
-    type=DomainType(
-        domain=DomainModel(
-            description="Blocked domains",
-            url="http://example.com/domains.txt",
-            auth=AuthModel(
-                username="user1",
-                password="pass123"
-            ),
-            recurring=HourlyRecurringModel(hourly={}),
-            expand_domain=True
-        )
-    )
-)
-
-payload = domain_list.model_dump(exclude_unset=True)
-response = edl.create(payload)
+response = client.external_dynamic_list.create(domain_list)
 ```
 
 ### Updating a List
 
 ```python
-# Using dictionary
-update_dict = {
-    "id": "123e4567-e89b-12d3-a456-426655440000",
-    "name": "blocked-ips-updated",
-    "type": {
-        "ip": {
-            "description": "Updated blocked IPs",
-            "url": "http://example.com/blocked-new.txt",
-            "recurring": {"daily": {"at": "12"}}
-        }
-    }
-}
+# Fetch existing EDL
+existing = client.external_dynamic_list.fetch(name="blocked-ips", folder="Shared")
 
-response = edl.update(update_dict)
+# Modify attributes using dot notation
+existing.type.ip.description = "Updated blocked IPs"
+existing.type.ip.url = "http://example.com/blocked-new.txt"
+existing.type.ip.recurring = {"daily": {"at": "12"}}
+
+# Pass modified object to update()
+updated = client.external_dynamic_list.update(existing)
 ```
 
 ## Best Practices
