@@ -41,19 +41,30 @@ The `Snippet` class manages snippet objects in Palo Alto Networks' Strata Cloud 
 
 ## Snippet Model Attributes
 
-| Attribute       | Type                            | Required | Description                                      |
-|-----------------|---------------------------------|----------|--------------------------------------------------|
-| `name`          | str                             | Yes      | Name of the snippet                              |
-| `id`            | UUID                            | Yes*     | Unique identifier (*response only)               |
-| `description`   | Optional[str]                   | No       | Optional description of the snippet              |
-| `labels`        | Optional[List[str]]             | No       | Optional list of labels to apply to the snippet  |
-| `enable_prefix` | Optional[bool]                  | No       | Whether to enable prefix for this snippet        |
-| `type`          | Optional[str]                   | No       | Snippet type: 'predefined', 'custom', 'readonly' |
-| `display_name`  | Optional[str]                   | No       | Display name for the snippet                     |
-| `last_update`   | Optional[str]                   | No       | Timestamp of last update                         |
-| `created_in`    | Optional[str]                   | No       | Timestamp of creation                            |
-| `folders`       | Optional[List[FolderReference]] | No       | Folders the snippet is applied to                |
-| `shared_in`     | Optional[str]                   | No       | Sharing scope (e.g., 'local')                    |
+| Attribute       | Type                            | Required | Default | Description                                      |
+|-----------------|---------------------------------|----------|---------|--------------------------------------------------|
+| `name`          | str                             | Yes      | None    | Name of the snippet                              |
+| `id`            | UUID                            | Yes*     | None    | Unique identifier (*response/update only)        |
+| `description`   | str                             | No       | None    | Optional description of the snippet              |
+| `labels`        | List[str]                       | No       | None    | Optional list of labels to apply to the snippet  |
+| `enable_prefix` | bool                            | No       | None    | Whether to enable prefix for this snippet        |
+| `type`          | str                             | No       | None    | Snippet type: 'predefined', 'custom', 'readonly' |
+| `display_name`  | str                             | No       | None    | Display name for the snippet                     |
+| `last_update`   | str                             | No       | None    | Timestamp of last update                         |
+| `created_in`    | str                             | No       | None    | Timestamp of creation                            |
+| `folders`       | List[FolderReference]           | No       | None    | Folders the snippet is applied to                |
+| `shared_in`     | str                             | No       | None    | Sharing scope (e.g., 'local')                    |
+
+\* Only required for response and update models
+
+### Filter Parameters
+
+The `list()` method supports the following filters:
+
+| Parameter | Type       | Description                              |
+|-----------|------------|------------------------------------------|
+| `labels`  | List[str]  | Filter by labels (server-side)           |
+| `types`   | List[str]  | Filter by snippet type (server-side)     |
 
 ## Exceptions
 
@@ -135,16 +146,18 @@ if snippet_by_name:
 ```
 
 ### Updating Snippets
+
 ```python
-from scm.models.setup.snippet import SnippetUpdateModel
-update_model = SnippetUpdateModel(
-    id="12345678-1234-1234-1234-123456789012",
-    name="Updated Security Policy",
-    description="Updated security policy configs",
-    labels=["security", "updated"]
-)
-updated = snippets.update(update_model)
-print(updated.name)
+# Fetch existing snippet
+existing = client.snippet.fetch(name="Security Policy Snippet")
+
+# Modify attributes using dot notation
+existing.description = "Updated security policy configs"
+existing.labels = ["security", "updated"]
+
+# Pass modified object to update()
+updated = client.snippet.update(existing)
+print(f"Updated snippet: {updated.name}")
 ```
 
 ### Listing Snippets
@@ -163,9 +176,24 @@ security_snippets = snippets.list(labels=["security"])
 ```
 
 ### Controlling Pagination with max_limit
+
 ```python
-snippets = Snippet(client, max_limit=100)
-results = snippets.list()
+from scm.client import ScmClient
+
+# Initialize client
+client = ScmClient(
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    tsg_id="your_tsg_id"
+)
+
+# Configure max_limit using the property setter
+client.snippet.max_limit = 100
+
+# List all snippets - auto-paginates through results
+all_snippets = client.snippet.list()
+
+# The snippets are fetched in chunks according to the max_limit setting.
 ```
 
 ### Deleting Snippets
@@ -210,4 +238,9 @@ except InvalidObjectError as e:
 See the test suite in `tests/scm/config/setup/test_snippet.py` for comprehensive usage and edge cases.
 
 ## Related Models
-- See [Snippet Models](../../models/setup/snippet_models.md) for model details.
+
+- [SnippetBaseModel](../../models/setup/snippet_models.md#Overview)
+- [SnippetCreateModel](../../models/setup/snippet_models.md#Overview)
+- [SnippetUpdateModel](../../models/setup/snippet_models.md#Overview)
+- [SnippetResponseModel](../../models/setup/snippet_models.md#Overview)
+- [FolderReference](../../models/setup/snippet_models.md#Overview)
