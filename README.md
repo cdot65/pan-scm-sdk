@@ -50,9 +50,8 @@ Python SDK for Palo Alto Networks Strata Cloud Manager.
 For developers working on this SDK:
 
 - **Service File Standards**: See `SDK_STYLING_GUIDE.md` for comprehensive service file guidelines
-- **Model Standards**: See `CLAUDE_MODELS.md` for Pydantic model patterns and conventions
+- **Model Standards**: See `PYDANTIC_MODELS_GUIDE.md` for Pydantic model patterns and conventions
 - **Templates**: Use `SDK_SERVICE_TEMPLATE.py` as a starting point for new services
-- **Claude Code Integration**: Reference `CLAUDE.md` for AI-assisted development guidelines
 
 ## Installation
 
@@ -195,9 +194,8 @@ The unified client provides access to the following services through attribute-b
 Before starting development, please review:
 
 - `SDK_STYLING_GUIDE.md` - Comprehensive guide for writing consistent SDK code
-- `CLAUDE_MODELS.md` - Guidelines for creating Pydantic models
+- `PYDANTIC_MODELS_GUIDE.md` - Guidelines for creating Pydantic models
 - `SDK_SERVICE_TEMPLATE.py` - Template for new service files
-- `WINDSURF_RULES.md` - Overall project standards
 
 ### Setup
 
