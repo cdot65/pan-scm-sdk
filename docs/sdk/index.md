@@ -217,6 +217,7 @@ The following table shows all services available through the unified client inte
 | `application`                      | Custom application definitions and signatures                 |
 | `application_filter`               | Filters for identifying applications by characteristics       |
 | `application_group`                | Logical groups of applications for policy application         |
+| `auto_tag_action`                  | Automated tag assignment based on traffic and security events |
 | `dynamic_user_group`               | User groups with dynamic membership criteria                  |
 | `external_dynamic_list`            | Externally managed lists of IPs, URLs, or domains             |
 | `hip_object`                       | Host information profile match criteria                       |
@@ -230,15 +231,22 @@ The following table shows all services available through the unified client inte
 | `service_group`                    | Collections of services for simplified policy management      |
 | `syslog_server_profile`            | Syslog server configurations for centralized logging          |
 | `tag`                              | Resource classification and organization labels               |
-| **Network**                        |                                                               |
-| `ike_crypto_profile`               | IKE crypto profiles for VPN tunnels                           |
-| `ike_gateway`                      | IKE gateway configurations for VPN tunnel endpoints           |
-| `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption               |
-| `nat_rule`                         | Network address translation policies for traffic routing      |
-| `security_zone`                    | Security zones for network segmentation                       |
 | **Mobile Agent**                   |                                                               |
 | `auth_setting`                     | GlobalProtect authentication settings by operating system     |
 | `agent_version`                    | Available GlobalProtect agent versions (read-only)            |
+| **Network**                        |                                                               |
+| `aggregate_interface`              | Aggregated ethernet interfaces with LACP support              |
+| `ethernet_interface`               | Physical ethernet interface configurations                    |
+| `ike_crypto_profile`               | IKE crypto profiles for VPN tunnels                           |
+| `ike_gateway`                      | IKE gateway configurations for VPN tunnel endpoints           |
+| `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption               |
+| `layer2_subinterface`              | Layer 2 VLAN subinterfaces for switching                      |
+| `layer3_subinterface`              | Layer 3 VLAN subinterfaces for routing                        |
+| `loopback_interface`               | Loopback interfaces for management and routing                |
+| `nat_rule`                         | Network address translation policies for traffic routing      |
+| `security_zone`                    | Security zones for network segmentation                       |
+| `tunnel_interface`                 | Tunnel interfaces for VPN and overlay networks                |
+| `vlan_interface`                   | VLAN interfaces for network segmentation                      |
 | **Deployment**                     |                                                               |
 | `bandwidth_allocation`             | Bandwidth allocation settings for regions and service nodes   |
 | `bgp_routing`                      | Global BGP routing preferences and behaviors                  |
@@ -247,17 +255,21 @@ The following table shows all services available through the unified client inte
 | `remote_network`                   | Secure branch and remote site connectivity configurations     |
 | `service_connection`               | Service connections to cloud service providers                |
 | **Security**                       |                                                               |
-| `security_rule`                    | Core security policies controlling network traffic            |
 | `anti_spyware_profile`             | Protection against spyware, C2 traffic, and data exfiltration |
 | `decryption_profile`               | SSL/TLS traffic inspection configurations                     |
 | `dns_security_profile`             | Protection against DNS-based threats and tunneling            |
+| `security_rule`                    | Core security policies controlling network traffic            |
 | `url_category`                     | Custom URL categorization for web filtering                   |
 | `vulnerability_protection_profile` | Defense against known CVEs and exploit attempts               |
 | `wildfire_antivirus_profile`       | Cloud-based malware analysis and zero-day protection          |
-| **Setup**                          |                                                               |
-| `folder`                           | Folder management for organizing configurations               |
 | **Insights**                       |                                                               |
-| `insights.alerts`                  | Security and operational alerts from Prisma Access            |
+| `alerts`                           | Security and operational alerts from Prisma Access            |
+| **Setup**                          |                                                               |
+| `device`                           | Device resources and management                               |
+| `folder`                           | Folder organization and hierarchy                             |
+| `label`                            | Resource classification and simple key-value object labels    |
+| `snippet`                          | Reusable configuration snippets                               |
+| `variable`                         | Typed variables with flexible container scoping               |
 
 Check out the [Client Module](client.md) documentation for more information on the unified client interface.
 
