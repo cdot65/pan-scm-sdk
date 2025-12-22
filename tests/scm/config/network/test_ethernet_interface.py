@@ -323,3 +323,170 @@ class TestEthernetInterfaceAdvanced(TestEthernetInterfaceBase):
         result = self.client.list(folder="Folder A", exclude_folders=["Folder B"])
         assert len(result) == 1
         assert result[0].folder == "Folder A"
+
+
+class TestEthernetInterfaceEdgeCases(TestEthernetInterfaceBase):
+    """Edge case tests for 100% coverage."""
+
+    def test_max_limit_setter(self):
+        """Test max_limit setter property."""
+        self.client.max_limit = 1000
+        assert self.client.max_limit == 1000
+
+    def test_max_limit_less_than_one(self):
+        """Test max_limit validation when less than 1."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            EthernetInterface(self.mock_scm, max_limit=0)
+        assert "must be greater than 0" in exc_info.value.message
+
+    def test_max_limit_exceeds_absolute_max(self):
+        """Test max_limit validation when exceeding absolute max."""
+        with pytest.raises(InvalidObjectError) as exc_info:
+            EthernetInterface(self.mock_scm, max_limit=10000)
+        assert "cannot exceed" in exc_info.value.message
+
+    def test_list_mode_filter_invalid_type(self, sample_ethernet_dict):
+        """Test list with invalid mode filter type."""
+        self.mock_scm.get.return_value = {"data": [sample_ethernet_dict], "limit": 20, "offset": 0, "total": 1}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Test", mode=123)
+        assert "'mode' filter must be a string" in exc_info.value.message
+
+    def test_list_link_speed_filter_invalid_type(self, sample_ethernet_dict):
+        """Test list with invalid link_speed filter type."""
+        self.mock_scm.get.return_value = {"data": [sample_ethernet_dict], "limit": 20, "offset": 0, "total": 1}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Test", link_speed=123)
+        assert "'link_speed' filter must be a string" in exc_info.value.message
+
+    def test_list_link_state_filter_invalid_type(self, sample_ethernet_dict):
+        """Test list with invalid link_state filter type."""
+        self.mock_scm.get.return_value = {"data": [sample_ethernet_dict], "limit": 20, "offset": 0, "total": 1}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Test", link_state=123)
+        assert "'link_state' filter must be a string" in exc_info.value.message
+
+    def test_list_response_not_dict(self):
+        """Test list when response is not a dictionary."""
+        self.mock_scm.get.return_value = "invalid response"
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Test")
+        assert "expected dictionary" in exc_info.value.message
+
+    def test_list_response_missing_data_field(self):
+        """Test list when response missing data field."""
+        self.mock_scm.get.return_value = {"other": "value"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Test")
+        assert "missing 'data' field" in exc_info.value.message
+
+    def test_list_response_data_not_list(self):
+        """Test list when data field is not a list."""
+        self.mock_scm.get.return_value = {"data": "not a list"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.list(folder="Test")
+        assert "'data' field must be a list" in exc_info.value.message
+
+    def test_list_pagination(self, sample_ethernet_dict):
+        """Test list with pagination (multiple pages)."""
+        # Create first page with exactly max_limit items to trigger pagination
+        page1_data = []
+        for i in range(5000):  # Use client's max_limit which is 5000
+            item = sample_ethernet_dict.copy()
+            item["id"] = str(uuid.uuid4())
+            item["name"] = f"$iface-{i}"
+            page1_data.append(item)
+
+        page2_data = [sample_ethernet_dict.copy()]
+        page2_data[0]["id"] = str(uuid.uuid4())
+        page2_data[0]["name"] = "$iface-last"
+
+        self.mock_scm.get.side_effect = [
+            {"data": page1_data, "limit": 5000, "offset": 0, "total": 5001},
+            {"data": page2_data, "limit": 5000, "offset": 5000, "total": 5001},
+        ]
+
+        result = self.client.list(folder="Test")
+        assert len(result) == 5001
+        assert self.mock_scm.get.call_count == 2
+
+    def test_list_with_exclude_snippets(self, sample_ethernet_dict):
+        """Test list with exclude_snippets filter."""
+        iface1 = sample_ethernet_dict.copy()
+        iface1["id"] = str(uuid.uuid4())
+        iface1["snippet"] = "Snippet A"
+        iface1["folder"] = None
+
+        iface2 = sample_ethernet_dict.copy()
+        iface2["id"] = str(uuid.uuid4())
+        iface2["name"] = "$iface-b"
+        iface2["snippet"] = "Snippet B"
+        iface2["folder"] = None
+
+        self.mock_scm.get.return_value = {"data": [iface1, iface2], "limit": 20, "offset": 0, "total": 2}
+
+        result = self.client.list(snippet="Snippet A", exclude_snippets=["Snippet B"])
+        assert len(result) == 1
+        assert result[0].snippet == "Snippet A"
+
+    def test_list_with_exclude_devices(self, sample_ethernet_dict):
+        """Test list with exclude_devices filter."""
+        iface1 = sample_ethernet_dict.copy()
+        iface1["id"] = str(uuid.uuid4())
+        iface1["device"] = "Device A"
+        iface1["folder"] = None
+
+        iface2 = sample_ethernet_dict.copy()
+        iface2["id"] = str(uuid.uuid4())
+        iface2["name"] = "$iface-b"
+        iface2["device"] = "Device B"
+        iface2["folder"] = None
+
+        self.mock_scm.get.return_value = {"data": [iface1, iface2], "limit": 20, "offset": 0, "total": 2}
+
+        result = self.client.list(device="Device A", exclude_devices=["Device B"])
+        assert len(result) == 1
+        assert result[0].device == "Device A"
+
+    def test_fetch_empty_folder(self):
+        """Test fetch with empty folder string."""
+        with pytest.raises(MissingQueryParameterError) as exc_info:
+            self.client.fetch(name="$test", folder="")
+        assert "'folder' cannot be empty" in exc_info.value.message
+
+    def test_fetch_response_not_dict(self):
+        """Test fetch when response is not a dictionary."""
+        self.mock_scm.get.return_value = "invalid"
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="$test", folder="Test")
+        assert "expected dictionary" in exc_info.value.message
+
+    def test_fetch_data_item_missing_id(self):
+        """Test fetch when data item is missing id field."""
+        self.mock_scm.get.return_value = {"data": [{"name": "$test"}]}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="$test", folder="Test")
+        assert "missing 'id' field" in exc_info.value.message
+
+    def test_fetch_multiple_results_warning(self, sample_ethernet_dict, caplog):
+        """Test fetch logs warning when multiple results found."""
+        item1 = sample_ethernet_dict.copy()
+        item1["id"] = str(uuid.uuid4())
+        item2 = sample_ethernet_dict.copy()
+        item2["id"] = str(uuid.uuid4())
+
+        self.mock_scm.get.return_value = {"data": [item1, item2]}
+
+        import logging
+        with caplog.at_level(logging.WARNING, logger="scm.config.network.ethernet_interface"):
+            result = self.client.fetch(name="$test-interface", folder="Test")
+
+        assert result is not None
+        assert "Multiple ethernet interfaces found" in caplog.text
+
+    def test_fetch_invalid_response_format(self):
+        """Test fetch with invalid response format (no id or data)."""
+        self.mock_scm.get.return_value = {"other_field": "value"}
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client.fetch(name="$test", folder="Test")
+        assert "expected either 'id' or 'data' field" in exc_info.value.message
