@@ -239,6 +239,56 @@ class TestLoopbackInterface(TestLoopbackInterfaceBase):
         result = self.client.list(folder="Folder1", exclude_folders=["Folder2"])
         assert len(result) == 1
 
+    def test_list_with_exclude_snippets(self, sample_loopback_dict):
+        """Test list method with exclude_snippets filter."""
+        loopback1 = sample_loopback_dict.copy()
+        loopback1["id"] = str(uuid.uuid4())
+        loopback1["name"] = "$loopback1"
+        loopback1["snippet"] = "Snippet1"
+        loopback1.pop("folder", None)
+
+        loopback2 = sample_loopback_dict.copy()
+        loopback2["id"] = str(uuid.uuid4())
+        loopback2["name"] = "$loopback2"
+        loopback2["snippet"] = "Snippet2"
+        loopback2.pop("folder", None)
+
+        self.mock_scm.get.return_value = {
+            "data": [loopback1, loopback2],
+            "limit": 100,
+            "offset": 0,
+            "total": 2,
+        }
+
+        result = self.client.list(snippet="Snippet1", exclude_snippets=["Snippet2"])
+        assert len(result) == 1
+        assert result[0].name == "$loopback1"
+
+    def test_list_with_exclude_devices(self, sample_loopback_dict):
+        """Test list method with exclude_devices filter."""
+        loopback1 = sample_loopback_dict.copy()
+        loopback1["id"] = str(uuid.uuid4())
+        loopback1["name"] = "$loopback1"
+        loopback1["device"] = "Device1"
+        loopback1.pop("folder", None)
+
+        loopback2 = sample_loopback_dict.copy()
+        loopback2["id"] = str(uuid.uuid4())
+        loopback2["name"] = "$loopback2"
+        loopback2["device"] = "Device2"
+        loopback2.pop("folder", None)
+
+        self.mock_scm.get.return_value = {
+            "data": [loopback1, loopback2],
+            "limit": 100,
+            "offset": 0,
+            "total": 2,
+        }
+
+        result = self.client.list(device="Device1", exclude_devices=["Device2"])
+        assert len(result) == 1
+        assert result[0].name == "$loopback1"
+
     def test_list_with_empty_folder(self):
         """Test list method with empty folder parameter."""
         with pytest.raises(MissingQueryParameterError) as excinfo:

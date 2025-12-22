@@ -332,3 +332,150 @@ class TestTunnelInterface(TestTunnelInterfaceBase):
         with pytest.raises(InvalidObjectError) as excinfo:
             self.client.fetch(name="tunnel.1", folder="Test Folder")
         assert "No matching tunnel interface found" in str(excinfo.value)
+
+        # Test data item without id field
+        self.mock_scm.get.return_value = {"data": [{"name": "tunnel.1", "folder": "Test Folder"}]}
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="tunnel.1", folder="Test Folder")
+        assert "Response data item missing 'id' field" in str(excinfo.value)
+
+    def test_list_filtering_invalid_profile(self, sample_tunnel_dict):
+        """Test list method with invalid interface_management_profile filter type."""
+        self.mock_scm.get.return_value = {
+            "data": [sample_tunnel_dict],
+            "limit": 20,
+            "offset": 0,
+            "total": 1,
+        }
+
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.list(folder="Test Folder", interface_management_profile=123)
+        assert "Invalid Object" in str(excinfo.value)
+
+    def test_list_with_exact_match(self, sample_tunnel_dict):
+        """Test list method with exact_match filter."""
+        tunnel1 = sample_tunnel_dict.copy()
+        tunnel1["id"] = str(uuid.uuid4())
+        tunnel1["name"] = "tunnel.1"
+        tunnel1["folder"] = "Folder1"
+
+        tunnel2 = sample_tunnel_dict.copy()
+        tunnel2["id"] = str(uuid.uuid4())
+        tunnel2["name"] = "tunnel.2"
+        tunnel2["folder"] = "Folder2"
+
+        self.mock_scm.get.return_value = {
+            "data": [tunnel1, tunnel2],
+            "limit": 100,
+            "offset": 0,
+            "total": 2,
+        }
+
+        result = self.client.list(folder="Folder1", exact_match=True)
+        assert len(result) == 1
+        assert result[0].name == "tunnel.1"
+
+    def test_list_with_exclude_folders(self, sample_tunnel_dict):
+        """Test list method with exclude_folders filter."""
+        tunnel1 = sample_tunnel_dict.copy()
+        tunnel1["id"] = str(uuid.uuid4())
+        tunnel1["name"] = "tunnel.1"
+        tunnel1["folder"] = "Folder1"
+
+        tunnel2 = sample_tunnel_dict.copy()
+        tunnel2["id"] = str(uuid.uuid4())
+        tunnel2["name"] = "tunnel.2"
+        tunnel2["folder"] = "Folder2"
+
+        self.mock_scm.get.return_value = {
+            "data": [tunnel1, tunnel2],
+            "limit": 100,
+            "offset": 0,
+            "total": 2,
+        }
+
+        result = self.client.list(folder="Folder1", exclude_folders=["Folder2"])
+        assert len(result) == 1
+        assert result[0].name == "tunnel.1"
+
+    def test_list_with_exclude_snippets(self, sample_tunnel_dict):
+        """Test list method with exclude_snippets filter."""
+        tunnel1 = sample_tunnel_dict.copy()
+        tunnel1["id"] = str(uuid.uuid4())
+        tunnel1["name"] = "tunnel.1"
+        tunnel1["snippet"] = "Snippet1"
+        tunnel1.pop("folder", None)
+
+        tunnel2 = sample_tunnel_dict.copy()
+        tunnel2["id"] = str(uuid.uuid4())
+        tunnel2["name"] = "tunnel.2"
+        tunnel2["snippet"] = "Snippet2"
+        tunnel2.pop("folder", None)
+
+        self.mock_scm.get.return_value = {
+            "data": [tunnel1, tunnel2],
+            "limit": 100,
+            "offset": 0,
+            "total": 2,
+        }
+
+        result = self.client.list(snippet="Snippet1", exclude_snippets=["Snippet2"])
+        assert len(result) == 1
+        assert result[0].name == "tunnel.1"
+
+    def test_list_with_exclude_devices(self, sample_tunnel_dict):
+        """Test list method with exclude_devices filter."""
+        tunnel1 = sample_tunnel_dict.copy()
+        tunnel1["id"] = str(uuid.uuid4())
+        tunnel1["name"] = "tunnel.1"
+        tunnel1["device"] = "Device1"
+        tunnel1.pop("folder", None)
+
+        tunnel2 = sample_tunnel_dict.copy()
+        tunnel2["id"] = str(uuid.uuid4())
+        tunnel2["name"] = "tunnel.2"
+        tunnel2["device"] = "Device2"
+        tunnel2.pop("folder", None)
+
+        self.mock_scm.get.return_value = {
+            "data": [tunnel1, tunnel2],
+            "limit": 100,
+            "offset": 0,
+            "total": 2,
+        }
+
+        result = self.client.list(device="Device1", exclude_devices=["Device2"])
+        assert len(result) == 1
+        assert result[0].name == "tunnel.1"
+
+    def test_fetch_with_multiple_objects_in_data(self, sample_tunnel_dict, monkeypatch):
+        """Test fetch method when data array contains multiple objects."""
+        from unittest.mock import MagicMock
+
+        tunnel1 = sample_tunnel_dict.copy()
+        tunnel1["id"] = str(uuid.uuid4())
+        tunnel1["name"] = "tunnel.1"
+
+        tunnel2 = sample_tunnel_dict.copy()
+        tunnel2["id"] = str(uuid.uuid4())
+        tunnel2["name"] = "tunnel.2"
+
+        self.mock_scm.get.return_value = {
+            "data": [tunnel1, tunnel2],
+            "limit": 20,
+            "offset": 0,
+            "total": 2,
+        }
+
+        mock_warning = MagicMock()
+        monkeypatch.setattr(self.client.logger, "warning", mock_warning)
+
+        result = self.client.fetch(name=tunnel1["name"], folder=tunnel1["folder"])
+
+        assert isinstance(result, TunnelInterfaceResponseModel)
+        assert result.id == uuid.UUID(tunnel1["id"])
+        assert result.name == tunnel1["name"]
+
+        mock_warning.assert_called_once()
+        call_args = mock_warning.call_args[0][0]
+        assert "Multiple tunnel interfaces found" in call_args
