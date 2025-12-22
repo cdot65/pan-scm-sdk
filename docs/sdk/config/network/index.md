@@ -13,9 +13,24 @@ This section covers the configuration of network features provided by the Palo A
 
 ## Available Network Objects
 
+### Network Interfaces
+
+- [Aggregate Interfaces](aggregate_interface.md) - Configure aggregate (bonded) ethernet interfaces with LACP
+- [Ethernet Interfaces](ethernet_interface.md) - Configure physical ethernet interfaces (Layer 2, Layer 3, TAP modes)
+- [Layer2 Subinterfaces](layer2_subinterface.md) - Configure Layer 2 VLAN subinterfaces
+- [Layer3 Subinterfaces](layer3_subinterface.md) - Configure Layer 3 VLAN subinterfaces with IP addressing
+- [Loopback Interfaces](loopback_interface.md) - Configure loopback interfaces for management and services
+- [Tunnel Interfaces](tunnel_interface.md) - Configure tunnel interfaces for VPN connections
+- [VLAN Interfaces](vlan_interface.md) - Configure VLAN interfaces for inter-VLAN routing
+
+### VPN Configuration
+
 - [IKE Crypto Profiles](ike_crypto_profile.md) - Configure Internet Key Exchange crypto profiles for VPN tunnels
 - [IKE Gateways](ike_gateway.md) - Configure Internet Key Exchange gateways for VPN tunnel endpoints
 - [IPsec Crypto Profiles](ipsec_crypto_profile.md) - Configure IPsec crypto profiles for VPN tunnels
+
+### Other Network Objects
+
 - [NAT Rules](nat_rules.md) - Configure Network Address Translation rules for traffic handling
 - [Security Zones](security_zone.md) - Configure Security Zones for network segmentation
 
