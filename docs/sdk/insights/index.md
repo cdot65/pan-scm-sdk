@@ -4,6 +4,19 @@
 
 The Insights configuration section provides access to the Prisma Access Insights API, which offers comprehensive visibility into your network's security posture, performance metrics, and operational health. The Insights API enables you to programmatically retrieve and analyze alerts, metrics, and other telemetry data from your Prisma Access deployment.
 
+## Developer Guide
+
+### [InsightsBaseObject Developer Guide](insights_base_object.md)
+
+Comprehensive documentation for working with the Insights API, including:
+
+- Understanding the query-based API architecture
+- Complete reference for all filter operators
+- Property functions and aggregations
+- Histogram configuration for time-series analysis
+- Step-by-step guide for creating custom Insights services
+- Best practices and common patterns
+
 ## Available Resources
 
 ### [Alerts](alerts.md)
@@ -91,6 +104,7 @@ All Insights API responses follow a consistent structure:
 
 ## Next Steps
 
+- Read the [InsightsBaseObject Developer Guide](insights_base_object.md) for comprehensive Query API documentation
 - Explore the [Alerts](alerts.md) documentation for detailed usage examples
 - Review the [Alerts Models](../models/insights/alerts_models.md) for data structure details
 - Check the main [SDK documentation](../../index.md) for general SDK patterns
