@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-02-17
+
+### Fixed
+- **DeviceResponseModel & ApplicationResponseModel**: Restored `extra="allow"` on these two models that intentionally expose undocumented API fields via `__pydantic_extra__`. The v0.5.0 migration incorrectly changed them to `extra="ignore"` which silently dropped extra fields.
+
 ## [0.5.0] - 2026-02-17
 
 ### Fixed
