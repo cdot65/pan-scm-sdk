@@ -196,7 +196,7 @@ class DeviceResponseModel(DeviceBaseModel):
     vm_state: Optional[str] = Field(None, description="VM state.")
 
     model_config = ConfigDict(
-        extra="ignore",
+        extra="allow",
         populate_by_name=True,
     )
 
@@ -205,7 +205,7 @@ class DeviceListResponseModel(BaseModel):
     """Model for the paginated response from GET /devices."""
 
     model_config = ConfigDict(
-        extra="ignore",
+        extra="allow",
         populate_by_name=True,
     )
 

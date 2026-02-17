@@ -157,9 +157,9 @@ class TestDeviceListResponseModel:
         assert isinstance(model.offset, int)
         assert isinstance(model.total, int)
 
-    def test_extra_fields_ignored(self):
-        """Test that extra fields are silently ignored on ResponseModel."""
+    def test_extra_fields_allowed(self):
+        """Test that extra fields are allowed on DeviceListResponseModel (API compatibility)."""
         data = DeviceListResponseModelDictFactory.build()
-        data["unknown_field"] = "should_be_ignored"
+        data["unknown_field"] = "should_be_allowed"
         model = DeviceListResponseModel.model_validate(data)
-        assert not hasattr(model, "unknown_field")
+        assert hasattr(model, "__pydantic_extra__")
