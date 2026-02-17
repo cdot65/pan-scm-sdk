@@ -111,6 +111,13 @@ class URLCategoriesUpdateModel(URLCategoriesBaseModel):
 class URLCategoriesResponseModel(URLCategoriesBaseModel):
     """Model for URL Category API responses."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="UUID of the resource",

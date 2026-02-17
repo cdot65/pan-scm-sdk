@@ -208,6 +208,13 @@ class SecurityZoneUpdateModel(SecurityZoneBaseModel):
 class SecurityZoneResponseModel(SecurityZoneBaseModel):
     """Model for Security Zone responses."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the security zone",

@@ -135,8 +135,8 @@ class TestExtraFieldsForbidden:
             URLCategoriesUpdateModel(**data)
         assert "Extra inputs are not permitted" in str(exc_info.value)
 
-    def test_response_model_rejects_extra_fields(self):
-        """Test that extra fields are rejected in ResponseModel."""
+    def test_response_model_ignores_extra_fields(self):
+        """Test that extra fields are silently ignored in ResponseModel."""
         from scm.models.security.url_categories import URLCategoriesResponseModel
 
         data = {
@@ -144,11 +144,10 @@ class TestExtraFieldsForbidden:
             "name": "TestCategory",
             "folder": "Texas",
             "list": ["example.com"],
-            "unknown_field": "should_fail",
+            "unknown_field": "should_be_ignored",
         }
-        with pytest.raises(ValueError) as exc_info:
-            URLCategoriesResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        model = URLCategoriesResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
 
 class TestEnumValues:

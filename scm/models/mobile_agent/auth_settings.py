@@ -176,6 +176,13 @@ class AuthSettingsResponseModel(AuthSettingsBaseModel):
     This class defines the structure for authentication settings returned by the API.
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
 
 class MovePosition(str, Enum):
     """Available positions for moving authentication settings."""

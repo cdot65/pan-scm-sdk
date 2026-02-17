@@ -209,6 +209,13 @@ class AddressGroupResponseModel(AddressGroupBaseModel):
 
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the application group",

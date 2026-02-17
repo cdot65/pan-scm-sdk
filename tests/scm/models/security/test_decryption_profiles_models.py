@@ -178,17 +178,16 @@ class TestExtraFieldsForbidden:
             DecryptionProfileUpdateModel(**data)
         assert "Extra inputs are not permitted" in str(exc_info.value)
 
-    def test_response_model_rejects_extra_fields(self):
-        """Test that extra fields are rejected in ResponseModel."""
+    def test_response_model_ignores_extra_fields(self):
+        """Test that extra fields are silently ignored in ResponseModel."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "TestProfile",
             "folder": "Texas",
-            "unknown_field": "should_fail",
+            "unknown_field": "should_be_ignored",
         }
-        with pytest.raises(ValidationError) as exc_info:
-            DecryptionProfileResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        model = DecryptionProfileResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
     def test_ssl_protocol_settings_rejects_extra_fields(self):
         """Test that extra fields are rejected in SSLProtocolSettings."""

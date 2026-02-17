@@ -358,11 +358,10 @@ class TestExtraFieldsForbidden:
             RegionUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_region_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in RegionResponseModel."""
+    def test_region_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in RegionResponseModel."""
         data = RegionResponseFactory.build_valid()
         data_dict = data.model_dump()
-        data_dict["unknown_field"] = "should fail"
-        with pytest.raises(ValidationError) as exc_info:
-            RegionResponseModel(**data_dict)
-        assert "extra" in str(exc_info.value).lower()
+        data_dict["unknown_field"] = "should be ignored"
+        model = RegionResponseModel(**data_dict)
+        assert not hasattr(model, "unknown_field")

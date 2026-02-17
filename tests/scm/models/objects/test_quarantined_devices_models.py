@@ -127,13 +127,12 @@ class TestExtraFieldsForbidden:
             QuarantinedDevicesCreateModel(host_id="test-host", unknown_field="should fail")
         assert "extra" in str(exc_info.value).lower()
 
-    def test_quarantined_devices_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in QuarantinedDevicesResponseModel."""
-        from pydantic import ValidationError
-
-        with pytest.raises(ValidationError) as exc_info:
-            QuarantinedDevicesResponseModel(host_id="test-host", unknown_field="should fail")
-        assert "extra" in str(exc_info.value).lower()
+    def test_quarantined_devices_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in QuarantinedDevicesResponseModel."""
+        model = QuarantinedDevicesResponseModel(
+            host_id="test-host", unknown_field="should be ignored"
+        )
+        assert not hasattr(model, "unknown_field")
 
     def test_quarantined_devices_list_params_model_extra_fields_forbidden(self):
         """Test that extra fields are rejected in QuarantinedDevicesListParamsModel."""

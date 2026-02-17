@@ -357,6 +357,13 @@ class IPsecCryptoProfileUpdateModel(IPsecCryptoProfileBaseModel):
 class IPsecCryptoProfileResponseModel(IPsecCryptoProfileBaseModel):
     """Model for IPsec Crypto Profile responses."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the IPsec crypto profile",

@@ -211,13 +211,12 @@ class TestExtraFieldsForbidden:
             )
         assert "extra" in str(exc_info.value).lower()
 
-    def test_tag_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in TagResponseModel."""
-        with pytest.raises(ValidationError) as exc_info:
-            TagResponseModel(
-                id="123e4567-e89b-12d3-a456-426655440000",
-                name="test-tag",
-                folder="Texas",
-                unknown_field="should fail",
-            )
-        assert "extra" in str(exc_info.value).lower()
+    def test_tag_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in TagResponseModel."""
+        model = TagResponseModel(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-tag",
+            folder="Texas",
+            unknown_field="should be ignored",
+        )
+        assert not hasattr(model, "unknown_field")

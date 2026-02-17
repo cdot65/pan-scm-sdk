@@ -332,17 +332,16 @@ class TestExtraFieldsForbidden:
             )
         assert "extra" in str(exc_info.value).lower()
 
-    def test_service_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in ServiceResponseModel."""
-        with pytest.raises(ValidationError) as exc_info:
-            ServiceResponseModel(
-                id="123e4567-e89b-12d3-a456-426655440000",
-                name="test-service",
-                folder="Texas",
-                protocol={"tcp": {"port": "80"}},
-                unknown_field="should fail",
-            )
-        assert "extra" in str(exc_info.value).lower()
+    def test_service_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in ServiceResponseModel."""
+        model = ServiceResponseModel(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-service",
+            folder="Texas",
+            protocol={"tcp": {"port": "80"}},
+            unknown_field="should be ignored",
+        )
+        assert not hasattr(model, "unknown_field")
 
 
 # -------------------- End of Test Classes --------------------

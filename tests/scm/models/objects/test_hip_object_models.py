@@ -150,13 +150,12 @@ class TestExtraFieldsForbidden:
             HIPObjectUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_hip_object_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in HIPObjectResponseModel."""
+    def test_hip_object_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in HIPObjectResponseModel."""
         data = HIPObjectResponseModelFactory.build_valid()
-        data["unknown_field"] = "should fail"
-        with pytest.raises(ValidationError) as exc_info:
-            HIPObjectResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        data["unknown_field"] = "should be ignored"
+        model = HIPObjectResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
 
 class TestProcessListItemModel:

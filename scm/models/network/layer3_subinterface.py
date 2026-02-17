@@ -135,6 +135,11 @@ class Layer3SubinterfaceUpdateModel(Layer3SubinterfaceBaseModel):
 class Layer3SubinterfaceResponseModel(Layer3SubinterfaceBaseModel):
     """Model for Layer3 Subinterface responses from the API."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the layer3 subinterface",

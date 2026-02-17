@@ -48,6 +48,11 @@ class LabelUpdateModel(LabelBaseModel):
 class LabelResponseModel(LabelBaseModel):
     """Model for Label responses from the API."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,  # required, readOnly
         description="The unique identifier of the label",

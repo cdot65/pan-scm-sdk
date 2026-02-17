@@ -280,3 +280,14 @@ deployment-services_new.yaml
 
 # Auto Claude data directory
 .auto-claude/
+
+# Agent harness
+.agent_harness/
+
+# Claude Code
+.claude/skills
+.claude/settings.json
+sdk-contribution-spec.md
+
+# Roadmap planning docs (agent harness generated)
+docs/plans/

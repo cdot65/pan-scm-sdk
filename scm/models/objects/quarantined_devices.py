@@ -49,6 +49,13 @@ class QuarantinedDevicesCreateModel(QuarantinedDevicesBaseModel):
 class QuarantinedDevicesResponseModel(QuarantinedDevicesBaseModel):
     """Represents the response from creating or retrieving a Quarantined Devices object."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
 
 class QuarantinedDevicesListParamsModel(BaseModel):
     """Parameters for listing Quarantined Devices.

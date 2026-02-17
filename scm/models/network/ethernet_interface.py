@@ -4,7 +4,7 @@ This module defines the Pydantic models used for creating, updating, and
 representing Ethernet Interface resources in the Strata Cloud Manager.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -220,6 +220,10 @@ class EthernetInterfaceBaseModel(BaseModel):
         max_length=64,
         description="The device in which the resource is defined",
     )
+    slot: Optional[int] = Field(
+        default=None,
+        description="The slot number for the ethernet interface",
+    )
 
     @model_validator(mode="after")
     def validate_interface_mode(self) -> "EthernetInterfaceBaseModel":
@@ -272,6 +276,11 @@ class EthernetInterfaceUpdateModel(EthernetInterfaceBaseModel):
 
 class EthernetInterfaceResponseModel(EthernetInterfaceBaseModel):
     """Model for Ethernet Interface responses from the API."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
 
     id: UUID = Field(
         ...,

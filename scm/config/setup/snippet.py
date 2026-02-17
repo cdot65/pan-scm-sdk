@@ -348,23 +348,13 @@ class Snippet(BaseObject):
             SnippetResponseModel: The updated snippet.
 
         Raises:
-            NotImplementedError: This method is not yet implemented.
+            NotImplementedError: This method is not yet supported by the SCM API.
 
         """
-        # This is a placeholder for future implementation
-        snippet_id_str = str(snippet_id)
-        folder_id_str = str(folder_id)
-
-        try:
-            response = self.api_client.post(
-                f"{self.ENDPOINT}/{snippet_id_str}/folders",
-                json={"folder_id": folder_id_str},
-            )
-            return SnippetResponseModel.model_validate(response)
-        except Exception as e:
-            raise NotImplementedError(
-                f"Associating snippets with folders is not yet implemented: {str(e)}"
-            )
+        raise NotImplementedError(
+            "Associating snippets with folders is not yet supported by the SCM API. "
+            "This method is reserved for future API support."
+        )
 
     def disassociate_folder(
         self, snippet_id: Union[str, UUID], folder_id: Union[str, UUID]
@@ -379,22 +369,13 @@ class Snippet(BaseObject):
             SnippetResponseModel: The updated snippet.
 
         Raises:
-            NotImplementedError: This method is not yet implemented.
+            NotImplementedError: This method is not yet supported by the SCM API.
 
         """
-        # This is a placeholder for future implementation
-        snippet_id_str = str(snippet_id)
-        folder_id_str = str(folder_id)
-
-        try:
-            response = self.api_client.delete(
-                f"{self.ENDPOINT}/{snippet_id_str}/folders/{folder_id_str}"
-            )
-            return SnippetResponseModel.model_validate(response)
-        except Exception as e:
-            raise NotImplementedError(
-                f"Disassociating snippets from folders is not yet implemented: {str(e)}"
-            )
+        raise NotImplementedError(
+            "Disassociating snippets from folders is not yet supported by the SCM API. "
+            "This method is reserved for future API support."
+        )
 
     def _get_paginated_results(
         self,

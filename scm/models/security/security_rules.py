@@ -275,6 +275,13 @@ class SecurityRuleUpdateModel(SecurityRuleBaseModel):
 class SecurityRuleResponseModel(SecurityRuleBaseModel):
     """Model for Security Rule responses, including the id field."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the security rule",

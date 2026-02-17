@@ -200,12 +200,11 @@ def test_update_model_extra_fields_forbidden():
     assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
-def test_response_model_extra_fields_forbidden():
-    """Test that extra fields are rejected on ResponseModel."""
+def test_response_model_extra_fields_ignored():
+    """Test that extra fields are silently ignored on ResponseModel."""
     data = VALID_IKE_GATEWAY.copy()
     data["id"] = "123e4567-e89b-12d3-a456-426655440000"
-    data["unknown_field"] = "should_fail"
+    data["unknown_field"] = "should_be_ignored"
 
-    with pytest.raises(ValidationError) as exc_info:
-        IKEGatewayResponseModel(**data)
-    assert "Extra inputs are not permitted" in str(exc_info.value)
+    model = IKEGatewayResponseModel(**data)
+    assert not hasattr(model, "unknown_field")

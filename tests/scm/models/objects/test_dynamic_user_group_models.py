@@ -282,15 +282,14 @@ class TestExtraFieldsForbidden:
             DynamicUserGroupUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_dynamic_user_group_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in DynamicUserGroupResponseModel."""
+    def test_dynamic_user_group_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in DynamicUserGroupResponseModel."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-group",
             "filter": "'tag.User.Developer'",
             "folder": "Shared",
-            "unknown_field": "should fail",
+            "unknown_field": "should be ignored",
         }
-        with pytest.raises(ValidationError) as exc_info:
-            DynamicUserGroupResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        model = DynamicUserGroupResponseModel(**data)
+        assert not hasattr(model, "unknown_field")

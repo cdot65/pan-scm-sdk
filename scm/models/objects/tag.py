@@ -253,6 +253,13 @@ class TagResponseModel(TagBaseModel):
 
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     # Optional fields
 
     id: Optional[UUID] = Field(

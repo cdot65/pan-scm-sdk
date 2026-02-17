@@ -359,23 +359,22 @@ class TestExtraFieldsForbidden:
             )
         assert "extra" in str(exc_info.value).lower()
 
-    def test_syslog_server_profile_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in SyslogServerProfileResponseModel."""
-        with pytest.raises(ValidationError) as exc_info:
-            SyslogServerProfileResponseModel(
-                id="123e4567-e89b-12d3-a456-426655440000",
-                name="test-profile",
-                folder="Shared",
-                server=[
-                    {
-                        "name": "server1",
-                        "server": "192.168.1.1",
-                        "transport": "UDP",
-                        "port": 514,
-                        "format": "BSD",
-                        "facility": "LOG_USER",
-                    }
-                ],
-                unknown_field="should fail",
-            )
-        assert "extra" in str(exc_info.value).lower()
+    def test_syslog_server_profile_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in SyslogServerProfileResponseModel."""
+        model = SyslogServerProfileResponseModel(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-profile",
+            folder="Shared",
+            server=[
+                {
+                    "name": "server1",
+                    "server": "192.168.1.1",
+                    "transport": "UDP",
+                    "port": 514,
+                    "format": "BSD",
+                    "facility": "LOG_USER",
+                }
+            ],
+            unknown_field="should be ignored",
+        )
+        assert not hasattr(model, "unknown_field")

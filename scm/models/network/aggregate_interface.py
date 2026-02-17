@@ -4,7 +4,7 @@ This module defines the Pydantic models used for creating, updating, and
 representing Aggregate Interface resources in the Strata Cloud Manager.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -194,6 +194,11 @@ class AggregateInterfaceUpdateModel(AggregateInterfaceBaseModel):
 
 class AggregateInterfaceResponseModel(AggregateInterfaceBaseModel):
     """Model for Aggregate Interface responses from the API."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
 
     id: UUID = Field(
         ...,

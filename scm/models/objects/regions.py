@@ -193,6 +193,13 @@ class RegionResponseModel(RegionBaseModel):
 
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     id: Optional[UUID] = Field(
         None,
         description="The UUID of the region (may be missing for predefined regions)",

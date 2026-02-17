@@ -448,13 +448,12 @@ class TestExtraFieldsForbidden:
             NatRuleUpdateModel(**data)
         assert "Extra inputs are not permitted" in str(exc_info.value)
 
-    def test_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected on NatRuleResponseModel."""
+    def test_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on NatRuleResponseModel."""
         data = NatRuleResponseFactory().model_dump()
-        data["unknown_field"] = "should_fail"
-        with pytest.raises(ValidationError) as exc_info:
-            NatRuleResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        data["unknown_field"] = "should_be_ignored"
+        model = NatRuleResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
     def test_move_model_extra_fields_forbidden(self):
         """Test that extra fields are rejected on NatRuleMoveModel."""

@@ -108,6 +108,11 @@ class LoopbackInterfaceUpdateModel(LoopbackInterfaceBaseModel):
 class LoopbackInterfaceResponseModel(LoopbackInterfaceBaseModel):
     """Model for Loopback Interface responses from the API."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the loopback interface",

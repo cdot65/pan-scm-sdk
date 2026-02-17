@@ -143,6 +143,11 @@ class VariableUpdateModel(VariableBaseModel):
 class VariableResponseModel(VariableBaseModel):
     """Model for Variable responses from the API."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,  # required, readOnly
         description="The unique identifier of the variable",

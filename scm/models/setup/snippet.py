@@ -109,6 +109,11 @@ class SnippetResponseModel(SnippetBaseModel):
 
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The unique identifier of the snippet",

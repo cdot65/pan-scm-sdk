@@ -231,18 +231,17 @@ class TestExtraFieldsForbidden:
             AddressGroupUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_address_group_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in AddressGroupResponseModel."""
+    def test_address_group_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in AddressGroupResponseModel."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-address-group",
             "static": ["address1", "address2"],
             "folder": "Texas",
-            "unknown_field": "should fail",
+            "unknown_field": "should be ignored",
         }
-        with pytest.raises(ValidationError) as exc_info:
-            AddressGroupResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        model = AddressGroupResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
 
 # -------------------- End of Test Classes --------------------

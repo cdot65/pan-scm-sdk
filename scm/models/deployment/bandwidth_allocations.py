@@ -77,6 +77,13 @@ class BandwidthAllocationUpdateModel(BandwidthAllocationBaseModel):
 class BandwidthAllocationResponseModel(BandwidthAllocationBaseModel):
     """Model for Bandwidth Allocation API responses."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     # Unlike other models, bandwidth allocations don't include an ID in responses
     # based on the OpenAPI specification
     pass
@@ -86,7 +93,7 @@ class BandwidthAllocationListResponseModel(BaseModel):
     """Model for the list response from the Bandwidth Allocations API."""
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra="ignore",
         populate_by_name=True,
     )
 

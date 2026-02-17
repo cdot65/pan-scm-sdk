@@ -197,6 +197,13 @@ class ServiceResponseModel(ServiceBaseModel):
     Includes all base fields plus the optional id field.
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     id: Optional[UUID] = Field(
         None,
         description="The UUID of the service.",

@@ -424,8 +424,8 @@ class TestIPsecCryptoProfileModels:
             IPsecCryptoProfileUpdateModel(**data)
         assert "Extra inputs are not permitted" in str(exc_info.value)
 
-    def test_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected on ResponseModel."""
+    def test_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ResponseModel."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-profile",
@@ -435,8 +435,7 @@ class TestIPsecCryptoProfileModels:
                 "authentication": ["sha1"],
             },
             "folder": "Test Folder",
-            "unknown_field": "should_fail",
+            "unknown_field": "should_be_ignored",
         }
-        with pytest.raises(ValidationError) as exc_info:
-            IPsecCryptoProfileResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        model = IPsecCryptoProfileResponseModel(**data)
+        assert not hasattr(model, "unknown_field")

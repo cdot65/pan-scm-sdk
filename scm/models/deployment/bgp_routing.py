@@ -131,6 +131,13 @@ class BGPRoutingResponseModel(BGPRoutingBaseModel):
     when BGP routing hasn't been fully configured.
     """
 
+    model_config = ConfigDict(
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        extra="ignore",
+    )
+
     # Override to set default to empty list
     outbound_routes_for_services: List[str] = Field(
         default_factory=list,
