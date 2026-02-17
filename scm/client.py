@@ -614,6 +614,35 @@ class Scm:
                 "scm.config.security.wildfire_antivirus_profile",
                 "WildfireAntivirusProfile",
             ),
+            # Network Interfaces
+            "aggregate_interface": (
+                "scm.config.network.aggregate_interface",
+                "AggregateInterface",
+            ),
+            "ethernet_interface": (
+                "scm.config.network.ethernet_interface",
+                "EthernetInterface",
+            ),
+            "layer2_subinterface": (
+                "scm.config.network.layer2_subinterface",
+                "Layer2Subinterface",
+            ),
+            "layer3_subinterface": (
+                "scm.config.network.layer3_subinterface",
+                "Layer3Subinterface",
+            ),
+            "loopback_interface": (
+                "scm.config.network.loopback_interface",
+                "LoopbackInterface",
+            ),
+            "tunnel_interface": (
+                "scm.config.network.tunnel_interface",
+                "TunnelInterface",
+            ),
+            "vlan_interface": (
+                "scm.config.network.vlan_interface",
+                "VlanInterface",
+            ),
         }
 
         # Check if the requested service exists in our registry

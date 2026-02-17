@@ -83,24 +83,25 @@ updated_result = client.nat_rule.update(update_dict)
 
 ## Models by Category
 
-### IKE Crypto Profiles
+### Network Interfaces
+
+- [Aggregate Interface Models](aggregate_interface_models.md) - Aggregate (bonded) ethernet interfaces with LACP
+- [Ethernet Interface Models](ethernet_interface_models.md) - Physical ethernet interfaces (Layer 2/3/TAP modes)
+- [Layer2 Subinterface Models](layer2_subinterface_models.md) - Layer 2 VLAN subinterfaces
+- [Layer3 Subinterface Models](layer3_subinterface_models.md) - Layer 3 VLAN subinterfaces with IP addressing
+- [Loopback Interface Models](loopback_interface_models.md) - Loopback interfaces
+- [Tunnel Interface Models](tunnel_interface_models.md) - Tunnel interfaces for VPN
+- [VLAN Interface Models](vlan_interface_models.md) - VLAN interfaces for inter-VLAN routing
+
+### VPN Configuration
 
 - [IKE Crypto Profile Models](ike_crypto_profile_models.md) - Internet Key Exchange crypto profiles for VPN tunnels
-
-### IKE Gateways
-
 - [IKE Gateway Models](ike_gateway_models.md) - Internet Key Exchange gateways for VPN tunnel endpoints
-
-### IPsec Crypto Profiles
-
 - [IPsec Crypto Profile Models](ipsec_crypto_profile_models.md) - IPsec crypto profiles for VPN tunnels
 
-### NAT Rules
+### Other Network Models
 
 - [NAT Rule Models](nat_rule_models.md) - Network Address Translation rules
-
-### Security Zones
-
 - [Security Zone Models](security_zone_models.md) - Security Zone configuration and management
 
 ## Best Practices

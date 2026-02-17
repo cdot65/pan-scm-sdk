@@ -277,3 +277,6 @@ CLAUDE.md
 prisma_api.md
 prisma_api.pdf
 deployment-services_new.yaml
+
+# Auto Claude data directory
+.auto-claude/
