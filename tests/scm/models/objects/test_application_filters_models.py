@@ -135,13 +135,12 @@ class TestExtraFieldsForbidden:
             ApplicationFiltersUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_application_filters_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in ApplicationFiltersResponseModel."""
+    def test_application_filters_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in ApplicationFiltersResponseModel."""
         data = ApplicationFiltersResponseModelFactory.build_valid()
-        data["unknown_field"] = "should fail"
-        with pytest.raises(ValidationError) as exc_info:
-            ApplicationFiltersResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        data["unknown_field"] = "should be ignored"
+        model = ApplicationFiltersResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
 
 # -------------------- End of Test Classes --------------------

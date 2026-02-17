@@ -157,10 +157,9 @@ class TestFolderResponseModel:
         assert model.name == data["name"]
         assert model.parent == ""  # Empty parent for root folder
 
-    def test_extra_fields_forbidden(self):
-        """Test that extra fields are rejected on ResponseModel."""
+    def test_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ResponseModel."""
         data = FolderResponseModelFactory.build_valid()
-        data["unknown_field"] = "should_fail"
-        with pytest.raises(ValidationError) as exc_info:
-            FolderResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        data["unknown_field"] = "should_be_ignored"
+        model = FolderResponseModel(**data)
+        assert not hasattr(model, "unknown_field")

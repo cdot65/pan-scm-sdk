@@ -522,6 +522,13 @@ class ExternalDynamicListsUpdateModel(ExternalDynamicListsBaseModel):
 class ExternalDynamicListsResponseModel(ExternalDynamicListsBaseModel):
     """Model for responses representing an external dynamic list resource."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     id: Optional[UUID] = Field(
         None,
         description="The UUID of the external dynamic list",

@@ -165,7 +165,9 @@ class TestVariableCreateModel:
         }
         with pytest.raises(ValueError) as exc_info:
             VariableCreateModel.model_validate(data)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
 
     def test_model_validate_with_multiple_containers_fails(self):
         """Test model_validate fails when multiple containers are provided."""
@@ -178,7 +180,9 @@ class TestVariableCreateModel:
         }
         with pytest.raises(ValueError) as exc_info:
             VariableCreateModel.model_validate(data)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
 
 
 class TestVariableUpdateModel:
@@ -252,7 +256,9 @@ class TestVariableUpdateModel:
         }
         with pytest.raises(ValueError) as exc_info:
             VariableUpdateModel.model_validate(data)
-        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(exc_info.value)
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
 
 
 class TestVariableResponseModel:
@@ -321,16 +327,15 @@ class TestVariableResponseModel:
             model = VariableResponseModelFactory.build(type=valid_type)
             assert model.type == valid_type
 
-    def test_extra_fields_forbidden(self):
-        """Test that extra fields are rejected on ResponseModel."""
+    def test_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ResponseModel."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426614174000",
             "name": "test_variable",
             "type": "ip-netmask",
             "value": "192.168.1.0/24",
             "folder": "test_folder",
-            "unknown_field": "should_fail",
+            "unknown_field": "should_be_ignored",
         }
-        with pytest.raises(ValidationError) as exc_info:
-            VariableResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        model = VariableResponseModel(**data)
+        assert not hasattr(model, "unknown_field")

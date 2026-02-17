@@ -190,8 +190,8 @@ class TestIKECryptoProfileModels:
             IKECryptoProfileUpdateModel(**data)
         assert "Extra inputs are not permitted" in str(exc_info.value)
 
-    def test_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected on ResponseModel."""
+    def test_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ResponseModel."""
         data = {
             "id": "123e4567-e89b-12d3-a456-426655440000",
             "name": "test-profile",
@@ -199,11 +199,10 @@ class TestIKECryptoProfileModels:
             "encryption": ["aes-128-cbc"],
             "dh_group": ["group2"],
             "folder": "test-folder",
-            "unknown_field": "should_fail",
+            "unknown_field": "should_be_ignored",
         }
-        with pytest.raises(ValidationError) as exc_info:
-            IKECryptoProfileResponseModel(**data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        model = IKECryptoProfileResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
     def test_non_auth_hash_algorithm(self):
         """Test that non-auth hash algorithm is supported."""

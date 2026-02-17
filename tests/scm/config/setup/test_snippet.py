@@ -322,94 +322,56 @@ class TestFolderAssociations(TestSnippetBase):
     """Tests for Snippet folder association methods."""
 
     def test_associate_folder_not_implemented(self, snippet_service, mock_scm_client):
-        """Test that associate_folder raises NotImplementedError."""
-        # Setup mock response that returns an error when called
-        mock_scm_client.post.side_effect = Exception("API error")
-
-        # Try to associate a folder - should raise NotImplementedError
-        with pytest.raises(Exception) as excinfo:
+        """Test that associate_folder raises NotImplementedError immediately."""
+        with pytest.raises(NotImplementedError) as excinfo:
             snippet_service.associate_folder(
                 snippet_id="123e4567-e89b-12d3-a456-426614174000",
                 folder_id="223e4567-e89b-12d3-a456-426614174000",
             )
 
-        # Verify the method was called and the exception contains the expected text
-        mock_scm_client.post.assert_called_once()
-        assert "not yet implemented" in str(excinfo.value)
+        # Verify the error message mentions the API limitation
+        assert "not yet supported by the SCM API" in str(excinfo.value)
 
-    def test_associate_folder_success(self, snippet_service, mock_scm_client):
-        """Test successful associate_folder method call (to cover line 291)."""
-        # Setup mock response for a successful API call
+        # Verify NO API call was made
+        mock_scm_client.post.assert_not_called()
+
+    def test_associate_folder_no_api_call(self, snippet_service, mock_scm_client):
+        """Test that associate_folder does not make any API call."""
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
         folder_id = "223e4567-e89b-12d3-a456-426614174000"
-        mock_response = SnippetResponseModelFactory.build()
-        mock_scm_client.post.return_value = mock_response
 
-        # Mock the model_validate to prevent NotImplementedError being raised
-        with patch(
-            "scm.models.setup.snippet.SnippetResponseModel.model_validate",
-            return_value=SnippetResponseModel.model_validate(mock_response),
-        ):
-            # Call associate_folder - this should succeed
-            with patch("scm.config.setup.snippet.NotImplementedError", side_effect=Exception):
-                try:
-                    result = snippet_service.associate_folder(snippet_id, folder_id)
+        # The method should raise NotImplementedError without calling the API
+        with pytest.raises(NotImplementedError):
+            snippet_service.associate_folder(snippet_id, folder_id)
 
-                    # This code won't be reached due to the NotImplementedError, but
-                    # it's here to show the expected behavior if the method were implemented
-                    assert isinstance(result, SnippetResponseModel)
-                    mock_scm_client.post.assert_called_once()
-                except Exception:
-                    # We expect an exception, but the API call should have been made
-                    mock_scm_client.post.assert_called_once()
-                    call_args = mock_scm_client.post.call_args
-                    assert call_args[0][0] == f"/config/setup/v1/snippets/{snippet_id}/folders"
-                    assert call_args[1]["json"]["folder_id"] == folder_id
+        # Verify no POST request was made
+        mock_scm_client.post.assert_not_called()
 
     def test_disassociate_folder_not_implemented(self, snippet_service, mock_scm_client):
-        """Test that disassociate_folder raises NotImplementedError."""
-        # Setup mock response that returns an error when called
-        mock_scm_client.delete.side_effect = Exception("API error")
-
-        # Try to disassociate a folder - should raise NotImplementedError
-        with pytest.raises(Exception) as excinfo:
+        """Test that disassociate_folder raises NotImplementedError immediately."""
+        with pytest.raises(NotImplementedError) as excinfo:
             snippet_service.disassociate_folder(
                 snippet_id="123e4567-e89b-12d3-a456-426614174000",
                 folder_id="223e4567-e89b-12d3-a456-426614174000",
             )
 
-        # Verify the method was called and the exception contains the expected text
-        mock_scm_client.delete.assert_called_once()
-        assert "not yet implemented" in str(excinfo.value)
+        # Verify the error message mentions the API limitation
+        assert "not yet supported by the SCM API" in str(excinfo.value)
 
-    def test_disassociate_folder_success(self, snippet_service, mock_scm_client):
-        """Test successful disassociate_folder method call (to cover line 321)."""
-        # Setup mock response for a successful API call
+        # Verify NO API call was made
+        mock_scm_client.delete.assert_not_called()
+
+    def test_disassociate_folder_no_api_call(self, snippet_service, mock_scm_client):
+        """Test that disassociate_folder does not make any API call."""
         snippet_id = "123e4567-e89b-12d3-a456-426614174000"
         folder_id = "223e4567-e89b-12d3-a456-426614174000"
-        mock_response = SnippetResponseModelFactory.build()
-        mock_scm_client.delete.return_value = mock_response
 
-        # Mock the model_validate to prevent NotImplementedError being raised
-        with patch(
-            "scm.models.setup.snippet.SnippetResponseModel.model_validate",
-            return_value=SnippetResponseModel.model_validate(mock_response),
-        ):
-            # Call disassociate_folder - this should succeed
-            with patch("scm.config.setup.snippet.NotImplementedError", side_effect=Exception):
-                try:
-                    result = snippet_service.disassociate_folder(snippet_id, folder_id)
+        # The method should raise NotImplementedError without calling the API
+        with pytest.raises(NotImplementedError):
+            snippet_service.disassociate_folder(snippet_id, folder_id)
 
-                    # This code won't be reached due to the NotImplementedError, but
-                    # it's here to show the expected behavior if the method were implemented
-                    assert isinstance(result, SnippetResponseModel)
-                    mock_scm_client.delete.assert_called_once()
-                except Exception:
-                    # We expect an exception, but the API call should have been made
-                    mock_scm_client.delete.assert_called_once()
-                    call_args = mock_scm_client.delete.call_args
-                    endpoint = f"/config/setup/v1/snippets/{snippet_id}/folders/{folder_id}"
-                    assert call_args[0][0] == endpoint
+        # Verify no DELETE request was made
+        mock_scm_client.delete.assert_not_called()
 
 
 class TestSnippetList(TestSnippetBase):

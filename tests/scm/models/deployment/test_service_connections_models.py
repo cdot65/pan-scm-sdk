@@ -349,10 +349,9 @@ class TestExtraFieldsForbidden:
             ServiceConnectionUpdateModel(**data)
         assert "extra" in str(exc_info.value).lower()
 
-    def test_service_connection_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in ServiceConnectionResponseModel."""
+    def test_service_connection_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in ServiceConnectionResponseModel."""
         data = ServiceConnectionResponseFactory.build()
-        data["unknown_field"] = "should fail"
-        with pytest.raises(ValidationError) as exc_info:
-            ServiceConnectionResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        data["unknown_field"] = "should_be_ignored"
+        model = ServiceConnectionResponseModel(**data)
+        assert not hasattr(model, "unknown_field")

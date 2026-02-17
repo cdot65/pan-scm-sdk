@@ -665,17 +665,16 @@ class TestExtraFieldsForbidden:
             )
         assert "extra" in str(exc_info.value).lower()
 
-    def test_schedule_response_model_extra_fields_forbidden(self):
-        """Test that extra fields are rejected in ScheduleResponseModel."""
-        with pytest.raises(ValidationError) as exc_info:
-            ScheduleResponseModel(
-                id="123e4567-e89b-12d3-a456-426655440000",
-                name="TestSchedule",
-                folder="Shared",
-                schedule_type={"recurring": {"daily": ["09:00-17:00"]}},
-                unknown_field="should fail",
-            )
-        assert "extra" in str(exc_info.value).lower()
+    def test_schedule_response_model_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored in ScheduleResponseModel."""
+        model = ScheduleResponseModel(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="TestSchedule",
+            folder="Shared",
+            schedule_type={"recurring": {"daily": ["09:00-17:00"]}},
+            unknown_field="should be ignored",
+        )
+        assert not hasattr(model, "unknown_field")
 
 
 # -------------------- End of Test Classes --------------------

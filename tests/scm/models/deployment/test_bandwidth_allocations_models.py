@@ -212,13 +212,12 @@ class TestBandwidthAllocationResponseModel:
         assert model.spn_name_list is None
         assert model.qos is None
 
-    def test_extra_fields_forbidden(self):
-        """Test that extra fields are rejected (inherited from BaseModel)."""
+    def test_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ResponseModel."""
         data = BandwidthAllocationResponseModelFactory.build_valid()
-        data["unknown_field"] = "fail"
-        with pytest.raises(ValidationError) as exc_info:
-            BandwidthAllocationResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        data["unknown_field"] = "should_be_ignored"
+        model = BandwidthAllocationResponseModel(**data)
+        assert not hasattr(model, "unknown_field")
 
 
 class TestBandwidthAllocationListResponseModel:
@@ -251,10 +250,9 @@ class TestBandwidthAllocationListResponseModel:
         assert len(model.data) == 0
         assert model.total == 0
 
-    def test_extra_fields_forbidden(self):
-        """Test that extra fields are rejected."""
+    def test_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ListResponseModel."""
         data = BandwidthAllocationResponseModelFactory.build_list_response()
-        data["unknown_field"] = "fail"
-        with pytest.raises(ValidationError) as exc_info:
-            BandwidthAllocationListResponseModel(**data)
-        assert "extra" in str(exc_info.value).lower()
+        data["unknown_field"] = "should_be_ignored"
+        model = BandwidthAllocationListResponseModel(**data)
+        assert not hasattr(model, "unknown_field")

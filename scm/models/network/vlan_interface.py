@@ -140,6 +140,11 @@ class VlanInterfaceUpdateModel(VlanInterfaceBaseModel):
 class VlanInterfaceResponseModel(VlanInterfaceBaseModel):
     """Model for VLAN Interface responses from the API."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the VLAN interface",

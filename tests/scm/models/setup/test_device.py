@@ -157,10 +157,9 @@ class TestDeviceListResponseModel:
         assert isinstance(model.offset, int)
         assert isinstance(model.total, int)
 
-    def test_extra_fields_forbidden(self):
-        """Test that extra fields are rejected."""
+    def test_extra_fields_ignored(self):
+        """Test that extra fields are silently ignored on ResponseModel."""
         data = DeviceListResponseModelDictFactory.build()
-        data["unknown_field"] = "should_fail"
-        with pytest.raises(ValidationError) as exc_info:
-            DeviceListResponseModel.model_validate(data)
-        assert "Extra inputs are not permitted" in str(exc_info.value)
+        data["unknown_field"] = "should_be_ignored"
+        model = DeviceListResponseModel.model_validate(data)
+        assert not hasattr(model, "unknown_field")

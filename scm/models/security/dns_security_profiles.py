@@ -298,6 +298,13 @@ class DNSSecurityProfileUpdateModel(DNSSecurityProfileBaseModel):
 class DNSSecurityProfileResponseModel(DNSSecurityProfileBaseModel):
     """Model for DNS Security Profile API responses."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="UUID of the resource",

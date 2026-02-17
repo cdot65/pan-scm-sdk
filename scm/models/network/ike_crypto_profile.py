@@ -207,7 +207,7 @@ class IKECryptoProfileResponseModel(IKECryptoProfileBaseModel):
     """Model for IKE Crypto Profile responses."""
 
     model_config = ConfigDict(
-        extra="forbid",
+        extra="ignore",
         populate_by_name=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,

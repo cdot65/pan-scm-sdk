@@ -91,6 +91,11 @@ class Layer2SubinterfaceUpdateModel(Layer2SubinterfaceBaseModel):
 class Layer2SubinterfaceResponseModel(Layer2SubinterfaceBaseModel):
     """Model for Layer2 Subinterface responses from the API."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the layer2 subinterface",

@@ -240,6 +240,13 @@ class RemoteNetworkResponseModel(RemoteNetworkBaseModel):
     Includes id as a required field.
     """
 
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
+
     id: UUID = Field(
         ...,
         description="The UUID of the remote network",

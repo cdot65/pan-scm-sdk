@@ -2,6 +2,21 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.5.0
+
+**Released:** February 17, 2026
+
+### Fixed
+
+- **EthernetInterface.list()**: Added missing `slot: Optional[int]` field to `EthernetInterfaceBaseModel` that caused `ValidationError` when the API returned slot data on PA-5000/PA-7000 series chassis
+- **tag.list()**: Fixed validation errors caused by `extra="forbid"` on `TagResponseModel` rejecting unknown fields in API responses
+- **snippet.associate_folder()**: Now raises `NotImplementedError` immediately instead of making a failing API call to a non-existent endpoint and masking the 404 error
+
+### Changed
+
+- **Response Model Resilience**: Migrated all 50 `*ResponseModel` classes from `extra="forbid"` to `extra="ignore"` so the SDK gracefully handles new fields added by the SCM API without crashing. `*CreateModel` and `*UpdateModel` classes retain `extra="forbid"` for strict input validation.
+- Updated 41 test methods to validate the new `extra="ignore"` behavior on response models while preserving `extra="forbid"` tests on create/update models
+
 ## Version 0.4.1
 
 **Released:** December 21, 2025
