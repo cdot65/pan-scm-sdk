@@ -19,9 +19,9 @@ from pydantic import (
 
 from scm.utils.tag_colors import normalize_color_name
 
-# Pattern allows: alphanumeric, spaces, underscores, dots, hyphens, brackets, ampersands, parentheses
-# Matches the Tag model's name pattern from OpenAPI spec
-TAG_NAME_PATTERN = r"^[a-zA-Z0-9_ \.\-\[\]\&\(\)]+$"
+# Pattern allows: alphanumeric, spaces, underscores, dots, hyphens, brackets, ampersands, parentheses, colons
+# Extended beyond OpenAPI spec to match actual API behavior (tags with colons are valid)
+TAG_NAME_PATTERN = r"^[a-zA-Z0-9_ \.\-\[\]\&\(\):]+$"
 
 # Annotated type for tag names - use this for tag reference fields across all models
 TagName = Annotated[str, Field(max_length=127, pattern=TAG_NAME_PATTERN)]
@@ -116,7 +116,7 @@ class TagBaseModel(BaseModel):
         ...,
         max_length=127,
         description="The name of the Tag object",
-        pattern=r"^[a-zA-Z0-9_ \.-\[\]\-\&\(\)]+$",
+        pattern=r"^[a-zA-Z0-9_ \.\-\[\]\&\(\):]+$",
     )
     # Optional fields
     color: Optional[str] = Field(
