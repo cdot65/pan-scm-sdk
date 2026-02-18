@@ -6,7 +6,7 @@ Contains Pydantic models for representing BGP authentication profile objects and
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # --- Main Models ---
@@ -50,6 +50,27 @@ class BgpAuthProfileBaseModel(BaseModel):
         max_length=64,
         description="The device in which the resource is defined",
     )
+
+
+class BgpAuthProfileCreateModel(BgpAuthProfileBaseModel):
+    """Model for creating new BGP Authentication Profiles."""
+
+    @model_validator(mode="after")
+    def validate_container_type(self) -> "BgpAuthProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            BgpAuthProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
+        container_fields = ["folder", "snippet", "device"]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
+        if len(provided) != 1:
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
+        return self
 
 
 class BgpAuthProfileUpdateModel(BgpAuthProfileBaseModel):

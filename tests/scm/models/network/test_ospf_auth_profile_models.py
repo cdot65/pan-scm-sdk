@@ -7,6 +7,7 @@ import pytest
 
 from scm.models.network import (
     OspfAuthProfileBaseModel,
+    OspfAuthProfileCreateModel,
     OspfAuthProfileMd5Key,
     OspfAuthProfileResponseModel,
     OspfAuthProfileUpdateModel,
@@ -151,6 +152,66 @@ class TestOspfAuthProfileBaseModel:
 
         with pytest.raises(ValidationError):
             OspfAuthProfileBaseModel(name="test", folder="Folder@#$")
+
+
+class TestOspfAuthProfileCreateModel:
+    """Test OSPF Authentication Profile create model."""
+
+    def test_valid_create_with_folder(self):
+        """Test valid create model with folder container."""
+        model = OspfAuthProfileCreateModel(
+            name="test-ospf",
+            folder="Test Folder",
+            password="ospf-secret",
+        )
+        assert model.name == "test-ospf"
+        assert model.folder == "Test Folder"
+
+    def test_valid_create_with_snippet(self):
+        """Test valid create model with snippet container."""
+        model = OspfAuthProfileCreateModel(
+            name="test-ospf",
+            snippet="MySnippet",
+        )
+        assert model.snippet == "MySnippet"
+
+    def test_valid_create_with_device(self):
+        """Test valid create model with device container."""
+        model = OspfAuthProfileCreateModel(
+            name="test-ospf",
+            device="MyDevice",
+        )
+        assert model.device == "MyDevice"
+
+    def test_create_no_container_raises_error(self):
+        """Test that create without any container raises ValueError."""
+        with pytest.raises(ValueError) as exc_info:
+            OspfAuthProfileCreateModel(name="test-ospf")
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
+
+    def test_create_multiple_containers_raises_error(self):
+        """Test that create with multiple containers raises ValueError."""
+        with pytest.raises(ValueError) as exc_info:
+            OspfAuthProfileCreateModel(
+                name="test-ospf",
+                folder="Test Folder",
+                snippet="MySnippet",
+            )
+        assert "Exactly one of 'folder', 'snippet', or 'device' must be provided" in str(
+            exc_info.value
+        )
+
+    def test_create_model_extra_fields_forbidden(self):
+        """Test that extra fields are rejected on OspfAuthProfileCreateModel."""
+        with pytest.raises(ValidationError) as exc_info:
+            OspfAuthProfileCreateModel(
+                name="test",
+                folder="Test Folder",
+                unknown_field="should_fail",
+            )
+        assert "Extra inputs are not permitted" in str(exc_info.value)
 
 
 class TestOspfAuthProfileUpdateModel:

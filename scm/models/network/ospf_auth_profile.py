@@ -91,6 +91,27 @@ class OspfAuthProfileBaseModel(BaseModel):
         return self
 
 
+class OspfAuthProfileCreateModel(OspfAuthProfileBaseModel):
+    """Model for creating new OSPF Authentication Profiles."""
+
+    @model_validator(mode="after")
+    def validate_container_type(self) -> "OspfAuthProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            OspfAuthProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
+        container_fields = ["folder", "snippet", "device"]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
+        if len(provided) != 1:
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
+        return self
+
+
 class OspfAuthProfileUpdateModel(OspfAuthProfileBaseModel):
     """Model for updating OSPF Authentication Profiles."""
 

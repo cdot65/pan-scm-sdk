@@ -8,6 +8,7 @@ import pytest
 from scm.config.network import RouteAccessList
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.network import (
+    RouteAccessListCreateModel,
     RouteAccessListResponseModel,
     RouteAccessListUpdateModel,
 )
@@ -92,6 +93,30 @@ class TestRouteAccessList(TestRouteAccessListBase):
             client = RouteAccessList(self.mock_scm)
             client.max_limit = 10000
         assert "max_limit exceeds maximum allowed value" in str(excinfo.value)
+
+    def test_create(self, sample_route_access_list_dict):
+        """Test create method."""
+        self.mock_scm.post.return_value = sample_route_access_list_dict
+
+        # Create a copy without the ID for create operation
+        create_data = sample_route_access_list_dict.copy()
+        create_data.pop("id")
+
+        result = self.client.create(create_data)
+
+        # Check that correct API call was made
+        self.mock_scm.post.assert_called_once()
+        call_args = self.mock_scm.post.call_args
+        assert call_args[0][0] == self.client.ENDPOINT
+
+        # Check payload validation
+        payload = call_args[1]["json"]
+        RouteAccessListCreateModel(**payload)
+
+        # Check result
+        assert isinstance(result, RouteAccessListResponseModel)
+        assert result.name == sample_route_access_list_dict["name"]
+        assert result.folder == sample_route_access_list_dict["folder"]
 
     def test_get(self, sample_route_access_list_dict):
         """Test get method."""
@@ -385,3 +410,13 @@ class TestRouteAccessList(TestRouteAccessListBase):
         mock_warning.assert_called_once()
         call_args = mock_warning.call_args[0][0]
         assert "Multiple route access lists found" in call_args
+
+    def test_delete(self, sample_route_access_list_dict):
+        """Test delete method."""
+        object_id = sample_route_access_list_dict["id"]
+
+        self.client.delete(object_id)
+
+        # Check that correct API call was made
+        expected_endpoint = f"{self.client.ENDPOINT}/{object_id}"
+        self.mock_scm.delete.assert_called_once_with(expected_endpoint)

@@ -354,6 +354,27 @@ class BgpAddressFamilyProfileBaseModel(BaseModel):
     )
 
 
+class BgpAddressFamilyProfileCreateModel(BgpAddressFamilyProfileBaseModel):
+    """Model for creating new BGP Address Family Profiles."""
+
+    @model_validator(mode="after")
+    def validate_container_type(self) -> "BgpAddressFamilyProfileCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            BgpAddressFamilyProfileCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
+        container_fields = ["folder", "snippet", "device"]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
+        if len(provided) != 1:
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
+        return self
+
+
 class BgpAddressFamilyProfileUpdateModel(BgpAddressFamilyProfileBaseModel):
     """Model for updating BGP Address Family Profiles."""
 

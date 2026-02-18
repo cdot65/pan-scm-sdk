@@ -255,6 +255,7 @@ from .bgp_address_family_profile import (
     BgpAddressFamilyNextHop,
     BgpAddressFamilyOrf,
     BgpAddressFamilyProfileBaseModel,
+    BgpAddressFamilyProfileCreateModel,
     BgpAddressFamilyProfileIpv4UnicastMulticast,
     BgpAddressFamilyProfileResponseModel,
     BgpAddressFamilyProfileUpdateModel,
@@ -263,17 +264,20 @@ from .bgp_address_family_profile import (
 )
 from .bgp_auth_profile import (
     BgpAuthProfileBaseModel,
+    BgpAuthProfileCreateModel,
     BgpAuthProfileResponseModel,
     BgpAuthProfileUpdateModel,
 )
 from .ospf_auth_profile import (
     OspfAuthProfileBaseModel,
+    OspfAuthProfileCreateModel,
     OspfAuthProfileMd5Key,
     OspfAuthProfileResponseModel,
     OspfAuthProfileUpdateModel,
 )
 from .route_access_list import (
     RouteAccessListBaseModel,
+    RouteAccessListCreateModel,
     RouteAccessListDestinationAddress,
     RouteAccessListIpv4,
     RouteAccessListIpv4Entry,
@@ -284,6 +288,7 @@ from .route_access_list import (
 )
 from .route_prefix_list import (
     RoutePrefixListBaseModel,
+    RoutePrefixListCreateModel,
     RoutePrefixListIpv4,
     RoutePrefixListIpv4Entry,
     RoutePrefixListPrefix,
@@ -585,6 +590,7 @@ __all__ = [
     "VrfConfig",
     # BGP Address Family Profile
     "BgpAddressFamilyProfileBaseModel",
+    "BgpAddressFamilyProfileCreateModel",
     "BgpAddressFamilyProfileUpdateModel",
     "BgpAddressFamilyProfileResponseModel",
     "BgpAddressFamilyProfileIpv4UnicastMulticast",
@@ -600,15 +606,18 @@ __all__ = [
     "BgpAddressFamilyOrf",
     # BGP Auth Profile
     "BgpAuthProfileBaseModel",
+    "BgpAuthProfileCreateModel",
     "BgpAuthProfileUpdateModel",
     "BgpAuthProfileResponseModel",
     # OSPF Auth Profile
     "OspfAuthProfileBaseModel",
+    "OspfAuthProfileCreateModel",
     "OspfAuthProfileUpdateModel",
     "OspfAuthProfileResponseModel",
     "OspfAuthProfileMd5Key",
     # Route Access List
     "RouteAccessListBaseModel",
+    "RouteAccessListCreateModel",
     "RouteAccessListUpdateModel",
     "RouteAccessListResponseModel",
     "RouteAccessListType",
@@ -618,6 +627,7 @@ __all__ = [
     "RouteAccessListDestinationAddress",
     # Route Prefix List
     "RoutePrefixListBaseModel",
+    "RoutePrefixListCreateModel",
     "RoutePrefixListUpdateModel",
     "RoutePrefixListResponseModel",
     "RoutePrefixListIpv4",

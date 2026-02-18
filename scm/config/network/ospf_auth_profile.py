@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 from scm.config import BaseObject
 from scm.exceptions import InvalidObjectError, MissingQueryParameterError
 from scm.models.network import (
+    OspfAuthProfileCreateModel,
     OspfAuthProfileResponseModel,
     OspfAuthProfileUpdateModel,
 )
@@ -97,6 +98,37 @@ class OspfAuthProfile(BaseObject):
             )
 
         return limit_int
+
+    def create(
+        self,
+        data: Dict[str, Any],
+    ) -> OspfAuthProfileResponseModel:
+        """Create a new OSPF authentication profile object.
+
+        Args:
+            data: Dictionary containing the OSPF authentication profile configuration
+
+        Returns:
+            OspfAuthProfileResponseModel
+
+        """
+        # Use the dictionary "data" to pass into Pydantic and return a modeled object
+        profile = OspfAuthProfileCreateModel(**data)
+
+        # Convert back to a Python dictionary, removing any unset fields and using aliases
+        payload = profile.model_dump(
+            exclude_unset=True,
+            by_alias=True,
+        )
+
+        # Send the updated object to the remote API as JSON
+        response: Dict[str, Any] = self.api_client.post(
+            self.ENDPOINT,
+            json=payload,
+        )
+
+        # Return the API response as a new Pydantic object
+        return OspfAuthProfileResponseModel(**response)
 
     def get(
         self,
@@ -430,3 +462,16 @@ class OspfAuthProfile(BaseObject):
                 http_status_code=500,
                 details={"error": "Response has invalid structure"},
             )
+
+    def delete(
+        self,
+        object_id: str,
+    ) -> None:
+        """Delete an OSPF authentication profile object.
+
+        Args:
+            object_id: The ID of the object to delete
+
+        """
+        endpoint = f"{self.ENDPOINT}/{object_id}"
+        self.api_client.delete(endpoint)

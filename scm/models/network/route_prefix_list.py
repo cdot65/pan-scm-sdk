@@ -150,6 +150,27 @@ class RoutePrefixListBaseModel(BaseModel):
     )
 
 
+class RoutePrefixListCreateModel(RoutePrefixListBaseModel):
+    """Model for creating new Route Prefix Lists."""
+
+    @model_validator(mode="after")
+    def validate_container_type(self) -> "RoutePrefixListCreateModel":
+        """Ensure exactly one container field (folder, snippet, or device) is set.
+
+        Returns:
+            RoutePrefixListCreateModel: The validated model instance.
+
+        Raises:
+            ValueError: If zero or more than one container field is set.
+
+        """
+        container_fields = ["folder", "snippet", "device"]
+        provided = [field for field in container_fields if getattr(self, field) is not None]
+        if len(provided) != 1:
+            raise ValueError("Exactly one of 'folder', 'snippet', or 'device' must be provided.")
+        return self
+
+
 class RoutePrefixListUpdateModel(RoutePrefixListBaseModel):
     """Model for updating Route Prefix Lists."""
 
