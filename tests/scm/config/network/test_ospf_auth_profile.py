@@ -179,6 +179,7 @@ class TestOspfAuthProfile(TestOspfAuthProfileBase):
 
     def test_list_with_exclusions(self, sample_ospf_auth_profile_dict):
         """Test list method with exclusion filters."""
+        # Create multiple profiles with different containers
         profile1 = sample_ospf_auth_profile_dict.copy()
         profile1["id"] = str(uuid.uuid4())
         profile1["name"] = "profile1"
@@ -189,20 +190,46 @@ class TestOspfAuthProfile(TestOspfAuthProfileBase):
         profile2["name"] = "profile2"
         profile2["folder"] = "Folder2"
 
+        profile3 = sample_ospf_auth_profile_dict.copy()
+        profile3["id"] = str(uuid.uuid4())
+        profile3["name"] = "profile3"
+        profile3["folder"] = "Folder1"
+        profile3["snippet"] = "Snippet1"
+
+        profile4 = sample_ospf_auth_profile_dict.copy()
+        profile4["id"] = str(uuid.uuid4())
+        profile4["name"] = "profile4"
+        profile4["folder"] = "Folder1"
+        profile4["device"] = "Device1"
+
         self.mock_scm.get.return_value = {
-            "data": [profile1, profile2],
+            "data": [profile1, profile2, profile3, profile4],
             "limit": 100,
             "offset": 0,
-            "total": 2,
+            "total": 4,
         }
 
+        # Test exact_match filter
         result = self.client.list(folder="Folder1", exact_match=True)
-        assert len(result) == 1
-        assert result[0].name == "profile1"
+        assert len(result) == 3  # Should match profile1, profile3, profile4
 
+        # Test exclude_folders filter
         result = self.client.list(folder="Folder1", exclude_folders=["Folder2"])
-        assert len(result) == 1
-        assert result[0].name == "profile1"
+        assert len(result) == 3  # Should exclude only profile2
+
+        # Test exclude_snippets filter
+        result = self.client.list(folder="Folder1", exclude_snippets=["Snippet1"])
+        assert len(result) == 3  # Should exclude profile3
+
+        # Test exclude_devices filter
+        result = self.client.list(folder="Folder1", exclude_devices=["Device1"])
+        assert len(result) == 3  # Should exclude profile4
+
+        # Test combining multiple exclusions
+        result = self.client.list(
+            folder="Folder1", exclude_snippets=["Snippet1"], exclude_devices=["Device1"]
+        )
+        assert len(result) == 2  # Should exclude profile3 and profile4
 
     def test_list_with_empty_folder(self):
         """Test list method with empty folder parameter."""

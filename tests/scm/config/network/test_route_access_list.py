@@ -190,6 +190,7 @@ class TestRouteAccessList(TestRouteAccessListBase):
 
     def test_list_with_exclusions(self, sample_route_access_list_dict):
         """Test list method with exclusion filters."""
+        # Create multiple ACLs with different containers
         acl1 = sample_route_access_list_dict.copy()
         acl1["id"] = str(uuid.uuid4())
         acl1["name"] = "acl1"
@@ -200,20 +201,46 @@ class TestRouteAccessList(TestRouteAccessListBase):
         acl2["name"] = "acl2"
         acl2["folder"] = "Folder2"
 
+        acl3 = sample_route_access_list_dict.copy()
+        acl3["id"] = str(uuid.uuid4())
+        acl3["name"] = "acl3"
+        acl3["folder"] = "Folder1"
+        acl3["snippet"] = "Snippet1"
+
+        acl4 = sample_route_access_list_dict.copy()
+        acl4["id"] = str(uuid.uuid4())
+        acl4["name"] = "acl4"
+        acl4["folder"] = "Folder1"
+        acl4["device"] = "Device1"
+
         self.mock_scm.get.return_value = {
-            "data": [acl1, acl2],
+            "data": [acl1, acl2, acl3, acl4],
             "limit": 100,
             "offset": 0,
-            "total": 2,
+            "total": 4,
         }
 
+        # Test exact_match filter
         result = self.client.list(folder="Folder1", exact_match=True)
-        assert len(result) == 1
-        assert result[0].name == "acl1"
+        assert len(result) == 3  # Should match acl1, acl3, acl4
 
+        # Test exclude_folders filter
         result = self.client.list(folder="Folder1", exclude_folders=["Folder2"])
-        assert len(result) == 1
-        assert result[0].name == "acl1"
+        assert len(result) == 3  # Should exclude only acl2
+
+        # Test exclude_snippets filter
+        result = self.client.list(folder="Folder1", exclude_snippets=["Snippet1"])
+        assert len(result) == 3  # Should exclude acl3
+
+        # Test exclude_devices filter
+        result = self.client.list(folder="Folder1", exclude_devices=["Device1"])
+        assert len(result) == 3  # Should exclude acl4
+
+        # Test combining multiple exclusions
+        result = self.client.list(
+            folder="Folder1", exclude_snippets=["Snippet1"], exclude_devices=["Device1"]
+        )
+        assert len(result) == 2  # Should exclude acl3 and acl4
 
     def test_list_with_empty_folder(self):
         """Test list method with empty folder parameter."""

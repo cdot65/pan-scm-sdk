@@ -191,6 +191,7 @@ class TestRoutePrefixList(TestRoutePrefixListBase):
 
     def test_list_with_exclusions(self, sample_route_prefix_list_dict):
         """Test list method with exclusion filters."""
+        # Create multiple prefix lists with different containers
         pl1 = sample_route_prefix_list_dict.copy()
         pl1["id"] = str(uuid.uuid4())
         pl1["name"] = "pl1"
@@ -201,20 +202,46 @@ class TestRoutePrefixList(TestRoutePrefixListBase):
         pl2["name"] = "pl2"
         pl2["folder"] = "Folder2"
 
+        pl3 = sample_route_prefix_list_dict.copy()
+        pl3["id"] = str(uuid.uuid4())
+        pl3["name"] = "pl3"
+        pl3["folder"] = "Folder1"
+        pl3["snippet"] = "Snippet1"
+
+        pl4 = sample_route_prefix_list_dict.copy()
+        pl4["id"] = str(uuid.uuid4())
+        pl4["name"] = "pl4"
+        pl4["folder"] = "Folder1"
+        pl4["device"] = "Device1"
+
         self.mock_scm.get.return_value = {
-            "data": [pl1, pl2],
+            "data": [pl1, pl2, pl3, pl4],
             "limit": 100,
             "offset": 0,
-            "total": 2,
+            "total": 4,
         }
 
+        # Test exact_match filter
         result = self.client.list(folder="Folder1", exact_match=True)
-        assert len(result) == 1
-        assert result[0].name == "pl1"
+        assert len(result) == 3  # Should match pl1, pl3, pl4
 
+        # Test exclude_folders filter
         result = self.client.list(folder="Folder1", exclude_folders=["Folder2"])
-        assert len(result) == 1
-        assert result[0].name == "pl1"
+        assert len(result) == 3  # Should exclude only pl2
+
+        # Test exclude_snippets filter
+        result = self.client.list(folder="Folder1", exclude_snippets=["Snippet1"])
+        assert len(result) == 3  # Should exclude pl3
+
+        # Test exclude_devices filter
+        result = self.client.list(folder="Folder1", exclude_devices=["Device1"])
+        assert len(result) == 3  # Should exclude pl4
+
+        # Test combining multiple exclusions
+        result = self.client.list(
+            folder="Folder1", exclude_snippets=["Snippet1"], exclude_devices=["Device1"]
+        )
+        assert len(result) == 2  # Should exclude pl3 and pl4
 
     def test_list_with_empty_folder(self):
         """Test list method with empty folder parameter."""
