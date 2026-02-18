@@ -513,6 +513,42 @@ class TestLogicalRouter(TestLogicalRouterBase):
         call_args = mock_warning.call_args[0][0]
         assert "Multiple logical routers found" in call_args
 
+    def test_fetch_with_raw_list_response(self, sample_logical_router_dict):
+        """Test fetch when API returns a raw list instead of dict wrapper."""
+        self.mock_scm.get.return_value = [sample_logical_router_dict]
+
+        result = self.client.fetch(
+            name=sample_logical_router_dict["name"],
+            folder=sample_logical_router_dict["folder"],
+        )
+
+        assert isinstance(result, LogicalRouterResponseModel)
+        assert result.name == sample_logical_router_dict["name"]
+
+    def test_fetch_with_raw_list_multiple_items(self, sample_logical_router_dict, monkeypatch):
+        """Test fetch with raw list containing multiple items logs a warning."""
+        from unittest.mock import MagicMock
+
+        lr1 = sample_logical_router_dict.copy()
+        lr1["id"] = str(uuid.uuid4())
+        lr1["name"] = "LR-1"
+
+        lr2 = sample_logical_router_dict.copy()
+        lr2["id"] = str(uuid.uuid4())
+        lr2["name"] = "LR-2"
+
+        self.mock_scm.get.return_value = [lr1, lr2]
+
+        mock_warning = MagicMock()
+        monkeypatch.setattr(self.client.logger, "warning", mock_warning)
+
+        result = self.client.fetch(name=lr1["name"], folder=lr1["folder"])
+
+        assert isinstance(result, LogicalRouterResponseModel)
+        assert result.id == uuid.UUID(lr1["id"])
+        mock_warning.assert_called_once()
+        assert "Multiple logical routers found" in mock_warning.call_args[0][0]
+
     # --- Create with nested config tests ---
 
     def test_create_with_vrf_and_routing(self):

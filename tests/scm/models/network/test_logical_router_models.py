@@ -8,11 +8,13 @@ import pytest
 from scm.models.network import (
     AdminDists,
     BfdProfile,
+    BgpAggregateRouteType,
     BgpConfig,
     BgpPeer,
     BgpPeerAddress,
     BgpPeerGroup,
     BgpPeerGroupType,
+    BgpPeerInherit,
     BgpPolicyAction,
     BgpPolicyActionAllow,
     BgpPolicyUpdateAsPath,
@@ -33,6 +35,7 @@ from scm.models.network import (
     MonitorDestination,
     OspfArea,
     OspfAreaType,
+    OspfAreaVrRange,
     OspfAuthProfile,
     OspfConfig,
     OspfInterface,
@@ -40,7 +43,10 @@ from scm.models.network import (
     OspfMd5Key,
     OspfNormalArea,
     OspfNssaArea,
+    OspfNssaDefaultRoute,
+    OspfNssaExtRange,
     OspfStubArea,
+    OspfStubDefaultRoute,
     PathMonitor,
     RoutingStackEnum,
     RoutingTable,
@@ -1007,3 +1013,121 @@ class TestCompleteNestedModelConstruction:
         assert "vrf" not in dumped
         assert "snippet" not in dumped
         assert "device" not in dumped
+
+
+class TestOspfAreaVrRangeModel:
+    """Test OspfAreaVrRange mutual exclusivity validator."""
+
+    def test_advertise_only(self):
+        """Verify advertise-only VR range is valid."""
+        model = OspfAreaVrRange(name="10.0.0.0/8", advertise={})
+        assert model.advertise is not None
+        assert model.suppress is None
+
+    def test_suppress_only(self):
+        """Verify suppress-only VR range is valid."""
+        model = OspfAreaVrRange(name="10.0.0.0/8", suppress={})
+        assert model.suppress is not None
+
+    def test_mutual_exclusivity(self):
+        """Verify advertise and suppress are mutually exclusive."""
+        with pytest.raises(ValidationError, match="mutually exclusive"):
+            OspfAreaVrRange(name="10.0.0.0/8", advertise={}, suppress={})
+
+
+class TestOspfStubDefaultRouteModel:
+    """Test OspfStubDefaultRoute mutual exclusivity validator."""
+
+    def test_disable_only(self):
+        """Verify disable-only default route is valid."""
+        model = OspfStubDefaultRoute(disable={})
+        assert model.disable is not None
+
+    def test_advertise_only(self):
+        """Verify advertise-only default route is valid."""
+        model = OspfStubDefaultRoute(advertise={"metric": 10})
+        assert model.advertise is not None
+
+    def test_mutual_exclusivity(self):
+        """Verify disable and advertise are mutually exclusive."""
+        with pytest.raises(ValidationError, match="mutually exclusive"):
+            OspfStubDefaultRoute(disable={}, advertise={"metric": 10})
+
+
+class TestOspfNssaDefaultRouteModel:
+    """Test OspfNssaDefaultRoute mutual exclusivity validator."""
+
+    def test_disable_only(self):
+        """Verify disable-only NSSA default route is valid."""
+        model = OspfNssaDefaultRoute(disable={})
+        assert model.disable is not None
+
+    def test_advertise_only(self):
+        """Verify advertise-only NSSA default route is valid."""
+        model = OspfNssaDefaultRoute(advertise={"metric": 10, "type": "ext-2"})
+        assert model.advertise is not None
+
+    def test_mutual_exclusivity(self):
+        """Verify disable and advertise are mutually exclusive for NSSA."""
+        with pytest.raises(ValidationError, match="mutually exclusive"):
+            OspfNssaDefaultRoute(disable={}, advertise={})
+
+
+class TestOspfNssaExtRangeModel:
+    """Test OspfNssaExtRange mutual exclusivity validator."""
+
+    def test_advertise_only(self):
+        """Verify advertise-only NSSA ext range is valid."""
+        model = OspfNssaExtRange(name="192.168.0.0/16", advertise={})
+        assert model.advertise is not None
+
+    def test_suppress_only(self):
+        """Verify suppress-only NSSA ext range is valid."""
+        model = OspfNssaExtRange(name="192.168.0.0/16", suppress={})
+        assert model.suppress is not None
+
+    def test_mutual_exclusivity(self):
+        """Verify advertise and suppress are mutually exclusive for NSSA ext range."""
+        with pytest.raises(ValidationError, match="mutually exclusive"):
+            OspfNssaExtRange(name="192.168.0.0/16", advertise={}, suppress={})
+
+
+class TestBgpPeerInheritModel:
+    """Test BgpPeerInherit mutual exclusivity validator."""
+
+    def test_ipv4_only(self):
+        """Verify ipv4-only inherit is valid."""
+        model = BgpPeerInherit(ipv4={"yes": {}})
+        assert model.ipv4 is not None
+
+    def test_no_only(self):
+        """Verify no-only inherit is valid."""
+        model = BgpPeerInherit(no={})
+        assert model.no is not None
+
+    def test_mutual_exclusivity(self):
+        """Verify ipv4 and no are mutually exclusive."""
+        with pytest.raises(ValidationError, match="mutually exclusive"):
+            BgpPeerInherit(ipv4={"yes": {}}, no={})
+
+
+class TestBgpAggregateRouteTypeModel:
+    """Test BgpAggregateRouteType mutual exclusivity validator."""
+
+    def test_ipv4_only(self):
+        """Verify ipv4-only aggregate route type is valid."""
+        model = BgpAggregateRouteType(ipv4={"summary_prefix": "10.0.0.0/8"})
+        assert model.ipv4 is not None
+
+    def test_ipv6_only(self):
+        """Verify ipv6-only aggregate route type is valid."""
+        model = BgpAggregateRouteType(ipv6={"summary_prefix": "fd00::/8"})
+        assert model.ipv6 is not None
+
+    def test_mutual_exclusivity(self):
+        """Verify ipv4 and ipv6 are mutually exclusive for aggregate route type."""
+        with pytest.raises(ValidationError, match="mutually exclusive"):
+            BgpAggregateRouteType(
+                ipv4={"summary_prefix": "10.0.0.0/8"},
+                ipv6={"summary_prefix": "fd00::/8"},
+            )
