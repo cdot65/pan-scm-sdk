@@ -21,18 +21,16 @@ def sample_bgp_af_profile_dict():
         "name": "test-bgp-af",
         "folder": "Test Folder",
         "ipv4": {
-            "ipv4": {
-                "unicast": {
-                    "enable": True,
-                    "soft_reconfig_with_stored_info": True,
-                    "add_path": {
-                        "tx_all_paths": True,
-                    },
+            "unicast": {
+                "enable": True,
+                "soft_reconfig_with_stored_info": True,
+                "add_path": {
+                    "tx_all_paths": True,
                 },
-                "multicast": {
-                    "enable": False,
-                },
-            }
+            },
+            "multicast": {
+                "enable": False,
+            },
         },
     }
 

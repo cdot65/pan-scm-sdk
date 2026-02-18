@@ -16,7 +16,6 @@ from scm.models.network import (
     BgpAddressFamilyOrf,
     BgpAddressFamilyProfileBaseModel,
     BgpAddressFamilyProfileIpv4UnicastMulticast,
-    BgpAddressFamilyProfileIpv4Wrapper,
     BgpAddressFamilyProfileResponseModel,
     BgpAddressFamilyProfileUpdateModel,
     BgpAddressFamilyRemovePrivateAS,
@@ -322,7 +321,7 @@ class TestBgpAddressFamily:
 
 
 class TestBgpAddressFamilyProfileIpv4Wrappers:
-    """Test IPv4 wrapper models."""
+    """Test IPv4 unicast/multicast model."""
 
     def test_valid_unicast_multicast(self):
         """Test valid unicast/multicast container."""
@@ -333,21 +332,11 @@ class TestBgpAddressFamilyProfileIpv4Wrappers:
         assert um.unicast.enable is True
         assert um.multicast.enable is False
 
-    def test_valid_ipv4_wrapper(self):
-        """Test valid IPv4 wrapper."""
-        wrapper = BgpAddressFamilyProfileIpv4Wrapper(
-            ipv4=BgpAddressFamilyProfileIpv4UnicastMulticast(unicast=BgpAddressFamily(enable=True))
-        )
-        assert wrapper.ipv4.unicast.enable is True
-
     def test_optional_fields(self):
-        """Test optional fields on wrapper models."""
+        """Test optional fields on unicast/multicast model."""
         um = BgpAddressFamilyProfileIpv4UnicastMulticast()
         assert um.unicast is None
         assert um.multicast is None
-
-        wrapper = BgpAddressFamilyProfileIpv4Wrapper()
-        assert wrapper.ipv4 is None
 
 
 class TestBgpAddressFamilyProfileBaseModel:
@@ -365,21 +354,19 @@ class TestBgpAddressFamilyProfileBaseModel:
         model = BgpAddressFamilyProfileBaseModel(
             name="test-af",
             folder="Test Folder",
-            ipv4=BgpAddressFamilyProfileIpv4Wrapper(
-                ipv4=BgpAddressFamilyProfileIpv4UnicastMulticast(
-                    unicast=BgpAddressFamily(
-                        enable=True,
-                        soft_reconfig_with_stored_info=True,
-                        allowas_in=BgpAddressFamilyAllowasIn(occurrence=3),
-                    ),
-                    multicast=BgpAddressFamily(enable=False),
-                )
+            ipv4=BgpAddressFamilyProfileIpv4UnicastMulticast(
+                unicast=BgpAddressFamily(
+                    enable=True,
+                    soft_reconfig_with_stored_info=True,
+                    allowas_in=BgpAddressFamilyAllowasIn(occurrence=3),
+                ),
+                multicast=BgpAddressFamily(enable=False),
             ),
         )
         assert model.name == "test-af"
-        assert model.ipv4.ipv4.unicast.enable is True
-        assert model.ipv4.ipv4.unicast.allowas_in.occurrence == 3
-        assert model.ipv4.ipv4.multicast.enable is False
+        assert model.ipv4.unicast.enable is True
+        assert model.ipv4.unicast.allowas_in.occurrence == 3
+        assert model.ipv4.multicast.enable is False
 
     def test_missing_name_raises_error(self):
         """Test that missing name field raises ValidationError."""

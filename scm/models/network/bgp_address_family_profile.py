@@ -311,20 +311,6 @@ class BgpAddressFamilyProfileIpv4UnicastMulticast(BaseModel):
     )
 
 
-class BgpAddressFamilyProfileIpv4Wrapper(BaseModel):
-    """Outer ipv4 wrapper (contains a nested 'ipv4' object)."""
-
-    model_config = ConfigDict(
-        extra="forbid",
-        populate_by_name=True,
-    )
-
-    ipv4: Optional[BgpAddressFamilyProfileIpv4UnicastMulticast] = Field(
-        None,
-        description="IPv4 address family configuration",
-    )
-
-
 # --- Main Models ---
 
 
@@ -342,7 +328,7 @@ class BgpAddressFamilyProfileBaseModel(BaseModel):
         ...,
         description="Profile name",
     )
-    ipv4: Optional[BgpAddressFamilyProfileIpv4Wrapper] = Field(
+    ipv4: Optional[BgpAddressFamilyProfileIpv4UnicastMulticast] = Field(
         None,
         description="IPv4 address family configuration",
     )

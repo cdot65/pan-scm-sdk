@@ -29,14 +29,13 @@ def live_client():
     Returns:
         Scm: Authenticated SCM client instance.
     """
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    tsg_id = os.getenv("TSG_ID")
+    client_id = os.getenv("SCM_CLIENT_ID") or os.getenv("CLIENT_ID")
+    client_secret = os.getenv("SCM_CLIENT_SECRET") or os.getenv("CLIENT_SECRET")
+    tsg_id = os.getenv("SCM_TSG_ID") or os.getenv("TSG_ID")
 
     if not all([client_id, client_secret, tsg_id]):
         pytest.skip(
-            "SCM credentials not configured. "
-            "Set CLIENT_ID, CLIENT_SECRET, and TSG_ID in .env file."
+            "SCM credentials not configured. Set CLIENT_ID, CLIENT_SECRET, and TSG_ID in .env file."
         )
 
     return Scm(

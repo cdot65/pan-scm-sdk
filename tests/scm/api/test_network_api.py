@@ -9,10 +9,15 @@ Run with: pytest -m api tests/scm/api/test_network_api.py -v
 import pytest
 
 from scm.models.network import (
+    BgpAddressFamilyProfileResponseModel,
+    BgpAuthProfileResponseModel,
     IKECryptoProfileResponseModel,
     IKEGatewayResponseModel,
     IPsecCryptoProfileResponseModel,
     NatRuleResponseModel,
+    OspfAuthProfileResponseModel,
+    RouteAccessListResponseModel,
+    RoutePrefixListResponseModel,
     SecurityZoneResponseModel,
 )
 
@@ -110,3 +115,93 @@ class TestSecurityZoneAPI:
                 ]
                 set_types = [t for t in interface_types if t is not None]
                 assert len(set_types) <= 1, f"Zone {zone.name} has multiple interface types"
+
+
+# ---------------------------------------------------------------------------
+# v0.8.0 Routing Profile Services (no-POST: list/get/update/fetch only)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.api
+class TestRouteAccessListAPI:
+    """Live API tests for RouteAccessList objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_route_access_lists(self, live_client):
+        """Verify RouteAccessList list responses parse correctly."""
+        items = live_client.route_access_list.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, RouteAccessListResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} route access lists in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestRoutePrefixListAPI:
+    """Live API tests for RoutePrefixList objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_route_prefix_lists(self, live_client):
+        """Verify RoutePrefixList list responses parse correctly."""
+        items = live_client.route_prefix_list.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, RoutePrefixListResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} route prefix lists in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestBgpAuthProfileAPI:
+    """Live API tests for BgpAuthProfile objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_bgp_auth_profiles(self, live_client):
+        """Verify BgpAuthProfile list responses parse correctly."""
+        items = live_client.bgp_auth_profile.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, BgpAuthProfileResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} BGP auth profiles in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestOspfAuthProfileAPI:
+    """Live API tests for OspfAuthProfile objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_ospf_auth_profiles(self, live_client):
+        """Verify OspfAuthProfile list responses parse correctly."""
+        items = live_client.ospf_auth_profile.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, OspfAuthProfileResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} OSPF auth profiles in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestBgpAddressFamilyProfileAPI:
+    """Live API tests for BgpAddressFamilyProfile objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_bgp_address_family_profiles(self, live_client):
+        """Verify BgpAddressFamilyProfile list responses parse correctly."""
+        items = live_client.bgp_address_family_profile.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, BgpAddressFamilyProfileResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} BGP address family profiles in '{self.FOLDER}'")
