@@ -161,6 +161,8 @@ The unified client provides access to the following services through attribute-b
 | `agent_version`                    | GlobalProtect agent versions (read-only)                      |
 | **Network**                        |                                                               |
 | `aggregate_interface`              | Aggregated ethernet interfaces with LACP support              |
+| `bgp_address_family_profile`       | BGP address family profiles (IPv4/IPv6 unicast/multicast)     |
+| `bgp_auth_profile`                 | BGP authentication profiles (MD5 for BGP sessions)            |
 | `dhcp_interface`                   | DHCP server and relay settings on interfaces                  |
 | `ethernet_interface`               | Physical ethernet interface configurations                    |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                 |
@@ -173,6 +175,9 @@ The unified client provides access to the following services through attribute-b
 | `logical_router`                   | Logical routers with VRF, BGP, OSPF, ECMP, static routes     |
 | `loopback_interface`               | Loopback interfaces for management and routing                |
 | `nat_rule`                         | Network address translation policies for traffic routing      |
+| `ospf_auth_profile`                | OSPF authentication profiles (MD5/password for adjacencies)   |
+| `route_access_list`                | Route access lists for filtering routes by network/mask       |
+| `route_prefix_list`                | Route prefix lists for prefix-based route filtering           |
 | `security_zone`                    | Security zones for network segmentation                       |
 | `tunnel_interface`                 | Tunnel interfaces for VPN and overlay networks                |
 | `vlan_interface`                   | VLAN interfaces for network segmentation                      |

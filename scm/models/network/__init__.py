@@ -245,6 +245,53 @@ from .logical_router import (
     VrAdminDists,
     VrfConfig,
 )
+from .bgp_address_family_profile import (
+    BgpAddressFamily,
+    BgpAddressFamilyAddPath,
+    BgpAddressFamilyAllowasIn,
+    BgpAddressFamilyMaximumPrefix,
+    BgpAddressFamilyMaximumPrefixAction,
+    BgpAddressFamilyMaximumPrefixRestart,
+    BgpAddressFamilyNextHop,
+    BgpAddressFamilyOrf,
+    BgpAddressFamilyProfileBaseModel,
+    BgpAddressFamilyProfileIpv4UnicastMulticast,
+    BgpAddressFamilyProfileIpv4Wrapper,
+    BgpAddressFamilyProfileResponseModel,
+    BgpAddressFamilyProfileUpdateModel,
+    BgpAddressFamilyRemovePrivateAS,
+    BgpAddressFamilySendCommunity,
+)
+from .bgp_auth_profile import (
+    BgpAuthProfileBaseModel,
+    BgpAuthProfileResponseModel,
+    BgpAuthProfileUpdateModel,
+)
+from .ospf_auth_profile import (
+    OspfAuthProfileBaseModel,
+    OspfAuthProfileMd5Key,
+    OspfAuthProfileResponseModel,
+    OspfAuthProfileUpdateModel,
+)
+from .route_access_list import (
+    RouteAccessListBaseModel,
+    RouteAccessListDestinationAddress,
+    RouteAccessListIpv4,
+    RouteAccessListIpv4Entry,
+    RouteAccessListResponseModel,
+    RouteAccessListSourceAddress,
+    RouteAccessListType,
+    RouteAccessListUpdateModel,
+)
+from .route_prefix_list import (
+    RoutePrefixListBaseModel,
+    RoutePrefixListIpv4,
+    RoutePrefixListIpv4Entry,
+    RoutePrefixListPrefix,
+    RoutePrefixListPrefixEntry,
+    RoutePrefixListResponseModel,
+    RoutePrefixListUpdateModel,
+)
 from .tunnel_interface import (
     TunnelInterfaceCreateModel,
     TunnelInterfaceResponseModel,
@@ -537,4 +584,46 @@ __all__ = [
     "BgpPolicy",
     "BgpConfig",
     "VrfConfig",
+    # BGP Address Family Profile
+    "BgpAddressFamilyProfileBaseModel",
+    "BgpAddressFamilyProfileUpdateModel",
+    "BgpAddressFamilyProfileResponseModel",
+    "BgpAddressFamilyProfileIpv4Wrapper",
+    "BgpAddressFamilyProfileIpv4UnicastMulticast",
+    "BgpAddressFamily",
+    "BgpAddressFamilyAddPath",
+    "BgpAddressFamilyAllowasIn",
+    "BgpAddressFamilyMaximumPrefix",
+    "BgpAddressFamilyMaximumPrefixAction",
+    "BgpAddressFamilyMaximumPrefixRestart",
+    "BgpAddressFamilyNextHop",
+    "BgpAddressFamilyRemovePrivateAS",
+    "BgpAddressFamilySendCommunity",
+    "BgpAddressFamilyOrf",
+    # BGP Auth Profile
+    "BgpAuthProfileBaseModel",
+    "BgpAuthProfileUpdateModel",
+    "BgpAuthProfileResponseModel",
+    # OSPF Auth Profile
+    "OspfAuthProfileBaseModel",
+    "OspfAuthProfileUpdateModel",
+    "OspfAuthProfileResponseModel",
+    "OspfAuthProfileMd5Key",
+    # Route Access List
+    "RouteAccessListBaseModel",
+    "RouteAccessListUpdateModel",
+    "RouteAccessListResponseModel",
+    "RouteAccessListType",
+    "RouteAccessListIpv4",
+    "RouteAccessListIpv4Entry",
+    "RouteAccessListSourceAddress",
+    "RouteAccessListDestinationAddress",
+    # Route Prefix List
+    "RoutePrefixListBaseModel",
+    "RoutePrefixListUpdateModel",
+    "RoutePrefixListResponseModel",
+    "RoutePrefixListIpv4",
+    "RoutePrefixListIpv4Entry",
+    "RoutePrefixListPrefix",
+    "RoutePrefixListPrefixEntry",
 ]

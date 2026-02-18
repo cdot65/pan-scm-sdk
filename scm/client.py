@@ -663,6 +663,27 @@ class Scm:
                 "scm.config.network.zone_protection_profile",
                 "ZoneProtectionProfile",
             ),
+            # Routing Profiles (v0.8.0)
+            "bgp_address_family_profile": (
+                "scm.config.network.bgp_address_family_profile",
+                "BgpAddressFamilyProfile",
+            ),
+            "bgp_auth_profile": (
+                "scm.config.network.bgp_auth_profile",
+                "BgpAuthProfile",
+            ),
+            "ospf_auth_profile": (
+                "scm.config.network.ospf_auth_profile",
+                "OspfAuthProfile",
+            ),
+            "route_access_list": (
+                "scm.config.network.route_access_list",
+                "RouteAccessList",
+            ),
+            "route_prefix_list": (
+                "scm.config.network.route_prefix_list",
+                "RoutePrefixList",
+            ),
         }
 
         # Check if the requested service exists in our registry
