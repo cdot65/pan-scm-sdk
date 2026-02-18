@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-17
+
+### Added
+- **Interface Management Profile**: New `scm.interface_management_profile` service for managing interface management profiles (HTTPS, SSH, ping, SNMP access control). Full CRUD with kebab-case field alias support.
+- **Zone Protection Profile**: New `scm.zone_protection_profile` service for managing zone protection profiles with deeply nested flood protection, scan protection, packet-based attack protection, IPv6 protection, and non-IP protocol filtering.
+- **DHCP Interface**: New `scm.dhcp_interface` service for configuring DHCP server and relay settings on interfaces, with server/relay mutual exclusivity validation.
+- **IPsec Tunnel**: New `scm.ipsec_tunnel` service for managing IPsec tunnel objects, completing the VPN stack alongside existing IKE crypto, IKE gateway, and IPsec crypto profile services.
+
+### Changed
+- Added 233 new tests across 8 test files (4 service tests + 4 model tests)
+- All new ResponseModels use `extra="ignore"` pattern established in v0.5.0
+
 ## [0.5.1] - 2026-02-17
 
 ### Fixed

@@ -2,6 +2,18 @@
 
 This page contains the release history of the Strata Cloud Manager SDK, with the most recent releases at the top.
 
+## Version 0.6.0
+
+**Released:** February 17, 2026
+
+### Added
+
+- **Interface Management Profile**: New service for managing interface management profiles (HTTPS, SSH, ping, SNMP access control). Supports kebab-case API field aliases.
+- **Zone Protection Profile**: New service for managing zone protection profiles with flood protection (SYN, UDP, SCTP, ICMP, ICMPv6), scan protection, packet-based attack protection, IPv6 protection, and non-IP protocol filtering.
+- **DHCP Interface**: New service for configuring DHCP server and relay settings on interfaces with server/relay mutual exclusivity validation.
+- **IPsec Tunnel**: New service for managing IPsec tunnel objects, completing the VPN stack (IKE crypto + IKE gateway + IPsec crypto profile + IPsec tunnel).
+- 233 new tests across 8 test files
+
 ## Version 0.5.0
 
 **Released:** February 17, 2026
