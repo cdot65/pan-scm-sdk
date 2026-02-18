@@ -526,6 +526,10 @@ class Scm:
                 "scm.config.network.ike_gateway",
                 "IKEGateway",
             ),
+            "interface_management_profile": (
+                "scm.config.network.interface_management_profile",
+                "InterfaceManagementProfile",
+            ),
             "internal_dns_server": (
                 "scm.config.deployment.internal_dns_servers",
                 "InternalDnsServers",
@@ -533,6 +537,10 @@ class Scm:
             "ipsec_crypto_profile": (
                 "scm.config.network.ipsec_crypto_profile",
                 "IPsecCryptoProfile",
+            ),
+            "ipsec_tunnel": (
+                "scm.config.network.ipsec_tunnel",
+                "IPsecTunnel",
             ),
             "label": (
                 "scm.config.setup.label",
@@ -642,6 +650,14 @@ class Scm:
             "vlan_interface": (
                 "scm.config.network.vlan_interface",
                 "VlanInterface",
+            ),
+            "dhcp_interface": (
+                "scm.config.network.dhcp_interface",
+                "DhcpInterface",
+            ),
+            "zone_protection_profile": (
+                "scm.config.network.zone_protection_profile",
+                "ZoneProtectionProfile",
             ),
         }
 

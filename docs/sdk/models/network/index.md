@@ -7,7 +7,10 @@
 3. [Common Model Patterns](#common-model-patterns)
 4. [Usage Examples](#usage-examples)
 5. [Models by Category](#models-by-category)
-   1. [NAT Rules](#nat-rules)
+   1. [Network Interfaces](#network-interfaces)
+   2. [Network Services](#network-services)
+   3. [VPN Configuration](#vpn-configuration)
+   4. [Other Network Models](#other-network-models)
 6. [Best Practices](#best-practices)
 7. [Related Documentation](#related-documentation)
 
@@ -93,16 +96,23 @@ updated_result = client.nat_rule.update(update_dict)
 - [Tunnel Interface Models](tunnel_interface_models.md) - Tunnel interfaces for VPN
 - [VLAN Interface Models](vlan_interface_models.md) - VLAN interfaces for inter-VLAN routing
 
+### Network Services
+
+- [DHCP Interface Models](dhcp_interface_models.md) - DHCP server and relay configurations on firewall interfaces
+- [Interface Management Profile Models](interface_management_profile_models.md) - Interface management profiles for controlling management access
+
 ### VPN Configuration
 
 - [IKE Crypto Profile Models](ike_crypto_profile_models.md) - Internet Key Exchange crypto profiles for VPN tunnels
 - [IKE Gateway Models](ike_gateway_models.md) - Internet Key Exchange gateways for VPN tunnel endpoints
 - [IPsec Crypto Profile Models](ipsec_crypto_profile_models.md) - IPsec crypto profiles for VPN tunnels
+- [IPsec Tunnel Models](ipsec_tunnel_models.md) - IPsec tunnel configurations for site-to-site VPN
 
 ### Other Network Models
 
 - [NAT Rule Models](nat_rule_models.md) - Network Address Translation rules
 - [Security Zone Models](security_zone_models.md) - Security Zone configuration and management
+- [Zone Protection Profile Models](zone_protection_profile_models.md) - Zone protection profiles for flood and scan protection
 
 ## Best Practices
 
