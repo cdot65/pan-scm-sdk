@@ -48,15 +48,12 @@ class TestOspfAuthProfileMd5Key:
         with pytest.raises(ValidationError):
             OspfAuthProfileMd5Key(name=256)
 
-    def test_md5_key_max_length(self):
-        """Test MD5 key max_length validation."""
-        # Valid at max length (16 chars)
-        key = OspfAuthProfileMd5Key(key="A" * 16)
-        assert len(key.key) == 16
-
-        # Invalid over max length
-        with pytest.raises(ValidationError):
-            OspfAuthProfileMd5Key(key="A" * 17)
+    def test_md5_key_accepts_encrypted_value(self):
+        """Test MD5 key accepts long encrypted values returned by API."""
+        # API returns encrypted keys like "-AQ==MzoT6FsyFbec2rckK2Q..."
+        encrypted = "-AQ==MzoT6FsyFbec2rckK2QehR0O5nc=T4nfel3vRF8QGRrgx9f93Q=="
+        key = OspfAuthProfileMd5Key(key=encrypted)
+        assert key.key == encrypted
 
     def test_md5_key_extra_fields_forbidden(self):
         """Test that extra fields are rejected on OspfAuthProfileMd5Key."""

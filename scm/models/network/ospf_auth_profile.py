@@ -28,8 +28,7 @@ class OspfAuthProfileMd5Key(BaseModel):
     )
     key: Optional[str] = Field(
         None,
-        description="MD5 hash",
-        max_length=16,
+        description="MD5 hash (API returns encrypted value on read)",
     )
     preferred: Optional[bool] = Field(
         None,

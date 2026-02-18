@@ -173,7 +173,8 @@ class TestRouteAccessList(TestRouteAccessListBase):
 
     def test_list_response_errors(self):
         """Test list method error handling for invalid responses."""
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        # Test non-list, non-dictionary response
+        self.mock_scm.get.return_value = "not a dictionary"
         with pytest.raises(InvalidObjectError) as excinfo:
             self.client.list(folder="Test Folder")
         assert "Response is not a dictionary" in str(excinfo.value)
@@ -330,7 +331,8 @@ class TestRouteAccessList(TestRouteAccessListBase):
 
     def test_fetch_response_errors(self):
         """Test fetch method error handling for invalid responses."""
-        self.mock_scm.get.return_value = ["not", "a", "dictionary"]
+        # Test non-list, non-dictionary response
+        self.mock_scm.get.return_value = "not a dictionary"
         with pytest.raises(InvalidObjectError) as excinfo:
             self.client.fetch(name="test-acl", folder="Test Folder")
         assert "Response is not a dictionary" in str(excinfo.value)
@@ -410,6 +412,66 @@ class TestRouteAccessList(TestRouteAccessListBase):
         mock_warning.assert_called_once()
         call_args = mock_warning.call_args[0][0]
         assert "Multiple route access lists found" in call_args
+
+    def test_fetch_with_raw_list_response(self, sample_route_access_list_dict):
+        """Test fetch method when API returns raw list instead of dict."""
+        acl_data = sample_route_access_list_dict.copy()
+        self.mock_scm.get.return_value = [acl_data]
+
+        result = self.client.fetch(name=acl_data["name"], folder=acl_data["folder"])
+
+        assert isinstance(result, RouteAccessListResponseModel)
+        assert result.id == uuid.UUID(acl_data["id"])
+        assert result.name == acl_data["name"]
+
+    def test_fetch_with_raw_list_response_empty(self):
+        """Test fetch method when API returns empty raw list."""
+        self.mock_scm.get.return_value = []
+
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="nonexistent", folder="Test Folder")
+        assert "No matching resource found" in str(excinfo.value)
+
+    def test_fetch_with_raw_list_response_multiple(
+        self, sample_route_access_list_dict, monkeypatch
+    ):
+        """Test fetch method when API returns raw list with multiple items."""
+        acl1 = sample_route_access_list_dict.copy()
+        acl1["id"] = str(uuid.uuid4())
+        acl1["name"] = "acl1"
+
+        acl2 = sample_route_access_list_dict.copy()
+        acl2["id"] = str(uuid.uuid4())
+        acl2["name"] = "acl2"
+
+        self.mock_scm.get.return_value = [acl1, acl2]
+
+        mock_warning = MagicMock()
+        monkeypatch.setattr(self.client.logger, "warning", mock_warning)
+
+        result = self.client.fetch(name="acl1", folder="Test Folder")
+
+        assert isinstance(result, RouteAccessListResponseModel)
+        assert result.id == uuid.UUID(acl1["id"])
+        mock_warning.assert_called_once()
+
+    def test_list_with_raw_list_response(self, sample_route_access_list_dict):
+        """Test list method when API returns raw list instead of dict with data wrapper."""
+        acl1 = sample_route_access_list_dict.copy()
+        acl1["id"] = str(uuid.uuid4())
+        acl1["name"] = "acl1"
+
+        acl2 = sample_route_access_list_dict.copy()
+        acl2["id"] = str(uuid.uuid4())
+        acl2["name"] = "acl2"
+
+        self.mock_scm.get.return_value = [acl1, acl2]
+
+        result = self.client.list(folder="Test Folder")
+
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert all(isinstance(r, RouteAccessListResponseModel) for r in result)
 
     def test_delete(self, sample_route_access_list_dict):
         """Test delete method."""

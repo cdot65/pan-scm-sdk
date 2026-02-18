@@ -280,6 +280,12 @@ class OspfAuthProfile(BaseObject):
                 params=params,
             )
 
+            # Handle raw list response
+            if isinstance(response, list):
+                data = response
+                # No more pages when API returns raw list
+                return [OspfAuthProfileResponseModel(**item) for item in data]
+
             if not isinstance(response, dict):
                 raise InvalidObjectError(
                     message="Invalid response format: expected dictionary",
@@ -421,6 +427,19 @@ class OspfAuthProfile(BaseObject):
             self.ENDPOINT,
             params=params,
         )
+
+        # Handle raw list response (API returns array directly without data wrapper)
+        if isinstance(response, list):
+            if not response:
+                raise InvalidObjectError(
+                    message=f"Resource '{name}' not found",
+                    error_code="E002",
+                    http_status_code=404,
+                    details={"error": "No matching resource found"},
+                )
+            if len(response) > 1:
+                self.logger.warning(f"Multiple resources found for '{name}'. Using the first one.")
+            return OspfAuthProfileResponseModel(**response[0])
 
         if not isinstance(response, dict):
             raise InvalidObjectError(
