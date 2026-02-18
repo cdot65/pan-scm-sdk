@@ -550,6 +550,10 @@ class Scm:
                 "scm.config.objects.log_forwarding_profile",
                 "LogForwardingProfile",
             ),
+            "logical_router": (
+                "scm.config.network.logical_router",
+                "LogicalRouter",
+            ),
             "nat_rule": (
                 "scm.config.network.nat_rules",
                 "NatRule",

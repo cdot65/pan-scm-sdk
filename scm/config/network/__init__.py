@@ -10,6 +10,7 @@ from .interface_management_profile import InterfaceManagementProfile
 from .ipsec_crypto_profile import IPsecCryptoProfile
 from .ipsec_tunnel import IPsecTunnel
 from .layer2_subinterface import Layer2Subinterface
+from .logical_router import LogicalRouter
 from .layer3_subinterface import Layer3Subinterface
 from .loopback_interface import LoopbackInterface
 from .nat_rules import NatRule
@@ -37,5 +38,6 @@ __all__ = [
     "IKEGateway",
     "IPsecCryptoProfile",
     "IPsecTunnel",
+    "LogicalRouter",
     "ZoneProtectionProfile",
 ]

@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-02-18
+
+### Added
+- **Logical Router**: New `scm.logical_router` service for managing logical routers - the most complex networking service with VRF-based routing configuration. Supports full CRUD operations (create, get, update, delete, list, fetch) against the `/config/network/v1/logical-routers` endpoint.
+  - 93 Pydantic model classes covering VRF, static routes (IPv4/IPv6), OSPF, BGP, ECMP, RIP, and administrative distance configuration
+  - 20 `model_validator` implementations for oneOf discriminator patterns (nexthop types, OSPF area types, ECMP algorithms, BGP peer group types, etc.)
+  - IPv4 static routes support 8 nexthop types: receive, discard, ip_address, ipv6_address, fqdn, next_lr, next_vr, tunnel
+  - IPv6 static routes support 7 nexthop types (no ip_address)
+  - BGP configuration with peer groups, peers, aggregate routes, redistribution rules, and policy import/export
+  - OSPF configuration with areas (normal/stub/NSSA), interfaces, virtual links, authentication profiles, and export rules
+  - ECMP with 4 algorithm options: ip_modulo, ip_hash, weighted_round_robin, balanced_round_robin
+  - RIP with interface-level configuration including mode, split horizon, and distribute lists
+  - Multicast and OSPFv3 configurations accepted as `Dict[str, Any]` for forward compatibility
+  - `routing_stack` filter support on `list()` for filtering by "legacy" or "advanced" routing stack
+- Added 134 new tests (106 model validation + 28 service CRUD tests)
+
 ## [0.6.0] - 2026-02-17
 
 ### Added
