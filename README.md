@@ -161,17 +161,22 @@ The unified client provides access to the following services through attribute-b
 | `agent_version`                    | GlobalProtect agent versions (read-only)                      |
 | **Network**                        |                                                               |
 | `aggregate_interface`              | Aggregated ethernet interfaces with LACP support              |
+| `dhcp_interface`                   | DHCP server and relay settings on interfaces                  |
 | `ethernet_interface`               | Physical ethernet interface configurations                    |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                 |
 | `ike_gateway`                      | IKE gateways for VPN tunnel endpoints                         |
+| `interface_management_profile`     | Interface management profiles (HTTPS, SSH, ping access)       |
 | `ipsec_crypto_profile`             | IPsec crypto profiles for VPN tunnel encryption               |
+| `ipsec_tunnel`                     | IPsec tunnel objects for encrypted site-to-site connectivity  |
 | `layer2_subinterface`              | Layer 2 VLAN subinterfaces for switching                      |
 | `layer3_subinterface`              | Layer 3 VLAN subinterfaces for routing                        |
+| `logical_router`                   | Logical routers with VRF, BGP, OSPF, ECMP, static routes     |
 | `loopback_interface`               | Loopback interfaces for management and routing                |
 | `nat_rule`                         | Network address translation policies for traffic routing      |
 | `security_zone`                    | Security zones for network segmentation                       |
 | `tunnel_interface`                 | Tunnel interfaces for VPN and overlay networks                |
 | `vlan_interface`                   | VLAN interfaces for network segmentation                      |
+| `zone_protection_profile`          | Zone protection with flood, scan, and packet-based defense    |
 | **Deployment**                     |                                                               |
 | `bandwidth_allocation`             | Bandwidth allocation management for network capacity planning |
 | `bgp_routing`                      | BGP routing configuration for network connectivity            |

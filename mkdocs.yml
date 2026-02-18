@@ -111,17 +111,22 @@ nav:
       - Network:
           - Overview: sdk/config/network/index.md
           - Aggregate Interfaces: sdk/config/network/aggregate_interface.md
+          - DHCP Interface: sdk/config/network/dhcp_interface.md
           - Ethernet Interfaces: sdk/config/network/ethernet_interface.md
           - IKE Crypto Profiles: sdk/config/network/ike_crypto_profile.md
           - IKE Gateways: sdk/config/network/ike_gateway.md
+          - Interface Management Profiles: sdk/config/network/interface_management_profile.md
           - IPsec Crypto Profiles: sdk/config/network/ipsec_crypto_profile.md
+          - IPsec Tunnels: sdk/config/network/ipsec_tunnel.md
           - Layer2 Subinterfaces: sdk/config/network/layer2_subinterface.md
           - Layer3 Subinterfaces: sdk/config/network/layer3_subinterface.md
+          - Logical Routers: sdk/config/network/logical_router.md
           - Loopback Interfaces: sdk/config/network/loopback_interface.md
           - NAT Rules: sdk/config/network/nat_rules.md
           - Security Zones: sdk/config/network/security_zone.md
           - Tunnel Interfaces: sdk/config/network/tunnel_interface.md
           - VLAN Interfaces: sdk/config/network/vlan_interface.md
+          - Zone Protection Profiles: sdk/config/network/zone_protection_profile.md
       - Objects:
           - Overview: sdk/config/objects/index.md
           - Addresses: sdk/config/objects/address.md
@@ -180,17 +185,22 @@ nav:
       - Network:
           - Overview: sdk/models/network/index.md
           - Aggregate Interfaces: sdk/models/network/aggregate_interface_models.md
+          - DHCP Interface: sdk/models/network/dhcp_interface_models.md
           - Ethernet Interfaces: sdk/models/network/ethernet_interface_models.md
           - IKE Crypto Profiles: sdk/models/network/ike_crypto_profile_models.md
           - IKE Gateways: sdk/models/network/ike_gateway_models.md
+          - Interface Management Profiles: sdk/models/network/interface_management_profile_models.md
           - IPsec Crypto Profiles: sdk/models/network/ipsec_crypto_profile_models.md
+          - IPsec Tunnels: sdk/models/network/ipsec_tunnel_models.md
           - Layer2 Subinterfaces: sdk/models/network/layer2_subinterface_models.md
           - Layer3 Subinterfaces: sdk/models/network/layer3_subinterface_models.md
+          - Logical Routers: sdk/models/network/logical_router_models.md
           - Loopback Interfaces: sdk/models/network/loopback_interface_models.md
           - NAT Rules: sdk/models/network/nat_rule_models.md
           - Security Zones: sdk/models/network/security_zone_models.md
           - Tunnel Interfaces: sdk/models/network/tunnel_interface_models.md
           - VLAN Interfaces: sdk/models/network/vlan_interface_models.md
+          - Zone Protection Profiles: sdk/models/network/zone_protection_profile_models.md
       - Objects:
           - Overview: sdk/models/objects/index.md
           - Addresses: sdk/models/objects/address_models.md
