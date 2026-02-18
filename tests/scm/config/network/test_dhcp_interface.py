@@ -550,3 +550,54 @@ class TestDhcpInterface(TestDhcpInterfaceBase):
         mock_warning.assert_called_once()
         call_args = mock_warning.call_args[0][0]
         assert "Multiple DHCP interfaces found" in call_args
+
+    def test_list_with_raw_array_response(self, sample_dhcp_interface_server_dict):
+        """Test list method when API returns a raw array instead of {"data": [...]}."""
+        self.mock_scm.get.return_value = [sample_dhcp_interface_server_dict]
+
+        result = self.client.list(folder="Test Folder")
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], DhcpInterfaceResponseModel)
+        assert result[0].name == sample_dhcp_interface_server_dict["name"]
+
+    def test_fetch_with_raw_array_response(self, sample_dhcp_interface_server_dict):
+        """Test fetch method when API returns a raw array instead of a dict."""
+        self.mock_scm.get.return_value = [sample_dhcp_interface_server_dict]
+
+        result = self.client.fetch(name="ethernet1/1", folder="Test Folder")
+
+        assert isinstance(result, DhcpInterfaceResponseModel)
+        assert result.name == sample_dhcp_interface_server_dict["name"]
+        assert result.id == uuid.UUID(sample_dhcp_interface_server_dict["id"])
+
+    def test_fetch_with_empty_raw_array(self):
+        """Test fetch method when API returns an empty raw array."""
+        self.mock_scm.get.return_value = []
+
+        with pytest.raises(InvalidObjectError) as excinfo:
+            self.client.fetch(name="ethernet1/1", folder="Test Folder")
+        assert "No matching DHCP interface found" in str(excinfo.value)
+
+    def test_fetch_with_multiple_raw_array_items(
+        self, sample_dhcp_interface_server_dict, monkeypatch
+    ):
+        """Test fetch method when API returns multiple items in raw array."""
+        from unittest.mock import MagicMock
+
+        iface1 = sample_dhcp_interface_server_dict.copy()
+        iface1["id"] = str(uuid.uuid4())
+        iface2 = sample_dhcp_interface_server_dict.copy()
+        iface2["id"] = str(uuid.uuid4())
+
+        self.mock_scm.get.return_value = [iface1, iface2]
+
+        mock_warning = MagicMock()
+        monkeypatch.setattr(self.client.logger, "warning", mock_warning)
+
+        result = self.client.fetch(name="ethernet1/1", folder="Test Folder")
+
+        assert isinstance(result, DhcpInterfaceResponseModel)
+        assert result.id == uuid.UUID(iface1["id"])
+        mock_warning.assert_called_once()
