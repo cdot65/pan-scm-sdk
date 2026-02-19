@@ -18,6 +18,11 @@ from .security_zone import SecurityZone
 from .tunnel_interface import TunnelInterface
 from .vlan_interface import VlanInterface
 from .zone_protection_profile import ZoneProtectionProfile
+from .bgp_address_family_profile import BgpAddressFamilyProfile
+from .bgp_auth_profile import BgpAuthProfile
+from .ospf_auth_profile import OspfAuthProfile
+from .route_access_list import RouteAccessList
+from .route_prefix_list import RoutePrefixList
 
 __all__ = [
     # Network Interfaces
@@ -40,4 +45,10 @@ __all__ = [
     "IPsecTunnel",
     "LogicalRouter",
     "ZoneProtectionProfile",
+    # Routing Profiles (v0.8.0)
+    "BgpAddressFamilyProfile",
+    "BgpAuthProfile",
+    "OspfAuthProfile",
+    "RouteAccessList",
+    "RoutePrefixList",
 ]

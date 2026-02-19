@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-02-18
+
+### Added
+- **Route Access List**: New `scm.route_access_list` service for managing route access lists that filter routes by network/mask. Supports get, update, list, and fetch operations (no-POST pattern) against `/config/network/v1/route-access-lists`.
+- **Route Prefix List**: New `scm.route_prefix_list` service for managing route prefix lists with prefix-based route filtering including ge/le constraints. Supports get, update, list, and fetch operations against `/config/network/v1/route-prefix-lists`.
+- **BGP Authentication Profile**: New `scm.bgp_auth_profile` service for managing BGP authentication profiles (MD5 authentication for BGP sessions). Supports get, update, list, and fetch operations against `/config/network/v1/bgp-auth-profiles`.
+- **OSPF Authentication Profile**: New `scm.ospf_auth_profile` service for managing OSPF authentication profiles with MD5 key list and simple password authentication modes (mutually exclusive). Supports get, update, list, and fetch operations against `/config/network/v1/ospf-auth-profiles`.
+- **BGP Address Family Profile**: New `scm.bgp_address_family_profile` service for managing BGP address family profiles with IPv4/IPv6 unicast/multicast configuration including allowas_in, maximum_prefix, next_hop, remove_private_AS, send_community, and ORF settings. Supports get, update, list, and fetch operations against `/config/network/v1/bgp-address-family-profiles`.
+- Added 269 new tests (165 model validation + 104 service tests) across 10 test files
+
 ## [0.7.0] - 2026-02-18
 
 ### Added
