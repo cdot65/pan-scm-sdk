@@ -272,6 +272,7 @@ from .ospf_auth_profile import (
     OspfAuthProfileBaseModel,
     OspfAuthProfileCreateModel,
     OspfAuthProfileMd5Key,
+    OspfAuthProfileMd5KeyResponse,
     OspfAuthProfileResponseModel,
     OspfAuthProfileUpdateModel,
 )
@@ -615,6 +616,7 @@ __all__ = [
     "OspfAuthProfileUpdateModel",
     "OspfAuthProfileResponseModel",
     "OspfAuthProfileMd5Key",
+    "OspfAuthProfileMd5KeyResponse",
     # Route Access List
     "RouteAccessListBaseModel",
     "RouteAccessListCreateModel",

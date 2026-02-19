@@ -9,6 +9,7 @@ from scm.models.network import (
     OspfAuthProfileBaseModel,
     OspfAuthProfileCreateModel,
     OspfAuthProfileMd5Key,
+    OspfAuthProfileMd5KeyResponse,
     OspfAuthProfileResponseModel,
     OspfAuthProfileUpdateModel,
 )
@@ -48,18 +49,40 @@ class TestOspfAuthProfileMd5Key:
         with pytest.raises(ValidationError):
             OspfAuthProfileMd5Key(name=256)
 
-    def test_md5_key_accepts_encrypted_value(self):
-        """Test MD5 key accepts long encrypted values returned by API."""
-        # API returns encrypted keys like "-AQ==MzoT6FsyFbec2rckK2Q..."
-        encrypted = "-AQ==MzoT6FsyFbec2rckK2QehR0O5nc=T4nfel3vRF8QGRrgx9f93Q=="
-        key = OspfAuthProfileMd5Key(key=encrypted)
-        assert key.key == encrypted
+    def test_md5_key_max_length(self):
+        """Test MD5 key enforces max_length=16 on input."""
+        key = OspfAuthProfileMd5Key(key="A" * 16)
+        assert len(key.key) == 16
+
+        with pytest.raises(ValidationError):
+            OspfAuthProfileMd5Key(key="A" * 17)
 
     def test_md5_key_extra_fields_forbidden(self):
         """Test that extra fields are rejected on OspfAuthProfileMd5Key."""
         with pytest.raises(ValidationError) as exc_info:
             OspfAuthProfileMd5Key(name=1, unknown_field="should_fail")
         assert "Extra inputs are not permitted" in str(exc_info.value)
+
+
+class TestOspfAuthProfileMd5KeyResponse:
+    """Test OSPF auth profile MD5 key response model (accepts encrypted values)."""
+
+    def test_accepts_encrypted_key(self):
+        """Test response key model accepts long encrypted values from API."""
+        encrypted = "-AQ==MzoT6FsyFbec2rckK2QehR0O5nc=T4nfel3vRF8QGRrgx9f93Q=="
+        key = OspfAuthProfileMd5KeyResponse(name=1, key=encrypted)
+        assert key.key == encrypted
+        assert len(key.key) == 57
+
+    def test_accepts_short_key(self):
+        """Test response key model also accepts short plaintext keys."""
+        key = OspfAuthProfileMd5KeyResponse(name=1, key="short")
+        assert key.key == "short"
+
+    def test_extra_fields_ignored(self):
+        """Test that extra fields are ignored on response model."""
+        key = OspfAuthProfileMd5KeyResponse(name=1, key="test", unknown="field")
+        assert key.name == 1
 
 
 class TestOspfAuthProfileBaseModel:

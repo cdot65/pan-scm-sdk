@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class OspfAuthProfileMd5Key(BaseModel):
-    """OSPF auth profile MD5 key entry."""
+    """OSPF auth profile MD5 key entry (for create/update input)."""
 
     model_config = ConfigDict(
         extra="forbid",
@@ -28,7 +28,32 @@ class OspfAuthProfileMd5Key(BaseModel):
     )
     key: Optional[str] = Field(
         None,
-        description="MD5 hash (API returns encrypted value on read)",
+        description="MD5 hash",
+        max_length=16,
+    )
+    preferred: Optional[bool] = Field(
+        None,
+        description="Preferred key",
+    )
+
+
+class OspfAuthProfileMd5KeyResponse(BaseModel):
+    """OSPF auth profile MD5 key entry (for API responses with encrypted values)."""
+
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
+    name: Optional[int] = Field(
+        None,
+        description="Key ID",
+        ge=1,
+        le=255,
+    )
+    key: Optional[str] = Field(
+        None,
+        description="MD5 hash (API returns encrypted value)",
     )
     preferred: Optional[bool] = Field(
         None,
@@ -121,7 +146,7 @@ class OspfAuthProfileUpdateModel(OspfAuthProfileBaseModel):
     )
 
 
-class OspfAuthProfileResponseModel(OspfAuthProfileBaseModel):
+class OspfAuthProfileResponseModel(BaseModel):
     """Model for OSPF Authentication Profile responses."""
 
     model_config = ConfigDict(
@@ -135,4 +160,34 @@ class OspfAuthProfileResponseModel(OspfAuthProfileBaseModel):
         ...,
         description="The UUID of the resource",
         examples=["123e4567-e89b-12d3-a456-426655440000"],
+    )
+    name: str = Field(
+        ...,
+        description="Profile name",
+    )
+    password: Optional[str] = Field(
+        None,
+        description="Simple password authentication (API returns encrypted value)",
+    )
+    md5: Optional[List[OspfAuthProfileMd5KeyResponse]] = Field(
+        None,
+        description="MD5 authentication keys (API returns encrypted values)",
+    )
+    folder: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The folder in which the resource is defined",
+    )
+    snippet: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The snippet in which the resource is defined",
+    )
+    device: Optional[str] = Field(
+        None,
+        pattern=r"^[a-zA-Z\d\-_. ]+$",
+        max_length=64,
+        description="The device in which the resource is defined",
     )
