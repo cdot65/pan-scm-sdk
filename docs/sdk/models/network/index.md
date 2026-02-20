@@ -112,7 +112,11 @@ updated_result = client.nat_rule.update(update_dict)
 
 ### Other Network Models
 
+- [DNS Proxy Models](dns_proxy_models.md) - DNS proxy configurations with domain-specific rules and caching
 - [NAT Rule Models](nat_rule_models.md) - Network Address Translation rules
+- [PBF Rule Models](pbf_rule_models.md) - Policy-Based Forwarding rule configurations
+- [QoS Profile Models](qos_profile_models.md) - Quality of Service profile configurations
+- [QoS Rule Models](qos_rule_models.md) - QoS policy rule configurations with move operations
 - [Security Zone Models](security_zone_models.md) - Security Zone configuration and management
 - [Zone Protection Profile Models](zone_protection_profile_models.md) - Zone protection profiles for flood and scan protection
 

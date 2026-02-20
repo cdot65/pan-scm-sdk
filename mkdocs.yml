@@ -122,7 +122,11 @@ nav:
           - Layer3 Subinterfaces: sdk/config/network/layer3_subinterface.md
           - Logical Routers: sdk/config/network/logical_router.md
           - Loopback Interfaces: sdk/config/network/loopback_interface.md
+          - DNS Proxies: sdk/config/network/dns_proxy.md
           - NAT Rules: sdk/config/network/nat_rules.md
+          - PBF Rules: sdk/config/network/pbf_rule.md
+          - QoS Profiles: sdk/config/network/qos_profile.md
+          - QoS Rules: sdk/config/network/qos_rule.md
           - Security Zones: sdk/config/network/security_zone.md
           - Tunnel Interfaces: sdk/config/network/tunnel_interface.md
           - VLAN Interfaces: sdk/config/network/vlan_interface.md
@@ -196,7 +200,11 @@ nav:
           - Layer3 Subinterfaces: sdk/models/network/layer3_subinterface_models.md
           - Logical Routers: sdk/models/network/logical_router_models.md
           - Loopback Interfaces: sdk/models/network/loopback_interface_models.md
+          - DNS Proxy Models: sdk/models/network/dns_proxy_models.md
           - NAT Rules: sdk/models/network/nat_rule_models.md
+          - PBF Rule Models: sdk/models/network/pbf_rule_models.md
+          - QoS Profile Models: sdk/models/network/qos_profile_models.md
+          - QoS Rule Models: sdk/models/network/qos_rule_models.md
           - Security Zones: sdk/models/network/security_zone_models.md
           - Tunnel Interfaces: sdk/models/network/tunnel_interface_models.md
           - VLAN Interfaces: sdk/models/network/vlan_interface_models.md
