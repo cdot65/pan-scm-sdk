@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-02-20
+
+### Added
+- **QoS Profile**: New `scm.qos_profile` service for managing QoS profiles for traffic shaping and bandwidth allocation. Supports full CRUD operations against `/config/network/v1/qos-profiles`. Includes aggregate bandwidth and class bandwidth type configuration.
+- **QoS Rule**: New `scm.qos_rule` service for managing QoS policy rules that apply QoS profiles to traffic. Supports list, get, update, and fetch operations (no-POST pattern) against `/config/network/v1/qos-rules`. Includes `:move` operation for rule reordering with destination (top/bottom/before/after) and rulebase (pre/post) support.
+- **DNS Proxy**: New `scm.dns_proxy` service for managing DNS proxy configurations for DNS interception and forwarding. Supports full CRUD operations against `/config/network/v1/dns-proxies`. Includes domain servers, static entries, TCP/UDP query settings, and cache configuration with proper alias handling for hyphenated API keys.
+- **PBF Rule**: New `scm.pbf_rule` service for managing Policy-Based Forwarding rules for application-aware routing. Supports full CRUD operations against `/config/network/v1/pbf-rules`. Includes forward/discard/no-PBF action types, enforce symmetric return, and source/destination matching.
+- Added 254 new tests (131 model validation + 99 service tests + 24 move operation tests) across 12 test files
+
 ## [0.9.0] - 2026-02-20
 
 ### Added

@@ -15,11 +15,15 @@ from scm.models.network import (
     BgpRedistributionProfileResponseModel,
     BgpRouteMapRedistributionResponseModel,
     BgpRouteMapResponseModel,
+    DnsProxyResponseModel,
     IKECryptoProfileResponseModel,
     IKEGatewayResponseModel,
     IPsecCryptoProfileResponseModel,
     NatRuleResponseModel,
     OspfAuthProfileResponseModel,
+    PbfRuleResponseModel,
+    QosProfileResponseModel,
+    QosRuleResponseModel,
     RouteAccessListResponseModel,
     RoutePrefixListResponseModel,
     SecurityZoneResponseModel,
@@ -282,3 +286,76 @@ class TestBgpRouteMapRedistributionAPI:
             assert item.id is not None
             assert item.name is not None
         print(f"\n  Found {len(items)} BGP route map redistributions in '{self.FOLDER}'")
+
+
+# ---------------------------------------------------------------------------
+# v0.10.0 Advanced Networking Services
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.api
+class TestQosProfileAPI:
+    """Live API tests for QosProfile objects."""
+
+    FOLDER = "Remote Networks"  # QoS Profiles only accept Remote Networks or Service Connections
+
+    def test_list_qos_profiles(self, live_client):
+        """Verify QosProfile list responses parse correctly."""
+        items = live_client.qos_profile.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, QosProfileResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} QoS profiles in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestQosRuleAPI:
+    """Live API tests for QosRule objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_qos_rules(self, live_client):
+        """Verify QosRule list responses parse correctly."""
+        items = live_client.qos_rule.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, QosRuleResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} QoS rules in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestDnsProxyAPI:
+    """Live API tests for DnsProxy objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_dns_proxies(self, live_client):
+        """Verify DnsProxy list responses parse correctly."""
+        items = live_client.dns_proxy.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, DnsProxyResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} DNS proxies in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestPbfRuleAPI:
+    """Live API tests for PbfRule objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_pbf_rules(self, live_client):
+        """Verify PbfRule list responses parse correctly."""
+        items = live_client.pbf_rule.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, PbfRuleResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} PBF rules in '{self.FOLDER}'")

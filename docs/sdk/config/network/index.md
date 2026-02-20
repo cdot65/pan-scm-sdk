@@ -33,8 +33,12 @@ This section covers the configuration of network features provided by the Palo A
 ### Other Network Objects
 
 - [DHCP Interfaces](dhcp_interface.md) - Configure DHCP server and relay on firewall interfaces
+- [DNS Proxies](dns_proxy.md) - Configure DNS proxy services with domain-specific rules and caching
 - [Interface Management Profiles](interface_management_profile.md) - Configure management service access on interfaces
 - [NAT Rules](nat_rules.md) - Configure Network Address Translation rules for traffic handling
+- [PBF Rules](pbf_rule.md) - Configure Policy-Based Forwarding rules for traffic routing overrides
+- [QoS Profiles](qos_profile.md) - Configure Quality of Service profiles for bandwidth management
+- [QoS Rules](qos_rule.md) - Configure QoS policy rules for traffic classification and prioritization
 - [Security Zones](security_zone.md) - Configure Security Zones for network segmentation
 - [Zone Protection Profiles](zone_protection_profile.md) - Configure zone-level protection against floods, scans, and packet-based attacks
 

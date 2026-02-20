@@ -185,6 +185,10 @@ The unified client provides access to the following services through attribute-b
 | `security_zone`                    | Security zones for network segmentation                       |
 | `tunnel_interface`                 | Tunnel interfaces for VPN and overlay networks                |
 | `vlan_interface`                   | VLAN interfaces for network segmentation                      |
+| `dns_proxy`                        | DNS proxy configurations for DNS interception and forwarding  |
+| `pbf_rule`                         | Policy-Based Forwarding rules for application-aware routing   |
+| `qos_profile`                      | QoS profiles for traffic shaping and bandwidth allocation     |
+| `qos_rule`                         | QoS policy rules with rule move/reorder support               |
 | `zone_protection_profile`          | Zone protection with flood, scan, and packet-based defense    |
 | **Deployment**                     |                                                               |
 | `bandwidth_allocation`             | Bandwidth allocation management for network capacity planning |

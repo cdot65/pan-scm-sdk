@@ -27,6 +27,10 @@ from .bgp_filtering_profile import BgpFilteringProfile
 from .bgp_redistribution_profile import BgpRedistributionProfile
 from .bgp_route_map import BgpRouteMap
 from .bgp_route_map_redistribution import BgpRouteMapRedistribution
+from .dns_proxy import DnsProxy
+from .pbf_rule import PbfRule
+from .qos_profile import QosProfile
+from .qos_rule import QosRule
 
 __all__ = [
     # Network Interfaces
@@ -60,4 +64,9 @@ __all__ = [
     "BgpRedistributionProfile",
     "BgpRouteMap",
     "BgpRouteMapRedistribution",
+    # Advanced Networking (v0.10.0)
+    "QosProfile",
+    "QosRule",
+    "DnsProxy",
+    "PbfRule",
 ]

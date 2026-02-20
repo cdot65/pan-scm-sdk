@@ -701,6 +701,23 @@ class Scm:
                 "scm.config.network.bgp_route_map_redistribution",
                 "BgpRouteMapRedistribution",
             ),
+            # Advanced Networking (v0.10.0)
+            "qos_profile": (
+                "scm.config.network.qos_profile",
+                "QosProfile",
+            ),
+            "qos_rule": (
+                "scm.config.network.qos_rule",
+                "QosRule",
+            ),
+            "dns_proxy": (
+                "scm.config.network.dns_proxy",
+                "DnsProxy",
+            ),
+            "pbf_rule": (
+                "scm.config.network.pbf_rule",
+                "PbfRule",
+            ),
         }
 
         # Check if the requested service exists in our registry
