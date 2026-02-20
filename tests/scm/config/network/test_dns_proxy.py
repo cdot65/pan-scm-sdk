@@ -401,6 +401,73 @@ class TestDnsProxy(TestDnsProxyBase):
         assert result.id == uuid.UUID(proxy1["id"])
         mock_warning.assert_called_once()
 
+    def test_list_with_exact_match(self, sample_dns_proxy_dict):
+        """Test list with exact_match filtering."""
+        other = sample_dns_proxy_dict.copy()
+        other["id"] = str(uuid.uuid4())
+        other["folder"] = "Other Folder"
+        self.mock_scm.get.return_value = {
+            "data": [sample_dns_proxy_dict, other],
+            "offset": 0,
+            "total": 2,
+            "limit": 200,
+        }
+
+        result = self.client.list(folder="Test Folder", exact_match=True)
+
+        assert len(result) == 1
+        assert result[0].folder == "Test Folder"
+
+    def test_list_with_exclude_folders(self, sample_dns_proxy_dict):
+        """Test list with exclude_folders filtering."""
+        self.mock_scm.get.return_value = {
+            "data": [sample_dns_proxy_dict],
+            "offset": 0,
+            "total": 1,
+            "limit": 200,
+        }
+
+        result = self.client.list(folder="Test Folder", exclude_folders=["Test Folder"])
+
+        assert len(result) == 0
+
+    def test_list_with_exclude_snippets(self, sample_dns_proxy_dict):
+        """Test list with exclude_snippets filtering."""
+        item = sample_dns_proxy_dict.copy()
+        item["snippet"] = "TestSnippet"
+        item.pop("folder", None)
+        self.mock_scm.get.return_value = {"data": [item], "offset": 0, "total": 1, "limit": 200}
+
+        result = self.client.list(snippet="TestSnippet", exclude_snippets=["TestSnippet"])
+
+        assert len(result) == 0
+
+    def test_list_with_exclude_devices(self, sample_dns_proxy_dict):
+        """Test list with exclude_devices filtering."""
+        item = sample_dns_proxy_dict.copy()
+        item["device"] = "TestDevice"
+        item.pop("folder", None)
+        self.mock_scm.get.return_value = {"data": [item], "offset": 0, "total": 1, "limit": 200}
+
+        result = self.client.list(device="TestDevice", exclude_devices=["TestDevice"])
+
+        assert len(result) == 0
+
+    def test_fetch_with_data_array_multiple_results(self, monkeypatch):
+        """Test fetch when API returns data array with multiple results."""
+        proxy1 = {"id": str(uuid.uuid4()), "name": "proxy1", "folder": "Test Folder"}
+        proxy2 = {"id": str(uuid.uuid4()), "name": "proxy1", "folder": "Test Folder"}
+        self.mock_scm.get.return_value = {"data": [proxy1, proxy2]}
+
+        mock_warning = MagicMock()
+        monkeypatch.setattr(self.client.logger, "warning", mock_warning)
+
+        result = self.client.fetch(name="proxy1", folder="Test Folder")
+
+        assert isinstance(result, DnsProxyResponseModel)
+        assert result.id == uuid.UUID(proxy1["id"])
+        mock_warning.assert_called_once()
+
     def test_delete(self, sample_dns_proxy_dict):
         """Test delete method."""
         object_id = sample_dns_proxy_dict["id"]
