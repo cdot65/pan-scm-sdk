@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pan-scm-sdk"
-version = "0.8.0"
+version = "0.9.0"
 description = "Python SDK for Palo Alto Networks Strata Cloud Manager."
 authors = ["Calvin Remsburg <calvin@cdot.io>"]
 license = "Apache 2.0"

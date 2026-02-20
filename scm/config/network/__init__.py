@@ -23,6 +23,10 @@ from .bgp_auth_profile import BgpAuthProfile
 from .ospf_auth_profile import OspfAuthProfile
 from .route_access_list import RouteAccessList
 from .route_prefix_list import RoutePrefixList
+from .bgp_filtering_profile import BgpFilteringProfile
+from .bgp_redistribution_profile import BgpRedistributionProfile
+from .bgp_route_map import BgpRouteMap
+from .bgp_route_map_redistribution import BgpRouteMapRedistribution
 
 __all__ = [
     # Network Interfaces
@@ -51,4 +55,9 @@ __all__ = [
     "OspfAuthProfile",
     "RouteAccessList",
     "RoutePrefixList",
+    # Routing Profiles (v0.9.0)
+    "BgpFilteringProfile",
+    "BgpRedistributionProfile",
+    "BgpRouteMap",
+    "BgpRouteMapRedistribution",
 ]

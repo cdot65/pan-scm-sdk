@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-02-20
+
+### Added
+- **BGP Filtering Profile**: New `scm.bgp_filtering_profile` service for managing BGP filtering profiles with inbound/outbound filter lists, network filters, route maps, and conditional advertisement. Supports full CRUD operations against `/config/network/v1/bgp-filtering-profiles`. Includes multicast oneOf pattern (inherit vs explicit filter configuration).
+- **BGP Redistribution Profile**: New `scm.bgp_redistribution_profile` service for managing BGP redistribution profiles that control route redistribution between protocols (static, OSPF, connected). Supports full CRUD operations against `/config/network/v1/bgp-redistribution-profiles`. All three protocol redistributions can coexist (non-mutually-exclusive).
+- **BGP Route Map**: New `scm.bgp_route_map` service for managing BGP route maps with sequenced entries containing match/set criteria for import/export policy control. Supports full CRUD operations against `/config/network/v1/bgp-route-maps`. Complex match criteria (AS path, communities, origin, metric, peer, IPv4) and set actions (local preference, weight, metric, communities, aggregator).
+- **BGP Route Map Redistribution**: New `scm.bgp_route_map_redistribution` service for managing BGP route map redistribution rules with protocol-specific crossover patterns. Supports full CRUD operations against `/config/network/v1/bgp-route-map-redistributions`. 31 Pydantic model classes implementing 2-level oneOf discrimination across 7 crossover variants (BGP->OSPF, BGP->RIB, OSPF->BGP, OSPF->RIB, Connected/Static->BGP, Connected/Static->OSPF, Connected/Static->RIB).
+- Added 336 new tests (220 model validation + 116 service tests) across 8 test files
+
 ## [0.8.0] - 2026-02-18
 
 ### Added

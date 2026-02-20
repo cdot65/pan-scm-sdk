@@ -11,6 +11,8 @@
    2. [Network Services](#network-services)
    3. [VPN Configuration](#vpn-configuration)
    4. [Other Network Models](#other-network-models)
+   5. [Routing Configuration](#routing-configuration)
+   6. [Routing Profile Models](#routing-profile-models)
 6. [Best Practices](#best-practices)
 7. [Related Documentation](#related-documentation)
 
@@ -113,6 +115,22 @@ updated_result = client.nat_rule.update(update_dict)
 - [NAT Rule Models](nat_rule_models.md) - Network Address Translation rules
 - [Security Zone Models](security_zone_models.md) - Security Zone configuration and management
 - [Zone Protection Profile Models](zone_protection_profile_models.md) - Zone protection profiles for flood and scan protection
+
+### Routing Configuration
+
+- [Logical Router Models](logical_router_models.md) - Logical router models with VRF, BGP, OSPF, ECMP, and static routes
+
+### Routing Profile Models
+
+- [BGP Address Family Profile Models](bgp_address_family_profile_models.md) - BGP address family configuration models
+- [BGP Auth Profile Models](bgp_auth_profile_models.md) - BGP MD5 authentication profile models
+- [BGP Filtering Profile Models](bgp_filtering_profile_models.md) - BGP filtering profile models for route filtering
+- [BGP Redistribution Profile Models](bgp_redistribution_profile_models.md) - BGP redistribution profile models
+- [BGP Route Map Models](bgp_route_map_models.md) - BGP route map models with match/set criteria
+- [BGP Route Map Redistribution Models](bgp_route_map_redistribution_models.md) - BGP route map redistribution models with protocol crossover patterns
+- [OSPF Auth Profile Models](ospf_auth_profile_models.md) - OSPF authentication profile models
+- [Route Access List Models](route_access_list_models.md) - Route access list models for route filtering
+- [Route Prefix List Models](route_prefix_list_models.md) - Route prefix list models for prefix-based filtering
 
 ## Best Practices
 

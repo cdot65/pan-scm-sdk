@@ -7,6 +7,10 @@ v0.8.0 additions: Creates BGP Auth Profile, OSPF Auth Profile, and BGP Address F
 Profile resources, then wires them into the Logical Router's BGP/OSPF configuration
 to validate the cross-service dependency chain.
 
+v0.9.0 additions: Creates BGP Filtering Profile and BGP Route Map resources, then
+wires BGP Filtering Profile into the Logical Router's peer group filtering_profile
+to validate the v0.9.0 cross-service dependency chain.
+
 Run with:
     PYTHONPATH=. python -m pytest tests/scm/api/test_logical_router_e2e.py -v -s
 
@@ -342,6 +346,80 @@ class TestLogicalRouterE2E:
         print(f"  Fetched BGP AF: {bgp_af.name}, unicast_enabled={bgp_af.ipv4.unicast.enable}")
 
     # ------------------------------------------------------------------
+    # Phase 5.7: Create v0.9.0 routing profile resources
+    # ------------------------------------------------------------------
+
+    def test_05e_create_bgp_filtering_profile(self, client, unique_name):
+        """Create a BGP Filtering Profile for peer group filtering config (v0.9.0)."""
+        profile_name = f"{unique_name}-bgp-filter"
+        cleanup_resource(client.bgp_filtering_profile, profile_name, FOLDER)
+
+        profile = client.bgp_filtering_profile.create(
+            {
+                "name": profile_name,
+                "ipv4": {
+                    "unicast": {
+                        "route_maps": {"inbound": "", "outbound": ""},
+                    },
+                    "multicast": {"inherit": True},
+                },
+                "folder": FOLDER,
+            }
+        )
+
+        assert profile.id is not None
+        assert profile.name == profile_name
+        self.__class__._bgp_filter_id = str(profile.id)
+        self.__class__._bgp_filter_name = profile_name
+        print(f"\n  Created BGP Filtering Profile: {profile_name} (id={profile.id})")
+
+    def test_05f_create_bgp_route_map(self, client, unique_name):
+        """Create a BGP Route Map resource (v0.9.0)."""
+        rmap_name = f"{unique_name}-bgp-rmap"
+        cleanup_resource(client.bgp_route_map, rmap_name, FOLDER)
+
+        rmap = client.bgp_route_map.create(
+            {
+                "name": rmap_name,
+                "route_map": [
+                    {
+                        "name": 10,
+                        "action": "permit",
+                        "set": {"local_preference": 200},
+                    },
+                    {
+                        "name": 20,
+                        "action": "deny",
+                    },
+                ],
+                "folder": FOLDER,
+            }
+        )
+
+        assert rmap.id is not None
+        assert rmap.name == rmap_name
+        self.__class__._bgp_rmap_id = str(rmap.id)
+        self.__class__._bgp_rmap_name = rmap_name
+        print(f"\n  Created BGP Route Map: {rmap_name} (id={rmap.id})")
+
+    def test_05g_fetch_v090_profiles(self, client):
+        """Fetch v0.9.0 routing profiles and verify model parsing."""
+        time.sleep(2)  # Allow API propagation after creates
+
+        bgp_filter = client.bgp_filtering_profile.get(self.__class__._bgp_filter_id)
+        assert bgp_filter.name == self.__class__._bgp_filter_name
+        assert bgp_filter.ipv4 is not None
+        print(f"\n  Fetched BGP Filtering Profile: {bgp_filter.name}")
+        if bgp_filter.ipv4.multicast:
+            print(f"    multicast inherit={bgp_filter.ipv4.multicast.inherit}")
+
+        bgp_rmap = client.bgp_route_map.get(self.__class__._bgp_rmap_id)
+        assert bgp_rmap.name == self.__class__._bgp_rmap_name
+        assert bgp_rmap.route_map is not None
+        assert len(bgp_rmap.route_map) == 2
+        print(f"  Fetched BGP Route Map: {bgp_rmap.name}, entries={len(bgp_rmap.route_map)}")
+
+    # ------------------------------------------------------------------
     # Phase 6: Update with BGP configuration + peer groups using profiles
     # ------------------------------------------------------------------
 
@@ -349,12 +427,14 @@ class TestLogicalRouterE2E:
         """Update the router with BGP base config and a peer group referencing routing profiles.
 
         This validates the cross-service dependency chain:
-        Logical Router -> BGP Peer Group -> BGP Address Family Profile
-        Logical Router -> BGP Peer Group -> BGP Auth Profile (via connection_options)
+        Logical Router -> BGP Peer Group -> BGP Address Family Profile (v0.8.0)
+        Logical Router -> BGP Peer Group -> BGP Auth Profile (v0.8.0, via connection_options)
+        Logical Router -> BGP Peer Group -> BGP Filtering Profile (v0.9.0, via filtering_profile)
 
         Note: Full peer config with local_address requires real interfaces on the router.
-        This test creates a peer group with address_family and connection_options references
-        but no peers, which validates the profile references are accepted by the API.
+        This test creates a peer group with address_family, connection_options, and
+        filtering_profile references but no peers, which validates the profile references
+        are accepted by the API.
         """
         router = client.logical_router.fetch(name=unique_name, folder=FOLDER)
 
@@ -365,6 +445,7 @@ class TestLogicalRouterE2E:
 
         bgp_af_name = self.__class__._bgp_af_name
         bgp_auth_name = self.__class__._bgp_auth_name
+        bgp_filter_name = self.__class__._bgp_filter_name
 
         for vrf in update_data.get("vrf", []):
             if vrf["name"] == "default":
@@ -388,6 +469,9 @@ class TestLogicalRouterE2E:
                             },
                             "address_family": {
                                 "ipv4": bgp_af_name,
+                            },
+                            "filtering_profile": {
+                                "ipv4": bgp_filter_name,
                             },
                             "connection_options": {
                                 "authentication": bgp_auth_name,
@@ -427,6 +511,9 @@ class TestLogicalRouterE2E:
         if pg.address_family:
             print(f"    Address Family IPv4: {pg.address_family.ipv4}")
             assert pg.address_family.ipv4 == bgp_af_name
+        if pg.filtering_profile:
+            print(f"    Filtering Profile IPv4: {pg.filtering_profile.ipv4}")
+            assert pg.filtering_profile.ipv4 == bgp_filter_name
         if pg.connection_options and pg.connection_options.authentication:
             print(f"    Auth Profile: {pg.connection_options.authentication}")
             assert pg.connection_options.authentication == bgp_auth_name
@@ -677,22 +764,29 @@ class TestLogicalRouterE2E:
             print(f"  Confirmed deleted (fetch raised: {type(e).__name__})")
 
     # ------------------------------------------------------------------
-    # Phase 13: Delete routing profiles (cleanup, v0.8.0)
+    # Phase 13: Delete routing profiles (cleanup, v0.8.0 + v0.9.0)
     # ------------------------------------------------------------------
 
     def test_13_delete_routing_profiles(self, client):
         """Delete the routing profile resources created for this E2E test."""
-        # Delete BGP Address Family Profile
+        # Delete v0.9.0 profiles first (no dependencies)
+        if hasattr(self.__class__, "_bgp_rmap_id"):
+            client.bgp_route_map.delete(self.__class__._bgp_rmap_id)
+            print(f"\n  Deleted BGP Route Map: {self.__class__._bgp_rmap_name}")
+
+        if hasattr(self.__class__, "_bgp_filter_id"):
+            client.bgp_filtering_profile.delete(self.__class__._bgp_filter_id)
+            print(f"  Deleted BGP Filtering Profile: {self.__class__._bgp_filter_name}")
+
+        # Delete v0.8.0 profiles
         if hasattr(self.__class__, "_bgp_af_id"):
             client.bgp_address_family_profile.delete(self.__class__._bgp_af_id)
-            print(f"\n  Deleted BGP AF Profile: {self.__class__._bgp_af_name}")
+            print(f"  Deleted BGP AF Profile: {self.__class__._bgp_af_name}")
 
-        # Delete OSPF Auth Profile
         if hasattr(self.__class__, "_ospf_auth_id"):
             client.ospf_auth_profile.delete(self.__class__._ospf_auth_id)
             print(f"  Deleted OSPF Auth Profile: {self.__class__._ospf_auth_name}")
 
-        # Delete BGP Auth Profile
         if hasattr(self.__class__, "_bgp_auth_id"):
             client.bgp_auth_profile.delete(self.__class__._bgp_auth_id)
             print(f"  Deleted BGP Auth Profile: {self.__class__._bgp_auth_name}")
@@ -700,6 +794,8 @@ class TestLogicalRouterE2E:
         # Verify all cleaned up
         time.sleep(1)
         for svc, name in [
+            (client.bgp_route_map, getattr(self.__class__, "_bgp_rmap_name", None)),
+            (client.bgp_filtering_profile, getattr(self.__class__, "_bgp_filter_name", None)),
             (client.bgp_auth_profile, getattr(self.__class__, "_bgp_auth_name", None)),
             (client.ospf_auth_profile, getattr(self.__class__, "_ospf_auth_name", None)),
             (client.bgp_address_family_profile, getattr(self.__class__, "_bgp_af_name", None)),

@@ -684,6 +684,23 @@ class Scm:
                 "scm.config.network.route_prefix_list",
                 "RoutePrefixList",
             ),
+            # Routing Profiles (v0.9.0)
+            "bgp_filtering_profile": (
+                "scm.config.network.bgp_filtering_profile",
+                "BgpFilteringProfile",
+            ),
+            "bgp_redistribution_profile": (
+                "scm.config.network.bgp_redistribution_profile",
+                "BgpRedistributionProfile",
+            ),
+            "bgp_route_map": (
+                "scm.config.network.bgp_route_map",
+                "BgpRouteMap",
+            ),
+            "bgp_route_map_redistribution": (
+                "scm.config.network.bgp_route_map_redistribution",
+                "BgpRouteMapRedistribution",
+            ),
         }
 
         # Check if the requested service exists in our registry
