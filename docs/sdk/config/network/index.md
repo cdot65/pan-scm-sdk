@@ -38,6 +38,22 @@ This section covers the configuration of network features provided by the Palo A
 - [Security Zones](security_zone.md) - Configure Security Zones for network segmentation
 - [Zone Protection Profiles](zone_protection_profile.md) - Configure zone-level protection against floods, scans, and packet-based attacks
 
+### Routing Configuration
+
+- [Logical Router](logical_router.md) - Configure logical routers with VRF, BGP, OSPF, ECMP, and static routes
+
+### Routing Profiles
+
+- [BGP Address Family Profile](bgp_address_family_profile.md) - Configure BGP address family settings for peer groups
+- [BGP Auth Profile](bgp_auth_profile.md) - Configure BGP MD5 authentication profiles
+- [BGP Filtering Profile](bgp_filtering_profile.md) - Configure BGP filtering profiles for route filtering
+- [BGP Redistribution Profile](bgp_redistribution_profile.md) - Configure BGP route redistribution between protocols
+- [BGP Route Map](bgp_route_map.md) - Configure BGP route maps for import/export policy control
+- [BGP Route Map Redistribution](bgp_route_map_redistribution.md) - Configure BGP route map redistribution with protocol crossover patterns
+- [OSPF Auth Profile](ospf_auth_profile.md) - Configure OSPF authentication profiles
+- [Route Access List](route_access_list.md) - Configure route access lists for route filtering
+- [Route Prefix List](route_prefix_list.md) - Configure route prefix lists for prefix-based filtering
+
 ## Common Features
 
 All network configuration objects provide standard operations:
