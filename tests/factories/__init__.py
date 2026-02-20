@@ -59,6 +59,32 @@ from tests.factories.network import (
     NatRuleUpdateApiFactory,
     NatRuleUpdateModelFactory,
     SourceTranslationFactory,
+    # QoS Profile factories
+    QosProfileCreateApiFactory,
+    QosProfileCreateModelFactory,
+    QosProfileResponseFactory,
+    QosProfileUpdateApiFactory,
+    QosProfileUpdateModelFactory,
+    # QoS Rule factories
+    QosRuleCreateApiFactory,
+    QosRuleCreateModelFactory,
+    QosRuleMoveApiFactory,
+    QosRuleMoveModelFactory,
+    QosRuleResponseFactory,
+    QosRuleUpdateApiFactory,
+    QosRuleUpdateModelFactory,
+    # DNS Proxy factories
+    DnsProxyCreateApiFactory,
+    DnsProxyCreateModelFactory,
+    DnsProxyResponseFactory,
+    DnsProxyUpdateApiFactory,
+    DnsProxyUpdateModelFactory,
+    # PBF Rule factories
+    PbfRuleCreateApiFactory,
+    PbfRuleCreateModelFactory,
+    PbfRuleResponseFactory,
+    PbfRuleUpdateApiFactory,
+    PbfRuleUpdateModelFactory,
 )
 from tests.factories.objects.address import (
     AddressCreateApiFactory,
@@ -373,4 +399,30 @@ __all__ = [
     "NatRuleUpdateApiFactory",
     "NatRuleUpdateModelFactory",
     "SourceTranslationFactory",
+    # QoS Profile factories
+    "QosProfileCreateApiFactory",
+    "QosProfileCreateModelFactory",
+    "QosProfileResponseFactory",
+    "QosProfileUpdateApiFactory",
+    "QosProfileUpdateModelFactory",
+    # QoS Rule factories
+    "QosRuleCreateApiFactory",
+    "QosRuleCreateModelFactory",
+    "QosRuleMoveApiFactory",
+    "QosRuleMoveModelFactory",
+    "QosRuleResponseFactory",
+    "QosRuleUpdateApiFactory",
+    "QosRuleUpdateModelFactory",
+    # DNS Proxy factories
+    "DnsProxyCreateApiFactory",
+    "DnsProxyCreateModelFactory",
+    "DnsProxyResponseFactory",
+    "DnsProxyUpdateApiFactory",
+    "DnsProxyUpdateModelFactory",
+    # PBF Rule factories
+    "PbfRuleCreateApiFactory",
+    "PbfRuleCreateModelFactory",
+    "PbfRuleResponseFactory",
+    "PbfRuleUpdateApiFactory",
+    "PbfRuleUpdateModelFactory",
 ]
