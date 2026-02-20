@@ -163,6 +163,10 @@ The unified client provides access to the following services through attribute-b
 | `aggregate_interface`              | Aggregated ethernet interfaces with LACP support              |
 | `bgp_address_family_profile`       | BGP address family profiles (IPv4/IPv6 unicast/multicast)     |
 | `bgp_auth_profile`                 | BGP authentication profiles (MD5 for BGP sessions)            |
+| `bgp_filtering_profile`           | BGP filtering profiles for inbound/outbound route filtering   |
+| `bgp_redistribution_profile`      | BGP redistribution profiles for protocol route redistribution |
+| `bgp_route_map`                   | BGP route maps for import/export policy control               |
+| `bgp_route_map_redistribution`    | BGP route map redistribution with protocol crossover patterns |
 | `dhcp_interface`                   | DHCP server and relay settings on interfaces                  |
 | `ethernet_interface`               | Physical ethernet interface configurations                    |
 | `ike_crypto_profile`               | IKE crypto profiles for VPN tunnel encryption                 |
