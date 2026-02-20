@@ -11,6 +11,10 @@ import pytest
 from scm.models.network import (
     BgpAddressFamilyProfileResponseModel,
     BgpAuthProfileResponseModel,
+    BgpFilteringProfileResponseModel,
+    BgpRedistributionProfileResponseModel,
+    BgpRouteMapRedistributionResponseModel,
+    BgpRouteMapResponseModel,
     IKECryptoProfileResponseModel,
     IKEGatewayResponseModel,
     IPsecCryptoProfileResponseModel,
@@ -205,3 +209,76 @@ class TestBgpAddressFamilyProfileAPI:
             assert item.id is not None
             assert item.name is not None
         print(f"\n  Found {len(items)} BGP address family profiles in '{self.FOLDER}'")
+
+
+# ---------------------------------------------------------------------------
+# v0.9.0 Routing Profile Services
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.api
+class TestBgpFilteringProfileAPI:
+    """Live API tests for BgpFilteringProfile objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_bgp_filtering_profiles(self, live_client):
+        """Verify BgpFilteringProfile list responses parse correctly."""
+        items = live_client.bgp_filtering_profile.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, BgpFilteringProfileResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} BGP filtering profiles in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestBgpRedistributionProfileAPI:
+    """Live API tests for BgpRedistributionProfile objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_bgp_redistribution_profiles(self, live_client):
+        """Verify BgpRedistributionProfile list responses parse correctly."""
+        items = live_client.bgp_redistribution_profile.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, BgpRedistributionProfileResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} BGP redistribution profiles in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestBgpRouteMapAPI:
+    """Live API tests for BgpRouteMap objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_bgp_route_maps(self, live_client):
+        """Verify BgpRouteMap list responses parse correctly."""
+        items = live_client.bgp_route_map.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, BgpRouteMapResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} BGP route maps in '{self.FOLDER}'")
+
+
+@pytest.mark.api
+class TestBgpRouteMapRedistributionAPI:
+    """Live API tests for BgpRouteMapRedistribution objects."""
+
+    FOLDER = "ngfw-shared"
+
+    def test_list_bgp_route_map_redistributions(self, live_client):
+        """Verify BgpRouteMapRedistribution list responses parse correctly."""
+        items = live_client.bgp_route_map_redistribution.list(folder=self.FOLDER)
+        assert isinstance(items, list)
+        for item in items:
+            assert isinstance(item, BgpRouteMapRedistributionResponseModel)
+            assert item.id is not None
+            assert item.name is not None
+        print(f"\n  Found {len(items)} BGP route map redistributions in '{self.FOLDER}'")
