@@ -57,12 +57,79 @@ class TestFloodProtectionModels:
         with pytest.raises(ValidationError):
             FloodRed(alarm_rate=0, activate_rate=2000001, maximal_rate=0)
 
+    def test_flood_red_rate_ordering_valid(self):
+        """Test FloodRed rate ordering validation with valid ordering."""
+        red = FloodRed(alarm_rate=100, activate_rate=200, maximal_rate=300)
+        assert red.alarm_rate == 100
+
+        # Equal values are valid
+        red = FloodRed(alarm_rate=100, activate_rate=100, maximal_rate=100)
+        assert red.alarm_rate == 100
+
+    def test_flood_red_rate_ordering_invalid(self):
+        """Test FloodRed rate ordering validation with invalid ordering."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            FloodRed(alarm_rate=300, activate_rate=200, maximal_rate=100)
+
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            FloodRed(alarm_rate=100, activate_rate=300, maximal_rate=200)
+
+    def test_flood_red_rate_ordering_partial(self):
+        """Test FloodRed rate ordering skipped when not all rates are set."""
+        # Should not raise when only some rates are set
+        red = FloodRed(alarm_rate=500)
+        assert red.alarm_rate == 500
+
+        red = FloodRed(alarm_rate=500, activate_rate=100)
+        assert red.alarm_rate == 500
+
     def test_flood_syn_cookies_valid(self):
         """Test valid FloodSynCookies configuration."""
         sc = FloodSynCookies(alarm_rate=100, activate_rate=200, maximal_rate=500)
         assert sc.alarm_rate == 100
         assert sc.activate_rate == 200
         assert sc.maximal_rate == 500
+
+    def test_flood_syn_cookies_rate_ordering_invalid(self):
+        """Test FloodSynCookies rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            FloodSynCookies(alarm_rate=300, activate_rate=200, maximal_rate=100)
+
+    def test_tcp_syn_flood_with_rate_fields(self):
+        """Test TcpSynFlood with top-level rate fields."""
+        tcp_syn = TcpSynFlood(
+            enable=True,
+            alarm_rate=10000,
+            activate_rate=20000,
+            maximal_rate=40000,
+        )
+        assert tcp_syn.enable is True
+        assert tcp_syn.alarm_rate == 10000
+        assert tcp_syn.activate_rate == 20000
+        assert tcp_syn.maximal_rate == 40000
+        assert tcp_syn.red is None
+        assert tcp_syn.syn_cookies is None
+
+    def test_tcp_syn_flood_rate_fields_boundary(self):
+        """Test TcpSynFlood rate field boundary values."""
+        tcp_syn = TcpSynFlood(alarm_rate=0, activate_rate=0, maximal_rate=0)
+        assert tcp_syn.alarm_rate == 0
+
+        tcp_syn = TcpSynFlood(alarm_rate=2000000, activate_rate=2000000, maximal_rate=2000000)
+        assert tcp_syn.maximal_rate == 2000000
+
+    def test_tcp_syn_flood_rate_fields_out_of_range(self):
+        """Test TcpSynFlood rate fields reject out-of-range values."""
+        with pytest.raises(ValidationError):
+            TcpSynFlood(alarm_rate=-1)
+
+        with pytest.raises(ValidationError):
+            TcpSynFlood(activate_rate=2000001)
+
+    def test_tcp_syn_flood_rate_ordering_invalid(self):
+        """Test TcpSynFlood rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            TcpSynFlood(alarm_rate=300, activate_rate=200, maximal_rate=100)
 
     def test_tcp_syn_flood_with_red(self):
         """Test TcpSynFlood with RED configuration."""
@@ -103,6 +170,23 @@ class TestFloodProtectionModels:
         assert udp.enable is True
         assert udp.red.alarm_rate == 1000
 
+    def test_udp_flood_with_rate_fields(self):
+        """Test UdpFlood with top-level rate fields."""
+        udp = UdpFlood(
+            enable=True,
+            alarm_rate=1000,
+            activate_rate=2000,
+            maximal_rate=5000,
+        )
+        assert udp.alarm_rate == 1000
+        assert udp.activate_rate == 2000
+        assert udp.maximal_rate == 5000
+
+    def test_udp_flood_rate_ordering_invalid(self):
+        """Test UdpFlood rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            UdpFlood(alarm_rate=500, activate_rate=200, maximal_rate=1000)
+
     def test_sctp_init_flood_valid(self):
         """Test valid SctpInitFlood configuration."""
         sctp = SctpInitFlood(
@@ -111,6 +195,23 @@ class TestFloodProtectionModels:
         )
         assert sctp.enable is True
         assert sctp.red.activate_rate == 1000
+
+    def test_sctp_init_flood_with_rate_fields(self):
+        """Test SctpInitFlood with top-level rate fields."""
+        sctp = SctpInitFlood(
+            enable=True,
+            alarm_rate=500,
+            activate_rate=1000,
+            maximal_rate=2000,
+        )
+        assert sctp.alarm_rate == 500
+        assert sctp.activate_rate == 1000
+        assert sctp.maximal_rate == 2000
+
+    def test_sctp_init_flood_rate_ordering_invalid(self):
+        """Test SctpInitFlood rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            SctpInitFlood(alarm_rate=2000, activate_rate=1000, maximal_rate=500)
 
     def test_icmp_flood_valid(self):
         """Test valid IcmpFlood configuration."""
@@ -121,6 +222,23 @@ class TestFloodProtectionModels:
         assert icmp.enable is True
         assert icmp.red.maximal_rate == 800
 
+    def test_icmp_flood_with_rate_fields(self):
+        """Test IcmpFlood with top-level rate fields."""
+        icmp = IcmpFlood(
+            enable=True,
+            alarm_rate=200,
+            activate_rate=400,
+            maximal_rate=800,
+        )
+        assert icmp.alarm_rate == 200
+        assert icmp.activate_rate == 400
+        assert icmp.maximal_rate == 800
+
+    def test_icmp_flood_rate_ordering_invalid(self):
+        """Test IcmpFlood rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            IcmpFlood(alarm_rate=800, activate_rate=400, maximal_rate=200)
+
     def test_icmpv6_flood_valid(self):
         """Test valid Icmpv6Flood configuration."""
         icmpv6 = Icmpv6Flood(
@@ -130,6 +248,23 @@ class TestFloodProtectionModels:
         assert icmpv6.enable is True
         assert icmpv6.red.alarm_rate == 300
 
+    def test_icmpv6_flood_with_rate_fields(self):
+        """Test Icmpv6Flood with top-level rate fields."""
+        icmpv6 = Icmpv6Flood(
+            enable=True,
+            alarm_rate=300,
+            activate_rate=600,
+            maximal_rate=1200,
+        )
+        assert icmpv6.alarm_rate == 300
+        assert icmpv6.activate_rate == 600
+        assert icmpv6.maximal_rate == 1200
+
+    def test_icmpv6_flood_rate_ordering_invalid(self):
+        """Test Icmpv6Flood rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            Icmpv6Flood(alarm_rate=1200, activate_rate=600, maximal_rate=300)
+
     def test_other_ip_flood_valid(self):
         """Test valid OtherIpFlood configuration."""
         other = OtherIpFlood(
@@ -138,6 +273,23 @@ class TestFloodProtectionModels:
         )
         assert other.enable is True
         assert other.red.activate_rate == 800
+
+    def test_other_ip_flood_with_rate_fields(self):
+        """Test OtherIpFlood with top-level rate fields."""
+        other = OtherIpFlood(
+            enable=True,
+            alarm_rate=400,
+            activate_rate=800,
+            maximal_rate=1600,
+        )
+        assert other.alarm_rate == 400
+        assert other.activate_rate == 800
+        assert other.maximal_rate == 1600
+
+    def test_other_ip_flood_rate_ordering_invalid(self):
+        """Test OtherIpFlood rate ordering validation."""
+        with pytest.raises(ValueError, match="Rate ordering must be"):
+            OtherIpFlood(alarm_rate=1600, activate_rate=800, maximal_rate=400)
 
     def test_flood_protection_complete(self):
         """Test complete FloodProtection configuration."""
