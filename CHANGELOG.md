@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-02-23
+
+### Fixed
+- **Zone Protection Profiles**: Remove invalid top-level `alarm_rate`, `activate_rate`, `maximal_rate` fields from all 6 flood models (`TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). E2E testing against the live SCM API confirmed these fields only work inside the nested `red`/`syn_cookies` sub-models (as `FloodRed.alarm_rate`), not at the top level. Top-level rate fields were silently discarded by the API. (#246)
+- **Zone Protection Profiles**: Add rate ordering validation (`alarm_rate <= activate_rate <= maximal_rate`) to `FloodRed` and `FloodSynCookies` sub-models.
+
 ## [0.10.1] - 2026-02-23
 
 ### Fixed
