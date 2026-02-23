@@ -20,9 +20,9 @@ class FloodRed(BaseModel):
         populate_by_name=True,
     )
 
-    alert_rate: Optional[int] = Field(
+    alarm_rate: Optional[int] = Field(
         None,
-        description="Alert rate threshold",
+        description="Alarm rate threshold",
         ge=0,
         le=2000000,
     )
@@ -41,14 +41,14 @@ class FloodRed(BaseModel):
 
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "FloodRed":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
+        """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
+        alarm = self.alarm_rate
         activate = self.activate_rate
         maximal = self.maximal_rate
         if alarm is not None and activate is not None and maximal is not None:
             if not (alarm <= activate <= maximal):
                 raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
+                    "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
         return self
 
@@ -61,9 +61,9 @@ class FloodSynCookies(BaseModel):
         populate_by_name=True,
     )
 
-    alert_rate: Optional[int] = Field(
+    alarm_rate: Optional[int] = Field(
         None,
-        description="Alert rate threshold",
+        description="Alarm rate threshold",
         ge=0,
         le=2000000,
     )
@@ -82,14 +82,14 @@ class FloodSynCookies(BaseModel):
 
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "FloodSynCookies":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
+        """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
+        alarm = self.alarm_rate
         activate = self.activate_rate
         maximal = self.maximal_rate
         if alarm is not None and activate is not None and maximal is not None:
             if not (alarm <= activate <= maximal):
                 raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
+                    "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
         return self
 
@@ -105,24 +105,6 @@ class TcpSynFlood(BaseModel):
     enable: Optional[bool] = Field(
         None,
         description="Enable TCP SYN flood protection",
-    )
-    alert_rate: Optional[int] = Field(
-        None,
-        description="Alert rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    activate_rate: Optional[int] = Field(
-        None,
-        description="Activate rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    maximal_rate: Optional[int] = Field(
-        None,
-        description="Maximal rate threshold",
-        ge=0,
-        le=2000000,
     )
     red: Optional[FloodRed] = Field(
         None,
@@ -140,19 +122,6 @@ class TcpSynFlood(BaseModel):
             raise ValueError("'red' and 'syn_cookies' are mutually exclusive.")
         return self
 
-    @model_validator(mode="after")
-    def validate_rate_ordering(self) -> "TcpSynFlood":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
-        activate = self.activate_rate
-        maximal = self.maximal_rate
-        if alarm is not None and activate is not None and maximal is not None:
-            if not (alarm <= activate <= maximal):
-                raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
-                )
-        return self
-
 
 class UdpFlood(BaseModel):
     """UDP flood protection configuration."""
@@ -166,41 +135,10 @@ class UdpFlood(BaseModel):
         None,
         description="Enable UDP flood protection",
     )
-    alert_rate: Optional[int] = Field(
-        None,
-        description="Alert rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    activate_rate: Optional[int] = Field(
-        None,
-        description="Activate rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    maximal_rate: Optional[int] = Field(
-        None,
-        description="Maximal rate threshold",
-        ge=0,
-        le=2000000,
-    )
     red: Optional[FloodRed] = Field(
         None,
         description="Random Early Detection configuration",
     )
-
-    @model_validator(mode="after")
-    def validate_rate_ordering(self) -> "UdpFlood":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
-        activate = self.activate_rate
-        maximal = self.maximal_rate
-        if alarm is not None and activate is not None and maximal is not None:
-            if not (alarm <= activate <= maximal):
-                raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
-                )
-        return self
 
 
 class SctpInitFlood(BaseModel):
@@ -215,41 +153,10 @@ class SctpInitFlood(BaseModel):
         None,
         description="Enable SCTP INIT flood protection",
     )
-    alert_rate: Optional[int] = Field(
-        None,
-        description="Alert rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    activate_rate: Optional[int] = Field(
-        None,
-        description="Activate rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    maximal_rate: Optional[int] = Field(
-        None,
-        description="Maximal rate threshold",
-        ge=0,
-        le=2000000,
-    )
     red: Optional[FloodRed] = Field(
         None,
         description="Random Early Detection configuration",
     )
-
-    @model_validator(mode="after")
-    def validate_rate_ordering(self) -> "SctpInitFlood":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
-        activate = self.activate_rate
-        maximal = self.maximal_rate
-        if alarm is not None and activate is not None and maximal is not None:
-            if not (alarm <= activate <= maximal):
-                raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
-                )
-        return self
 
 
 class IcmpFlood(BaseModel):
@@ -264,41 +171,10 @@ class IcmpFlood(BaseModel):
         None,
         description="Enable ICMP flood protection",
     )
-    alert_rate: Optional[int] = Field(
-        None,
-        description="Alert rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    activate_rate: Optional[int] = Field(
-        None,
-        description="Activate rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    maximal_rate: Optional[int] = Field(
-        None,
-        description="Maximal rate threshold",
-        ge=0,
-        le=2000000,
-    )
     red: Optional[FloodRed] = Field(
         None,
         description="Random Early Detection configuration",
     )
-
-    @model_validator(mode="after")
-    def validate_rate_ordering(self) -> "IcmpFlood":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
-        activate = self.activate_rate
-        maximal = self.maximal_rate
-        if alarm is not None and activate is not None and maximal is not None:
-            if not (alarm <= activate <= maximal):
-                raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
-                )
-        return self
 
 
 class Icmpv6Flood(BaseModel):
@@ -313,41 +189,10 @@ class Icmpv6Flood(BaseModel):
         None,
         description="Enable ICMPv6 flood protection",
     )
-    alert_rate: Optional[int] = Field(
-        None,
-        description="Alert rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    activate_rate: Optional[int] = Field(
-        None,
-        description="Activate rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    maximal_rate: Optional[int] = Field(
-        None,
-        description="Maximal rate threshold",
-        ge=0,
-        le=2000000,
-    )
     red: Optional[FloodRed] = Field(
         None,
         description="Random Early Detection configuration",
     )
-
-    @model_validator(mode="after")
-    def validate_rate_ordering(self) -> "Icmpv6Flood":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
-        activate = self.activate_rate
-        maximal = self.maximal_rate
-        if alarm is not None and activate is not None and maximal is not None:
-            if not (alarm <= activate <= maximal):
-                raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
-                )
-        return self
 
 
 class OtherIpFlood(BaseModel):
@@ -362,41 +207,10 @@ class OtherIpFlood(BaseModel):
         None,
         description="Enable other IP flood protection",
     )
-    alert_rate: Optional[int] = Field(
-        None,
-        description="Alert rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    activate_rate: Optional[int] = Field(
-        None,
-        description="Activate rate threshold",
-        ge=0,
-        le=2000000,
-    )
-    maximal_rate: Optional[int] = Field(
-        None,
-        description="Maximal rate threshold",
-        ge=0,
-        le=2000000,
-    )
     red: Optional[FloodRed] = Field(
         None,
         description="Random Early Detection configuration",
     )
-
-    @model_validator(mode="after")
-    def validate_rate_ordering(self) -> "OtherIpFlood":
-        """Validate that alert_rate <= activate_rate <= maximal_rate when all are set."""
-        alarm = self.alert_rate
-        activate = self.activate_rate
-        maximal = self.maximal_rate
-        if alarm is not None and activate is not None and maximal is not None:
-            if not (alarm <= activate <= maximal):
-                raise ValueError(
-                    "Rate ordering must be: alert_rate <= activate_rate <= maximal_rate"
-                )
-        return self
 
 
 class FloodProtection(BaseModel):

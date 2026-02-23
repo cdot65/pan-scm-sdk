@@ -7,13 +7,14 @@ All notable changes to this project will be documented in this file.
 ## [0.10.2] - 2026-02-23
 
 ### Fixed
-- **Zone Protection Profiles**: Rename `alarm_rate` to `alert_rate` across all flood protection models (`FloodRed`, `FloodSynCookies`, `TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). The SCM API expects `alert-rate` but the SDK was sending `alarm-rate`, causing `UNEXPECTED_NODE_ERROR` rejections. (#246)
+- **Zone Protection Profiles**: Remove invalid top-level `alarm_rate`, `activate_rate`, `maximal_rate` fields from all 6 flood models (`TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). E2E testing against the live SCM API confirmed these fields only work inside the nested `red`/`syn_cookies` sub-models (as `FloodRed.alarm_rate`), not at the top level. Top-level rate fields were silently discarded by the API. (#246)
+- **Zone Protection Profiles**: Add rate ordering validation (`alarm_rate <= activate_rate <= maximal_rate`) to `FloodRed` and `FloodSynCookies` sub-models.
 
 ## [0.10.1] - 2026-02-23
 
 ### Fixed
-- **Zone Protection Profiles**: Add missing `alert_rate`, `activate_rate`, and `maximal_rate` fields to all 6 flood protection models (`TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). The SCM API accepts these fields at the top level of each flood type, but the SDK's Pydantic models rejected them with `extra="forbid"`. (#246)
-- **Zone Protection Profiles**: Add rate ordering validation (`alert_rate <= activate_rate <= maximal_rate`) to all flood models including `FloodRed` and `FloodSynCookies`.
+- **Zone Protection Profiles**: Add missing `alarm_rate`, `activate_rate`, and `maximal_rate` fields to all 6 flood protection models (`TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`). The SCM API accepts these fields at the top level of each flood type, but the SDK's Pydantic models rejected them with `extra="forbid"`. (#246)
+- **Zone Protection Profiles**: Add rate ordering validation (`alarm_rate <= activate_rate <= maximal_rate`) to all flood models including `FloodRed` and `FloodSynCookies`.
 
 ## [0.10.0] - 2026-02-20
 
