@@ -42,9 +42,11 @@ class FloodRed(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "FloodRed":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -81,9 +83,11 @@ class FloodSynCookies(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "FloodSynCookies":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -139,9 +143,11 @@ class TcpSynFlood(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "TcpSynFlood":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -186,9 +192,11 @@ class UdpFlood(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "UdpFlood":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -233,9 +241,11 @@ class SctpInitFlood(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "SctpInitFlood":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -280,9 +290,11 @@ class IcmpFlood(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "IcmpFlood":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -327,9 +339,11 @@ class Icmpv6Flood(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "Icmpv6Flood":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
@@ -374,9 +388,11 @@ class OtherIpFlood(BaseModel):
     @model_validator(mode="after")
     def validate_rate_ordering(self) -> "OtherIpFlood":
         """Validate that alarm_rate <= activate_rate <= maximal_rate when all are set."""
-        rates = [self.alarm_rate, self.activate_rate, self.maximal_rate]
-        if all(r is not None for r in rates):
-            if not (self.alarm_rate <= self.activate_rate <= self.maximal_rate):
+        alarm = self.alarm_rate
+        activate = self.activate_rate
+        maximal = self.maximal_rate
+        if alarm is not None and activate is not None and maximal is not None:
+            if not (alarm <= activate <= maximal):
                 raise ValueError(
                     "Rate ordering must be: alarm_rate <= activate_rate <= maximal_rate"
                 )
