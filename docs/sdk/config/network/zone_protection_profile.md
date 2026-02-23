@@ -101,7 +101,7 @@ The `flood` attribute contains sub-objects for each flood type:
 | `icmpv6`      | Icmpv6Flood   | ICMPv6 flood protection         |
 | `other_ip`    | OtherIpFlood  | Other IP flood protection       |
 
-Each flood type supports `enable` (bool) and `red` (FloodRed with `alarm_rate`, `activate_rate`, `maximal_rate`). TCP SYN flood also supports `syn_cookies` as an alternative to `red` (mutually exclusive).
+Each flood type supports `enable` (bool) and `red` (FloodRed with `alert_rate`, `activate_rate`, `maximal_rate`). TCP SYN flood also supports `syn_cookies` as an alternative to `red` (mutually exclusive).
 
 ### Scan Protection (ScanEntry)
 
@@ -188,7 +188,7 @@ profile_data = {
       "tcp_syn": {
          "enable": True,
          "red": {
-            "alarm_rate": 10000,
+            "alert_rate": 10000,
             "activate_rate": 20000,
             "maximal_rate": 40000
          }
@@ -196,7 +196,7 @@ profile_data = {
       "udp": {
          "enable": True,
          "red": {
-            "alarm_rate": 10000,
+            "alert_rate": 10000,
             "activate_rate": 20000,
             "maximal_rate": 40000
          }
@@ -204,7 +204,7 @@ profile_data = {
       "icmp": {
          "enable": True,
          "red": {
-            "alarm_rate": 5000,
+            "alert_rate": 5000,
             "activate_rate": 10000,
             "maximal_rate": 20000
          }
@@ -438,7 +438,7 @@ try:
          "tcp_syn": {
             "enable": True,
             "red": {
-               "alarm_rate": 10000,
+               "alert_rate": 10000,
                "activate_rate": 20000,
                "maximal_rate": 40000
             }
@@ -488,7 +488,7 @@ except MissingQueryParameterError as e:
    - Configure scan protection entries for port scan and host sweep detection
 
 3. **Nested Model Structure**
-   - Understand that flood protection uses deeply nested objects (e.g., `flood.tcp_syn.red.alarm_rate`)
+   - Understand that flood protection uses deeply nested objects (e.g., `flood.tcp_syn.red.alert_rate`)
    - Note that `red` and `syn_cookies` are mutually exclusive in TCP SYN flood configuration
    - Scan actions (`allow`, `alert`, `block`, `block_ip`) are also mutually exclusive
    - Use `block_ip` with appropriate `track_by` and `duration` for aggressive scan blocking

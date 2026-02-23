@@ -132,11 +132,11 @@ Random Early Detection (RED) configuration shared by multiple flood protection t
 
 | Attribute     | Type | Required | Default | Description                        |
 |---------------|------|----------|---------|------------------------------------|
-| alarm_rate    | int  | No       | None    | Alarm rate threshold. Range: 0-2000000.    |
+| alert_rate    | int  | No       | None    | Alert rate threshold. Range: 0-2000000.    |
 | activate_rate | int  | No       | None    | Activate rate threshold. Range: 0-2000000. |
 | maximal_rate  | int  | No       | None    | Maximal rate threshold. Range: 0-2000000.  |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### FloodSynCookies
 
@@ -144,11 +144,11 @@ SYN Cookies configuration for TCP SYN flood protection.
 
 | Attribute     | Type | Required | Default | Description                        |
 |---------------|------|----------|---------|------------------------------------|
-| alarm_rate    | int  | No       | None    | Alarm rate threshold. Range: 0-2000000.    |
+| alert_rate    | int  | No       | None    | Alert rate threshold. Range: 0-2000000.    |
 | activate_rate | int  | No       | None    | Activate rate threshold. Range: 0-2000000. |
 | maximal_rate  | int  | No       | None    | Maximal rate threshold. Range: 0-2000000.  |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### TcpSynFlood
 
@@ -157,7 +157,7 @@ TCP SYN flood protection configuration. Supports either RED or SYN Cookies mode,
 | Attribute     | Type            | Required | Default | Description                              |
 |---------------|-----------------|----------|---------|------------------------------------------|
 | enable        | bool            | No       | None    | Enable TCP SYN flood protection.         |
-| alarm_rate    | int             | No       | None    | Alarm rate threshold. Range: 0-2000000.  |
+| alert_rate    | int             | No       | None    | Alert rate threshold. Range: 0-2000000.  |
 | activate_rate | int             | No       | None    | Activate rate threshold. Range: 0-2000000.|
 | maximal_rate  | int             | No       | None    | Maximal rate threshold. Range: 0-2000000.|
 | red           | FloodRed        | No*      | None    | Random Early Detection configuration.    |
@@ -165,7 +165,7 @@ TCP SYN flood protection configuration. Supports either RED or SYN Cookies mode,
 
 \* `red` and `syn_cookies` are mutually exclusive. Only one may be set at a time.
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### UdpFlood
 
@@ -174,12 +174,12 @@ UDP flood protection configuration.
 | Attribute     | Type     | Required | Default | Description                              |
 |---------------|----------|----------|---------|------------------------------------------|
 | enable        | bool     | No       | None    | Enable UDP flood protection.             |
-| alarm_rate    | int      | No       | None    | Alarm rate threshold. Range: 0-2000000.  |
+| alert_rate    | int      | No       | None    | Alert rate threshold. Range: 0-2000000.  |
 | activate_rate | int      | No       | None    | Activate rate threshold. Range: 0-2000000.|
 | maximal_rate  | int      | No       | None    | Maximal rate threshold. Range: 0-2000000.|
 | red           | FloodRed | No       | None    | Random Early Detection configuration.    |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### SctpInitFlood
 
@@ -188,12 +188,12 @@ SCTP INIT flood protection configuration.
 | Attribute     | Type     | Required | Default | Description                              |
 |---------------|----------|----------|---------|------------------------------------------|
 | enable        | bool     | No       | None    | Enable SCTP INIT flood protection.       |
-| alarm_rate    | int      | No       | None    | Alarm rate threshold. Range: 0-2000000.  |
+| alert_rate    | int      | No       | None    | Alert rate threshold. Range: 0-2000000.  |
 | activate_rate | int      | No       | None    | Activate rate threshold. Range: 0-2000000.|
 | maximal_rate  | int      | No       | None    | Maximal rate threshold. Range: 0-2000000.|
 | red           | FloodRed | No       | None    | Random Early Detection configuration.    |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### IcmpFlood
 
@@ -202,12 +202,12 @@ ICMP flood protection configuration.
 | Attribute     | Type     | Required | Default | Description                              |
 |---------------|----------|----------|---------|------------------------------------------|
 | enable        | bool     | No       | None    | Enable ICMP flood protection.            |
-| alarm_rate    | int      | No       | None    | Alarm rate threshold. Range: 0-2000000.  |
+| alert_rate    | int      | No       | None    | Alert rate threshold. Range: 0-2000000.  |
 | activate_rate | int      | No       | None    | Activate rate threshold. Range: 0-2000000.|
 | maximal_rate  | int      | No       | None    | Maximal rate threshold. Range: 0-2000000.|
 | red           | FloodRed | No       | None    | Random Early Detection configuration.    |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### Icmpv6Flood
 
@@ -216,12 +216,12 @@ ICMPv6 flood protection configuration.
 | Attribute     | Type     | Required | Default | Description                              |
 |---------------|----------|----------|---------|------------------------------------------|
 | enable        | bool     | No       | None    | Enable ICMPv6 flood protection.          |
-| alarm_rate    | int      | No       | None    | Alarm rate threshold. Range: 0-2000000.  |
+| alert_rate    | int      | No       | None    | Alert rate threshold. Range: 0-2000000.  |
 | activate_rate | int      | No       | None    | Activate rate threshold. Range: 0-2000000.|
 | maximal_rate  | int      | No       | None    | Maximal rate threshold. Range: 0-2000000.|
 | red           | FloodRed | No       | None    | Random Early Detection configuration.    |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### OtherIpFlood
 
@@ -230,12 +230,12 @@ Other IP flood protection configuration.
 | Attribute     | Type     | Required | Default | Description                              |
 |---------------|----------|----------|---------|------------------------------------------|
 | enable        | bool     | No       | None    | Enable other IP flood protection.        |
-| alarm_rate    | int      | No       | None    | Alarm rate threshold. Range: 0-2000000.  |
+| alert_rate    | int      | No       | None    | Alert rate threshold. Range: 0-2000000.  |
 | activate_rate | int      | No       | None    | Activate rate threshold. Range: 0-2000000.|
 | maximal_rate  | int      | No       | None    | Maximal rate threshold. Range: 0-2000000.|
 | red           | FloodRed | No       | None    | Random Early Detection configuration.    |
 
-> **Rate ordering:** When all three rate fields are set, they must satisfy `alarm_rate <= activate_rate <= maximal_rate`.
+> **Rate ordering:** When all three rate fields are set, they must satisfy `alert_rate <= activate_rate <= maximal_rate`.
 
 ### ScanEntry
 
@@ -334,7 +334,7 @@ The models perform strict validation and will raise `ValueError` in scenarios su
 All flood models (`FloodRed`, `FloodSynCookies`, `TcpSynFlood`, `UdpFlood`, `SctpInitFlood`, `IcmpFlood`, `Icmpv6Flood`, `OtherIpFlood`) enforce rate ordering when all three rate fields are set:
 
 - **validate_rate_ordering**:
-  Ensures that `alarm_rate <= activate_rate <= maximal_rate`. If any rate field is `None`, the validation is skipped. This matches the SCM API's server-side validation.
+  Ensures that `alert_rate <= activate_rate <= maximal_rate`. If any rate field is `None`, the validation is skipped. This matches the SCM API's server-side validation.
 
 ### Field Validators in `TcpSynFlood`
 
@@ -367,7 +367,7 @@ profile_data = {
         "tcp_syn": {
             "enable": True,
             "red": {
-                "alarm_rate": 10000,
+                "alert_rate": 10000,
                 "activate_rate": 20000,
                 "maximal_rate": 40000
             }
@@ -375,7 +375,7 @@ profile_data = {
         "udp": {
             "enable": True,
             "red": {
-                "alarm_rate": 10000,
+                "alert_rate": 10000,
                 "activate_rate": 20000,
                 "maximal_rate": 40000
             }
@@ -383,7 +383,7 @@ profile_data = {
         "icmp": {
             "enable": True,
             "red": {
-                "alarm_rate": 10000,
+                "alert_rate": 10000,
                 "activate_rate": 20000,
                 "maximal_rate": 40000
             }
@@ -486,7 +486,7 @@ flood = FloodProtection(
     tcp_syn=TcpSynFlood(
         enable=True,
         syn_cookies=FloodSynCookies(
-            alarm_rate=10000,
+            alert_rate=10000,
             activate_rate=20000,
             maximal_rate=40000
         )

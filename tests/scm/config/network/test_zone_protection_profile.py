@@ -26,7 +26,7 @@ def sample_zone_protection_profile_dict():
             "tcp_syn": {
                 "enable": True,
                 "red": {
-                    "alarm_rate": 10000,
+                    "alert_rate": 10000,
                     "activate_rate": 20000,
                     "maximal_rate": 40000,
                 },
@@ -34,7 +34,7 @@ def sample_zone_protection_profile_dict():
             "udp": {
                 "enable": True,
                 "red": {
-                    "alarm_rate": 5000,
+                    "alert_rate": 5000,
                     "activate_rate": 10000,
                     "maximal_rate": 20000,
                 },
@@ -520,7 +520,7 @@ class TestZoneProtectionProfile(TestZoneProtectionProfileBase):
                 "tcp_syn": {
                     "enable": True,
                     "syn_cookies": {
-                        "alarm_rate": 100,
+                        "alert_rate": 100,
                         "activate_rate": 200,
                         "maximal_rate": 500,
                     },
@@ -528,7 +528,7 @@ class TestZoneProtectionProfile(TestZoneProtectionProfileBase):
                 "icmp": {
                     "enable": True,
                     "red": {
-                        "alarm_rate": 1000,
+                        "alert_rate": 1000,
                         "activate_rate": 2000,
                         "maximal_rate": 4000,
                     },
@@ -544,9 +544,9 @@ class TestZoneProtectionProfile(TestZoneProtectionProfileBase):
 
         assert isinstance(result, ZoneProtectionProfileResponseModel)
         assert result.flood.tcp_syn.enable is True
-        assert result.flood.tcp_syn.syn_cookies.alarm_rate == 100
+        assert result.flood.tcp_syn.syn_cookies.alert_rate == 100
         assert result.flood.icmp.enable is True
-        assert result.flood.icmp.red.alarm_rate == 1000
+        assert result.flood.icmp.red.alert_rate == 1000
 
     def test_create_with_scan_protection(self):
         """Test create with scan protection configuration."""
