@@ -454,6 +454,10 @@ class Scm:
                 "scm.config.security.anti_spyware_profile",
                 "AntiSpywareProfile",
             ),
+            "authentication_profile": (
+                "scm.config.identity.authentication_profile",
+                "AuthenticationProfile",
+            ),
             "app_override_rule": (
                 "scm.config.security.app_override_rule",
                 "AppOverrideRule",
@@ -530,6 +534,10 @@ class Scm:
                 "scm.config.network.ike_crypto_profile",
                 "IKECryptoProfile",
             ),
+            "kerberos_server_profile": (
+                "scm.config.identity.kerberos_server_profile",
+                "KerberosServerProfile",
+            ),
             "ike_gateway": (
                 "scm.config.network.ike_gateway",
                 "IKEGateway",
@@ -554,6 +562,10 @@ class Scm:
                 "scm.config.setup.label",
                 "Label",
             ),
+            "ldap_server_profile": (
+                "scm.config.identity.ldap_server_profile",
+                "LdapServerProfile",
+            ),
             "log_forwarding_profile": (
                 "scm.config.objects.log_forwarding_profile",
                 "LogForwardingProfile",
@@ -574,6 +586,10 @@ class Scm:
                 "scm.config.objects.quarantined_devices",
                 "QuarantinedDevices",
             ),
+            "radius_server_profile": (
+                "scm.config.identity.radius_server_profile",
+                "RadiusServerProfile",
+            ),
             "region": (
                 "scm.config.objects.region",
                 "Region",
@@ -581,6 +597,10 @@ class Scm:
             "remote_network": (
                 "scm.config.deployment.remote_networks",
                 "RemoteNetworks",
+            ),
+            "saml_server_profile": (
+                "scm.config.identity.saml_server_profile",
+                "SamlServerProfile",
             ),
             "schedule": (
                 "scm.config.objects.schedules",
@@ -621,6 +641,10 @@ class Scm:
             "syslog_server_profile": (
                 "scm.config.objects.syslog_server_profiles",
                 "SyslogServerProfile",
+            ),
+            "tacacs_server_profile": (
+                "scm.config.identity.tacacs_server_profile",
+                "TacacsServerProfile",
             ),
             "tag": (
                 "scm.config.objects.tag",
