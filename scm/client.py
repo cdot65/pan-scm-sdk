@@ -578,6 +578,14 @@ class Scm:
                 "scm.config.objects.schedules",
                 "Schedule",
             ),
+            "decryption_rule": (
+                "scm.config.security.decryption_rule",
+                "DecryptionRule",
+            ),
+            "authentication_rule": (
+                "scm.config.security.authentication_rule",
+                "AuthenticationRule",
+            ),
             "security_rule": (
                 "scm.config.security.security_rule",
                 "SecurityRule",

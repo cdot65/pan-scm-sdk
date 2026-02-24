@@ -155,7 +155,9 @@ nav:
       - Security Services:
           - Overview: sdk/config/security_services/index.md
           - Anti-Spyware Profiles: sdk/config/security_services/anti_spyware_profile.md
+          - Authentication Rules: sdk/config/security_services/authentication_rule.md
           - Decryption Profiles: sdk/config/security_services/decryption_profile.md
+          - Decryption Rules: sdk/config/security_services/decryption_rule.md
           - DNS Security Profiles: sdk/config/security_services/dns_security_profile.md
           - Security Rules: sdk/config/security_services/security_rule.md
           - URL Categories: sdk/config/security_services/url_categories.md
@@ -237,7 +239,9 @@ nav:
       - Security Services:
           - Overview: sdk/models/security_services/index.md
           - Anti-Spyware Profiles: sdk/models/security_services/anti_spyware_profile_models.md
+          - Authentication Rules: sdk/models/security_services/authentication_rule_models.md
           - Decryption Profiles: sdk/models/security_services/decryption_profile_models.md
+          - Decryption Rules: sdk/models/security_services/decryption_rule_models.md
           - DNS Security Profiles: sdk/models/security_services/dns_security_profile_models.md
           - Security Rules: sdk/models/security_services/security_rule_models.md
           - URL Categories: sdk/models/security_services/url_categories_models.md

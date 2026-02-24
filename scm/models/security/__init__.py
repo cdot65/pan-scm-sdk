@@ -11,6 +11,20 @@ from .decryption_profiles import (
     DecryptionProfileResponseModel,
     DecryptionProfileUpdateModel,
 )
+from .decryption_rules import (
+    DecryptionRuleCreateModel,
+    DecryptionRuleMoveModel,
+    DecryptionRuleResponseModel,
+    DecryptionRuleRulebase,
+    DecryptionRuleUpdateModel,
+)
+from .authentication_rules import (
+    AuthenticationRuleCreateModel,
+    AuthenticationRuleMoveModel,
+    AuthenticationRuleResponseModel,
+    AuthenticationRuleRulebase,
+    AuthenticationRuleUpdateModel,
+)
 from .dns_security_profiles import (
     DNSSecurityProfileCreateModel,
     DNSSecurityProfileResponseModel,
@@ -46,6 +60,16 @@ __all__ = [
     "DecryptionProfileCreateModel",
     "DecryptionProfileResponseModel",
     "DecryptionProfileUpdateModel",
+    "DecryptionRuleCreateModel",
+    "DecryptionRuleResponseModel",
+    "DecryptionRuleMoveModel",
+    "DecryptionRuleUpdateModel",
+    "DecryptionRuleRulebase",
+    "AuthenticationRuleCreateModel",
+    "AuthenticationRuleResponseModel",
+    "AuthenticationRuleMoveModel",
+    "AuthenticationRuleUpdateModel",
+    "AuthenticationRuleRulebase",
     "DNSSecurityProfileCreateModel",
     "DNSSecurityProfileResponseModel",
     "DNSSecurityProfileUpdateModel",

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-02-24
+
+### Added
+- **Decryption Rules**: New `scm.decryption_rule` service for managing SSL/TLS decryption policy rules. Endpoint: `/config/security/v1/decryption-rules`. Full CRUD with rulebase (pre/post) support, `:move` operation for rule reordering, and SSL forward proxy / inbound inspection type configuration. Action enum supports `decrypt` and `no-decrypt`.
+- **Authentication Rules**: New `scm.authentication_rule` service for managing identity-based authentication policy rules. Endpoint: `/config/identity/v1/authentication-rules`. Full CRUD with rulebase (pre/post) support, `:move` operation, authentication enforcement profile linking, and session timeout configuration (1-1440 minutes).
+- Added 374 new tests (160 model validation + 214 service tests) across 4 test files with 100% code coverage.
+
 ## [0.10.2] - 2026-02-23
 
 ### Fixed

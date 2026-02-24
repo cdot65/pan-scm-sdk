@@ -10,6 +10,15 @@ from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileUpdateApiFactory,
     AntiSpywareProfileUpdateModelFactory,
 )
+from tests.factories.security.decryption_rule import (
+    DecryptionRuleCreateApiFactory,
+    DecryptionRuleCreateModelFactory,
+    DecryptionRuleMoveApiFactory,
+    DecryptionRuleMoveModelFactory,
+    DecryptionRuleResponseFactory,
+    DecryptionRuleUpdateApiFactory,
+    DecryptionRuleUpdateModelFactory,
+)
 from tests.factories.security.decryption_profile import (
     DecryptionProfileCreateApiFactory,
     DecryptionProfileCreateModelFactory,
@@ -76,6 +85,13 @@ __all__ = [
     "AntiSpywareProfileUpdateApiFactory",
     "AntiSpywareProfileUpdateModelFactory",
     "BotnetDomainsFactory",
+    "DecryptionRuleCreateApiFactory",
+    "DecryptionRuleCreateModelFactory",
+    "DecryptionRuleMoveApiFactory",
+    "DecryptionRuleMoveModelFactory",
+    "DecryptionRuleResponseFactory",
+    "DecryptionRuleUpdateApiFactory",
+    "DecryptionRuleUpdateModelFactory",
     "DecryptionProfileCreateApiFactory",
     "DecryptionProfileUpdateApiFactory",
     "DecryptionProfileResponseFactory",
