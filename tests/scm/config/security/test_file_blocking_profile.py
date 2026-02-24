@@ -139,6 +139,49 @@ class TestFileBlockingProfileList(TestFileBlockingProfileBase):
         error = exc_info.value
         assert isinstance(error, InvalidObjectError)
 
+    def test_list_filters_rules_functionality(self):
+        """Test that rules filter works correctly when valid."""
+        mock_response = {
+            "data": [
+                FileBlockingProfileResponseFactory(
+                    name="profile1",
+                    folder="Texas",
+                    rules=[
+                        {
+                            "name": "block-exe",
+                            "action": "block",
+                            "application": ["any"],
+                            "direction": "both",
+                            "file_type": ["exe"],
+                        }
+                    ],
+                ).model_dump(),
+                FileBlockingProfileResponseFactory(
+                    name="profile2",
+                    folder="Texas",
+                    rules=[
+                        {
+                            "name": "alert-pdf",
+                            "action": "alert",
+                            "application": ["any"],
+                            "direction": "both",
+                            "file_type": ["pdf"],
+                        }
+                    ],
+                ).model_dump(),
+                FileBlockingProfileResponseFactory(
+                    name="profile3",
+                    folder="Texas",
+                    rules=None,
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        filtered_objects = self.client.list(folder="Texas", rules=["block-exe"])
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "profile1"
+
     def test_list_response_invalid_format(self):
         """Test that InvalidObjectError is raised when the response is not a dictionary."""
         self.mock_scm.get.return_value = ["not", "a", "dictionary"]  # noqa

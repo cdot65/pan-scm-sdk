@@ -280,31 +280,64 @@ class TestAppOverrideRuleList(TestAppOverrideRuleBase):
             self.client.list(folder="Texas")
 
     def test_list_invalid_application_filter(self):
-        """Test that list method raises InvalidObjectError when 'application' filter is not a list."""
-        folder = "Texas"
-        filters = {"application": "web-browsing"}  # Should be a list, not a string
+        """Test that _apply_filters raises InvalidObjectError when 'application' filter is not a list."""
+        mock_rules = []
+        invalid_filters = {"application": "web-browsing"}  # Should be a list, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder=folder, **filters)
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+            self.client._apply_filters(mock_rules, invalid_filters)
+        assert isinstance(exc_info.value, InvalidObjectError)
 
     def test_list_invalid_disabled_filter(self):
-        """Test that list method raises InvalidObjectError when 'disabled' filter is not a bool."""
-        folder = "Texas"
-        filters = {"disabled": "True"}  # Should be a bool, not a string
+        """Test that _apply_filters raises InvalidObjectError when 'disabled' filter is not a bool."""
+        mock_rules = []
+        invalid_filters = {"disabled": "True"}  # Should be a bool, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder=folder, **filters)
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+            self.client._apply_filters(mock_rules, invalid_filters)
+        assert isinstance(exc_info.value, InvalidObjectError)
 
     def test_list_invalid_source_filter(self):
-        """Test that list method raises InvalidObjectError when 'source' filter is not a list."""
-        folder = "Texas"
-        filters = {"source": "192.168.1.1"}  # Should be a list, not a string
+        """Test that _apply_filters raises InvalidObjectError when 'source' filter is not a list."""
+        mock_rules = []
+        invalid_filters = {"source": "192.168.1.1"}  # Should be a list, not a string
 
         with pytest.raises(InvalidObjectError) as exc_info:
-            self.client.list(folder=folder, **filters)
-        assert "HTTP error: 500 - API error: E003" in str(exc_info.value)
+            self.client._apply_filters(mock_rules, invalid_filters)
+        assert isinstance(exc_info.value, InvalidObjectError)
+
+    def test_list_invalid_protocol_filter(self):
+        """Test that _apply_filters raises InvalidObjectError when 'protocol' filter is not a list."""
+        mock_rules = []
+        invalid_filters = {"protocol": "tcp"}  # Should be a list, not a string
+
+        with pytest.raises(InvalidObjectError) as exc_info:
+            self.client._apply_filters(mock_rules, invalid_filters)
+        assert isinstance(exc_info.value, InvalidObjectError)
+
+    def test_list_filters_protocol_functionality(self):
+        """Test that protocol filter works correctly when valid."""
+        mock_response = {
+            "data": [
+                AppOverrideRuleResponseFactory(
+                    name="rule1",
+                    folder="Texas",
+                    application="web-browsing",
+                    protocol="tcp",
+                ).model_dump(by_alias=True),
+                AppOverrideRuleResponseFactory(
+                    name="rule2",
+                    folder="Texas",
+                    application="dns",
+                    protocol="udp",
+                ).model_dump(by_alias=True),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response  # noqa
+
+        filtered_objects = self.client.list(folder="Texas", protocol=["tcp"])
+        assert len(filtered_objects) == 1
+        assert filtered_objects[0].name == "rule1"
 
     def test_list_invalid_rulebase(self):
         """Test that list method raises InvalidObjectError when rulebase is invalid."""
@@ -1680,6 +1713,32 @@ class TestAppOverrideRuleModelMisc(TestAppOverrideRuleBase):
                 folder="Texas",
                 snippet="MySnippet",
             )
+
+    def test_ensure_list_of_strings_none_value(self):
+        """Test that None values pass through ensure_list_of_strings validator unchanged."""
+        model = AppOverrideRuleCreateModel(
+            name="test-rule",
+            application="web-browsing",
+            port="80",
+            protocol="tcp",
+            tag=None,
+            folder="Texas",
+        )
+        assert model.tag is None
+
+    def test_ensure_unique_items_none_value(self):
+        """Test that None values pass through ensure_unique_items validator unchanged."""
+        # tag=None should pass both validators without error
+        model = AppOverrideRuleResponseModel(
+            id="123e4567-e89b-12d3-a456-426655440000",
+            name="test-rule",
+            application="web-browsing",
+            port="80",
+            protocol="tcp",
+            tag=None,
+            folder="Texas",
+        )
+        assert model.tag is None
 
     def test_move_model_unexpected_destination_rule_top(self):
         """Test that providing destination_rule with 'top' raises a ValueError."""
