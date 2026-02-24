@@ -3,6 +3,8 @@
 
 from .anti_spyware_profile import AntiSpywareProfile
 from .decryption_profile import DecryptionProfile
+from .decryption_rule import DecryptionRule
+from .authentication_rule import AuthenticationRule
 from .dns_security_profile import DNSSecurityProfile
 from .security_rule import SecurityRule
 from .url_categories import URLCategories
@@ -12,6 +14,8 @@ from .wildfire_antivirus_profile import WildfireAntivirusProfile
 __all__ = [
     "AntiSpywareProfile",
     "DecryptionProfile",
+    "DecryptionRule",
+    "AuthenticationRule",
     "DNSSecurityProfile",
     "SecurityRule",
     "URLCategories",
