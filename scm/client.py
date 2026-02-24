@@ -454,6 +454,10 @@ class Scm:
                 "scm.config.security.anti_spyware_profile",
                 "AntiSpywareProfile",
             ),
+            "app_override_rule": (
+                "scm.config.security.app_override_rule",
+                "AppOverrideRule",
+            ),
             "application": (
                 "scm.config.objects.application",
                 "Application",
@@ -501,6 +505,10 @@ class Scm:
             "external_dynamic_list": (
                 "scm.config.objects.external_dynamic_lists",
                 "ExternalDynamicLists",
+            ),
+            "file_blocking_profile": (
+                "scm.config.security.file_blocking_profile",
+                "FileBlockingProfile",
             ),
             "folder": (
                 "scm.config.setup.folder",
@@ -617,6 +625,10 @@ class Scm:
             "tag": (
                 "scm.config.objects.tag",
                 "Tag",
+            ),
+            "url_access_profile": (
+                "scm.config.security.url_access_profile",
+                "URLAccessProfile",
             ),
             "url_category": (
                 "scm.config.security.url_categories",

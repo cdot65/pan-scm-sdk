@@ -2,6 +2,15 @@
 
 """Factory definitions for security objects."""
 
+from tests.factories.security.app_override_rule import (
+    AppOverrideRuleCreateApiFactory,
+    AppOverrideRuleCreateModelFactory,
+    AppOverrideRuleMoveApiFactory,
+    AppOverrideRuleMoveModelFactory,
+    AppOverrideRuleResponseFactory,
+    AppOverrideRuleUpdateApiFactory,
+    AppOverrideRuleUpdateModelFactory,
+)
 from tests.factories.security.anti_spyware_profile import (
     AntiSpywareProfileBaseFactory,
     AntiSpywareProfileCreateApiFactory,
@@ -26,6 +35,15 @@ from tests.factories.security.decryption_profile import (
     DecryptionProfileUpdateApiFactory,
     DecryptionProfileUpdateModelFactory,
 )
+from tests.factories.security.file_blocking_profile import (
+    FileBlockingProfileBaseFactory,
+    FileBlockingProfileCreateApiFactory,
+    FileBlockingProfileCreateModelFactory,
+    FileBlockingProfileResponseFactory,
+    FileBlockingProfileUpdateApiFactory,
+    FileBlockingProfileUpdateModelFactory,
+    FileBlockingRuleDictFactory,
+)
 from tests.factories.security.dns_security_profile import (
     BotnetDomainsFactory,
     DNSSecurityCategoryEntryFactory,
@@ -48,6 +66,14 @@ from tests.factories.security.security_rule import (
     SecurityRuleResponseFactory,
     SecurityRuleUpdateApiFactory,
     SecurityRuleUpdateModelFactory,
+)
+from tests.factories.security.url_access_profile import (
+    URLAccessProfileBaseFactory,
+    URLAccessProfileCreateApiFactory,
+    URLAccessProfileCreateModelFactory,
+    URLAccessProfileResponseFactory,
+    URLAccessProfileUpdateApiFactory,
+    URLAccessProfileUpdateModelFactory,
 )
 from tests.factories.security.url_categories import (
     URLCategoriesCreateModelFactory,
@@ -78,6 +104,13 @@ from tests.factories.security.wildfire_antivirus_profile import (
 
 # Explicitly export these factories
 __all__ = [
+    "AppOverrideRuleCreateApiFactory",
+    "AppOverrideRuleCreateModelFactory",
+    "AppOverrideRuleMoveApiFactory",
+    "AppOverrideRuleMoveModelFactory",
+    "AppOverrideRuleResponseFactory",
+    "AppOverrideRuleUpdateApiFactory",
+    "AppOverrideRuleUpdateModelFactory",
     "AntiSpywareProfileBaseFactory",
     "AntiSpywareProfileCreateApiFactory",
     "AntiSpywareProfileCreateModelFactory",
@@ -97,6 +130,13 @@ __all__ = [
     "DecryptionProfileResponseFactory",
     "DecryptionProfileCreateModelFactory",
     "DecryptionProfileUpdateModelFactory",
+    "FileBlockingProfileBaseFactory",
+    "FileBlockingProfileCreateApiFactory",
+    "FileBlockingProfileCreateModelFactory",
+    "FileBlockingProfileResponseFactory",
+    "FileBlockingProfileUpdateApiFactory",
+    "FileBlockingProfileUpdateModelFactory",
+    "FileBlockingRuleDictFactory",
     "DNSSecurityCategoryEntryFactory",
     "DNSSecurityProfileCreateApiFactory",
     "DNSSecurityProfileCreateModelFactory",
@@ -114,6 +154,12 @@ __all__ = [
     "SecurityRuleUpdateApiFactory",
     "SecurityRuleUpdateModelFactory",
     "SinkholeSettingsFactory",
+    "URLAccessProfileBaseFactory",
+    "URLAccessProfileCreateApiFactory",
+    "URLAccessProfileCreateModelFactory",
+    "URLAccessProfileResponseFactory",
+    "URLAccessProfileUpdateApiFactory",
+    "URLAccessProfileUpdateModelFactory",
     "URLCategoriesCreateModelFactory",
     "URLCategoriesResponseModelFactory",
     "URLCategoriesUpdateModelFactory",

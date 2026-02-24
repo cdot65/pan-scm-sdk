@@ -113,6 +113,26 @@ updated_result = client.security_rule.update(update_dict)
 
 - [WildFire Antivirus Profile Models](wildfire_antivirus_profile_models.md) - WildFire and Antivirus profiles
 
+### File Blocking Profile
+
+- [File Blocking Profile Models](file_blocking_profile_models.md) - File blocking security profiles
+
+### URL Access Profile
+
+- [URL Access Profile Models](url_access_profile_models.md) - URL access filtering profiles
+
+### App Override Rule
+
+- [App Override Rule Models](app_override_rule_models.md) - Application override rules
+
+### Decryption Rule
+
+- [Decryption Rule Models](decryption_rule_models.md) - SSL/TLS decryption rules
+
+### Authentication Rule
+
+- [Authentication Rule Models](authentication_rule_models.md) - Authentication policy rules
+
 ## Best Practices
 
 1. **Model Validation**

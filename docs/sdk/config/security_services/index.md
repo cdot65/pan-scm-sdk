@@ -80,6 +80,51 @@ Configure WildFire and Antivirus profiles for:
 - Known malware blocking
 - File type controls
 
+### [File Blocking Profile](file_blocking_profile.md)
+
+Manage File Blocking profiles to:
+
+- Control file transfers based on file type
+- Block dangerous file downloads and uploads
+- Alert on suspicious file transfers
+- Configure direction-based file policies
+
+### [URL Access Profile](url_access_profile.md)
+
+Configure URL Access profiles to:
+
+- Control access to websites by URL category
+- Define alert, allow, block, continue, and redirect actions
+- Configure credential enforcement to prevent credential theft
+- Enable inline categorization and safe search enforcement
+
+### [App Override Rule](app_override_rule.md)
+
+Manage App Override Rules to:
+
+- Force application identification for specific traffic
+- Override App-ID for custom applications
+- Define rules based on port, protocol, and zone
+- Position rules within pre or post rulebases
+
+### [Decryption Rule](decryption_rule.md)
+
+Manage Decryption Rules to:
+
+- Control SSL/TLS traffic decryption policies
+- Define decrypt and no-decrypt rules
+- Configure SSL forward proxy and inbound inspection
+- Manage rule positioning within rulebases
+
+### [Authentication Rule](authentication_rule.md)
+
+Manage Authentication Rules to:
+
+- Define authentication policies for network traffic
+- Control authentication requirements by zone and address
+- Configure authentication enforcement settings
+- Manage rule positioning within rulebases
+
 ## Common Features
 
 All configuration objects provide standard CRUD operations:

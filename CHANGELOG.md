@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-02-24
+
+### Added
+- **File Blocking Profiles**: New `scm.file_blocking_profile` service for managing file blocking profiles for data filtering policy. Endpoint: `/config/security/v1/file-blocking-profiles`. Full CRUD operations. Includes nested rules with action (alert/block/continue), application, direction (download/upload/both), and file type configuration.
+- **URL Access Profiles**: New `scm.url_access_profile` service for managing URL filtering profiles with category-based access control. Endpoint: `/config/security/v1/url-access-profiles`. Full CRUD operations. Includes URL category lists (alert/allow/block/continue/redirect), credential enforcement settings, inline categorization, safe search enforcement, and HTTP header logging options.
+- **App Override Rules**: New `scm.app_override_rule` service for managing application override rules for custom app identification. Endpoint: `/config/security/v1/app-override-rules`. Full CRUD with rulebase (pre/post) support, `:move` operation for rule reordering. Zone/address/port/protocol-based matching with application override.
+- Added 307 new tests (103 model validation + 204 service tests) across 9 test files with comprehensive coverage.
+- Added documentation for all 3 new services and their models.
+
 ## [0.10.3] - 2026-02-24
 
 ### Added
