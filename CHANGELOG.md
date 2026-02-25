@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-02-24
+
+### Added
+- **Authentication Profiles**: New `scm.authentication_profile` service for managing authentication profiles that define auth methods (local DB, SAML, LDAP, RADIUS, TACACS+, Kerberos). Endpoint: `/config/identity/v1/authentication-profiles`. Full CRUD. Complex oneOf method schema with lockout, MFA, and SSO configuration.
+- **LDAP Server Profiles**: New `scm.ldap_server_profile` service for managing LDAP server connection profiles. Endpoint: `/config/identity/v1/ldap-server-profiles`. Full CRUD. Server array with address/port, bind DN/password, SSL, LDAP type (Active Directory/eDirectory/Sun/Other).
+- **RADIUS Server Profiles**: New `scm.radius_server_profile` service for managing RADIUS server connection profiles. Endpoint: `/config/identity/v1/radius-server-profiles`. Full CRUD. Server array with address/port/secret, oneOf protocol (CHAP/PAP/EAP-TTLS/PEAP variants).
+- **TACACS+ Server Profiles**: New `scm.tacacs_server_profile` service for managing TACACS+ server connection profiles. Endpoint: `/config/identity/v1/tacacs-server-profiles`. Full CRUD. Server array with address/port/secret, protocol (CHAP/PAP).
+- **SAML Server Profiles**: New `scm.saml_server_profile` service for managing SAML Identity Provider server profiles. Endpoint: `/config/identity/v1/saml-server-profiles`. Full CRUD. Entity ID, SSO URL, certificate, SSO/SLO bindings.
+- **Kerberos Server Profiles**: New `scm.kerberos_server_profile` service for managing Kerberos server connection profiles. Endpoint: `/config/identity/v1/kerberos-server-profiles`. Full CRUD. Server array with host/port.
+- New `scm/config/identity/` service category for identity and authentication services.
+- Added 392 new tests across 18 test files with comprehensive coverage.
+
 ## [0.11.0] - 2026-02-24
 
 ### Added
