@@ -197,6 +197,36 @@ class TestRadiusServerProfileList(TestRadiusServerProfileBase):
         filtered = self.client.list(folder="Texas", exclude_folders=["All"])
         assert len(filtered) == 1
 
+    def test_list_exclude_snippets(self):
+        """Test that exclude_snippets removes objects from specified snippets."""
+        mock_response = {
+            "data": [
+                RadiusServerProfileResponseFactory(name="p1", folder="Texas").model_dump(),
+                RadiusServerProfileResponseFactory.with_snippet(
+                    name="p2", snippet="default"
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+        filtered = self.client.list(folder="Texas", exclude_snippets=["default"])
+        assert len(filtered) == 1
+        assert filtered[0].name == "p1"
+
+    def test_list_exclude_devices(self):
+        """Test that exclude_devices removes objects from specified devices."""
+        mock_response = {
+            "data": [
+                RadiusServerProfileResponseFactory(name="p1", folder="Texas").model_dump(),
+                RadiusServerProfileResponseFactory.with_device(
+                    name="p2", device="DeviceA"
+                ).model_dump(),
+            ]
+        }
+        self.mock_scm.get.return_value = mock_response
+        filtered = self.client.list(folder="Texas", exclude_devices=["DeviceA"])
+        assert len(filtered) == 1
+        assert filtered[0].name == "p1"
+
     def test_list_pagination_multiple_pages(self):
         """Test that pagination aggregates data from multiple pages."""
         client = RadiusServerProfile(self.mock_scm, max_limit=2500)
