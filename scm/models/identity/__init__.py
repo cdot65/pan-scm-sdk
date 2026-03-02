@@ -6,6 +6,17 @@ from .authentication_profiles import (
     AuthenticationProfileResponseModel,
     AuthenticationProfileUpdateModel,
 )
+from .certificate_profiles import (
+    CertificateProfileCreateModel,
+    CertificateProfileResponseModel,
+    CertificateProfileUpdateModel,
+)
+from .certificates import (
+    CertificateExportModel,
+    CertificateGenerateModel,
+    CertificateImportModel,
+    CertificateResponseModel,
+)
 from .kerberos_server_profiles import (
     KerberosServerProfileCreateModel,
     KerberosServerProfileResponseModel,
@@ -31,11 +42,23 @@ from .tacacs_server_profiles import (
     TacacsServerProfileResponseModel,
     TacacsServerProfileUpdateModel,
 )
+from .tls_service_profiles import (
+    TlsServiceProfileCreateModel,
+    TlsServiceProfileResponseModel,
+    TlsServiceProfileUpdateModel,
+)
 
 __all__ = [
     "AuthenticationProfileCreateModel",
     "AuthenticationProfileResponseModel",
     "AuthenticationProfileUpdateModel",
+    "CertificateExportModel",
+    "CertificateGenerateModel",
+    "CertificateImportModel",
+    "CertificateProfileCreateModel",
+    "CertificateProfileResponseModel",
+    "CertificateProfileUpdateModel",
+    "CertificateResponseModel",
     "KerberosServerProfileCreateModel",
     "KerberosServerProfileResponseModel",
     "KerberosServerProfileUpdateModel",
@@ -51,4 +74,7 @@ __all__ = [
     "TacacsServerProfileCreateModel",
     "TacacsServerProfileResponseModel",
     "TacacsServerProfileUpdateModel",
+    "TlsServiceProfileCreateModel",
+    "TlsServiceProfileResponseModel",
+    "TlsServiceProfileUpdateModel",
 ]
