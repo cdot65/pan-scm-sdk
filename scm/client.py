@@ -490,6 +490,14 @@ class Scm:
                 "scm.config.deployment.bgp_routing",
                 "BGPRouting",
             ),
+            "certificate": (
+                "scm.config.identity.certificate",
+                "Certificate",
+            ),
+            "certificate_profile": (
+                "scm.config.identity.certificate_profile",
+                "CertificateProfile",
+            ),
             "decryption_profile": (
                 "scm.config.security.decryption_profile",
                 "DecryptionProfile",
@@ -649,6 +657,10 @@ class Scm:
             "tag": (
                 "scm.config.objects.tag",
                 "Tag",
+            ),
+            "tls_service_profile": (
+                "scm.config.identity.tls_service_profile",
+                "TlsServiceProfile",
             ),
             "url_access_profile": (
                 "scm.config.security.url_access_profile",

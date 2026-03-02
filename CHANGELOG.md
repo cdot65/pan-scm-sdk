@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-03-02
+
+### Added
+- **TLS Service Profiles**: New `scm.tls_service_profile` service for managing TLS/SSL service profiles with protocol version and cipher suite configuration. Endpoint: `/config/identity/v1/tls-service-profiles`. Full CRUD. Protocol settings with min/max TLS version, key exchange, encryption, and authentication algorithm controls.
+- **Certificate Profiles**: New `scm.certificate_profile` service for managing certificate validation profiles with CRL/OCSP settings, CA certificate lists, and blocking rules. Endpoint: `/config/identity/v1/certificate-profiles`. Full CRUD. Timeout validations, username field extraction, and certificate status blocking.
+- **Certificates**: New `scm.certificate` service for certificate lifecycle management. Endpoint: `/config/identity/v1/certificates`. Non-standard pattern: `generate()` (POST), `import_cert()` (POST :import), `export()` (POST :export), list, get, fetch, delete. No standard create/update. Supports RSA/ECDSA algorithms with configurable digest (sha1/sha256/sha384/sha512/md5).
+- Added 245 new tests across 9 test files with 100% code coverage.
+
 ## [0.12.0] - 2026-02-24
 
 ### Added
