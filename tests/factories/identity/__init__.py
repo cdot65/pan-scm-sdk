@@ -9,6 +9,19 @@ from tests.factories.identity.authentication_profile import (
     AuthenticationProfileUpdateApiFactory,
     AuthenticationProfileUpdateModelFactory,
 )
+from tests.factories.identity.certificate import (
+    CertificateExportModelFactory,
+    CertificateGenerateModelFactory,
+    CertificateImportModelFactory,
+    CertificateResponseFactory,
+)
+from tests.factories.identity.certificate_profile import (
+    CertificateProfileCreateApiFactory,
+    CertificateProfileCreateModelFactory,
+    CertificateProfileResponseFactory,
+    CertificateProfileUpdateApiFactory,
+    CertificateProfileUpdateModelFactory,
+)
 from tests.factories.identity.kerberos_server_profile import (
     KerberosServerProfileCreateApiFactory,
     KerberosServerProfileCreateModelFactory,
@@ -44,6 +57,13 @@ from tests.factories.identity.tacacs_server_profile import (
     TacacsServerProfileUpdateApiFactory,
     TacacsServerProfileUpdateModelFactory,
 )
+from tests.factories.identity.tls_service_profile import (
+    TlsServiceProfileCreateApiFactory,
+    TlsServiceProfileCreateModelFactory,
+    TlsServiceProfileResponseFactory,
+    TlsServiceProfileUpdateApiFactory,
+    TlsServiceProfileUpdateModelFactory,
+)
 
 __all__ = [
     "AuthenticationProfileCreateApiFactory",
@@ -51,6 +71,15 @@ __all__ = [
     "AuthenticationProfileResponseFactory",
     "AuthenticationProfileUpdateApiFactory",
     "AuthenticationProfileUpdateModelFactory",
+    "CertificateExportModelFactory",
+    "CertificateGenerateModelFactory",
+    "CertificateImportModelFactory",
+    "CertificateProfileCreateApiFactory",
+    "CertificateProfileCreateModelFactory",
+    "CertificateProfileResponseFactory",
+    "CertificateProfileUpdateApiFactory",
+    "CertificateProfileUpdateModelFactory",
+    "CertificateResponseFactory",
     "KerberosServerProfileCreateApiFactory",
     "KerberosServerProfileCreateModelFactory",
     "KerberosServerProfileResponseFactory",
@@ -76,4 +105,9 @@ __all__ = [
     "TacacsServerProfileResponseFactory",
     "TacacsServerProfileUpdateApiFactory",
     "TacacsServerProfileUpdateModelFactory",
+    "TlsServiceProfileCreateApiFactory",
+    "TlsServiceProfileCreateModelFactory",
+    "TlsServiceProfileResponseFactory",
+    "TlsServiceProfileUpdateApiFactory",
+    "TlsServiceProfileUpdateModelFactory",
 ]
