@@ -871,6 +871,4 @@ This page contains the release history of the Strata Cloud Manager SDK, with the
 
 - **Initial Release**: Developer version of `pan-scm-sdk`
 
----
-
 For more detailed information on each release, visit the [GitHub repository](https://github.com/cdot65/pan-scm-sdk/releases) or check the [commit history](https://github.com/cdot65/pan-scm-sdk/commits/main).

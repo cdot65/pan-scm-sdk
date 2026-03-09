@@ -63,7 +63,7 @@ Retrieves a list of objects:
 all_items = client.address.list()
 
 # List with filtering
-filtered_items = client.address.list(filter="name eq 'example'")
+filtered_items = client.address.list(filter="name eq 'web-server'")
 
 # List with limit
 limited_items = client.address.list(limit=10)
@@ -85,8 +85,8 @@ Creates a new object:
 ```python
 # Create a new object
 new_object = client.address.create({
-    "name": "example",
-    "folder": "Shared",
+    "name": "web-server",
+    "folder": "Texas",
     # Other required fields
 })
 ```

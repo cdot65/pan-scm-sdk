@@ -14,8 +14,8 @@ After making changes to your configuration, you need to push those changes to ma
 from scm.models.operations.candidate_push import CandidatePushRequestModel
 
 # Create some objects
-client.address.create({"name": "server1", "folder": "Shared", "ip_netmask": "192.168.1.100/32"})
-client.address.create({"name": "server2", "folder": "Shared", "ip_netmask": "192.168.1.101/32"})
+client.address.create({"name": "web-server-1", "folder": "Texas", "ip_netmask": "192.168.1.100/32"})
+client.address.create({"name": "web-server-2", "folder": "Texas", "ip_netmask": "192.168.1.101/32"})
 
 # Commit the changes
 response = client.candidate_push({

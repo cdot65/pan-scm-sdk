@@ -45,7 +45,7 @@ print(f"Found {len(addresses)} address objects")
 # Create a new address object
 new_address = client.address.create({
     "name": "example-server",
-    "folder": "Shared",
+    "folder": "Texas",
     "ip_netmask": "192.168.1.100/32",
     "description": "Example server created via SDK"
 })

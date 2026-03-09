@@ -20,7 +20,7 @@ from scm.models.objects.address import AddressCreateModel
 # Create a model instance
 address_data = AddressCreateModel(
     name="example-server",
-    folder="Shared",
+    folder="Texas",
     ip_netmask="192.168.1.100/32",
     description="Example server created via SDK"
 )
@@ -81,7 +81,7 @@ client = Scm(client_id="...", client_secret="...", tenant_id="...")
 # Create a model instance
 address_data = AddressCreateModel(
     name="example-server",
-    folder="Shared",
+    folder="Texas",
     ip_netmask="192.168.1.100/32"
 )
 
