@@ -96,8 +96,8 @@ class DecryptionRuleBaseModel(BaseModel):
     name: str = Field(
         ..., description="The name of the decryption rule", pattern=r"^[a-zA-Z0-9_ \.-]+$"
     )
-    action: DecryptionRuleAction = Field(
-        ...,
+    action: Optional[DecryptionRuleAction] = Field(
+        None,
         description="The action to be taken when the rule is matched",
     )
     description: Optional[str] = Field(None, description="The description of the decryption rule")

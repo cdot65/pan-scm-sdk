@@ -397,6 +397,16 @@ class TestDecryptionRuleResponseModel:
                 device={"some_key": "some_value"},
             )
 
+    def test_decryption_rule_response_model_without_action(self):
+        """Test response model accepts missing action field (API may omit it)."""
+        model = DecryptionRuleResponseModel(
+            id=uuid.uuid4(),
+            name="test_rule",
+            folder="Texas",
+        )
+        assert model.action is None
+        assert model.name == "test_rule"
+
     def test_decryption_rule_response_model_with_rulebase(self):
         """Test response model with rulebase field."""
         data = DecryptionRuleResponseFactory(rulebase=DecryptionRuleRulebase.POST).model_dump()

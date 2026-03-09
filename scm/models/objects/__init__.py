@@ -2,6 +2,11 @@
 # scm/models/objects/__init__.py
 
 from .address import AddressCreateModel, AddressResponseModel, AddressUpdateModel
+from .auto_tag_actions import (
+    AutoTagActionCreateModel,
+    AutoTagActionResponseModel,
+    AutoTagActionUpdateModel,
+)
 from .address_group import (
     AddressGroupCreateModel,
     AddressGroupResponseModel,
@@ -91,6 +96,9 @@ from .tag import (
 )
 
 __all__ = [
+    "AutoTagActionCreateModel",
+    "AutoTagActionUpdateModel",
+    "AutoTagActionResponseModel",
     "AddressCreateModel",
     "AddressUpdateModel",
     "AddressResponseModel",
