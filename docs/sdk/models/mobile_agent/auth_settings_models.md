@@ -1,6 +1,6 @@
 # GlobalProtect Authentication Settings Models
 
-## Overview {#Overview}
+## Overview
 
 The GlobalProtect Authentication Settings models provide a structured way to manage authentication settings for mobile users in Palo Alto Networks' Strata Cloud Manager. These models support different operating system configurations and authentication preferences. The models handle validation of inputs and outputs when interacting with the SCM API.
 
@@ -22,11 +22,11 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute                                 | Type              | Required | Default | Description                                                                  |
 |-------------------------------------------|-------------------|----------|---------|------------------------------------------------------------------------------|
-| name                                      | str               | Yes      | None    | Name of the authentication settings. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
-| authentication_profile                    | str               | Yes      | None    | The authentication profile to use                                            |
-| os                                        | OperatingSystem   | No       | Any     | The operating system this authentication setting applies to                   |
-| user_credential_or_client_cert_required   | bool              | No       | None    | Whether user credentials or client certificate is required                   |
-| folder                                    | str               | Yes*     | None    | Must be "Mobile Users" for all operations                                    |
+| `name` | `str` | Yes      | None    | Name of the authentication settings. Max length: 63 chars. Must match pattern: ^[a-zA-Z0-9_ \.-]+$ |
+| `authentication_profile` | `str` | Yes      | None    | The authentication profile to use                                            |
+| `os` | `OperatingSystem` | No       | Any     | The operating system this authentication setting applies to                   |
+| `user_credential_or_client_cert_required` | `bool` | No       | None    | Whether user credentials or client certificate is required                   |
+| `folder` | `str` | Yes*     | None    | Must be "Mobile Users" for all operations                                    |
 
 \* Required for create operations, optional for update
 
@@ -36,26 +36,26 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Value        | Description                   |
 |--------------|-------------------------------|
-| ANY          | Any operating system          |
-| ANDROID      | Android devices               |
-| BROWSER      | Browser based access          |
-| CHROME       | Chrome OS devices             |
-| IOT          | Internet of Things devices    |
-| LINUX        | Linux systems                 |
-| MAC          | macOS systems                 |
-| SATELLITE    | Satellite systems             |
-| WINDOWS      | Windows systems               |
-| WINDOWS_UWP  | Windows UWP applications      |
-| IOS          | iOS devices                   |
+| `ANY` | Any operating system          |
+| `ANDROID` | Android devices               |
+| `BROWSER` | Browser based access          |
+| `CHROME` | Chrome OS devices             |
+| `IOT` | Internet of Things devices    |
+| `LINUX` | Linux systems                 |
+| `MAC` | macOS systems                 |
+| `SATELLITE` | Satellite systems             |
+| `WINDOWS` | Windows systems               |
+| `WINDOWS_UWP` | Windows UWP applications      |
+| `IOS` | iOS devices                   |
 
 ### MovePosition
 
 | Value        | Description                                |
 |--------------|--------------------------------------------|
-| BEFORE       | Move settings before a target setting      |
-| AFTER        | Move settings after a target setting       |
-| TOP          | Move settings to the top of the list       |
-| BOTTOM       | Move settings to the bottom of the list    |
+| `BEFORE` | Move settings before a target setting      |
+| `AFTER` | Move settings after a target setting       |
+| `TOP` | Move settings to the top of the list       |
+| `BOTTOM` | Move settings to the bottom of the list    |
 
 ## Exceptions
 

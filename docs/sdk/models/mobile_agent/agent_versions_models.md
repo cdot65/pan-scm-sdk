@@ -1,14 +1,6 @@
 # GlobalProtect Agent Versions Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Usage Examples](#usage-examples)
-4. [Error Handling](#error-handling)
-5. [Related Documentation](#related-documentation)
-
-## Overview {#Overview}
+## Overview
 
 The `AgentVersions` models provide data structures for GlobalProtect agent version information in the Strata Cloud Manager API. These are read-only models used to represent the available GlobalProtect agent versions.
 
@@ -27,15 +19,15 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute       | Type      | Required | Default | Description                                    |
 |-----------------|-----------|----------|---------|------------------------------------------------|
-| `agent_versions`| List[str] | Yes      | None    | List of available GlobalProtect agent versions |
+| `agent_versions`| `List[str]` | Yes      | None    | List of available GlobalProtect agent versions |
 
 ### AgentVersionModel
 
 | Attribute        | Type | Required | Default | Description                                        |
 |------------------|------|----------|---------|----------------------------------------------------|
-| `version`        | str  | Yes      | None    | The version string of the GlobalProtect agent      |
-| `release_date`   | str  | No       | None    | The release date of the version (if available)     |
-| `is_recommended` | bool | No       | None    | Whether this version is recommended (if available) |
+| `version`        | `str` | Yes      | None    | The version string of the GlobalProtect agent      |
+| `release_date`   | `str` | No       | None    | The release date of the version (if available)     |
+| `is_recommended` | `bool` | No       | None    | Whether this version is recommended (if available) |
 
 ## Usage Examples
 

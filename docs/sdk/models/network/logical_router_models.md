@@ -1,15 +1,6 @@
 # Logical Router Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Logical Router models provide a structured way to represent and validate logical router configuration data for Palo Alto Networks' Strata Cloud Manager. These models ensure data integrity when creating and updating logical routers, enforcing proper VRF configuration, routing protocol settings (BGP, OSPF, ECMP, RIP), static route nexthop types, administrative distances, container specifications, and field validations. With 93 model classes and 20 `model_validator` implementations, this is the most complex model hierarchy in the SDK.
 
@@ -103,12 +94,12 @@ This is the base model containing fields common to all logical router operations
 
 | Attribute     | Type                  | Required | Default | Description                                                     |
 |---------------|-----------------------|----------|---------|-----------------------------------------------------------------|
-| name          | str                   | Yes      | None    | Name of the logical router.                                     |
-| routing_stack | RoutingStackEnum      | No       | None    | Routing stack type: `legacy` or `advanced`.                     |
-| vrf           | List[VrfConfig]       | No       | None    | List of VRF configurations.                                     |
-| folder        | str                   | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet       | str                   | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device        | str                   | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Name of the logical router.                                     |
+| `routing_stack` | `RoutingStackEnum` | No       | None    | Routing stack type: `legacy` or `advanced`.                     |
+| `vrf` | `List[VrfConfig]` | No       | None    | List of VRF configurations.                                     |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -122,7 +113,7 @@ Extends `LogicalRouterBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                  |
 |-----------|------|----------|---------|----------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the logical router. |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the logical router. |
 
 ### LogicalRouterResponseModel
 
@@ -130,9 +121,10 @@ Extends `LogicalRouterBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                  |
 |-----------|------|----------|---------|----------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the logical router. |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the logical router. |
 
-> **Note:** The `LogicalRouterResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `LogicalRouterResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -142,21 +134,21 @@ This model defines VRF (Virtual Routing and Forwarding) configuration. Each logi
 
 | Attribute      | Type                | Required | Default | Description                         |
 |----------------|---------------------|----------|---------|-------------------------------------|
-| name           | str                 | Yes      | None    | VRF name.                           |
-| interface      | List[str]           | No       | None    | Interfaces assigned to this VRF.    |
-| global_vrid    | int                 | No       | None    | Global VRID.                        |
-| zone_name      | str                 | No       | None    | Zone name.                          |
-| sdwan_type     | str                 | No       | None    | SD-WAN type.                        |
-| admin_dists    | AdminDists          | No       | None    | Administrative distance settings.   |
-| vr_admin_dists | VrAdminDists        | No       | None    | VR administrative distances.        |
-| rib_filter     | RibFilter           | No       | None    | RIB filter configuration.           |
-| routing_table  | RoutingTable        | No       | None    | Routing table with static routes.   |
-| ospf           | OspfConfig          | No       | None    | OSPF configuration.                 |
-| ospfv3         | Dict[str, Any]      | No       | None    | OSPFv3 configuration (raw dict).    |
-| ecmp           | EcmpConfig          | No       | None    | ECMP configuration.                 |
-| multicast      | Dict[str, Any]      | No       | None    | Multicast configuration (raw dict). |
-| rip            | RipConfig           | No       | None    | RIP configuration.                  |
-| bgp            | BgpConfig           | No       | None    | BGP configuration.                  |
+| `name` | `str` | Yes      | None    | VRF name.                           |
+| `interface` | `List[str]` | No       | None    | Interfaces assigned to this VRF.    |
+| `global_vrid` | `int` | No       | None    | Global VRID.                        |
+| `zone_name` | `str` | No       | None    | Zone name.                          |
+| `sdwan_type` | `str` | No       | None    | SD-WAN type.                        |
+| `admin_dists` | `AdminDists` | No       | None    | Administrative distance settings.   |
+| `vr_admin_dists` | `VrAdminDists` | No       | None    | VR administrative distances.        |
+| `rib_filter` | `RibFilter` | No       | None    | RIB filter configuration.           |
+| `routing_table` | `RoutingTable` | No       | None    | Routing table with static routes.   |
+| `ospf` | `OspfConfig` | No       | None    | OSPF configuration.                 |
+| `ospfv3` | `Dict[str, Any]` | No       | None    | OSPFv3 configuration (raw dict).    |
+| `ecmp` | `EcmpConfig` | No       | None    | ECMP configuration.                 |
+| `multicast` | `Dict[str, Any]` | No       | None    | Multicast configuration (raw dict). |
+| `rip` | `RipConfig` | No       | None    | RIP configuration.                  |
+| `bgp` | `BgpConfig` | No       | None    | BGP configuration.                  |
 
 ### AdminDists
 
@@ -164,18 +156,18 @@ Administrative distance settings for a logical router.
 
 | Attribute   | Type | Required | Default | Description                      |
 |-------------|------|----------|---------|----------------------------------|
-| static      | int  | No       | None    | Static route admin distance.     |
-| static_ipv6 | int  | No       | None    | Static IPv6 route admin distance.|
-| ospf_inter  | int  | No       | None    | OSPF inter-area admin distance.  |
-| ospf_intra  | int  | No       | None    | OSPF intra-area admin distance.  |
-| ospf_ext    | int  | No       | None    | OSPF external admin distance.    |
-| ospfv3_inter| int  | No       | None    | OSPFv3 inter-area admin distance.|
-| ospfv3_intra| int  | No       | None    | OSPFv3 intra-area admin distance.|
-| ospfv3_ext  | int  | No       | None    | OSPFv3 external admin distance.  |
-| bgp_internal| int  | No       | None    | BGP internal admin distance.     |
-| bgp_external| int  | No       | None    | BGP external admin distance.     |
-| bgp_local   | int  | No       | None    | BGP local admin distance.        |
-| rip         | int  | No       | None    | RIP admin distance.              |
+| `static` | `int` | No       | None    | Static route admin distance.     |
+| `static_ipv6` | `int` | No       | None    | Static IPv6 route admin distance.|
+| `ospf_inter` | `int` | No       | None    | OSPF inter-area admin distance.  |
+| `ospf_intra` | `int` | No       | None    | OSPF intra-area admin distance.  |
+| `ospf_ext` | `int` | No       | None    | OSPF external admin distance.    |
+| `ospfv3_inter` | `int` | No       | None    | OSPFv3 inter-area admin distance.|
+| `ospfv3_intra` | `int` | No       | None    | OSPFv3 intra-area admin distance.|
+| `ospfv3_ext` | `int` | No       | None    | OSPFv3 external admin distance.  |
+| `bgp_internal` | `int` | No       | None    | BGP internal admin distance.     |
+| `bgp_external` | `int` | No       | None    | BGP external admin distance.     |
+| `bgp_local` | `int` | No       | None    | BGP local admin distance.        |
+| `rip` | `int` | No       | None    | RIP admin distance.              |
 
 ### VrAdminDists
 
@@ -183,15 +175,15 @@ VR-level administrative distance settings.
 
 | Attribute   | Type | Required | Default | Description                      |
 |-------------|------|----------|---------|----------------------------------|
-| static      | int  | No       | None    | Static route admin distance.     |
-| static_ipv6 | int  | No       | None    | Static IPv6 route admin distance.|
-| ospf_int    | int  | No       | None    | OSPF internal admin distance.    |
-| ospf_ext    | int  | No       | None    | OSPF external admin distance.    |
-| ospfv3_int  | int  | No       | None    | OSPFv3 internal admin distance.  |
-| ospfv3_ext  | int  | No       | None    | OSPFv3 external admin distance.  |
-| ibgp        | int  | No       | None    | iBGP admin distance.             |
-| ebgp        | int  | No       | None    | eBGP admin distance.             |
-| rip         | int  | No       | None    | RIP admin distance.              |
+| `static` | `int` | No       | None    | Static route admin distance.     |
+| `static_ipv6` | `int` | No       | None    | Static IPv6 route admin distance.|
+| `ospf_int` | `int` | No       | None    | OSPF internal admin distance.    |
+| `ospf_ext` | `int` | No       | None    | OSPF external admin distance.    |
+| `ospfv3_int` | `int` | No       | None    | OSPFv3 internal admin distance.  |
+| `ospfv3_ext` | `int` | No       | None    | OSPFv3 external admin distance.  |
+| `ibgp` | `int` | No       | None    | iBGP admin distance.             |
+| `ebgp` | `int` | No       | None    | eBGP admin distance.             |
+| `rip` | `int` | No       | None    | RIP admin distance.              |
 
 ### RIB Filter Models
 
@@ -212,15 +204,15 @@ Static routes are organized under `RoutingTable` > `RoutingTableIp` / `RoutingTa
 
 | Attribute    | Type            | Required | Default | Description                      |
 |--------------|-----------------|----------|---------|----------------------------------|
-| name         | str             | Yes      | None    | Static route name.               |
-| destination  | str             | No       | None    | Destination network (CIDR).      |
-| interface    | str             | No       | None    | Egress interface.                |
-| nexthop      | IPv4Nexthop     | No       | None    | Nexthop configuration.           |
-| route_table  | IPv4RouteTable  | No       | None    | Route table selection.           |
-| admin_dist   | int             | No       | None    | Administrative distance.         |
-| metric       | int             | No       | None    | Route metric.                    |
-| bfd          | BfdProfile      | No       | None    | BFD profile reference.           |
-| path_monitor | PathMonitor     | No       | None    | Path monitor configuration.      |
+| `name` | `str` | Yes      | None    | Static route name.               |
+| `destination` | `str` | No       | None    | Destination network (CIDR).      |
+| `interface` | `str` | No       | None    | Egress interface.                |
+| `nexthop` | `IPv4Nexthop` | No       | None    | Nexthop configuration.           |
+| `route_table` | `IPv4RouteTable` | No       | None    | Route table selection.           |
+| `admin_dist` | `int` | No       | None    | Administrative distance.         |
+| `metric` | `int` | No       | None    | Route metric.                    |
+| `bfd` | `BfdProfile` | No       | None    | BFD profile reference.           |
+| `path_monitor` | `PathMonitor` | No       | None    | Path monitor configuration.      |
 
 #### IPv4Nexthop (oneOf)
 
@@ -228,14 +220,14 @@ At most one of the following nexthop types may be set:
 
 | Attribute    | Type           | Description                    |
 |--------------|----------------|--------------------------------|
-| receive      | Dict[str, Any] | Receive (drop into local host).|
-| discard      | Dict[str, Any] | Discard (silently drop).       |
-| ip_address   | str            | IPv4 address nexthop.          |
-| ipv6_address | str            | IPv6 address nexthop.          |
-| fqdn         | str            | FQDN nexthop.                  |
-| next_lr      | str            | Next logical router.           |
-| next_vr      | str            | Next virtual router.           |
-| tunnel       | str            | Tunnel nexthop.                |
+| `receive` | `Dict[str, Any]` | Receive (drop into local host).|
+| `discard` | `Dict[str, Any]` | Discard (silently drop).       |
+| `ip_address` | `str` | IPv4 address nexthop.          |
+| `ipv6_address` | `str` | IPv6 address nexthop.          |
+| `fqdn` | `str` | FQDN nexthop.                  |
+| `next_lr` | `str` | Next logical router.           |
+| `next_vr` | `str` | Next virtual router.           |
+| `tunnel` | `str` | Tunnel nexthop.                |
 
 #### IPv4RouteTable (oneOf)
 
@@ -247,7 +239,7 @@ Same structure as `IPv4StaticRoute`, with the addition of:
 
 | Attribute | Type           | Required | Default | Description       |
 |-----------|----------------|----------|---------|-------------------|
-| option    | Dict[str, Any] | No       | None    | Route option.     |
+| `option` | `Dict[str, Any]` | No       | None    | Route option.     |
 
 #### IPv6Nexthop (oneOf)
 
@@ -257,10 +249,10 @@ Same as `IPv4Nexthop` but without `ip_address` (7 nexthop types instead of 8).
 
 | Attribute            | Type                    | Required | Default | Description                    |
 |----------------------|-------------------------|----------|---------|--------------------------------|
-| enable               | bool                    | No       | None    | Enable path monitoring.        |
-| failure_condition    | str                     | No       | None    | Failure condition: `any`/`all`.|
-| hold_time            | int                     | No       | None    | Hold time.                     |
-| monitor_destinations | List[MonitorDestination]| No       | None    | List of monitor destinations.  |
+| `enable` | `bool` | No       | None    | Enable path monitoring.        |
+| `failure_condition` | `str` | No       | None    | Failure condition: `any`/`all`.|
+| `hold_time` | `int` | No       | None    | Hold time.                     |
+| `monitor_destinations` | `List[MonitorDestination]` | No       | None    | List of monitor destinations.  |
 
 ### OSPF Models
 
@@ -270,33 +262,33 @@ OSPF configuration is organized hierarchically: `OspfConfig` > `OspfArea` > `Osp
 
 | Attribute                  | Type                    | Required | Default | Description                         |
 |----------------------------|-------------------------|----------|---------|-------------------------------------|
-| router_id                  | str                     | No       | None    | OSPF router ID.                     |
-| enable                     | bool                    | No       | None    | Enable OSPF.                        |
-| rfc1583                    | bool                    | No       | None    | RFC 1583 compatibility.             |
-| reject_default_route       | bool                    | No       | None    | Reject default route.               |
-| allow_redist_default_route | bool                    | No       | None    | Allow redistribution of default.    |
-| spf_timer                  | str                     | No       | None    | SPF timer profile.                  |
-| global_if_timer            | str                     | No       | None    | Global interface timer profile.     |
-| redistribution_profile     | str                     | No       | None    | Redistribution profile name.        |
-| global_bfd                 | BfdProfile              | No       | None    | Global BFD profile.                 |
-| flood_prevention           | OspfFloodPrevention     | No       | None    | Flood prevention configuration.     |
-| vr_timers                  | OspfVrTimers            | No       | None    | VR timer settings.                  |
-| auth_profile               | List[OspfAuthProfile]   | No       | None    | Authentication profiles.            |
-| area                       | List[OspfArea]          | No       | None    | OSPF areas.                         |
-| export_rules               | List[OspfExportRule]    | No       | None    | Export rules.                       |
-| graceful_restart           | OspfGracefulRestart     | No       | None    | Graceful restart configuration.     |
+| `router_id` | `str` | No       | None    | OSPF router ID.                     |
+| `enable` | `bool` | No       | None    | Enable OSPF.                        |
+| `rfc1583` | `bool` | No       | None    | RFC 1583 compatibility.             |
+| `reject_default_route` | `bool` | No       | None    | Reject default route.               |
+| `allow_redist_default_route` | `bool` | No       | None    | Allow redistribution of default.    |
+| `spf_timer` | `str` | No       | None    | SPF timer profile.                  |
+| `global_if_timer` | `str` | No       | None    | Global interface timer profile.     |
+| `redistribution_profile` | `str` | No       | None    | Redistribution profile name.        |
+| `global_bfd` | `BfdProfile` | No       | None    | Global BFD profile.                 |
+| `flood_prevention` | `OspfFloodPrevention` | No       | None    | Flood prevention configuration.     |
+| `vr_timers` | `OspfVrTimers` | No       | None    | VR timer settings.                  |
+| `auth_profile` | `List[OspfAuthProfile]` | No       | None    | Authentication profiles.            |
+| `area` | `List[OspfArea]` | No       | None    | OSPF areas.                         |
+| `export_rules` | `List[OspfExportRule]` | No       | None    | Export rules.                       |
+| `graceful_restart` | `OspfGracefulRestart` | No       | None    | Graceful restart configuration.     |
 
 #### OspfArea
 
 | Attribute    | Type                   | Required | Default | Description                 |
 |--------------|------------------------|----------|---------|-----------------------------|
-| name         | str                    | Yes      | None    | Area ID.                    |
-| authentication | str                  | No       | None    | Authentication profile.     |
-| type         | OspfAreaType           | No       | None    | Area type (normal/stub/nssa).|
-| range        | List[OspfAreaRange]    | No       | None    | Area ranges.                |
-| vr_range     | List[OspfAreaVrRange]  | No       | None    | VR area ranges.             |
-| interface    | List[OspfInterface]    | No       | None    | OSPF interfaces.            |
-| virtual_link | List[OspfVirtualLink]  | No       | None    | OSPF virtual links.         |
+| `name` | `str` | Yes      | None    | Area ID.                    |
+| `authentication` | `str` | No       | None    | Authentication profile.     |
+| `type` | `OspfAreaType` | No       | None    | Area type (normal/stub/nssa).|
+| `range` | `List[OspfAreaRange]` | No       | None    | Area ranges.                |
+| `vr_range` | `List[OspfAreaVrRange]` | No       | None    | VR area ranges.             |
+| `interface` | `List[OspfInterface]` | No       | None    | OSPF interfaces.            |
+| `virtual_link` | `List[OspfVirtualLink]` | No       | None    | OSPF virtual links.         |
 
 #### OspfAreaType (oneOf)
 
@@ -306,9 +298,9 @@ At most one area type may be set: `normal` (OspfNormalArea), `stub` (OspfStubAre
 
 | Attribute | Type            | Required | Description                      |
 |-----------|-----------------|----------|----------------------------------|
-| name      | str             | Yes      | Auth profile name.               |
-| password  | str             | No*      | Simple password authentication.  |
-| md5       | List[OspfMd5Key]| No*      | MD5 authentication keys.         |
+| `name` | `str` | Yes      | Auth profile name.               |
+| `password` | `str` | No*      | Simple password authentication.  |
+| `md5` | `List[OspfMd5Key]` | No*      | MD5 authentication keys.         |
 
 \* `password` and `md5` are mutually exclusive.
 
@@ -324,11 +316,11 @@ ECMP (Equal-Cost Multi-Path) configuration controls load balancing across multip
 
 | Attribute          | Type          | Required | Default | Description                    |
 |--------------------|---------------|----------|---------|--------------------------------|
-| enable             | bool          | No       | None    | Enable ECMP.                   |
-| algorithm          | EcmpAlgorithm | No       | None    | ECMP algorithm selection.      |
-| max_path           | int           | No       | None    | Maximum number of ECMP paths.  |
-| symmetric_return   | bool          | No       | None    | Enable symmetric return.       |
-| strict_source_path | bool          | No       | None    | Enable strict source path.     |
+| `enable` | `bool` | No       | None    | Enable ECMP.                   |
+| `algorithm` | `EcmpAlgorithm` | No       | None    | ECMP algorithm selection.      |
+| `max_path` | `int` | No       | None    | Maximum number of ECMP paths.  |
+| `symmetric_return` | `bool` | No       | None    | Enable symmetric return.       |
+| `strict_source_path` | `bool` | No       | None    | Enable strict source path.     |
 
 #### EcmpAlgorithm (oneOf)
 
@@ -336,10 +328,10 @@ At most one algorithm may be set:
 
 | Attribute              | Type                   | Description                    |
 |------------------------|------------------------|--------------------------------|
-| ip_modulo              | Dict[str, Any]         | IP modulo algorithm.           |
-| ip_hash                | EcmpIpHash             | IP hash algorithm.             |
-| weighted_round_robin   | EcmpWeightedRoundRobin | Weighted round-robin.          |
-| balanced_round_robin   | Dict[str, Any]         | Balanced round-robin.          |
+| `ip_modulo` | `Dict[str, Any]` | IP modulo algorithm.           |
+| `ip_hash` | `EcmpIpHash` | IP hash algorithm.             |
+| `weighted_round_robin` | `EcmpWeightedRoundRobin` | Weighted round-robin.          |
+| `balanced_round_robin` | `Dict[str, Any]` | Balanced round-robin.          |
 
 ### RIP Models
 
@@ -347,28 +339,28 @@ At most one algorithm may be set:
 
 | Attribute                       | Type                | Required | Default | Description                          |
 |---------------------------------|---------------------|----------|---------|--------------------------------------|
-| enable                          | bool                | No       | None    | Enable RIP.                          |
-| default_information_originate   | bool                | No       | None    | Originate default information.       |
-| global_timer                    | str                 | No       | None    | Global timer profile.               |
-| auth_profile                    | str                 | No       | None    | Authentication profile name.        |
-| redistribution_profile          | str                 | No       | None    | Redistribution profile name.        |
-| global_bfd                      | BfdProfile          | No       | None    | Global BFD profile.                 |
-| global_inbound_distribute_list  | RipDistributeList   | No       | None    | Global inbound distribute list.     |
-| global_outbound_distribute_list | RipDistributeList   | No       | None    | Global outbound distribute list.    |
-| interface                       | List[RipInterface]  | No       | None    | RIP interfaces.                     |
+| `enable` | `bool` | No       | None    | Enable RIP.                          |
+| `default_information_originate` | `bool` | No       | None    | Originate default information.       |
+| `global_timer` | `str` | No       | None    | Global timer profile.               |
+| `auth_profile` | `str` | No       | None    | Authentication profile name.        |
+| `redistribution_profile` | `str` | No       | None    | Redistribution profile name.        |
+| `global_bfd` | `BfdProfile` | No       | None    | Global BFD profile.                 |
+| `global_inbound_distribute_list` | `RipDistributeList` | No       | None    | Global inbound distribute list.     |
+| `global_outbound_distribute_list` | `RipDistributeList` | No       | None    | Global outbound distribute list.    |
+| `interface` | `List[RipInterface]` | No       | None    | RIP interfaces.                     |
 
 #### RipInterface
 
 | Attribute                          | Type              | Required | Default | Description                                                  |
 |------------------------------------|-------------------|----------|---------|--------------------------------------------------------------|
-| name                               | str               | Yes      | None    | Interface name.                                              |
-| enable                             | bool              | No       | None    | Enable RIP on interface.                                     |
-| mode                               | str               | No       | None    | RIP mode: `active`, `passive`, or `send-only`.               |
-| split_horizon                      | str               | No       | None    | Split horizon mode.                                          |
-| authentication                     | str               | No       | None    | Authentication profile name.                                 |
-| bfd                                | BfdProfile        | No       | None    | BFD profile.                                                 |
-| interface_inbound_distribute_list  | RipDistributeList | No       | None    | Inbound distribute list.                                     |
-| interface_outbound_distribute_list | RipDistributeList | No       | None    | Outbound distribute list.                                    |
+| `name` | `str` | Yes      | None    | Interface name.                                              |
+| `enable` | `bool` | No       | None    | Enable RIP on interface.                                     |
+| `mode` | `str` | No       | None    | RIP mode: `active`, `passive`, or `send-only`.               |
+| `split_horizon` | `str` | No       | None    | Split horizon mode.                                          |
+| `authentication` | `str` | No       | None    | Authentication profile name.                                 |
+| `bfd` | `BfdProfile` | No       | None    | BFD profile.                                                 |
+| `interface_inbound_distribute_list` | `RipDistributeList` | No       | None    | Inbound distribute list.                                     |
+| `interface_outbound_distribute_list` | `RipDistributeList` | No       | None    | Outbound distribute list.                                    |
 
 ### BGP Models
 
@@ -378,44 +370,44 @@ BGP configuration is the most deeply nested section, organized as: `BgpConfig` >
 
 | Attribute                       | Type                     | Required | Default | Description                               |
 |---------------------------------|--------------------------|----------|---------|-------------------------------------------|
-| enable                          | bool                     | No       | None    | Enable BGP.                               |
-| router_id                       | str                      | No       | None    | BGP router ID.                            |
-| local_as                        | str                      | No       | None    | Local AS number (ASPLAIN format).         |
-| confederation_member_as         | str                      | No       | None    | Confederation member AS.                  |
-| install_route                   | bool                     | No       | None    | Install routes.                           |
-| enforce_first_as                | bool                     | No       | None    | Enforce first AS.                         |
-| fast_external_failover          | bool                     | No       | None    | Fast external failover.                   |
-| ecmp_multi_as                   | bool                     | No       | None    | ECMP multi-AS.                            |
-| default_local_preference        | int                      | No       | None    | Default local preference.                 |
-| graceful_shutdown               | bool                     | No       | None    | Graceful shutdown.                        |
-| always_advertise_network_route  | bool                     | No       | None    | Always advertise network route.           |
-| reject_default_route            | bool                     | No       | None    | Reject default route.                     |
-| allow_redist_default_route      | bool                     | No       | None    | Allow redistribution of default route.    |
-| as_format                       | str                      | No       | None    | AS number format.                         |
-| med                             | BgpMed                   | No       | None    | MED configuration.                        |
-| aggregate                       | BgpAggregate             | No       | None    | Aggregate configuration.                  |
-| graceful_restart                | BgpGracefulRestart       | No       | None    | Graceful restart configuration.           |
-| global_bfd                      | BfdProfile               | No       | None    | Global BFD profile.                       |
-| peer_group                      | List[BgpPeerGroup]       | No       | None    | Peer groups.                              |
-| aggregate_routes                | List[BgpAggregateRoute]  | No       | None    | Aggregate routes.                         |
-| redistribution_profile          | BgpRedistProfile         | No       | None    | Redistribution profile.                   |
-| advertise_network               | BgpAdvertiseNetwork      | No       | None    | Advertise network configuration.          |
-| policy                          | BgpPolicy                | No       | None    | BGP policy configuration.                 |
-| redist_rules                    | List[BgpRedistRule]      | No       | None    | Redistribution rules.                     |
+| `enable` | `bool` | No       | None    | Enable BGP.                               |
+| `router_id` | `str` | No       | None    | BGP router ID.                            |
+| `local_as` | `str` | No       | None    | Local AS number (ASPLAIN format).         |
+| `confederation_member_as` | `str` | No       | None    | Confederation member AS.                  |
+| `install_route` | `bool` | No       | None    | Install routes.                           |
+| `enforce_first_as` | `bool` | No       | None    | Enforce first AS.                         |
+| `fast_external_failover` | `bool` | No       | None    | Fast external failover.                   |
+| `ecmp_multi_as` | `bool` | No       | None    | ECMP multi-AS.                            |
+| `default_local_preference` | `int` | No       | None    | Default local preference.                 |
+| `graceful_shutdown` | `bool` | No       | None    | Graceful shutdown.                        |
+| `always_advertise_network_route` | `bool` | No       | None    | Always advertise network route.           |
+| `reject_default_route` | `bool` | No       | None    | Reject default route.                     |
+| `allow_redist_default_route` | `bool` | No       | None    | Allow redistribution of default route.    |
+| `as_format` | `str` | No       | None    | AS number format.                         |
+| `med` | `BgpMed` | No       | None    | MED configuration.                        |
+| `aggregate` | `BgpAggregate` | No       | None    | Aggregate configuration.                  |
+| `graceful_restart` | `BgpGracefulRestart` | No       | None    | Graceful restart configuration.           |
+| `global_bfd` | `BfdProfile` | No       | None    | Global BFD profile.                       |
+| `peer_group` | `List[BgpPeerGroup]` | No       | None    | Peer groups.                              |
+| `aggregate_routes` | `List[BgpAggregateRoute]` | No       | None    | Aggregate routes.                         |
+| `redistribution_profile` | `BgpRedistProfile` | No       | None    | Redistribution profile.                   |
+| `advertise_network` | `BgpAdvertiseNetwork` | No       | None    | Advertise network configuration.          |
+| `policy` | `BgpPolicy` | No       | None    | BGP policy configuration.                 |
+| `redist_rules` | `List[BgpRedistRule]` | No       | None    | Redistribution rules.                     |
 
 #### BgpPeerGroup
 
 | Attribute                   | Type                           | Required | Default | Description                       |
 |-----------------------------|--------------------------------|----------|---------|-----------------------------------|
-| name                        | str                            | Yes      | None    | Peer group name.                  |
-| enable                      | bool                           | No       | None    | Enable peer group.                |
-| aggregated_confed_as_path   | bool                           | No       | None    | Aggregated confederation AS path. |
-| soft_reset_with_stored_info | bool                           | No       | None    | Soft reset with stored info.      |
-| type                        | BgpPeerGroupType               | No       | None    | Peer group type.                  |
-| address_family              | BgpPeerGroupAddressFamily      | No       | None    | Address family configuration.     |
-| filtering_profile           | BgpPeerGroupFilteringProfile   | No       | None    | Filtering profile configuration.  |
-| connection_options          | BgpPeerGroupConnectionOptions  | No       | None    | Connection options.               |
-| peer                        | List[BgpPeer]                  | No       | None    | Peers in this group.              |
+| `name` | `str` | Yes      | None    | Peer group name.                  |
+| `enable` | `bool` | No       | None    | Enable peer group.                |
+| `aggregated_confed_as_path` | `bool` | No       | None    | Aggregated confederation AS path. |
+| `soft_reset_with_stored_info` | `bool` | No       | None    | Soft reset with stored info.      |
+| `type` | `BgpPeerGroupType` | No       | None    | Peer group type.                  |
+| `address_family` | `BgpPeerGroupAddressFamily` | No       | None    | Address family configuration.     |
+| `filtering_profile` | `BgpPeerGroupFilteringProfile` | No       | None    | Filtering profile configuration.  |
+| `connection_options` | `BgpPeerGroupConnectionOptions` | No       | None    | Connection options.               |
+| `peer` | `List[BgpPeer]` | No       | None    | Peers in this group.              |
 
 #### BgpPeerGroupType (oneOf)
 
@@ -437,10 +429,10 @@ At most one peer group type may be set: `ibgp`, `ebgp_confed`, `ibgp_confed`, or
 
 | Attribute                 | Type                  | Required | Default | Description                                  |
 |---------------------------|-----------------------|----------|---------|----------------------------------------------|
-| import_ (alias: `import`) | BgpPolicyImportExport | No       | None    | Import policy rules.                         |
-| export                    | BgpPolicyImportExport | No       | None    | Export policy rules.                         |
-| conditional_advertisement | Dict[str, Any]        | No       | None    | Conditional advertisement config (raw dict). |
-| aggregation               | Dict[str, Any]        | No       | None    | Aggregation policy config (raw dict).        |
+| `import_ (alias: `import`)` | `BgpPolicyImportExport` | No       | None    | Import policy rules.                         |
+| `export` | `BgpPolicyImportExport` | No       | None    | Export policy rules.                         |
+| `conditional_advertisement` | `Dict[str, Any]` | No       | None    | Conditional advertisement config (raw dict). |
+| `aggregation` | `Dict[str, Any]` | No       | None    | Aggregation policy config (raw dict).        |
 
 #### BgpPolicyAction (oneOf)
 

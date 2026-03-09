@@ -1,18 +1,6 @@
 # IPsec Crypto Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Lifetime Models](#lifetime-models)
-6. [Lifesize Models](#lifesize-models)
-7. [Exceptions](#exceptions)
-8. [Model Validators](#model-validators)
-9. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The IPsec Crypto Profile models provide a structured way to manage IPsec crypto profile configurations in Palo Alto Networks' Strata Cloud Manager. These models support defining security protocols, encryption algorithms, authentication methods, and lifetime/lifesize settings for IPsec VPN tunnels. The models handle validation of inputs and outputs when interacting with the SCM API.
 
@@ -45,16 +33,16 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute  | Type           | Required | Default  | Description                                                |
 |------------|----------------|----------|----------|------------------------------------------------------------|
-| `name`     | str            | Yes      | None     | Profile name. Max 31 chars. Pattern: `^[0-9a-zA-Z._-]+$`   |
-| `id`       | UUID           | Yes*     | None     | Unique identifier (*response/update only)                  |
-| `dh_group` | DhGroup        | No       | group2   | Phase-2 DH group (PFS DH group)                            |
-| `lifetime` | dict           | Yes      | None     | Lifetime configuration (seconds, minutes, hours, or days)  |
-| `lifesize` | dict           | No       | None     | Lifesize configuration (kb, mb, gb, or tb)                 |
-| `esp`      | EspConfig      | No*      | None     | ESP configuration (encryption and authentication)          |
-| `ah`       | AhConfig       | No*      | None     | AH configuration (authentication only)                     |
-| `folder`   | str            | No**     | None     | Folder containing the profile. Max 64 chars                |
-| `snippet`  | str            | No**     | None     | Snippet containing the profile. Max 64 chars               |
-| `device`   | str            | No**     | None     | Device containing the profile. Max 64 chars                |
+| `name`     | `str` | Yes      | None     | Profile name. Max 31 chars. Pattern: `^[0-9a-zA-Z._-]+$`   |
+| `id`       | `UUID` | Yes*     | None     | Unique identifier (*response/update only)                  |
+| `dh_group` | `DhGroup` | No       | group2   | Phase-2 DH group (PFS DH group)                            |
+| `lifetime` | `dict` | Yes      | None     | Lifetime configuration (seconds, minutes, hours, or days)  |
+| `lifesize` | `dict` | No       | None     | Lifesize configuration (kb, mb, gb, or tb)                 |
+| `esp`      | `EspConfig` | No*      | None     | ESP configuration (encryption and authentication)          |
+| `ah`       | `AhConfig` | No*      | None     | AH configuration (authentication only)                     |
+| `folder`   | `str` | No**     | None     | Folder containing the profile. Max 64 chars                |
+| `snippet`  | `str` | No**     | None     | Snippet containing the profile. Max 64 chars               |
+| `device`   | `str` | No**     | None     | Device containing the profile. Max 64 chars                |
 
 \* Only required for update and response models
 \* Exactly one of `esp` or `ah` must be provided
@@ -123,8 +111,8 @@ Encapsulating Security Payload (ESP) configuration:
 
 | Attribute        | Type               | Required | Default | Description              |
 |------------------|--------------------|----------|---------|--------------------------|
-| `encryption`     | List[EspEncryption]| Yes      | None    | Encryption algorithms    |
-| `authentication` | List[str]          | Yes      | None    | Authentication algorithms|
+| `encryption`     | `List[EspEncryption]` | Yes      | None    | Encryption algorithms    |
+| `authentication` | `List[str]` | Yes      | None    | Authentication algorithms|
 
 ### AhConfig Model
 
@@ -132,7 +120,7 @@ Authentication Header (AH) configuration:
 
 | Attribute        | Type                 | Required | Default | Description              |
 |------------------|----------------------|----------|---------|--------------------------|
-| `authentication` | List[AhAuthentication]| Yes     | None    | Authentication algorithms|
+| `authentication` | `List[AhAuthentication]` | Yes     | None    | Authentication algorithms|
 
 ## Lifetime Models
 
@@ -142,25 +130,25 @@ IPsec Crypto Profiles support four different lifetime units. Each has its own mo
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `seconds` | int  | Yes      | None    | Lifetime in seconds (range: 180-65535) |
+| `seconds` | `int` | Yes      | None    | Lifetime in seconds (range: 180-65535) |
 
 ### LifetimeMinutes
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `minutes` | int  | Yes      | None    | Lifetime in minutes (range: 3-65535) |
+| `minutes` | `int` | Yes      | None    | Lifetime in minutes (range: 3-65535) |
 
 ### LifetimeHours
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `hours`   | int  | Yes      | None    | Lifetime in hours (range: 1-65535)   |
+| `hours`   | `int` | Yes      | None    | Lifetime in hours (range: 1-65535)   |
 
 ### LifetimeDays
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `days`    | int  | Yes      | None    | Lifetime in days (range: 1-365)      |
+| `days`    | `int` | Yes      | None    | Lifetime in days (range: 1-365)      |
 
 ## Lifesize Models
 
@@ -170,25 +158,25 @@ IPsec Crypto Profiles support four different lifesize units. Each has its own mo
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `kb`      | int  | Yes      | None    | Lifesize in kilobytes (range: 1-65535) |
+| `kb`      | `int` | Yes      | None    | Lifesize in kilobytes (range: 1-65535) |
 
 ### LifesizeMB
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `mb`      | int  | Yes      | None    | Lifesize in megabytes (range: 1-65535) |
+| `mb`      | `int` | Yes      | None    | Lifesize in megabytes (range: 1-65535) |
 
 ### LifesizeGB
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `gb`      | int  | Yes      | None    | Lifesize in gigabytes (range: 1-65535) |
+| `gb`      | `int` | Yes      | None    | Lifesize in gigabytes (range: 1-65535) |
 
 ### LifesizeTB
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| `tb`      | int  | Yes      | None    | Lifesize in terabytes (range: 1-65535) |
+| `tb`      | `int` | Yes      | None    | Lifesize in terabytes (range: 1-65535) |
 
 ## Exceptions
 

@@ -18,12 +18,12 @@ All models use `extra="forbid"` to reject undefined fields.
 
 | Attribute  | Type   | Required | Default | Description                               |
 |------------|--------|----------|---------|-------------------------------------------|
-| `name`     | str    | Yes      | None    | Interface name (e.g., "ethernet1/1.100")  |
-| `comment`  | str    | No       | None    | Description (max 1023 chars)              |
-| `vlan_tag` | str    | Yes      | None    | VLAN tag (1-4096)                         |
-| `folder`   | str    | No*      | None    | Folder container                          |
-| `snippet`  | str    | No*      | None    | Snippet container                         |
-| `device`   | str    | No*      | None    | Device container                          |
+| `name`     | `str` | Yes      | None    | Interface name (e.g., "ethernet1/1.100")  |
+| `comment`  | `str` | No       | None    | Description (max 1023 chars)              |
+| `vlan_tag` | `str` | Yes      | None    | VLAN tag (1-4096)                         |
+| `folder`   | `str` | No*      | None    | Folder container                          |
+| `snippet`  | `str` | No*      | None    | Snippet container                         |
+| `device`   | `str` | No*      | None    | Device container                          |
 
 \* Exactly one container required for create operations
 

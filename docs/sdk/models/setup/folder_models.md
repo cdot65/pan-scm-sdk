@@ -1,14 +1,6 @@
 # Folder Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Exceptions](#exceptions)
-4. [Model Validators](#model-validators)
-5. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Folder models provide a structured way to manage folder resources in Palo Alto Networks' Strata Cloud Manager.
 These models represent folder hierarchies used to organize configuration objects. The models handle validation of
@@ -31,16 +23,16 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute     | Type      | Required | Default | Description                                                |
 |---------------|-----------|----------|---------|------------------------------------------------------------|
-| name          | str       | Yes      | None    | The name of the folder                                     |
-| parent        | str       | Yes      | None    | Name of the parent folder. Empty string for root folders   |
-| description   | str       | No       | None    | Optional description of the folder                         |
-| labels        | List[str] | No       | None    | Optional list of labels to apply to the folder             |
-| snippets      | List[str] | No       | None    | Optional list of snippet IDs associated with the folder    |
-| display_name  | str       | No       | None    | Display name for the folder/device                         |
-| model         | str       | No       | None    | Device model, if present (e.g., 'PA-VM')                   |
-| serial_number | str       | No       | None    | Device serial number, if present                           |
-| type          | str       | No       | None    | Type of folder or device (e.g., 'on-prem', 'container')    |
-| device_only   | bool      | No       | None    | True if this is a device-only entry                        |
+| `name` | `str` | Yes      | None    | The name of the folder                                     |
+| `parent` | `str` | Yes      | None    | Name of the parent folder. Empty string for root folders   |
+| `description` | `str` | No       | None    | Optional description of the folder                         |
+| `labels` | `List[str]` | No       | None    | Optional list of labels to apply to the folder             |
+| `snippets` | `List[str]` | No       | None    | Optional list of snippet IDs associated with the folder    |
+| `display_name` | `str` | No       | None    | Display name for the folder/device                         |
+| `model` | `str` | No       | None    | Device model, if present (e.g., 'PA-VM')                   |
+| `serial_number` | `str` | No       | None    | Device serial number, if present                           |
+| `type` | `str` | No       | None    | Type of folder or device (e.g., 'on-prem', 'container')    |
+| `device_only` | `bool` | No       | None    | True if this is a device-only entry                        |
 
 ### FolderCreateModel
 
@@ -52,7 +44,7 @@ Extends `FolderBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the folder  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the folder  |
 
 ### FolderResponseModel
 
@@ -60,7 +52,7 @@ Extends `FolderBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                          |
 |-----------|------|----------|---------|--------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the folder  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the folder  |
 
 ## Exceptions
 

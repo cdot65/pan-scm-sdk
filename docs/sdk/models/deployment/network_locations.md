@@ -1,6 +1,6 @@
 # Network Location Models
 
-## Overview {#Overview}
+## Overview
 
 The Network Location models provide a structured way to manage network location data in Palo Alto Networks' Strata Cloud Manager. Network Locations are read-only resources that represent geographic network locations for service connectivity.
 
@@ -35,13 +35,13 @@ location = NetworkLocationModel(
 
 | Attribute          | Type   | Required | Default | Description                                            |
 |--------------------|--------|----------|---------|--------------------------------------------------------|
-| `value`            | str    | Yes      | None    | The system value of the location (e.g., 'us-west-1')   |
-| `display`          | str    | Yes      | None    | The human-readable display name of the location        |
-| `continent`        | str    | No       | None    | The continent in which the location exists             |
-| `latitude`         | float  | No       | None    | The latitudinal position of the location (-90 to 90)   |
-| `longitude`        | float  | No       | None    | The longitudinal position of the location (-180 to 180)|
-| `region`           | str    | No       | None    | The region code of the location                        |
-| `aggregate_region` | str    | No       | None    | The aggregate region identifier                        |
+| `value`            | `str` | Yes      | None    | The system value of the location (e.g., 'us-west-1')   |
+| `display`          | `str` | Yes      | None    | The human-readable display name of the location        |
+| `continent`        | `str` | No       | None    | The continent in which the location exists             |
+| `latitude`         | `float` | No       | None    | The latitudinal position of the location (-90 to 90)   |
+| `longitude`        | `float` | No       | None    | The longitudinal position of the location (-180 to 180)|
+| `region`           | `str` | No       | None    | The region code of the location                        |
+| `aggregate_region` | `str` | No       | None    | The aggregate region identifier                        |
 
 ### Example Data
 

@@ -1,6 +1,6 @@
 # Bandwidth Allocation Models
 
-## Overview {#Overview}
+## Overview
 
 The Bandwidth Allocation models provide a structured way to manage bandwidth allocation configurations in Palo Alto Networks' Strata Cloud Manager. These models allow you to create, update, and manage bandwidth allocations for different regions, supporting optional Quality of Service (QoS) configurations.
 
@@ -21,19 +21,19 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute           | Type          | Required | Default | Description                                                     |
 |---------------------|---------------|----------|---------|------------------------------------------------------------------|
-| name                | str           | Yes      | None    | Name of the aggregated bandwidth region. Must match pattern `^[0-9a-zA-Z._\- ]+$` |
-| allocated_bandwidth | float         | Yes      | None    | Bandwidth to allocate in Mbps, must be greater than 0           |
-| spn_name_list       | List[str]     | No       | None    | List of SPN (Service Processing Node) names for this region      |
-| qos                 | QosModel      | No       | None    | Quality of Service configuration for bandwidth allocation        |
+| `name` | `str` | Yes      | None    | Name of the aggregated bandwidth region. Must match pattern `^[0-9a-zA-Z._\- ]+$` |
+| `allocated_bandwidth` | `float` | Yes      | None    | Bandwidth to allocate in Mbps, must be greater than 0           |
+| `spn_name_list` | `List[str]` | No       | None    | List of SPN (Service Processing Node) names for this region      |
+| `qos` | `QosModel` | No       | None    | Quality of Service configuration for bandwidth allocation        |
 
 ### QoS Model Attributes
 
 | Attribute        | Type     | Required | Default | Description                             |
 |------------------|----------|----------|---------|-----------------------------------------|
-| enabled          | bool     | No       | None    | Enable QoS for bandwidth allocation     |
-| customized       | bool     | No       | None    | Use customized QoS settings             |
-| profile          | str      | No       | None    | QoS profile name                        |
-| guaranteed_ratio | float    | No       | None    | Guaranteed ratio for bandwidth          |
+| `enabled` | `bool` | No       | None    | Enable QoS for bandwidth allocation     |
+| `customized` | `bool` | No       | None    | Use customized QoS settings             |
+| `profile` | `str` | No       | None    | QoS profile name                        |
+| `guaranteed_ratio` | `float` | No       | None    | Guaranteed ratio for bandwidth          |
 
 ## Model Validators
 

@@ -1,15 +1,6 @@
 # PBF Rule Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Sub-Models](#sub-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The PBF Rule models provide a structured way to represent and validate Policy-Based Forwarding (PBF) rule configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage PBF rules that override normal routing decisions and forward traffic based on source, destination, application, service, and user criteria.
 
@@ -57,23 +48,23 @@ This is the base model containing fields common to all PBF rule operations.
 
 | Attribute                 | Type                            | Required | Default | Description                                                       |
 |---------------------------|--------------------------------|----------|---------|-------------------------------------------------------------------|
-| name                      | str                            | Yes      | None    | PBF rule name.                                                    |
-| description               | str                            | No       | None    | Description of the PBF rule.                                      |
-| tag                       | List[str]                      | No       | None    | Tags associated with the PBF rule.                                |
-| schedule                  | str                            | No       | None    | Schedule for the PBF rule.                                        |
-| disabled                  | bool                           | No       | None    | Is the PBF rule disabled.                                         |
-| from_                     | PbfRuleFrom                    | No       | None    | Source zone or interface. Alias: `from`.                           |
-| source                    | List[str]                      | No       | None    | Source addresses.                                                  |
-| source_user               | List[str]                      | No       | None    | Source users.                                                      |
-| destination               | List[str]                      | No       | None    | Destination addresses.                                             |
-| destination_application   | Dict[str, Any]                 | No       | None    | Destination application configuration.                             |
-| service                   | List[str]                      | No       | None    | Services.                                                          |
-| application               | List[str]                      | No       | None    | Applications.                                                      |
-| action                    | PbfRuleAction                  | No       | None    | Action configuration (forward, discard, or no_pbf).                |
-| enforce_symmetric_return  | PbfRuleEnforceSymmetricReturn  | No       | None    | Enforce symmetric return configuration.                            |
-| folder                    | str                            | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.     |
-| snippet                   | str                            | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.    |
-| device                    | str                            | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.     |
+| `name` | `str` | Yes      | None    | PBF rule name.                                                    |
+| `description` | `str` | No       | None    | Description of the PBF rule.                                      |
+| `tag` | `List[str]` | No       | None    | Tags associated with the PBF rule.                                |
+| `schedule` | `str` | No       | None    | Schedule for the PBF rule.                                        |
+| `disabled` | `bool` | No       | None    | Is the PBF rule disabled.                                         |
+| `from_` | `PbfRuleFrom` | No       | None    | Source zone or interface. Alias: `from`.                           |
+| `source` | `List[str]` | No       | None    | Source addresses.                                                  |
+| `source_user` | `List[str]` | No       | None    | Source users.                                                      |
+| `destination` | `List[str]` | No       | None    | Destination addresses.                                             |
+| `destination_application` | `Dict[str, Any]` | No       | None    | Destination application configuration.                             |
+| `service` | `List[str]` | No       | None    | Services.                                                          |
+| `application` | `List[str]` | No       | None    | Applications.                                                      |
+| `action` | `PbfRuleAction` | No       | None    | Action configuration (forward, discard, or no_pbf).                |
+| `enforce_symmetric_return` | `PbfRuleEnforceSymmetricReturn` | No       | None    | Enforce symmetric return configuration.                            |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.     |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.    |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.     |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -87,7 +78,7 @@ Extends `PbfRuleBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the PBF rule              |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the PBF rule              |
 
 ### PbfRuleResponseModel
 
@@ -95,9 +86,10 @@ Extends `PbfRuleBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the PBF rule              |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the PBF rule              |
 
-> **Note:** The `PbfRuleResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `PbfRuleResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Sub-Models
 
@@ -107,8 +99,8 @@ Source zone/interface configuration. Supports one of: zone (list of zone names) 
 
 | Attribute | Type        | Required | Default | Description                              |
 |-----------|-------------|----------|---------|------------------------------------------|
-| zone      | List[str]   | No       | None    | Source zones.                            |
-| interface | List[str]   | No       | None    | Source interfaces.                       |
+| `zone` | `List[str]` | No       | None    | Source zones.                            |
+| `interface` | `List[str]` | No       | None    | Source interfaces.                       |
 
 ### PbfRuleAction
 
@@ -116,9 +108,9 @@ Action configuration for PBF rules. Supports one of: forward, discard, or no_pbf
 
 | Attribute | Type              | Required | Default | Description                              |
 |-----------|-------------------|----------|---------|------------------------------------------|
-| forward   | PbfRuleForward    | No       | None    | Forward action configuration.            |
-| discard   | Dict[str, Any]    | No       | None    | Discard action (empty object).           |
-| no_pbf    | Dict[str, Any]    | No       | None    | No PBF action (empty object).            |
+| `forward` | `PbfRuleForward` | No       | None    | Forward action configuration.            |
+| `discard` | `Dict[str, Any]` | No       | None    | Discard action (empty object).           |
+| `no_pbf` | `Dict[str, Any]` | No       | None    | No PBF action (empty object).            |
 
 ### PbfRuleForward
 
@@ -126,9 +118,9 @@ Forward action configuration.
 
 | Attribute        | Type                    | Required | Default | Description                              |
 |------------------|-------------------------|----------|---------|------------------------------------------|
-| egress_interface | str                     | No       | None    | Egress interface.                        |
-| nexthop          | PbfRuleForwardNexthop   | No       | None    | Next hop configuration.                  |
-| monitor          | PbfRuleForwardMonitor   | No       | None    | Monitor configuration.                   |
+| `egress_interface` | `str` | No       | None    | Egress interface.                        |
+| `nexthop` | `PbfRuleForwardNexthop` | No       | None    | Next hop configuration.                  |
+| `monitor` | `PbfRuleForwardMonitor` | No       | None    | Monitor configuration.                   |
 
 ### PbfRuleForwardNexthop
 
@@ -136,8 +128,8 @@ Nexthop configuration for forward action. Supports one of: ip_address or fqdn.
 
 | Attribute  | Type | Required | Default | Description                              |
 |------------|------|----------|---------|------------------------------------------|
-| ip_address | str  | No       | None    | Next hop IP address.                     |
-| fqdn       | str  | No       | None    | Next hop FQDN.                           |
+| `ip_address` | `str` | No       | None    | Next hop IP address.                     |
+| `fqdn` | `str` | No       | None    | Next hop FQDN.                           |
 
 ### PbfRuleForwardMonitor
 
@@ -145,9 +137,9 @@ Monitor configuration for forward action.
 
 | Attribute              | Type | Required | Default | Description                                                |
 |------------------------|------|----------|---------|------------------------------------------------------------|
-| profile                | str  | No       | None    | Monitoring profile.                                        |
-| disable_if_unreachable | bool | No       | None    | Disable this rule if nexthop/monitor IP is unreachable.    |
-| ip_address             | str  | No       | None    | Monitor IP address.                                        |
+| `profile` | `str` | No       | None    | Monitoring profile.                                        |
+| `disable_if_unreachable` | `bool` | No       | None    | Disable this rule if nexthop/monitor IP is unreachable.    |
+| `ip_address` | `str` | No       | None    | Monitor IP address.                                        |
 
 ### PbfRuleEnforceSymmetricReturn
 
@@ -155,8 +147,8 @@ Enforce symmetric return configuration.
 
 | Attribute            | Type                      | Required | Default | Description                              |
 |----------------------|---------------------------|----------|---------|------------------------------------------|
-| enabled              | bool                      | No       | None    | Enforce symmetric return.                |
-| nexthop_address_list | List[PbfRuleNexthopAddress]| No      | None    | Next hop IP addresses for symmetric return.|
+| `enabled` | `bool` | No       | None    | Enforce symmetric return.                |
+| `nexthop_address_list` | `List[PbfRuleNexthopAddress]` | No      | None    | Next hop IP addresses for symmetric return.|
 
 ### PbfRuleNexthopAddress
 
@@ -164,7 +156,7 @@ Nexthop address entry for enforce symmetric return.
 
 | Attribute | Type | Required | Default | Description                              |
 |-----------|------|----------|---------|------------------------------------------|
-| name      | str  | Yes      | None    | Next hop IP address.                     |
+| `name` | `str` | Yes      | None    | Next hop IP address.                     |
 
 ## Exceptions
 

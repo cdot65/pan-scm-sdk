@@ -1,15 +1,6 @@
 # Variable Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Variable Types](#variable-types)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Variable models provide a structured way to manage variable resources in Palo Alto Networks' Strata Cloud Manager.
 These models represent reusable values that can be referenced across configurations. The models handle validation
@@ -32,13 +23,13 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute   | Type | Required | Default | Description                                       |
 |-------------|------|----------|---------|---------------------------------------------------|
-| name        | str  | Yes      | None    | Name of the variable. Max length: 63 chars        |
-| type        | str  | Yes      | None    | Variable type (see Variable Types)                |
-| value       | str  | Yes      | None    | Value of the variable                             |
-| description | str  | No       | None    | Description of the variable                       |
-| folder      | str  | No*      | None    | Folder scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
-| snippet     | str  | No*      | None    | Snippet scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
-| device      | str  | No*      | None    | Device scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
+| `name` | `str` | Yes      | None    | Name of the variable. Max length: 63 chars        |
+| `type` | `str` | Yes      | None    | Variable type (see Variable Types)                |
+| `value` | `str` | Yes      | None    | Value of the variable                             |
+| `description` | `str` | No       | None    | Description of the variable                       |
+| `folder` | `str` | No*      | None    | Folder scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
+| `snippet` | `str` | No*      | None    | Snippet scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
+| `device` | `str` | No*      | None    | Device scope. Pattern: `^[a-zA-Z0-9\-_. ]+$`. Max: 64 |
 
 \* Exactly one of `folder`, `snippet`, or `device` must be provided
 
@@ -52,7 +43,7 @@ Extends `VariableBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                            |
 |-----------|------|----------|---------|----------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the variable  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the variable  |
 
 ### VariableResponseModel
 
@@ -60,14 +51,14 @@ Extends `VariableBaseModel` by adding:
 
 | Attribute     | Type      | Required | Default | Description                              |
 |---------------|-----------|----------|---------|------------------------------------------|
-| id            | UUID      | Yes      | None    | The unique identifier of the variable    |
-| overridden    | bool      | No       | None    | Whether the variable is overridden       |
-| labels        | List[str] | No       | None    | Labels assigned to the variable          |
-| parent        | str       | No       | None    | Parent folder or container               |
-| snippets      | List[str] | No       | None    | Snippets associated with the variable    |
-| model         | str       | No       | None    | Device model information                 |
-| serial_number | str       | No       | None    | Device serial number                     |
-| device_only   | bool      | No       | None    | Whether variable is device-only          |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the variable    |
+| `overridden` | `bool` | No       | None    | Whether the variable is overridden       |
+| `labels` | `List[str]` | No       | None    | Labels assigned to the variable          |
+| `parent` | `str` | No       | None    | Parent folder or container               |
+| `snippets` | `List[str]` | No       | None    | Snippets associated with the variable    |
+| `model` | `str` | No       | None    | Device model information                 |
+| `serial_number` | `str` | No       | None    | Device serial number                     |
+| `device_only` | `bool` | No       | None    | Whether variable is device-only          |
 
 ## Variable Types
 

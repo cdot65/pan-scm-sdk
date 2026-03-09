@@ -1,19 +1,11 @@
 # BGP Redistribution Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The BGP Redistribution Profile models provide a structured way to represent and validate BGP redistribution profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models control which routing protocols' routes are redistributed into BGP, with per-protocol enable/disable, metric, and route map settings.
 
-> **Important:** Unlike many other BGP configuration models that use oneOf (mutually exclusive) semantics, the protocols in a redistribution profile are **NOT mutually exclusive**. All three protocols (static, OSPF, and connected) can be configured simultaneously under the unicast container.
+!!! warning
+    Unlike many other BGP configuration models that use oneOf (mutually exclusive) semantics, the protocols in a redistribution profile are **NOT mutually exclusive**. All three protocols (static, OSPF, and connected) can be configured simultaneously under the unicast container.
 
 ### Models
 
@@ -37,11 +29,11 @@ This is the base model containing fields common to all BGP redistribution profil
 
 | Attribute | Type                   | Required | Default | Description                                                     |
 |-----------|------------------------|----------|---------|-----------------------------------------------------------------|
-| name      | str                    | Yes      | None    | Profile name.                                                   |
-| ipv4      | BgpRedistributionIpv4  | No       | None    | IPv4 redistribution configuration.                              |
-| folder    | str                    | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet   | str                    | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device    | str                    | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Profile name.                                                   |
+| `ipv4` | `BgpRedistributionIpv4` | No       | None    | IPv4 redistribution configuration.                              |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -55,7 +47,7 @@ Extends `BgpRedistributionProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                               |
 |-----------|------|----------|---------|-----------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP redistribution profile   |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP redistribution profile   |
 
 ### BgpRedistributionProfileResponseModel
 
@@ -63,9 +55,10 @@ Extends `BgpRedistributionProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                               |
 |-----------|------|----------|---------|-----------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP redistribution profile   |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP redistribution profile   |
 
-> **Note:** The `BgpRedistributionProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `BgpRedistributionProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -75,7 +68,7 @@ IPv4 container for redistribution profiles.
 
 | Attribute | Type                     | Required | Default | Description                          |
 |-----------|--------------------------|----------|---------|--------------------------------------|
-| unicast   | BgpRedistributionUnicast | No       | None    | Unicast redistribution configuration.|
+| `unicast` | `BgpRedistributionUnicast` | No       | None    | Unicast redistribution configuration.|
 
 ### BgpRedistributionUnicast
 
@@ -83,9 +76,9 @@ Unicast redistribution containing static, OSPF, and connected protocol configura
 
 | Attribute | Type                       | Required | Default | Description                     |
 |-----------|----------------------------|----------|---------|---------------------------------|
-| static    | BgpRedistributionProtocol  | No       | None    | Static route redistribution.    |
-| ospf      | BgpRedistributionProtocol  | No       | None    | OSPF route redistribution.      |
-| connected | BgpRedistributionProtocol  | No       | None    | Connected route redistribution. |
+| `static` | `BgpRedistributionProtocol` | No       | None    | Static route redistribution.    |
+| `ospf` | `BgpRedistributionProtocol` | No       | None    | OSPF route redistribution.      |
+| `connected` | `BgpRedistributionProtocol` | No       | None    | Connected route redistribution. |
 
 ### BgpRedistributionProtocol
 
@@ -93,9 +86,9 @@ Configuration for a single redistribution protocol (static, OSPF, or connected).
 
 | Attribute | Type | Required | Default | Description                         |
 |-----------|------|----------|---------|-------------------------------------|
-| enable    | bool | No       | None    | Enable redistribution for protocol. |
-| metric    | int  | No       | None    | Metric value (1-65535).             |
-| route_map | str  | No       | None    | Route map name to apply.            |
+| `enable` | `bool` | No       | None    | Enable redistribution for protocol. |
+| `metric` | `int` | No       | None    | Metric value (1-65535).             |
+| `route_map` | `str` | No       | None    | Route map name to apply.            |
 
 ## Exceptions
 

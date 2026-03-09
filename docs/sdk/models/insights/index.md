@@ -1,21 +1,19 @@
 # Insights Models
 
+Data models for Prisma Access Insights API responses.
+
 ## Overview
 
 The Insights models provide structured data representations for the Prisma Access Insights API responses. These models ensure type safety, data validation, and consistent interfaces when working with alerts, metrics, and other telemetry data from your Prisma Access deployment.
 
 ## Available Models
 
-### [Alert Models](alerts_models.md)
-Data models for security and operational alerts:
-- **Alert**: Complete alert data with severity, status, and metadata
-- **AlertStatistic**: Statistical aggregation of alert data
-- **AlertSeverity**: Constants for alert severity levels
-- **AlertStatus**: Constants for alert status values
+- [Alert Models](alerts_models.md) - Models for security and operational alerts
 
 ## Common Patterns
 
 ### Field Mapping
+
 Many Insights models use field aliases to provide more intuitive property names:
 
 ```python
@@ -27,6 +25,7 @@ name: Optional[str] = Field(None, alias="message")
 ```
 
 ### Flexible Response Handling
+
 Insights models are designed to handle varying response formats:
 
 ```python
@@ -38,6 +37,7 @@ model_config = ConfigDict(extra="allow")
 ```
 
 ### JSON Field Parsing
+
 Some fields may contain JSON strings that need parsing:
 
 ```python
@@ -56,33 +56,30 @@ def parse_json_string(cls, v):
 ## Model Categories
 
 ### Response Models
+
 These models represent data returned from the API:
+
 - Read-only fields like `id`, `created_at`, etc.
 - All fields from the resource
 - Timestamp and metadata fields
 
 ### Statistic Models
+
 These models represent aggregated data:
+
 - Count fields
 - Grouping fields (severity, category, state)
 - Time-based aggregations
 
 ### Enum Classes
+
 These provide constants for valid field values:
+
 - Severity levels (Critical, High, Medium, Low, etc.)
 - Status values (Raised, Cleared, etc.)
 - Other categorical values
 
-## Best Practices
+## Related Documentation
 
-1. **Type Safety**: Always use the provided models for type hints in your code
-2. **Field Access**: Use model properties rather than dictionary access
-3. **Validation**: Models automatically validate data on instantiation
-4. **Serialization**: Use `model_dump()` to convert models to dictionaries
-5. **Optional Fields**: Always check Optional fields before use
-
-## Next Steps
-
-- Review [Alert Models](alerts_models.md) for detailed alert data structures
-- Check the [Alerts Configuration](../../insights/alerts.md) for usage examples
-- See the main [SDK documentation](../../index.md) for general SDK patterns
+- [Alert Models](alerts_models.md) - Detailed alert data structures
+- [Alerts Configuration](../../insights/alerts.md) - Usage examples

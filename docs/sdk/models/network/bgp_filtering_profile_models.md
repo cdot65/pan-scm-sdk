@@ -1,15 +1,6 @@
 # BGP Filtering Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The BGP Filtering Profile models provide a structured way to represent and validate BGP filtering profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage route filtering through filter lists, network filters (distribute lists and prefix lists), route maps, conditional advertisement, and unsuppress maps. The IPv4 configuration supports separate unicast and multicast filtering, with multicast supporting either inheritance from unicast or its own independent filter configuration.
 
@@ -40,11 +31,11 @@ This is the base model containing fields common to all BGP filtering profile ope
 
 | Attribute | Type                      | Required | Default | Description                                                     |
 |-----------|---------------------------|----------|---------|-----------------------------------------------------------------|
-| name      | str                       | Yes      | None    | Profile name.                                                   |
-| ipv4      | BgpFilteringProfileIpv4   | No       | None    | IPv4 filtering configuration.                                   |
-| folder    | str                       | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet   | str                       | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device    | str                       | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Profile name.                                                   |
+| `ipv4` | `BgpFilteringProfileIpv4` | No       | None    | IPv4 filtering configuration.                                   |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -58,7 +49,7 @@ Extends `BgpFilteringProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                          |
 |-----------|------|----------|---------|------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP filtering profile   |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP filtering profile   |
 
 ### BgpFilteringProfileResponseModel
 
@@ -66,9 +57,10 @@ Extends `BgpFilteringProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                          |
 |-----------|------|----------|---------|------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP filtering profile   |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP filtering profile   |
 
-> **Note:** The `BgpFilteringProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `BgpFilteringProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -78,8 +70,8 @@ IPv4 container with unicast and multicast filtering.
 
 | Attribute | Type                         | Required | Default | Description           |
 |-----------|------------------------------|----------|---------|-----------------------|
-| unicast   | BgpFilter                    | No       | None    | Unicast filtering.    |
-| multicast | BgpFilteringProfileMulticast | No       | None    | Multicast filtering.  |
+| `unicast` | `BgpFilter` | No       | None    | Unicast filtering.    |
+| `multicast` | `BgpFilteringProfileMulticast` | No       | None    | Multicast filtering.  |
 
 ### BgpFilter
 
@@ -87,12 +79,12 @@ Shared BGP filter schema used by unicast filtering.
 
 | Attribute                 | Type                         | Required | Default | Description                          |
 |---------------------------|------------------------------|----------|---------|--------------------------------------|
-| filter_list               | BgpFilterList                | No       | None    | Filter list configuration.           |
-| inbound_network_filters   | BgpNetworkFilters            | No       | None    | Inbound network filters.             |
-| outbound_network_filters  | BgpNetworkFilters            | No       | None    | Outbound network filters.            |
-| route_maps                | BgpRouteMaps                 | No       | None    | Route maps configuration.            |
-| conditional_advertisement | BgpConditionalAdvertisement  | No       | None    | Conditional advertisement config.    |
-| unsuppress_map            | str                          | No       | None    | Unsuppress map name.                 |
+| `filter_list` | `BgpFilterList` | No       | None    | Filter list configuration.           |
+| `inbound_network_filters` | `BgpNetworkFilters` | No       | None    | Inbound network filters.             |
+| `outbound_network_filters` | `BgpNetworkFilters` | No       | None    | Outbound network filters.            |
+| `route_maps` | `BgpRouteMaps` | No       | None    | Route maps configuration.            |
+| `conditional_advertisement` | `BgpConditionalAdvertisement` | No       | None    | Conditional advertisement config.    |
+| `unsuppress_map` | `str` | No       | None    | Unsuppress map name.                 |
 
 ### BgpFilteringProfileMulticast
 
@@ -100,13 +92,13 @@ IPv4 multicast filtering. Uses oneOf semantics: `inherit` and filter fields are 
 
 | Attribute                 | Type                         | Required | Default | Description                          |
 |---------------------------|------------------------------|----------|---------|--------------------------------------|
-| inherit                   | bool                         | No*      | None    | Inherit filtering from unicast.      |
-| filter_list               | BgpFilterList                | No*      | None    | Filter list configuration.           |
-| inbound_network_filters   | BgpNetworkFilters            | No*      | None    | Inbound network filters.             |
-| outbound_network_filters  | BgpNetworkFilters            | No*      | None    | Outbound network filters.            |
-| route_maps                | BgpRouteMaps                 | No*      | None    | Route maps configuration.            |
-| conditional_advertisement | BgpConditionalAdvertisement  | No*      | None    | Conditional advertisement config.    |
-| unsuppress_map            | str                          | No*      | None    | Unsuppress map name.                 |
+| `inherit` | `bool` | No*      | None    | Inherit filtering from unicast.      |
+| `filter_list` | `BgpFilterList` | No*      | None    | Filter list configuration.           |
+| `inbound_network_filters` | `BgpNetworkFilters` | No*      | None    | Inbound network filters.             |
+| `outbound_network_filters` | `BgpNetworkFilters` | No*      | None    | Outbound network filters.            |
+| `route_maps` | `BgpRouteMaps` | No*      | None    | Route maps configuration.            |
+| `conditional_advertisement` | `BgpConditionalAdvertisement` | No*      | None    | Conditional advertisement config.    |
+| `unsuppress_map` | `str` | No*      | None    | Unsuppress map name.                 |
 
 \* `inherit` and filter fields (`filter_list`, `inbound_network_filters`, `outbound_network_filters`, `route_maps`, `conditional_advertisement`, `unsuppress_map`) are mutually exclusive.
 
@@ -116,8 +108,8 @@ Filter list with inbound and outbound references.
 
 | Attribute | Type | Required | Default | Description               |
 |-----------|------|----------|---------|---------------------------|
-| inbound   | str  | No       | None    | Inbound filter list name. |
-| outbound  | str  | No       | None    | Outbound filter list name.|
+| `inbound` | `str` | No       | None    | Inbound filter list name. |
+| `outbound` | `str` | No       | None    | Outbound filter list name.|
 
 ### BgpNetworkFilters
 
@@ -125,8 +117,8 @@ Network filters with distribute list and prefix list options.
 
 | Attribute       | Type | Required | Default | Description          |
 |-----------------|------|----------|---------|----------------------|
-| distribute_list | str  | No       | None    | Distribute list name.|
-| prefix_list     | str  | No       | None    | Prefix list name.    |
+| `distribute_list` | `str` | No       | None    | Distribute list name.|
+| `prefix_list` | `str` | No       | None    | Prefix list name.    |
 
 ### BgpRouteMaps
 
@@ -134,8 +126,8 @@ Route maps with inbound and outbound references.
 
 | Attribute | Type | Required | Default | Description              |
 |-----------|------|----------|---------|--------------------------|
-| inbound   | str  | No       | None    | Inbound route map name.  |
-| outbound  | str  | No       | None    | Outbound route map name. |
+| `inbound` | `str` | No       | None    | Inbound route map name.  |
+| `outbound` | `str` | No       | None    | Outbound route map name. |
 
 ### BgpConditionalAdvertisement
 
@@ -143,8 +135,8 @@ Conditional advertisement with exist and non-exist conditions.
 
 | Attribute | Type                                    | Required | Default | Description          |
 |-----------|-----------------------------------------|----------|---------|----------------------|
-| exist     | BgpConditionalAdvertisementCondition    | No       | None    | Exist condition.     |
-| non_exist | BgpConditionalAdvertisementCondition    | No       | None    | Non-exist condition. |
+| `exist` | `BgpConditionalAdvertisementCondition` | No       | None    | Exist condition.     |
+| `non_exist` | `BgpConditionalAdvertisementCondition` | No       | None    | Non-exist condition. |
 
 ### BgpConditionalAdvertisementCondition
 
@@ -152,7 +144,7 @@ Condition for conditional advertisement.
 
 | Attribute     | Type | Required | Default | Description          |
 |---------------|------|----------|---------|----------------------|
-| advertise_map | str  | No       | None    | Advertise map name.  |
+| `advertise_map` | `str` | No       | None    | Advertise map name.  |
 
 ## Exceptions
 

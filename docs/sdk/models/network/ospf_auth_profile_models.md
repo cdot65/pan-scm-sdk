@@ -1,15 +1,6 @@
 # OSPF Auth Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The OSPF Auth Profile models provide a structured way to represent and validate OSPF authentication profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage OSPF authentication settings, supporting both simple password and MD5 key-based authentication. The two authentication types are mutually exclusive -- a profile uses either a password or a list of MD5 keys, but not both.
 
@@ -26,7 +17,8 @@ The module provides the following Pydantic models:
 
 The `OspfAuthProfileBaseModel` and `OspfAuthProfileCreateModel` / `OspfAuthProfileUpdateModel` use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model. The `OspfAuthProfileResponseModel` uses `extra="ignore"` to provide resilience against unexpected fields returned by the API.
 
-> **Note:** The response model does NOT inherit from the base model. It defines its own fields because MD5 keys in responses use `OspfAuthProfileMd5KeyResponse` (with `extra="ignore"`) instead of `OspfAuthProfileMd5Key` (with `extra="forbid"`), since the API may return encrypted key values with additional metadata.
+!!! note
+    The response model does NOT inherit from the base model. It defines its own fields because MD5 keys in responses use `OspfAuthProfileMd5KeyResponse` (with `extra="ignore"`) instead of `OspfAuthProfileMd5Key` (with `extra="forbid"`), since the API may return encrypted key values with additional metadata.
 
 ## Model Attributes
 
@@ -36,12 +28,12 @@ This is the base model containing fields common to create and update OSPF auth p
 
 | Attribute | Type                        | Required | Default | Description                                                     |
 |-----------|-----------------------------|----------|---------|-----------------------------------------------------------------|
-| name      | str                         | Yes      | None    | Profile name.                                                   |
-| password  | str                         | No*      | None    | Simple password authentication.                                 |
-| md5       | List[OspfAuthProfileMd5Key] | No*      | None    | MD5 authentication keys.                                        |
-| folder    | str                         | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet   | str                         | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device    | str                         | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Profile name.                                                   |
+| `password` | `str` | No*      | None    | Simple password authentication.                                 |
+| `md5` | `List[OspfAuthProfileMd5Key]` | No*      | None    | MD5 authentication keys.                                        |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \* `password` and `md5` are mutually exclusive.
 
@@ -57,7 +49,7 @@ Extends `OspfAuthProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                       |
 |-----------|------|----------|---------|---------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the OSPF auth profile    |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the OSPF auth profile    |
 
 ### OspfAuthProfileResponseModel
 
@@ -65,15 +57,16 @@ This model is defined independently (not inheriting from `OspfAuthProfileBaseMod
 
 | Attribute | Type                                | Required | Default | Description                                                     |
 |-----------|-------------------------------------|----------|---------|-----------------------------------------------------------------|
-| id        | UUID                                | Yes      | None    | The unique identifier of the OSPF auth profile.                 |
-| name      | str                                 | Yes      | None    | Profile name.                                                   |
-| password  | str                                 | No       | None    | Simple password authentication (API returns encrypted value).   |
-| md5       | List[OspfAuthProfileMd5KeyResponse] | No       | None    | MD5 authentication keys (API returns encrypted values).         |
-| folder    | str                                 | No       | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet   | str                                 | No       | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device    | str                                 | No       | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the OSPF auth profile.                 |
+| `name` | `str` | Yes      | None    | Profile name.                                                   |
+| `password` | `str` | No       | None    | Simple password authentication (API returns encrypted value).   |
+| `md5` | `List[OspfAuthProfileMd5KeyResponse]` | No       | None    | MD5 authentication keys (API returns encrypted values).         |
+| `folder` | `str` | No       | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No       | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No       | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
-> **Note:** The `OspfAuthProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `OspfAuthProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -83,9 +76,9 @@ MD5 key entry for create/update operations. Uses `extra="forbid"`.
 
 | Attribute | Type | Required | Default | Description                        |
 |-----------|------|----------|---------|------------------------------------|
-| name      | int  | No       | None    | Key ID (1-255).                    |
-| key       | str  | No       | None    | MD5 hash. Max 16 characters.       |
-| preferred | bool | No       | None    | Whether this is the preferred key. |
+| `name` | `int` | No       | None    | Key ID (1-255).                    |
+| `key` | `str` | No       | None    | MD5 hash. Max 16 characters.       |
+| `preferred` | `bool` | No       | None    | Whether this is the preferred key. |
 
 ### OspfAuthProfileMd5KeyResponse
 
@@ -93,9 +86,9 @@ MD5 key entry for API responses. Uses `extra="ignore"` because the API may retur
 
 | Attribute | Type | Required | Default | Description                                       |
 |-----------|------|----------|---------|---------------------------------------------------|
-| name      | int  | No       | None    | Key ID (1-255).                                   |
-| key       | str  | No       | None    | MD5 hash (API returns encrypted value).            |
-| preferred | bool | No       | None    | Whether this is the preferred key.                |
+| `name` | `int` | No       | None    | Key ID (1-255).                                   |
+| `key` | `str` | No       | None    | MD5 hash (API returns encrypted value).            |
+| `preferred` | `bool` | No       | None    | Whether this is the preferred key.                |
 
 ## Exceptions
 

@@ -1,6 +1,6 @@
 # BGP Routing Models
 
-## Overview {#Overview}
+## Overview
 
 The BGP Routing models provide a structured way to manage BGP (Border Gateway Protocol) routing configurations in Palo Alto Networks' Strata Cloud Manager. These models define the structure, validation rules, and behavior for BGP routing settings, which control global routing preferences and behaviors for Service Connections.
 
@@ -24,12 +24,12 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 | Attribute                     | Type                                              | Required | Default | Description                                            |
 |-------------------------------|---------------------------------------------------|----------|---------|--------------------------------------------------------|
-| `routing_preference`          | Union[DefaultRoutingModel, HotPotatoRoutingModel] | No       | None    | The routing preference setting (default or hot potato) |
-| `backbone_routing`            | BackboneRoutingEnum                               | No       | None    | Controls asymmetric routing options                    |
-| `accept_route_over_SC`        | bool                                              | No       | None    | Whether to accept routes over service connections      |
-| `outbound_routes_for_services`| List[str]                                         | No       | []      | List of outbound routes for services in CIDR format    |
-| `add_host_route_to_ike_peer`  | bool                                              | No       | None    | Whether to add host route to IKE peer                  |
-| `withdraw_static_route`       | bool                                              | No       | None    | Whether to withdraw static routes                      |
+| `routing_preference`          | `Union[DefaultRoutingModel, HotPotatoRoutingModel]` | No       | None    | The routing preference setting (default or hot potato) |
+| `backbone_routing`            | `BackboneRoutingEnum` | No       | None    | Controls asymmetric routing options                    |
+| `accept_route_over_SC`        | `bool` | No       | None    | Whether to accept routes over service connections      |
+| `outbound_routes_for_services`| `List[str]` | No       | []      | List of outbound routes for services in CIDR format    |
+| `add_host_route_to_ike_peer`  | `bool` | No       | None    | Whether to add host route to IKE peer                  |
+| `withdraw_static_route`       | `bool` | No       | None    | Whether to withdraw static routes                      |
 
 Note: All fields are optional. For update operations, at least one field must be specified.
 

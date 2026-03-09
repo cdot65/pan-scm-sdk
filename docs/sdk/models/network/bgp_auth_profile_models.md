@@ -1,14 +1,6 @@
 # BGP Auth Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Exceptions](#exceptions)
-4. [Model Validators](#model-validators)
-5. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The BGP Auth Profile models provide a structured way to represent and validate BGP authentication profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage BGP MD5 authentication keys used to secure BGP peering sessions between routers.
 
@@ -31,11 +23,11 @@ This is the base model containing fields common to all BGP authentication profil
 
 | Attribute | Type | Required | Default | Description                                                     |
 |-----------|------|----------|---------|-----------------------------------------------------------------|
-| name      | str  | Yes      | None    | Profile name.                                                   |
-| secret    | str  | No       | None    | BGP authentication key (MD5 secret).                            |
-| folder    | str  | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet   | str  | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device    | str  | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Profile name.                                                   |
+| `secret` | `str` | No       | None    | BGP authentication key (MD5 secret).                            |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -49,7 +41,7 @@ Extends `BgpAuthProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP auth profile      |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP auth profile      |
 
 ### BgpAuthProfileResponseModel
 
@@ -57,9 +49,10 @@ Extends `BgpAuthProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP auth profile      |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP auth profile      |
 
-> **Note:** The `BgpAuthProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `BgpAuthProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Exceptions
 

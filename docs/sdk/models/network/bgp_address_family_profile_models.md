@@ -1,15 +1,6 @@
 # BGP Address Family Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Supporting Models](#supporting-models)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The BGP Address Family Profile models provide a structured way to represent and validate BGP address family profile configuration data for Palo Alto Networks' Strata Cloud Manager. These models control per-neighbor address family settings including add-path, allowas-in, maximum prefix limits, next-hop behavior, private AS removal, community handling, and ORF configuration.
 
@@ -43,11 +34,11 @@ This is the base model containing fields common to all BGP address family profil
 
 | Attribute | Type                                       | Required | Default | Description                                                     |
 |-----------|--------------------------------------------|----------|---------|-----------------------------------------------------------------|
-| name      | str                                        | Yes      | None    | Profile name.                                                   |
-| ipv4      | BgpAddressFamilyProfileIpv4UnicastMulticast | No       | None    | IPv4 address family configuration.                              |
-| folder    | str                                        | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
-| snippet   | str                                        | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
-| device    | str                                        | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `name` | `str` | Yes      | None    | Profile name.                                                   |
+| `ipv4` | `BgpAddressFamilyProfileIpv4UnicastMulticast` | No       | None    | IPv4 address family configuration.                              |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars. |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.  |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -61,7 +52,7 @@ Extends `BgpAddressFamilyProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                             |
 |-----------|------|----------|---------|---------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP address family profile |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP address family profile |
 
 ### BgpAddressFamilyProfileResponseModel
 
@@ -69,9 +60,10 @@ Extends `BgpAddressFamilyProfileBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                             |
 |-----------|------|----------|---------|---------------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the BGP address family profile |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the BGP address family profile |
 
-> **Note:** The `BgpAddressFamilyProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `BgpAddressFamilyProfileResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ## Supporting Models
 
@@ -81,8 +73,8 @@ IPv4 container wrapping unicast and multicast address families.
 
 | Attribute | Type            | Required | Default | Description              |
 |-----------|-----------------|----------|---------|--------------------------|
-| unicast   | BgpAddressFamily | No       | None    | Unicast address family.  |
-| multicast | BgpAddressFamily | No       | None    | Multicast address family.|
+| `unicast` | `BgpAddressFamily` | No       | None    | Unicast address family.  |
+| `multicast` | `BgpAddressFamily` | No       | None    | Multicast address family.|
 
 ### BgpAddressFamily
 
@@ -90,19 +82,19 @@ Core address family configuration, reused for both unicast and multicast.
 
 | Attribute                    | Type                          | Required | Default | Description                                              |
 |------------------------------|-------------------------------|----------|---------|----------------------------------------------------------|
-| enable                       | bool                          | No       | None    | Enable address family.                                   |
-| soft_reconfig_with_stored_info | bool                        | No       | None    | Soft reconfiguration with stored routes.                 |
-| add_path                     | BgpAddressFamilyAddPath       | No       | None    | Add-path configuration.                                  |
-| as_override                  | bool                          | No       | None    | Override ASNs in outbound updates if AS-Path equals Remote-AS. |
-| route_reflector_client       | bool                          | No       | None    | Route reflector client.                                  |
-| default_originate            | bool                          | No       | None    | Originate default route.                                 |
-| default_originate_map        | str                           | No       | None    | Default originate route map.                             |
-| allowas_in                   | BgpAddressFamilyAllowasIn     | No       | None    | Allow-AS-in configuration.                               |
-| maximum_prefix               | BgpAddressFamilyMaximumPrefix | No       | None    | Maximum prefix configuration.                            |
-| next_hop                     | BgpAddressFamilyNextHop       | No       | None    | Next-hop configuration.                                  |
-| remove_private_AS            | BgpAddressFamilyRemovePrivateAS | No     | None    | Remove private AS configuration.                         |
-| send_community               | BgpAddressFamilySendCommunity | No       | None    | Send community configuration.                            |
-| orf                          | BgpAddressFamilyOrf           | No       | None    | ORF configuration.                                       |
+| `enable` | `bool` | No       | None    | Enable address family.                                   |
+| `soft_reconfig_with_stored_info` | `bool` | No       | None    | Soft reconfiguration with stored routes.                 |
+| `add_path` | `BgpAddressFamilyAddPath` | No       | None    | Add-path configuration.                                  |
+| `as_override` | `bool` | No       | None    | Override ASNs in outbound updates if AS-Path equals Remote-AS. |
+| `route_reflector_client` | `bool` | No       | None    | Route reflector client.                                  |
+| `default_originate` | `bool` | No       | None    | Originate default route.                                 |
+| `default_originate_map` | `str` | No       | None    | Default originate route map.                             |
+| `allowas_in` | `BgpAddressFamilyAllowasIn` | No       | None    | Allow-AS-in configuration.                               |
+| `maximum_prefix` | `BgpAddressFamilyMaximumPrefix` | No       | None    | Maximum prefix configuration.                            |
+| `next_hop` | `BgpAddressFamilyNextHop` | No       | None    | Next-hop configuration.                                  |
+| `remove_private_AS` | `BgpAddressFamilyRemovePrivateAS` | No     | None    | Remove private AS configuration.                         |
+| `send_community` | `BgpAddressFamilySendCommunity` | No       | None    | Send community configuration.                            |
+| `orf` | `BgpAddressFamilyOrf` | No       | None    | ORF configuration.                                       |
 
 ### BgpAddressFamilyAddPath
 
@@ -110,8 +102,8 @@ Add-path configuration for advertising multiple paths.
 
 | Attribute          | Type | Required | Default | Description                          |
 |--------------------|------|----------|---------|--------------------------------------|
-| tx_all_paths       | bool | No       | None    | Advertise all paths to peer.         |
-| tx_bestpath_per_AS | bool | No       | None    | Advertise bestpath per neighboring AS.|
+| `tx_all_paths` | `bool` | No       | None    | Advertise all paths to peer.         |
+| `tx_bestpath_per_AS` | `bool` | No       | None    | Advertise bestpath per neighboring AS.|
 
 ### BgpAddressFamilyAllowasIn
 
@@ -119,8 +111,8 @@ Allow-AS-in configuration. Uses oneOf semantics: `origin` and `occurrence` are m
 
 | Attribute  | Type          | Required | Default | Description                                          |
 |------------|---------------|----------|---------|------------------------------------------------------|
-| origin     | Dict[str,Any] | No*      | None    | Allow origin AS in path.                             |
-| occurrence | int           | No*      | None    | Number of times own AS can appear in AS_PATH (1-10). |
+| `origin` | `Dict[str,Any]` | No*      | None    | Allow origin AS in path.                             |
+| `occurrence` | `int` | No*      | None    | Number of times own AS can appear in AS_PATH (1-10). |
 
 \* `origin` and `occurrence` are mutually exclusive.
 
@@ -130,9 +122,9 @@ Maximum prefix configuration for limiting the number of prefixes accepted from a
 
 | Attribute    | Type                               | Required | Default | Description                              |
 |--------------|------------------------------------|----------|---------|------------------------------------------|
-| num_prefixes | int                                | No       | None    | Maximum number of prefixes (1-4294967295).|
-| threshold    | int                                | No       | None    | Threshold percentage (1-100).            |
-| action       | BgpAddressFamilyMaximumPrefixAction | No       | None    | Action on limit.                         |
+| `num_prefixes` | `int` | No       | None    | Maximum number of prefixes (1-4294967295).|
+| `threshold` | `int` | No       | None    | Threshold percentage (1-100).            |
+| `action` | `BgpAddressFamilyMaximumPrefixAction` | No       | None    | Action on limit.                         |
 
 ### BgpAddressFamilyMaximumPrefixAction
 
@@ -140,8 +132,8 @@ Maximum prefix action. Uses oneOf semantics: `warning_only` and `restart` are mu
 
 | Attribute    | Type                                  | Required | Default | Description           |
 |--------------|---------------------------------------|----------|---------|-----------------------|
-| warning_only | Dict[str,Any]                         | No*      | None    | Warning only action.  |
-| restart      | BgpAddressFamilyMaximumPrefixRestart  | No*      | None    | Restart action.       |
+| `warning_only` | `Dict[str,Any]` | No*      | None    | Warning only action.  |
+| `restart` | `BgpAddressFamilyMaximumPrefixRestart` | No*      | None    | Restart action.       |
 
 \* `warning_only` and `restart` are mutually exclusive.
 
@@ -151,7 +143,7 @@ Restart configuration for maximum prefix action.
 
 | Attribute | Type | Required | Default | Description                    |
 |-----------|------|----------|---------|--------------------------------|
-| interval  | int  | No       | None    | Restart interval (1-65535).    |
+| `interval` | `int` | No       | None    | Restart interval (1-65535).    |
 
 ### BgpAddressFamilyNextHop
 
@@ -159,8 +151,8 @@ Next-hop configuration. Uses oneOf semantics: `self` and `self_force` are mutual
 
 | Attribute  | Type          | Required | Default | Description              |
 |------------|---------------|----------|---------|--------------------------|
-| self\_     | Dict[str,Any] | No*      | None    | Set next-hop to self. (alias: `self`) |
-| self_force | Dict[str,Any] | No*      | None    | Force next-hop to self.  |
+| `self\_` | `Dict[str,Any]` | No*      | None    | Set next-hop to self. (alias: `self`) |
+| `self_force` | `Dict[str,Any]` | No*      | None    | Force next-hop to self.  |
 
 \* `self` and `self_force` are mutually exclusive. Note: the Python attribute is `self_` with an underscore to avoid conflict with the Python keyword, but the serialized alias is `self`.
 
@@ -170,8 +162,8 @@ Remove private AS configuration. Uses oneOf semantics: `all` and `replace_AS` ar
 
 | Attribute  | Type          | Required | Default | Description                    |
 |------------|---------------|----------|---------|--------------------------------|
-| all        | Dict[str,Any] | No*      | None    | Remove all private AS numbers. |
-| replace_AS | Dict[str,Any] | No*      | None    | Replace private AS numbers.    |
+| `all` | `Dict[str,Any]` | No*      | None    | Remove all private AS numbers. |
+| `replace_AS` | `Dict[str,Any]` | No*      | None    | Replace private AS numbers.    |
 
 \* `all` and `replace_AS` are mutually exclusive.
 
@@ -181,11 +173,11 @@ Send community configuration. Uses oneOf semantics: at most one type can be set.
 
 | Attribute | Type          | Required | Default | Description                         |
 |-----------|---------------|----------|---------|-------------------------------------|
-| all       | Dict[str,Any] | No*      | None    | Send all communities.               |
-| both      | Dict[str,Any] | No*      | None    | Send both standard and extended.    |
-| extended  | Dict[str,Any] | No*      | None    | Send extended communities.          |
-| large     | Dict[str,Any] | No*      | None    | Send large communities.             |
-| standard  | Dict[str,Any] | No*      | None    | Send standard communities.          |
+| `all` | `Dict[str,Any]` | No*      | None    | Send all communities.               |
+| `both` | `Dict[str,Any]` | No*      | None    | Send both standard and extended.    |
+| `extended` | `Dict[str,Any]` | No*      | None    | Send extended communities.          |
+| `large` | `Dict[str,Any]` | No*      | None    | Send large communities.             |
+| `standard` | `Dict[str,Any]` | No*      | None    | Send standard communities.          |
 
 \* At most one of `all`, `both`, `extended`, `large`, or `standard` may be set.
 
@@ -195,7 +187,7 @@ Outbound Route Filtering configuration.
 
 | Attribute       | Type | Required | Default | Description                                            |
 |-----------------|------|----------|---------|--------------------------------------------------------|
-| orf_prefix_list | str  | No       | None    | ORF prefix list mode. Pattern: `^(none\|both\|receive\|send)$` |
+| `orf_prefix_list` | `str` | No       | None    | ORF prefix list mode. Pattern: `^(none\|both\|receive\|send)$` |
 
 ## Exceptions
 

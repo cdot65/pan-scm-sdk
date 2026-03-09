@@ -18,14 +18,14 @@ All models use `extra="forbid"` to reject undefined fields.
 
 | Attribute                      | Type       | Required | Default | Description                               |
 |--------------------------------|------------|----------|---------|-------------------------------------------|
-| `name`                         | str        | Yes      | None    | Interface name (e.g., "tunnel.1")         |
-| `comment`                      | str        | No       | None    | Description (max 1023 chars)              |
-| `ip`                           | List[str]  | No       | None    | IPv4 addresses                            |
-| `mtu`                          | int        | No       | 1500    | MTU (576-9216)                            |
-| `interface_management_profile` | str        | No       | None    | Management profile (max 31 chars)         |
-| `folder`                       | str        | No*      | None    | Folder container                          |
-| `snippet`                      | str        | No*      | None    | Snippet container                         |
-| `device`                       | str        | No*      | None    | Device container                          |
+| `name`                         | `str` | Yes      | None    | Interface name (e.g., "tunnel.1")         |
+| `comment`                      | `str` | No       | None    | Description (max 1023 chars)              |
+| `ip`                           | `List[str]` | No       | None    | IPv4 addresses                            |
+| `mtu`                          | `int` | No       | 1500    | MTU (576-9216)                            |
+| `interface_management_profile` | `str` | No       | None    | Management profile (max 31 chars)         |
+| `folder`                       | `str` | No*      | None    | Folder container                          |
+| `snippet`                      | `str` | No*      | None    | Snippet container                         |
+| `device`                       | `str` | No*      | None    | Device container                          |
 
 \* Exactly one container required for create operations
 

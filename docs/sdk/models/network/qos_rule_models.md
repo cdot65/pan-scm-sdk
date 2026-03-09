@@ -1,15 +1,6 @@
 # QoS Rule Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enumerations](#enumerations)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The QoS Rule models provide a structured way to represent and validate QoS policy rule configuration data for Palo Alto Networks' Strata Cloud Manager. These models manage QoS rule definitions that classify traffic and assign it to QoS classes, supporting DSCP/TOS markings, schedule-based policies, and rule positioning within the rulebase.
 
@@ -40,14 +31,14 @@ This is the base model containing fields common to all QoS rule operations.
 
 | Attribute     | Type              | Required | Default | Description                                                                 |
 |---------------|-------------------|----------|---------|-----------------------------------------------------------------------------|
-| name          | str               | Yes      | None    | QoS rule name.                                                              |
-| description   | str               | No       | None    | Description of the QoS rule.                                                |
-| action        | Dict[str, Any]    | No       | None    | QoS action configuration with 'class' field referencing a QoS profile class.|
-| schedule      | str               | No       | None    | Schedule for the QoS rule.                                                  |
-| dscp_tos      | Dict[str, Any]    | No       | None    | DSCP/TOS codepoint settings.                                                |
-| folder        | str               | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.              |
-| snippet       | str               | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.             |
-| device        | str               | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.              |
+| `name` | `str` | Yes      | None    | QoS rule name.                                                              |
+| `description` | `str` | No       | None    | Description of the QoS rule.                                                |
+| `action` | `Dict[str, Any]` | No       | None    | QoS action configuration with 'class' field referencing a QoS profile class.|
+| `schedule` | `str` | No       | None    | Schedule for the QoS rule.                                                  |
+| `dscp_tos` | `Dict[str, Any]` | No       | None    | DSCP/TOS codepoint settings.                                                |
+| `folder` | `str` | No**     | None    | Folder location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.              |
+| `snippet` | `str` | No**     | None    | Snippet location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.             |
+| `device` | `str` | No**     | None    | Device location. Pattern: `^[a-zA-Z\d\-_. ]+$`. Max 64 chars.              |
 
 \** Exactly one container (folder/snippet/device) must be provided for create operations
 
@@ -61,7 +52,7 @@ Extends `QosRuleBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the QoS rule              |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the QoS rule              |
 
 ### QosRuleResponseModel
 
@@ -69,9 +60,10 @@ Extends `QosRuleBaseModel` by adding:
 
 | Attribute | Type | Required | Default | Description                                        |
 |-----------|------|----------|---------|----------------------------------------------------|
-| id        | UUID | Yes      | None    | The unique identifier of the QoS rule              |
+| `id` | `UUID` | Yes      | None    | The unique identifier of the QoS rule              |
 
-> **Note:** The `QosRuleResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
+!!! note
+    The `QosRuleResponseModel` uses `extra="ignore"` instead of `extra="forbid"`. This means it will silently ignore any extra fields returned by the API that are not defined in the model, providing resilience against API changes.
 
 ### QosRuleMoveModel
 
@@ -79,9 +71,9 @@ Model for QoS rule move (reorder) operations within the rulebase.
 
 | Attribute        | Type                | Required | Default | Description                                                       |
 |------------------|---------------------|----------|---------|-------------------------------------------------------------------|
-| destination      | QosMoveDestination  | Yes      | None    | Where to move the rule (top, bottom, before, after).              |
-| rulebase         | QosRulebase         | Yes      | None    | Which rulebase to use (pre or post).                              |
-| destination_rule | UUID                | No       | None    | UUID of the reference rule for before/after moves.                |
+| `destination` | `QosMoveDestination` | Yes      | None    | Where to move the rule (top, bottom, before, after).              |
+| `rulebase` | `QosRulebase` | Yes      | None    | Which rulebase to use (pre or post).                              |
+| `destination_rule` | `UUID` | No       | None    | UUID of the reference rule for before/after moves.                |
 
 ## Enumerations
 
