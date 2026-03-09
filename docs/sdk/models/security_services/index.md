@@ -1,24 +1,8 @@
 # Security Services Data Models
 
-## Table of Contents
+Pydantic models for validating and serializing security service configuration resources in the Strata Cloud Manager SDK.
 
-1. [Overview](#overview)
-2. [Model Types](#model-types)
-3. [Common Model Patterns](#common-model-patterns)
-4. [Usage Examples](#usage-examples)
-5. [Models by Category](#models-by-category)
-   1. [Security Rules](#security-rules)
-   2. [Anti-Spyware Profile](#anti-spyware-profile)
-   3. [Decryption Profile](#decryption-profile)
-   4. [DNS Security Profile](#dns-security-profile)
-   5. [URL Categories](#url-categories)
-   6. [Vulnerability Protection Profile](#vulnerability-protection-profile)
-   7. [WildFire Antivirus Profile](#wildfire-antivirus-profile)
-6. [Best Practices](#best-practices)
-7. [Related Documentation](#related-documentation)
-
-## Overview {#Overview}
-<span id="overview"></span>
+## Overview
 
 The Strata Cloud Manager SDK uses Pydantic models for data validation and serialization of security services. These models ensure that the data being sent to and received from the Strata Cloud Manager API adheres to the expected structure and constraints. This section documents the models for security service configuration resources.
 
@@ -44,9 +28,11 @@ Security service models share common patterns:
 
 ## Usage Examples
 
+### Creating a Security Rule
+
 ```python
 from scm.client import ScmClient
-from scm.models.security import SecurityRuleCreateModel, SecurityRuleUpdateModel
+from scm.models.security import SecurityRuleCreateModel
 
 # Initialize client
 client = ScmClient(
@@ -69,18 +55,15 @@ security_rule = SecurityRuleCreateModel(
 # Convert the model to a dictionary for the API call
 rule_dict = security_rule.model_dump(exclude_unset=True)
 result = client.security_rule.create(rule_dict)
+```
 
-# Update an existing security rule using a model
-update_rule = SecurityRuleUpdateModel(
-   id=result.id,
-   name="allow-web-traffic-updated",
-   description="Updated web traffic rule",
-   application=["web-browsing", "ssl"],
-   folder="Security Policies"
-)
+### Parsing a Response
 
-update_dict = update_rule.model_dump(exclude_unset=True)
-updated_result = client.security_rule.update(update_dict)
+```python
+from scm.models.security import SecurityRuleResponseModel
+
+response = SecurityRuleResponseModel(**api_response)
+print(f"Rule: {response.name}, Action: {response.action}")
 ```
 
 ## Models by Category
@@ -97,9 +80,21 @@ updated_result = client.security_rule.update(update_dict)
 
 - [Decryption Profile Models](decryption_profile_models.md) - SSL/TLS decryption profiles
 
+### Decryption Rule
+
+- [Decryption Rule Models](decryption_rule_models.md) - SSL/TLS decryption rules
+
 ### DNS Security Profile
 
 - [DNS Security Profile Models](dns_security_profile_models.md) - DNS security profiles
+
+### File Blocking Profile
+
+- [File Blocking Profile Models](file_blocking_profile_models.md) - File blocking security profiles
+
+### URL Access Profile
+
+- [URL Access Profile Models](url_access_profile_models.md) - URL access filtering profiles
 
 ### URL Categories
 
@@ -113,51 +108,10 @@ updated_result = client.security_rule.update(update_dict)
 
 - [WildFire Antivirus Profile Models](wildfire_antivirus_profile_models.md) - WildFire and Antivirus profiles
 
-### File Blocking Profile
-
-- [File Blocking Profile Models](file_blocking_profile_models.md) - File blocking security profiles
-
-### URL Access Profile
-
-- [URL Access Profile Models](url_access_profile_models.md) - URL access filtering profiles
-
 ### App Override Rule
 
 - [App Override Rule Models](app_override_rule_models.md) - Application override rules
 
-### Decryption Rule
-
-- [Decryption Rule Models](decryption_rule_models.md) - SSL/TLS decryption rules
-
 ### Authentication Rule
 
 - [Authentication Rule Models](authentication_rule_models.md) - Authentication policy rules
-
-## Best Practices
-
-1. **Model Validation**
-   - Always validate security configuration data with models before sending to the API
-   - Handle validation errors appropriately for security policy data
-   - Use model_dump(exclude_unset=True) to avoid sending default values in security policies
-
-2. **Security Rule Configuration**
-   - Ensure source and destination attributes are properly formatted
-   - Validate application and service combinations
-   - Remember that security rule order is important for policy evaluation
-   - Test security rules in a non-production environment first
-
-3. **Security Profile Association**
-   - Validate that referenced security profiles exist before associating them with rules
-   - Use consistent security profile naming conventions
-   - Understand the implications of profile group vs. individual profile attachments
-
-4. **Policy Validation**
-   - Test security rules with model validation before deployment
-   - Validate security profile settings against expected protection levels
-   - Ensure security policies don't conflict with other existing policies
-
-## Related Documentation
-
-- [Security Service Configuration](../../config/security_services/index.md) - Working with security services
-- [Security Rule Configuration](../../config/security_services/security_rule.md) - Security rule operations
-- [Anti-Spyware Configuration](../../config/security_services/anti_spyware_profile.md) - Anti-spyware profile operations

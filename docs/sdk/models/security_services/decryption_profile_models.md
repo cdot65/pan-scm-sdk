@@ -1,20 +1,10 @@
 # Decryption Profile Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Supporting Models](#supporting-models)
-5. [Exceptions](#exceptions)
-6. [Model Validators](#model-validators)
-7. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Decryption Profile models provide a structured way to manage SSL/TLS decryption settings in Palo Alto Networks' Strata Cloud Manager. These models support configuring forward proxy, inbound proxy, and no-proxy SSL settings, as well as protocol-specific settings like allowed algorithms and TLS versions. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -81,7 +71,7 @@ Defines the SSL/TLS version options:
 | `tls1-3` | TLS version 1.3      |
 | `max`    | Maximum available    |
 
-## Supporting Models
+## Component Models
 
 ### SSLProtocolSettings
 

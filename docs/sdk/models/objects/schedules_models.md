@@ -1,10 +1,10 @@
 # Schedule Models
 
-## Overview {#Overview}
+## Overview
 
 The Schedule models provide a structured way to manage time-based schedules in Palo Alto Networks' Strata Cloud Manager. These models support defining recurring schedules (weekly or daily) and non-recurring schedules. Schedules are used to specify time periods when security policies should be active, and can be defined in folders, snippets, or devices. The models handle validation of inputs and outputs when interacting with the SCM API, including format validation for time ranges and date-time specifications.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -19,26 +19,7 @@ The module provides the following Pydantic models:
 
 All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
-## Model Hierarchy
-
-The Schedule models use a hierarchical structure to represent different schedule types:
-
-1. **Base Models**:
-   - `ScheduleBaseModel`: Common fields for all schedule objects
-   - `ScheduleCreateModel`: For creating new schedules
-   - `ScheduleUpdateModel`: For updating existing schedules
-   - `ScheduleResponseModel`: For API responses
-
-2. **Schedule Type Models**:
-   - `ScheduleTypeModel`: Container for either recurring or non-recurring schedules
-   - `RecurringScheduleModel`: Container for either weekly or daily schedules
-   - `WeeklyScheduleModel`: Weekly time ranges for each day of the week
-   - `DailyScheduleModel`: Daily time ranges
-   - `NonRecurringScheduleModel`: One-time schedules with date-time ranges
-
 ## Attributes
-
-### Schedule Base Model Attributes
 
 | Attribute       | Type                | Required | Default | Description                                                         |
 |-----------------|---------------------|----------|---------|---------------------------------------------------------------------|
@@ -52,13 +33,13 @@ The Schedule models use a hierarchical structure to represent different schedule
 \* Exactly one container type (folder/snippet/device) must be provided for create operations
 \** Only required for update and response models
 
-### Schedule Type Model Attributes
+## Component Models
 
 | Model                     | Attributes                                                            | Format                                             |
 |---------------------------|-----------------------------------------------------------------------|---------------------------------------------------|
-| WeeklyScheduleModel       | sunday, monday, tuesday, wednesday, thursday, friday, saturday        | List of time ranges ("hh:mm-hh:mm")               |
-| DailyScheduleModel        | daily                                                                 | List of time ranges ("hh:mm-hh:mm")               |
-| NonRecurringScheduleModel | non_recurring                                                         | List of datetime ranges ("YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm") |
+| `WeeklyScheduleModel`     | sunday, monday, tuesday, wednesday, thursday, friday, saturday        | List of time ranges ("hh:mm-hh:mm")               |
+| `DailyScheduleModel`      | daily                                                                 | List of time ranges ("hh:mm-hh:mm")               |
+| `NonRecurringScheduleModel` | non_recurring                                                       | List of datetime ranges ("YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm") |
 
 ## Exceptions
 
@@ -361,28 +342,3 @@ updated = client.schedule.update(existing)
 print(f"Updated schedule: {updated.name}")
 ```
 
-## Best Practices
-
-1. **Time Formatting**
-   - Always use the correct format for time ranges ("hh:mm-hh:mm")
-   - Always use the correct format for datetime ranges ("YYYY/MM/DD@hh:mm-YYYY/MM/DD@hh:mm")
-   - Include leading zeros for hours, minutes, months, and days
-   - Validate time ranges before submission
-
-2. **Schedule Types**
-   - Use weekly schedules for time patterns that vary by day of the week
-   - Use daily schedules for consistent daily time patterns
-   - Use non-recurring schedules for one-time events
-
-3. **Naming Conventions**
-   - Use descriptive names that indicate the schedule's purpose
-   - Consider including time or frequency information in the name
-   - Use consistent naming patterns
-   - Avoid special characters
-   - Document naming standards
-
-4. **Multiple Time Ranges**
-   - For complex time patterns (like split shifts), use multiple time ranges within a day
-   - Order time ranges chronologically
-   - Avoid overlapping time ranges
-   - Consider using separate schedules for very different patterns

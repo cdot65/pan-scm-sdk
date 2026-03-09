@@ -1,12 +1,12 @@
 # HIP Object Models
 
-## Overview {#Overview}
+## Overview
 
 The HIP Object models provide a structured way to manage Host Information Profile (HIP) objects in Palo Alto Networks'
 Strata Cloud Manager. These models support comprehensive host profiling including host information, network details,
 security products, mobile device management, certificate validation, and custom checks.
 
-### Models
+## Models
 
 | Model                    | Purpose                                          |
 |--------------------------|--------------------------------------------------|
@@ -182,43 +182,3 @@ if existing.host_info and existing.host_info.criteria:
 updated = client.hip_object.update(existing)
 ```
 
-## Best Practices
-
-1. **Profile Management**
-    - Use descriptive names for profiles
-    - Document profile purposes
-    - Group related criteria
-    - Keep profiles focused
-    - Review and update regularly
-
-2. **Container Management**
-    - Always specify exactly one container type
-    - Use consistent container names
-    - Validate container existence
-    - Group related configurations
-
-3. **Security**
-    - Set appropriate patch requirements
-    - Enable disk encryption checks
-    - Validate mobile device security
-    - Check certificate validity
-    - Monitor compliance status
-
-4. **Performance**
-    - Use efficient criteria combinations
-    - Avoid overly complex rules
-    - Monitor evaluation times
-    - Test profile impacts
-    - Optimize rule ordering
-
-## Related Models
-
-- HostInfoModel
-- NetworkInfoModel
-- PatchManagementModel
-- DiskEncryptionModel
-- MobileDeviceModel
-- CertificateModel
-- CustomChecksModel (includes ProcessListItemModel, RegistryKeyModel, RegistryValueModel, PlistModel, PlistKeyModel)
-
-These related models are defined within the same file and described in the Attributes section above.

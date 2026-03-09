@@ -1,22 +1,13 @@
 # Authentication Rule Models
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Model Attributes](#model-attributes)
-3. [Enum Types](#enum-types)
-4. [Exceptions](#exceptions)
-5. [Model Validators](#model-validators)
-6. [Usage Examples](#usage-examples)
-
-## Overview {#Overview}
+## Overview
 
 The Authentication Rule models provide a structured way to manage authentication rules in Palo Alto Networks' Strata
 Cloud Manager. These models support defining identity-based policies with source/destination zones, addresses, users,
 and authentication enforcement profiles. Rules can be defined in folders, snippets, or devices and placed in either pre
 or post rulebases. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 

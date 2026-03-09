@@ -1,12 +1,12 @@
 # HIP Profile Models
 
-## Overview {#Overview}
+## Overview
 
 The HIP Profile models provide a structured way to manage Host Information Profile (HIP) profiles in Palo Alto Networks'
 Strata Cloud Manager. These models define the match criteria expressions used to associate HIP objects with policy rules,
 enabling dynamic security policy enforcement based on host posture assessments.
 
-### Models
+## Models
 
 | Model                     | Purpose                                          |
 |---------------------------|--------------------------------------------------|
@@ -155,34 +155,3 @@ match = '("is-win" or "is-mac") and "is-firewall-enabled"'
 match = '("is-win" and "is-firewall-enabled") or ("is-mac" and "is-mac-firewall-enabled")'
 ```
 
-## Best Practices
-
-1. **Match Expression Design**
-    - Use quoted object names (e.g., `"is-win"`)
-    - Maintain clear boolean logic with parentheses
-    - Verify HIP objects exist before referencing them
-    - Keep expressions simple and maintainable
-    - Test expressions against expected hosts
-
-2. **Container Management**
-    - Always specify exactly one container type
-    - Use consistent container names
-    - Validate container existence
-    - Group related profiles
-
-3. **Performance**
-    - Keep match expressions concise
-    - Avoid overly complex expressions
-    - Test profile evaluation performance
-    - Consider impact on policy processing
-
-4. **Security**
-    - Document profile purposes
-    - Review profiles regularly
-    - Use clear naming conventions
-    - Consider least privilege principles
-    - Validate match expressions
-
-## Related Models
-
-- HIP Objects - See [HIP Object Models](../../models/objects/hip_object_models.md)

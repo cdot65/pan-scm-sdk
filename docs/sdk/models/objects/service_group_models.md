@@ -1,10 +1,10 @@
 # Service Group Models
 
-## Overview {#Overview}
+## Overview
 
 The Service Group models provide a structured way to manage service group objects in Palo Alto Networks' Strata Cloud Manager. These models support creating and managing collections of services with a static list of service references. The models handle validation of inputs and outputs when interacting with the SCM API.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -160,20 +160,3 @@ for group in groups:
         print(f"  Tags: {', '.join(group.tag)}")
 ```
 
-## Best Practices
-
-### Member Management
-- Use descriptive member names that reference existing service objects
-- Members must be references to existing service or service group objects in SCM
-- Avoid using predefined service names like 'HTTP' or 'HTTPS' directly
-- Keep member lists organized and documented
-
-### Container Management
-- Always specify exactly one container type (folder, snippet, or device)
-- Use consistent naming conventions for service groups
-- Organize service groups logically by function or application
-
-### Validation
-- Handle validation errors appropriately in your application
-- Ensure all members and tags are unique within their lists
-- Validate that referenced services exist before creating groups

@@ -1,10 +1,10 @@
 # Quarantined Devices Models
 
-## Overview {#Overview}
+## Overview
 
 Quarantined Devices allow you to manage devices that have been quarantined in Palo Alto Networks' Strata Cloud Manager. These models define the structure for creating and retrieving quarantined device configurations.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -15,7 +15,9 @@ The module provides the following Pydantic models:
 
 All models use `extra="forbid"` configuration, which rejects any fields not explicitly defined in the model.
 
-## QuarantinedDevicesBaseModel
+## Base Models
+
+### QuarantinedDevicesBaseModel
 
 The `QuarantinedDevicesBaseModel` contains fields common to all quarantined device CRUD operations.
 
@@ -24,7 +26,7 @@ The `QuarantinedDevicesBaseModel` contains fields common to all quarantined devi
 | host_id | str | Yes | - | Device host ID |
 | serial_number | Optional[str] | No | None | Device serial number |
 
-## QuarantinedDevicesCreateModel
+### QuarantinedDevicesCreateModel
 
 The `QuarantinedDevicesCreateModel` extends the base model for creating new quarantined devices.
 
@@ -32,7 +34,7 @@ The `QuarantinedDevicesCreateModel` extends the base model for creating new quar
 |-----------|------|----------|---------|-------------|
 | *All attributes from QuarantinedDevicesBaseModel* |  |  |  |  |
 
-## QuarantinedDevicesResponseModel
+### QuarantinedDevicesResponseModel
 
 The `QuarantinedDevicesResponseModel` extends the base model and represents the API response.
 
@@ -40,7 +42,7 @@ The `QuarantinedDevicesResponseModel` extends the base model and represents the 
 |-----------|------|----------|---------|-------------|
 | *All attributes from QuarantinedDevicesBaseModel* |  |  |  |  |
 
-## QuarantinedDevicesListParamsModel
+### QuarantinedDevicesListParamsModel
 
 The `QuarantinedDevicesListParamsModel` defines parameters for filtering list operations.
 
@@ -100,14 +102,3 @@ client.quarantined_device.delete("device-12345")
 print("Device deleted successfully")
 ```
 
-## Best Practices
-
-### Device Management
-- Always provide a valid `host_id` when creating quarantined devices
-- Use the `serial_number` field when available for better device identification
-- Verify device existence before deletion using the `list()` method
-
-### Error Handling
-- Handle `InvalidObjectError` for invalid request payloads
-- Handle `MissingQueryParameterError` when host_id is missing for delete operations
-- Validate `host_id` is not empty before calling `delete()`

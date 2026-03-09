@@ -1,8 +1,8 @@
 # Auto Tag Actions Models
 
-This page describes the Pydantic models used for Auto Tag Actions configuration in the Strata Cloud Manager SDK.
+Pydantic models for managing auto tag action objects in Strata Cloud Manager.
 
-## Overview {#Overview}
+## Overview
 
 Auto Tag Actions models define the data structures for automated tag assignment based on traffic patterns, security events, and other triggers. These models handle attributes such as:
 
@@ -53,9 +53,7 @@ class AutoTagActionResponse(BaseModel):
     hit_count: Optional[int] = None
 ```
 
-## Match Criteria Models
-
-Models for defining when auto tag actions should be triggered.
+## Component Models
 
 ### AutoTagMatchCriteria
 
@@ -111,10 +109,6 @@ class AutoTagDestinationCriteria(BaseModel):
     domain_contains: Optional[List[str]] = None
 ```
 
-## Scope Models
-
-Models for defining the scope of auto tag actions.
-
 ### AutoTagScope
 
 ```python
@@ -124,10 +118,6 @@ class AutoTagScope(BaseModel):
     vsys: Optional[List[str]] = None
     apply_to: Optional[Literal["source", "destination", "both"]] = "source"
 ```
-
-## Tag Models
-
-Models for tag references in auto tag actions.
 
 ### TagReference
 
@@ -145,10 +135,6 @@ class TagResponse(BaseModel):
     name: str
     color: Optional[str] = None
 ```
-
-## List Models
-
-Models for paginated list responses.
 
 ### AutoTagActionListResponse
 

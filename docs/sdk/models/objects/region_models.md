@@ -1,10 +1,10 @@
 # Region Models
 
-## Overview {#Overview}
+## Overview
 
 Region objects define geographic locations and network addresses in Palo Alto Networks' Strata Cloud Manager. These models provide the structure for creating, updating, and retrieving region configurations.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -18,7 +18,9 @@ All models use `extra="forbid"` configuration, which rejects any fields not expl
 
 **Note:** The `description` and `tag` fields are included in the SDK models for consistency with other object types, but they are **not supported** by the Strata Cloud Manager API for Region objects. They will be automatically excluded when sending requests to the API.
 
-## GeoLocation
+## Component Models
+
+### GeoLocation
 
 The `GeoLocation` model defines the geographic coordinates of a region with valid latitude and longitude values.
 
@@ -27,7 +29,9 @@ The `GeoLocation` model defines the geographic coordinates of a region with vali
 | latitude   | float | Yes      | -       | The latitudinal position (-90 to 90 degrees)   |
 | longitude  | float | Yes      | -       | The longitudinal position (-180 to 180 degrees)|
 
-## RegionBaseModel
+## Base Models
+
+### RegionBaseModel
 
 The `RegionBaseModel` contains fields common to all region CRUD operations.
 
@@ -42,38 +46,10 @@ The `RegionBaseModel` contains fields common to all region CRUD operations.
 | snippet       | Optional[str]           | No       | None    | The snippet in which the resource is defined (max length: 64)   |
 | device        | Optional[str]           | No       | None    | The device in which the resource is defined (max length: 64)    |
 
-### Field Validators
+!!! note
+    The `address` and `tag` fields include validators that convert single strings to lists and ensure all values are unique.
 
-The model includes validators for the `address` and `tag` fields:
-
-```python
-@field_validator("address", "tag", mode="before")
-def ensure_list_of_strings(cls, v):
-    """Converts single string to list if needed."""
-    if v is None:
-        return v
-    if isinstance(v, str):
-        return [v]
-    if isinstance(v, list):
-        return v
-    raise ValueError("Value must be a string or a list of strings")
-
-@field_validator("address")
-def ensure_unique_addresses(cls, v):
-    """Ensures all addresses in the list are unique."""
-    if v is not None and len(v) != len(set(v)):
-        raise ValueError("List of addresses must contain unique values")
-    return v
-
-@field_validator("tag")
-def ensure_unique_tags(cls, v):
-    """Ensures all tags in the list are unique."""
-    if v is not None and len(v) != len(set(v)):
-        raise ValueError("List of tags must contain unique values")
-    return v
-```
-
-## RegionCreateModel
+#### RegionCreateModel
 
 The `RegionCreateModel` extends the base model and includes validation to ensure that exactly one container type is provided.
 
@@ -81,35 +57,9 @@ The `RegionCreateModel` extends the base model and includes validation to ensure
 |----------------------------------------|------|----------|---------|-------------|
 | *All attributes from RegionBaseModel*  |      |          |         |             |
 
-### Container Type Validation
+When creating a region, exactly one container type (`folder`, `snippet`, or `device`) must be provided.
 
-When creating a region, exactly one of the following container types must be provided:
-- `folder`: The folder in which the resource is defined
-- `snippet`: The snippet in which the resource is defined
-- `device`: The device in which the resource is defined
-
-This validation is enforced by the `validate_container_type` model validator.
-
-```python
-@model_validator(mode="after")
-def validate_container_type(self) -> "RegionCreateModel":
-    """Validates that exactly one container type is provided."""
-    container_fields = [
-        "folder",
-        "snippet",
-        "device",
-    ]
-    provided = [
-        field for field in container_fields if getattr(self, field) is not None
-    ]
-    if len(provided) != 1:
-        raise ValueError(
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-        )
-    return self
-```
-
-## RegionUpdateModel
+#### RegionUpdateModel
 
 The `RegionUpdateModel` extends the base model and adds the ID field required for updating existing region objects.
 
@@ -118,7 +68,7 @@ The `RegionUpdateModel` extends the base model and adds the ID field required fo
 | id                                     | UUID | Yes      | -       | The UUID of the region    |
 | *All attributes from RegionBaseModel*  |      |          |         |                           |
 
-## RegionResponseModel
+### RegionResponseModel
 
 The `RegionResponseModel` extends the base model and includes the ID field returned in API responses.
 
@@ -213,30 +163,3 @@ for region in regions:
         print(f"  Addresses: {', '.join(region.address)}")
 ```
 
-## Best Practices
-
-### Geographic Locations
-- Provide accurate latitude and longitude coordinates
-- Use decimal degrees format for coordinates
-- Ensure coordinates are within valid ranges (latitude: -90 to 90, longitude: -180 to 180)
-
-### Address Management
-- Use CIDR notation for IP networks (e.g., "10.0.0.0/8")
-- Keep address lists concise and organized by logical grouping
-- Avoid overlapping network ranges when possible
-- Ensure all addresses in a region's list are unique
-
-### Container Management
-- Always specify exactly one container type (folder, snippet, or device)
-- Use consistent naming conventions for regions
-- Organize regions logically by geographic location or network function
-
-### Validation
-- Handle validation errors appropriately in your application
-- Check for input errors, especially with latitude/longitude ranges
-- Remember that predefined regions may not have an ID
-
-## Related Models
-
-- [Address Models](address_models.md): For defining IP addresses that can be referenced by regions
-- [Tag Models](tag_models.md): For adding tags to classify and organize regions

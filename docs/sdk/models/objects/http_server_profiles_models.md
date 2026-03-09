@@ -1,10 +1,10 @@
 # HTTP Server Profile Models
 
-## Overview {#Overview}
+## Overview
 
 HTTP Server Profiles allow you to configure HTTP servers that can receive logs from Palo Alto Networks' Strata Cloud Manager. These models define the structure for creating, updating, and retrieving HTTP server profile configurations.
 
-### Models
+## Models
 
 The module provides the following Pydantic models:
 
@@ -15,7 +15,9 @@ The module provides the following Pydantic models:
 - `HTTPServerProfileUpdateModel`: Model for updating existing HTTP server profiles
 - `HTTPServerProfileResponseModel`: Response model for HTTP server profile operations
 
-## ServerModel
+## Component Models
+
+### ServerModel
 
 The `ServerModel` represents a server configuration within an HTTP server profile.
 
@@ -31,7 +33,7 @@ The `ServerModel` represents a server configuration within an HTTP server profil
 | username | Optional[str] | No | None | Username for HTTP server authentication |
 | password | Optional[str] | No | None | Password for HTTP server authentication |
 
-## PayloadFormatModel
+### PayloadFormatModel
 
 The `PayloadFormatModel` represents the payload format configuration for a specific log type.
 
@@ -43,7 +45,9 @@ The `PayloadFormatModel` represents the payload format configuration for a speci
 | params | Optional[List[Dict[str, str]]] | No | None | List of HTTP parameters to include in the request |
 | payload | Optional[str] | No | None | The log payload format containing log field values |
 
-## HTTPServerProfileBaseModel
+## Base Models
+
+### HTTPServerProfileBaseModel
 
 The `HTTPServerProfileBaseModel` contains fields common to all HTTP server profile CRUD operations.
 
@@ -58,7 +62,7 @@ The `HTTPServerProfileBaseModel` contains fields common to all HTTP server profi
 | snippet | Optional[str] | No | None | The snippet in which the resource is defined (max length: 64) |
 | device | Optional[str] | No | None | The device in which the resource is defined (max length: 64) |
 
-## HTTPServerProfileCreateModel
+### HTTPServerProfileCreateModel
 
 The `HTTPServerProfileCreateModel` extends the base model and includes validation to ensure that exactly one container type is provided.
 
@@ -66,35 +70,9 @@ The `HTTPServerProfileCreateModel` extends the base model and includes validatio
 |-----------|------|----------|---------|-------------|
 | *All attributes from HTTPServerProfileBaseModel* |  |  |  |  |
 
-### Container Type Validation
+When creating an HTTP server profile, exactly one container type (`folder`, `snippet`, or `device`) must be provided.
 
-When creating an HTTP server profile, exactly one of the following container types must be provided:
-- `folder`: The folder in which the resource is defined
-- `snippet`: The snippet in which the resource is defined
-- `device`: The device in which the resource is defined
-
-This validation is enforced by the `validate_container_type` model validator.
-
-```python
-@model_validator(mode="after")
-def validate_container_type(self) -> "HTTPServerProfileCreateModel":
-    """Validates that exactly one container type is provided."""
-    container_fields = [
-        "folder",
-        "snippet",
-        "device",
-    ]
-    provided = [
-        field for field in container_fields if getattr(self, field) is not None
-    ]
-    if len(provided) != 1:
-        raise ValueError(
-            "Exactly one of 'folder', 'snippet', or 'device' must be provided."
-        )
-    return self
-```
-
-## HTTPServerProfileUpdateModel
+#### HTTPServerProfileUpdateModel
 
 The `HTTPServerProfileUpdateModel` extends the base model and adds the ID field required for updating existing HTTP server profiles.
 
@@ -103,7 +81,7 @@ The `HTTPServerProfileUpdateModel` extends the base model and adds the ID field 
 | id | UUID | Yes | - | The UUID of the HTTP server profile |
 | *All attributes from HTTPServerProfileBaseModel* |  |  |  |  |
 
-## HTTPServerProfileResponseModel
+### HTTPServerProfileResponseModel
 
 The `HTTPServerProfileResponseModel` extends the base model and includes the ID field returned in API responses.
 
@@ -191,25 +169,3 @@ existing.server.append({
 updated = client.http_server_profile.update(existing)
 ```
 
-## Best Practices
-
-### Server Configuration
-- Include at least one server in the `server` list
-- Use HTTPS with TLS 1.2 or higher for secure communication
-- Configure appropriate certificate profiles when using HTTPS
-- Set authentication credentials when required by your HTTP servers
-
-### Format Configuration
-- Define specific format settings for each log type when needed
-- Include any necessary HTTP headers and parameters
-- Design payload formats to match your log analysis system requirements
-
-### Container Management
-- Always specify exactly one container type (folder, snippet, or device)
-- Use consistent naming conventions for HTTP server profiles
-- Organize profiles logically by function or application
-
-## Related Models
-
-- [Tag Models](tag_models.md): For working with tags that can be registered by HTTP server profiles
-- [Address Models](address_models.md): For defining addresses used in HTTP server configurations
